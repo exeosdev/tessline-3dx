@@ -29,6 +29,9 @@
 #  endif
 #endif
 
+#include "prerequisites/gpuapiCommon.h"
+#include "prerequisites/geometryCommon.h"
+
 namespace ts3
 {
 }

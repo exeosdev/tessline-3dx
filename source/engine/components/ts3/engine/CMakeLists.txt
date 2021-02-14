@@ -1,5 +1,8 @@
 
 set( TS3_ENGINE_SRC_FILES
+		"prerequisites/gpuapiCommon.h"
+		"prerequisites/geometryCommon.h"
+
         "prerequisites.h"
         "prerequisites.cpp"
 
@@ -7,15 +10,13 @@ set( TS3_ENGINE_SRC_FILES
         "camera/cameraController.h"
         "camera/cameraController.cpp"
 
-        "gpuapi/commonGpuAPIDefs.h"
-        "gpuapi/geometryStorage.h"
-        "gpuapi/geometryStorage.cpp"
+        "gpuapi/commonGPUDefs.h"
+		"gpuapi/hardwareBuffer.h"
+		"gpuapi/hardwareBuffer.cpp"
+		"gpuapi/hardwareGeometryBuffer.h"
+		"gpuapi/hardwareGeometryBuffer.cpp"
         "gpuapi/vertexFormatDefs.h"
         "gpuapi/vertexFormatDefs.cpp"
-
-        "gpuapi/geometryCommon.h"
-        "gpuapi/geometryStorage.h"
-        "gpuapi/geometryStorage.cpp"
 
         "rcs/commonRcsUtils.h"
         "rcs/commonRcsUtils.cpp"
