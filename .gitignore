@@ -1,0 +1,51 @@
+
+.gradle/
+.idea/
+.vs/
+.vscode/
+.cxx/
+
+bin/
+build/
+cmake-bin-vs/
+cmake-bin-vs2017/
+cmake-bin-vs2019/
+cmake-build-debug/
+cmake-build-release/
+out/
+
+# IDE-specific
+*.iml
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app

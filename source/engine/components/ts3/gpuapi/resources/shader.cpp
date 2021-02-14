@@ -1,0 +1,21 @@
+
+#include "shader.h"
+
+namespace ts3::gpuapi
+{
+
+	Shader::Shader( GPUDevice & pGPUDevice, EShaderType pShaderType )
+	: GPUBaseObject( pGPUDevice )
+	, mEShaderType( pShaderType )
+	, mShaderBinary()
+	{}
+
+	Shader::Shader( GPUDevice & pGPUDevice, EShaderType pShaderType, ShaderBinary pShaderBinary )
+	: GPUBaseObject( pGPUDevice )
+	, mEShaderType( pShaderType )
+	, mShaderBinary( std::move( pShaderBinary ) )
+	{}
+
+	Shader::~Shader() = default;
+
+}

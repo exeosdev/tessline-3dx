@@ -1,0 +1,44 @@
+
+set( TS3_STDEXT_SRC_FILES
+        "prerequisites.h"
+        "bitmask.h"
+        "bitmaskAtomic.h"
+        "hash.h"
+        "hash.cpp"
+        "memory.h"
+        "memory.cpp"
+        "memoryBuffer.h"
+        "range.h"
+        "sortedArray.h"
+        "staticAlgo.h"
+        "staticLimits.h"
+        "stringUtils.h"
+        "typeTraits.h"
+        "utilities.h"
+        )
+
+if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
+    add_library( ts3-stdext STATIC ${TS3_STDEXT_SRC_FILES} )
+    target_compile_definitions( ts3-stdext PRIVATE
+            "TS3_BUILD_STATIC=1")
+else()
+    add_library( ts3-stdext SHARED ${TS3_STDEXT_SRC_FILES} )
+endif()
+
+set_target_properties( ts3-stdext PROPERTIES
+        OUTPUT_NAME "ts3-stdext"
+        )
+
+target_compile_definitions( ts3-stdext PRIVATE
+        "TS3_STDEXT_BUILD=1"
+        )
+
+target_include_directories( ts3-stdext PUBLIC
+        "${TS3_INCLUDE_DIR}"
+        )
+
+target_link_libraries( ts3-stdext PUBLIC
+        dplib-zlib
+        ts3-platform
+        )
+        
