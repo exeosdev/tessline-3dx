@@ -177,6 +177,9 @@ namespace ts3
 		static SysDisplayDriverHandle create( SysDisplayManagerHandle pDisplayManager );
 
 	private:
+		void _sysInitialize();
+		void _sysRelease();
+
 		virtual void _sysResetInternalState() override final;
 		virtual void _sysEnumAdapterList() override final;
 		virtual void _sysEnumOutputList( SysDsmAdapter & pAdapterInfo ) override final;

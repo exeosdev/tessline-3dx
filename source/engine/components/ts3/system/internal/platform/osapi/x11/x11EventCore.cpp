@@ -1,5 +1,5 @@
 
-#include <ts3/system/eventCoreNative.h>
+#include <ts3/system/eventCore.h>
 #include <ts3/math/vectorOps.h>
 #include <X11/keysym.h>
 
@@ -34,27 +34,27 @@ namespace ts3
 	void SysEventController::_sysDispatchNextEvent()
 	{
 		XEvent xevent;
-		if( _x11EventPeek( pEventController.systemContext->nativeData, xevent ) )
+		if( _x11EventPeek( mSysContext->mNativeData, xevent ) )
 		{
-			_x11TranslateAndDispatch( pEventController, xevent );
+			_x11TranslateAndDispatch( *this, xevent );
 		}
 	}
 
 	void SysEventController::_sysDispatchNextEventWait()
 	{
 		XEvent xevent;
-		if( _x11EventWait( pEventController.systemContext->nativeData, xevent ) )
+		if( _x11EventWait( mSysContext->mNativeData, xevent ) )
 		{
-			_x11TranslateAndDispatch( pEventController, xevent );
+			_x11TranslateAndDispatch( *this, xevent );
 		}
 	}
 
 	void SysEventController::_sysDispatchQueuedEvents()
 	{
 		XEvent xevent;
-		while( _x11EventPeek( pEventController.systemContext->nativeData, xevent ) )
+		while( _x11EventPeek( mSysContext->mNativeData, xevent ) )
 		{
-			_x11TranslateAndDispatch( pEventController, xevent );
+			_x11TranslateAndDispatch( *this, xevent );
 		}
 	}
 
@@ -63,15 +63,15 @@ namespace ts3
 		uint32 fetchedEventsNum = 0;
 
 		XEvent xevent;
-		while( _x11EventPeek( pEventController.systemContext->nativeData, xevent ) )
+		while( _x11EventPeek( mSysContext->mNativeData, xevent ) )
 		{
-			_x11TranslateAndDispatch( pEventController, xevent );
+			_x11TranslateAndDispatch( *this, xevent );
 			++fetchedEventsNum;
 		}
 
-		if( ( fetchedEventsNum == 0 ) && _x11EventWait( pEventController.systemContext->nativeData, xevent ) )
+		if( ( fetchedEventsNum == 0 ) && _x11EventWait( mSysContext->mNativeData, xevent ) )
 		{
-			_x11TranslateAndDispatch( pEventController, xevent );
+			_x11TranslateAndDispatch( *this, xevent );
 		}
 	}
 
@@ -105,7 +105,7 @@ namespace ts3
 
 		SysEvent sysEvent;
 
-		if( ( pNativeEvent.type >= KeyPress ) && ( pNativeEvent.type <= MotionNotify ) )
+		if( ( pXEvent.type >= KeyPress ) && ( pXEvent.type <= MotionNotify ) )
 		{
 			auto & inputState = dispatcher.getInputState();
 			if( !_x11TranslateInputEvent( inputState, pXEvent, sysEvent ) )
@@ -113,7 +113,7 @@ namespace ts3
 				return false;
 			}
 		}
-		else if( ( pNativeEvent.type >= EnterNotify ) && ( pNativeEvent.type <= MapRequest ) )
+		else if( ( pXEvent.type >= EnterNotify ) && ( pXEvent.type <= MapRequest ) )
 		{
 			if( !_x11TranslateGenericEvent( dispatcher, pXEvent, sysEvent ) )
 			{
@@ -403,10 +403,10 @@ namespace ts3
 		{
 			case ClientMessage:
 			{
-				auto * scNativeData = pDispatcher.systemContext->nativeData;
+				auto & scNativeData = pDispatcher.mSysContext->mNativeData;
 				// Type of wm protocol message is stored in data.l[0].
 				long wmpMessageType = pXEvent.xclient.data.l[0];
-				if ( wmpMessageType == scNativeData->wmpDeleteWindow )
+				if ( wmpMessageType == scNativeData.wmpDeleteWindow )
 				{
 					auto & eventData = pEvent.eWindowUpdateClose;
 					eventData.eventCode = E_SYS_EVENT_CODE_WINDOW_UPDATE_CLOSE;

@@ -1,5 +1,6 @@
 
-#include <ts3/system/displayManagerNative.h>
+#include <ts3/system/displayManager.h>
+#include <ts3/system/systemContext.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
 namespace ts3
@@ -10,56 +11,39 @@ namespace ts3
 
 	void SysDisplayManager::_sysInitialize()
 	{
-		auto * scNativeData = mSystemContext->nativeData;
-		scNativeData->display = scNativeData->display;
-		scNativeData->screenIndex = XDefaultScreen( scNativeData->display );
-		scNativeData->rootWindow = XRootWindow( scNativeData->display, scNativeData->screenIndex );
+		auto & scNativeData = mSysContext->mNativeData;
 
-		pDisplayManager.nativeData->display = scNativeData->display;
-		pDisplayManager.nativeData->screenIndex = scNativeData->screenIndex;
-		pDisplayManager.nativeData->rootWindow = scNativeData->rootWindow;
+		if( scNativeData.screenIndex == -1 )
+		{
+			scNativeData.screenIndex = XDefaultScreen( scNativeData.display );
+			scNativeData.rootWindow = XRootWindow( scNativeData.display, scNativeData.screenIndex );
+			scNativeData.wmpDeleteWindow = XInternAtom( scNativeData.display, "WM_DELETE_WINDOW", False );
+		}
 
-		x11XRRInitializeDriverState( pDisplayManager.nativeData );
+		mNativeData.display = scNativeData.display;
+		mNativeData.screenIndex = scNativeData.screenIndex;
+		mNativeData.rootWindow = scNativeData.rootWindow;
 
-		_x11EnumerateDisplayManagerConfiguration( pDisplayManager.nativeData );
+		x11XRRInitializeDriverState( &mNativeData );
+
+		_x11EnumerateDisplayManagerConfiguration( &mNativeData );
 	}
 
 	void SysDisplayManager::_sysRelease() noexcept
 	{
+		_x11FreeDisplayManagerConfiguration( &mNativeData );
+
+		x11XRRReleaseDriverState( &mNativeData );
+
+		mNativeData.display = nullptr;
+		mNativeData.rootWindow = cvXIDNone;
 	}
 
 	void SysDisplayManager::_sysQueryDisplaySize( SysDisplaySize & pDisplaySize ) const
 	{
-	}
-
-	void SysDisplayManager::_sysQueryMinWindowSize( SysDisplaySize & pMinWindowSize ) const
-	{
-	}
-
-	void nativeDisplayManagerInitialize( SysDisplayManager & pDisplayManager )
-	{
-	}
-
-	void SysDisplayManagerImplProxy::nativeReleaseDisplayManager( SysDisplayManager & pDisplayManager )
-	{
-		_x11FreeDisplayManagerConfiguration( pDisplayManager.nativeData );
-
-		x11XRRReleaseDriverState( pDisplayManager.nativeData );
-
-		pDisplayManager.nativeData->display = nullptr;
-		pDisplayManager.nativeData->rootWindow = cvXIDNone;
-
-		auto * scNativeData = pDisplayManager.systemContext->nativeData;
-		scNativeData->display = nullptr;
-		scNativeData->screenIndex = -1;
-		scNativeData->rootWindow = cvXIDNone;
-	}
-
-	void SysDisplayManagerImplProxy::nativeQueryDisplaySize( const SysDisplayManager & pDisplayManager, SysDisplaySize & pDisplaySize )
-	{
 		// Ideally, we have XRR available here and can fetch the data from XRRMonitorInfo structure.
 		// With that approach, we can tell precisely the size of the default monitor (not the entire virtual screen).
-		auto * xrrDefaultMonitorInfo = pDisplayManager.nativeData->xrrDefaultMonitorInfo;
+		auto * xrrDefaultMonitorInfo = mNativeData.xrrDefaultMonitorInfo;
 
 		if( xrrDefaultMonitorInfo != nullptr )
 		{
@@ -73,14 +57,14 @@ namespace ts3
 			// area which (in case of a usual multi-monitor setup) may contain more than one monitor. E.g. for my setup
 			// with two 27" 1440p monitors, all X11 functions return the screen size as 5120 x 1440 pixels.
 			// TODO: can we somehow get the size of a current default monitor without using XRR/XF86 APIs?
-			auto displayWidth = XDisplayWidth( pDisplayManager.nativeData->display, pDisplayManager.nativeData->screenIndex );
-			auto displayHeight = XDisplayHeight( pDisplayManager.nativeData->display, pDisplayManager.nativeData->screenIndex );
+			auto displayWidth = XDisplayWidth( mNativeData.display, mNativeData.screenIndex );
+			auto displayHeight = XDisplayHeight( mNativeData.display, mNativeData.screenIndex );
 			pDisplaySize.x = static_cast<uint32>( displayWidth );
 			pDisplaySize.y = static_cast<uint32>( displayHeight );
 		}
 	}
 
-	void SysDisplayManagerImplProxy::nativeQueryMinWindowSize( const SysDisplayManager & pDisplayManager, SysDisplaySize & pMinWindowSize )
+	void SysDisplayManager::_sysQueryMinWindowSize( SysDisplaySize & pMinWindowSize ) const
 	{
 		pMinWindowSize.x = 0u;
 		pMinWindowSize.y = 0u;

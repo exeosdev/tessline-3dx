@@ -12,8 +12,9 @@ namespace ts3
 		Colormap colormap = cvXIDNone;
 	};
 
-	struct X11SysWindowCreateInfo : public SysWindowCreateInfo
+	struct X11SysWindowCreateInfo
 	{
+		SysWindowProperties commonProperties;
 		Display * display = nullptr;
 		int screenIndex = -1;
 		Window rootWindow = cvXIDNone;

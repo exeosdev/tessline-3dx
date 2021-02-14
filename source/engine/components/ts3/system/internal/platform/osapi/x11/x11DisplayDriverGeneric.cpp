@@ -1,6 +1,6 @@
 
-#include <ts3/system/displayDriverNative.h>
-#include <ts3/system/displayManagerNative.h>
+#include <ts3/system/displayDriver.h>
+#include <ts3/system/displayManager.h>
 
 namespace ts3
 {
@@ -8,59 +8,53 @@ namespace ts3
 	void _x11EnumerateXRRDriverConfiguration( SysDisplayDriverNativeDataGeneric * pDriverNativeData );
 	void _x11FreeXRRDriverConfiguration( SysDisplayDriverNativeDataGeneric * pDriverNativeData );
 
-	void SysDisplayDriverGenericImplProxy::nativeInitializeDriver( SysDisplayDriverGeneric & pDisplayDriver )
+	void SysDisplayDriverGeneric::_sysInitialize()
 	{
-		auto * displayManagerNativeData = pDisplayDriver.displayManager->nativeData;
-
-		if( displayManagerNativeData->xrrScreenResources == nullptr )
+		if( mDisplayManager->mNativeData.xrrScreenResources == nullptr )
 		{
 			throw 0;
 		}
 
-		auto * xrrDriverNativeData = pDisplayDriver.nativeData->generic;
-		xrrDriverNativeData->xrrVersion = displayManagerNativeData->xrrVersion;
-		xrrDriverNativeData->display = displayManagerNativeData->display;
-		xrrDriverNativeData->rootWindow = displayManagerNativeData->rootWindow;
-		xrrDriverNativeData->xrrScreenResources = displayManagerNativeData->xrrScreenResources;
-		xrrDriverNativeData->xrrMonitorList = displayManagerNativeData->xrrMonitorList;
-		xrrDriverNativeData->xrrMonitorsNum = displayManagerNativeData->xrrMonitorsNum;
+		mNativeData.generic->xrrVersion = mDisplayManager->mNativeData.xrrVersion;
+		mNativeData.generic->display = mDisplayManager->mNativeData.display;
+		mNativeData.generic->rootWindow = mDisplayManager->mNativeData.rootWindow;
+		mNativeData.generic->xrrScreenResources = mDisplayManager->mNativeData.xrrScreenResources;
+		mNativeData.generic->xrrMonitorList = mDisplayManager->mNativeData.xrrMonitorList;
+		mNativeData.generic->xrrMonitorsNum = mDisplayManager->mNativeData.xrrMonitorsNum;
 
-		_x11EnumerateXRRDriverConfiguration( xrrDriverNativeData );
+		_x11EnumerateXRRDriverConfiguration( mNativeData.generic );
 	}
 
-	void SysDisplayDriverGenericImplProxy::nativeReleaseDriver( SysDisplayDriverGeneric & pDisplayDriver ) noexcept
+	void SysDisplayDriverGeneric::_sysRelease()
 	{
-		auto * xrrDriverNativeData = pDisplayDriver.nativeData->generic;
+		_x11FreeXRRDriverConfiguration( mNativeData.generic );
 
-		_x11FreeXRRDriverConfiguration( xrrDriverNativeData );
-
-		xrrDriverNativeData->xrrVersion = cvVersionUnknown;
-		xrrDriverNativeData->display = nullptr;
-		xrrDriverNativeData->rootWindow = cvXIDNone;
-		xrrDriverNativeData->xrrScreenResources = nullptr;
-		xrrDriverNativeData->xrrMonitorList = nullptr;
-		xrrDriverNativeData->xrrMonitorsNum = 0;
+		mNativeData.generic->xrrVersion = cvVersionUnknown;
+		mNativeData.generic->display = nullptr;
+		mNativeData.generic->rootWindow = cvXIDNone;
+		mNativeData.generic->xrrScreenResources = nullptr;
+		mNativeData.generic->xrrMonitorList = nullptr;
+		mNativeData.generic->xrrMonitorsNum = 0;
 	}
 
-	void SysDisplayDriverGenericImplProxy::nativeOnResetInternalState( SysDisplayDriverGeneric & pDisplayDriver ) noexcept
+	void SysDisplayDriverGeneric::_sysResetInternalState()
 	{
-		auto * xrrDriverNativeData = pDisplayDriver.nativeData->generic;
-		_x11FreeXRRDriverConfiguration( xrrDriverNativeData );
-		_x11EnumerateXRRDriverConfiguration( xrrDriverNativeData );
+		_x11FreeXRRDriverConfiguration( mNativeData.generic );
+		_x11EnumerateXRRDriverConfiguration( mNativeData.generic );
 	}
 
-	void SysDisplayDriverGenericImplProxy::nativeEnumAdapterList( SysDisplayDriverGeneric & pDisplayDriver )
+	void SysDisplayDriverGeneric::_sysEnumAdapterList()
 	{
-		auto * defaultAdapter = pDisplayDriver.registerAdapter();
+		auto * defaultAdapter = registerAdapter();
 		defaultAdapter->adapterDesc.index = 0u;
 		defaultAdapter->adapterDesc.name = "DefaultAdapter";
 		defaultAdapter->adapterDesc.vendorID = ESysDsmAdapterVendorID::Unknown;
 		defaultAdapter->adapterDesc.flags = E_SYS_DSM_ADAPTER_FLAG_PRIMARY_BIT;
 	}
 
-	void SysDisplayDriverGenericImplProxy::nativeEnumOutputList( SysDisplayDriverGeneric & pDisplayDriver, SysDsmAdapter & pAdapter )
+	void SysDisplayDriverGeneric::_sysEnumOutputList( SysDsmAdapter & pAdapter )
 	{
-		auto * xrrDriverData = pAdapter.driver->nativeData->generic;
+		auto * xrrDriverData = mNativeData.generic;
 
 		for ( size_t monitorIndex = 0; monitorIndex < xrrDriverData->xrrMonitorsNum; ++monitorIndex )
 		{
@@ -74,9 +68,9 @@ namespace ts3
 				{
 					if ( ( monitorInfo.width != 0 ) && ( monitorInfo.height != 0 ) )
 					{
-						auto * outputInfo = pDisplayDriver.registerOutput( pAdapter );
-						outputInfo->nativeData->generic->xrrOutputID = xrrOutputID;
-						outputInfo->nativeData->generic->xrrCrtcID = xrrOutputInfo->crtc;
+						auto * outputInfo = registerOutput( pAdapter );
+						outputInfo->nativeData.generic->xrrOutputID = xrrOutputID;
+						outputInfo->nativeData.generic->xrrCrtcID = xrrOutputInfo->crtc;
 						outputInfo->outputDesc.flags = 0u;
 						outputInfo->outputDesc.name = XGetAtomName( xrrDriverData->display, monitorInfo.name );
 						outputInfo->outputDesc.index = monitorOutputIndex;
@@ -97,10 +91,10 @@ namespace ts3
 		}
 	}
 
-	void SysDisplayDriverGenericImplProxy::nativeEnumVideoModeList( SysDisplayDriverGeneric & pDisplayDriver, SysDsmOutput & pOutput, SysColorFormat pFormat )
+	void SysDisplayDriverGeneric::_sysEnumVideoModeList( SysDsmOutput & pOutput, SysColorFormat pFormat )
 	{
-		auto * xrrDriverData = pOutput.driver->nativeData->generic;
-		auto * xrrOutputData = pOutput.nativeData->generic;
+		auto * xrrDriverData = mNativeData.generic;
+		auto * xrrOutputData = pOutput.nativeData.generic;
 
 		if( auto * xrrOutputInfo = XRRGetOutputInfo( xrrDriverData->display, xrrDriverData->xrrScreenResources, xrrOutputData->xrrOutputID ) )
 		{
@@ -126,9 +120,9 @@ namespace ts3
 						refreshRate = static_cast<uint32_t>( std::round( ( double )xrrModeInfo->dotClock / ( double )rateVHTotal ) );
 					}
 
-					auto * displayMode = pDisplayDriver.registerVideoMode( pOutput, pFormat );
-					displayMode->nativeData->generic->xrrModeID = xrrModeID;
-					displayMode->nativeData->generic->xrrModeInfo = xrrModeInfo;
+					auto * displayMode = registerVideoMode( pOutput, pFormat );
+					displayMode->nativeData.generic->xrrModeID = xrrModeID;
+					displayMode->nativeData.generic->xrrModeInfo = xrrModeInfo;
 					displayMode->modeDesc.index = static_cast<sys_dsm_index_t>( modeIndex );
 					displayMode->modeDesc.format = pFormat;
 					displayMode->modeDesc.settings.resolution.x = xrrModeInfo->width;

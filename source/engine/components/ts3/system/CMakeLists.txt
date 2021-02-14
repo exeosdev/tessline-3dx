@@ -115,9 +115,13 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
             )
 endif()
 
-add_library( ts3-system STATIC
-        ${TS3_SYSTEM_SRC_FILES}
-        )
+if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
+    add_library( ts3-system STATIC ${TS3_SYSTEM_SRC_FILES} )
+    target_compile_definitions( ts3-system PRIVATE
+            "TS3_BUILD_STATIC=1" )
+else()
+    add_library( ts3-system SHARED ${TS3_SYSTEM_SRC_FILES} )
+endif()
 
 set_target_properties( ts3-system PROPERTIES
         OUTPUT_NAME "exf-system"

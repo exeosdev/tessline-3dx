@@ -6,12 +6,6 @@
 #include <ts3/stdext/bitmask.h>
 #include <ts3/stdext/staticLimits.h>
 
-#if( PCFG_BUILD_TYPE == PCFG_BUILD_TYPE_DEBUG )
-#  define TS3_DEBUG 1
-#else
-#  define TS3_DEBUG 0
-#endif
-
 #if( TS3_BUILD_STATIC )
 #  define TS3_CORE_API
 #  define TS3_CORE_CLASS

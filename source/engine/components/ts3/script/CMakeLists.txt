@@ -1,7 +1,7 @@
 
 set( TS3_SCRIPT_SRC_FILES
-    "Prerequisites.h"
-    "Prerequisites.cpp"
+    "prerequisites.h"
+    "prerequisites.cpp"
 )
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )

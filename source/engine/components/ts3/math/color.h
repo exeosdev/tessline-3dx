@@ -3,6 +3,7 @@
 #define __TS3_MATH_COLOR_H__
 
 #include "prerequisites.h"
+#include <ts3/stdext/staticLimits.h>
 
 namespace ts3::math
 {

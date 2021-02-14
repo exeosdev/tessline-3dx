@@ -26,8 +26,6 @@
 #include <ts3ext/rcsupport/fonts/fontTypeFTF.h>
 #include <ts3ext/rcsupport/images/bitmapCommon.h>
 
-#include <Ts3/GpuAPI/Memory/CommonMemoryDefs.h>
-
 #include <ts3/math/matrixUtils.h>
 #include <ts3/system/perfCounter.h>
 

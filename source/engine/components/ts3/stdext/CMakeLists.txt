@@ -17,20 +17,12 @@ set( TS3_STDEXT_SRC_FILES
         "utilities.h"
         )
 
-if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
-    add_library( ts3-stdext STATIC ${TS3_STDEXT_SRC_FILES} )
-    target_compile_definitions( ts3-stdext PRIVATE
-            "TS3_BUILD_STATIC=1")
-else()
-    add_library( ts3-stdext SHARED ${TS3_STDEXT_SRC_FILES} )
-endif()
+add_library( ts3-stdext STATIC
+        ${TS3_STDEXT_SRC_FILES}
+        )
 
 set_target_properties( ts3-stdext PROPERTIES
         OUTPUT_NAME "ts3-stdext"
-        )
-
-target_compile_definitions( ts3-stdext PRIVATE
-        "TS3_STDEXT_BUILD=1"
         )
 
 target_include_directories( ts3-stdext PUBLIC

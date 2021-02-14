@@ -10,10 +10,6 @@ set( TS3_ENGINE_SRC_FILES
         "gpuapi/commonGpuAPIDefs.h"
         "gpuapi/geometryStorage.h"
         "gpuapi/geometryStorage.cpp"
-        "gpuapi/gpuBufferDataController.h"
-        "gpuapi/gpuBufferDataController.cpp"
-        "gpuapi/gpuBufferUpdateCache.h"
-        "gpuapi/gpuBufferUpdateCache.cpp"
         "gpuapi/vertexFormatDefs.h"
         "gpuapi/vertexFormatDefs.cpp"
 

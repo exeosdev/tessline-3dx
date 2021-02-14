@@ -1,6 +1,10 @@
 
 cmake_minimum_required( VERSION 3.10 )
 
+set( CMAKE_C_STANDARD 11 )
+set( CMAKE_C_STANDARD_REQUIRED ON )
+set( CMAKE_C_EXTENSIONS OFF )
+
 set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS OFF )
@@ -33,6 +37,7 @@ setInternal( TS3_LINK_DIR
         )
 
 add_subdirectory( "source/dependencies" )
+
 add_subdirectory( "source/engine/components" )
 add_subdirectory( "source/engine/drivers" )
 add_subdirectory( "source/engine/extensions" )

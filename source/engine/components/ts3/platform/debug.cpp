@@ -1,5 +1,6 @@
 
 #include "debug.h"
+#include <cstdarg>
 
 namespace ts3
 {

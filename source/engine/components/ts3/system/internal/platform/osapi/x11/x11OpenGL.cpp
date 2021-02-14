@@ -1,5 +1,5 @@
 
-#include <ts3/system/gfxOpenGLNative.h>
+#include <ts3/system/openGL.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
 namespace ts3
@@ -28,7 +28,7 @@ namespace ts3
 	void _x11GetAttribArrayForVisualConfig( const SysVisualConfig & pVisualConfig, int * pAttribArray );
 
 
-	void SysGLSurface::_sysDestroy()
+	void SysGLSurface::_sysDestroy() noexcept
 	{
 		_x11DestroyGLWindowAndSurface( mNativeData );
 	}
@@ -41,8 +41,8 @@ namespace ts3
 	void SysGLSurface::_sysQueryCurrentSize( SysWindowSize & pSize ) const
 	{
 		XWindowAttributes windowAttributes;
-		XGetWindowAttributes( pGLSurface.mNativeData.display,
-		                      pGLSurface.mNativeData.xwindow,
+		XGetWindowAttributes( mNativeData.display,
+		                      mNativeData.xwindow,
 		                      &windowAttributes );
 
 		pSize.x = windowAttributes.width;
@@ -50,16 +50,16 @@ namespace ts3
 	}
 
 
-	void SysGLContext::_sysDestroy()
+	void SysGLContext::_sysDestroy() noexcept
 	{
 		if( mNativeData.contextHandle != nullptr )
 		{
 			if( _sysValidateCurrentBinding() )
 			{
-				::glXMakeContextCurrent( mNativeData.display, nullptr, nullptr, nullptr );
+				::glXMakeContextCurrent( mNativeData.display, cvXIDNone, cvXIDNone, nullptr );
 			}
 
-			::glXDeleteContext( mNativeData.display, mNativeData.contextHandle );
+			::glXDestroyContext( mNativeData.display, mNativeData.contextHandle );
 
 			mNativeData.contextHandle = nullptr;
 		}
@@ -68,8 +68,8 @@ namespace ts3
 	void SysGLContext::_sysBindForCurrentThread( SysGLSurface & pTargetSurface )
 	{
 		::glXMakeContextCurrent( mNativeData.display,
-		                         pTargetSurface.mNativeData.surfaceHandle,
-		                         pTargetSurface.mNativeData.surfaceHandle,
+		                         pTargetSurface.mNativeData.xwindow,
+		                         pTargetSurface.mNativeData.xwindow,
 		                         mNativeData.contextHandle );
 	}
 
@@ -93,7 +93,7 @@ namespace ts3
 		}
 
 		SysVisualConfig legacyVisualConfig;
-		legacyVisualConfig = dsmGetDefaultVisualConfigForSystemWindow();
+		legacyVisualConfig = sysDsmGetDefaultVisualConfigForSystemWindow();
 		legacyVisualConfig.flags.set( SYS_VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
 		X11SysWindowCreateInfo x11WindowCreateInfo;
@@ -130,8 +130,6 @@ namespace ts3
 		{
 			throw 0;
 		}
-
-		return true;
 	}
 
 	void SysGLSubsystem::_sysReleaseInitState()
@@ -147,7 +145,7 @@ namespace ts3
 
 		if( openglSysInitState.surfaceData.xwindow != cvXIDNone )
 		{
-			_x11DestroyGLWindowAndSurface( &( openglSysInitState.surfaceData ) );
+			_x11DestroyGLWindowAndSurface( openglSysInitState.surfaceData );
 			openglSysInitState.surfaceData.glxFBConfig = nullptr;
 		}
 
@@ -163,8 +161,8 @@ namespace ts3
 		auto & scNativeData = mSysContext->mNativeData;
 
 		X11SysWindowCreateInfo x11WindowCreateInfo;
-		x11WindowCreateInfo.properties.geometry = pCreateInfo.windowGeometry;
-		x11WindowCreateInfo.properties.title = "Exeos Framework OpenGL Window";
+		x11WindowCreateInfo.commonProperties.geometry = pCreateInfo.windowGeometry;
+		x11WindowCreateInfo.commonProperties.title = "Exeos Framework OpenGL Window";
 		x11WindowCreateInfo.display = scNativeData.display;
 		x11WindowCreateInfo.screenIndex = scNativeData.screenIndex;
 		x11WindowCreateInfo.rootWindow = scNativeData.rootWindow;
@@ -258,9 +256,9 @@ namespace ts3
 			throw 0;
 		}
 
-		pContext.mNativeData.display = pGLSurface.mNativeData.display;
-		pContext.mNativeData.targetSurface = pGLSurface.mNativeData.xwindow;
-		pContext.mNativeData.contextHandle = contextHandle;
+		pGLContext.mNativeData.display = pGLSurface.mNativeData.display;
+		pGLContext.mNativeData.targetSurface = pGLSurface.mNativeData.xwindow;
+		pGLContext.mNativeData.contextHandle = contextHandle;
 	}
 
 	void SysGLSubsystem::_sysCreateRenderContextForCurrentThread( SysGLContext & pGLContext )
@@ -270,7 +268,7 @@ namespace ts3
 		{
 			throw 0;
 		}
-		pContext.mNativeData.contextHandle = contextHandle;
+		pGLContext.mNativeData.contextHandle = contextHandle;
 	}
 
 	

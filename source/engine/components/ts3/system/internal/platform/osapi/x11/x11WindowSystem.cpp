@@ -7,7 +7,7 @@ namespace ts3
 
 	void SysWindowManager::_sysInitialize()
 	{
-		auto & scNativeData = pWindowManager.systemContext->mNativeData;
+		auto & scNativeData = mSysContext->mNativeData;
 		scNativeData.wmpDeleteWindow = XInternAtom( scNativeData.display, "WM_DELETE_WINDOW", False );
 	}
 
@@ -17,10 +17,10 @@ namespace ts3
 
 	void SysWindow::_sysInitialize( const SysWindowCreateInfo & pCreateInfo )
 	{
-		auto & scNativeData = pWindowManager.systemContext->mNativeData;
+		auto & scNativeData = mSysContext->mNativeData;
 
 		X11SysWindowCreateInfo x11WindowCreateInfo;
-		x11WindowCreateInfo.properties = pCreateInfo.properties;
+		x11WindowCreateInfo.commonProperties = pCreateInfo.properties;
 		x11WindowCreateInfo.display = scNativeData.display;
 		x11WindowCreateInfo.screenIndex = scNativeData.screenIndex;
 		x11WindowCreateInfo.rootWindow = scNativeData.rootWindow;
@@ -28,8 +28,8 @@ namespace ts3
 		x11WindowCreateInfo.colorDepth = XDefaultDepth( scNativeData.display, scNativeData.screenIndex );
 		x11WindowCreateInfo.windowVisual = XDefaultVisual( scNativeData.display, scNativeData.screenIndex );
 
-		sysX11CreateWindow( pWindow.nativeData, x11WindowCreateInfo );
-		sysX11UpdateNewWindowState( pWindow.nativeData, x11WindowCreateInfo );
+		sysX11CreateWindow( mNativeData, x11WindowCreateInfo );
+		sysX11UpdateNewWindowState( mNativeData, x11WindowCreateInfo );
 	}
 
 	void SysWindow::_sysRelease() noexcept
@@ -38,23 +38,23 @@ namespace ts3
 	void SysWindow::_sysGetClientAreaSize( SysWindowSize & pClientAreaSize ) const
 	{
 		XWindowAttributes windowAttributes;
-		XGetWindowAttributes( pWindow.mNativeData.display,
-		                      pWindow.mNativeData.xwindow,
+		XGetWindowAttributes( mNativeData.display,
+		                      mNativeData.xwindow,
 		                      &windowAttributes );
 
-		pSize->x = windowAttributes.width - windowAttributes.border_width;
-		pSize->y = windowAttributes.height - windowAttributes.border_width;
+		pClientAreaSize.x = windowAttributes.width - windowAttributes.border_width;
+		pClientAreaSize.y = windowAttributes.height - windowAttributes.border_width;
 	}
 
 	void SysWindow::_sysGetFrameSize( SysWindowSize & pFrameSize ) const
 	{
 		XWindowAttributes windowAttributes;
-		XGetWindowAttributes( pWindow.mNativeData.display,
-		                      pWindow.mNativeData.xwindow,
+		XGetWindowAttributes( mNativeData.display,
+		                      mNativeData.xwindow,
 		                      &windowAttributes );
 
-		pSize->x = windowAttributes.width;
-		pSize->y = windowAttributes.height;
+		pFrameSize.x = windowAttributes.width;
+		pFrameSize.y = windowAttributes.height;
 	}
 
 
@@ -86,8 +86,8 @@ namespace ts3
 		Window xwindow = XCreateWindow( pCreateInfo.display,
 		                                pCreateInfo.rootWindow,
 		                                0, 0,
-		                                pCreateInfo.properties.geometry.size.x,
-		                                pCreateInfo.properties.geometry.size.y,
+		                                pCreateInfo.commonProperties.geometry.size.x,
+		                                pCreateInfo.commonProperties.geometry.size.y,
 		                                0u,
 		                                pCreateInfo.colorDepth,
 		                                InputOutput,
@@ -124,11 +124,14 @@ namespace ts3
 	{
 		XMapWindow( pWindowNativeData.display, pWindowNativeData.xwindow );
 
-		XMoveWindow( pWindowNativeData.display, pWindowNativeData.xwindow, pCreateInfo.properties.geometry.position.x, pCreateInfo.properties.geometry.position.y );
+		XMoveWindow( pWindowNativeData.display,
+		             pWindowNativeData.xwindow,
+		             pCreateInfo.commonProperties.geometry.position.x,
+		             pCreateInfo.commonProperties.geometry.position.y );
 
 		Atom wmpDeleteWindowProtocol = pCreateInfo.wmpDeleteWindow;
 		XSetWMProtocols( pWindowNativeData.display, pWindowNativeData.xwindow, &wmpDeleteWindowProtocol, 1 );
-		XStoreName( pWindowNativeData.display, pWindowNativeData.xwindow, pCreateInfo.properties.title.c_str() );
+		XStoreName( pWindowNativeData.display, pWindowNativeData.xwindow, pCreateInfo.commonProperties.title.c_str() );
 		XFlush( pWindowNativeData.display );
 	}
 

@@ -37,20 +37,11 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Android" )
 			)
 endif()
 
-if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
-    add_library( ts3-platform STATIC ${TS3_PLATFORM_SRC_FILES} )
-    target_compile_definitions( ts3-platform PRIVATE
-			"TS3_BUILD_STATIC=1" )
-else()
-    add_library( ts3-platform SHARED ${TS3_PLATFORM_SRC_FILES} )
-endif()
+add_library( ts3-platform STATIC ${TS3_PLATFORM_SRC_FILES}
+		)
 
 set_target_properties( ts3-platform PROPERTIES
 		OUTPUT_NAME "ts3-platform"
-		)
-
-target_compile_definitions( ts3-platform PRIVATE
-		"TS3_PLATFORM_BUILD=1"
 		)
 
 target_include_directories( ts3-platform PUBLIC

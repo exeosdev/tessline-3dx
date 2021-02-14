@@ -23,6 +23,7 @@ namespace ts3
 	{
 	public:
 		GeometryDataType const mGeometryDataType;
+		GPUBufferRef const mGPUBufferRef;
 
 		bool isBufferMappable() const;
 

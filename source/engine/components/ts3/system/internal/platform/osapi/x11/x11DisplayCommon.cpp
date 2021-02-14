@@ -1,4 +1,5 @@
 
+#include <ts3/system/displayCommon.h>
 #include "x11DisplayCommon.h"
 
 namespace ts3

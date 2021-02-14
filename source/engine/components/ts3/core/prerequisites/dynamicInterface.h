@@ -86,7 +86,7 @@ namespace ts3
 	template <typename TpOutInterface, typename TpInInterface>
 	inline std::unique_ptr<TpOutInterface> moveInterfaceUniquePtr( std::unique_ptr<TpInInterface> pUPtr )
 	{
-		TpOutInterface * targetPtr = pUPtr->queryInterface<TpOutInterface>();
+		TpOutInterface * targetPtr = pUPtr->template queryInterface<TpOutInterface>();
 		pUPtr.release();
 		return std::unique_ptr<TpOutInterface>{ targetPtr };
 	}

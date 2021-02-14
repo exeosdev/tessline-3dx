@@ -6,30 +6,30 @@ namespace ts3
 
 	void SysContext::_sysInitialize( const SysContextCreateInfo & pCreateInfo )
 	{
-		int thrInitStatus = XInitThreads();
+		int thrInitStatus = ::XInitThreads();
 		if( thrInitStatus == False )
 		{
 			throw 0;
 		}
 
-		auto * xdisplay = XOpenDisplay( nullptr );
+		auto * xdisplay = ::XOpenDisplay( nullptr );
 		if( xdisplay == nullptr )
 		{
 			throw 0;
 		}
 
-		pSysContext.nativeData->display = xdisplay;
-		pSysContext.nativeData->sessionExtInfo.connectionNumber = XConnectionNumber( xdisplay );
-		pSysContext.nativeData->sessionExtInfo.vendorName = XServerVendor( xdisplay );
-		pSysContext.nativeData->sessionExtInfo.displayString = XDisplayString( xdisplay );
+		mNativeData.display = xdisplay;
+		mNativeData.sessionExtInfo.connectionNumber = XConnectionNumber( xdisplay );
+		mNativeData.sessionExtInfo.vendorName = XServerVendor( xdisplay );
+		mNativeData.sessionExtInfo.displayString = XDisplayString( xdisplay );
 	}
 
 	void SysContext::_sysRelease() noexcept
 	{
-		pSysContext.nativeData->display = nullptr;
-		pSysContext.nativeData->sessionExtInfo.connectionNumber = -1;
-		pSysContext.nativeData->sessionExtInfo.vendorName.clear();
-		pSysContext.nativeData->sessionExtInfo.displayString.clear();
+		mNativeData.display = nullptr;
+		mNativeData.sessionExtInfo.connectionNumber = -1;
+		mNativeData.sessionExtInfo.vendorName.clear();
+		mNativeData.sessionExtInfo.displayString.clear();
 	}
 
 }

@@ -2,9 +2,6 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_X11_COMMON_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_X11_COMMON_H__
 
-#include <ts3/core/debug.h>
-#include <ts3/core/version.h>
-
 #include <X11/X.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
