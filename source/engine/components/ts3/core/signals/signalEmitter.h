@@ -4,145 +4,133 @@
 #ifndef __TS3_CORE_SIGNAL_EMITTER_H__
 #define __TS3_CORE_SIGNAL_EMITTER_H__
 
-#include "signalProxy.h"
+#include "signalCommon.h"
+
+#include <list> // Used for list of event handlers
+#include <unordered_map> // Used for receiver->HandlerList mapping
 
 namespace ts3
 {
 
-	template <typename TpSignal>
-	class SignalEmitter;
+	template <typename TpClass, typename TpEvent>
+	class EventEmitter;
 
-	template <signal_code_value_t tpSignalCode, typename... TpSignalArgs>
-	class SignalEmitter< Signal<tpSignalCode, TpSignalArgs...> >
+	template <typename TpClass, event_code_value_t tpEventCode, typename... TpEventArgs>
+	class EventEmitter< TpClass, Event<tpEventCode, TpEventArgs...> >
 	{
 	public:
-		using Handler = std::function<void( TpSignalArgs &&... )>;
-
-		struct HandlerInfo
-		{
-			Handler handler;
-			void * receiver;
-		};
+		using Handler = std::function<void( TpClass &, TpEventArgs... )>;
+		using HandlerList = std::list<Handler>;
+		using HandlerMap = std::unordered_map<uintptr_t, HandlerList>;
+		using HandlerRef = typename HandlerList::iterator;
+		using HandlerRefList = std::list<HandlerRef>;
 
 	public:
-		SignalEmitter( SignalProxy * pSignalProxy = nullptr )
-		: _signalProxy( pSignalProxy )
+		explicit EventEmitter( TpClass & pSourceObjectRef )
+		: _sourceObjectRef( pSourceObjectRef )
 		{}
 
-		void setProxy( SignalProxy * pSignalProxy )
+		void emit( TpEventArgs &&... pArgs )
 		{
-			_signalProxy = pSignalProxy;
-		}
-
-		void emit( TpSignalArgs &&... pArgs )
-		{
-			if ( _signalProxy != nullptr )
+			for ( auto & handlerRef : _handlerOrderedRefList )
 			{
-				_signalProxy->onEmit( tpSignalCode );
-			}
-
-			for ( auto & handlerInfo : _handlers )
-			{
-				if ( _signalProxy != nullptr )
-				{
-					_signalProxy->onHandler( tpSignalCode, handlerInfo.receiver );
-				}
-
-				handlerInfo.handler( std::forward<TpSignalArgs>( pArgs )... );
+				( *handlerRef )( _sourceObjectRef, std::forward<TpEventArgs>( pArgs )... );
 			}
 		}
 
 		template <typename TpRet, typename TpReceiver>
-		void connect( TpRet( TpReceiver:: * pSlot )( TpSignalArgs... ), TpReceiver * pReceiver ) const
+		void connect( uintptr_t pRefID, std::function<TpRet( TpClass &, TpEventArgs... )> pHandler ) const
 		{
-			_handlers.push_back(
-				HandlerInfo {
-					[pReceiver, pSlot]( TpSignalArgs &&... pSignalArgs ) {
-						( pReceiver->*pSlot )( std::forward<TpSignalArgs>( pSignalArgs )... );
-					},
-					pReceiver
-				} );
+			auto & handlerList = _handlerMap[pRefID];
 
-			if ( _signalProxy != nullptr )
-			{
-				_signalProxy->onConnect( tpSignalCode, pReceiver );
-			}
+			auto newHandlerRef = handlerList.insert( handlerList.end(), std::move( pHandler ) );
+			_handlerOrderedRefList.push_back( newHandlerRef );
 		}
 
-		// template <typename TpRet, typename TpReceiver, typename... TpAdditionalArgs>
-		// void connect( TpRet( TpReceiver:: * pSlot )( TpSignalArgs..., TpAdditionalArgs... ), TpReceiver * pReceiver, TpAdditionalArgs &&... pAdditionalArgs ) const
-		// {
-		// 	_handlers.emplace_back(
-		// 		[pReceiver, pSlot, pAdditionalArgs...]( TpSignalArgs &&... pSignalArgs ) {
-		// 			( pReceiver->*pSlot )( std::forward<TpSignalArgs>( pSignalArgs )..., std::forward<TpAdditionalArgs>( pAdditionalArgs )... );
-		// 		},
-		// 		pReceiver );
-		// 
-		// 	if ( _signalProxy != nullptr )
-		// 	{
-		// 		_signalProxy->onConnect( tpSignalCode, pReceiver );
-		// 	}
-		// }
-
-		template <typename TpReceiver>
-		void disconnect( TpReceiver * pReceiver ) const
+		template <typename TpRet, typename TpReceiver>
+		void connect( TpReceiver * pReceiver, TpRet( TpReceiver:: * pSlot )( TpClass &, TpEventArgs... ) ) const
 		{
-			bool result = false;
+			auto refID = reinterpret_cast<uintptr_t>( pReceiver );
+			auto & handlerList = _handlerMap[refID];
 
-			auto handlerIter = _handlers.begin();
-			auto handlersEnd = _handlers.end();
+			auto newHandlerRef = handlerList.insert(
+				handlerList.end(),
+				[pReceiver, pSlot]( TpClass & pSource, TpEventArgs &&... pEventArgs ) -> void {
+					( pReceiver->*pSlot )( pSource, std::forward<TpEventArgs>( pEventArgs )... );
+				} );
+			_handlerOrderedRefList.push_back( newHandlerRef );
+		}
 
-			for ( ; handlerIter != handlersEnd; ++handlerIter )
+		template <typename TpRet, typename TpReceiver>
+		bool connectUnique( uintptr_t pRefID, std::function<TpRet( TpClass &, TpEventArgs... )> pHandler ) const
+		{
+			auto & handlerList = _handlerMap[pRefID];
+			if( !handlerList.empty() )
 			{
-				if ( handlerIter->receiver == pReceiver )
-				{
-					_handlers.erase( handlerIter );
-					result = true;
-					break;
-				}
+				return false;
 			}
 
-			if ( _signalProxy != nullptr )
+			auto newHandlerRef = handlerList.insert( handlerList.end(), std::move( pHandler ) );
+			_handlerOrderedRefList.push_back( newHandlerRef );
+
+			return true;
+		}
+
+		template <typename TpRet, typename TpReceiver>
+		bool connectUnique( TpReceiver * pReceiver, TpRet( TpReceiver:: * pSlot )( TpClass &, TpEventArgs... ) ) const
+		{
+			auto refID = reinterpret_cast<uintptr_t>( pReceiver );
+			auto & handlerList = _handlerMap[refID];
+			if( !handlerList.empty() )
 			{
-				_signalProxy->onDisconnect( tpSignalCode, pReceiver, result );
+				return false;
 			}
+
+			auto newHandlerRef = handlerList.insert(
+					handlerList.end(),
+					[pReceiver, pSlot]( TpClass & pSource, TpEventArgs &&... pEventArgs ) -> void {
+						( pReceiver->*pSlot )( pSource, std::forward<TpEventArgs>( pEventArgs )... );
+					} );
+			_handlerOrderedRefList.push_back( newHandlerRef );
+
+			return true;
 		}
 
 	private:
-		SignalProxy * _signalProxy;
-		mutable std::vector<HandlerInfo> _handlers;
+		TpClass & _sourceObjectRef;
+		mutable HandlerMap _handlerMap;
+		mutable HandlerRefList _handlerOrderedRefList;
 	};
 
-	template <signal_code_value_t tpSignalCode, typename... TpSignalArgs, typename TpRet, typename TpReceiver>
-	void signalConnect( const SignalEmitter< Signal<tpSignalCode, TpSignalArgs...> > & pEmitter, TpRet( TpReceiver:: * pSlot )( TpSignalArgs... ), TpReceiver * pReceiver )
-	{
-		pEmitter.connect( pSlot, pReceiver );
-	}
-
-	// template <signal_code_value_t tpSignalCode, typename... TpSignalArgs, typename TpRet, typename TpReceiver, typename... TpAdditionalArgs>
-	// void signalConnect( const SignalEmitter< Signal<tpSignalCode, TpSignalArgs...> > & pEmitter, TpRet( TpReceiver:: * pSlot )( TpSignalArgs..., TpAdditionalArgs... ), TpReceiver * pReceiver, TpAdditionalArgs &&... pAdditionalArgs )
+	// template <event_code_value_t tpEventCode, typename... TpEventArgs, typename TpRet, typename TpReceiver>
+	// void eventConnect( const EventEmitter< Event<tpEventCode, TpEventArgs...> > & pEmitter, TpRet( TpReceiver:: * pSlot )( TpEventArgs... ), TpReceiver * pReceiver )
 	// {
-	// 	pEmitter.connect( pSlot, pReceiver, std::forward<TpAdditionalArgs>( pAdditionalArgs )... );
+	// 	pEmitter.connect( pSlot, pReceiver );
+	// }
+	// template <event_code_value_t tpEventCode, typename... TpEventArgs, typename TpReceiver>
+	// void eventDisconnect( const EventEmitter< Event<tpEventCode, TpEventArgs...> > & pEmitter, TpReceiver * pReceiver )
+	// {
+	// 	pEmitter.disconnect( pReceiver );
 	// }
 
-	template <signal_code_value_t tpSignalCode, typename... TpSignalArgs, typename TpReceiver>
-	void signalDisconnect( const SignalEmitter< Signal<tpSignalCode, TpSignalArgs...> > & pEmitter, TpReceiver * pReceiver )
-	{
-		pEmitter.disconnect( pReceiver );
-	}
+#define ts3AddEvent( pEventType, pVariableName ) \
+	private: \
+		EventEmitter<pEventType> _evt##pVariableName; \
+	public: \
+		const EventEmitter<pEventType> & mEvt##pVariableName = _evt##pVariableName;
 
 #define slots
 
-#define ts3DeclareSignals( pSignals ) \
+#define ts3DeclareEvents( pEvents ) \
 	public: \
-		struct Signals \
+		struct Events \
 		{ \
-			pSignals \
+			pEvents \
 		}; \
 	private: \
-		Signals _signals; \
+		Events _events; \
 	public: \
-		const Signals & signals = _signals;
+		const Events & mEvents = _events;
 
 }
 

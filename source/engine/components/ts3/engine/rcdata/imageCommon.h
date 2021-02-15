@@ -2,7 +2,7 @@
 #ifndef __TS3_ENGINE_IMAGE_COMMON_H__
 #define __TS3_ENGINE_IMAGE_COMMON_H__
 
-#include "../commonRcsUtils.h"
+#include "commonRDUtils.h"
 #include <ts3/core/graphicsTypes.h>
 #include <ts3/stdext/memoryBuffer.h>
 

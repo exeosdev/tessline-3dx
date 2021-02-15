@@ -4,8 +4,8 @@
 #ifndef __TS3_ENGINE_COMMON_FONT_DEFS_H__
 #define __TS3_ENGINE_COMMON_FONT_DEFS_H__
 
-#include "../commonRcsUtils.h"
-#include "../image/imageCommon.h"
+#include "commonRDUtils.h"
+#include "imageCommon.h"
 #include <ts3/gpuapi/resources/textureCommon.h>
 #include <ts3/stdext/memoryBuffer.h>
 

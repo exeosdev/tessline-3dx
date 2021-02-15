@@ -10,12 +10,12 @@
 namespace ts3
 {
 
-	using signal_code_value_t = uint32;
+	using event_code_value_t = uint32;
 
-	template <signal_code_value_t tpSignalCode, typename... TpSignalArgs>
-	struct Signal
+	template <event_code_value_t tpEventCode, typename... TpEventArgs>
+	struct Event
 	{
-		static constexpr signal_code_value_t signalCode = tpSignalCode;
+		static constexpr event_code_value_t eventCode = tpEventCode;
 	};
 
 }

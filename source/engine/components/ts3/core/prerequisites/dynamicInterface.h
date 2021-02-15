@@ -10,7 +10,7 @@ namespace ts3
 {
 
 	template <typename TpClass>
-	using InterfaceHandle = std::shared_ptr<TpClass>;
+	using SharedHandle = std::shared_ptr<TpClass>;
 
 	class DynamicInterface : public std::enable_shared_from_this<DynamicInterface>
 	{
@@ -48,7 +48,7 @@ namespace ts3
 		}
 
 		template <typename TpSubclass>
-		InterfaceHandle<TpSubclass> getHandle()
+		SharedHandle<TpSubclass> getHandle()
 		{
 		#if( TS3_DEBUG )
 			return dynamic_pointer_cast_check<TpSubclass>( shared_from_this() );
@@ -58,7 +58,7 @@ namespace ts3
 		}
 
 		template <typename TpSubclass>
-		InterfaceHandle<TpSubclass> queryHandle()
+		SharedHandle<TpSubclass> queryHandle()
 		{
 		#if( TS3_DEBUG )
 			return dynamic_pointer_cast_throw<TpSubclass>( shared_from_this() );
@@ -73,7 +73,7 @@ namespace ts3
 	};
 
 	template <typename TpClass, typename... TpArgs>
-	inline InterfaceHandle<TpClass> createDynamicInterfaceObject( TpArgs && ...pArgs )
+	inline SharedHandle<TpClass> createDynamicInterfaceObject( TpArgs && ...pArgs )
 	{
 		auto objectHandle = std::make_shared<TpClass>( std::forward<TpArgs>( pArgs )... );
 	#if( TS3_DEBUG )

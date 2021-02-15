@@ -12,13 +12,6 @@ namespace ts3
 	/// @brief Data of a texture object used by a font to store glyph images.
 	struct FontTextureInfo
 	{
-		FontTextureInfo() = default;
-
-		FontTextureInfo( std::nullptr_t )
-		: texture( nullptr )
-		, textureArraySize( 0 )
-		{}
-
 		gpuapi::TextureHandle texture;
 
 		// Texture dimension. Usually - a single 2D texture or an array of those.
@@ -30,6 +23,13 @@ namespace ts3
 		// Number of sub-textures (layers) in the texture. 1 for a single texture,
 		// 1 or more for texture arrays.
 		uint32 textureArraySize;
+
+		FontTextureInfo() = default;
+
+		FontTextureInfo( std::nullptr_t )
+		: texture( nullptr )
+		, textureArraySize( 0 )
+		{}
 
 		explicit operator bool() const
 		{

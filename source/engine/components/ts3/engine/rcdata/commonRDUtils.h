@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef __TS3_ENGINE_COMMON_RC_UTILS_H__
-#define __TS3_ENGINE_COMMON_RC_UTILS_H__
+#ifndef __TS3_ENGINE_COMMON_RD_UTILS_H__
+#define __TS3_ENGINE_COMMON_RD_UTILS_H__
 
 #include "../prerequisites.h"
 #include <ts3/stdext/memoryBuffer.h>
@@ -46,4 +46,4 @@ namespace ts3
 
 }
 
-#endif // __TS3_ENGINE_COMMON_RC_UTILS_H__
+#endif // __TS3_ENGINE_COMMON_RD_UTILS_H__
