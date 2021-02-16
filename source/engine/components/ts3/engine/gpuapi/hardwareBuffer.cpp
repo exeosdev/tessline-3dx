@@ -5,7 +5,9 @@ namespace ts3
 {
 
 	HardwareBuffer::HardwareBuffer()
-	: mGPUBufferRef( _bufferRef )
+	: mGPUBufferRef( _gpuBufferRef )
+	, mEventProxy( _eventProxy )
+	, _eventProxy( *this )
 	{}
 
 	HardwareBuffer::~HardwareBuffer() = default;

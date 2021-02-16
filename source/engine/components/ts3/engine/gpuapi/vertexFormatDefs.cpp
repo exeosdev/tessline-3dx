@@ -4,7 +4,27 @@
 namespace ts3
 {
 
-	const gpuapi::VertexInputFormatDesc GPUVertexInputFormatDescForVertexStruct<GPUVertexFormat2DDefault>::sFormat =
+	const gpuapi::VertexInputFormatDesc & queryVertexInputFormatDesc( EGPUVertexFormatID pFormatID )
+	{
+		switch( pFormatID )
+		{
+			case EGPUVertexFormatID::VF2DDefault:
+				return cvVertexInputFormatDesc2DDefault;
+
+			case EGPUVertexFormatID::VF2DUI:
+				return cvVertexInputFormatDesc2DUI;
+
+			case EGPUVertexFormatID::VF3DDefault:
+				return cvVertexInputFormatDesc3DDefault;
+
+			default:
+				break;
+		}
+
+		throw 0;
+	}
+
+	const gpuapi::VertexInputFormatDesc cvVertexInputFormatDesc2DDefault =
 	{
 		ts3gaVertexAttributeDesc( 0,
 		                          0,
@@ -31,7 +51,7 @@ namespace ts3
 		                          0 )
 	};
 
-	const gpuapi::VertexInputFormatDesc GPUVertexInputFormatDescForVertexStruct<GPUVertexFormat2DUI>::sFormat =
+	const gpuapi::VertexInputFormatDesc cvVertexInputFormatDesc2DUI =
 	{
 		ts3gaVertexAttributeDesc( 0,
 		                          0,
@@ -58,7 +78,7 @@ namespace ts3
 		                          0 )
 	};
 
-	const gpuapi::VertexInputFormatDesc GPUVertexInputFormatDescForVertexStruct<GPUVertexFormat3DDefault>::sFormat =
+	const gpuapi::VertexInputFormatDesc cvVertexInputFormatDesc3DDefault =
 	{
 		ts3gaVertexAttributeDesc( 0,
 		                          0,

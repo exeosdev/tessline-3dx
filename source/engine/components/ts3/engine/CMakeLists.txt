@@ -11,29 +11,27 @@ set( TS3_ENGINE_SRC_FILES
         "camera/cameraController.cpp"
 
         "gpuapi/commonGPUDefs.h"
+		"gpuapi/hardwareBufferCommon.h"
 		"gpuapi/hardwareBuffer.h"
 		"gpuapi/hardwareBuffer.cpp"
-		"gpuapi/hardwareGeometryBuffer.h"
-		"gpuapi/hardwareGeometryBuffer.cpp"
-        "gpuapi/vertexFormatDefs.h"
+		"gpuapi/hardwareBufferManager.h"
+		"gpuapi/hardwareBufferManager.cpp"
+		"gpuapi/vertexFormatDefs.h"
         "gpuapi/vertexFormatDefs.cpp"
 
-        "rcs/commonRcsUtils.h"
-        "rcs/commonRcsUtils.cpp"
-
-        "rcs/font/fontCommon.h"
-        "rcs/font/font.h"
-        "rcs/font/font.cpp"
-        "rcs/font/fontTexture.h"
-        "rcs/font/fontTexture.cpp"
-        "rcs/font/fontManager.h"
-        "rcs/font/fontManager.cpp"
-
-        "rcs/image/imageCommon.h"
-        "rcs/image/imageCommon.cpp"
-
-        "rcs/mesh/mesh.h"
-        "rcs/mesh/mesh.cpp"
+        "rcdata/commonRDUtils.h"
+        "rcdata/commonRDUtils.cpp"
+        "rcdata/fontCommon.h"
+        "rcdata/font.h"
+        "rcdata/font.cpp"
+        "rcdata/fontTexture.h"
+        "rcdata/fontTexture.cpp"
+        "rcdata/fontManager.h"
+        "rcdata/fontManager.cpp"
+        "rcdata/imageCommon.h"
+        "rcdata/imageCommon.cpp"
+        "rcdata/mesh.h"
+        "rcdata/mesh.cpp"
 )
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
