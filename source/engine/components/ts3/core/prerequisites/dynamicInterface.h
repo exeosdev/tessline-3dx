@@ -12,6 +12,9 @@ namespace ts3
 	template <typename TpClass>
 	using SharedHandle = std::shared_ptr<TpClass>;
 
+	template <typename TpClass>
+	using WeakHandle = std::weak_ptr<TpClass>;
+
 	class DynamicInterface : public std::enable_shared_from_this<DynamicInterface>
 	{
 	public:
@@ -90,6 +93,14 @@ namespace ts3
 		pUPtr.release();
 		return std::unique_ptr<TpOutInterface>{ targetPtr };
 	}
+
+#define ts3DeclareClassHandle( pClassName ) \
+    class pClassName; \
+    using pClassName##Handle = SharedHandle<pClassName>; \
+    using pClassName##WeakHandle = WeakHandle<pClassName>;
+
+#define ts3DeclareTypedefHandle( pAliasName, pTypeName ) \
+    using pAliasName = pTypeName; using pAliasName##Handle = SharedHandle<pAliasName>
 
 }
 

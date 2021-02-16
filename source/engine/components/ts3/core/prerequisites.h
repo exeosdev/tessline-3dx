@@ -4,6 +4,7 @@
 
 #include <ts3/platform/debug.h>
 #include <ts3/stdext/bitmask.h>
+#include <ts3/stdext/bitUtils.h>
 #include <ts3/stdext/staticLimits.h>
 
 #if( TS3_BUILD_STATIC )

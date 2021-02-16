@@ -5,6 +5,7 @@
 #define __TS3_PLATFORM_DEBUG_H__
 
 #include "fileLocationInfo.h"
+#include <cstdarg>
 
 namespace ts3
 {
@@ -48,7 +49,7 @@ namespace ts3
 		static void interrupt( DebugInterruptHandlerType pHandler, const FileLocationInfo & pLocationInfo );
 
 		/// @brief Handles the print forwarding and vararg handling.
-		static void printDebug( DebugPrintHandlerType pHandler, const char* pFormat, ... );
+		static void printDebug( DebugPrintHandlerType pHandler, const char * pFormat, ... );
 
 	private:
 		// Default assertion handler: prints assertion info using TS3_PCL_DEBUG_OUTPUT() and then triggers an interrupt with TS3_PCL_DEBUG_BREAK().
@@ -105,7 +106,12 @@ namespace ts3
 
 	/// @brief Prints formatted output to the default debug output stream.
 	/// If _ts3DebugPrintHandler is defined, provided handler is used instead.
-	#define ts3DebugOutput( pFormat, ... ) \
+	#define ts3DebugOutput( pText ) \
+		::ts3::DebugInterface::printDebug( _ts3DebugPrintHandler, "%s", pText  )
+
+	/// @brief Prints formatted output to the default debug output stream.
+	/// If _ts3DebugPrintHandler is defined, provided handler is used instead.
+	#define ts3DebugOutputFmt( pFormat, ... ) \
 		::ts3::DebugInterface::printDebug( _ts3DebugPrintHandler, pFormat, __VA_ARGS__  )
 
 
@@ -152,7 +158,12 @@ namespace ts3
 
 	/// @brief Similar to ts3DebugOutput, but uses explicitly specified handler to handle a condition failure.
 	/// If _ts3DebugPrintHandler is defined, provided handler is used instead.
-	#define ts3DebugOutputEx( pHandler, pFormat, ... ) \
+	#define ts3DebugOutputEx( pHandler, pText ) \
+		::ts3::DebugInterface::printDebug( pHandler, "%s", pText  )
+
+	/// @brief Similar to ts3DebugOutput, but uses explicitly specified handler to handle a condition failure.
+	/// If _ts3DebugPrintHandler is defined, provided handler is used instead.
+	#define ts3DebugOutputExFmt( pHandler, pFormat, ... ) \
 		::ts3::DebugInterface::printDebug( pHandler, pFormat, __VA_ARGS__  )
 
 }

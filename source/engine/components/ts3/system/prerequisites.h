@@ -34,7 +34,7 @@ namespace ts3
 	class SystemInterface;
 
 	template <typename TpObject>
-	using SysHandle = InterfaceHandle<TpObject>;
+	using SysHandle = SharedHandle<TpObject>;
 
 #define ts3DeclareSysHandle( pType ) \
 	class pType; using pType##Handle = SysHandle<pType>;
