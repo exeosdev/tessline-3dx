@@ -25,7 +25,7 @@ namespace ts3::gpuapi
 	/// vertex and index buffers should naturally have E_GPU_RESOURCE_USAGE_FLAG_VERTEX_STREAM_BIT set as well as a
 	/// part of their properties. To ensure that is the case (and to reduce the amount of flags specified at creation
 	/// time), these bind flags also have all required USAGE bits set as well.
-	enum EGPUBufferBindFlags : gpu_resource_flags_value_t
+	enum EGPUBufferBindFlags : resource_flags_value_t
 	{
 		// Bind flag for using a buffer as a constant buffer in one or more shader stages.
 		// Such buffer is accessible via one of the valid CB input registers.
@@ -70,7 +70,7 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief Represents all valid targets for buffer resources. Corresponding E_GPU_BUFFER_BIND_FLAGs are used as values.
-	enum class EGPUBufferTarget : enum_default_value_t
+	enum class EGPUBufferTarget : uint32
 	{
 		ConstantBuffer         = E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT,
 		VertexBuffer           = E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT,

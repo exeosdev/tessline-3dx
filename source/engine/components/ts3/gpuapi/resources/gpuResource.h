@@ -11,7 +11,7 @@ namespace ts3::gpuapi
 
 	struct GPUResourceProperties
 	{
-		Bitmask<gpu_resource_flags_value_t> resourceFlags;
+		Bitmask<resource_flags_value_t> resourceFlags;
 	};
 
 	class GPUResource : public GPUBaseObject

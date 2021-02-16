@@ -25,7 +25,7 @@ namespace ts3::gpuapi
 	struct GPUBufferDataUploadDesc;
 	struct GPUBufferSubDataUploadDesc;
 
-	using gpu_resource_flags_value_t = uint32;
+	using resource_flags_value_t = uint32;
 	using gpu_resource_size_t = uint32;
 
 	enum class EGPUResourceBaseType : enum_default_value_t
@@ -36,7 +36,7 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief
-	enum EGPUResourceContentFlags : gpu_resource_flags_value_t
+	enum EGPUResourceContentFlags : resource_flags_value_t
 	{
 		// Specifies dynamic content, i.e. content expected to be updated frequently, possibly multiple
 		// times per single frame. This flag should be combined with CPU_WRITE access to enable resource
@@ -73,7 +73,7 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief
-	enum EGPUResourceUsageFlags : gpu_resource_flags_value_t
+	enum EGPUResourceUsageFlags : resource_flags_value_t
 	{
 		E_GPU_RESOURCE_USAGE_FLAG_VERTEX_STREAM_BIT   = 0x0100,
 
@@ -108,7 +108,7 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief A set of pre-defined memory bit masks for most common scenarios.
-	enum EGPUResourceEMemoryFlags : gpu_resource_flags_value_t
+	enum EGPUResourceMemoryFlags : resource_flags_value_t
 	{
 		E_GPU_RESOURCE_MEMORY_MASK_DEFAULT =
 			E_MEMORY_ACCESS_FLAG_GPU_READ_BIT |
@@ -149,8 +149,8 @@ namespace ts3::gpuapi
 
 	struct ResourceCreateInfo
 	{
-		Bitmask<gpu_resource_flags_value_t> resourceFlags = 0;
-		memory_align_t  memoryBaseAlignment = cxMemoryDefaultAlignment;
+		Bitmask<resource_flags_value_t> resourceFlags = 0;
+		memory_align_t memoryBaseAlignment = cxMemoryDefaultAlignment;
 		Bitmask<EMemoryFlags> memoryFlags = E_GPU_RESOURCE_MEMORY_MASK_DEFAULT;
 	};
 

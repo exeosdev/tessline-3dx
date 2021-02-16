@@ -13,6 +13,7 @@ namespace ts3::gpuapi
 	using memory_align_t = uint32;
 	using memory_offset_t = uint64;
 	using memory_size_t = uint64;
+	using memory_flags_value_t = uint32;
 
 	enum MemoryConstants32 : uint32
 	{
@@ -26,7 +27,7 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief Flags representing various properties of host/device memory pools like access and heap properties.
-	enum EMemoryFlags : uint32
+	enum EMemoryFlags : memory_flags_value_t
 	{
 		// Memory has a READ access granted to the CPU.
 		E_MEMORY_ACCESS_FLAG_CPU_READ_BIT   = 0x0001,
@@ -80,7 +81,7 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief Valid flags
-	enum EMemoryMapFlags : uint32
+	enum EMemoryMapFlags : memory_flags_value_t
 	{
 		// Memory is mapped with read-only permission.
 		E_MEMORY_MAP_FLAG_ACCESS_READ_BIT       = E_MEMORY_ACCESS_FLAG_CPU_READ_BIT,

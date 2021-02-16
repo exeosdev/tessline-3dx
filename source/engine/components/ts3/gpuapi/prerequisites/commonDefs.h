@@ -10,7 +10,7 @@ namespace ts3::gpuapi
 	using gpu_resource_id_t = uint64;
 
 	template <typename TpClass>
-	using Handle = InterfaceHandle<TpClass>;
+	using Handle = SharedHandle<TpClass>;
 
 	enum SystemMetrics : uint32
 	{
@@ -39,11 +39,5 @@ namespace ts3::gpuapi
 	};
 
 }
-
-#define ts3DeclareClassHandle( pClassName ) \
-    class pClassName; using pClassName##Handle = Handle<pClassName>
-
-#define ts3DeclareTypedefHandle( pAliasName, pTypeName ) \
-    using pAliasName = pTypeName; using pAliasName##Handle = Handle<pAliasName>
 
 #endif // __TS3_GPUAPI_COMMON_DEFS_H__

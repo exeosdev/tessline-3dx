@@ -4,7 +4,7 @@
 namespace ts3::gpuapi
 {
 
-	EGPUBufferTarget getBufferTargetFromResourceFlags( const Bitmask<gpu_resource_flags_value_t> & pBufferResourceFlags );
+	EGPUBufferTarget getBufferTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pBufferResourceFlags );
 
 	GPUBuffer::GPUBuffer( GPUDevice & pGPUDevice,
 	                      const ResourceMemoryInfo & pResourceMemory,
@@ -76,7 +76,7 @@ namespace ts3::gpuapi
 	}
 
 
-	EGPUBufferTarget getBufferTargetFromResourceFlags( const Bitmask<gpu_resource_flags_value_t> & pBufferResourceFlags )
+	EGPUBufferTarget getBufferTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pBufferResourceFlags )
 	{
 		static const EGPUBufferTarget bufferTargetArray[] =
 		{
@@ -94,7 +94,7 @@ namespace ts3::gpuapi
 
 		for( auto bufferTarget : bufferTargetArray )
 		{
-			auto bufferTargetResourceFlags = static_cast<gpu_resource_flags_value_t>( bufferTarget );
+			auto bufferTargetResourceFlags = static_cast<resource_flags_value_t>( bufferTarget );
 			if( pBufferResourceFlags.isSet( bufferTargetResourceFlags ) )
 			{
 				return bufferTarget;

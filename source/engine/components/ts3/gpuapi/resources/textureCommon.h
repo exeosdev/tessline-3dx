@@ -44,7 +44,7 @@ namespace ts3::gpuapi
 	///
 	/// Note:
 	/// Just like in case of EGPUBufferBindFlags, these flags contain required E_GPU_RESOURCE_USAGE_FLAG bits as well.
-	enum ETextureBindFlags : gpu_resource_flags_value_t
+	enum ETextureBindFlags : resource_flags_value_t
 	{
 		// Bind flag for using a texture as a sampled image available in one or more shader stages.
 		// Such texture is accessible via one of the valid TX input registers and can be read through a sampler object.
@@ -71,7 +71,7 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief Represents all valid targets for texture resources. Corresponding E_TEXTURE_BIND_FLAGs are used as values.
-	enum class ETextureTarget : gpu_resource_flags_value_t
+	enum class ETextureTarget : resource_flags_value_t
 	{
 		ShaderInputSampledImage            = E_TEXTURE_BIND_FLAG_SHADER_INPUT_SAMPLED_IMAGE_BIT,
 		RenderTargetColorAttachment        = E_TEXTURE_BIND_FLAG_RENDER_TARGET_COLOR_ATTACHMENT_BIT,

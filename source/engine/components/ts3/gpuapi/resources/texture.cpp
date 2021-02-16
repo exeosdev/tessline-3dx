@@ -4,7 +4,7 @@
 namespace ts3::gpuapi
 {
 
-	ETextureTarget getETextureTargetFromResourceFlags( const Bitmask<gpu_resource_flags_value_t> & pTextureResourceFlags );
+	ETextureTarget getETextureTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pTextureResourceFlags );
 
 	Texture::Texture( GPUDevice & pGPUDevice,
 	                  const ResourceMemoryInfo & pResourceMemory,
@@ -82,7 +82,7 @@ namespace ts3::gpuapi
 	}
 
 
-	ETextureTarget getETextureTargetFromResourceFlags( const Bitmask<gpu_resource_flags_value_t> & pTextureResourceFlags )
+	ETextureTarget getETextureTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pTextureResourceFlags )
 	{
 		static const ETextureTarget textureTargetArray[] =
 		{
@@ -95,7 +95,7 @@ namespace ts3::gpuapi
 
 		for( auto textureTarget : textureTargetArray )
 		{
-			auto textureTargetResourceFlags = static_cast<gpu_resource_flags_value_t>( textureTarget );
+			auto textureTargetResourceFlags = static_cast<resource_flags_value_t>( textureTarget );
 			if( pTextureResourceFlags.isSet( textureTargetResourceFlags ) )
 			{
 				return textureTarget;
