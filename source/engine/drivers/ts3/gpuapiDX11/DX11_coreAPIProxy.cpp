@@ -255,7 +255,7 @@ namespace ts3::gpuapi
 		return d3d11ClearDSFlags;
 	}
 
-	UINT DX11CoreAPIProxy::translateDX11BufferBindFlags( Bitmask<gpu_resource_flags_value_t> pBufferFlags )
+	UINT DX11CoreAPIProxy::translateDX11BufferBindFlags( Bitmask<resource_flags_value_t> pBufferFlags )
 	{
 		Bitmask<UINT> d3d11BindFlags = 0;
 		if( pBufferFlags.isSet( E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT ) )
@@ -408,7 +408,7 @@ namespace ts3::gpuapi
 		return ts3::staticArrayElement( textureAddressModeArray, pAddressMode );
 	}
 
-	UINT DX11CoreAPIProxy::translateDX11ETextureBindFlags( Bitmask<gpu_resource_flags_value_t> pTextureFlags )
+	UINT DX11CoreAPIProxy::translateDX11ETextureBindFlags( Bitmask<resource_flags_value_t> pTextureFlags )
 	{
 		Bitmask<UINT> d3d11BindFlags = 0;
 		if( pTextureFlags.isSet( E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT ) )

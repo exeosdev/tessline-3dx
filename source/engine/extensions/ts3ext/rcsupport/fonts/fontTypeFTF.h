@@ -4,7 +4,7 @@
 #ifndef __TS3EXT_RCSUPPORT_FONT_TYPE_FTF_H__
 #define __TS3EXT_RCSUPPORT_FONT_TYPE_FTF_H__
 
-#include <ts3/engine/rcs/font/font.h>
+#include <ts3/engine/rcdata/font.h>
 #include <ts3/core/graphics/rectAllocator.h>
 #include "freeTypeFontObject.h"
 

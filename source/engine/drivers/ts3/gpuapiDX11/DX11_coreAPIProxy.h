@@ -10,7 +10,7 @@
 namespace ts3::gpuapi
 {
 
-	using gpu_resource_flags_value_t = uint32 ;
+	using resource_flags_value_t = uint32 ;
 
 	enum GPUDriverConfigFlags : uint32;
 	enum ERenderTargetAttachmentFlags : uint32;
@@ -32,7 +32,6 @@ namespace ts3::gpuapi
 	enum class ETextureFilter : enum_default_value_t;
 	enum class ETextureFormat : gpu_pixel_format_value_t;
 	enum class ETextureMipMode : enum_default_value_t;
-	enum class TextureType : gpu_resource_flags_value_t;
 	enum class ETriangleVerticesOrder : enum_default_value_t;
 
 	namespace DX11CoreAPIProxy
@@ -67,7 +66,7 @@ namespace ts3::gpuapi
 
 		D3D11_DEPTH_WRITE_MASK translateDX11DepthWriteMask( EDepthWriteMask pDepthWriteMask );
 
-		UINT translateDX11BufferBindFlags( Bitmask<gpu_resource_flags_value_t> pBufferFlags );
+		UINT translateDX11BufferBindFlags( Bitmask<resource_flags_value_t> pBufferFlags );
 
 		D3D11_MAP translateDX11BufferMapFlags( EMemoryMapMode pMapMode, Bitmask<EMemoryFlags> pMemoryFlags );
 
@@ -81,7 +80,7 @@ namespace ts3::gpuapi
 
 		D3D11_TEXTURE_ADDRESS_MODE translateDX11ETextureAddressMode( ETextureAddressMode pAddressMode );
 
-		UINT translateDX11ETextureBindFlags( Bitmask<gpu_resource_flags_value_t> pTextureFlags );
+		UINT translateDX11ETextureBindFlags( Bitmask<resource_flags_value_t> pTextureFlags );
 
 		D3D11_FILTER translateDX11ETextureFilter( ETextureFilter magFilter, ETextureFilter minFilter, ETextureMipMode mipMode, uint32 anisotropyLevel );
 

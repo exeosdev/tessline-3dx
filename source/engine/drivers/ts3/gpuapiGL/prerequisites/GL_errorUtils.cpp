@@ -23,7 +23,7 @@ namespace ts3::gpuapi
 		if( errorCode != GL_NO_ERROR )
 		{
 			auto * errorMessageStr = translateErrorCode( errorCode );
-			ts3DebugOutput( "OpenGL API error: %s.", errorMessageStr );
+			ts3DebugOutputFmt( "OpenGL API error: %s.", errorMessageStr );
 			ts3DebugInterrupt();
 		}
 	}
@@ -39,7 +39,7 @@ namespace ts3::gpuapi
 				break;
 			}
 			auto * errorMessageStr = translateErrorCode( errorCode );
-			ts3DebugOutput( "OpenGL API error: %s.", errorMessageStr );
+			ts3DebugOutputFmt( "OpenGL API error: %s.", errorMessageStr );
 			++errorsNum;
 		}
 	}

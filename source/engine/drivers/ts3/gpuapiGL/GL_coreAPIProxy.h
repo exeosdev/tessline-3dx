@@ -9,7 +9,7 @@
 namespace ts3::gpuapi
 {
 
-	using gpu_resource_flags_value_t = uint32 ;
+	using resource_flags_value_t = uint32 ;
 
 	enum GPUDriverConfigFlags : uint32;
 	enum ERenderTargetAttachmentFlags : uint32;
@@ -31,17 +31,16 @@ namespace ts3::gpuapi
 	enum class ETextureFilter : enum_default_value_t;
 	enum class ETextureFormat : gpu_pixel_format_value_t;
 	enum class ETextureMipMode : enum_default_value_t;
-	enum class TextureType : gpu_resource_flags_value_t;
 	enum class ETriangleVerticesOrder : enum_default_value_t;
 
 	namespace GLCoreAPIProxy
 	{
 
-		GLenum chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<gpu_resource_flags_value_t> pBufferFlags, Bitmask<EMemoryFlags> pMemoryFlags );
+		GLenum chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EMemoryFlags> pMemoryFlags );
 
-		GLenum chooseGLBufferStorageFlags( GLenum pBindTarget, Bitmask<gpu_resource_flags_value_t> pBufferFlags, Bitmask<EMemoryFlags> pMemoryFlags );
+		GLenum chooseGLBufferStorageFlags( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EMemoryFlags> pMemoryFlags );
 
-		GLenum chooseGLBufferUsagePolicy( GLenum pBindTarget, Bitmask<gpu_resource_flags_value_t> pBufferFlags );
+		GLenum chooseGLBufferUsagePolicy( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags );
 
 		GLenum chooseGLTextureMagFilter( ETextureFilter pMagFilter, ETextureMipMode pMipMode );
 

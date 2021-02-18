@@ -2,7 +2,7 @@
 #ifndef __TS3EXT_RCSUPPORT_FREE_TYPE_COMMON_H__
 #define __TS3EXT_RCSUPPORT_FREE_TYPE_COMMON_H__
 
-#include <ts3/engine/rcs/font/fontCommon.h>
+#include <ts3/engine/rcdata/fontCommon.h>
 #include <ft2build.h>
 #include <freetype/freetype.h>
 #include <freetype/ftbitmap.h>

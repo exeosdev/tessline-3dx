@@ -9,7 +9,7 @@
 namespace ts3::gpuapi
 {
 
-	GLenum GLCoreAPIProxy::chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<gpu_resource_flags_value_t> pBufferFlags, Bitmask<EMemoryFlags> pMemoryFlags )
+	GLenum GLCoreAPIProxy::chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EMemoryFlags> pMemoryFlags )
 	{
 	#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
 		return chooseGLBufferUsagePolicy( pBindTarget, pBufferFlags );
@@ -18,7 +18,7 @@ namespace ts3::gpuapi
 	#endif
 	}
 
-	GLenum GLCoreAPIProxy::chooseGLBufferStorageFlags( GLenum pBindTarget, Bitmask<gpu_resource_flags_value_t> pBufferFlags, Bitmask<EMemoryFlags> pMemoryFlags )
+	GLenum GLCoreAPIProxy::chooseGLBufferStorageFlags( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EMemoryFlags> pMemoryFlags )
 	{
 		Bitmask<GLenum> storageFlags = 0;
 
@@ -57,7 +57,7 @@ namespace ts3::gpuapi
 		return storageFlags;
 	}
 
-	GLenum GLCoreAPIProxy::chooseGLBufferUsagePolicy( GLenum pBindTarget, Bitmask<gpu_resource_flags_value_t> pBufferFlags )
+	GLenum GLCoreAPIProxy::chooseGLBufferUsagePolicy( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags )
 	{
 		// Usage constants have standard values. Use that fact to avoid huge if-else.
 		// Basically, we first select between DYNAMIC, STREAM and STATIC and then advance

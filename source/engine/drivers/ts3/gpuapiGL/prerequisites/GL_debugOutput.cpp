@@ -30,7 +30,7 @@ namespace ts3::gpuapi
 		}
 
 		setCallbackActive( pEnable );
-		ts3DebugOutput( "Debug output has been %s.", pEnable ? "enabled" : "disabled" );
+		ts3DebugOutputFmt( "Debug output has been %s.", pEnable ? "enabled" : "disabled" );
 	}
 
 	void GLDebugOutput::enableSync( bool pEnable )
@@ -147,7 +147,7 @@ namespace ts3::gpuapi
 			auto apiVersion = debugOutputInterface->getVersion();
 			const char * extensionName = debugOutputInterface->getExtensionName();
 
-			ts3DebugOutput( "GLDebugOutput object has been initialized (version %u: %s)", apiVersion, extensionName );
+			ts3DebugOutputFmt( "GLDebugOutput object has been initialized (version %u: %s)", apiVersion, extensionName );
 
 		}
 
@@ -158,7 +158,7 @@ namespace ts3::gpuapi
 	{
 		++_processedEventsNum;
 
-		ts3DebugOutput( "%s", pEventInfo );
+		ts3DebugOutput( pEventInfo );
 
 		if( ( pEventSeverity == GL_DEBUG_SEVERITY_HIGH_ARB ) && _stateFlags.isSet( STATE_FLAG_ENABLE_BREAK_ON_EVENT ) )
 		{

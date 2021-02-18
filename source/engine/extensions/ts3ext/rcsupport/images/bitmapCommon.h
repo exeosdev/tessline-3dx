@@ -2,7 +2,7 @@
 #ifndef __TS3EXT_RCSUPPORT_BITMAP_COMMON_H__
 #define __TS3EXT_RCSUPPORT_BITMAP_COMMON_H__
 
-#include <ts3/engine/rcs/image/imageCommon.h>
+#include <ts3/engine/rcdata/imageCommon.h>
 
 namespace ts3
 {

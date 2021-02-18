@@ -21,8 +21,8 @@
 #include <ts3/gpuapiDX11/DX11_gpuDriverAPI.h>
 #endif
 #include <ts3/engine/camera/cameraController.h>
-#include <ts3/engine/rcs/font/font.h>
-#include <ts3/engine/rcs/font/fontManager.h>
+#include <ts3/engine/rcdata/font.h>
+#include <ts3/engine/rcdata/fontManager.h>
 #include <ts3ext/rcsupport/fonts/fontTypeFTF.h>
 #include <ts3ext/rcsupport/images/bitmapCommon.h>
 
@@ -67,16 +67,26 @@ struct CB0Data
 
 struct VertexArray
 {
-	ts3::GPUVertexFormat2DUI vertices[16];
+	ts3::GPUVertexFormatData2DUI vertices[16];
+};
+
+#include <ts3/engine/gpuapi/hwBuffer.h>
+
+struct EventReactor
+{
+	uint64 onEvent( ts3::HardwareBuffer & )
+	{
+		printf( "GPUBufferRef has been locked!\n" );
+		return 0x77;
+	}
 };
 
 int main( int argc, char ** argv )
 {
-	VertexArray varray;
-	const auto varraySize = sizeof( varray );
-	const auto varraySize1 = sizeof( ts3::GPUVertexFormat2DDefault );
-	const auto varraySize2 = sizeof( ts3::GPUVertexFormat2DUI );
-	const auto varraySize3 = sizeof( ts3::GPUVertexFormat3DDefault );
+	EventReactor er;
+	ts3::HardwareBuffer hwb;
+	hwb.mEventProxy.eLocked.connect( &er, &EventReactor::onEvent );
+	hwb.mEventProxy.eLocked.connect( &er, &EventReactor::onEvent );
 
 	srand( time( nullptr ) );
 
@@ -336,7 +346,7 @@ int main( int argc, char ** argv )
 
 	inputSignatureDesc.descriptorSetArray[0].descriptorType = ts3::gpuapi::EShaderInputDescriptorType::Resource;
 	inputSignatureDesc.descriptorSetArray[0].descriptorsNum = 2;
-	inputSignatureDesc.descriptorSetArray[0].descriptorList[0] = { 0, ts3::gpuapi::EShaderInputDescriptorType::Resource, ts3::gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT };
+	inputSignatureDesc.descriptorSetArray[0].descriptorList[0] = {0, ts3::gpuapi::EShaderInputDescriptorType::Resource, ts3::gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT };
 	inputSignatureDesc.descriptorSetArray[0].descriptorList[0].uResourceDesc = { ts3::gpuapi::EShaderInputResourceType::CBVConstantBuffer, 0, 1 };
 	inputSignatureDesc.descriptorSetArray[0].descriptorList[1] = { 1, ts3::gpuapi::EShaderInputDescriptorType::Resource, ts3::gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT };
 	inputSignatureDesc.descriptorSetArray[0].descriptorList[1].uResourceDesc = { ts3::gpuapi::EShaderInputResourceType::SRVTextureImage, 0, 1 };
