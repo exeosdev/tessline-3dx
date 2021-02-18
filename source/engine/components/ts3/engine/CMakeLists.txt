@@ -11,11 +11,13 @@ set( TS3_ENGINE_SRC_FILES
         "camera/cameraController.cpp"
 
         "gpuapi/commonGPUDefs.h"
-		"gpuapi/hardwareBufferCommon.h"
-		"gpuapi/hardwareBuffer.h"
-		"gpuapi/hardwareBuffer.cpp"
-		"gpuapi/hardwareBufferManager.h"
-		"gpuapi/hardwareBufferManager.cpp"
+		"gpuapi/hwBufferCommon.h"
+		"gpuapi/hwBuffer.h"
+		"gpuapi/hwBuffer.cpp"
+		"gpuapi/hwBufferManager.h"
+		"gpuapi/hwBufferManager.cpp"
+		"gpuapi/hwGeometryBuffer.h"
+		"gpuapi/hwGeometryBuffer.cpp"
 		"gpuapi/vertexFormatDefs.h"
         "gpuapi/vertexFormatDefs.cpp"
 

@@ -2,16 +2,16 @@
 #ifndef __TS3_ENGINE_HARDWARE_BUFFER_H__
 #define __TS3_ENGINE_HARDWARE_BUFFER_H__
 
-#include "hardwareBufferCommon.h"
+#include "hwBufferCommon.h"
 #include <ts3/core/signals/signalEmitter.h>
 
 namespace ts3
 {
 
-	struct HardwareBufferEventProxy
+	struct HWBufferEventProxy
 	{
 		template <typename TpEvent>
-		using EventEmitterType = EventEmitter<HardwareBuffer, TpEvent>;
+		using EventEmitterType = EventEmitter<HWBuffer, TpEvent>;
 
 		using EvtLocked = Event<E_EVT_HWB_LOCKED>;
 		using EvtUnlocked = Event<E_EVT_HWB_UNLOCKED>;
@@ -19,24 +19,24 @@ namespace ts3
 		EventEmitterType<EvtLocked> eLocked;
 		EventEmitterType<EvtUnlocked> eUnlocked;
 
-		explicit HardwareBufferEventProxy( HardwareBuffer & pHWBufferRef ) noexcept
+		explicit HWBufferEventProxy( HWBuffer & pHWBufferRef ) noexcept
 		: eLocked( pHWBufferRef )
 		, eUnlocked( pHWBufferRef )
 		{}
 	};
 
-	class TS3_ENGINE_API HardwareBuffer : public DynamicInterface
+	class TS3_ENGINE_API HWBuffer : public DynamicInterface
 	{
 	public:
 		const GPUBufferRef & mGPUBufferRef;
-		const HardwareBufferEventProxy & mEventProxy;
+		const HWBufferEventProxy & mEventProxy;
 
-		HardwareBuffer();
-		virtual ~HardwareBuffer();
+		HWBuffer();
+		virtual ~HWBuffer();
 
 	private:
 		GPUBufferRef _gpuBufferRef;
-		HardwareBufferEventProxy _eventProxy;
+		HWBufferEventProxy _eventProxy;
 	};
 
 }

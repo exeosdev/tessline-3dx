@@ -7,16 +7,16 @@
 namespace ts3
 {
 
-	class HardwareVertexBuffer;
-	class HardwareIndexBuffer;
+	class HWVertexBuffer;
+	class HWIndexBuffer;
 
 	class MeshPart
 	{
 	public:
 
 	private:
-		SharedHandle<HardwareVertexBuffer> _hwVertexBuffer;
-		SharedHandle<HardwareIndexBuffer> _hwIndexBuffer;
+		SharedHandle<HWVertexBuffer> _hwVertexBuffer;
+		SharedHandle<HWIndexBuffer> _hwIndexBuffer;
 	};
 
 }

@@ -1,15 +1,15 @@
 
-#include "hardwareBuffer.h"
+#include "hwBuffer.h"
 
 namespace ts3
 {
 
-	HardwareBuffer::HardwareBuffer()
+	HWBuffer::HWBuffer()
 	: mGPUBufferRef( _gpuBufferRef )
 	, mEventProxy( _eventProxy )
 	, _eventProxy( *this )
 	{}
 
-	HardwareBuffer::~HardwareBuffer() = default;
+	HWBuffer::~HWBuffer() = default;
 
 }

@@ -52,19 +52,19 @@ namespace ts3
 		uint32 allocatedSubRegionCount;
 	};
 
-	struct GenericHWBufferMetrics
+	struct HWBufferMetrics
 	{
 		gpuapi::memory_size_t bufferSize;
 	};
 
-	struct VertexHWBufferMetrics : public GenericHWBufferMetrics
+	struct HWVertexBufferMetrics : public HWBufferMetrics
 	{
 		uint32 instanceDataStepRate;
 		uint32 vertexCount;
 		uint32 vertexSize;
 	};
 
-	struct IndexHWBufferMetrics : public GenericHWBufferMetrics
+	struct HWIndexBufferMetrics : public HWBufferMetrics
 	{
 		uint32 indexCount;
 		uint32 indexSize;

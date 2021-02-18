@@ -2,7 +2,7 @@
 #ifndef __TS3_ENGINE_HARDWARE_BUFFER_MANAGER_H__
 #define __TS3_ENGINE_HARDWARE_BUFFER_MANAGER_H__
 
-#include "hardwareBuffer.h"
+#include "hwBuffer.h"
 #include <ts3/stdext/memory.h>
 
 namespace ts3
@@ -10,32 +10,32 @@ namespace ts3
 
 	using gpuapi_buffer_ref_id_t = uint64;
 
-	struct HardwareBufferCreateInfo
+	struct HWBufferCreateInfo
 	{
 		union Metrics
 		{
-			GenericHWBufferMetrics uGeneric;
-			VertexHWBufferMetrics uVertexBuffer;
-			IndexHWBufferMetrics uIndexBuffer;
+			HWBufferMetrics uGeneric;
+			HWVertexBufferMetrics uVertexBuffer;
+			HWIndexBufferMetrics uIndexBuffer;
 		};
 
-		EHardwareBufferType baseType = EHardwareBufferType::HBTUnknown;
+		EHWBufferType baseType = EHWBufferType::HBTUnknown;
 		Bitmask<hardware_buffer_flags_value_t> flags = 0;
 		Metrics metrics;
 		gpuapi::GPUBufferInitDataDesc initData;
 
-		HardwareBufferCreateInfo()
+		HWBufferCreateInfo()
 		{
 			memZero( metrics );
 		}
 	};
 
-	class HardwareBufferManager
+	class HWBufferManager
 	{
 	public:
 		struct GPUBufferState
 		{
-			using HWBufferList = std::list<HardwareBufferWeakHandle>;
+			using HWBufferList = std::list<HWBufferWeakHandle>;
 			gpuapi_buffer_ref_id_t bufferRefID;
 			gpuapi::GPUBufferHandle gpuBuffer;
 			HWBufferList allocatedHWBufferList;
@@ -46,31 +46,31 @@ namespace ts3
 		Result allocateGPUBufferExplicit( gpuapi_buffer_ref_id_t pGPUBufferRefID,
 		                                  const gpuapi::GPUBufferCreateInfo & pGPUBufferCreateInfo );
 
-		HardwareVertexBufferHandle createVertexBuffer( const HardwareBufferCreateInfo & pHWBCreateInfo );
+		HWVertexBufferHandle createVertexBuffer( const HWBufferCreateInfo & pHWBCreateInfo );
 
-		HardwareVertexBufferHandle createVertexBufferEx( gpuapi_buffer_ref_id_t pGBUBufferRefID,
-		                                                 const HardwareBufferCreateInfo & pHWBCreateInfo );
+		HWVertexBufferHandle createVertexBufferEx( gpuapi_buffer_ref_id_t pGBUBufferRefID,
+		                                           const HWBufferCreateInfo & pHWBCreateInfo );
 
-		HardwareIndexBufferHandle createIndexBuffer( const HardwareBufferCreateInfo & pHWBCreateInfo );
+		HWIndexBufferHandle createIndexBuffer( const HWBufferCreateInfo & pHWBCreateInfo );
 
-		HardwareIndexBufferHandle createIndexBufferEx( gpuapi_buffer_ref_id_t pGBUBufferRefID,
-		                                               const HardwareBufferCreateInfo & pHWBCreateInfo );
+		HWIndexBufferHandle createIndexBufferEx( gpuapi_buffer_ref_id_t pGBUBufferRefID,
+		                                         const HWBufferCreateInfo & pHWBCreateInfo );
 
 		TS3_PCL_ATTR_NO_DISCARD GPUBufferUsageInfo getGPUBufferInfo( gpuapi_buffer_ref_id_t pGPUBufferRefID ) const;
 
-		static gpuapi::memory_align_t queryAlignmentRequirementsForBuffer( EHardwareBufferType pBufferType,
+		static gpuapi::memory_align_t queryAlignmentRequirementsForBuffer( EHWBufferType pBufferType,
 		                                                                   gpuapi::memory_size_t pBufferSize,
 		                                                                   Bitmask<gpuapi::memory_flags_value_t> pMemoryFlags = 0 );
 
 	private:
 		gpuapi::GPUBufferHandle _createGPUBuffer( gpuapi_buffer_ref_id_t pGPUBufferRefID,
-		                                          const HardwareBufferCreateInfo & pHWBCreateInfo );
+		                                          const HWBufferCreateInfo & pHWBCreateInfo );
 
 		GPUBufferRef _reserveGPUBufferRegion( gpuapi_buffer_ref_id_t pGPUBufferRefID,
 		                                      gpuapi::memory_size_t pSize,
 		                                      gpuapi::memory_align_t pAlignment = 0 );
 
-		static void _validateBufferCreateInfo( EHardwareBufferType pBufferType, HardwareBufferCreateInfo & pHWBCreateInfo );
+		static void _validateBufferCreateInfo( EHWBufferType pBufferType, HWBufferCreateInfo & pHWBCreateInfo );
 
 	private:
 		using GPUBufferMap = std::unordered_map<gpuapi_buffer_ref_id_t, GPUBufferState>;

@@ -1,20 +1,20 @@
 
-#include "hardwareBufferManager.h"
+#include "hwBufferManager.h"
 #include <ts3/gpuapi/gpuDevice.h>
 #include <ts3/gpuapi/resources/gpuBuffer.h>
 
 namespace ts3
 {
 
-	Result HardwareBufferManager::allocateGPUBufferExplicit( gpuapi_buffer_ref_id_t pGPUBufferRefID,
-	                                                         const gpuapi::GPUBufferCreateInfo & pGBCreateInfo )
+	Result HWBufferManager::allocateGPUBufferExplicit( gpuapi_buffer_ref_id_t pGPUBufferRefID,
+	                                                   const gpuapi::GPUBufferCreateInfo & pGBCreateInfo )
 	{
 	}
 
-	HardwareVertexBufferHandle HardwareBufferManager::createVertexBuffer( const HardwareBufferCreateInfo & pHWBCreateInfo )
+	HWVertexBufferHandle HWBufferManager::createVertexBuffer( const HWBufferCreateInfo & pHWBCreateInfo )
 	{
 		auto hwBufferCreateInfo = pHWBCreateInfo;
-		_validateBufferCreateInfo( EHardwareBufferType::HBTVertexBuffer, hwBufferCreateInfo );
+		_validateBufferCreateInfo( EHWBufferType::HBTVertexBuffer, hwBufferCreateInfo );
 
 		auto gpuBuffer = _createGPUBuffer( 0, hwBufferCreateInfo );
 		if( !gpuBuffer )
@@ -24,33 +24,33 @@ namespace ts3
 		}
 	}
 
-	HardwareVertexBufferHandle HardwareBufferManager::createVertexBufferEx( gpuapi_buffer_ref_id_t pGBUBufferRefID,
-	                                                                        const HardwareBufferCreateInfo & pHWBCreateInfo )
+	HWVertexBufferHandle HWBufferManager::createVertexBufferEx( gpuapi_buffer_ref_id_t pGBUBufferRefID,
+	                                                            const HWBufferCreateInfo & pHWBCreateInfo )
 	{
 	}
 
-	HardwareIndexBufferHandle HardwareBufferManager::createIndexBuffer( const HardwareBufferCreateInfo & pHWBCreateInfo )
+	HWIndexBufferHandle HWBufferManager::createIndexBuffer( const HWBufferCreateInfo & pHWBCreateInfo )
 	{
 	}
 
-	HardwareIndexBufferHandle HardwareBufferManager::createIndexBufferEx( gpuapi_buffer_ref_id_t pGBUBufferRefID,
-	                                                                      const HardwareBufferCreateInfo & pHWBCreateInfo )
+	HWIndexBufferHandle HWBufferManager::createIndexBufferEx( gpuapi_buffer_ref_id_t pGBUBufferRefID,
+	                                                          const HWBufferCreateInfo & pHWBCreateInfo )
 	{
 	}
 
-	GPUBufferUsageInfo HardwareBufferManager::getGPUBufferInfo( gpuapi_buffer_ref_id_t pGPUBufferRefID ) const
+	GPUBufferUsageInfo HWBufferManager::getGPUBufferInfo( gpuapi_buffer_ref_id_t pGPUBufferRefID ) const
 	{
 	}
 
-	gpuapi::memory_align_t HardwareBufferManager::queryAlignmentRequirementsForBuffer( EHardwareBufferType pBufferType,
-	                                                                                   gpuapi::memory_size_t pBufferSize,
-	                                                                                   Bitmask<gpuapi::memory_flags_value_t> pMemoryFlags )
+	gpuapi::memory_align_t HWBufferManager::queryAlignmentRequirementsForBuffer( EHWBufferType pBufferType,
+	                                                                             gpuapi::memory_size_t pBufferSize,
+	                                                                             Bitmask<gpuapi::memory_flags_value_t> pMemoryFlags )
 	{
 		return gpuapi::cxMemoryDefaultAlignment;
 	}
 
-	gpuapi::GPUBufferHandle HardwareBufferManager::_createGPUBuffer( gpuapi_buffer_ref_id_t pGPUBufferRefID,
-	                                                                 const HardwareBufferCreateInfo & pHWBCreateInfo )
+	gpuapi::GPUBufferHandle HWBufferManager::_createGPUBuffer( gpuapi_buffer_ref_id_t pGPUBufferRefID,
+	                                                           const HWBufferCreateInfo & pHWBCreateInfo )
 	{
 		const auto requestedBufferSize = pHWBCreateInfo.metrics.uGeneric.bufferSize;
 		if( requestedBufferSize == 0 )
@@ -105,9 +105,9 @@ namespace ts3
 		return gpuBuffer;
 	}
 
-	GPUBufferRef HardwareBufferManager::_reserveGPUBufferRegion( gpuapi_buffer_ref_id_t pGPUBufferRefID,
-	                                                             gpuapi::memory_size_t pSize,
-	                                                             gpuapi::memory_align_t pAlignment )
+	GPUBufferRef HWBufferManager::_reserveGPUBufferRegion( gpuapi_buffer_ref_id_t pGPUBufferRefID,
+	                                                       gpuapi::memory_size_t pSize,
+	                                                       gpuapi::memory_align_t pAlignment )
 	{
 		auto internalBufferStateIter = _gpuBufferMap.find( pGPUBufferRefID );
 		if( internalBufferStateIter == _gpuBufferMap.end() )
@@ -167,9 +167,9 @@ namespace ts3
 		return gpuBufferRef;
 	}
 
-	void HardwareBufferManager::_validateBufferCreateInfo( EHardwareBufferType pBufferType, HardwareBufferCreateInfo & pHWBCreateInfo )
+	void HWBufferManager::_validateBufferCreateInfo( EHWBufferType pBufferType, HWBufferCreateInfo & pHWBCreateInfo )
 	{
-		if( ( pHWBCreateInfo.baseType != EHardwareBufferType::HBTUnknown ) && ( pHWBCreateInfo.baseType != pBufferType ) )
+		if( ( pHWBCreateInfo.baseType != EHWBufferType::HBTUnknown ) && ( pHWBCreateInfo.baseType != pBufferType ) )
 		{
 			ts3DebugOutput( "HWB: Invalid baseType specified for a buffer. Buffer class type will be used instead." );
 			pHWBCreateInfo.baseType = pBufferType;

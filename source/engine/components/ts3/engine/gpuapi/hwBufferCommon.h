@@ -5,15 +5,13 @@
 #include "commonGPUDefs.h"
 #include <ts3/core/signals/signalCommon.h>
 
-#define ts3MemoryFlagU64Set( pFlag ) ( ( ( uint64 ) pFlag ) << 32 )
-
 namespace ts3
 {
 
-	ts3DeclareClassHandle( HardwareBuffer );
-	ts3DeclareClassHandle( HardwareGeometryBuffer );
-	ts3DeclareClassHandle( HardwareVertexBuffer );
-	ts3DeclareClassHandle( HardwareIndexBuffer );
+	ts3DeclareClassHandle( HWBuffer );
+	ts3DeclareClassHandle( HWGeometryBuffer );
+	ts3DeclareClassHandle( HWVertexBuffer );
+	ts3DeclareClassHandle( HWIndexBuffer );
 
 	using hardware_buffer_flags_value_t = uint64;
 
@@ -25,7 +23,7 @@ namespace ts3
 		E_EVT_HWB_UNLOCKED,
 	};
 
-	enum class EHardwareBufferType : uint32
+	enum class EHWBufferType : uint32
 	{
 		HBTConstantBuffer         = static_cast<uint32>( gpuapi::EGPUBufferTarget::ConstantBuffer ),
 		HBTVertexBuffer           = static_cast<uint32>( gpuapi::EGPUBufferTarget::VertexBuffer ),
@@ -36,7 +34,7 @@ namespace ts3
 		HBTUnknown                = static_cast<uint32>( gpuapi::EGPUBufferTarget::Unknown ),
 	};
 
-	enum class EHardwareBufferUsageMode : hardware_buffer_flags_value_t
+	enum class EHWBufferUsageMode : hardware_buffer_flags_value_t
 	{
 		ConstantBufferDynamic       = gpuapi::E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT |
