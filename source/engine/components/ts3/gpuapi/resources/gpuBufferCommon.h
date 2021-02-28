@@ -97,7 +97,7 @@ namespace ts3::gpuapi
 	{
 		// Total size of the buffer, in bytes. The buffer, if created, will have at least the specified size.
 		// Additional alignment rules and memory requirements may cause the buffer to be larger than requested.
-		memory_size_t bufferSize = 0;
+		gpu_memory_size_t bufferSize = 0;
 
 		// Initial target for the buffer. Some drivers, like GL, require binding to a target in order to actually
 		// initialize the buffer. If the buffer has multiple bind targets specified (which is perfectly fine), this
@@ -121,7 +121,7 @@ namespace ts3::gpuapi
 	struct GPUBufferSubDataCopyDesc
 	{
 		MemoryRegion sourceBufferRegion;
-		memory_offset_t targetBufferOffset;
+		gpu_memory_offset_t targetBufferOffset;
 		Bitmask<EGPUBufferDataCopyFlags> flags = E_GPU_BUFFER_DATA_COPY_FLAGS_DEFAULT;
 	};
 

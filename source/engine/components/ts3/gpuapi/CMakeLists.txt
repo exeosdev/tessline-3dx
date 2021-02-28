@@ -35,7 +35,7 @@ set( TS3_GPUAPI_SRC_FILES
         # "systemDisplayManager.h"
         # "systemDisplayManager.cpp"
 
-        "memory/commonMemoryDefs.h"
+        "memory/commonGPUMemoryDefs.h"
 
         "resources/commonGPUResourceDefs.h"
         "resources/gpuBuffer.h"

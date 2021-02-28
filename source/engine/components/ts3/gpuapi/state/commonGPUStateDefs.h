@@ -4,7 +4,7 @@
 #ifndef __TS3_GPUAPI_COMMON_STATE_DEFS_H__
 #define __TS3_GPUAPI_COMMON_STATE_DEFS_H__
 
-#include "../memory/commonMemoryDefs.h"
+#include "../memory/commonGPUMemoryDefs.h"
 #include <ts3/stdext/hash.h>
 #include <list>
 

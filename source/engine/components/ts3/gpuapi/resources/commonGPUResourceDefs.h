@@ -4,7 +4,7 @@
 #ifndef __TS3_GPUAPI_COMMON_RESOURCE_DEFS_H__
 #define __TS3_GPUAPI_COMMON_RESOURCE_DEFS_H__
 
-#include "../memory/commonMemoryDefs.h"
+#include "../memory/commonGPUMemoryDefs.h"
 
 namespace ts3::gpuapi
 {
@@ -139,7 +139,7 @@ namespace ts3::gpuapi
 	struct ResourceInputDataDesc
 	{
 		const void * pointer = nullptr;
-		memory_size_t size = 0;
+		gpu_memory_size_t size = 0;
 
 		constexpr explicit operator bool() const
 		{
@@ -150,7 +150,7 @@ namespace ts3::gpuapi
 	struct ResourceCreateInfo
 	{
 		Bitmask<resource_flags_value_t> resourceFlags = 0;
-		memory_align_t memoryBaseAlignment = cxMemoryDefaultAlignment;
+		gpu_memory_align_t memoryBaseAlignment = cxGPUMemoryDefaultAlignment;
 		Bitmask<EMemoryFlags> memoryFlags = E_GPU_RESOURCE_MEMORY_MASK_DEFAULT;
 	};
 

@@ -12,7 +12,7 @@ namespace ts3::gpuapi
 
 	struct GPUBufferProperties : public GPUResourceProperties
 	{
-		memory_size_t byteSize;
+		gpu_memory_size_t byteSize;
 	};
 
 	class GPUBuffer : public GPUResource

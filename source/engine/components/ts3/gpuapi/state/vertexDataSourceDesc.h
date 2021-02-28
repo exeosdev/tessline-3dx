@@ -25,7 +25,7 @@ namespace ts3::gpuapi
 			// Buffer must have been created with the E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT bit set.
 			GPUBuffer * bufferObject = nullptr;
 			// An offset from the beginning of the buffer's storage.
-			memory_offset_t dataOffset = 0;
+			gpu_memory_offset_t dataOffset = 0;
 			// A format of the data within the bound buffer's range.
 			EIndexDataFormat format = EIndexDataFormat::Uint32;
 		};
@@ -40,10 +40,10 @@ namespace ts3::gpuapi
 			// Buffer must have been created with the E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT bit set.
 			GPUBuffer * bufferObject = nullptr;
 			// An offset from the beginning of the buffer's storage.
-			memory_offset_t dataOffset = 0;
+			gpu_memory_offset_t dataOffset = 0;
 			// Size of a single vertex instance within the buffer. Basically, it's a size of a struct
 			// used to represent vertex subdata stored in this buffer. Cannot be 0.
-			memory_size_t dataStride = 0;
+			gpu_memory_size_t dataStride = 0;
 		};
 
 		using VertexBufferBindingDescArray = std::array<VertexBufferBindingDesc, GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM>;
@@ -81,15 +81,15 @@ namespace ts3::gpuapi
 		struct IndexBufferBinding
 		{
 			GPUBuffer * bufferObject = nullptr;
-			memory_offset_t dataOffset;
+			gpu_memory_offset_t dataOffset;
 			EIndexDataFormat format;
 		};
 
 		struct VertexBufferBinding
 		{
 			GPUBuffer * bufferObject = nullptr;
-			memory_offset_t dataOffset;
-			memory_size_t dataStride;
+			gpu_memory_offset_t dataOffset;
+			gpu_memory_size_t dataStride;
 		};
 
 		struct VertexStreamRange

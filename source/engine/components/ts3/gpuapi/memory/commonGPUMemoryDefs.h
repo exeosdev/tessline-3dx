@@ -10,24 +10,26 @@
 namespace ts3::gpuapi
 {
 
-	using memory_align_t = uint32;
-	using memory_offset_t = uint64;
-	using memory_size_t = uint64;
-	using memory_flags_value_t = uint32;
+	using gpu_memory_align_t = uint32;
+	using gpu_memory_offset_t = uint64;
+	using gpu_memory_size_t = uint64;
+	using gpu_memory_flags_value_t = uint32;
 
-	enum MemoryConstants32 : uint32
+	using gpu_memory_heap_id_t = uint64;
+
+	enum GPUMemoryConstants32 : uint32
 	{
-		cxMemoryDefaultAlignment = 0,
+		cxGPUMemoryDefaultAlignment = 0,
 	};
 
-	enum MemoryConstants64 : uint64
+	enum GPUMemoryConstants64 : uint64
 	{
-		cxMemoryOffsetInvalid = ts3::Limits<memory_offset_t>::maxValue,
-		cxMemorySizeMax = ts3::Limits<memory_offset_t>::maxValue,
+		cxGPUMemoryOffsetInvalid = ts3::Limits<gpu_memory_offset_t>::maxValue,
+		cxGPUMemorySizeMax = ts3::Limits<gpu_memory_offset_t>::maxValue,
 	};
 
 	/// @brief Flags representing various properties of host/device memory pools like access and heap properties.
-	enum EMemoryFlags : memory_flags_value_t
+	enum EMemoryFlags : gpu_memory_flags_value_t
 	{
 		// Memory has a READ access granted to the CPU.
 		E_MEMORY_ACCESS_FLAG_CPU_READ_BIT   = 0x0001,
@@ -81,7 +83,7 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief Valid flags
-	enum EMemoryMapFlags : memory_flags_value_t
+	enum EMemoryMapFlags : gpu_memory_flags_value_t
 	{
 		// Memory is mapped with read-only permission.
 		E_MEMORY_MAP_FLAG_ACCESS_READ_BIT       = E_MEMORY_ACCESS_FLAG_CPU_READ_BIT,
@@ -122,12 +124,12 @@ namespace ts3::gpuapi
 		WriteInvalidate = E_MEMORY_MAP_FLAG_WRITE_INVALIDATE_BIT,
 	};
 
-	using MemoryRange = ts3::InclusiveRange<memory_size_t>;
+	using MemoryRange = ts3::InclusiveRange<gpu_memory_size_t>;
 
 	struct MemoryRegion
 	{
-		memory_offset_t offset = 0;
-		memory_size_t size = 0;
+		gpu_memory_offset_t offset = 0;
+		gpu_memory_size_t size = 0;
 
 		explicit operator bool() const
 		{
@@ -149,6 +151,8 @@ namespace ts3::gpuapi
 		{
 			return size == 0;
 		}
+
+		static MemoryRegion
 	};
 
 	inline bool operator==( const MemoryRegion & pLhs, const MemoryRegion & pRhs )
@@ -163,9 +167,9 @@ namespace ts3::gpuapi
 
 	struct ResourceMemoryInfo
 	{
-		memory_align_t baseAlignment;
+		gpu_memory_align_t baseAlignment;
 		Bitmask<EMemoryFlags> memoryFlags;
-		uint64 sourceHeapID;
+		gpu_memory_heap_id_t sourceHeapID;
 		MemoryRegion sourceHeapRegion;
 	};
 

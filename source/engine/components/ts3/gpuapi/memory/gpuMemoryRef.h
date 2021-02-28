@@ -1,0 +1,8 @@
+//
+// Created by GrjM on 28/02/2021.
+//
+
+#ifndef TESSLINE_3DX_MEMORYREF_H
+#define TESSLINE_3DX_MEMORYREF_H
+
+#endif //TESSLINE_3DX_MEMORYREF_H
