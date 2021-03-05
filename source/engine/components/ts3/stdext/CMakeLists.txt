@@ -13,6 +13,8 @@ set( TS3_STDEXT_SRC_FILES
         "staticAlgo.h"
         "staticLimits.h"
         "stringUtils.h"
+        "syncCommon.h"
+        "syncCommon.cpp"
         "typeTraits.h"
         "utilities.h"
         )

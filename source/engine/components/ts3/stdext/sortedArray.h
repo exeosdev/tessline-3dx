@@ -61,7 +61,7 @@ namespace ts3
 
 	    const TpValue & operator[]( size_t pIndex ) const
 	    {
-		    return _underlyingContainer[pIndex];
+		    return _underlyingContainer[pIndex];0
 	    }
 
 	    TpValue & at( size_t pIndex )
