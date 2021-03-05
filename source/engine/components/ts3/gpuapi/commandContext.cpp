@@ -29,13 +29,13 @@ namespace ts3::gpuapi
 		return mCommandList->endCommandSequence();
 	}
 
-	bool CommandContext::mapBuffer( GPUBuffer & pBuffer, EMemoryMapMode pMapMode )
+	bool CommandContext::mapBuffer( GPUBuffer & pBuffer, EGPUMemoryMapMode pMapMode )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsCommon ) );
 		return mCommandList->mapBuffer( pBuffer, pMapMode );
 	}
 
-	bool CommandContext::mapBufferRegion( GPUBuffer & pBuffer, const MemoryRegion & pRegion, EMemoryMapMode pMapMode )
+	bool CommandContext::mapBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsCommon ) );
 		return mCommandList->mapBufferRegion( pBuffer, pRegion, pMapMode );
@@ -53,7 +53,7 @@ namespace ts3::gpuapi
 		return mCommandList->flushMappedBuffer( pBuffer );
 	}
 
-	bool CommandContext::flushMappedBufferRegion( GPUBuffer & pBuffer, const MemoryRegion & pRegion )
+	bool CommandContext::flushMappedBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsCommon ) );
 		return mCommandList->flushMappedBufferRegion( pBuffer, pRegion );
@@ -91,7 +91,7 @@ namespace ts3::gpuapi
 		return mCommandList->invalidateBuffer( pBuffer );
 	}
 
-	bool CommandContextDirect::invalidateBufferRegion( GPUBuffer & pBuffer, const MemoryRegion & pRegion )
+	bool CommandContextDirect::invalidateBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDirect ) );
 		return mCommandList->invalidateBufferRegion( pBuffer, pRegion );
@@ -247,13 +247,13 @@ namespace ts3::gpuapi
 	bool CommandContextDeferred::mapBufferDeferred( GPUBuffer & pBuffer )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferred ) );
-		return mCommandList->mapBuffer( pBuffer, EMemoryMapMode::WriteAppend );
+		return mCommandList->mapBuffer( pBuffer, EGPUMemoryMapMode::WriteAppend );
 	}
 
-	bool CommandContextDeferred::mapBufferRegionDeferred( GPUBuffer & pBuffer, const MemoryRegion & pRegion )
+	bool CommandContextDeferred::mapBufferRegionDeferred( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferred ) );
-		return mCommandList->mapBufferRegion( pBuffer, pRegion, EMemoryMapMode::WriteAppend );
+		return mCommandList->mapBufferRegion( pBuffer, pRegion, EGPUMemoryMapMode::WriteAppend );
 	}
 
 	bool CommandContextDeferred::unmapBufferDeferred( GPUBuffer & pBuffer )

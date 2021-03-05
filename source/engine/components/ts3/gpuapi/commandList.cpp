@@ -61,12 +61,12 @@ namespace ts3::gpuapi
 	void CommandList::endCommandSequence()
 	{}
 
-	bool CommandList::mapBuffer( GPUBuffer & pBuffer, EMemoryMapMode pMapMode )
+	bool CommandList::mapBuffer( GPUBuffer & pBuffer, EGPUMemoryMapMode pMapMode )
 	{
-		return mapBufferRegion( pBuffer, MemoryRegion{ 0, pBuffer.mBufferProperties.byteSize }, pMapMode );
+		return mapBufferRegion( pBuffer, GPUMemoryRegion{ 0, pBuffer.mBufferProperties.byteSize }, pMapMode );
 	}
 
-	bool CommandList::mapBufferRegion( GPUBuffer & pBuffer, const MemoryRegion & pRegion, EMemoryMapMode pMapMode )
+	bool CommandList::mapBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode )
 	{
 		if( !pBuffer.validateMapRequest( pRegion, pMapMode ) )
 		{
@@ -92,14 +92,14 @@ namespace ts3::gpuapi
 
 	bool CommandList::flushMappedBuffer( GPUBuffer & pBuffer )
 	{
-		MemoryRegion flushRegion;
+		GPUMemoryRegion flushRegion;
 		flushRegion.offset = 0;
 		flushRegion.size = pBuffer.mBufferProperties.byteSize;
 
 		return flushMappedBufferRegion( pBuffer, flushRegion );
 	}
 
-	bool CommandList::flushMappedBufferRegion( GPUBuffer & pBuffer, const MemoryRegion & pRegion )
+	bool CommandList::flushMappedBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion )
 	{
 		if( !pBuffer.isMapped() )
 		{
@@ -114,14 +114,14 @@ namespace ts3::gpuapi
 
 	bool CommandList::invalidateBuffer( GPUBuffer & pBuffer )
 	{
-		MemoryRegion invalidateRegion;
+		GPUMemoryRegion invalidateRegion;
 		invalidateRegion.offset = 0;
 		invalidateRegion.size = pBuffer.mBufferProperties.byteSize;
 
 		return invalidateBufferRegion( pBuffer, invalidateRegion );
 	}
 
-	bool CommandList::invalidateBufferRegion( GPUBuffer & pBuffer, const MemoryRegion & pRegion )
+	bool CommandList::invalidateBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion )
 	{
 		pBuffer.invalidateRegion( this, pRegion );
 		return true;

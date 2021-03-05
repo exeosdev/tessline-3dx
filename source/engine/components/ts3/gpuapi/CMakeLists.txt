@@ -36,6 +36,14 @@ set( TS3_GPUAPI_SRC_FILES
         # "systemDisplayManager.cpp"
 
         "memory/commonGPUMemoryDefs.h"
+		"memory/gpuMemoryAllocator.h"
+		"memory/gpuMemoryAllocator.cpp"
+		"memory/gpuMemoryHeap.h"
+		"memory/gpuMemoryHeap.cpp"
+		"memory/gpuMemoryPool.h"
+		"memory/gpuMemoryPool.cpp"
+		"memory/gpuMemoryRef.h"
+		"memory/gpuMemoryRef.cpp"
 
         "resources/commonGPUResourceDefs.h"
         "resources/gpuBuffer.h"

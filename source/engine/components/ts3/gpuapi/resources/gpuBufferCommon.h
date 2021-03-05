@@ -13,8 +13,8 @@ namespace ts3::gpuapi
 
 	enum EGPUBufferDataCopyFlags : uint32
 	{
-		E_GPU_BUFFER_DATA_COPY_FLAG_MODE_APPEND_BIT     = E_MEMORY_MAP_FLAG_WRITE_APPEND_BIT,
-		E_GPU_BUFFER_DATA_COPY_FLAG_MODE_INVALIDATE_BIT = E_MEMORY_MAP_FLAG_WRITE_INVALIDATE_BIT,
+		E_GPU_BUFFER_DATA_COPY_FLAG_MODE_APPEND_BIT     = E_GPU_MEMORY_MAP_FLAG_WRITE_APPEND_BIT,
+		E_GPU_BUFFER_DATA_COPY_FLAG_MODE_INVALIDATE_BIT = E_GPU_MEMORY_MAP_FLAG_WRITE_INVALIDATE_BIT,
 		E_GPU_BUFFER_DATA_COPY_FLAGS_DEFAULT = 0,
 	};
 
@@ -120,7 +120,7 @@ namespace ts3::gpuapi
 
 	struct GPUBufferSubDataCopyDesc
 	{
-		MemoryRegion sourceBufferRegion;
+		GPUMemoryRegion sourceBufferRegion;
 		gpu_memory_offset_t targetBufferOffset;
 		Bitmask<EGPUBufferDataCopyFlags> flags = E_GPU_BUFFER_DATA_COPY_FLAGS_DEFAULT;
 	};
@@ -133,7 +133,7 @@ namespace ts3::gpuapi
 
 	struct GPUBufferSubDataUploadDesc
 	{
-		MemoryRegion bufferRegion;
+		GPUMemoryRegion bufferRegion;
 		ResourceInputDataDesc inputDataDesc;
 		Bitmask<EGPUBufferDataCopyFlags> flags = E_GPU_BUFFER_DATA_COPY_FLAGS_DEFAULT;
 	};

@@ -20,7 +20,7 @@ namespace ts3::gpuapi
 		return mBufferProperties.resourceFlags.isSet( pBufferTarget );
 	}
 
-	bool GPUBuffer::validateMapRequest( const MemoryRegion & pRegion, const EMemoryMapMode & pMapMode )
+	bool GPUBuffer::validateMapRequest( const GPUMemoryRegion & pRegion, const EGPUMemoryMapMode & pMapMode )
 	{
 		if( isMapped() )
 		{
@@ -32,7 +32,7 @@ namespace ts3::gpuapi
 			return false;
 		}
 
-		const MemoryRegion bufferDataRegion{ 0, mBufferProperties.byteSize };
+		const GPUMemoryRegion bufferDataRegion{ 0, mBufferProperties.byteSize };
 		if( !ts3::checkRangeSubrange( bufferDataRegion.asRange(), pRegion.asRange() ) )
 		{
 			return false;

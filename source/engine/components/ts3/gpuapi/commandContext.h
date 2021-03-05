@@ -25,11 +25,11 @@ namespace ts3::gpuapi
 		void beginCommandSequence();
 		void endCommandSequence();
 
-		bool mapBuffer( GPUBuffer & pBuffer, EMemoryMapMode pMapMode );
-		bool mapBufferRegion( GPUBuffer & pBuffer, const MemoryRegion & pRegion, EMemoryMapMode pMapMode );
+		bool mapBuffer( GPUBuffer & pBuffer, EGPUMemoryMapMode pMapMode );
+		bool mapBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode );
 		bool unmapBuffer( GPUBuffer & pBuffer );
 		bool flushMappedBuffer( GPUBuffer & pBuffer );
-		bool flushMappedBufferRegion( GPUBuffer & pBuffer, const MemoryRegion & pRegion );
+		bool flushMappedBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion );
 
 	protected:
 		bool checkCommandListSupport( Bitmask<ECommandListFlags> pCmdListFlags );
@@ -52,7 +52,7 @@ namespace ts3::gpuapi
 		void executeDeferredContext( CommandContextDeferred & pDeferredContext );
 
 		bool invalidateBuffer( GPUBuffer & pBuffer );
-		bool invalidateBufferRegion( GPUBuffer & pBuffer, const MemoryRegion & pRegion );
+		bool invalidateBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion );
 	};
 
 	class CommandContextDirectTransfer : public CommandContextDirect
@@ -132,7 +132,7 @@ namespace ts3::gpuapi
 		virtual ~CommandContextDeferred() = default;
 
 		bool mapBufferDeferred( GPUBuffer & pBuffer );
-		bool mapBufferRegionDeferred( GPUBuffer & pBuffer, const MemoryRegion & pRegion );
+		bool mapBufferRegionDeferred( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion );
 		bool unmapBufferDeferred( GPUBuffer & pBuffer );
 	};
 

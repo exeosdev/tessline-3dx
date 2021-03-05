@@ -19,7 +19,7 @@ namespace ts3::gpuapi
 		return ( _mappedMemory.pointer != nullptr ) && !_mappedMemory.mappedRegion.empty();
 	}
 
-	bool GPUResource::isMapped( const MemoryRegion & pRegion ) const
+	bool GPUResource::isMapped( const GPUMemoryRegion & pRegion ) const
 	{
 		return ts3::checkRangeSubrange( _mappedMemory.mappedRegion.asRange(), pRegion.asRange() );
 	}

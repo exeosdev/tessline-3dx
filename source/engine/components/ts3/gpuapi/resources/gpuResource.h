@@ -27,7 +27,7 @@ namespace ts3::gpuapi
 		virtual ~GPUResource();
 
 		bool isMapped() const;
-		bool isMapped( const MemoryRegion & pRegion ) const;
+		bool isMapped( const GPUMemoryRegion & pRegion ) const;
 
 		const ResourceMappedMemory & getMappedMemory() const;
 

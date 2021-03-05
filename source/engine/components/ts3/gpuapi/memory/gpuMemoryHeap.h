@@ -9,19 +9,30 @@
 namespace ts3::gpuapi
 {
 
-	struct GPUMemoryHeapMetrics
+	struct GPUMemoryPoolMetrics
+	{
+		gpu_memory_align_t baseAlignment;
+		gpu_memory_size_t totalSizeBase;
+		gpu_memory_size_t totalSizeMB;
+	};
+
+	struct GPUMemoryHeapProperties
 	{
 		gpu_memory_heap_id_t heapID;
-		gpu_memory_align_t memoryBaseAlignment;
-		Bitmask<EMemoryFlags> memoryFlags;
-		gpu_memory_size_t
+		Bitmask<EGPUMemoryFlags> memoryFlags;
+		GPUMemoryPoolMetrics heapMetrics;
 	};
 
 	class GPUMemoryHeap
 	{
+	public:
+		GPUMemoryHeapProperties const mHeapProperties;
+
+	public:
+		GPUMemoryHeap();
+		virtual ~GPUMemoryHeap();
 	};
 
 }
 
 #endif // __TS3_GPUAPI_GPU_MEMORY_HEAP_H__
-

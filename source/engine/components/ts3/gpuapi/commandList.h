@@ -31,13 +31,13 @@ namespace ts3::gpuapi
 		virtual void beginCommandSequence();
 		virtual void endCommandSequence();
 
-		bool mapBuffer( GPUBuffer & pBuffer, EMemoryMapMode pMapMode );
-		bool mapBufferRegion( GPUBuffer & pBuffer, const MemoryRegion & pRegion, EMemoryMapMode pMapMode );
+		bool mapBuffer( GPUBuffer & pBuffer, EGPUMemoryMapMode pMapMode );
+		bool mapBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode );
 		bool unmapBuffer( GPUBuffer & pBuffer );
 		bool flushMappedBuffer( GPUBuffer & pBuffer );
-		bool flushMappedBufferRegion( GPUBuffer & pBuffer, const MemoryRegion & pRegion );
+		bool flushMappedBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion );
 		bool invalidateBuffer( GPUBuffer & pBuffer );
-		bool invalidateBufferRegion( GPUBuffer & pBuffer, const MemoryRegion & pRegion );
+		bool invalidateBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion );
 		bool updateBufferDataCopy( GPUBuffer & pBuffer, GPUBuffer & pSourceBuffer, const GPUBufferDataCopyDesc & pCopyDesc );
 		bool updateBufferSubDataCopy( GPUBuffer & pBuffer, GPUBuffer & pSourceBuffer, const GPUBufferSubDataCopyDesc & pCopyDesc );
 		bool updateBufferDataUpload( GPUBuffer & pBuffer, const GPUBufferDataUploadDesc & pUploadDesc );
