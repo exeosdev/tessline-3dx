@@ -9,9 +9,9 @@
 namespace ts3
 {
 
-    inline constexpr XID cvXIDAlways = Always;
-    inline constexpr XID cvXIDNone = None;
-    inline constexpr XID cvXIDSuccess= Success;
+    constexpr XID cvXIDAlways = Always;
+    constexpr XID cvXIDNone = None;
+    constexpr XID cvXIDSuccess= Success;
 
 }
 

@@ -73,7 +73,7 @@ namespace ts3
 
 	void _x11EnumerateDisplayManagerConfiguration( SysDisplayManagerNativeData * pNativeData )
 	{
-		for ( size_t monitorIndex = 0; monitorIndex < pNativeData->xrrMonitorsNum; ++monitorIndex )
+		for ( int monitorIndex = 0; monitorIndex < pNativeData->xrrMonitorsNum; ++monitorIndex )
 		{
 			auto & monitorInfo = pNativeData->xrrMonitorList[monitorIndex];
 			if ( monitorInfo.primary != 0 )

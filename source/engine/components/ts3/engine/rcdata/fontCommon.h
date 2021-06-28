@@ -9,6 +9,18 @@
 #include <ts3/gpuapi/resources/textureCommon.h>
 #include <ts3/stdext/memoryBuffer.h>
 
+#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#  pragma clang diagnostic ignored "-Wnested-anon-types"
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpedantic"
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
+#  pragma warning( push )
+#  pragma warning( disable: 4201 )  // 'Nonstandard extension used: nameless struct/union'
+#endif
+
 namespace ts3
 {
 
@@ -154,5 +166,13 @@ namespace ts3
 	};
 
 }
+
+#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#  pragma clang diagnostic pop
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#  pragma GCC diagnostic pop
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
+#  pragma warning( pop )
+#endif
 
 #endif // __TS3_ENGINE_COMMON_FONT_DEFS_H__

@@ -97,7 +97,7 @@ namespace ts3
 #define ts3DeclareClassHandle( pClassName ) \
     class pClassName; \
     using pClassName##Handle = SharedHandle<pClassName>; \
-    using pClassName##WeakHandle = WeakHandle<pClassName>;
+    using pClassName##WeakHandle = WeakHandle<pClassName>
 
 #define ts3DeclareTypedefHandle( pAliasName, pTypeName ) \
     using pAliasName = pTypeName; using pAliasName##Handle = SharedHandle<pAliasName>

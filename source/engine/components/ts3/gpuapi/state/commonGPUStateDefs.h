@@ -33,8 +33,8 @@ namespace ts3::gpuapi
 	using EStencilTestState = EActiveState;
 	using EScissorTestState = EActiveState;
 
-	inline constexpr vertex_attribute_index_t cxInvalidVertexAttributeIndex = ts3::Limits<vertex_attribute_index_t>::maxValue;
-	inline constexpr vertex_stream_index_t cxInvalidVertexStreamIndex = ts3::Limits<vertex_stream_index_t>::maxValue;
+	constexpr vertex_attribute_index_t cxInvalidVertexAttributeIndex = ts3::Limits<vertex_attribute_index_t>::maxValue;
+	constexpr vertex_stream_index_t cxInvalidVertexStreamIndex = ts3::Limits<vertex_stream_index_t>::maxValue;
 
 	enum class EBlendFactor : enum_default_value_t
 	{
@@ -147,7 +147,7 @@ namespace ts3::gpuapi
 		// CBV/SRV/UAV
 		Resource = 1,
 		//
-		Sampler
+		Sampler,
 	};
 
 	enum class EShaderInputResourceClass : uint16

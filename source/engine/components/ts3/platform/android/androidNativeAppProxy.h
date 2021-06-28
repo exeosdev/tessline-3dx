@@ -84,7 +84,7 @@ struct AndroidPollSource {
     void (*process)(struct AndroidAppState* app, struct AndroidPollSource* source);
 };
 
-inline constexpr size_t cvAndroidAppUserDataMaxSize = 64u;
+constexpr size_t cxAndroidAppUserDataMaxSize = 64u;
 
 /**
  * This is the interface for the standard glue code of a threaded

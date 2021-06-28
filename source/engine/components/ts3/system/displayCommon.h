@@ -13,6 +13,18 @@
 #  define TS3_SYSTEM_DISPLAY_DRIVER_SUPPORT_DXGI 0
 #endif
 
+#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#  pragma clang diagnostic ignored "-Wnested-anon-types"
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpedantic"
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
+#  pragma warning( push )
+#  pragma warning( disable: 4201 )  // 'Nonstandard extension used: nameless struct/union'
+#endif
+
 namespace ts3
 {
 
@@ -31,10 +43,10 @@ namespace ts3
 	using SysDisplaySize = math::Size2u;
 
 	/// @brief Represents invalid display system index (of an adapter or an output, for example).
-	inline constexpr sys_dsm_index_t cvSysDsmIndexInvalid = Limits<sys_dsm_index_t>::maxValue;
+	constexpr sys_dsm_index_t cvSysDsmIndexInvalid = Limits<sys_dsm_index_t>::maxValue;
 
 	/// @brief Represents invalid display settings hash. Used to identify/report invalid and/or empty configurations.
-	inline constexpr sys_dsm_video_settings_hash_t cvSysDsmVideoSettingsHashInvalid = Limits<sys_dsm_video_settings_hash_t>::maxValue;
+	constexpr sys_dsm_video_settings_hash_t cvSysDsmVideoSettingsHashInvalid = Limits<sys_dsm_video_settings_hash_t>::maxValue;
 
 	enum class ESysDisplayDriverType : enum_default_value_t
 	{
@@ -121,7 +133,7 @@ namespace ts3
 		Bitmask<ESysDsmVideoSettingsFlags> flags = 0u;
 	};
 
-	inline constexpr SysDsmVideoSettings cvSysDsmVideoSettingsEmpty { { 0U, 0U }, 0U, 0U };
+	constexpr SysDsmVideoSettings cvSysDsmVideoSettingsEmpty { { 0U, 0U }, 0U, 0U };
 
 	/// @brief
 	struct SysDsmVideoSettingsFilter
@@ -138,7 +150,7 @@ namespace ts3
 		Bitmask<ESysDsmVideoSettingsFilterFlags> flags = 0;
 	};
 
-	inline constexpr SysDsmVideoSettingsFilter cvSysDsmVideoSettingsFilterNone { cvSysDsmVideoSettingsEmpty, 0U };
+	constexpr SysDsmVideoSettingsFilter cvSysDsmVideoSettingsFilterNone { cvSysDsmVideoSettingsEmpty, 0U };
 
 	struct SysDsmAdapterDesc
 	{
@@ -231,5 +243,13 @@ namespace ts3
 	std::string sysDsmGetVideoSettingsString( SysColorFormat pFormat, const SysDsmVideoSettings & pSettings );
 
 }
+
+#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#  pragma clang diagnostic pop
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#  pragma GCC diagnostic pop
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
+#  pragma warning( pop )
+#endif
 
 #endif // __TS3_SYSTEM_DISPLAY_COMMON_H__

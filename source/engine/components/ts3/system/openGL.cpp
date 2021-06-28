@@ -158,7 +158,7 @@ namespace ts3
 
 		auto openglContext = sysCreateObject<SysGLContext>( getHandle<SysGLSubsystem>() );
 
-		_sysCreateRenderContext( *openglContext, pSurface, pCreateInfo );
+		_sysCreateRenderContext( *openglContext, pSurface, validatedCreateInfo );
 
 		return openglContext;
 	}

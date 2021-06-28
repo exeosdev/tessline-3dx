@@ -12,8 +12,8 @@ namespace ts3::gpuapi
 
 	using display_system_id_t = uint64;
 
-	inline constexpr display_system_id_t cvDisplaySystemIDDefault = ts3::Limits<display_system_id_t>::maxValue;
-	inline constexpr display_system_id_t cvDisplaySystemIDInvalid = cvDisplaySystemIDDefault - 1;
+	constexpr display_system_id_t cvDisplaySystemIDDefault = ts3::Limits<display_system_id_t>::maxValue;
+	constexpr display_system_id_t cvDisplaySystemIDInvalid = cvDisplaySystemIDDefault - 1;
 
 	enum EAdapterFlags : uint32
 	{

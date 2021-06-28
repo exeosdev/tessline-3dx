@@ -188,20 +188,20 @@ namespace ts3
 		static constexpr ValueType roundError = 0.5L;
 	};
 
-	inline constexpr auto cxInt16Max = Limits<int16>::maxValue;
-	inline constexpr auto cxInt16Min = Limits<int16>::minValue;
-	inline constexpr auto cxUint16Max = Limits<uint16>::maxValue;
-	inline constexpr auto cxUint16Min = Limits<uint16>::minValue;
+	constexpr auto cxInt16Max = Limits<int16>::maxValue;
+	constexpr auto cxInt16Min = Limits<int16>::minValue;
+	constexpr auto cxUint16Max = Limits<uint16>::maxValue;
+	constexpr auto cxUint16Min = Limits<uint16>::minValue;
 
-	inline constexpr auto cxInt32Max = Limits<int32>::maxValue;
-	inline constexpr auto cxInt32Min = Limits<int32>::minValue;
-	inline constexpr auto cxUint32Max = Limits<uint32>::maxValue;
-	inline constexpr auto cxUint32Min = Limits<uint32>::minValue;
+	constexpr auto cxInt32Max = Limits<int32>::maxValue;
+	constexpr auto cxInt32Min = Limits<int32>::minValue;
+	constexpr auto cxUint32Max = Limits<uint32>::maxValue;
+	constexpr auto cxUint32Min = Limits<uint32>::minValue;
 
-	inline constexpr auto cxInt64Max = Limits<int64>::maxValue;
-	inline constexpr auto cxInt64Min = Limits<int64>::minValue;
-	inline constexpr auto cxUint64Max = Limits<uint64>::maxValue;
-	inline constexpr auto cxUint64Min = Limits<uint64>::minValue;
+	constexpr auto cxInt64Max = Limits<int64>::maxValue;
+	constexpr auto cxInt64Min = Limits<int64>::minValue;
+	constexpr auto cxUint64Max = Limits<uint64>::maxValue;
+	constexpr auto cxUint64Min = Limits<uint64>::minValue;
 
 }
 

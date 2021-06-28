@@ -1,6 +1,9 @@
 
 #pragma once
 
+#ifndef __STDX_VERSION_H__
+#define __STDX_VERSION_H__
+
 #include "prerequisites.h"
 
 #define TS3_VERSION_MAJOR    0
@@ -15,6 +18,18 @@
 #define TS3_VER_COPYRIGHT_STR    "Copyright (c) 2020 Mateusz Grzejek"
 #define TS3_VER_PRODUCTNAME_STR  "Exeos Framework"
 
+#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#  pragma clang diagnostic ignored "-Wnested-anon-types"
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpedantic"
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
+#  pragma warning( push )
+#  pragma warning( disable: 4201 )  // 'Nonstandard extension used: nameless struct/union'
+#endif
+
 namespace ts3
 {
 
@@ -27,15 +42,14 @@ namespace ts3
 			uint16 major;
 			uint16 minor;
 		};
-
 		uint32 hash;
 
 	public:
 		TS3_PCL_ATTR_NO_DISCARD std::string toString() const;
 	};
 
-	inline constexpr Version cvVersionInvalid{ cxUint16Max, cxUint16Max };
-	inline constexpr Version cvVersionUnknown{ 0, 0 };
+	constexpr Version cvVersionInvalid{ cxUint16Max, cxUint16Max };
+	constexpr Version cvVersionUnknown{ 0, 0 };
 
 	inline bool operator==( const Version & pLhs, const Version & pRhs )
 	{
@@ -68,3 +82,13 @@ namespace ts3
 	}
 
 }
+
+#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#  pragma clang diagnostic pop
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#  pragma GCC diagnostic pop
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
+#  pragma warning( pop )
+#endif
+
+#endif // __STDX_VERSION_H__

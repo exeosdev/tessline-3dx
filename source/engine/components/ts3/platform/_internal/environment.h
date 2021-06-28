@@ -564,6 +564,10 @@
 #  error "Unsupported compiler!"
 #endif
 
+#if !defined( TS3_UNUSED )
+#  define TS3_UNUSED( x ) ( x );
+#endif
+
 #if !defined( TS3_PCL_COPY_MEMORY )
 #  define TS3_PCL_COPY_MEMORY( destPtr, srcPtr, size ) memcpy( (destPtr), (srcPtr), (size) )
 #endif

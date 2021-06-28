@@ -7,8 +7,8 @@ namespace ts3
 
     using SysNativeEvent = struct ANativeEvent;
 
-    inline constexpr int cvAndroidLooperWaitTimeoutImmediate = 0;
-    inline constexpr int cvAndroidLooperWaitTimeoutInfinity = -1;
+    constexpr int cvAndroidLooperWaitTimeoutImmediate = 0;
+    constexpr int cvAndroidLooperWaitTimeoutInfinity = -1;
 
     enum class ANativeEventType : enum_default_value_t
     {

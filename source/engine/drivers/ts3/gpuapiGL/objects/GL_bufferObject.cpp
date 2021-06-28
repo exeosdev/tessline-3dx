@@ -52,7 +52,7 @@ namespace ts3::gpuapi
 		auto bufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
 		void * mapPointer = nullptr;
-		glGetBufferPointerv( mGLBufferBindTarget, GL_BUFFER_MAP_POINTER, &mapPointer );
+		glGetBufferPointerv( bufferBindTarget, GL_BUFFER_MAP_POINTER, &mapPointer );
 		ts3GLHandleLastError();
 
 		if( mapPointer != nullptr )
@@ -60,7 +60,7 @@ namespace ts3::gpuapi
 			ts3DebugInterrupt();
 		}
 
-		glMapBufferRange( mGLBufferBindTarget, pOffset, pLength, pFlags );
+		glMapBufferRange( bufferBindTarget, pOffset, pLength, pFlags );
 		ts3GLHandleLastError();
 
 		return queryIsMapped();

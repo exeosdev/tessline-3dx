@@ -64,7 +64,7 @@ namespace ts3::gpuapi
 
 			union
 			{
-				ResourceDesc uResourceDesc;
+				ResourceDesc uResourceDesc{};
 				SamplerDesc uSamplerDesc;
 			};
 		};

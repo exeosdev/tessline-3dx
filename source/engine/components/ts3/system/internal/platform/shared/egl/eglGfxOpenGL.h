@@ -8,9 +8,9 @@
 namespace ts3
 {
 
-    inline constexpr EGLConfig cvSysEGLInvalidConfigID = nullptr;
-    inline constexpr size_t cvSysEGLMaxEGLConfigsNum = 256u;
-    inline constexpr size_t cvSysEGLMaxEGLConfigAttributesNum = 64u;
+    constexpr EGLConfig cvSysEGLInvalidConfigID = nullptr;
+    constexpr size_t cvSysEGLMaxEGLConfigsNum = 256u;
+    constexpr size_t cvSysEGLMaxEGLConfigAttributesNum = 64u;
 
     struct EGLSurfaceNativeData
     {

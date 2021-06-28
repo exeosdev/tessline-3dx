@@ -69,6 +69,8 @@ namespace ts3
 	public:
 		explicit FontLoader( gpuapi::CommandContext & pGPUCommandContext );
 
+		virtual ~FontLoader() = default;
+
 		virtual FontHandle createFont( const FontCreateInfo & pFontCreateInfo ) = 0;
 
 	protected:

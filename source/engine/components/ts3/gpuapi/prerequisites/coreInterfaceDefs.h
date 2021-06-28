@@ -26,8 +26,8 @@ namespace ts3::gpuapi
 	class TS3_GPUAPI_API GPUDeviceChildObject : public GPUAPIObject
 	{
 	public:
+        GPUDriver & mGPUDriver;
 		GPUDevice & mGPUDevice;
-		GPUDriver & mGPUDriver;
 
 		explicit GPUDeviceChildObject( GPUDevice & pGPUDevice );
 		virtual ~GPUDeviceChildObject();

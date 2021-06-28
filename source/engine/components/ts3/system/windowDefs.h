@@ -16,17 +16,17 @@ namespace ts3
 	using SysWindowNativeHandle = uint64;
 
 	/// @brief Predefined window position: auto. When used, window is spawned centered.
-	inline constexpr SysWindowPos cvSysWindowPositionAuto { -1, -1 };
+	constexpr SysWindowPos cvSysWindowPositionAuto { -1, -1 };
 
 	/// @brief Predefined window position: origin. When used, window is spawned at the origin point (0,0).
-	inline constexpr SysWindowPos cvSysWindowPositionOrigin { 0, 0 };
+	constexpr SysWindowPos cvSysWindowPositionOrigin { 0, 0 };
 
 	/// @brief Predefined window size: auto. When used, window size is selected by the implementation.
-	inline constexpr SysWindowSize cvSysWindowSizeAuto { 0, 0 };
+	constexpr SysWindowSize cvSysWindowSizeAuto { 0, 0 };
 
 	/// @brief Predefined window size: max. When used, window size is the maximum size allowed by the system.
 	/// Max size usually means the current size of the screen, but selected frame style may affect this (Win32).
-	inline constexpr SysWindowSize cvSysWindowSizeMax { cxUint32Max, cxUint32Max };
+	constexpr SysWindowSize cvSysWindowSizeMax { cxUint32Max, cxUint32Max };
 
 	/// @brief Window styles supported by the system.
 	enum class SysWindowFrameStyle : enum_default_value_t

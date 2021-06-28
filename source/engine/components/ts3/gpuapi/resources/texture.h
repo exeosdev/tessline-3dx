@@ -19,8 +19,8 @@ namespace ts3::gpuapi
 	class Texture : public GPUResource
 	{
 	public:
+        TextureProperties const mTextureProperties;
 		TextureLayout const mTextureLayout;
-		TextureProperties const mTextureProperties;
 
 		Texture( GPUDevice & pGPUDevice,
 		         const ResourceMemoryInfo & pResourceMemory,

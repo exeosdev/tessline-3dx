@@ -176,8 +176,6 @@ namespace ts3
 
 	void SysGLSubsystem::_sysCreateDisplaySurfaceForCurrentThread( SysGLSurface & pGLSurface )
 	{
-		auto & scNativeData = mSysContext->mNativeData;
-
 		pGLSurface.mNativeData.display = glXGetCurrentDisplay();
 		pGLSurface.mNativeData.xwindow = glXGetCurrentDrawable();
 

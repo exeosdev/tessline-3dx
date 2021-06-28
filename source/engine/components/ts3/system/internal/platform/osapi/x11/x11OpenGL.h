@@ -9,9 +9,9 @@
 namespace ts3
 {
 
-	inline constexpr GLXFBConfigID cvSysX11InvalidFBConfigID = -1;
-	inline constexpr size_t cvSysX11MaxGLXFBConfigsNum = 256u;
-	inline constexpr size_t cvSysX11MaxGLXFBConfigAttributesNum = 64u;
+	constexpr GLXFBConfigID cvSysX11InvalidFBConfigID = -1;
+	constexpr size_t cvSysX11MaxGLXFBConfigsNum = 256u;
+	constexpr size_t cvSysX11MaxGLXFBConfigAttributesNum = 64u;
 
 	struct SysGLSurfaceNativeData : public SysWindowNativeData
 	{

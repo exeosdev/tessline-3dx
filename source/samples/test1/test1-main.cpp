@@ -372,13 +372,12 @@ int main( int argc, char ** argv )
 	auto globalVSSO = gpuDevice.createVertexStreamStateObject( vssoCreateInfo );
 
 	auto rtSize = gxDriverState.presentationLayer->queryRenderTargetSize();
-    auto ts3View = ts3::math::lookAtLH(
-        cameraOriginPoint,
-        cameraTargetPoint,
-        Vec3f{ 0.0f, 1.0f,  0.0f } );
-
-	auto ts3ProjectionScreen = perspectiveAspectLH<float>(
-			ts3::math::constants::cxFloatRad30Degree, ( float )rtSize.x / ( float )rtSize.y, 0.1f, 1000.0f );
+    // auto ts3View = ts3::math::lookAtLH(
+    //     cameraOriginPoint,
+    //     cameraTargetPoint,
+    //     Vec3f{ 0.0f, 1.0f,  0.0f } );
+	// auto ts3ProjectionScreen = perspectiveAspectLH<float>(
+	// 		ts3::math::constants::cxFloatRad30Degree, ( float )rtSize.x / ( float )rtSize.y, 0.1f, 1000.0f );
 
 	auto ts3ViewTexture = lookAtLH(
 			Vec3f{ 0.0f, 3.0f,  -1.0f },

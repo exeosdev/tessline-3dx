@@ -5,6 +5,18 @@
 #include "prerequisites.h"
 #include <ts3/stdext/staticLimits.h>
 
+#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#  pragma clang diagnostic ignored "-Wnested-anon-types"
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpedantic"
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
+#  pragma warning( push )
+#  pragma warning( disable: 4201 )  // 'Nonstandard extension used: nameless struct/union'
+#endif
+
 namespace ts3::math
 {
 
@@ -105,17 +117,25 @@ namespace ts3::math
 	namespace colors
 	{
 
-		inline constexpr RGBAColorU8 cxColorBlueDeepSky{ 0x00, 0xB2, 0xEE };
-		inline constexpr RGBAColorU8 cxColorBlueFacebookDark{ 0x3b, 0x59, 0x98 };
-		inline constexpr RGBAColorU8 cxColorBlueFacebookLight{ 0x8b, 0x9d, 0xc3 };
-		inline constexpr RGBAColorU8 cxColorBlueNavyDark{ 0x00, 0x00, 0x80 };
-		inline constexpr RGBAColorU8 cxColorBlueSignatory{ 0x00, 0x3F, 0x77 };
-		inline constexpr RGBAColorU8 cxColorPeachPuff{ 0xFF, 0xDA, 0xB9 };
-		inline constexpr RGBAColorU8 cxColorTeal{ 0x00, 0x80, 0x80 };
-		inline constexpr RGBAColorU8 cxColorTopaz{ 0x01, 0x98, 0xE1 };
+		constexpr RGBAColorU8 cxColorBlueDeepSky{ 0x00, 0xB2, 0xEE };
+		constexpr RGBAColorU8 cxColorBlueFacebookDark{ 0x3b, 0x59, 0x98 };
+		constexpr RGBAColorU8 cxColorBlueFacebookLight{ 0x8b, 0x9d, 0xc3 };
+		constexpr RGBAColorU8 cxColorBlueNavyDark{ 0x00, 0x00, 0x80 };
+		constexpr RGBAColorU8 cxColorBlueSignatory{ 0x00, 0x3F, 0x77 };
+		constexpr RGBAColorU8 cxColorPeachPuff{ 0xFF, 0xDA, 0xB9 };
+		constexpr RGBAColorU8 cxColorTeal{ 0x00, 0x80, 0x80 };
+		constexpr RGBAColorU8 cxColorTopaz{ 0x01, 0x98, 0xE1 };
 
 	}
 
 }
+
+#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#  pragma clang diagnostic pop
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#  pragma GCC diagnostic pop
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
+#  pragma warning( pop )
+#endif
 
 #endif // __TS3_MATH_COLOR_H__

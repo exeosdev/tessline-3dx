@@ -18,7 +18,7 @@ namespace stdx
 	{
 
 		/// @brief Represents invalid Variant type index. Usually indicates, that incompatible type was used as a target.
-		inline constexpr variant_index_t invalidVariantIndex = 0;
+		constexpr variant_index_t invalidVariantIndex = 0;
 
 		/// @brief Shared instance of `VariantTypeConvTag`. Use it to force desired overload.
 		inline constexpr VariantTypeConvTag variantTypeConv{};

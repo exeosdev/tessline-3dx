@@ -132,7 +132,7 @@ namespace ts3::gpuapi
 		ts3DebugAssert( pGLUploadDesc.openglDimensionClass == GL_TEXTURE_CUBE_MAP );
 		ts3DebugAssert( ( pActiveBindTarget == 0 ) || ( pActiveBindTarget == GL_TEXTURE_CUBE_MAP ) );
 
-		auto textureBindTarget = checkActiveBindTarget( pActiveBindTarget );
+		checkActiveBindTarget( pActiveBindTarget );
 
 		glTexSubImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + pGLUploadDesc.textureSubRegion.offset.uCubeMap.uFaceIndex,
 		                 pGLUploadDesc.textureSubRegion.offset.uCubeMap.mipLevel,

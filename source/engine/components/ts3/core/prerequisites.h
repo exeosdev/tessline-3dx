@@ -46,14 +46,14 @@
 namespace ts3
 {
 
-	inline constexpr uint32 cxInvalidU32ID = Limits<uint32>::maxValue;
-	inline constexpr uint64 cxInvalidU64ID = Limits<uint64>::maxValue;
+	constexpr uint32 cxInvalidU32ID = Limits<uint32>::maxValue;
+	constexpr uint64 cxInvalidU64ID = Limits<uint64>::maxValue;
 
 	struct tag_init_empty_t
 	{
 	};
 
-	inline constexpr tag_init_empty_t cvInitEmpty {};
+	constexpr tag_init_empty_t cvInitEmpty {};
 
 }
 

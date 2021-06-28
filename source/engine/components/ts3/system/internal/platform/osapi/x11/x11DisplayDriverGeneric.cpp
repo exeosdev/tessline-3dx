@@ -56,7 +56,7 @@ namespace ts3
 	{
 		auto * xrrDriverData = mNativeData.generic;
 
-		for ( size_t monitorIndex = 0; monitorIndex < xrrDriverData->xrrMonitorsNum; ++monitorIndex )
+		for ( int monitorIndex = 0; monitorIndex < xrrDriverData->xrrMonitorsNum; ++monitorIndex )
 		{
 			// Output list is fetched during the initialization phase.
 			auto & monitorInfo = xrrDriverData->xrrMonitorList[monitorIndex];
@@ -100,7 +100,7 @@ namespace ts3
 		{
 			if ( xrrOutputInfo->modes != nullptr )
 			{
-				for ( size_t modeIndex = 0; modeIndex < xrrOutputInfo->nmode; ++modeIndex )
+				for ( int modeIndex = 0; modeIndex < xrrOutputInfo->nmode; ++modeIndex )
 				{
 					RRMode xrrModeID = xrrOutputInfo->modes[modeIndex];
 

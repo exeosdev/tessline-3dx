@@ -7,8 +7,8 @@ namespace ts3
 
 
 	SysDsmAdapter::SysDsmAdapter( SysDisplayDriver & pDisplayDriver )
-	: driver( &pDisplayDriver )
-	, driverType( pDisplayDriver.mDriverType )
+	: driverType( pDisplayDriver.mDriverType )
+    , driver( &pDisplayDriver )
 	{
 		sysDsmInitializeNativeData( &nativeData, driverType );
 	}
@@ -20,8 +20,8 @@ namespace ts3
 
 
 	SysDsmOutput::SysDsmOutput( SysDsmAdapter & pAdapter )
-	: driver( pAdapter.driver )
-	, driverType( pAdapter.driverType )
+	: driverType( pAdapter.driverType )
+    , driver( pAdapter.driver )
 	, adapter( &pAdapter )
 	{
 		sysDsmInitializeNativeData( &nativeData, driverType );
@@ -34,8 +34,8 @@ namespace ts3
 
 
 	SysDsmVideoMode::SysDsmVideoMode( SysDsmOutput & pOutput )
-	: driver( pOutput.driver )
-	, driverType( pOutput.driverType )
+	: driverType( pOutput.driverType )
+    , driver( pOutput.driver )
 	, output( &pOutput )
 	{
 		sysDsmInitializeNativeData( &nativeData, driverType );

@@ -36,10 +36,10 @@ namespace ts3
 
 		void reset();
 
-		bool checkFreeSpace( const math::Vec2u32 & pRect ) const;
-		bool isEmpty() const;
+		TS3_PCL_ATTR_NO_DISCARD bool checkFreeSpace( const math::Vec2u32 & pRect ) const;
+        TS3_PCL_ATTR_NO_DISCARD bool isEmpty() const;
 
-		const RectAllocatorConfig & getConfig() const
+        TS3_PCL_ATTR_NO_DISCARD const RectAllocatorConfig & getConfig() const
 		{
 			return _config;
 		}
@@ -51,6 +51,6 @@ namespace ts3
 		uint32              _rectCounter;
 	};
 	
-};
+}
 
 #endif // __TS3_CORE_RECT_ALLOCATOR_H__

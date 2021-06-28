@@ -7,7 +7,7 @@
 namespace ts3
 {
 
-	inline constexpr size_t cxInvalidPosition = static_cast<size_t>( -1 );
+	constexpr size_t cxInvalidPosition = static_cast<size_t>( -1 );
 
 	template <typename Tp1, typename Tp2>
 	struct DefaultCmpEqual

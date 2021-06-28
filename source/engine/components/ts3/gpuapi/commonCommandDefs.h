@@ -122,7 +122,7 @@ namespace ts3::gpuapi
 		ECommandSubmitSyncMode syncMode = ECommandSubmitSyncMode::None;
 	};
 
-	inline constexpr CommandContextSubmitInfo cvCommandContextSubmitDefault {};
+	constexpr CommandContextSubmitInfo cvCommandContextSubmitDefault {};
 
 	struct CommandSync
 	{

@@ -13,6 +13,13 @@ project( tessline-3dx )
 
 include( "cmake/CMakeLists.txt" )
 
+if( "${CM_EBS_SYSCONF_HOST_COMPILER}" STREQUAL "GCC" )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -Wuninitialized -Winit-self -ansi -pedantic" )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-declarations" )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-compare" )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-switch" )
+endif()
+
 if( "${CM_EBS_SYSCONF_HOST_COMPILER}" STREQUAL "MSVC" )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
 endif()

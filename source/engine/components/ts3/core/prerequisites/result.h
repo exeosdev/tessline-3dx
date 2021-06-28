@@ -131,10 +131,10 @@ namespace ts3
 
 #endif
 
-	inline constexpr result_code_value_t cxResultCodeControlKey   = 0x18000000;
-	inline constexpr result_code_value_t cxResultCodeTypeMask     = 0x00FF0000;
-	inline constexpr result_code_value_t cxResultCodeCategoryMask = 0x0000FF00;
-	inline constexpr result_code_value_t cxResultCodeIIDMask      = 0x000000FF;
+	constexpr result_code_value_t cxResultCodeControlKey   = 0x18000000;
+	constexpr result_code_value_t cxResultCodeTypeMask     = 0x00FF0000;
+	constexpr result_code_value_t cxResultCodeCategoryMask = 0x0000FF00;
+	constexpr result_code_value_t cxResultCodeIIDMask      = 0x000000FF;
 
 	///
 	inline constexpr result_code_value_t ecDeclareResultCode( ResultType pType, uint8 pCategory, uint8 pInternalID )

@@ -12,10 +12,10 @@ namespace ts3
 {
 
 	/// @brief Represents empty char* literal.
-	inline constexpr const char * cxEmptyCstr = "";
+	constexpr const char * cxEmptyCstr = "";
 
 	/// @brief Represents empty wchar_t* literal.
-	inline constexpr const wchar_t * cxEmptyWstr = L"";
+	constexpr const wchar_t * cxEmptyWstr = L"";
 
 	struct FileLocationInfo
 	{
