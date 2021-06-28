@@ -39,8 +39,8 @@ namespace ts3
 			gpuapi_buffer_ref_id_t bufferRefID;
 			gpuapi::GPUBufferHandle gpuBuffer;
 			HWBufferList allocatedHWBufferList;
-			gpuapi::memory_size_t availableMemorySize;
-			gpuapi::memory_offset_t currentAllocOffset;
+			gpuapi::gpu_memory_size_t availableMemorySize;
+			gpuapi::gpu_memory_size_t currentAllocOffset;
 		};
 
 		Result allocateGPUBufferExplicit( gpuapi_buffer_ref_id_t pGPUBufferRefID,
@@ -58,17 +58,17 @@ namespace ts3
 
 		TS3_PCL_ATTR_NO_DISCARD GPUBufferUsageInfo getGPUBufferInfo( gpuapi_buffer_ref_id_t pGPUBufferRefID ) const;
 
-		static gpuapi::memory_align_t queryAlignmentRequirementsForBuffer( EHWBufferType pBufferType,
-		                                                                   gpuapi::memory_size_t pBufferSize,
-		                                                                   Bitmask<gpuapi::memory_flags_value_t> pMemoryFlags = 0 );
+		static memory_align_t queryAlignmentRequirementsForBuffer( EHWBufferType pBufferType,
+		                                                           gpuapi::gpu_memory_size_t pBufferSize,
+		                                                           Bitmask<gpuapi::gpu_memory_flags_value_t> pMemoryFlags = 0 );
 
 	private:
 		gpuapi::GPUBufferHandle _createGPUBuffer( gpuapi_buffer_ref_id_t pGPUBufferRefID,
 		                                          const HWBufferCreateInfo & pHWBCreateInfo );
 
 		GPUBufferRef _reserveGPUBufferRegion( gpuapi_buffer_ref_id_t pGPUBufferRefID,
-		                                      gpuapi::memory_size_t pSize,
-		                                      gpuapi::memory_align_t pAlignment = 0 );
+		                                      gpuapi::gpu_memory_size_t pSize,
+		                                      memory_align_t pAlignment = 0 );
 
 		static void _validateBufferCreateInfo( EHWBufferType pBufferType, HWBufferCreateInfo & pHWBCreateInfo );
 

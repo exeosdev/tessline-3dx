@@ -161,10 +161,10 @@ endif()
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
     target_link_libraries( ts3-system PUBLIC
-            dplib-glew
             X11
             Xrandr
             GL
+            GLEW
             )
 endif()
 

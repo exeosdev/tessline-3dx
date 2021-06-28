@@ -40,7 +40,7 @@ static bool appExec = true;
 #if( _WIN32 )
 static const std::string sWorkspaceDirectory = "C:\\Repo\\ESD\\tessline-3dx-workspace\\modules\\tessline-3dx";
 #elif( TS3_PCL_TARGET_OS_LINUX )
-static const std::string sWorkspaceDirectory = "/home/mateusz/Dev/tessline-3dx-workspace/modules/tessline-3dx";
+static const std::string sWorkspaceDirectory = "/home/mateusz/Dev/Projects/Exeos/Repo/tessline-3dx/";
 #endif
 
 struct GraphicsDriverState
@@ -74,7 +74,7 @@ struct VertexArray
 
 struct EventReactor
 {
-	uint64 onEvent( ts3::HardwareBuffer & )
+	uint64 onEvent( ts3::HWBuffer & )
 	{
 		printf( "GPUBufferRef has been locked!\n" );
 		return 0x77;
@@ -84,7 +84,7 @@ struct EventReactor
 int main( int argc, char ** argv )
 {
 	EventReactor er;
-	ts3::HardwareBuffer hwb;
+	ts3::HWBuffer hwb;
 	hwb.mEventProxy.eLocked.connect( &er, &EventReactor::onEvent );
 	hwb.mEventProxy.eLocked.connect( &er, &EventReactor::onEvent );
 
@@ -216,7 +216,7 @@ int main( int argc, char ** argv )
 	ts3::gpuapi::GPUBufferHandle cbuffer0;
 	{
 		ts3::gpuapi::GPUBufferCreateInfo cbci;
-		cbci.memoryFlags = ts3::gpuapi::E_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+		cbci.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
 		cbci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
 		cbci.initialTarget = ts3::gpuapi::EGPUBufferTarget::ConstantBuffer;
 		cbci.bufferSize = sizeof( CB0Data );
@@ -225,7 +225,7 @@ int main( int argc, char ** argv )
 	ts3::gpuapi::GPUBufferHandle vbuffer;
 	{
 		ts3::gpuapi::GPUBufferCreateInfo vbci;
-		vbci.memoryFlags = ts3::gpuapi::E_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+		vbci.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
 		vbci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT;
 		vbci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
 		vbci.initialTarget = ts3::gpuapi::EGPUBufferTarget::VertexBuffer;
@@ -236,7 +236,7 @@ int main( int argc, char ** argv )
 	ts3::gpuapi::GPUBufferHandle ibuffer;
 	{
 		ts3::gpuapi::GPUBufferCreateInfo ibci;
-		ibci.memoryFlags = ts3::gpuapi::E_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+		ibci.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
 		ibci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT;
 		ibci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
 		ibci.initialTarget = ts3::gpuapi::EGPUBufferTarget::IndexBuffer;
@@ -253,7 +253,7 @@ int main( int argc, char ** argv )
 		txci.dimensionClass = ts3::gpuapi::ETextureDimensionClass::Texture2D;
 		txci.dimensions.width = imageData.formatInfo.dimensions.x;
 		txci.dimensions.height = imageData.formatInfo.dimensions.y;
-		txci.memoryFlags = ts3::gpuapi::E_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+		txci.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
 		txci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT;
 		txci.pixelFormat = ts3::gpuapi::ETextureFormat::B8G8R8A8_UNORM;
 		txci.initialTarget = ts3::gpuapi::ETextureTarget::ShaderInputSampledImage;
@@ -269,7 +269,7 @@ int main( int argc, char ** argv )
 		texRTColor0CI.dimensionClass = ts3::gpuapi::ETextureDimensionClass::Texture2D;
 		texRTColor0CI.dimensions.width = 1920;
 		texRTColor0CI.dimensions.height = 1080;
-		texRTColor0CI.memoryFlags = ts3::gpuapi::E_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+		texRTColor0CI.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
 		texRTColor0CI.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT |
 		                              ts3::gpuapi::E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT;
 		texRTColor0CI.pixelFormat = ts3::gpuapi::ETextureFormat::B8G8R8A8_UNORM;
@@ -283,7 +283,7 @@ int main( int argc, char ** argv )
 		texRTDepthStencilCI.dimensionClass = ts3::gpuapi::ETextureDimensionClass::Texture2D;
 		texRTDepthStencilCI.dimensions.width = 1920;
 		texRTDepthStencilCI.dimensions.height = 1080;
-		texRTDepthStencilCI.memoryFlags = ts3::gpuapi::E_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+		texRTDepthStencilCI.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
 		texRTDepthStencilCI.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT;
 		texRTDepthStencilCI.pixelFormat = ts3::gpuapi::ETextureFormat::D24_UNORM_S8_UINT;
 		texRTDepthStencilCI.initialTarget = ts3::gpuapi::ETextureTarget::RenderTargetDepthStencilAttachment;

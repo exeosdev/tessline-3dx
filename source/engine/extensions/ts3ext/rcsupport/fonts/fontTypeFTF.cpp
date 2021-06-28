@@ -177,12 +177,12 @@ namespace ts3
 
 		if( dynamicSubTexturesNum == 0 )
 		{
-			gpuTextureCreateInfo.memoryFlags = gpuapi::E_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+			gpuTextureCreateInfo.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
 			gpuTextureCreateInfo.resourceFlags = gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
 		}
 		else
 		{
-			gpuTextureCreateInfo.memoryFlags = gpuapi::E_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT | gpuapi::E_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+			gpuTextureCreateInfo.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT | gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
 			gpuTextureCreateInfo.resourceFlags = gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT;
 		}
 

@@ -4,7 +4,7 @@
 #ifndef __TS3DRIVER_GPUAPI_GLCOMMON_PREREQUISITES_H__
 #define __TS3DRIVER_GPUAPI_GLCOMMON_PREREQUISITES_H__
 
-#include <ts3/gpuapi/memory/commonMemoryDefs.h>
+#include <ts3/gpuapi/memory/commonGPUMemoryDefs.h>
 #include <ts3/system/openGL.h>
 
 #define TS3GX_GL_PLATFORM_TYPE_CORE 0x7100

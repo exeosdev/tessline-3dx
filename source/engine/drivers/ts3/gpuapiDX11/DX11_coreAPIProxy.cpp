@@ -285,15 +285,15 @@ namespace ts3::gpuapi
 		return d3d11BindFlags;
 	}
 
-	D3D11_MAP DX11CoreAPIProxy::translateDX11BufferMapFlags( EMemoryMapMode pMapMode, Bitmask<EMemoryFlags> /* pMemoryFlags */ )
+	D3D11_MAP DX11CoreAPIProxy::translateDX11BufferMapFlags( EGPUMemoryMapMode pMapMode, Bitmask<EGPUMemoryFlags> /* pMemoryFlags */ )
 	{
-		static const std::unordered_map<EMemoryMapMode, D3D11_MAP> mapModeMap =
+		static const std::unordered_map<EGPUMemoryMapMode, D3D11_MAP> mapModeMap =
 		{
-			{ EMemoryMapMode::ReadOnly        , D3D11_MAP_READ               },
-			{ EMemoryMapMode::ReadWrite       , D3D11_MAP_READ_WRITE         },
-			{ EMemoryMapMode::WriteDefault    , D3D11_MAP_WRITE              },
-			{ EMemoryMapMode::WriteInvalidate , D3D11_MAP_WRITE_DISCARD      },
-			{ EMemoryMapMode::WriteAppend     , D3D11_MAP_WRITE_NO_OVERWRITE },
+			{ EGPUMemoryMapMode::ReadOnly        , D3D11_MAP_READ               },
+			{ EGPUMemoryMapMode::ReadWrite       , D3D11_MAP_READ_WRITE         },
+			{ EGPUMemoryMapMode::WriteDefault    , D3D11_MAP_WRITE              },
+			{ EGPUMemoryMapMode::WriteInvalidate , D3D11_MAP_WRITE_DISCARD      },
+			{ EGPUMemoryMapMode::WriteAppend     , D3D11_MAP_WRITE_NO_OVERWRITE },
 		};
 		return ts3::getMapValueOrDefault( mapModeMap, pMapMode, static_cast<D3D11_MAP>( 0 ) );
 	}

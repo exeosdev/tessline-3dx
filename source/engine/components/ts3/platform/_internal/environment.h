@@ -572,8 +572,8 @@
 #  define TS3_PCL_FILL_MEMORY( memPtr, size, value ) memset( (memPtr), (value), (size) )
 #endif
 
-#if !defined( TS3_PCL_MOVE_MEMORY )
-#  define TS3_PCL_MOVE_MEMORY( destPtr, srcPtr, size ) memmove( (destPtr), (srcPtr), (size) )
+#if !defined( TS3_PCL_MOVE_GPU_MEMORY )
+#  define TS3_PCL_MOVE_GPU_MEMORY( destPtr, srcPtr, size ) memmove( (destPtr), (srcPtr), (size) )
 #endif
 
 #if !defined( TS3_PCL_ZERO_MEMORY )

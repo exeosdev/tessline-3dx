@@ -22,31 +22,37 @@ namespace ts3
 			ts3DebugOutput( "HWB: GPU buffer creation has failed" );
 			return nullptr;
 		}
+
+        return nullptr;
 	}
 
 	HWVertexBufferHandle HWBufferManager::createVertexBufferEx( gpuapi_buffer_ref_id_t pGBUBufferRefID,
 	                                                            const HWBufferCreateInfo & pHWBCreateInfo )
 	{
+        return nullptr;
 	}
 
 	HWIndexBufferHandle HWBufferManager::createIndexBuffer( const HWBufferCreateInfo & pHWBCreateInfo )
 	{
+        return nullptr;
 	}
 
 	HWIndexBufferHandle HWBufferManager::createIndexBufferEx( gpuapi_buffer_ref_id_t pGBUBufferRefID,
 	                                                          const HWBufferCreateInfo & pHWBCreateInfo )
 	{
+        return nullptr;
 	}
 
 	GPUBufferUsageInfo HWBufferManager::getGPUBufferInfo( gpuapi_buffer_ref_id_t pGPUBufferRefID ) const
 	{
+	    return {};
 	}
 
-	gpuapi::memory_align_t HWBufferManager::queryAlignmentRequirementsForBuffer( EHWBufferType pBufferType,
-	                                                                             gpuapi::memory_size_t pBufferSize,
-	                                                                             Bitmask<gpuapi::memory_flags_value_t> pMemoryFlags )
+	memory_align_t HWBufferManager::queryAlignmentRequirementsForBuffer( EHWBufferType pBufferType,
+	                                                                     gpuapi::gpu_memory_size_t pBufferSize,
+	                                                                     Bitmask<gpuapi::gpu_memory_flags_value_t> pMemoryFlags )
 	{
-		return gpuapi::cxMemoryDefaultAlignment;
+		return cxMemoryDefaultAlignment;
 	}
 
 	gpuapi::GPUBufferHandle HWBufferManager::_createGPUBuffer( gpuapi_buffer_ref_id_t pGPUBufferRefID,
@@ -106,8 +112,8 @@ namespace ts3
 	}
 
 	GPUBufferRef HWBufferManager::_reserveGPUBufferRegion( gpuapi_buffer_ref_id_t pGPUBufferRefID,
-	                                                       gpuapi::memory_size_t pSize,
-	                                                       gpuapi::memory_align_t pAlignment )
+	                                                       gpuapi::gpu_memory_size_t pSize,
+	                                                       memory_align_t pAlignment )
 	{
 		auto internalBufferStateIter = _gpuBufferMap.find( pGPUBufferRefID );
 		if( internalBufferStateIter == _gpuBufferMap.end() )

@@ -85,7 +85,7 @@ namespace ts3::gpuapi
 
 		GLenum checkActiveBindTarget( GLenum pBindTarget ) const;
 
-		static GLuint computeInputPixelDataAlignment( GLenum pPixelDataLayout , GLenum pPixelDataType );
+		static GLuint computeInputPixelDataAlignment( GLenum pPixelDataLayout, GLenum pPixelDataType );
 	};
 
 }

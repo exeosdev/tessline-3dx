@@ -32,7 +32,7 @@ namespace ts3::gpuapi
 		static GLGPUBufferHandle create( GLGPUDevice & pGLGPUDevice, const GPUBufferCreateInfo & pCreateInfo );
 
 	private:
-		virtual bool mapRegion( void * pCommandObject, const MemoryRegion & pRegion, EMemoryMapMode pMapMode ) override;
+		virtual bool mapRegion( void * pCommandObject, const MemoryRegion & pRegion, EGPUMemoryMapMode pMapMode ) override;
 
 		virtual void unmap( void * pCommandObject ) override;
 
@@ -44,7 +44,7 @@ namespace ts3::gpuapi
 
 		virtual void updateSubDataUpload( void * pCommandObject, const GPUBufferSubDataUploadDesc & pUploadDesc ) override;
 		
-		virtual bool validateMapRequest( const MemoryRegion & pRegion, const EMemoryMapMode & pMapMode ) override;
+		virtual bool validateMapRequest( const MemoryRegion & pRegion, const EGPUMemoryMapMode & pMapMode ) override;
 
 		static bool validateBufferCreateInfo( GPUBufferCreateInfo & pCreateInfo );
 	};

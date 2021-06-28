@@ -125,7 +125,7 @@ namespace ts3
 		// Destination pointer: source pointer + number of elements to move the block by.
 		auto * const dstMemoryPtr = srcMemoryPtr + pMoveOffset;
 		// Do the actual move.
-		TS3_PCL_MOVE_MEMORY( dstMemoryPtr, srcMemoryPtr, pMoveSize );
+		TS3_PCL_MOVE_GPU_MEMORY( dstMemoryPtr, srcMemoryPtr, pMoveSize );
 	}
 
 	void memMoveUnchecked( void * pMemoryPtr, size_t pMemorySize, size_t pBaseOffset, size_t pMoveSize, ptrdiff_t pMoveOffset )
@@ -134,7 +134,7 @@ namespace ts3
 		ts3DebugAssert( pBaseOffset + pMoveOffset + pMoveSize <= pMemorySize );
 		auto * const srcMemoryPtr = reinterpret_cast<char *>( pMemoryPtr ) + pBaseOffset;
 		auto * const dstMemoryPtr = srcMemoryPtr + pMoveOffset;
-		TS3_PCL_MOVE_MEMORY( dstMemoryPtr, srcMemoryPtr, pMoveSize );
+		TS3_PCL_MOVE_GPU_MEMORY( dstMemoryPtr, srcMemoryPtr, pMoveSize );
 	}
 
 	void memZeroChecked( void * pMemoryPtr, size_t pMemorySize, size_t pZeroSize )

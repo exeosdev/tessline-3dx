@@ -68,7 +68,7 @@ namespace ts3::gpuapi
 
 		UINT translateDX11BufferBindFlags( Bitmask<resource_flags_value_t> pBufferFlags );
 
-		D3D11_MAP translateDX11BufferMapFlags( EMemoryMapMode pMapMode, Bitmask<EMemoryFlags> pMemoryFlags );
+		D3D11_MAP translateDX11BufferMapFlags( EGPUMemoryMapMode pMapMode, Bitmask<EGPUMemoryFlags> pMemoryFlags );
 
 		D3D11_FILL_MODE translateDX11PrimitiveFillMode( EPrimitiveFillMode pFillMode );
 

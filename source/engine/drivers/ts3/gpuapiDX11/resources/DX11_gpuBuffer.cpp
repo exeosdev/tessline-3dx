@@ -93,7 +93,7 @@ namespace ts3::gpuapi
 		return dx11Buffer;
 	}
 
-	bool DX11GPUBuffer::mapRegion( void * pCommandObject, const MemoryRegion & pRegion, EMemoryMapMode pMapMode )
+	bool DX11GPUBuffer::mapRegion( void * pCommandObject, const MemoryRegion & pRegion, EGPUMemoryMapMode pMapMode )
 	{
 		auto * d3d11DeviceContext1 = getD3D11DeviceContext( pCommandObject );
 
@@ -110,7 +110,7 @@ namespace ts3::gpuapi
 		ResourceMappedMemory mappedMemoryInfo;
 		mappedMemoryInfo.pointer = mappedBufferInfo.pData;
 		mappedMemoryInfo.mappedRegion = pRegion;
-		mappedMemoryInfo.memoryMapFlags = static_cast<EMemoryMapFlags>( pMapMode );
+		mappedMemoryInfo.memoryMapFlags = static_cast<EGPUMemoryMapFlags>( pMapMode );
 
 		_dx11MapInfo.mappedSubresource = mappedBufferInfo;
 		_dx11MapInfo.requestedMapMode = d3d11MapMode;
@@ -204,7 +204,7 @@ namespace ts3::gpuapi
         }
 	}
 
-	bool DX11GPUBuffer::validateMapRequest( const MemoryRegion & pRegion, const EMemoryMapMode & pMapMode )
+	bool DX11GPUBuffer::validateMapRequest( const MemoryRegion & pRegion, const EGPUMemoryMapMode & pMapMode )
 	{
 		return GPUBuffer::validateMapRequest( pRegion, pMapMode );
 	}
@@ -216,7 +216,7 @@ namespace ts3::gpuapi
 			return false;
 		}
 
-		constexpr uint32 cxDX11GPUBufferMemorySupportedFlags = E_MEMORY_MAP_FLAG_ACCESS_READ_WRITE_BIT;
+		constexpr uint32 cxDX11GPUBufferMemorySupportedFlags = E_GPU_MEMORY_MAP_FLAG_ACCESS_READ_WRITE_BIT;
 		pCreateInfo.memoryFlags = pCreateInfo.memoryFlags & cxDX11GPUBufferMemorySupportedFlags;
 
 		return true;
@@ -244,11 +244,11 @@ namespace ts3::gpuapi
 			dx11GPUBufferDesc.cpuAccessFlags.set( D3D11_CPU_ACCESS_WRITE );
 		}
 
-		if( pCreateInfo.memoryFlags.isSet( E_MEMORY_MAP_FLAG_ACCESS_READ_BIT ) )
+		if( pCreateInfo.memoryFlags.isSet( E_GPU_MEMORY_MAP_FLAG_ACCESS_READ_BIT ) )
 		{
 			dx11GPUBufferDesc.cpuAccessFlags.set( D3D11_CPU_ACCESS_READ );
 		}
-		if( pCreateInfo.memoryFlags.isSet( E_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT ) )
+		if( pCreateInfo.memoryFlags.isSet( E_GPU_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT ) )
 		{
 			dx11GPUBufferDesc.cpuAccessFlags.set( D3D11_CPU_ACCESS_WRITE );
 		}

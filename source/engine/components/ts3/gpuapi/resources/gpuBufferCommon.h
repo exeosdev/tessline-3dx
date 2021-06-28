@@ -121,7 +121,7 @@ namespace ts3::gpuapi
 	struct GPUBufferSubDataCopyDesc
 	{
 		GPUMemoryRegion sourceBufferRegion;
-		gpu_memory_offset_t targetBufferOffset;
+		gpu_memory_size_t targetBufferOffset;
 		Bitmask<EGPUBufferDataCopyFlags> flags = E_GPU_BUFFER_DATA_COPY_FLAGS_DEFAULT;
 	};
 

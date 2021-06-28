@@ -307,11 +307,11 @@ namespace ts3::gpuapi
 			dx11UsageDesc.cpuAccessFlags.set( D3D11_CPU_ACCESS_WRITE );
 		}
 
-		if( pCreateInfo.memoryFlags.isSet( E_MEMORY_ACCESS_FLAG_CPU_READ_BIT ) )
+		if( pCreateInfo.memoryFlags.isSet( E_GPU_MEMORY_ACCESS_FLAG_CPU_READ_BIT ) )
 		{
 			dx11UsageDesc.cpuAccessFlags.set( D3D11_CPU_ACCESS_READ );
 		}
-		if( pCreateInfo.memoryFlags.isSet( E_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT ) )
+		if( pCreateInfo.memoryFlags.isSet( E_GPU_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT ) )
 		{
 			dx11UsageDesc.cpuAccessFlags.set( D3D11_CPU_ACCESS_WRITE );
 		}

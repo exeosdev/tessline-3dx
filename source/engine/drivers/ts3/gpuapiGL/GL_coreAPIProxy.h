@@ -36,9 +36,9 @@ namespace ts3::gpuapi
 	namespace GLCoreAPIProxy
 	{
 
-		GLenum chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EMemoryFlags> pMemoryFlags );
+		GLenum chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags );
 
-		GLenum chooseGLBufferStorageFlags( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EMemoryFlags> pMemoryFlags );
+		GLenum chooseGLBufferStorageFlags( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags );
 
 		GLenum chooseGLBufferUsagePolicy( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags );
 
@@ -56,7 +56,7 @@ namespace ts3::gpuapi
 
 		GLenum translateGLBufferBindTarget( EGPUBufferTarget pBufferTarget );
 
-		GLenum translateGLBufferMapFlags( EMemoryMapMode pMapMode, Bitmask<EMemoryFlags> pMemoryFlags );
+		GLenum translateGLBufferMapFlags( EGPUMemoryMapMode pMapMode, Bitmask<EGPUMemoryFlags> pMemoryFlags );
 
 		GLenum translateGLCompFunc( ECompFunc pCompFunc );
 

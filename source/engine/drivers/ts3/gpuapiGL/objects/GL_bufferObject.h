@@ -32,15 +32,15 @@ namespace ts3::gpuapi
 		virtual bool release();
 		virtual bool validateHandle() const;
 
-		bool map( memory_offset_t pOffset, memory_size_t pLength, GLenum pFlags, GLenum pActiveBindTarget = 0 );
+		bool map( gpu_memory_size_t pOffset, memory_size_t pLength, GLenum pFlags, GLenum pActiveBindTarget = 0 );
 
 		bool mapPersistent( GLenum pFlags, GLenum pActiveBindTarget = 0 );
 
 		void unmap( GLenum pActiveBindTarget = 0 );
 
-		void flushMappedRegion( memory_offset_t pOffset, memory_size_t pLength, GLenum pActiveBindTarget = 0 );
+		void flushMappedRegion( gpu_memory_size_t pOffset, memory_size_t pLength, GLenum pActiveBindTarget = 0 );
 
-		void invalidateRegion( memory_offset_t pOffset, memory_size_t pLength, GLenum pActiveBindTarget = 0 );
+		void invalidateRegion( gpu_memory_size_t pOffset, memory_size_t pLength, GLenum pActiveBindTarget = 0 );
 
 		void updateCopy( GLBufferObject & pSource, const GPUBufferSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget = 0 );
 

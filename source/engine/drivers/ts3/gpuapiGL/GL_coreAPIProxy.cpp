@@ -9,7 +9,7 @@
 namespace ts3::gpuapi
 {
 
-	GLenum GLCoreAPIProxy::chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EMemoryFlags> pMemoryFlags )
+	GLenum GLCoreAPIProxy::chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags )
 	{
 	#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
 		return chooseGLBufferUsagePolicy( pBindTarget, pBufferFlags );
@@ -18,7 +18,7 @@ namespace ts3::gpuapi
 	#endif
 	}
 
-	GLenum GLCoreAPIProxy::chooseGLBufferStorageFlags( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EMemoryFlags> pMemoryFlags )
+	GLenum GLCoreAPIProxy::chooseGLBufferStorageFlags( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags )
 	{
 		Bitmask<GLenum> storageFlags = 0;
 
@@ -33,22 +33,22 @@ namespace ts3::gpuapi
 		{
 			storageFlags.set( GL_CLIENT_STORAGE_BIT );
 		}
-		if( pMemoryFlags.isSet( E_MEMORY_ACCESS_FLAG_CPU_READ_BIT ) )
+		if( pMemoryFlags.isSet( E_GPU_MEMORY_ACCESS_FLAG_CPU_READ_BIT ) )
 		{
 			storageFlags.set( GL_MAP_READ_BIT );
 		}
-		if( pMemoryFlags.isSet( E_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT ) )
+		if( pMemoryFlags.isSet( E_GPU_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT ) )
 		{
 			storageFlags.set( GL_MAP_WRITE_BIT );
 		}
-		if( pMemoryFlags.isSet( E_MEMORY_HEAP_PROPERTY_FLAG_CPU_CACHED_BIT ) )
+		if( pMemoryFlags.isSet( E_GPU_MEMORY_HEAP_PROPERTY_FLAG_CPU_CACHED_BIT ) )
 		{
 			storageFlags.set( GL_CLIENT_STORAGE_BIT );
 		}
-		if( pMemoryFlags.isSet( E_MEMORY_HEAP_PROPERTY_FLAG_PERSISTENT_MAP_BIT ) )
+		if( pMemoryFlags.isSet( E_GPU_MEMORY_HEAP_PROPERTY_FLAG_PERSISTENT_MAP_BIT ) )
 		{
 			storageFlags.set( GL_MAP_PERSISTENT_BIT );
-			if( pMemoryFlags.isSetAnyOf( E_MEMORY_HEAP_PROPERTY_FLAG_CPU_COHERENT_BIT | E_MEMORY_HEAP_PROPERTY_FLAG_GPU_COHERENT_BIT ) )
+			if( pMemoryFlags.isSetAnyOf( E_GPU_MEMORY_HEAP_PROPERTY_FLAG_CPU_COHERENT_BIT | E_GPU_MEMORY_HEAP_PROPERTY_FLAG_GPU_COHERENT_BIT ) )
 			{
 				storageFlags.set( GL_MAP_COHERENT_BIT );
 			}
@@ -330,28 +330,28 @@ namespace ts3::gpuapi
 		return ts3::getMapValueOrDefault( bufferTargetMap, pBufferTarget, GL_TS3_ERR_INVALID_PARAM );
 	}
 
-	GLenum GLCoreAPIProxy::translateGLBufferMapFlags( EMemoryMapMode pMapMode, Bitmask<EMemoryFlags> pMemoryFlags )
+	GLenum GLCoreAPIProxy::translateGLBufferMapFlags( EGPUMemoryMapMode pMapMode, Bitmask<EGPUMemoryFlags> pMemoryFlags )
 	{
 		Bitmask<uint32> resourceMapFlags = static_cast<uint32>( pMapMode );
 		Bitmask<GLenum> openglMapFlags = 0;
 
-		if( resourceMapFlags.isSet( E_MEMORY_MAP_FLAG_ACCESS_READ_BIT ) )
+		if( resourceMapFlags.isSet( E_GPU_MEMORY_MAP_FLAG_ACCESS_READ_BIT ) )
 		{
 			openglMapFlags.set( GL_MAP_READ_BIT );
 		}
-		if( resourceMapFlags.isSet( E_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT ) )
+		if( resourceMapFlags.isSet( E_GPU_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT ) )
 		{
 			openglMapFlags.set( GL_MAP_WRITE_BIT );
 		}
-		if( resourceMapFlags.isSet( E_MEMORY_MAP_FLAG_WRITE_INVALIDATE_BIT ) )
+		if( resourceMapFlags.isSet( E_GPU_MEMORY_MAP_FLAG_WRITE_INVALIDATE_BIT ) )
 		{
 			openglMapFlags.set( GL_MAP_INVALIDATE_BUFFER_BIT );
 		}
-		if( pMemoryFlags.isSet( E_MEMORY_HEAP_PROPERTY_FLAG_PERSISTENT_MAP_BIT ) )
+		if( pMemoryFlags.isSet( E_GPU_MEMORY_HEAP_PROPERTY_FLAG_PERSISTENT_MAP_BIT ) )
 		{
 			openglMapFlags.set( GL_MAP_PERSISTENT_BIT );
 		}
-		if( pMemoryFlags.isSet( E_MEMORY_HEAP_PROPERTY_FLAG_CPU_COHERENT_BIT ) )
+		if( pMemoryFlags.isSet( E_GPU_MEMORY_HEAP_PROPERTY_FLAG_CPU_COHERENT_BIT ) )
 		{
 			openglMapFlags.set( GL_MAP_COHERENT_BIT );
 		}

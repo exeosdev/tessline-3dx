@@ -11,7 +11,7 @@ namespace ts3::gpuapi
 
 	struct GPUMemoryPoolMetrics
 	{
-		gpu_memory_align_t baseAlignment;
+		memory_align_t baseAlignment;
 		gpu_memory_size_t totalSizeBase;
 		gpu_memory_size_t totalSizeMB;
 	};

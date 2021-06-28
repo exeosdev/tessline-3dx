@@ -43,7 +43,7 @@ namespace ts3::gpuapi
 			pCreateInfo.initialTarget = initialTarget;
 		}
 
-		if( pCreateInfo.memoryBaseAlignment == cxGPUMemoryDefaultAlignment )
+		if( pCreateInfo.memoryBaseAlignment == cxMemoryDefaultAlignment )
 		{
 			pCreateInfo.memoryBaseAlignment = TS3_PCL_MEMORY_BASE_ALIGNMENT;
 		}

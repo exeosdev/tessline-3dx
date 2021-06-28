@@ -5,32 +5,27 @@
 #define __TS3_GPUAPI_COMMON_MEMORY_DEFS_H__
 
 #include "../prerequisites.h"
-#include <ts3/stdext/range.h>
+#include <ts3/core/memory/commonMemoryDefs.h>
 
 namespace ts3::gpuapi
 {
 
-	class GPUMemoryHeap;
-	class GPUMemoryPool;
+    class GPUMemoryHeap;
+    class GPUMemoryPool;
 
-	using gpu_memory_align_t = uint32;
-	using gpu_memory_offset_t = uint64;
+    using gpu_memory_diff_t = int64;
 	using gpu_memory_size_t = uint64;
 	using gpu_memory_flags_value_t = uint32;
 
-	using gpu_memory_heap_id_t = uint64;
-	using gpu_memory_pool_id_t = uint64;
+    using gpu_memory_heap_id_t = uint64;
+    using gpu_memory_pool_id_t = uint64;
 
-	enum GPUMemoryConstants32 : uint32
-	{
-		cxGPUMemoryDefaultAlignment = 0,
-	};
+    using GPUMemoryRegion = Region<gpu_memory_size_t>;
+    using GPUMemoryRange = GPUMemoryRegion::Range;
 
-	enum GPUMemoryConstants64 : uint64
-	{
-		cxGPUMemoryOffsetInvalid = ts3::Limits<gpu_memory_offset_t>::maxValue,
-		cxGPUMemorySizeMax = ts3::Limits<gpu_memory_offset_t>::maxValue,
-	};
+    constexpr gpu_memory_size_t cxGPUMemoryOffsetInvalid = ts3::Limits<gpu_memory_size_t>::maxValue;
+
+    constexpr gpu_memory_size_t cxGPUMemorySizeMax = ts3::Limits<gpu_memory_size_t>::maxValue;
 
 	/// @brief Flags representing various properties of host/device memory pools like access and heap properties.
 	enum EGPUMemoryFlags : gpu_memory_flags_value_t
@@ -81,7 +76,6 @@ namespace ts3::gpuapi
 		// the app needs to. Persistent mapping may require additional visibility control depending on caching/coherency.
 		E_GPU_MEMORY_HEAP_PROPERTY_FLAG_PERSISTENT_MAP_BIT = 0x0080,
 
-
 		// Mask with all valid HEAP_PROPERTY_FLAG bits set.
 		E_GPU_MEMORY_HEAP_PROPERTY_MASK_ALL                = 0x00F0,
 	};
@@ -128,48 +122,9 @@ namespace ts3::gpuapi
 		WriteInvalidate = E_GPU_MEMORY_MAP_FLAG_WRITE_INVALIDATE_BIT,
 	};
 
-	using GPUMemoryRange = ts3::InclusiveRange<gpu_memory_size_t>;
-
-	struct GPUMemoryRegion
-	{
-		gpu_memory_offset_t offset = 0;
-		gpu_memory_size_t size = 0;
-
-		explicit operator bool() const
-		{
-			return !empty();
-		}
-
-		GPUMemoryRange asRange() const
-		{
-			return { offset, offset + size };
-		}
-
-		void reset()
-		{
-			offset = 0;
-			size = 0;
-		}
-
-		bool empty() const
-		{
-			return size == 0;
-		}
-	};
-
-	inline bool operator==( const GPUMemoryRegion & pLhs, const GPUMemoryRegion & pRhs )
-	{
-		return ( pLhs.offset == pRhs.offset ) && ( pLhs.size == pRhs.size );
-	}
-
-	inline bool operator!=( const GPUMemoryRegion & pLhs, const GPUMemoryRegion & pRhs )
-	{
-		return ( pLhs.offset != pRhs.offset ) || ( pLhs.size != pRhs.size );
-	}
-
 	struct ResourceMemoryInfo
 	{
-		gpu_memory_align_t baseAlignment;
+        memory_align_t baseAlignment;
 		Bitmask<EGPUMemoryFlags> memoryFlags;
 		gpu_memory_heap_id_t sourceHeapID;
 		GPUMemoryRegion sourceHeapRegion;
@@ -194,6 +149,6 @@ namespace ts3::gpuapi
 		return pMemoryFlags.isSet( mapRequestedAccessFlags );
 	}
 
-}
+} // namespace gpuapi
 
 #endif // __TS3_GPUAPI_COMMON_MEMORY_DEFS_H__

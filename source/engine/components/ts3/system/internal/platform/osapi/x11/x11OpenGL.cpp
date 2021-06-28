@@ -85,7 +85,8 @@ namespace ts3
 		auto & scNativeData = mSysContext->mNativeData;
 		auto & openglSysInitState = mNativeData.initState;
 
-		int glxVersionMajor = 0, glxVersionMinor = 0;
+		int glxVersionMajor = 0;
+		int glxVersionMinor = 0;
 		::glXQueryVersion( scNativeData.display, &glxVersionMajor, &glxVersionMinor );
 		if( ( glxVersionMajor == 0 ) || ( ( glxVersionMajor == 1 ) && ( glxVersionMinor < 3 ) ) )
 		{
@@ -125,11 +126,11 @@ namespace ts3
 			throw 0;
 		}
 
-		auto glewResult = glewInit();
-		if ( glewResult != GLEW_OK )
-		{
-			throw 0;
-		}
+        auto glewResult = glewInit();
+        if ( glewResult != GLEW_OK )
+        {
+            throw 0;
+        }
 	}
 
 	void SysGLSubsystem::_sysReleaseInitState()
@@ -380,10 +381,12 @@ namespace ts3
 
 			if( bestFBConfigRGB8 != nullptr )
 			{
-				bestFBConfig == bestFBConfigRGB8;
+				bestFBConfig = bestFBConfigRGB8;
 				break;
 			}
 		}
+
+        XFree( fbConfigList );
 
 		return bestFBConfig;
 	}

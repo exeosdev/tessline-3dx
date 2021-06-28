@@ -411,7 +411,7 @@ namespace ts3::gpuapi
 		return pBindTarget;
 	}
 
-	GLuint GLTextureObject::computeInputPixelDataAlignment( GLenum pPixelDataLayout , GLenum pPixelDataType )
+	GLuint GLTextureObject::computeInputPixelDataAlignment( GLenum pPixelDataLayout, GLenum pPixelDataType )
 	{
 		return 1;
 	}

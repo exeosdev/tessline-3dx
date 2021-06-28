@@ -27,7 +27,7 @@ namespace ts3::gpuapi
 
 	inline constexpr pipeline_state_descriptor_id_t cxInvalidPipelineStateDescriptorID = ts3::cvEmptyHash<ts3::HashAlgo::FNV1A>;
 
-	inline constexpr gpu_memory_offset_t cxVertexAttributeOffsetPackedAppend = ts3::Limits<gpu_memory_offset_t>::maxValue;
+	inline constexpr gpu_memory_size_t cxVertexAttributeOffsetPackedAppend = ts3::Limits<gpu_memory_size_t>::maxValue;
 
 	struct GraphicsPipelineStateDescriptorSet
 	{
@@ -95,7 +95,7 @@ namespace ts3::gpuapi
 			const char * semanticName;
 			uint32 semanticIndex;
 			EVertexAttribFormat format;
-			gpu_memory_offset_t relativeOffset;
+			gpu_memory_size_t relativeOffset;
 			uint32 instanceRate = 0;
 			constexpr explicit operator bool() const
 			{

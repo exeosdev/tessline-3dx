@@ -38,7 +38,7 @@ namespace ts3
 	{
 		ConstantBufferDynamic       = gpuapi::E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT |
-		                              bshLeft<uint64, 32>( gpuapi::E_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT ),
+		                              bshLeft<uint64, 32>( gpuapi::E_GPU_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT ),
 
 		ConstantBufferImmutable     = gpuapi::E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_IMMUTABLE_BIT,
@@ -48,11 +48,11 @@ namespace ts3
 
 		ConstantBufferWriteDiscard  = gpuapi::E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT |
-		                              bshLeft<uint64, 32>( gpuapi::E_MEMORY_MAP_FLAG_WRITE_INVALIDATE_BIT ),
+		                              bshLeft<uint64, 32>( gpuapi::E_GPU_MEMORY_MAP_FLAG_WRITE_INVALIDATE_BIT ),
 
 		IndexBufferDynamic          = gpuapi::E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT |
-		                              bshLeft<uint64, 32>( gpuapi::E_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT ),
+		                              bshLeft<uint64, 32>( gpuapi::E_GPU_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT ),
 
 		IndexBufferImmutable        = gpuapi::E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_IMMUTABLE_BIT,
@@ -62,15 +62,15 @@ namespace ts3
 
 		IndexBufferStreamAppend     = gpuapi::E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT |
-		                              bshLeft<uint64, 32>( gpuapi::E_MEMORY_MAP_FLAG_WRITE_APPEND_BIT ),
+		                              bshLeft<uint64, 32>( gpuapi::E_GPU_MEMORY_MAP_FLAG_WRITE_APPEND_BIT ),
 
 		IndexBufferStreamOverwrite  = gpuapi::E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT |
-		                              bshLeft<uint64, 32>( gpuapi::E_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT ),
+		                              bshLeft<uint64, 32>( gpuapi::E_GPU_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT ),
 
 		VertexBufferDynamic         = gpuapi::E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT |
-		                              bshLeft<uint64, 32>( gpuapi::E_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT ),
+		                              bshLeft<uint64, 32>( gpuapi::E_GPU_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT ),
 
 		VertexBufferImmutable       = gpuapi::E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_IMMUTABLE_BIT,
@@ -80,17 +80,17 @@ namespace ts3
 
 		VertexBufferStreamAppend    = gpuapi::E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT |
-		                              bshLeft<uint64, 32>( gpuapi::E_MEMORY_MAP_FLAG_WRITE_APPEND_BIT ),
+		                              bshLeft<uint64, 32>( gpuapi::E_GPU_MEMORY_MAP_FLAG_WRITE_APPEND_BIT ),
 
 		VertexBufferStreamOverwrite = gpuapi::E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT |
-		                              bshLeft<uint64, 32>( gpuapi::E_MEMORY_MAP_FLAG_WRITE_APPEND_BIT ),
+		                              bshLeft<uint64, 32>( gpuapi::E_GPU_MEMORY_MAP_FLAG_WRITE_APPEND_BIT ),
 	};
 
 	template <typename TpBufferUsage>
-	inline constexpr gpuapi::memory_flags_value_t ecGetHWBufferUsageGPUMemoryFlags( TpBufferUsage pBufferUsage )
+	inline constexpr gpuapi::gpu_memory_flags_value_t ecGetHWBufferUsageGPUMemoryFlags( TpBufferUsage pBufferUsage )
 	{
-		return static_cast<gpuapi::memory_flags_value_t>( ( ( ( hardware_buffer_flags_value_t ) pBufferUsage ) >> 32 ) & Limits<uint32>::maxValue );
+		return static_cast<gpuapi::gpu_memory_flags_value_t>( ( ( ( hardware_buffer_flags_value_t ) pBufferUsage ) >> 32 ) & Limits<uint32>::maxValue );
 	}
 
 	template <typename TpBufferUsage>

@@ -108,7 +108,7 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief A set of pre-defined memory bit masks for most common scenarios.
-	enum EGPUResourceMemoryFlags : resource_flags_value_t
+	enum EGPUResourcEGPUMemoryFlags : resource_flags_value_t
 	{
 		E_GPU_RESOURCE_GPU_MEMORY_MASK_DEFAULT =
 			E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT |
@@ -150,7 +150,7 @@ namespace ts3::gpuapi
 	struct ResourceCreateInfo
 	{
 		Bitmask<resource_flags_value_t> resourceFlags = 0;
-		gpu_memory_align_t memoryBaseAlignment = cxGPUMemoryDefaultAlignment;
+		memory_align_t memoryBaseAlignment = cxMemoryDefaultAlignment;
 		Bitmask<EGPUMemoryFlags> memoryFlags = E_GPU_RESOURCE_GPU_MEMORY_MASK_DEFAULT;
 	};
 

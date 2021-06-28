@@ -19,7 +19,7 @@ set( TS3_CORE_SRC_FILES
 
 		"graphics/rectAllocator.h"
 		"graphics/rectAllocator.cpp"
-)
+        memory/commonMemoryDefs.h)
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
     add_library( ts3-core STATIC ${TS3_CORE_SRC_FILES} )

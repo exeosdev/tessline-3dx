@@ -24,9 +24,9 @@ namespace ts3
 		imageDataClone.sizeInBytes = sizeInBytes;
 
 		memCopy( imageDataClone.pixelBuffer.dataPtr(),
-		              imageDataClone.pixelBuffer.size(),
-		              pixelBuffer.dataPtr(),
-		              pixelBuffer.size() );
+                 imageDataClone.pixelBuffer.size(),
+                 pixelBuffer.dataPtr(),
+                 pixelBuffer.size() );
 
 		return imageDataClone;
 	}

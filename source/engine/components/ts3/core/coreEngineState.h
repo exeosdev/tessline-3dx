@@ -13,6 +13,11 @@ namespace ts3
 	{
 	};
 
+	struct CoreEngineStateDeleter
+    {
+	    void operator()( CoreEngineState * pState ) const;
+    };
+
 	CoreEngineState * initializeCoreEngineState();
 
 	void releaseCoreEngineState( CoreEngineState * pState );
