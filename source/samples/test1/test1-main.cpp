@@ -40,7 +40,7 @@ static bool appExec = true;
 #if( _WIN32 )
 static const std::string sWorkspaceDirectory = "C:\\Repo\\ESD\\tessline-3dx-workspace\\modules\\tessline-3dx";
 #elif( TS3_PCL_TARGET_OS_LINUX )
-static const std::string sWorkspaceDirectory = "/home/mateusz/Dev/Projects/Exeos/Repo/tessline-3dx/";
+static const std::string sWorkspaceDirectory = "/home/mateusz/Dev/Projects/Exeos/Repo/tessline-3dx";
 #endif
 
 struct GraphicsDriverState
@@ -64,11 +64,6 @@ struct CB0Data
 };
 
 #define D_OPENGL 1
-
-struct VertexArray
-{
-	ts3::GPUVertexFormatData2DUI vertices[16];
-};
 
 #include <ts3/engine/gpuapi/hwBuffer.h>
 

@@ -355,10 +355,12 @@ namespace ts3
 		return pEvent.commonData.eventCode != E_SYS_EVENT_CODE_UNDEFINED;
 	}
 
+#if defined( WM_TOUCH )
 	bool _win32TranslateInputEventTouch( SysEventInputState & pInputState, const MSG & pMSG, SysEvent & pEvent )
 	{
 		return false;
 	}
+#endif
 
 	static const SysKeyCode asciiKeyCodeMap_08_7B[] =
 	{

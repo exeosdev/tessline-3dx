@@ -17,6 +17,11 @@ namespace ts3
 	: FontLoader( pGPUCommandContext )
 	{}
 
+	FreeTypeFontLoader::~FreeTypeFontLoader()
+	{
+		printf("AJAJAJAJAJAJAJAJAJAJ!!!\n" );
+	}
+
 	FontHandle FreeTypeFontLoader::createFont( const FontCreateInfo & pFontCreateInfo )
 	{
 		const auto * freeTypeCreateInfo = reinterpret_cast<const FreeTypeFontCreateInfo *>( &pFontCreateInfo );

@@ -19,6 +19,18 @@ namespace ts3
 
 	FreeTypeFontObject::~FreeTypeFontObject()
 	{
+	    if( !_ftFontFaceMap.empty() )
+        {
+	        // !! Do not forget about this !!
+	        //
+	        // All FT data (glyphs, faces, etc.) must be destroyed BEFORE FT_Done_FreeType() is called.
+	        // FT_Done_FreeType() causes the whole library to invalidate and calls to most FT_* functions
+	        // are no longer possible after that point. In cases of weird SIGSEGVs and NULL values inside
+	        // FT objects - ensure everything has been released before FT_Done_FreeType() gets to work.
+
+            _ftFontFaceMap.clear();
+        }
+
 		if( _ftLibraryInstance )
 		{
 			FT_Done_FreeType( _ftLibraryInstance );
@@ -34,7 +46,7 @@ namespace ts3
 			return true;
 		}
 
-		FreeTypeFontFaceCreateInfo ftFaceCreateInfo;
+		FreeTypeFontFaceCreateInfo ftFaceCreateInfo{};
 		ftFaceCreateInfo.faceDesc.faceIndex = 0;
 		ftFaceCreateInfo.faceDesc.fontSize = pFontSize;
 		ftFaceCreateInfo.faceDesc.fontResolutionHint = { 0, 0 };

@@ -70,6 +70,8 @@ namespace ts3
 	public:
 		explicit FreeTypeFontLoader( gpuapi::CommandContext & pGPUCommandContext );
 
+		virtual ~FreeTypeFontLoader();
+
 		virtual FontHandle createFont( const FontCreateInfo & pFontCreateInfo ) override;
 
 	private:
