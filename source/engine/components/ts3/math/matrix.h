@@ -4,6 +4,18 @@
 
 #include "vector.h"
 
+#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#  pragma clang diagnostic ignored "-Wnested-anon-types"
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpedantic"
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
+#  pragma warning( push )
+#  pragma warning( disable: 4201 )  // 'Nonstandard extension used: nameless struct/union'
+#endif
+
 namespace ts3::math
 {
 
@@ -40,7 +52,6 @@ namespace ts3::math
 	struct Matrix;
 
 
-	// MatrixBase for 2xR matrices of type Tp.
 	template <typename Tp, size_t tColumns>
 	struct Matrix<Tp, 2, tColumns>
 	{
@@ -60,55 +71,97 @@ namespace ts3::math
 			{
 				RowSIMDDataType mm0, mm1;
 			};
+
 			struct
 			{
-				RowVector rv0, rv1;
+				RowVector row0, row1;
 			};
-			RowSIMDDataType mmArray[sRowsNum];
-			RowVector rvArray[sRowsNum];
-			Tp valueArray[sMatrixSize];
+
+			struct
+            {
+                Tp values[sMatrixSize];
+            };
 		};
 
 	public:
 		constexpr Matrix( const Matrix & ) = default;
 		constexpr Matrix & operator=( const Matrix & ) = default;
 
-		constexpr Matrix() noexcept
-		{}
-
-		constexpr Matrix( std::initializer_list<Tp> pData ) noexcept
-		: rv0( pData.begin() )
-		, rv1( pData.begin() + tColumns )
-		{}
+		constexpr Matrix() noexcept = default;
 
 		template <typename Tp0, typename Tp1>
 		constexpr Matrix( const Vector<Tp0, tColumns> & pRow0,
 		                  const Vector<Tp1, tColumns> & pRow1 ) noexcept
-		: rv0( pRow0 ), rv1( pRow1 )
+		: row0( pRow0 )
+		, row1( pRow1 )
 		{}
 
 		template <typename TpScalar, enable_if_scalar_t<TpScalar> = true>
 		constexpr explicit Matrix( TpScalar pScalar ) noexcept
-		: rv0( pScalar ), rv1( pScalar )
+		: row0( pScalar )
+		, row1( pScalar )
 		{}
 
-		Vector<Tp, tColumns> & operator[]( size_t pIndex ) noexcept
+        Matrix( std::initializer_list<Tp> pData ) noexcept
+        : row0( pData.begin() )
+        , row1( pData.begin() + tColumns )
+        {
+            ts3DebugAssert( pData.size() == sMatrixSize );
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD Vector<Tp, tColumns> & operator[]( size_t pIndex ) noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<RowVector *>( &row0 )[pIndex];
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD const Vector<Tp, tColumns> & operator[]( size_t pIndex ) const noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<const RowVector *>( &row0 )[pIndex];
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD ColumnVector column( size_t pColumnIndex ) const noexcept
 		{
-			return staticArrayElement( rvArray, pIndex );
+			return { row0[pColumnIndex], row1[pColumnIndex] };
 		}
 
-		const Vector<Tp, tColumns> & operator[]( size_t pIndex ) const noexcept
-		{
-			return staticArrayElement( rvArray, pIndex );
-		}
+        TS3_PCL_ATTR_NO_DISCARD Tp * data() noexcept
+        {
+            return &( values[0] );
+        }
 
-		ColumnVector column( size_t pCIndex ) const noexcept
-		{
-			return { rv0[pCIndex], rv1[pCIndex] };
-		}
+        TS3_PCL_ATTR_NO_DISCARD const Tp * data() const noexcept
+        {
+            return &( values[0] );
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD RowVector * rowPtr( size_t pIndex = 0 ) noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<RowVector *>( &row0 ) + pIndex;
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD const RowVector * rowPtr( size_t pIndex = 0 ) const noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<const RowVector *>( &row0 ) + pIndex;
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD RowSIMDDataType * simdPtr( size_t pIndex = 0 ) noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<RowSIMDDataType *>( &mm0 ) + pIndex;
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD const RowSIMDDataType * simdPtr( size_t pIndex = 0 ) const noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<const RowSIMDDataType *>( &mm0 ) + pIndex;
+        }
 	};
 
-	// MatrixBase for 3xR matrices of type Tp.
+
 	template <typename Tp, size_t tColumns>
 	struct Matrix<Tp, 3, tColumns>
 	{
@@ -128,126 +181,217 @@ namespace ts3::math
 			{
 				RowSIMDDataType mm0, mm1, mm2;
 			};
+
 			struct
 			{
-				RowVector rv0, rv1, rv2;
+				RowVector row0, row1, row2;
 			};
-			RowSIMDDataType mmArray[sRowsNum];
-			RowVector rvArray[sRowsNum];
-			Tp valueArray[sMatrixSize];
+
+            struct
+            {
+                Tp values[sMatrixSize];
+            };
 		};
 
 	public:
 		constexpr Matrix( const Matrix & ) = default;
 		constexpr Matrix & operator=( const Matrix & ) = default;
 
-		constexpr Matrix() noexcept
-		{}
-
-		constexpr Matrix( std::initializer_list<Tp> pData ) noexcept
-		: rv0( pData.begin() )
-		, rv1( pData.begin() + tColumns )
-		, rv2( pData.begin() + 2*tColumns )
-		{}
+        constexpr Matrix() noexcept = default;
 
 		template <typename Tp0, typename Tp1, typename Tp2>
 		constexpr Matrix( const Vector<Tp0, tColumns> & pRow0,
 		                  const Vector<Tp1, tColumns> & pRow1,
 		                  const Vector<Tp2, tColumns> & pRow2 ) noexcept
-		: rv0( pRow0 ), rv1( pRow1 ), rv2( pRow2 )
+		: row0( pRow0 )
+		, row1( pRow1 )
+		, row2( pRow2 )
 		{}
 
 		template <typename TpScalar, enable_if_scalar_t<TpScalar> = true>
 		constexpr explicit Matrix( TpScalar pScalar ) noexcept
-		: rv0( pScalar ), rv1( pScalar ), rv2( pScalar )
+		: row0( pScalar )
+		, row1( pScalar )
+		, row2( pScalar )
 		{}
 
-		Vector<Tp, tColumns> & operator[]( size_t pIndex ) noexcept
+        Matrix( std::initializer_list<Tp> pData ) noexcept
+        : row0( pData.begin() )
+        , row1( pData.begin() + tColumns )
+        , row2( pData.begin() + 2*tColumns )
+        {
+            ts3DebugAssert( pData.size() == sMatrixSize );
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD Vector<Tp, tColumns> & operator[]( size_t pIndex ) noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<RowVector *>( &row0 )[pIndex];
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD const Vector<Tp, tColumns> & operator[]( size_t pIndex ) const noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<const RowVector *>( &row0 )[pIndex];
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD ColumnVector column( size_t pColumnIndex ) const noexcept
 		{
-			return staticArrayElement( rvArray, pIndex );
+			return { row0[pColumnIndex], row1[pColumnIndex], row2[pColumnIndex] };
 		}
 
-		const Vector<Tp, tColumns> & operator[]( size_t pIndex ) const noexcept
-		{
-			return staticArrayElement( rvArray, pIndex );
-		}
+        TS3_PCL_ATTR_NO_DISCARD Tp * data() noexcept
+        {
+            return &( values[0] );
+        }
 
-		ColumnVector column( size_t pCIndex ) const noexcept
-		{
-			return { rv0[pCIndex], rv1[pCIndex], rv2[pCIndex] };
-		}
+        TS3_PCL_ATTR_NO_DISCARD const Tp * data() const noexcept
+        {
+            return &( values[0] );
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD RowVector * rowPtr( size_t pIndex = 0 ) noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<RowVector *>( &row0 ) + pIndex;
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD const RowVector * rowPtr( size_t pIndex = 0 ) const noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<const RowVector *>( &row0 ) + pIndex;
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD RowSIMDDataType * simdPtr( size_t pIndex = 0 ) noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<RowSIMDDataType *>( &mm0 ) + pIndex;
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD const RowSIMDDataType * simdPtr( size_t pIndex = 0 ) const noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<const RowSIMDDataType *>( &mm0 ) + pIndex;
+        }
 	};
 
-	// MatrixBase for Rx3 matrices of type Tp.
+
 	template <typename Tp, size_t tColumns>
 	struct Matrix<Tp, 4, tColumns>
 	{
 	public:
 		static constexpr size_t sRowsNum = 4;
 		static constexpr size_t sColumnsNum = tColumns;
-		static constexpr size_t sMatrixSize = sRowsNum * tColumns;
+        static constexpr size_t sMatrixSize = sRowsNum * tColumns;
+        static constexpr size_t sAlignment = alignof( Tp );
 		using RowSIMDDataType = typename MatrixRowSIMDData<Tp, sRowsNum, tColumns>::Type;
 
 		using Traits = MatrixTraits<Tp, sRowsNum, tColumns>;
 		using ColumnVector = Vector<Tp, sRowsNum>;
 		using RowVector = Vector<Tp, tColumns>;
 
-		union
+        union
 		{
-			struct
+            struct
 			{
 				RowSIMDDataType mm0, mm1, mm2, mm3;
 			};
-			struct
+
+            struct
 			{
-				RowVector rv0, rv1, rv2, rv3;
+				RowVector row0, row1, row2, row3;
 			};
-			RowSIMDDataType mmArray[sRowsNum];
-			RowVector rvArray[sRowsNum];
-			Tp valueArray[sMatrixSize];
+
+            struct
+            {
+                Tp values[sMatrixSize];
+            };
 		};
 
 	public:
 		constexpr Matrix( const Matrix & ) = default;
 		constexpr Matrix & operator=( const Matrix & ) = default;
 
-		constexpr Matrix() noexcept
-		{}
-
-		constexpr Matrix( std::initializer_list<Tp> pData ) noexcept
-		: rv0( pData.begin() )
-		, rv1( pData.begin() + tColumns )
-		, rv2( pData.begin() + 2*tColumns )
-		, rv3( pData.begin() + 3*tColumns )
-		{}
+        constexpr Matrix() noexcept = default;
 
 		template <typename Tp0, typename Tp1, typename Tp2, typename Tp3>
 		constexpr Matrix( const Vector<Tp0, tColumns> & pRow0,
 		                  const Vector<Tp1, tColumns> & pRow1,
 		                  const Vector<Tp2, tColumns> & pRow2,
 		                  const Vector<Tp3, tColumns> & pRow3 ) noexcept
-		: rv0( pRow0 ), rv1( pRow1 ), rv2( pRow2 ), rv3( pRow3 )
+		: row0( pRow0 )
+		, row1( pRow1 )
+		, row2( pRow2 )
+		, row3( pRow3 )
 		{}
 
 		template <typename TpScalar, enable_if_scalar_t<TpScalar> = true>
 		constexpr explicit Matrix( TpScalar pScalar ) noexcept
-		: rv0( pScalar ), rv1( pScalar ), rv2( pScalar ), rv3( pScalar )
+		: row0( pScalar )
+		, row1( pScalar )
+		, row2( pScalar )
+		, row3( pScalar )
 		{}
 
-		Vector<Tp, tColumns> & operator[]( size_t pIndex ) noexcept
+        Matrix( std::initializer_list<Tp> pData ) noexcept
+        : row0( pData.begin() )
+        , row1( pData.begin() + tColumns )
+        , row2( pData.begin() + 2*tColumns )
+        , row3( pData.begin() + 3*tColumns )
+        {
+            ts3DebugAssert( pData.size() == sMatrixSize );
+        }
+
+		TS3_PCL_ATTR_NO_DISCARD Vector<Tp, tColumns> & operator[]( size_t pIndex ) noexcept
 		{
-			return staticArrayElement( rvArray, pIndex );
+            ts3DebugAssert( pIndex < sRowsNum );
+			return static_cast<RowVector *>( &row0 )[pIndex];
 		}
 
-		const Vector<Tp, tColumns> & operator[]( size_t pIndex ) const noexcept
+        TS3_PCL_ATTR_NO_DISCARD const Vector<Tp, tColumns> & operator[]( size_t pIndex ) const noexcept
 		{
-			return staticArrayElement( rvArray, pIndex );
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<const RowVector *>( &row0 )[pIndex];
 		}
 
-		ColumnVector column( size_t pCIndex ) const noexcept
+        TS3_PCL_ATTR_NO_DISCARD ColumnVector column( size_t pColumnIndex ) const noexcept
 		{
-			return { rv0[pCIndex], rv1[pCIndex], rv2[pCIndex], rv3[pCIndex] };
+			return { row0[pColumnIndex], row1[pColumnIndex], row2[pColumnIndex], row3[pColumnIndex] };
 		}
+
+        TS3_PCL_ATTR_NO_DISCARD Tp * data() noexcept
+        {
+            return &( values[0] );
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD const Tp * data() const noexcept
+        {
+            return &( values[0] );
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD RowVector * rowPtr( size_t pIndex = 0 ) noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<RowVector *>( &row0 ) + pIndex;
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD const RowVector * rowPtr( size_t pIndex = 0 ) const noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<const RowVector *>( &row0 ) + pIndex;
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD RowSIMDDataType * simdPtr( size_t pIndex = 0 ) noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<RowSIMDDataType *>( &mm0 ) + pIndex;
+        }
+
+        TS3_PCL_ATTR_NO_DISCARD const RowSIMDDataType * simdPtr( size_t pIndex = 0 ) const noexcept
+        {
+            ts3DebugAssert( pIndex < sRowsNum );
+            return static_cast<const RowSIMDDataType *>( &mm0 ) + pIndex;
+        }
 	};
 
 	template <typename Tp, size_t tColumns>
@@ -338,5 +482,13 @@ namespace ts3::math
 	using Mat4f   = Mat4x4f;
 
 }
+
+#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#  pragma clang diagnostic pop
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#  pragma GCC diagnostic pop
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
+#  pragma warning( pop )
+#endif
 
 #endif // __TS3_MATH_MATRIX_BASE_H__

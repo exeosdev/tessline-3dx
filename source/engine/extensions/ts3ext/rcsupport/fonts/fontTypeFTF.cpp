@@ -148,78 +148,14 @@ namespace ts3
 				}
 
 				glyphImageRef.imageIndex = currentTextureLayer->layerIndex;
-				glyphImageRef.rect.baseOffset.x = static_cast<float>( glyphImageTextureOffset.x ) / cxTextureWidth;
-				glyphImageRef.rect.baseOffset.y = static_cast<float>( glyphImageTextureOffset.y ) / cxTextureHeight;
-				glyphImageRef.rect.dimensions.x = static_cast<float>( glyphSourceImage.dimensions.x ) / cxTextureWidth;
-				glyphImageRef.rect.dimensions.y = static_cast<float>( glyphSourceImage.dimensions.y ) / cxTextureHeight;
+				glyphImageRef.rect.offset.x = static_cast<float>( glyphImageTextureOffset.x ) / cxTextureWidth;
+				glyphImageRef.rect.offset.y = static_cast<float>( glyphImageTextureOffset.y ) / cxTextureHeight;
+				glyphImageRef.rect.size.x = static_cast<float>( glyphSourceImage.dimensions.x ) / cxTextureWidth;
+				glyphImageRef.rect.size.y = static_cast<float>( glyphSourceImage.dimensions.y ) / cxTextureHeight;
 			}
 
 			pFTFontData.glyphMap[ftGlyphData.glyph.codePoint] = ftGlyphData.glyph;
 		}
-	}
-
-	gpuapi::TextureCreateInfo FreeTypeFontLoader::getTextureCreateInfo( const FreeTypeFontData & pFTFontData,
-	                                                                    const FreeTypeFontCreateInfo & pFontCreateInfo )
-	{
-		const auto staticSubTexturesNum = trunc_numeric_cast<uint32>( pFTFontData.textureLayerDataArray.size() );
-		const auto dynamicSubTexturesNum = pFontCreateInfo.dynamicLayersNum;
-		const auto totalSubTexturesNum = staticSubTexturesNum + dynamicSubTexturesNum;
-
-		gpuapi::TextureCreateInfo gpuTextureCreateInfo;
-		gpuTextureCreateInfo.dimensions.depth = 1;
-		gpuTextureCreateInfo.dimensions.mipLevelsNum = 1;
-		gpuTextureCreateInfo.dimensions.width = pFontCreateInfo.textureDimensions.x;
-		gpuTextureCreateInfo.dimensions.height = pFontCreateInfo.textureDimensions.y;
-		gpuTextureCreateInfo.memoryBaseAlignment = 256;
-		gpuTextureCreateInfo.msaaLevel = 0;
-		gpuTextureCreateInfo.pixelFormat = pFontCreateInfo.textureFormat;
-		gpuTextureCreateInfo.initialTarget = gpuapi::ETextureTarget::ShaderInputSampledImage;
-
-		if( dynamicSubTexturesNum == 0 )
-		{
-			gpuTextureCreateInfo.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-			gpuTextureCreateInfo.resourceFlags = gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
-		}
-		else
-		{
-			gpuTextureCreateInfo.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT | gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-			gpuTextureCreateInfo.resourceFlags = gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT;
-		}
-
-		if( totalSubTexturesNum == 1 )
-		{
-			gpuTextureCreateInfo.dimensionClass = gpuapi::ETextureDimensionClass::Texture2D;
-			gpuTextureCreateInfo.dimensions.arraySize = 1;
-		}
-		else
-		{
-			gpuTextureCreateInfo.dimensionClass = gpuapi::ETextureDimensionClass::Texture2DArray;
-			gpuTextureCreateInfo.dimensions.arraySize = totalSubTexturesNum;
-		}
-
-		gpuTextureCreateInfo.initDataDesc.initialize( gpuTextureCreateInfo.dimensions );
-
-		for( uint32 staticSubTextureIndex = 0; staticSubTextureIndex < staticSubTexturesNum; ++staticSubTextureIndex )
-		{
-			const auto & textureLayerDataDesc = pFTFontData.textureLayerDataArray[staticSubTextureIndex];
-
-			// Each font sub-texture has only one mip level, as mip-mapping is disabled for fonts.
-			auto & subTextureInitData = gpuTextureCreateInfo.initDataDesc.subTextureInitDataBasePtr[staticSubTextureIndex].mipLevelInitDataArray[0];
-			subTextureInitData.pointer = textureLayerDataDesc.initDataBuffer.dataPtr();
-			subTextureInitData.size = textureLayerDataDesc.initDataBuffer.size();
-		}
-
-		for( uint32 dynamicSubTextureBaseIndex = 0; dynamicSubTextureBaseIndex < dynamicSubTexturesNum; ++dynamicSubTextureBaseIndex )
-		{
-			// Dynamic font layers come directly after the static/pre-rendered ones.
-			uint32 dynamicSubTextureIndex = staticSubTexturesNum + dynamicSubTextureBaseIndex;
-
-			auto & subTextureInitData = gpuTextureCreateInfo.initDataDesc.subTextureInitDataBasePtr[dynamicSubTextureIndex].mipLevelInitDataArray[0];
-			subTextureInitData.pointer = nullptr;
-			subTextureInitData.size = 0;
-		}
-
-		return gpuTextureCreateInfo;
 	}
 
 	FreeTypeFontObject * FreeTypeFontLoader::createFreeTypeFontObject( const FreeTypeFontCreateInfo & pFontCreateInfo )
@@ -249,5 +185,69 @@ namespace ts3
 
 		return nullptr;
 	}
+
+    gpuapi::TextureCreateInfo FreeTypeFontLoader::getTextureCreateInfo( const FreeTypeFontData & pFTFontData,
+                                                                        const FreeTypeFontCreateInfo & pFontCreateInfo )
+    {
+        const auto staticSubTexturesNum = trunc_numeric_cast<uint32>( pFTFontData.textureLayerDataArray.size() );
+        const auto dynamicSubTexturesNum = pFontCreateInfo.dynamicLayersNum;
+        const auto totalSubTexturesNum = staticSubTexturesNum + dynamicSubTexturesNum;
+
+        gpuapi::TextureCreateInfo gpuTextureCreateInfo;
+        gpuTextureCreateInfo.dimensions.depth = 1;
+        gpuTextureCreateInfo.dimensions.mipLevelsNum = 1;
+        gpuTextureCreateInfo.dimensions.width = pFontCreateInfo.textureDimensions.x;
+        gpuTextureCreateInfo.dimensions.height = pFontCreateInfo.textureDimensions.y;
+        gpuTextureCreateInfo.memoryBaseAlignment = 256;
+        gpuTextureCreateInfo.msaaLevel = 0;
+        gpuTextureCreateInfo.pixelFormat = pFontCreateInfo.textureFormat;
+        gpuTextureCreateInfo.initialTarget = gpuapi::ETextureTarget::ShaderInputSampledImage;
+
+        if( dynamicSubTexturesNum == 0 )
+        {
+            gpuTextureCreateInfo.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+            gpuTextureCreateInfo.resourceFlags = gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
+        }
+        else
+        {
+            gpuTextureCreateInfo.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT | gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+            gpuTextureCreateInfo.resourceFlags = gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT;
+        }
+
+        if( totalSubTexturesNum == 1 )
+        {
+            gpuTextureCreateInfo.dimensionClass = gpuapi::ETextureDimensionClass::Texture2D;
+            gpuTextureCreateInfo.dimensions.arraySize = 1;
+        }
+        else
+        {
+            gpuTextureCreateInfo.dimensionClass = gpuapi::ETextureDimensionClass::Texture2DArray;
+            gpuTextureCreateInfo.dimensions.arraySize = totalSubTexturesNum;
+        }
+
+        gpuTextureCreateInfo.initDataDesc.initialize( gpuTextureCreateInfo.dimensions );
+
+        for( uint32 staticSubTextureIndex = 0; staticSubTextureIndex < staticSubTexturesNum; ++staticSubTextureIndex )
+        {
+            const auto & textureLayerDataDesc = pFTFontData.textureLayerDataArray[staticSubTextureIndex];
+
+            // Each font sub-texture has only one mip level, as mip-mapping is disabled for fonts.
+            auto & subTextureInitData = gpuTextureCreateInfo.initDataDesc.subTextureInitDataBasePtr[staticSubTextureIndex].mipLevelInitDataArray[0];
+            subTextureInitData.pointer = textureLayerDataDesc.initDataBuffer.dataPtr();
+            subTextureInitData.size = textureLayerDataDesc.initDataBuffer.size();
+        }
+
+        for( uint32 dynamicSubTextureBaseIndex = 0; dynamicSubTextureBaseIndex < dynamicSubTexturesNum; ++dynamicSubTextureBaseIndex )
+        {
+            // Dynamic font layers come directly after the static/pre-rendered ones.
+            uint32 dynamicSubTextureIndex = staticSubTexturesNum + dynamicSubTextureBaseIndex;
+
+            auto & subTextureInitData = gpuTextureCreateInfo.initDataDesc.subTextureInitDataBasePtr[dynamicSubTextureIndex].mipLevelInitDataArray[0];
+            subTextureInitData.pointer = nullptr;
+            subTextureInitData.size = 0;
+        }
+
+        return gpuTextureCreateInfo;
+    }
 
 }

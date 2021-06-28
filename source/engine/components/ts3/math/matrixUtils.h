@@ -343,9 +343,9 @@ namespace ts3::math
 		rMat[2][2] = pAxis.z * icnAxis.z + angleCos;
 
 		return Matrix4x4<Tp> {
-			rMat.rv0.x, rMat.rv0.y, rMat.rv0.z, 0,
-			rMat.rv1.x, rMat.rv1.y, rMat.rv1.z, 0,
-			rMat.rv2.x, rMat.rv2.y, rMat.rv2.z, 0,
+			rMat.row0.x, rMat.row0.y, rMat.row0.z, 0,
+			rMat.row1.x, rMat.row1.y, rMat.row1.z, 0,
+			rMat.row2.x, rMat.row2.y, rMat.row2.z, 0,
 			0,          0,          0,          1
 		};
 	}

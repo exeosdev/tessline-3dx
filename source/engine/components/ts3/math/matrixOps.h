@@ -11,25 +11,25 @@ namespace ts3::math
 	template <typename Tp, size_t tC>
 	inline void add( const Matrix<Tp, 2, tC> & pFirst, const Matrix<Tp, 2, tC> & pSecond, Matrix<Tp, 2, tC> & pResult )
 	{
-		pResult.rv0 = pFirst.rv0 + pSecond.rv0;
-		pResult.rv1 = pFirst.rv1 + pSecond.rv1;
+		pResult.row0 = pFirst.row0 + pSecond.row0;
+		pResult.row1 = pFirst.row1 + pSecond.row1;
 	}
 
 	template <typename Tp, size_t tC>
 	inline void add( const Matrix<Tp, 3, tC> & pFirst, const Matrix<Tp, 3, tC> & pSecond, Matrix<Tp, 3, tC> & pResult )
 	{
-		pResult.rv0 = pFirst.rv0 + pSecond.rv0;
-		pResult.rv1 = pFirst.rv1 + pSecond.rv1;
-		pResult.rv2 = pFirst.rv2 + pSecond.rv2;
+		pResult.row0 = pFirst.row0 + pSecond.row0;
+		pResult.row1 = pFirst.row1 + pSecond.row1;
+		pResult.row2 = pFirst.row2 + pSecond.row2;
 	}
 
 	template <typename Tp, size_t tC>
 	inline void add( const Matrix<Tp, 4, tC> & pFirst, const Matrix<Tp, 4, tC> & pSecond, Matrix<Tp, 4, tC> & pResult )
 	{
-		pResult.rv0 = pFirst.rv0 + pSecond.rv0;
-		pResult.rv1 = pFirst.rv1 + pSecond.rv1;
-		pResult.rv2 = pFirst.rv2 + pSecond.rv2;
-		pResult.rv3 = pFirst.rv3 + pSecond.rv3;
+		pResult.row0 = pFirst.row0 + pSecond.row0;
+		pResult.row1 = pFirst.row1 + pSecond.row1;
+		pResult.row2 = pFirst.row2 + pSecond.row2;
+		pResult.row3 = pFirst.row3 + pSecond.row3;
 	}
 
 	template <typename TpMatrix>
@@ -43,25 +43,25 @@ namespace ts3::math
 	template <typename Tp, size_t tC>
 	inline void sub( const Matrix<Tp, 2, tC> & pFirst, const Matrix<Tp, 2, tC> & pSecond, Matrix<Tp, 2, tC> & pResult )
 	{
-		pResult.rv0 = pFirst.rv0 - pSecond.rv0;
-		pResult.rv1 = pFirst.rv1 - pSecond.rv1;
+		pResult.row0 = pFirst.row0 - pSecond.row0;
+		pResult.row1 = pFirst.row1 - pSecond.row1;
 	}
 
 	template <typename Tp, size_t tC>
 	inline void sub( const Matrix<Tp, 3, tC> & pFirst, const Matrix<Tp, 3, tC> & pSecond, Matrix<Tp, 3, tC> & pResult )
 	{
-		pResult.rv0 = pFirst.rv0 - pSecond.rv0;
-		pResult.rv1 = pFirst.rv1 - pSecond.rv1;
-		pResult.rv2 = pFirst.rv2 - pSecond.rv2;
+		pResult.row0 = pFirst.row0 - pSecond.row0;
+		pResult.row1 = pFirst.row1 - pSecond.row1;
+		pResult.row2 = pFirst.row2 - pSecond.row2;
 	}
 
 	template <typename Tp, size_t tC>
 	inline void sub( const Matrix<Tp, 4, tC> & pFirst, const Matrix<Tp, 4, tC> & pSecond, Matrix<Tp, 4, tC> & pResult )
 	{
-		pResult.rv0 = pFirst.rv0 - pSecond.rv0;
-		pResult.rv1 = pFirst.rv1 - pSecond.rv1;
-		pResult.rv2 = pFirst.rv2 - pSecond.rv2;
-		pResult.rv3 = pFirst.rv3 - pSecond.rv3;
+		pResult.row0 = pFirst.row0 - pSecond.row0;
+		pResult.row1 = pFirst.row1 - pSecond.row1;
+		pResult.row2 = pFirst.row2 - pSecond.row2;
+		pResult.row3 = pFirst.row3 - pSecond.row3;
 	}
 
 	template <typename TpMatrix>
@@ -92,67 +92,67 @@ namespace ts3::math
 	template <typename Tp>
 	inline void mul( const Matrix2x2<Tp> & pFirst, const Matrix2x2<Tp> & pSecond, Matrix2x2<Tp> & pResult )
 	{
-		const auto firstE00MulSecondR0 = pFirst.rv0[0] * pSecond.rv0;
-		const auto firstE01MulSecondR1 = pFirst.rv0[1] * pSecond.rv1;
-		pResult.rv0 = firstE00MulSecondR0 + firstE01MulSecondR1;
+		const auto firstE00MulSecondR0 = pFirst.row0[0] * pSecond.row0;
+		const auto firstE01MulSecondR1 = pFirst.row0[1] * pSecond.row1;
+		pResult.row0 = firstE00MulSecondR0 + firstE01MulSecondR1;
 
-		const auto firstE10MulSecondR0 = pFirst.rv1[0] * pSecond.rv0;
-		const auto firstE11MulSecondR1 = pFirst.rv1[1] * pSecond.rv1;
-		pResult.rv1 = firstE10MulSecondR0 + firstE11MulSecondR1;
+		const auto firstE10MulSecondR0 = pFirst.row1[0] * pSecond.row0;
+		const auto firstE11MulSecondR1 = pFirst.row1[1] * pSecond.row1;
+		pResult.row1 = firstE10MulSecondR0 + firstE11MulSecondR1;
 	}
 
 	template <typename Tp>
 	inline void mul( const Matrix3x3<Tp> & pFirst, const Matrix3x3<Tp> & pSecond, Matrix3x3<Tp> & pResult )
 	{
-		const auto firstE00MulSecondR0 = pFirst.rv0[0] * pSecond.rv0;
-		const auto firstE01MulSecondR1 = pFirst.rv0[1] * pSecond.rv1;
-		const auto firstE02MulSecondR2 = pFirst.rv0[2] * pSecond.rv2;
-		pResult.rv0 = firstE00MulSecondR0 + firstE01MulSecondR1 + firstE02MulSecondR2;
+		const auto firstE00MulSecondR0 = pFirst.row0[0] * pSecond.row0;
+		const auto firstE01MulSecondR1 = pFirst.row0[1] * pSecond.row1;
+		const auto firstE02MulSecondR2 = pFirst.row0[2] * pSecond.row2;
+		pResult.row0 = firstE00MulSecondR0 + firstE01MulSecondR1 + firstE02MulSecondR2;
 
-		const auto firstE10MulSecondR0 = pFirst.rv1[0] * pSecond.rv0;
-		const auto firstE11MulSecondR1 = pFirst.rv1[1] * pSecond.rv1;
-		const auto firstE12MulSecondR2 = pFirst.rv1[2] * pSecond.rv2;
-		pResult.rv1 = firstE10MulSecondR0 + firstE11MulSecondR1 + firstE12MulSecondR2;
+		const auto firstE10MulSecondR0 = pFirst.row1[0] * pSecond.row0;
+		const auto firstE11MulSecondR1 = pFirst.row1[1] * pSecond.row1;
+		const auto firstE12MulSecondR2 = pFirst.row1[2] * pSecond.row2;
+		pResult.row1 = firstE10MulSecondR0 + firstE11MulSecondR1 + firstE12MulSecondR2;
 
-		const auto firstE20MulSecondR0 = pFirst.rv2[0] * pSecond.rv0;
-		const auto firstE21MulSecondR1 = pFirst.rv2[1] * pSecond.rv1;
-		const auto firstE22MulSecondR2 = pFirst.rv2[2] * pSecond.rv2;
-		pResult.rv2 = firstE20MulSecondR0 + firstE21MulSecondR1 + firstE22MulSecondR2;
+		const auto firstE20MulSecondR0 = pFirst.row2[0] * pSecond.row0;
+		const auto firstE21MulSecondR1 = pFirst.row2[1] * pSecond.row1;
+		const auto firstE22MulSecondR2 = pFirst.row2[2] * pSecond.row2;
+		pResult.row2 = firstE20MulSecondR0 + firstE21MulSecondR1 + firstE22MulSecondR2;
 	}
 
 	template <typename Tp>
 	inline void mul( const Matrix4x4<Tp> & pFirst, const Matrix4x4<Tp> & pSecond, Matrix4x4<Tp> & pResult )
 	{
-		const auto firstE00MulSecondR0 = pFirst.rv0[0] * pSecond.rv0;
-		const auto firstE01MulSecondR1 = pFirst.rv0[1] * pSecond.rv1;
-		const auto firstE02MulSecondR2 = pFirst.rv0[2] * pSecond.rv2;
-		const auto firstE03MulSecondR3 = pFirst.rv0[3] * pSecond.rv3;
-		pResult.rv0 = firstE00MulSecondR0 + firstE01MulSecondR1 + firstE02MulSecondR2 + firstE03MulSecondR3;
+		const auto firstE00MulSecondR0 = pFirst.row0[0] * pSecond.row0;
+		const auto firstE01MulSecondR1 = pFirst.row0[1] * pSecond.row1;
+		const auto firstE02MulSecondR2 = pFirst.row0[2] * pSecond.row2;
+		const auto firstE03MulSecondR3 = pFirst.row0[3] * pSecond.row3;
+		pResult.row0 = firstE00MulSecondR0 + firstE01MulSecondR1 + firstE02MulSecondR2 + firstE03MulSecondR3;
 
-		const auto firstE10MulSecondR0 = pFirst.rv1[0] * pSecond.rv0;
-		const auto firstE11MulSecondR1 = pFirst.rv1[1] * pSecond.rv1;
-		const auto firstE12MulSecondR2 = pFirst.rv1[2] * pSecond.rv2;
-		const auto firstE13MulSecondR3 = pFirst.rv1[3] * pSecond.rv3;
-		pResult.rv1 = firstE10MulSecondR0 + firstE11MulSecondR1 + firstE12MulSecondR2 + firstE13MulSecondR3;
+		const auto firstE10MulSecondR0 = pFirst.row1[0] * pSecond.row0;
+		const auto firstE11MulSecondR1 = pFirst.row1[1] * pSecond.row1;
+		const auto firstE12MulSecondR2 = pFirst.row1[2] * pSecond.row2;
+		const auto firstE13MulSecondR3 = pFirst.row1[3] * pSecond.row3;
+		pResult.row1 = firstE10MulSecondR0 + firstE11MulSecondR1 + firstE12MulSecondR2 + firstE13MulSecondR3;
 
-		const auto firstE20MulSecondR0 = pFirst.rv2[0] * pSecond.rv0;
-		const auto firstE21MulSecondR1 = pFirst.rv2[1] * pSecond.rv1;
-		const auto firstE22MulSecondR2 = pFirst.rv2[2] * pSecond.rv2;
-		const auto firstE23MulSecondR3 = pFirst.rv2[3] * pSecond.rv3;
-		pResult.rv2 = firstE20MulSecondR0 + firstE21MulSecondR1 + firstE22MulSecondR2 + firstE23MulSecondR3;
+		const auto firstE20MulSecondR0 = pFirst.row2[0] * pSecond.row0;
+		const auto firstE21MulSecondR1 = pFirst.row2[1] * pSecond.row1;
+		const auto firstE22MulSecondR2 = pFirst.row2[2] * pSecond.row2;
+		const auto firstE23MulSecondR3 = pFirst.row2[3] * pSecond.row3;
+		pResult.row2 = firstE20MulSecondR0 + firstE21MulSecondR1 + firstE22MulSecondR2 + firstE23MulSecondR3;
 
-		const auto firstE30MulSecondR0 = pFirst.rv3[0] * pSecond.rv0;
-		const auto firstE31MulSecondR1 = pFirst.rv3[1] * pSecond.rv1;
-		const auto firstE32MulSecondR2 = pFirst.rv3[2] * pSecond.rv2;
-		const auto firstE33MulSecondR3 = pFirst.rv3[3] * pSecond.rv3;
-		pResult.rv3 = firstE30MulSecondR0 + firstE31MulSecondR1 + firstE32MulSecondR2 + firstE33MulSecondR3;
+		const auto firstE30MulSecondR0 = pFirst.row3[0] * pSecond.row0;
+		const auto firstE31MulSecondR1 = pFirst.row3[1] * pSecond.row1;
+		const auto firstE32MulSecondR2 = pFirst.row3[2] * pSecond.row2;
+		const auto firstE33MulSecondR3 = pFirst.row3[3] * pSecond.row3;
+		pResult.row3 = firstE30MulSecondR0 + firstE31MulSecondR1 + firstE32MulSecondR2 + firstE33MulSecondR3;
 	}
 
 	template <typename Tp>
 	inline void mul( const Matrix2x2<Tp> & pMatrix, const Vector2<Tp> & pVector, Vector2<Tp> & pResult )
 	{
-		pResult[0] = pMatrix.rv0 * pVector;
-		pResult[1] = pMatrix.rv1 * pVector;
+		pResult[0] = pMatrix.row0 * pVector;
+		pResult[1] = pMatrix.row1 * pVector;
 	}
 
 	template <typename Tp>
@@ -165,9 +165,9 @@ namespace ts3::math
 	template <typename Tp>
 	inline void mul( const Matrix3x3<Tp> & pMatrix, const Vector3<Tp> & pVector, Vector3<Tp> & pResult )
 	{
-		pResult.x = pMatrix.rv0 * pVector;
-		pResult.y = pMatrix.rv1 * pVector;
-		pResult.z = pMatrix.rv2 * pVector;
+		pResult.x = pMatrix.row0 * pVector;
+		pResult.y = pMatrix.row1 * pVector;
+		pResult.z = pMatrix.row2 * pVector;
 	}
 
 	template <typename Tp>
@@ -181,10 +181,10 @@ namespace ts3::math
 	template <typename Tp>
 	inline void mul( const Matrix4x4<Tp> & pMatrix, const Vector4<Tp> & pVector, Vector4<Tp> & pResult )
 	{
-		pResult.x = dot( pMatrix.rv0, pVector );
-		pResult.y = dot( pMatrix.rv1, pVector );
-		pResult.z = dot( pMatrix.rv2, pVector );
-		pResult.w = dot( pMatrix.rv3, pVector );
+		pResult.x = dot( pMatrix.row0, pVector );
+		pResult.y = dot( pMatrix.row1, pVector );
+		pResult.z = dot( pMatrix.row2, pVector );
+		pResult.w = dot( pMatrix.row3, pVector );
 	}
 
 	template <typename Tp>

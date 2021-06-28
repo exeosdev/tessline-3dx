@@ -4,6 +4,18 @@
 
 #include "prerequisites.h"
 
+#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#  pragma clang diagnostic ignored "-Wnested-anon-types"
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpedantic"
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
+#  pragma warning( push )
+#  pragma warning( disable: 4201 )  // 'Nonstandard extension used: nameless struct/union'
+#endif
+
 namespace ts3::math
 {
 
@@ -83,8 +95,11 @@ namespace ts3::math
 				// Explicit values for member access.
 				Tp x, y;
 			};
-			//
-			Tp valueArray[2];
+
+            struct
+            {
+                Tp values[2];
+            };
 		};
 
 	public:
@@ -119,24 +134,24 @@ namespace ts3::math
 
 		Tp * data() noexcept
 		{
-			return &( valueArray[0] );
+			return &( values[0] );
 		}
 
 		const Tp * data() const noexcept
 		{
-			return &( valueArray[0] );
+			return &( values[0] );
 		}
 
 		Tp & operator[]( size_t pIndex ) noexcept
 		{
 			ts3DebugAssert( pIndex < sLength )
-			return valueArray[pIndex];
+			return values[pIndex];
 		}
 
 		const Tp & operator[]( size_t pIndex ) const noexcept
 		{
 			ts3DebugAssert( pIndex < sLength )
-			return valueArray[pIndex];
+			return values[pIndex];
 		}
 	};
 
@@ -156,8 +171,11 @@ namespace ts3::math
 				// Explicit values for member access.
 				Tp x, y, z;
 			};
-			//
-			Tp valueArray[3];
+
+            struct
+            {
+                Tp values[3];
+            };
 		};
 
 	public:
@@ -210,24 +228,24 @@ namespace ts3::math
 
 		Tp * data() noexcept
 		{
-			return &( valueArray[0] );
+			return &( values[0] );
 		}
 
 		const Tp * data() const noexcept
 		{
-			return &( valueArray[0] );
+			return &( values[0] );
 		}
 
 		Tp & operator[]( size_t pIndex ) noexcept
 		{
 			ts3DebugAssert( pIndex < sLength )
-			return valueArray[pIndex];
+			return values[pIndex];
 		}
 
 		const Tp & operator[]( size_t pIndex ) const noexcept
 		{
 			ts3DebugAssert( pIndex < sLength )
-			return valueArray[pIndex];
+			return values[pIndex];
 		}
 	};
 
@@ -248,10 +266,17 @@ namespace ts3::math
 				// Explicit values for member access.
 				Tp x, y, z, w;
 			};
-			// Either generic array of values or SSE/AVX SIMD type (depends on support and build config).
-			SIMDDataType mmv;
-			//
-			Tp valueArray[4];
+
+            struct
+            {
+                // Either generic array of values or SSE/AVX SIMD type (depends on support and build config).
+                SIMDDataType mmv;
+            };
+
+            struct
+            {
+                Tp values[4];
+            };
 		};
 
 	public:
@@ -260,7 +285,7 @@ namespace ts3::math
 
 		constexpr Vector() = default;
 
-		constexpr Vector( SIMDDataType pMMV ) noexcept
+		constexpr explicit Vector( SIMDDataType pMMV ) noexcept
 		: mmv( pMMV )
 		{}
 
@@ -336,37 +361,37 @@ namespace ts3::math
 		, w( static_cast<Tp>( pW ) )
 		{}
 
-		operator SIMDDataType & ()
-		{
-			return mmv;
-		}
+        Tp & operator[]( size_t pIndex ) noexcept
+        {
+            ts3DebugAssert( pIndex < sLength )
+            return values[pIndex];
+        }
 
-		operator const SIMDDataType & () const
-		{
-			return mmv;
-		}
+        const Tp & operator[]( size_t pIndex ) const noexcept
+        {
+            ts3DebugAssert( pIndex < sLength )
+            return values[pIndex];
+        }
 
 		Tp * data() noexcept
 		{
-			return &( valueArray[0] );
+			return &( values[0] );
 		}
 
 		const Tp * data() const noexcept
 		{
-			return &( valueArray[0] );
+			return &( values[0] );
 		}
 
-		Tp & operator[]( size_t pIndex ) noexcept
-		{
-			ts3DebugAssert( pIndex < sLength )
-			return valueArray[pIndex];
-		}
+        SIMDDataType * simdPtr() noexcept
+        {
+            return &mmv;
+        }
 
-		const Tp & operator[]( size_t pIndex ) const noexcept
-		{
-			ts3DebugAssert( pIndex < sLength )
-			return valueArray[pIndex];
-		}
+        const SIMDDataType * simdPtr() const noexcept
+        {
+            return &mmv;
+        }
 	};
 
 	template <typename Tp>
@@ -418,5 +443,13 @@ namespace ts3::math
 	using Size3u = Vector3<uint32>;
 
 }
+
+#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#  pragma clang diagnostic pop
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#  pragma GCC diagnostic pop
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
+#  pragma warning( pop )
+#endif
 
 #endif // __TS3_MATH_VECTOR_BASE_H__

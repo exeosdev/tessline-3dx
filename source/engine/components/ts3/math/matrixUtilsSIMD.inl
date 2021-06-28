@@ -45,13 +45,13 @@ namespace ts3::math
 	TS3_PCL_ATTR_ALWAYS_INLINE Matrix4x4<float> transpose( const Matrix4x4<float> & pMatrix )
 	{
 		Matrix4x4<float> result;
-		_mm_transpose_mat4_128f( pMatrix.mm0, pMatrix.mm1, pMatrix.mm2, pMatrix.mm3, result.mmArray );
+		_mm_transpose_mat4_128f( pMatrix.mm0, pMatrix.mm1, pMatrix.mm2, pMatrix.mm3, result.simdPtr() );
 		return result;
 	}
 
 	TS3_PCL_ATTR_ALWAYS_INLINE void transposeInplace( Matrix4x4<float> & pMatrix )
 	{
-		_mm_transpose_mat4_128f( pMatrix.mm0, pMatrix.mm1, pMatrix.mm2, pMatrix.mm3, pMatrix.mmArray );
+		_mm_transpose_mat4_128f( pMatrix.mm0, pMatrix.mm1, pMatrix.mm2, pMatrix.mm3, pMatrix.simdPtr() );
 	}
 
 #endif // TS3_MATH_SIMD_USE_VX128F

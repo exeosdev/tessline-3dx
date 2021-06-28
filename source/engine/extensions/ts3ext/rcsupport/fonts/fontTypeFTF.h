@@ -80,10 +80,10 @@ namespace ts3
 		                            FreeTypeFontData & pFTFontData,
 		                            const FreeTypeFontCreateInfo & pFontCreateInfo );
 
-		gpuapi::TextureCreateInfo getTextureCreateInfo( const FreeTypeFontData & pFTFontData,
-		                                                const FreeTypeFontCreateInfo & pFontCreateInfo );
-
 		FreeTypeFontObject * createFreeTypeFontObject( const FreeTypeFontCreateInfo & pFontCreateInfo );
+
+        static gpuapi::TextureCreateInfo getTextureCreateInfo( const FreeTypeFontData & pFTFontData,
+                                                               const FreeTypeFontCreateInfo & pFontCreateInfo );
 
 	private:
 		struct FTFontInstance
