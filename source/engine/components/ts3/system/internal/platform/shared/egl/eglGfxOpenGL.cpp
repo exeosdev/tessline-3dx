@@ -9,7 +9,7 @@ namespace ts3
 	void _internalEGLGetAttribArrayForVisualConfig( const SysVisualConfig & pVisualConfig, int * pAttribArray );
 	void _internalEGLValidateRequestedContextVersion( Version & pVersion );
 
-	void eglInitializeGLSubsystem( SysGLSubsystem & pDriver )
+	void eglInitializeGLCoreDevice( SysGLCoreDevice & pDriver )
 	{
 		EGLDisplay eglDisplay = ::eglGetDisplay( EGL_DEFAULT_DISPLAY );
 		
@@ -28,7 +28,7 @@ namespace ts3
 		pDriver.nativeData->eglVersion.minor = eglVersionMinor;
 	}
 
-	void eglReleaseGLSubsystem( SysGLSubsystem & pDriver )
+	void eglReleaseGLCoreDevice( SysGLCoreDevice & pDriver )
 	{
 		::eglTerminate( pDriver.nativeData->display );
 		pDriver.nativeData->display = EGL_NO_DISPLAY;
@@ -72,13 +72,13 @@ namespace ts3
 		pSurface.nativeData->fbConfig = pEGLConfig;
 	}
 
-	void eglCreateCoreContext( SysGLContext & pContext, const SysGLContextCreateInfo & pCreateInfo )
+	void eglCreateCoreContext( SysGLRenderContext & pContext, const SysGLRenderContextCreateInfo & pCreateInfo )
 	{
 		auto * surfaceNativeData = pCreateInfo.displaySurface->nativeData;
 
 		int contextProfile = EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT;
 		Bitmask<int> contextCreateFlags = 0;
-		EGLContext shareContextHandle = nullptr;
+		EGLRenderContext shareContextHandle = nullptr;
 
 		if ( pCreateInfo.targetAPIProfile == ESysGLAPIProfile::Legacy )
 		{
@@ -119,7 +119,7 @@ namespace ts3
 			EGL_NONE
 		};
 
-		EGLContext contextHandle = ::eglCreateContext( surfaceNativeData->display,
+		EGLRenderContext contextHandle = ::eglCreateContext( surfaceNativeData->display,
 													   surfaceNativeData->fbConfig,
 													   shareContextHandle,
 													   contextAttribs );

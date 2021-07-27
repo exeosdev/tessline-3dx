@@ -6,14 +6,14 @@
 namespace ts3
 {
 
-    bool SysGLImplProxy::nativeInitializeGLSubsystem( SysGLSubsystem & pDriver )
+    bool SysGLImplProxy::nativeInitializeGLCoreDevice( SysGLCoreDevice & pDriver )
     {
-        eglInitializeGLSubsystem( pDriver );
+        eglInitializeGLCoreDevice( pDriver );
         pDriver.nativeData->androidNativeWindow = pDriver.systemContext->nativeData->androidNativeWindow;
         return true;
     }
 
-    void SysGLImplProxy::nativeReleaseGLSubsystemInitState( SysGLSubsystem & pDriver )
+    void SysGLImplProxy::nativeReleaseGLCoreDeviceInitState( SysGLCoreDevice & pDriver )
     {}
 
     void SysGLImplProxy::nativeCreateGLSurface( SysGLSurface & pSurface, const SysGLSurfaceCreateInfo & pCreateInfo )
@@ -39,7 +39,7 @@ namespace ts3
         eglCreateSurface( pSurface, driverNativeData->display, driverNativeData->androidNativeWindow, fbConfig );
     }
 
-    void SysGLImplProxy::nativeCreateGLContext( SysGLContext & pContext, const SysGLContextCreateInfo & pCreateInfo )
+    void SysGLImplProxy::nativeCreateGLRenderContext( SysGLRenderContext & pContext, const SysGLRenderContextCreateInfo & pCreateInfo )
     {
         eglCreateCoreContext( pContext, pCreateInfo );
     }
@@ -49,7 +49,7 @@ namespace ts3
         ::eglSwapBuffers( pSurface.nativeData->display, pSurface.nativeData->surfaceHandle );
     }
 
-    void SysGLImplProxy::nativeBindContextForCurrentThread( SysGLContext & pContext )
+    void SysGLImplProxy::nativeBindContextForCurrentThread( SysGLRenderContext & pContext )
     {
         ::eglMakeCurrent( pContext.nativeData->display,
                           pContext.nativeData->surfaceHandle,

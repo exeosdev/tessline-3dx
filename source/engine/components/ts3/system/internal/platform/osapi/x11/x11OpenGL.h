@@ -9,33 +9,33 @@
 namespace ts3
 {
 
-	constexpr GLXFBConfigID cvSysX11InvalidFBConfigID = -1;
-	constexpr size_t cvSysX11MaxGLXFBConfigsNum = 256u;
-	constexpr size_t cvSysX11MaxGLXFBConfigAttributesNum = 64u;
-
 	struct SysX11GLSurfaceNativeData : public SysX11WindowNativeData
 	{
-		GLXFBConfig glxFBConfig = nullptr;
-		XVisualInfo * xvisualInfo = nullptr;
+		GLXFBConfig fbConfig = nullptr;
+		XVisualInfo * visualInfo = nullptr;
 	};
 
-	struct SysGLContextNativeData
+	struct SysX11GLRenderContextNativeData
 	{
-		Display * display;
-		GLXDrawable targetSurface;
-		GLXContext contextHandle;
+		Display * display = nullptr;
+		GLXDrawable targetSurface = XID_None;
+		GLXContext contextHandle = nullptr;
 	};
 
-	struct SysGLSubsystemNativeData
+	struct SysX11GLCoreDeviceNativeData
 	{
 		struct InitState
 		{
-			SysGLSurfaceNativeData surfaceData;
-			SysGLContextNativeData contextData;
+            SysX11GLSurfaceNativeData surfaceData;
+            SysX11GLRenderContextNativeData contextData;
 		};
 
-		InitState initState;
+		InitState * initState = nullptr;
 	};
+
+    using SysGLCoreDeviceNativeData = SysX11GLCoreDeviceNativeData;
+    using SysGLSurfaceNativeData = SysX11GLSurfaceNativeData;
+    using SysGLRenderContextNativeData = SysX11GLRenderContextNativeData;
 
 }
 

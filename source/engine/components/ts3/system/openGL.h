@@ -2,26 +2,16 @@
 #ifndef __TS3_SYSTEM_GFX_OPENGL_H__
 #define __TS3_SYSTEM_GFX_OPENGL_H__
 
-#include "eventCore.h"
 #include "visual.h"
 #include "windowDefs.h"
 #include <GL/glew.h>
 
-#if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
-#  include "internal/platform/osapi/android/androidOpenGL.h"
-#elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
-#  include "internal/platform/osapi/win32/win32OpenGL.h"
-#elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
-#  include "internal/platform/osapi/x11/x11OpenGL.h"
-#endif
-
 namespace ts3
 {
 
-	ts3DeclareSysHandle( SysDisplayManager );
-	ts3DeclareSysHandle( SysGLSubsystem );
-	ts3DeclareSysHandle( SysGLSurface );
-	ts3DeclareSysHandle( SysGLContext );
+    using SysGLCoreDeviceHandle = struct SysGLCoreDevice *;
+    using SysGLSurfaceHandle = struct SysGLSurface *;
+    using SysGLRenderContextHandle = struct SysGLRenderContext *;
 
 	/// @brief
 	enum ESysGLSurfaceCreateFlags : uint32
@@ -34,7 +24,7 @@ namespace ts3
 	};
 
 	/// @brief
-	enum ESysGLContextCreateFlags : uint32
+	enum ESysGLRenderContextCreateFlags : uint32
 	{
 		E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT = 0x1000,
 		E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT = 0x2000,
@@ -83,30 +73,33 @@ namespace ts3
 	};
 
 	/// @brief
-	struct SysGLContextCreateInfo
+	struct SysGLRenderContextCreateInfo
 	{
 		//
 		// SysGLSurface * displaySurface = nullptr;
 		//
-		SysGLContext * shareContext = nullptr;
+        SysGLRenderContextHandle shareContext = nullptr;
 		// Target API version (minimum) a context must support.
 		Version requiredAPIVersion;
 		// Target API profile which will be used by the app.
 		ESysGLAPIProfile targetAPIProfile;
 		//
-		Bitmask<ESysGLContextCreateFlags> flags = 0;
+		Bitmask<ESysGLRenderContextCreateFlags> flags = 0;
 	};
+
+
+
 
 	/// @brief
 	class SysGLSurface : public SysBaseObject, public SysEventSource
 	{
-		friend class SysGLSubsystem;
+		friend class SysGLCoreDevice;
 
 	public:
 		SysGLSurfaceNativeData mNativeData;
-		SysGLSubsystemHandle const mGLSubsystem;
+		SysGLCoreDeviceHandle const mGLCoreDevice;
 
-		explicit SysGLSurface( SysGLSubsystemHandle pGLSubsystem ) noexcept;
+		explicit SysGLSurface( SysGLCoreDeviceHandle pGLCoreDevice ) noexcept;
 		virtual ~SysGLSurface() noexcept;
 
 		void swapBuffers();
@@ -120,16 +113,16 @@ namespace ts3
 	};
 
 	/// @brief
-	class SysGLContext : public SysBaseObject
+	class SysGLRenderContext : public SysBaseObject
 	{
-		friend class SysGLSubsystem;
+		friend class SysGLCoreDevice;
 
 	public:
-		SysGLContextNativeData mNativeData;
-		SysGLSubsystemHandle const mGLSubsystem;
+		SysGLRenderContextNativeData mNativeData;
+		SysGLCoreDeviceHandle const mGLCoreDevice;
 
-		explicit SysGLContext( SysGLSubsystemHandle pGLSubsystem ) noexcept;
-		virtual ~SysGLContext() noexcept;
+		explicit SysGLRenderContext( SysGLCoreDeviceHandle pGLCoreDevice ) noexcept;
+		virtual ~SysGLRenderContext() noexcept;
 
 		void bindForCurrentThread( SysGLSurface & pTargetSurface );
 
@@ -144,16 +137,16 @@ namespace ts3
 	};
 
 	/// @brief
-	class SysGLSubsystem : public SysBaseObject
+	class SysGLCoreDevice : public SysBaseObject
 	{
 	public:
-		SysGLSubsystemNativeData mNativeData;
+		SysGLCoreDeviceNativeData mNativeData;
 		SysDisplayManagerHandle const mDisplayManager;
 
-		explicit SysGLSubsystem( SysDisplayManagerHandle pDisplayManager ) noexcept;
-		virtual ~SysGLSubsystem() noexcept;
+		explicit SysGLCoreDevice( SysDisplayManagerHandle pDisplayManager ) noexcept;
+		virtual ~SysGLCoreDevice() noexcept;
 
-		static SysGLSubsystemHandle create( SysDisplayManagerHandle pDisplayManager );
+		static SysGLCoreDeviceHandle create( SysDisplayManagerHandle pDisplayManager );
 
 		/// @brief Initializes core OpenGL state and system-level interfaces.
 		///
@@ -165,14 +158,14 @@ namespace ts3
 		/// Call this method after you have created actual display surface and context. It's not mandatory, (everything
 		/// will be released at shutdown anyway), but on some platforms this could free some extra memory and release
 		/// couple system-level interfaces. Context is required to ensure another valid context has been already created.
-		void releaseInitState( SysGLContext & pGLContext );
+		void releaseInitState( SysGLRenderContext & pGLRenderContext );
 
 		SysGLSurfaceHandle createDisplaySurface( const SysGLSurfaceCreateInfo & pCreateInfo );
 		SysGLSurfaceHandle createDisplaySurfaceForCurrentThread();
-		SysGLContextHandle createRenderContext( SysGLSurface & pSurface, const SysGLContextCreateInfo & pCreateInfo );
-		SysGLContextHandle createRenderContextForCurrentThread();
+		SysGLRenderContextHandle createRenderContext( SysGLSurface & pSurface, const SysGLRenderContextCreateInfo & pCreateInfo );
+		SysGLRenderContextHandle createRenderContextForCurrentThread();
 
-		void setPrimaryContext( SysGLContext & pPrimaryContext );
+		void setPrimaryContext( SysGLRenderContext & pPrimaryContext );
 
 		void resetPrimaryContext();
 
@@ -180,18 +173,18 @@ namespace ts3
 
 		std::vector<SysMSAAMode> querySupportedMSAAModes( SysColorFormat pColorFormat, SysDepthStencilFormat pDepthStencilFormat );
 
-		SysGLContext * getPrimaryContext() const;
+		SysGLRenderContext * getPrimaryContext() const;
 
 	private:
 		void _sysInitializePlatform();
 		void _sysReleaseInitState();
 		void _sysCreateDisplaySurface( SysGLSurface & pGLSurface, const SysGLSurfaceCreateInfo & pCreateInfo );
 		void _sysCreateDisplaySurfaceForCurrentThread( SysGLSurface & pGLSurface );
-		void _sysCreateRenderContext( SysGLContext & pGLContext, SysGLSurface & pGLSurface, const SysGLContextCreateInfo & pCreateInfo );
-		void _sysCreateRenderContextForCurrentThread( SysGLContext & pGLContext );
+		void _sysCreateRenderContext( SysGLRenderContext & pGLRenderContext, SysGLSurface & pGLSurface, const SysGLRenderContextCreateInfo & pCreateInfo );
+		void _sysCreateRenderContextForCurrentThread( SysGLRenderContext & pGLRenderContext );
 
 	private:
-		SysGLContext * _primaryContext;
+		SysGLRenderContext * _primaryContext;
 	};
 
 }

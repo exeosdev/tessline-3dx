@@ -20,24 +20,24 @@ namespace ts3
         EGLSurface surfaceHandle;
     };
 
-    struct EGLContextNativeData
+    struct EGLRenderContextNativeData
     {
         EGLDisplay display;
         EGLSurface surfaceHandle;
-        EGLContext contextHandle;
+        EGLRenderContext contextHandle;
     };
 
-    struct EGLSubsystemNativeData
+    struct EGLCoreDeviceNativeData
     {
         EGLDisplay display;
         EGLNativeWindowType androidNativeWindow;
         Version eglVersion;
     };
 
-    void eglInitializeGLSubsystem( SysGLSubsystem & pDriver );
+    void eglInitializeGLCoreDevice( SysGLCoreDevice & pDriver );
     EGLConfig eglChooseCoreEGLConfig( EGLDisplay pDisplay, const SysVisualConfig & pVisualConfig );
     void eglCreateSurface( SysGLSurface & pSurface, EGLDisplay pEGLDisplay, EGLNativeWindowType pWindow, EGLConfig pEGLConfig );
-    void eglCreateCoreContext( SysGLContext & pContext, const SysGLContextCreateInfo & pCreateInfo );
+    void eglCreateCoreContext( SysGLRenderContext & pContext, const SysGLRenderContextCreateInfo & pCreateInfo );
 
 }
 

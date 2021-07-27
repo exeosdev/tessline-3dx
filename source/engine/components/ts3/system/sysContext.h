@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_SYSTEM_CONTEXT_H__
-#define __TS3_SYSTEM_SYSTEM_CONTEXT_H__
+#ifndef __TS3_SYSTEM_SYS_CONTEXT_H__
+#define __TS3_SYSTEM_SYS_CONTEXT_H__
 
 #include "prerequisites.h"
 
@@ -45,4 +45,4 @@ namespace ts3
 
 }
 
-#endif // __TS3_SYSTEM_SYSTEM_CONTEXT_H__
+#endif // __TS3_SYSTEM_SYS_CONTEXT_H__

@@ -58,7 +58,7 @@ namespace ts3
 	}
 
 
-	void SysGLContext::_sysDestroy() noexcept
+	void SysGLRenderContext::_sysDestroy() noexcept
 	{
 		if( mNativeData.contextHandle != nullptr )
 		{
@@ -73,19 +73,19 @@ namespace ts3
 		}
 	}
 
-	void SysGLContext::_sysBindForCurrentThread( SysGLSurface & pTargetSurface )
+	void SysGLRenderContext::_sysBindForCurrentThread( SysGLSurface & pTargetSurface )
 	{
 		::wglMakeCurrent( pTargetSurface.mNativeData.surfaceHandle, mNativeData.contextHandle );
 	}
 
-	bool SysGLContext::_sysValidateCurrentBinding() const
+	bool SysGLRenderContext::_sysValidateCurrentBinding() const
 	{
 		auto currentContext = ::wglGetCurrentContext();
 		return mNativeData.contextHandle == currentContext;
 	}
 
 
-	void SysGLSubsystem::_sysInitializePlatform()
+	void SysGLCoreDevice::_sysInitializePlatform()
 	{
 		auto & openglSysInitState = mNativeData.initState;
 
@@ -134,7 +134,7 @@ namespace ts3
 		}
 	}
 
-	void SysGLSubsystem::_sysReleaseInitState()
+	void SysGLCoreDevice::_sysReleaseInitState()
 	{
 		auto & openglSysInitState = mNativeData.initState;
 
@@ -158,7 +158,7 @@ namespace ts3
 		}
 	}
 
-	void SysGLSubsystem::_sysCreateDisplaySurface( SysGLSurface & pGLSurface, const SysGLSurfaceCreateInfo & pCreateInfo )
+	void SysGLCoreDevice::_sysCreateDisplaySurface( SysGLSurface & pGLSurface, const SysGLSurfaceCreateInfo & pCreateInfo )
 	{
 		SysWindowCreateInfo surfaceWindowCreateInfo;
 		surfaceWindowCreateInfo.properties.geometry = pCreateInfo.windowGeometry;
@@ -190,7 +190,7 @@ namespace ts3
 		}
 	}
 
-	void SysGLSubsystem::_sysCreateDisplaySurfaceForCurrentThread( SysGLSurface & pGLSurface )
+	void SysGLCoreDevice::_sysCreateDisplaySurfaceForCurrentThread( SysGLSurface & pGLSurface )
 	{
 		auto surfaceHandle = ::wglGetCurrentDC();
 		if ( surfaceHandle == nullptr )
@@ -211,7 +211,7 @@ namespace ts3
 
 	}
 
-	void SysGLSubsystem::_sysCreateRenderContext( SysGLContext & pGLContext, SysGLSurface & pGLSurface, const SysGLContextCreateInfo & pCreateInfo )
+	void SysGLCoreDevice::_sysCreateRenderContext( SysGLRenderContext & pGLRenderContext, SysGLSurface & pGLSurface, const SysGLRenderContextCreateInfo & pCreateInfo )
 	{
 		int contextProfile = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
 		Bitmask<int> contextCreateFlags = 0;
@@ -264,17 +264,17 @@ namespace ts3
 			throw 0;
 		}
 
-		pGLContext.mNativeData.contextHandle = contextHandle;
+		pGLRenderContext.mNativeData.contextHandle = contextHandle;
 	}
 
-	void SysGLSubsystem::_sysCreateRenderContextForCurrentThread( SysGLContext & pGLContext )
+	void SysGLCoreDevice::_sysCreateRenderContextForCurrentThread( SysGLRenderContext & pGLRenderContext )
 	{
 		auto contextHandle = ::wglGetCurrentContext();
 		if ( contextHandle == nullptr )
 		{
 			throw 0;
 		}
-		pGLContext.mNativeData.contextHandle = contextHandle;
+		pGLRenderContext.mNativeData.contextHandle = contextHandle;
 	}
 
 

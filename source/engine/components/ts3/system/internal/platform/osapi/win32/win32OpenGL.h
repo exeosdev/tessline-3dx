@@ -18,17 +18,17 @@ namespace ts3
 		int pixelFormatIndex;
 	};
 
-	struct SysGLContextNativeData
+	struct SysGLRenderContextNativeData
 	{
 		HGLRC contextHandle;
 	};
 
-	struct SysGLSubsystemNativeData
+	struct SysGLCoreDeviceNativeData
 	{
 		struct InitState
 		{
 			SysGLSurfaceNativeData surfaceData;
-			SysGLContextNativeData contextData;
+			SysGLRenderContextNativeData contextData;
 		};
 
 		InitState initState;

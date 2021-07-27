@@ -15,11 +15,11 @@ namespace ts3
 	{
 	};
 
-	struct SysGLContextNativeData : public EGLContextNativeData
+	struct SysGLRenderContextNativeData : public EGLRenderContextNativeData
 	{
 	};
 
-	struct SysGLSubsystemNativeData : public EGLSubsystemNativeData
+	struct SysGLCoreDeviceNativeData : public EGLCoreDeviceNativeData
 	{
 	};
 

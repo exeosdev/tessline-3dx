@@ -50,7 +50,7 @@ namespace ts3
 	}
 
 
-	void SysGLContext::_sysDestroy() noexcept
+	void SysGLRenderContext::_sysDestroy() noexcept
 	{
 		if( mNativeData.contextHandle != nullptr )
 		{
@@ -65,7 +65,7 @@ namespace ts3
 		}
 	}
 
-	void SysGLContext::_sysBindForCurrentThread( SysGLSurface & pTargetSurface )
+	void SysGLRenderContext::_sysBindForCurrentThread( SysGLSurface & pTargetSurface )
 	{
 		::glXMakeContextCurrent( mNativeData.display,
 		                         pTargetSurface.mNativeData.xwindow,
@@ -73,14 +73,14 @@ namespace ts3
 		                         mNativeData.contextHandle );
 	}
 
-	bool SysGLContext::_sysValidateCurrentBinding() const
+	bool SysGLRenderContext::_sysValidateCurrentBinding() const
 	{
 		auto currentContext = ::glXGetCurrentContext();
 		return mNativeData.contextHandle == currentContext;
 	}
 
 
-	void SysGLSubsystem::_sysInitializePlatform()
+	void SysGLCoreDevice::_sysInitializePlatform()
 	{
 		auto & scNativeData = mSysContext->mNativeData;
 		auto & openglSysInitState = mNativeData.initState;
@@ -106,7 +106,7 @@ namespace ts3
 		_x11CreateGLWindowAndSurface( openglSysInitState.surfaceData, x11WindowCreateInfo, legacyVisualConfig );
 
 		auto tempContextHandle = ::glXCreateContext( scNativeData.display,
-		                                             openglSysInitState.surfaceData.xvisualInfo,
+		                                             openglSysInitState.surfaceData.visualInfo,
 		                                             nullptr,
 		                                             True );
 		if ( tempContextHandle == nullptr )
@@ -133,7 +133,7 @@ namespace ts3
         }
 	}
 
-	void SysGLSubsystem::_sysReleaseInitState()
+	void SysGLCoreDevice::_sysReleaseInitState()
 	{
 		auto & openglSysInitState = mNativeData.initState;
 
@@ -147,17 +147,17 @@ namespace ts3
 		if( openglSysInitState.surfaceData.xwindow != cvXIDNone )
 		{
 			_x11DestroyGLWindowAndSurface( openglSysInitState.surfaceData );
-			openglSysInitState.surfaceData.glxFBConfig = nullptr;
+			openglSysInitState.surfaceData.fbConfig = nullptr;
 		}
 
-		if( openglSysInitState.surfaceData.xvisualInfo != nullptr )
+		if( openglSysInitState.surfaceData.visualInfo != nullptr )
 		{
-			XFree( openglSysInitState.surfaceData.xvisualInfo );
-			openglSysInitState.surfaceData.xvisualInfo = nullptr;
+			XFree( openglSysInitState.surfaceData.visualInfo );
+			openglSysInitState.surfaceData.visualInfo = nullptr;
 		}
 	}
 
-	void SysGLSubsystem::_sysCreateDisplaySurface( SysGLSurface & pGLSurface, const SysGLSurfaceCreateInfo & pCreateInfo )
+	void SysGLCoreDevice::_sysCreateDisplaySurface( SysGLSurface & pGLSurface, const SysGLSurfaceCreateInfo & pCreateInfo )
 	{
 		auto & scNativeData = mSysContext->mNativeData;
 
@@ -174,7 +174,7 @@ namespace ts3
 		sysX11UpdateNewWindowState( pGLSurface.mNativeData, x11WindowCreateInfo );
 	}
 
-	void SysGLSubsystem::_sysCreateDisplaySurfaceForCurrentThread( SysGLSurface & pGLSurface )
+	void SysGLCoreDevice::_sysCreateDisplaySurfaceForCurrentThread( SysGLSurface & pGLSurface )
 	{
 		pGLSurface.mNativeData.display = glXGetCurrentDisplay();
 		pGLSurface.mNativeData.xwindow = glXGetCurrentDrawable();
@@ -187,7 +187,7 @@ namespace ts3
 		pGLSurface.mNativeData.colormap = windowAttributes.colormap;
 	}
 
-	void SysGLSubsystem::_sysCreateRenderContext( SysGLContext & pGLContext, SysGLSurface & pGLSurface, const SysGLContextCreateInfo & pCreateInfo )
+	void SysGLCoreDevice::_sysCreateRenderContext( SysGLRenderContext & pGLRenderContext, SysGLSurface & pGLSurface, const SysGLRenderContextCreateInfo & pCreateInfo )
 	{
 		static PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsProc = nullptr;
 		static PFNGLXSWAPINTERVALEXTPROC glXSwapIntervalEXTProc = nullptr;
@@ -245,7 +245,7 @@ namespace ts3
 		};
 
 		GLXContext contextHandle = glXCreateContextAttribsProc( pGLSurface.mNativeData.display,
-		                                                        pGLSurface.mNativeData.glxFBConfig,
+		                                                        pGLSurface.mNativeData.fbConfig,
 		                                                        shareContextHandle,
 		                                                        True,
 		                                                        &( contextAttribs[0] ) );
@@ -255,19 +255,19 @@ namespace ts3
 			throw 0;
 		}
 
-		pGLContext.mNativeData.display = pGLSurface.mNativeData.display;
-		pGLContext.mNativeData.targetSurface = pGLSurface.mNativeData.xwindow;
-		pGLContext.mNativeData.contextHandle = contextHandle;
+		pGLRenderContext.mNativeData.display = pGLSurface.mNativeData.display;
+		pGLRenderContext.mNativeData.targetSurface = pGLSurface.mNativeData.xwindow;
+		pGLRenderContext.mNativeData.contextHandle = contextHandle;
 	}
 
-	void SysGLSubsystem::_sysCreateRenderContextForCurrentThread( SysGLContext & pGLContext )
+	void SysGLCoreDevice::_sysCreateRenderContextForCurrentThread( SysGLRenderContext & pGLRenderContext )
 	{
 		auto contextHandle = ::glXGetCurrentContext();
 		if ( contextHandle == nullptr )
 		{
 			throw 0;
 		}
-		pGLContext.mNativeData.contextHandle = contextHandle;
+		pGLRenderContext.mNativeData.contextHandle = contextHandle;
 	}
 
 	
@@ -297,8 +297,8 @@ namespace ts3
 			throw 0;
 		}
 
-		pGLSurfaceNativeData.glxFBConfig = windowFBConfig;
-		pGLSurfaceNativeData.xvisualInfo = fbConfigVisualInfo;
+		pGLSurfaceNativeData.fbConfig = windowFBConfig;
+		pGLSurfaceNativeData.visualInfo = fbConfigVisualInfo;
 
 		pWindowCreateInfo.colorDepth = fbConfigVisualInfo->depth;
 		pWindowCreateInfo.windowVisual = fbConfigVisualInfo->visual;
@@ -409,11 +409,13 @@ namespace ts3
 		return bestFBConfig;
 	}
 
+    static constexpr size_t cxSysX11MaxGLXFBConfigAttributesNum = 64u;
+
 	std::vector<GLXFBConfig> _x11QueryCompatibleFBConfigList( Display * pDisplay, int pScreenIndex, const SysVisualConfig & pVisualConfig )
 	{
 		std::vector<GLXFBConfig> result;
 
-		int fbConfigAttribArray[cvSysX11MaxGLXFBConfigAttributesNum];
+		int fbConfigAttribArray[cxSysX11MaxGLXFBConfigAttributesNum];
 		_x11GetAttribArrayForVisualConfig( pVisualConfig, fbConfigAttribArray );
 
 		int pFBConfigListSize = 0;
