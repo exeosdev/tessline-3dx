@@ -7,9 +7,7 @@
 namespace ts3
 {
 
-	struct SysWindowCreateInfo;
-
-	struct SysWindowNativeData : public SysEventSourceNativeData
+	struct Win32SysWindowNativeData
 	{
 		ATOM wndClassID = 0;
 		LPCSTR wndClassName = nullptr;

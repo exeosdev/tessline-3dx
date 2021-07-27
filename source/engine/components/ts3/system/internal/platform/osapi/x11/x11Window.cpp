@@ -19,7 +19,7 @@ namespace ts3
 	{
 		auto & scNativeData = mSysContext->mNativeData;
 
-		X11SysWindowCreateInfo x11WindowCreateInfo;
+		SysX11WindowCreateInfo x11WindowCreateInfo;
 		x11WindowCreateInfo.commonProperties = pCreateInfo.properties;
 		x11WindowCreateInfo.display = scNativeData.display;
 		x11WindowCreateInfo.screenIndex = scNativeData.screenIndex;
@@ -58,7 +58,7 @@ namespace ts3
 	}
 
 
-	void sysX11CreateWindow( SysWindowNativeData & pWindowNativeData, const X11SysWindowCreateInfo & pCreateInfo )
+	void sysX11CreateWindow( SysWindowNativeData & pWindowNativeData, const SysX11WindowCreateInfo & pCreateInfo )
 	{
 		// Colormap for our window.
 		Colormap colormap = XCreateColormap( pCreateInfo.display,
@@ -120,7 +120,7 @@ namespace ts3
 		pWindowNativeData.colormap = colormap;
 	}
 
-	void sysX11UpdateNewWindowState( SysWindowNativeData & pWindowNativeData, const X11SysWindowCreateInfo & pCreateInfo )
+	void sysX11UpdateNewWindowState( SysWindowNativeData & pWindowNativeData, const SysX11WindowCreateInfo & pCreateInfo )
 	{
 		XMapWindow( pWindowNativeData.display, pWindowNativeData.xwindow );
 

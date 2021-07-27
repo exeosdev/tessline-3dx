@@ -1,0 +1,8 @@
+//
+// Created by mateusz on 30.06.2021.
+//
+
+#ifndef TESSLINE_3DX_X11_APPCONTEXT_H
+#define TESSLINE_3DX_X11_APPCONTEXT_H
+
+#endif //TESSLINE_3DX_X11_APPCONTEXT_H

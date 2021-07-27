@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_X11_GFX_OPENGL_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_X11_GFX_OPENGL_H__
 
-#include "x11WindowSystem.h"
+#include "x11Window.h"
 #include <GL/glx.h>
 #include <GL/glxext.h>
 
@@ -13,7 +13,7 @@ namespace ts3
 	constexpr size_t cvSysX11MaxGLXFBConfigsNum = 256u;
 	constexpr size_t cvSysX11MaxGLXFBConfigAttributesNum = 64u;
 
-	struct SysGLSurfaceNativeData : public SysWindowNativeData
+	struct SysX11GLSurfaceNativeData : public SysX11WindowNativeData
 	{
 		GLXFBConfig glxFBConfig = nullptr;
 		XVisualInfo * xvisualInfo = nullptr;

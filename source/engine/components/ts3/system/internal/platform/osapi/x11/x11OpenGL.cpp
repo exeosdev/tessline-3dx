@@ -6,7 +6,7 @@ namespace ts3
 {
 	// Creates X11 OpenGL surface using provided window create attributes and visual config.
 	void _x11CreateGLWindowAndSurface( SysGLSurfaceNativeData & pGLSurfaceNativeData,
-	                                   X11SysWindowCreateInfo & pWindowCreateInfo,
+	                                   SysX11WindowCreateInfo & pWindowCreateInfo,
 	                                   const SysVisualConfig & pVisualConfig );
 
 	// Destroys existing surface and corresponding window.
@@ -97,7 +97,7 @@ namespace ts3
 		legacyVisualConfig = sysDsmGetDefaultVisualConfigForSystemWindow();
 		legacyVisualConfig.flags.set( SYS_VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
-		X11SysWindowCreateInfo x11WindowCreateInfo;
+		SysX11WindowCreateInfo x11WindowCreateInfo;
 		x11WindowCreateInfo.display = scNativeData.display;
 		x11WindowCreateInfo.screenIndex = scNativeData.screenIndex;
 		x11WindowCreateInfo.rootWindow = scNativeData.rootWindow;
@@ -161,7 +161,7 @@ namespace ts3
 	{
 		auto & scNativeData = mSysContext->mNativeData;
 
-		X11SysWindowCreateInfo x11WindowCreateInfo;
+		SysX11WindowCreateInfo x11WindowCreateInfo;
 		x11WindowCreateInfo.commonProperties.geometry = pCreateInfo.windowGeometry;
 		x11WindowCreateInfo.commonProperties.title = "Exeos Framework OpenGL Window";
 		x11WindowCreateInfo.display = scNativeData.display;
@@ -272,7 +272,7 @@ namespace ts3
 
 	
 	void _x11CreateGLWindowAndSurface( SysGLSurfaceNativeData & pGLSurfaceNativeData,
-	                                   X11SysWindowCreateInfo & pWindowCreateInfo,
+	                                   SysX11WindowCreateInfo & pWindowCreateInfo,
 	                                   const SysVisualConfig & pVisualConfig )
 	{
 		GLXFBConfig windowFBConfig = nullptr;

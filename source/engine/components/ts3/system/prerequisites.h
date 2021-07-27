@@ -27,6 +27,9 @@
 #  endif
 #endif
 
+#define ts3SysDeclarePlatformTypeHandleImpl( pName, pPlatform ) \
+    using pName##Handle = struct pPlatform##pName##NativeData *
+
 namespace ts3
 {
 
