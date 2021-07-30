@@ -6,8 +6,8 @@
 namespace ts3::gpuapi
 {
 
-	GL4GPUDriver::GL4GPUDriver( SysGLSubsystemHandle pSysGLSubsystem )
-	: GLGPUDriver( pSysGLSubsystem )
+	GL4GPUDriver::GL4GPUDriver( SysGLCoreDeviceHandle pSysGLCoreDevice )
+	: GLGPUDriver( pSysGLCoreDevice )
 	{}
 
 	GL4GPUDriver::~GL4GPUDriver() = default;
@@ -28,13 +28,13 @@ namespace ts3::gpuapi
 			}
 		}
 
-		auto sysGLSubsystem = initializeSysGLSubsystem( sysContext );
-		if( !sysGLSubsystem )
+		auto sysGLCoreDevice = initializeSysGLCoreDevice( sysContext );
+		if( !sysGLCoreDevice )
 		{
 			return nullptr;
 		}
 
-		auto gl4Driver = createGPUAPIObject<GL4GPUDriver>( sysGLSubsystem );
+		auto gl4Driver = createGPUAPIObject<GL4GPUDriver>( sysGLCoreDevice );
 		gl4Driver->setConfigFlags( pCreateInfo.configFlags & gl4SupportedGPUConfigFlags );
 
 		return gl4Driver;

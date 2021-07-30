@@ -16,10 +16,10 @@ namespace ts3::gpuapi
 	class TS3_GPUAPI_CLASS GLCommandList : public CommandList
 	{
 	public:
-		SysGLContextHandle const mSysGLContext;
+		SysGLRenderContextHandle const mSysGLRenderContext;
 
 	public:
-		GLCommandList( GLCommandSystem & pGLCommandSystem, ECommandListType pListType, SysGLContextHandle pSysGLContext );
+		GLCommandList( GLCommandSystem & pGLCommandSystem, ECommandListType pListType, SysGLRenderContextHandle pSysGLRenderContext );
 		virtual ~GLCommandList();
 
 		virtual void beginCommandSequence() override;

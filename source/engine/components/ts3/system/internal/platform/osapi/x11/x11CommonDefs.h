@@ -24,29 +24,30 @@ namespace ts3
     #undef None
     #undef Success
 
-    struct SysX11SessionInfo
-    {
-        int connectionNumber;
-        std::string vendorName;
-        std::string displayString;
-    };
 
-    struct SysX11PlatformNativeData
+    struct SysPlatformNativeData
     {
+        struct SessionInfo
+        {
+            int connectionNumber;
+            std::string vendorName;
+            std::string displayString;
+        };
+
         Display * display = nullptr;
         Window rootWindow = XID_None;
         int screenIndex = -1;
         Atom wmpDeleteWindow = -1;
-        SysX11SessionInfo sessionInfo;
+        SessionInfo sessionInfo;
     };
 
-    struct SysX11PlatformNativeDataDeleter
+    struct SysPlatformNativeDataDeleter
     {
-        void operator()( SysX11PlatformNativeData * );
+        void operator()( SysPlatformNativeData * );
     };
 
-    using SysPlatformNativeData = SysX11PlatformNativeData;
-    using SysPlatformNativeDataDeleter = SysX11PlatformNativeDataDeleter;
+    using SysX11PlatformNativeData = SysPlatformNativeData;
+    using SysX11SessionInfo = SysPlatformNativeData::SessionInfo;
 
 }
 

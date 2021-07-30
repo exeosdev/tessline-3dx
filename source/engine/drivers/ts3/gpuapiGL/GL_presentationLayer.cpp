@@ -6,7 +6,7 @@
 namespace ts3::gpuapi
 {
 
-	static SysGLSurfaceHandle createSysGLSurface( SysGLSubsystemHandle pSysGLSubsystem, const GLPresentationLayerCreateInfo & pSCCreateInfo )
+	static SysGLSurfaceHandle createSysGLSurface( SysGLCoreDeviceHandle pSysGLCoreDevice, const GLPresentationLayerCreateInfo & pSCCreateInfo )
 	{
 		try
 		{
@@ -31,7 +31,7 @@ namespace ts3::gpuapi
 				surfaceCreateInfo.flags.set( E_SYS_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT );
 			}
 
-			auto sysGLSurface = pSysGLSubsystem->createDisplaySurface( surfaceCreateInfo );
+			auto sysGLSurface = pSysGLCoreDevice->createDisplaySurface( surfaceCreateInfo );
 
 			return sysGLSurface;
 		}
@@ -64,7 +64,7 @@ namespace ts3::gpuapi
 
 	GLScreenPresentationLayerHandle GLScreenPresentationLayer::create( GLGPUDevice & pDevice, const GLPresentationLayerCreateInfo & pCreateInfo )
 	{
-		auto sysGLSurface = createSysGLSurface( pDevice.mSysGLSubsystem, pCreateInfo );
+		auto sysGLSurface = createSysGLSurface( pDevice.mSysGLCoreDevice, pCreateInfo );
 		ts3DebugAssert( sysGLSurface );
 
 		auto presentationLayer = createGPUAPIObject<GLScreenPresentationLayer>( pDevice, sysGLSurface );
@@ -75,7 +75,7 @@ namespace ts3::gpuapi
 	void GLScreenPresentationLayer::bindRenderTarget( CommandContext * pCmdContext )
 	{
 		// auto * openglCmdContext = pCmdContext->queryInterface<GLCommandContext>();
-		// openglCmdContext->mExfGLContext->bindForCurrentThread( mExfGLSurface );
+		// openglCmdContext->mExfGLRenderContext->bindForCurrentThread( mExfGLSurface );
 		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 		ts3GLHandleLastError();
 	}

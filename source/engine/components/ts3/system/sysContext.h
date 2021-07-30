@@ -9,7 +9,7 @@
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
 #  include "internal/platform/osapi/win32/win32SystemContext.h"
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
-#  include "internal/platform/osapi/x11/sysX11temContext.h"
+#  include "internal/platform/osapi/x11/x11SystemContext.h"
 #endif
 
 namespace ts3

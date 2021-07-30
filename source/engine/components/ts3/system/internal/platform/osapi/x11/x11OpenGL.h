@@ -6,23 +6,25 @@
 #include <GL/glx.h>
 #include <GL/glxext.h>
 
+#define EPC_SYS_ID X11
+
 namespace ts3
 {
 
-	struct SysX11GLSurfaceNativeData : public SysX11WindowNativeData
+	struct SysGLSurfaceNativeData : public SysWindowNativeData
 	{
 		GLXFBConfig fbConfig = nullptr;
 		XVisualInfo * visualInfo = nullptr;
 	};
 
-	struct SysX11GLRenderContextNativeData
+	struct SysGLRenderContextNativeData
 	{
 		Display * display = nullptr;
 		GLXDrawable targetSurface = XID_None;
 		GLXContext contextHandle = nullptr;
 	};
 
-	struct SysX11GLCoreDeviceNativeData
+	struct SysGLCoreDeviceNativeData
 	{
 		struct InitState
 		{
@@ -33,9 +35,9 @@ namespace ts3
 		InitState * initState = nullptr;
 	};
 
-    using SysGLCoreDeviceNativeData = SysX11GLCoreDeviceNativeData;
-    using SysGLSurfaceNativeData = SysX11GLSurfaceNativeData;
-    using SysGLRenderContextNativeData = SysX11GLRenderContextNativeData;
+    using SysX11GLCoreDeviceNativeData = SysGLCoreDeviceNativeData;
+    using SysX11GLSurfaceNativeData = SysGLSurfaceNativeData;
+    using SysX11GLRenderContextNativeData = SysGLRenderContextNativeData;
 
 }
 

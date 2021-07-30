@@ -23,7 +23,7 @@ namespace ts3::gpuapi
 		{
 			ts3DebugAssert( contextExecutionMode == ECommandExecutionMode::Direct );
 			commandContext = std::make_unique<CommandContextDirectGraphics>( *this, *commandList );
-			commandList->mSysGLContext->bindForCurrentThread( *_targetSysGLSurface );
+			commandList->mSysGLRenderContext->bindForCurrentThread( *_targetSysGLSurface );
 		}
 
 		if( commandContext )
@@ -95,21 +95,21 @@ namespace ts3::gpuapi
 		auto * openglGPUDevice = mGPUDevice.queryInterface<GLGPUDevice>();
 		ts3DebugAssert( openglGPUDevice );
 
-		auto sysGLContext = GLCommandSystem::createSysGLContext( *openglGPUDevice, _targetSysGLSurface );
-		ts3DebugAssert( sysGLContext );
+		auto sysGLRenderContext = GLCommandSystem::createSysGLRenderContext( *openglGPUDevice, _targetSysGLSurface );
+		ts3DebugAssert( sysGLRenderContext );
 
-		_mainCommandList = createGPUAPIObject<GLCommandList>( *this, ECommandListType::DirectGraphics, sysGLContext );
+		_mainCommandList = createGPUAPIObject<GLCommandList>( *this, ECommandListType::DirectGraphics, sysGLRenderContext );
 
 		return true;
 	}
 
-	SysGLContextHandle GLCommandSystem::createSysGLContext( GLGPUDevice & pGLGPUDevice, SysGLSurfaceHandle pSysGLSurface )
+	SysGLRenderContextHandle GLCommandSystem::createSysGLRenderContext( GLGPUDevice & pGLGPUDevice, SysGLSurfaceHandle pSysGLSurface )
 	{
-		SysGLContextHandle sysGLContext = nullptr;
+		SysGLRenderContextHandle sysGLRenderContext = nullptr;
 
 		try
 		{
-			SysGLContextCreateInfo contextCreateInfo;
+			SysGLRenderContextCreateInfo contextCreateInfo;
 			contextCreateInfo.shareContext = nullptr;
 			contextCreateInfo.flags.set( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
 
@@ -130,9 +130,9 @@ namespace ts3::gpuapi
 				contextCreateInfo.flags.set( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT );
 			}
 
-			auto sysGLContext = pSysGLSurface->mGLSubsystem->createRenderContext( *pSysGLSurface, contextCreateInfo );
+			auto sysGLRenderContext = pSysGLSurface->mGLCoreDevice->createRenderContext( *pSysGLSurface, contextCreateInfo );
 
-			return sysGLContext;
+			return sysGLRenderContext;
 		}
 		catch ( ... )
 		{

@@ -19,7 +19,7 @@ namespace ts3::gpuapi
 
 	GLGPUDevice::GLGPUDevice( GLGPUDriver & pGLGPUDriver )
 	: GPUDevice( pGLGPUDriver )
-	, mSysGLSubsystem( pGLGPUDriver.mSysGLSubsystem )
+	, mSysGLCoreDevice( pGLGPUDriver.mSysGLCoreDevice )
 	{}
 
 	GLGPUDevice::~GLGPUDevice() = default;

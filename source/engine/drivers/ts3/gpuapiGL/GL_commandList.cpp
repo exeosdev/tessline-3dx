@@ -19,9 +19,9 @@
 namespace ts3::gpuapi
 {
 
-	GLCommandList::GLCommandList( GLCommandSystem & pGLCommandSystem, ECommandListType pListType, SysGLContextHandle pSysGLContext )
+	GLCommandList::GLCommandList( GLCommandSystem & pGLCommandSystem, ECommandListType pListType, SysGLRenderContextHandle pSysGLRenderContext )
 	: CommandList( pGLCommandSystem, pListType )
-	, mSysGLContext( pSysGLContext )
+	, mSysGLRenderContext( pSysGLRenderContext )
 	, _stateController( mGPUDevice.queryInterface<GLGPUDevice>()->getDescriptorCache() )
 	{}
 

@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_EVENT_OBJECT_H__
 #define __TS3_SYSTEM_EVENT_OBJECT_H__
 
-#include "eventTypesDef.h"
+#include "eventTypes.h"
 
 namespace ts3
 {

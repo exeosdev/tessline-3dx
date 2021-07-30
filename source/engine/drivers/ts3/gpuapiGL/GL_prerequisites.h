@@ -64,7 +64,7 @@ namespace ts3::gpuapi
 	ts3DeclareClassHandle( GLGPUDriver );
 	ts3DeclareClassHandle( GLPresentationLayer );
 
-	struct GLContextSpecification
+	struct GLRenderContextSpecification
 	{
 		Version apiVersion;
 		ESysGLAPIProfile targetProfile;

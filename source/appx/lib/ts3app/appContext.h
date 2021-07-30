@@ -9,7 +9,7 @@ namespace ts3
     
     struct SysPlatformNativeData;
     struct SysGLSurfaceNativeData;
-    struct SysGLContextNativeData;
+    struct SysGLRenderContextNativeData;
 
     enum AppFeatureFlags : uint32
     {

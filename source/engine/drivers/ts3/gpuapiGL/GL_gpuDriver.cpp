@@ -7,23 +7,23 @@
 namespace ts3::gpuapi
 {
 
-	GLGPUDriver::GLGPUDriver( SysGLSubsystemHandle pSysGLSubsystem )
-	: GPUDriver( pSysGLSubsystem->mSysContext )
-	, mSysGLSubsystem( std::move( pSysGLSubsystem ) )
+	GLGPUDriver::GLGPUDriver( SysGLCoreDeviceHandle pSysGLCoreDevice )
+	: GPUDriver( pSysGLCoreDevice->mSysContext )
+	, mSysGLCoreDevice( std::move( pSysGLCoreDevice ) )
 	{ }
 
 	GLGPUDriver::~GLGPUDriver() = default;
 
-	SysGLSubsystemHandle GLGPUDriver::initializeSysGLSubsystem( SysContextHandle pSysContext )
+	SysGLCoreDeviceHandle GLGPUDriver::initializeSysGLCoreDevice( SysContextHandle pSysContext )
 	{
 		try
 		{
 			auto sysDisplayManager = SysDisplayManager::create( pSysContext );
-			auto sysGLSubsystem = SysGLSubsystem::create( sysDisplayManager );
+			auto sysGLCoreDevice = SysGLCoreDevice::create( sysDisplayManager );
 
-			sysGLSubsystem->initializePlatform();
+			sysGLCoreDevice->initializePlatform();
 
-			return sysGLSubsystem;
+			return sysGLCoreDevice;
 		}
 		catch ( ... )
 		{}

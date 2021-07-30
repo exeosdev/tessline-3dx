@@ -7,7 +7,7 @@
 namespace ts3
 {
 
-    struct SysX11WindowNativeData
+    struct SysWindowNativeData
     {
         Display * display = nullptr;
         Window xWindow = XID_None;
@@ -24,6 +24,8 @@ namespace ts3
         Atom wmpDeleteWindow = -1;
         bool fullscreenMode = false;
     };
+
+    using SysX11WindowNativeData = SysWindowNativeData;
 
 	void sysX11CreateWindow( SysX11WindowNativeData & pWindowNativeData, const SysX11WindowCreateInfo & pCreateInfo );
 	void sysX11UpdateNewWindowState( SysX11WindowNativeData & pWindowNativeData, const SysX11WindowCreateInfo & pCreateInfo );

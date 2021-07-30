@@ -6,8 +6,8 @@
 namespace ts3::gpuapi
 {
 
-	GLES3GPUDriver::GLES3GPUDriver( ts3::SysGfxGLSubsystem * pExfGLSubsystem )
-	: GLGPUDriver( pExfGLSubsystem )
+	GLES3GPUDriver::GLES3GPUDriver( ts3::SysGfxGLCoreDevice * pExfGLCoreDevice )
+	: GLGPUDriver( pExfGLCoreDevice )
 	{ }
 
 	GLES3GPUDriver::~GLES3GPUDriver()
@@ -15,12 +15,12 @@ namespace ts3::gpuapi
 
 	GLES3GPUDriverHandle GLES3GPUDriver::create( const GLES3GPUDriverCreateInfo & pCreateInfo )
 	{
-		auto * exfGLSubsystem = initializeExfGLSubsystem( pCreateInfo.exfSystemContext );
-		if( exfGLSubsystem == nullptr )
+		auto * exfGLCoreDevice = initializeExfGLCoreDevice( pCreateInfo.exfSystemContext );
+		if( exfGLCoreDevice == nullptr )
 		{
 			return nullptr;
 		}
-		return createGPUAPIObject<GLES3GPUDriver>( exfGLSubsystem );
+		return createGPUAPIObject<GLES3GPUDriver>( exfGLCoreDevice );
 	}
 
 	GPUDeviceHandle GLES3GPUDriver::createDevice( const GPUDeviceCreateInfo & pCreateInfo )

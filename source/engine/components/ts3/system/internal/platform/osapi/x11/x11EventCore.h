@@ -17,8 +17,8 @@ namespace ts3
 		VWheelDown,
 		HWheelLeft,
 		HWheelRight,
-		Xbtn1,
-		Xbtn2
+		XBT1,
+		XBT2
 	};
 
 }

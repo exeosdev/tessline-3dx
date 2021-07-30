@@ -40,7 +40,7 @@ namespace ts3::gpuapi
 		GLCommandList * acquireCommandList( ECommandExecutionMode pCommandExecutionMode );
 		bool initializeMainCommandList();
 
-		static SysGLContextHandle createSysGLContext( GLGPUDevice & pGLGPUDevice, SysGLSurfaceHandle pSysGLSurface );
+		static SysGLRenderContextHandle createSysGLRenderContext( GLGPUDevice & pGLGPUDevice, SysGLSurfaceHandle pSysGLSurface );
 
 	protected:
 		SysGLSurfaceHandle _targetSysGLSurface;
