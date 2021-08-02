@@ -6,35 +6,35 @@
 namespace ts3
 {
 
-	SysDisplayManager::SysDisplayManager( SysContextHandle pSysContext ) noexcept
-	: SysBaseObject( pSysContext )
+	DisplayManager::DisplayManager( ContextHandle pContext ) noexcept
+	: BaseObject( pContext )
 	{}
 
-	SysDisplayManager::~SysDisplayManager() noexcept
+	DisplayManager::~DisplayManager() noexcept
 	{
 		_sysRelease();
 	}
 
-	SysDisplayManagerHandle SysDisplayManager::create( SysContextHandle pSysContext )
+	DisplayManagerHandle DisplayManager::create( ContextHandle pContext )
 	{
-		auto displayManager = sysCreateObject<SysDisplayManager>( pSysContext );
+		auto displayManager = sysCreateObject<DisplayManager>( pContext );
 		displayManager->_sysInitialize();
 		return displayManager;
 	}
 
 #if( TS3_SYSTEM_DISPLAY_DRIVER_SUPPORT_DXGI )
-	SysDisplayDriverHandle SysDisplayManager::createDisplayDriverDXGI( const SysDisplayDriverCreateInfoDXGI & pCreateInfo )
+	DisplayDriverHandle DisplayManager::createDisplayDriverDXGI( const DisplayDriverCreateInfoDXGI & pCreateInfo )
 	{
-		return SysDisplayDriverDXGI::create( getHandle<SysDisplayManager>(), pCreateInfo );
+		return DisplayDriverDXGI::create( getHandle<DisplayManager>(), pCreateInfo );
 	}
 #endif
 
-	SysDisplayDriverHandle SysDisplayManager::createDisplayDriverGeneric()
+	DisplayDriverHandle DisplayManager::createDisplayDriverGeneric()
 	{
-		return SysDisplayDriverGeneric::create( getHandle<SysDisplayManager>() );
+		return DisplayDriverGeneric::create( getHandle<DisplayManager>() );
 	}
 
-	bool SysDisplayManager::validateWindowGeometry( SysWindowGeometry & pWindowGeometry ) const
+	bool DisplayManager::validateWindowGeometry( WindowGeometry & pWindowGeometry ) const
 	{
 		auto originalPos = pWindowGeometry.position;
 		auto originalSize = pWindowGeometry.size;
@@ -44,7 +44,7 @@ namespace ts3
 		auto screenSize = queryDisplaySize();
 		auto minWindowSize = queryMinWindowSize();
 
-		if ( frameSize == cvSysWindowSizeMax )
+		if ( frameSize == cvWindowSizeMax )
 		{
 			// Window size exceeds the screen size - clamp the size.
 			frameSize.x = screenSize.x;
@@ -84,28 +84,28 @@ namespace ts3
 		return ( framePos != originalPos ) || ( frameSize != originalSize );
 	}
 
-	SysDisplaySize SysDisplayManager::queryDisplaySize() const
+	DisplaySize DisplayManager::queryDisplaySize() const
 	{
-		SysDisplaySize displaySize;
+		DisplaySize displaySize;
 		_sysQueryDisplaySize( displaySize );
 		return displaySize;
 	}
 
-	SysDisplaySize SysDisplayManager::queryMinWindowSize() const
+	DisplaySize DisplayManager::queryMinWindowSize() const
 	{
-		SysDisplaySize minWindowSize;
+		DisplaySize minWindowSize;
 		_sysQueryMinWindowSize( minWindowSize );
 		return minWindowSize;
 	}
 
-	bool SysDisplayManager::checkDisplayDriverSupport( ESysDsmDisplayDriverType pDriverID )
+	bool DisplayManager::checkDisplayDriverSupport( EDsmDisplayDriverType pDriverID )
 	{
 		switch( pDriverID )
 		{
-			case ESysDsmDisplayDriverType::Generic:
+			case EDsmDisplayDriverType::Generic:
 				return true;
 
-			case ESysDsmDisplayDriverType::DXGI:
+			case EDsmDisplayDriverType::DXGI:
 				return TS3_SYSTEM_DISPLAY_DRIVER_SUPPORT_DXGI != 0;
 
 			default:
@@ -115,26 +115,26 @@ namespace ts3
 		return false;
 	}
 
-	ESysDsmDisplayDriverType SysDisplayManager::resolveDisplayDriverID( ESysDsmDisplayDriverType pDriverID )
+	EDsmDisplayDriverType DisplayManager::resolveDisplayDriverID( EDsmDisplayDriverType pDriverID )
 	{
-		ESysDsmDisplayDriverType resolvedDriverID = ESysDsmDisplayDriverType::Unknown;
+		EDsmDisplayDriverType resolvedDriverID = EDsmDisplayDriverType::Unknown;
 
-		if( pDriverID == ESysDsmDisplayDriverType::Generic )
+		if( pDriverID == EDsmDisplayDriverType::Generic )
 		{
-			resolvedDriverID = ESysDsmDisplayDriverType::Generic;
+			resolvedDriverID = EDsmDisplayDriverType::Generic;
 		}
-		else if( pDriverID == ESysDsmDisplayDriverType::Default )
+		else if( pDriverID == EDsmDisplayDriverType::Default )
 		{
 		#if( TS3_SYSTEM_DISPLAY_DRIVER_SUPPORT_DXGI )
-			resolvedDriverID = ESysDsmDisplayDriverType::DXGI;
+			resolvedDriverID = EDsmDisplayDriverType::DXGI;
 		#else
-			resolvedDriverID = ESysDsmDisplayDriverType::Generic;
+			resolvedDriverID = EDsmDisplayDriverType::Generic;
 		#endif
 		}
 	#if( TS3_SYSTEM_DISPLAY_DRIVER_SUPPORT_DXGI )
-		else if( pDriverID == ESysDsmDisplayDriverType::DXGI )
+		else if( pDriverID == EDsmDisplayDriverType::DXGI )
 		{
-			resolvedDriverID = ESysDsmDisplayDriverType::DXGI;
+			resolvedDriverID = EDsmDisplayDriverType::DXGI;
 		}
 	#endif
 

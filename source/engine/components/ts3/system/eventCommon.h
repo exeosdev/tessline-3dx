@@ -14,52 +14,54 @@
 	( TS3_ENUM_EVENT_CODE_CONTROL_KEY | ( (uint32)( pBaseType ) << 16 ) | ( (uint32)( pCategory ) << 8 ) | (uint32)( pIndex ) )
 
 #define ExfEnumDeclareEventCodeAppActivity( pIndex ) \
-	ExfEnumDeclareEventCode( ESysEventBaseType::App, ESysEventCategory::AppActivity, pIndex )
+	ExfEnumDeclareEventCode( EEventBaseType::App, EEventCategory::AppActivity, pIndex )
 
 #define ExfEnumDeclareEventCodeInputGamepad( pIndex ) \
-	ExfEnumDeclareEventCode( ESysEventBaseType::Input, ESysEventCategory::InputGamepad, pIndex )
+	ExfEnumDeclareEventCode( EEventBaseType::Input, EEventCategory::InputGamepad, pIndex )
 
 #define ExfEnumDeclareEventCodeInputKeyboard( pIndex ) \
-	ExfEnumDeclareEventCode( ESysEventBaseType::Input, ESysEventCategory::InputKeyboard, pIndex )
+	ExfEnumDeclareEventCode( EEventBaseType::Input, EEventCategory::InputKeyboard, pIndex )
 
 #define ExfEnumDeclareEventCodeInputMouse( pIndex ) \
-	ExfEnumDeclareEventCode( ESysEventBaseType::Input, ESysEventCategory::InputMouse, pIndex )
+	ExfEnumDeclareEventCode( EEventBaseType::Input, EEventCategory::InputMouse, pIndex )
 
 #define ExfEnumDeclareEventCodeInputTouch( pIndex ) \
-	ExfEnumDeclareEventCode( ESysEventBaseType::Input, ESysEventCategory::InputTouch, pIndex )
+	ExfEnumDeclareEventCode( EEventBaseType::Input, EEventCategory::InputTouch, pIndex )
 
 #define ExfEnumDeclareEventCodeWindowUpdate( pIndex ) \
-	ExfEnumDeclareEventCode( ESysEventBaseType::Window, ESysEventCategory::WindowUpdate, pIndex )
+	ExfEnumDeclareEventCode( EEventBaseType::Window, EEventCategory::WindowUpdate, pIndex )
 
 #define ExfEnumGetEventCodeBaseType( pEventCode ) \
-	(ESysEventBaseType)( ( ( sys_event_code_value_t )( pEventCode ) & TS3_ENUM_EVENT_CODE_BASE_TYPE_MASK ) >> 16 )
+	(EEventBaseType)( ( ( event_code_value_t )( pEventCode ) & TS3_ENUM_EVENT_CODE_BASE_TYPE_MASK ) >> 16 )
 
 #define ExfEnumGetEventCodeCategory( pEventCode ) \
-	( ESysEventCategory )( ( ( sys_event_code_value_t )( pEventCode ) & TS3_ENUM_EVENT_CODE_CATEGORY_MASK ) >> 8 )
+	( EEventCategory )( ( ( event_code_value_t )( pEventCode ) & TS3_ENUM_EVENT_CODE_CATEGORY_MASK ) >> 8 )
 
 #define ExfEnumGetEventCodeIndex( pEventCode ) \
-	( ESysEventCodeIndex )( ( sys_event_code_value_t )( pEventCode ) & TS3_ENUM_EVENT_CODE_INDEX_MASK )
+	( EEventCodeIndex )( ( event_code_value_t )( pEventCode ) & TS3_ENUM_EVENT_CODE_INDEX_MASK )
 
 #define ExfEnumValidateEventCode( pEventCode ) \
-	( ( ( sys_event_code_value_t )( pEventCode ) & TS3_ENUM_EVENT_CODE_CONTROL_KEY ) == TS3_ENUM_EVENT_CODE_CONTROL_KEY )
+	( ( ( event_code_value_t )( pEventCode ) & TS3_ENUM_EVENT_CODE_CONTROL_KEY ) == TS3_ENUM_EVENT_CODE_CONTROL_KEY )
 
 namespace ts3
 {
+namespace system
+{
 
-	ts3DeclareSysHandle( SysEventSource );
-	ts3DeclareSysHandle( SysEventController );
-	ts3DeclareSysHandle( SysEventDispatcher );
+	ts3DeclareHandle( EventSource );
+	ts3DeclareHandle( EventController );
+	ts3DeclareHandle( EventDispatcher );
 
-	struct SysEvent;
-
-	/// @brief
-	using SysEventHandler = std::function<bool( SysEvent & )>;
-
-	/// @brief
-	using sys_event_code_value_t = uint32;
+	struct Event;
 
 	/// @brief
-	enum class ESysEventBaseType : sys_event_code_value_t
+	using EventHandler = std::function<bool( Event & )>;
+
+	/// @brief
+	using event_code_value_t = uint32;
+
+	/// @brief
+	enum class EEventBaseType : event_code_value_t
 	{
 		Undefined,
 		App,
@@ -69,7 +71,7 @@ namespace ts3
 	};
 
 	/// @brief
-	enum class ESysEventCategory : sys_event_code_value_t
+	enum class EEventCategory : event_code_value_t
 	{
 		Undefined,
 		AppActivity,
@@ -82,7 +84,7 @@ namespace ts3
 	};
 
 	/// @brief
-	enum class ESysEventCodeIndex : sys_event_code_value_t
+	enum class EEventCodeIndex : event_code_value_t
 	{
 		Undefined,
 		AppActivityDisplayReady,
@@ -111,71 +113,72 @@ namespace ts3
 		_Reserved
 	};
 
-	inline constexpr auto cvSysEnumEventBaseTypeCount = static_cast< size_t >( ESysEventBaseType::_Reserved );
-	inline constexpr auto cvSysEnumEventCategoryCount = static_cast< size_t >( ESysEventCategory::_Reserved );
-	inline constexpr auto cvSysEnumEventCodeIndexCount = static_cast< size_t >( ESysEventCodeIndex::_Reserved );
+	inline constexpr auto cvEnumEventBaseTypeCount = static_cast< size_t >( EEventBaseType::_Reserved );
+	inline constexpr auto cvEnumEventCategoryCount = static_cast< size_t >( EEventCategory::_Reserved );
+	inline constexpr auto cvEnumEventCodeIndexCount = static_cast< size_t >( EEventCodeIndex::_Reserved );
 
 	/// @brief
-	enum SysEventControllerConfigFlagBits : uint32
+	enum EventControllerConfigFlagBits : uint32
 	{
-		E_SYS_EVENT_CONTROLLER_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT = 0x0001,
-		E_SYS_EVENT_CONTROLLER_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT = 0x0002 | E_SYS_EVENT_CONTROLLER_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT,
-		E_SYS_EVENT_CONTROLLER_CONFIG_FLAGS_DEFAULT = E_SYS_EVENT_CONTROLLER_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT
+		E_EVENT_CONTROLLER_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT = 0x0001,
+		E_EVENT_CONTROLLER_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT = 0x0002 | E_EVENT_CONTROLLER_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT,
+		E_EVENT_CONTROLLER_CONFIG_FLAGS_DEFAULT = E_EVENT_CONTROLLER_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT
 	};
 
 	/// @brief
-	struct SysEventControllerConfig
+	struct EventControllerConfig
 	{
 		//
-		Bitmask<SysEventControllerConfigFlagBits> flags = E_SYS_EVENT_CONTROLLER_CONFIG_FLAGS_DEFAULT;
+		Bitmask<EventControllerConfigFlagBits> flags = E_EVENT_CONTROLLER_CONFIG_FLAGS_DEFAULT;
 		//
-		sys_event_code_value_t mouseClickSequenceTimeoutMs = 100;
+		event_code_value_t mouseClickSequenceTimeoutMs = 100;
 	};
 
-	enum ESysEventCode : sys_event_code_value_t
+	enum EEventCode : event_code_value_t
 	{
-		E_SYS_EVENT_CODE_UNDEFINED = 0,
-		E_SYS_EVENT_CODE_APP_ACTIVITY_DISPLAY_READY = ExfEnumDeclareEventCodeAppActivity( ESysEventCodeIndex::AppActivityDisplayReady ),
-		E_SYS_EVENT_CODE_APP_ACTIVITY_FOCUS_GAINED = ExfEnumDeclareEventCodeAppActivity( ESysEventCodeIndex::AppActivityFocusGained ),
-		E_SYS_EVENT_CODE_APP_ACTIVITY_FOCUS_LOST = ExfEnumDeclareEventCodeAppActivity( ESysEventCodeIndex::AppActivityFocusLost ),
-		E_SYS_EVENT_CODE_APP_ACTIVITY_PAUSE = ExfEnumDeclareEventCodeAppActivity( ESysEventCodeIndex::AppActivityPause ),
-		E_SYS_EVENT_CODE_APP_ACTIVITY_RESUME = ExfEnumDeclareEventCodeAppActivity( ESysEventCodeIndex::AppActivityResume ),
-		E_SYS_EVENT_CODE_APP_ACTIVITY_START = ExfEnumDeclareEventCodeAppActivity( ESysEventCodeIndex::AppActivityStart ),
-		E_SYS_EVENT_CODE_APP_ACTIVITY_STOP = ExfEnumDeclareEventCodeAppActivity( ESysEventCodeIndex::AppActivityStop ),
-		E_SYS_EVENT_CODE_APP_ACTIVITY_QUIT = ExfEnumDeclareEventCodeAppActivity( ESysEventCodeIndex::AppActivityQuit ),
-		E_SYS_EVENT_CODE_APP_ACTIVITY_TERMINATE = ExfEnumDeclareEventCodeAppActivity( ESysEventCodeIndex::AppActivityTerminate ),
-		E_SYS_EVENT_CODE_INPUT_GAMEPAD_AXIS = ExfEnumDeclareEventCodeInputGamepad( ESysEventCodeIndex::InputGamepadAxis ),
-		E_SYS_EVENT_CODE_INPUT_GAMEPAD_BUTTON = ExfEnumDeclareEventCodeInputGamepad( ESysEventCodeIndex::InputGamepadButton ),
-		E_SYS_EVENT_CODE_INPUT_GAMEPAD_STATE = ExfEnumDeclareEventCodeInputGamepad( ESysEventCodeIndex::InputGamepadState ),
-		E_SYS_EVENT_CODE_INPUT_KEYBOARD_KEY = ExfEnumDeclareEventCodeInputKeyboard( ESysEventCodeIndex::InputKeyboardKey ),
-		E_SYS_EVENT_CODE_INPUT_MOUSE_BUTTON = ExfEnumDeclareEventCodeInputMouse( ESysEventCodeIndex::InputMouseButton ),
-		E_SYS_EVENT_CODE_INPUT_MOUSE_MOVE = ExfEnumDeclareEventCodeInputMouse( ESysEventCodeIndex::InputMouseMove ),
-		E_SYS_EVENT_CODE_INPUT_MOUSE_SCROLL = ExfEnumDeclareEventCodeInputMouse( ESysEventCodeIndex::InputMouseScroll ),
-		E_SYS_EVENT_CODE_INPUT_TOUCH_DOWN = ExfEnumDeclareEventCodeInputTouch( ESysEventCodeIndex::InputTouchDown ),
-		E_SYS_EVENT_CODE_INPUT_TOUCH_MOVE = ExfEnumDeclareEventCodeInputTouch( ESysEventCodeIndex::InputTouchMove ),
-		E_SYS_EVENT_CODE_INPUT_TOUCH_UP = ExfEnumDeclareEventCodeInputTouch( ESysEventCodeIndex::InputTouchUp ),
-		E_SYS_EVENT_CODE_WINDOW_UPDATE_CLOSE = ExfEnumDeclareEventCodeWindowUpdate( ESysEventCodeIndex::WindowUpdateClose ),
-		E_SYS_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN = ExfEnumDeclareEventCodeWindowUpdate( ESysEventCodeIndex::WindowUpdateFullscreen ),
-		E_SYS_EVENT_CODE_WINDOW_UPDATE_RESIZE = ExfEnumDeclareEventCodeWindowUpdate( ESysEventCodeIndex::WindowUpdateResize ),
-		E_SYS_EVENT_CODE_WINDOW_UPDATE_VISIBILITY = ExfEnumDeclareEventCodeWindowUpdate( ESysEventCodeIndex::WindowUpdateVisibility )
+		E_EVENT_CODE_UNDEFINED = 0,
+		E_EVENT_CODE_APP_ACTIVITY_DISPLAY_READY = ExfEnumDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityDisplayReady ),
+		E_EVENT_CODE_APP_ACTIVITY_FOCUS_GAINED = ExfEnumDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityFocusGained ),
+		E_EVENT_CODE_APP_ACTIVITY_FOCUS_LOST = ExfEnumDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityFocusLost ),
+		E_EVENT_CODE_APP_ACTIVITY_PAUSE = ExfEnumDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityPause ),
+		E_EVENT_CODE_APP_ACTIVITY_RESUME = ExfEnumDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityResume ),
+		E_EVENT_CODE_APP_ACTIVITY_START = ExfEnumDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityStart ),
+		E_EVENT_CODE_APP_ACTIVITY_STOP = ExfEnumDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityStop ),
+		E_EVENT_CODE_APP_ACTIVITY_QUIT = ExfEnumDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityQuit ),
+		E_EVENT_CODE_APP_ACTIVITY_TERMINATE = ExfEnumDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityTerminate ),
+		E_EVENT_CODE_INPUT_GAMEPAD_AXIS = ExfEnumDeclareEventCodeInputGamepad( EEventCodeIndex::InputGamepadAxis ),
+		E_EVENT_CODE_INPUT_GAMEPAD_BUTTON = ExfEnumDeclareEventCodeInputGamepad( EEventCodeIndex::InputGamepadButton ),
+		E_EVENT_CODE_INPUT_GAMEPAD_STATE = ExfEnumDeclareEventCodeInputGamepad( EEventCodeIndex::InputGamepadState ),
+		E_EVENT_CODE_INPUT_KEYBOARD_KEY = ExfEnumDeclareEventCodeInputKeyboard( EEventCodeIndex::InputKeyboardKey ),
+		E_EVENT_CODE_INPUT_MOUSE_BUTTON = ExfEnumDeclareEventCodeInputMouse( EEventCodeIndex::InputMouseButton ),
+		E_EVENT_CODE_INPUT_MOUSE_MOVE = ExfEnumDeclareEventCodeInputMouse( EEventCodeIndex::InputMouseMove ),
+		E_EVENT_CODE_INPUT_MOUSE_SCROLL = ExfEnumDeclareEventCodeInputMouse( EEventCodeIndex::InputMouseScroll ),
+		E_EVENT_CODE_INPUT_TOUCH_DOWN = ExfEnumDeclareEventCodeInputTouch( EEventCodeIndex::InputTouchDown ),
+		E_EVENT_CODE_INPUT_TOUCH_MOVE = ExfEnumDeclareEventCodeInputTouch( EEventCodeIndex::InputTouchMove ),
+		E_EVENT_CODE_INPUT_TOUCH_UP = ExfEnumDeclareEventCodeInputTouch( EEventCodeIndex::InputTouchUp ),
+		E_EVENT_CODE_WINDOW_UPDATE_CLOSE = ExfEnumDeclareEventCodeWindowUpdate( EEventCodeIndex::WindowUpdateClose ),
+		E_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN = ExfEnumDeclareEventCodeWindowUpdate( EEventCodeIndex::WindowUpdateFullscreen ),
+		E_EVENT_CODE_WINDOW_UPDATE_RESIZE = ExfEnumDeclareEventCodeWindowUpdate( EEventCodeIndex::WindowUpdateResize ),
+		E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY = ExfEnumDeclareEventCodeWindowUpdate( EEventCodeIndex::WindowUpdateVisibility )
 	};
 
 	/// @brief
-	struct SysEvtBase
+	struct EvtBase
 	{
 	public:
 		//
-		sys_event_code_value_t eventCode;
+		event_code_value_t eventCode;
 		//
-		sys_perf_counter_value_t timeStamp;
+		perf_counter_value_t timeStamp;
 
 	public:
-		explicit SysEvtBase( sys_event_code_value_t pEventCode )
+		explicit EvtBase( event_code_value_t pEventCode )
 		: eventCode( pEventCode )
 		, timeStamp( 0 )
 		{}
 	};
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_EVENT_DEFS_H__

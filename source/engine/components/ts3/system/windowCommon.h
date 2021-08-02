@@ -7,29 +7,31 @@
 
 namespace ts3
 {
+namespace system
+{
 
-	ts3DeclareSysHandle( SysWindow );
-	ts3DeclareSysHandle( SysWindowManager );
+	ts3DeclareHandle( Window );
+	ts3DeclareHandle( WindowManager );
 
-	using SysWindowPos = math::Pos2i;
-	using SysWindowSize = math::Size2u;
-	using SysWindowNativeHandle = uint64;
+	using WindowPos = math::Pos2i;
+	using WindowSize = math::Size2u;
+	using WindowNativeHandle = uint64;
 
 	/// @brief Predefined window position: auto. When used, window is spawned centered.
-	constexpr SysWindowPos cvSysWindowPositionAuto { -1, -1 };
+	constexpr WindowPos cvWindowPositionAuto { -1, -1 };
 
 	/// @brief Predefined window position: origin. When used, window is spawned at the origin point (0,0).
-	constexpr SysWindowPos cvSysWindowPositionOrigin { 0, 0 };
+	constexpr WindowPos cvWindowPositionOrigin { 0, 0 };
 
 	/// @brief Predefined window size: auto. When used, window size is selected by the implementation.
-	constexpr SysWindowSize cvSysWindowSizeAuto { 0, 0 };
+	constexpr WindowSize cvWindowSizeAuto { 0, 0 };
 
 	/// @brief Predefined window size: max. When used, window size is the maximum size allowed by the system.
 	/// Max size usually means the current size of the screen, but selected frame style may affect this (Win32).
-	constexpr SysWindowSize cvSysWindowSizeMax { cxUint32Max, cxUint32Max };
+	constexpr WindowSize cvWindowSizeMax { cxUint32Max, cxUint32Max };
 
 	/// @brief Window styles supported by the system.
-	enum class SysWindowFrameStyle : enum_default_value_t
+	enum class WindowFrameStyle : enum_default_value_t
 	{
 		// Title-bar only window, no system menu, non-resizeable, no close or minimize button.
 		Caption,
@@ -44,20 +46,21 @@ namespace ts3
 	};
 
 	/// @brief
-	struct SysWindowGeometry
+	struct WindowGeometry
 	{
-		SysWindowPos position;
-		SysWindowSize size;
-		SysWindowFrameStyle frameStyle;
+		WindowPos position;
+		WindowSize size;
+		WindowFrameStyle frameStyle;
 	};
 
 	/// @brief
-	struct SysWindowProperties
+	struct WindowProperties
 	{
-		SysWindowGeometry geometry;
+		WindowGeometry geometry;
 		std::string title;
 	};
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_WINDOW_DEFS_H__

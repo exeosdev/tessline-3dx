@@ -8,35 +8,38 @@
 
 namespace ts3
 {
+namespace system
+{
 
-	struct SysGLSurfaceNativeData : public SysWindowNativeData
+	struct GfxGLSurfaceNativeData : public WindowNativeData
 	{
 		GLXFBConfig fbConfig = nullptr;
 		XVisualInfo * visualInfo = nullptr;
 	};
 
-	struct SysGLRenderContextNativeData
+	struct GfxGLRenderContextNativeData
 	{
 		Display * display = nullptr;
 		GLXDrawable targetSurface = XID_None;
 		GLXContext contextHandle = nullptr;
 	};
 
-	struct SysGLDriverNativeData
+	struct GfxGLDriverNativeData
 	{
 		struct InitState
 		{
-            SysX11GLSurfaceNativeData surfaceData;
-            SysX11GLRenderContextNativeData contextData;
+            X11GLSurfaceNativeData surfaceData;
+            X11GLRenderContextNativeData contextData;
 		};
 
 		InitState * initState = nullptr;
 	};
 
-    using SysX11GLDriverNativeData = SysGLDriverNativeData;
-    using SysX11GLSurfaceNativeData = SysGLSurfaceNativeData;
-    using SysX11GLRenderContextNativeData = SysGLRenderContextNativeData;
+    using X11GLDriverNativeData = GfxGLDriverNativeData;
+    using X11GLSurfaceNativeData = GfxGLSurfaceNativeData;
+    using X11GLRenderContextNativeData = GfxGLRenderContextNativeData;
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_X11_GFX_OPENGL_H__

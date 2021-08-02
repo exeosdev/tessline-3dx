@@ -5,24 +5,24 @@
 namespace ts3
 {
 
-	void SysDisplayManager::_sysInitialize()
+	void DisplayManager::_sysInitialize()
 	{}
 
-	void SysDisplayManager::_sysRelease() noexcept
+	void DisplayManager::_sysRelease() noexcept
 	{}
 
-	void SysDisplayManager::_sysQueryDisplaySize( SysDisplaySize & pDisplaySize ) const
+	void DisplayManager::_sysQueryDisplaySize( DisplaySize & pDisplaySize ) const
 	{
-		auto screenWidth = ::GetSystemMetrics( SM_CXSCREEN );
-		auto screenHeight = ::GetSystemMetrics( SM_CYSCREEN );
+		auto screenWidth = ::GettemMetrics( SM_CXSCREEN );
+		auto screenHeight = ::GettemMetrics( SM_CYSCREEN );
 		pDisplaySize.x = static_cast<uint32>( screenWidth );
 		pDisplaySize.y = static_cast<uint32>( screenHeight );
 	}
 
-	void SysDisplayManager::_sysQueryMinWindowSize( SysDisplaySize & pMinWindowSize ) const
+	void DisplayManager::_sysQueryMinWindowSize( DisplaySize & pMinWindowSize ) const
 	{
-		auto minWindowWidth = ::GetSystemMetrics( SM_CXMIN );
-		auto minWindowHeight = ::GetSystemMetrics( SM_CYMIN );
+		auto minWindowWidth = ::GettemMetrics( SM_CXMIN );
+		auto minWindowHeight = ::GettemMetrics( SM_CYMIN );
 		pMinWindowSize.x = static_cast<uint32>( minWindowWidth );
 		pMinWindowSize.y = static_cast<uint32>( minWindowHeight );
 	}

@@ -4,10 +4,10 @@
 namespace ts3
 {
 
-	void SysContext::_sysInitialize( const SysContextCreateInfo & pCreateInfo )
+	void Context::_sysInitialize( const ContextCreateInfo & pCreateInfo )
 	{}
 
-	void SysContext::_sysRelease() noexcept
+	void Context::_sysRelease() noexcept
 	{}
 
 }

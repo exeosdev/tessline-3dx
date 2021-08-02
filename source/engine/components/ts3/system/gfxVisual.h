@@ -7,8 +7,10 @@
 
 namespace ts3
 {
+namespace system
+{
 
-	enum class SysColorFormat : uint32
+	enum class GfxColorFormat : uint32
 	{
 		Unknown,
 		B8G8R8,
@@ -19,14 +21,14 @@ namespace ts3
 		R10G10B10A2
 	};
 
-	enum class SysColorSpace : uint32
+	enum class GfxColorSpace : uint32
 	{
 		Unknown,
 		Linear,
 		SRGB
 	};
 
-	enum class SysDepthStencilFormat : uint16
+	enum class GfxDepthStencilFormat : uint16
 	{
 		Unknown,
 		D16,
@@ -36,7 +38,7 @@ namespace ts3
 		D32FS8
 	};
 
-	enum class SysMSAAMode : uint16
+	enum class GfxMSAAMode : uint16
 	{
 		Unknown,
 		x1,
@@ -48,7 +50,7 @@ namespace ts3
 	};
 
 	/// @brief Flags representing attributes (properties) of visuals.
-	enum SysVisualAttribFlags : uint32
+	enum GfxVisualAttribFlags : uint32
 	{
 		// Note: some flags are mutually exclusive. If both are set (e.g. inside visual
 		// configuration for a surface), they are chosen by the following priority rules:
@@ -56,72 +58,73 @@ namespace ts3
 		// - If StereoDisplay and MonoDisplay are both set, MonoDisplay is used. If none is set, MonoDisplay is used.
 
 		//
-		SYS_VISUAL_ATTRIB_FLAG_LEGACY_BIT = 0x0001,
+		SYS_GFX_VISUAL_ATTRIB_FLAG_LEGACY_BIT = 0x0001,
 		// Visual supports double buffering.
-		SYS_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT = 0x0100,
+		SYS_GFX_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT = 0x0100,
 		// Visual does not support double buffering.
-		SYS_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT = 0x0200,
+		SYS_GFX_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT = 0x0200,
 		// Visual is sRGB-capable.
-		SYS_VISUAL_ATTRIB_FLAG_SRGB_CAPABLE_BIT = 0x1000,
+		SYS_GFX_VISUAL_ATTRIB_FLAG_SRGB_CAPABLE_BIT = 0x1000,
 		// Visual has the stereoscopic display mode.
-		SYS_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT = 0x0400,
+		SYS_GFX_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT = 0x0400,
 		// Visual has the classic, monoscopic display mode.
-		SYS_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT = 0x0800,
+		SYS_GFX_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT = 0x0800,
 	};
 
-	struct SysColorDesc
+	struct GfxColorDesc
 	{
 		math::RGBAColorU8 rgba;
 		uint32 size = 0;
-		SysColorSpace colorSpace = SysColorSpace::Linear;
+		GfxColorSpace colorSpace = GfxColorSpace::Linear;
 	};
 
-	struct SysDepthStencilDesc
+	struct GfxDepthStencilDesc
 	{
 		uint8 depthBufferSize;
 		uint8 stencilBufferSize;
 	};
 
-	struct SysMSAADesc
+	struct GfxMSAADesc
 	{
 		uint8 bufferCount;
 		uint8 quality;
 	};
 
 	/// @brief
-	struct SysVisualConfig
+	struct GfxVisualConfig
 	{
 		// Struct representation of the color format.
-		SysColorDesc colorDesc;
+		GfxColorDesc colorDesc;
 		// Enum ID of the color format.
-		SysColorFormat colorFormat;
+		GfxColorFormat colorFormat;
 		// Struct representation of a depth/stencil buffer description.
-		SysDepthStencilDesc depthStencilDesc;
+		GfxDepthStencilDesc depthStencilDesc;
 		// Enum ID of the depth/stencil buffer format.
-		SysDepthStencilFormat depthStencilFormat;
+		GfxDepthStencilFormat depthStencilFormat;
 		// Struct representation of the MSAA mode.
-		SysMSAADesc msaaDesc;
+		GfxMSAADesc msaaDesc;
 		// Enum ID of the MSAA mode.
-		SysMSAAMode msaaMode;
+		GfxMSAAMode msaaMode;
 		// Additional visual config flags.
-		Bitmask<SysVisualAttribFlags> flags;
+		Bitmask<GfxVisualAttribFlags> flags;
 	};
 
     /// @brief Returns a ColorDesc structure representation of a specified ColorFormat.
-	TS3_SYSTEM_API const SysColorDesc & sysDsmGetDescForColorFormat( SysColorFormat pFormat );
+	TS3_SYSTEM_API const GfxColorDesc & sysGfxGetDescForColorFormat( GfxColorFormat pFormat );
 
     /// @brief Returns a DepthStencilDesc structure representation of a specified DepthStencilFormat.
-	TS3_SYSTEM_API const SysDepthStencilDesc & sysDsmGetDescForDepthStencilFormat( SysDepthStencilFormat pFormat );
+	TS3_SYSTEM_API const GfxDepthStencilDesc & sysGfxGetDescForDepthStencilFormat( GfxDepthStencilFormat pFormat );
 
     /// @brief Returns an MSAADesc structure representation of a specified MSAAMode.
-	TS3_SYSTEM_API const SysMSAADesc & sysDsmGetDescForMSAAMode( SysMSAAMode pMode );
+	TS3_SYSTEM_API const GfxMSAADesc & sysGfxGetDescForMSAAMode( GfxMSAAMode pMode );
 
     /// @brief Returns a ColorDesc structure representation of a specified ColorFormat.
-	TS3_SYSTEM_API const SysVisualConfig & sysDsmGetDefaultVisualConfigForSystemWindow();
+	TS3_SYSTEM_API const GfxVisualConfig & sysGfxGetDefaultVisualConfigFortemWindow();
 
     ///
-	TS3_SYSTEM_API bool dsmCheckColorFormatCompatibility( SysColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha );
+	TS3_SYSTEM_API bool sysGfxCheckColorFormatCompatibility( GfxColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha );
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_VISUAL_H__

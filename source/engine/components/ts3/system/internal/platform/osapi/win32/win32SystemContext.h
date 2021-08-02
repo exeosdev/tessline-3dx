@@ -7,11 +7,11 @@
 namespace ts3
 {
 
-	struct SysContextNativeData
+	struct ContextNativeData
 	{
 	};
 
-	struct SysContextNativeCreateInfo
+	struct ContextNativeCreateInfo
 	{
 	};
 

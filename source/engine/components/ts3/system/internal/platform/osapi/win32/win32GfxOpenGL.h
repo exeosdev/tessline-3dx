@@ -2,33 +2,33 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_GFX_OPENGL_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_GFX_OPENGL_H__
 
-#include "win32WindowSystem.h"
+#include "win32Windowtem.h"
 #include <GL/wglew.h>
 
 namespace ts3
 {
 
-	inline constexpr int cvSysWin32InvalidPixelFormatIndex = -1;
-	inline constexpr size_t cvSysWin32MaxWGLPixelFormatsNum = 256u;
-	inline constexpr size_t cvSysWin32MaxWGLPixelFormatAttributesNum = 64u;
+	inline constexpr int cvWin32InvalidPixelFormatIndex = -1;
+	inline constexpr size_t cvWin32MaxWGLPixelFormatsNum = 256u;
+	inline constexpr size_t cvWin32MaxWGLPixelFormatAttributesNum = 64u;
 
-	struct SysGLSurfaceNativeData : public SysWindowNativeData
+	struct GfxGLSurfaceNativeData : public WindowNativeData
 	{
 		HDC surfaceHandle;
 		int pixelFormatIndex;
 	};
 
-	struct SysGLRenderContextNativeData
+	struct GfxGLRenderContextNativeData
 	{
 		HGLRC contextHandle;
 	};
 
-	struct SysGLDriverNativeData
+	struct GfxGLDriverNativeData
 	{
 		struct InitState
 		{
-			SysGLSurfaceNativeData surfaceData;
-			SysGLRenderContextNativeData contextData;
+			GfxGLSurfaceNativeData surfaceData;
+			GfxGLRenderContextNativeData contextData;
 		};
 
 		InitState initState;

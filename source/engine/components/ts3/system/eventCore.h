@@ -16,64 +16,66 @@
 
 namespace ts3
 {
+namespace system
+{
 
 	// Represents invalid mouse position. Used as a default value for last position registered.
-	constexpr math::Vec2i32 cvSysMousePosInvalid { cxInt32Max, cxInt32Max };
+	constexpr math::Vec2i32 cvMousePosInvalid { cxInt32Max, cxInt32Max };
 
-	enum ESysEventConfigFlags : uint32
+	enum EEventConfigFlags : uint32
 	{
-		E_SYS_EVENT_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT = 0x0001,
-		E_SYS_EVENT_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT = 0x0002 | E_SYS_EVENT_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT,
-		E_SYS_EVENT_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT = 0x1000
+		E_EVENT_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT = 0x0001,
+		E_EVENT_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT = 0x0002 | E_EVENT_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT,
+		E_EVENT_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT = 0x1000
 	};
 
-	struct SysEventInputState
+	struct EventInputState
 	{
 		//
-		SysContextNativeData * scNativeData = nullptr;
+		ContextNativeData * scNativeData = nullptr;
 		//
-		Bitmask<ESysEventConfigFlags> flags = 0u;
+		Bitmask<EEventConfigFlags> flags = 0u;
 		//
 		duration_value_t mouseClickSequenceTimeoutMs = 100;
 		// Current state of the keyboard.
-		SysKeyboardState keyboardState;
+		KeyboardState keyboardState;
 		// Last cursor position registered by the event system.
-		math::Vec2i32 mouseLastRegPos = cvSysMousePosInvalid;
+		math::Vec2i32 mouseLastRegPos = cvMousePosInvalid;
 		// State of the mouse buttons. Used for motion events on systems which do not have reliable states (X11).
-		Bitmask<SysMouseButtonFlagBits> mouseButtonStateMask = 0;
+		Bitmask<MouseButtonFlagBits> mouseButtonStateMask = 0;
 		// Last mouse button pressed. Used to detect multi-click sequences.
-		SysMouseButtonID mouseLastPressButton = SysMouseButtonID::Unknown;
+		MouseButtonID mouseLastPressButton = MouseButtonID::Unknown;
 		// Current sequence length, i.e. number of clicks of the same button in a row.
 		uint32 mouseClickSequenceLength = 1;
 		// Timestamp of last registered mouse button press.
-		sys_perf_counter_value_t mouseLastPressTimestamp = 0u;
+		perf_counter_value_t mouseLastPressTimestamp = 0u;
 	};
 
-	class SysEventSource
+	class EventSource
 	{
-		friend class SysEventController;
+		friend class EventController;
 
 	public:
-		SysEventSourceNativeData & mEvtSrcNativeData;
+		EventSourceNativeData & mEvtSrcNativeData;
 
-		explicit SysEventSource( SysEventSourceNativeData & pEvtSrcNativeData ) noexcept
+		explicit EventSource( EventSourceNativeData & pEvtSrcNativeData ) noexcept
 		: mEvtSrcNativeData( pEvtSrcNativeData )
 		{}
 	};
 
-	class SysEventController : public SysBaseObject
+	class EventController : public BaseObject
 	{
-		friend class SysEventDispatcher;
+		friend class EventDispatcher;
 
 	public:
-		explicit SysEventController( SysContextHandle pSysContext ) noexcept;
-		virtual ~SysEventController() noexcept;
+		explicit EventController( ContextHandle pContext ) noexcept;
+		virtual ~EventController() noexcept;
 
-		static SysEventControllerHandle create( SysContextHandle pSysContext );
+		static EventControllerHandle create( ContextHandle pContext );
 
-		SysEventDispatcherHandle createEventDispatcher();
+		EventDispatcherHandle createEventDispatcher();
 
-		void dispatchEvent( SysEvent & pEvent );
+		void dispatchEvent( Event & pEvent );
 
 		void processEvent();
 		void processQueue();
@@ -82,20 +84,20 @@ namespace ts3
 		void dispatchQueuedEvents();
 		void dispatchQueuedEventsWait();
 
-		void addEventSource( SysEventSource & pEventSource );
-		void removeEventSource( SysEventSource & pEventSource );
+		void addEventSource( EventSource & pEventSource );
+		void removeEventSource( EventSource & pEventSource );
 
-		void setActiveDispatcher( SysEventDispatcher & pDispatcher );
+		void setActiveDispatcher( EventDispatcher & pDispatcher );
 		void resetActiveDispatcher();
 
-		TS3_PCL_ATTR_NO_DISCARD SysEventDispatcher & getActiveDispatcher() const;
-		TS3_PCL_ATTR_NO_DISCARD SysEventDispatcher & getDefaultDispatcher() const;
+		TS3_PCL_ATTR_NO_DISCARD EventDispatcher & getActiveDispatcher() const;
+		TS3_PCL_ATTR_NO_DISCARD EventDispatcher & getDefaultDispatcher() const;
 
 	private:
 		void _sysInitialize();
 		void _sysRelease();
-		void _sysAddEventSource( SysEventSource & pEventSource );
-		void _sysRemoveEventSource( SysEventSource & pEventSource );
+		void _sysAddEventSource( EventSource & pEventSource );
+		void _sysRemoveEventSource( EventSource & pEventSource );
 		void _sysDispatchNextEvent();
 		void _sysDispatchNextEventWait();
 		void _sysDispatchQueuedEvents();
@@ -103,30 +105,30 @@ namespace ts3
 
 	private:
 		//
-		SysEventDispatcherHandle _defaultDispatcher;
+		EventDispatcherHandle _defaultDispatcher;
 		//
-		SysEventDispatcher * _activeDispatcher;
+		EventDispatcher * _activeDispatcher;
 	};
 
-	class SysEventDispatcher : public SysBaseObject
+	class EventDispatcher : public BaseObject
 	{
-		friend class SysEventController;
+		friend class EventController;
 
 	public:
-		SysEventControllerHandle const mEventController;
+		EventControllerHandle const mEventController;
 
-		SysEventDispatcher( SysEventControllerHandle pEventController ) noexcept;
-		~SysEventDispatcher() noexcept;
+		EventDispatcher( EventControllerHandle pEventController ) noexcept;
+		~EventDispatcher() noexcept;
 
-		static SysEventDispatcherHandle create( SysEventControllerHandle pEventController );
+		static EventDispatcherHandle create( EventControllerHandle pEventController );
 
-		void bindEventHandler( ESysEventBaseType pBaseType, SysEventHandler pHandler );
-		void bindEventHandler( ESysEventCategory pCategory, SysEventHandler pHandler );
-		void bindEventHandler( ESysEventCodeIndex pCodeIndex, SysEventHandler pHandler );
-		void bindDefaultEventHandler( SysEventHandler pHandler );
+		void bindEventHandler( EEventBaseType pBaseType, EventHandler pHandler );
+		void bindEventHandler( EEventCategory pCategory, EventHandler pHandler );
+		void bindEventHandler( EEventCodeIndex pCodeIndex, EventHandler pHandler );
+		void bindDefaultEventHandler( EventHandler pHandler );
 
-		void postEvent( SysEvent pEvent );
-		void postSimpleEvent( sys_event_code_value_t pEventCode );
+		void postEvent( Event pEvent );
+		void postSimpleEvent( event_code_value_t pEventCode );
 		void postEventAppQuit();
 		void postEventAppTerminate();
 
@@ -134,23 +136,23 @@ namespace ts3
 
 		bool checkIdleProcessingMode() const;
 
-		SysEventInputState & getInputState();
+		EventInputState & getInputState();
 
 	private:
-		void internalPutEvent( SysEvent & pEvent );
+		void internalPutEvent( Event & pEvent );
 
-		void _preProcessEvent( SysEvent & pEvent );
-		void _putEvent( SysEvent & pEvent );
+		void _preProcessEvent( Event & pEvent );
+		void _putEvent( Event & pEvent );
 
 	private:
-		using EventBaseTypeHandlerMap = std::array<SysEventHandler, cvSysEnumEventBaseTypeCount>;
-		using EventCategoryHandlerMap = std::array<SysEventHandler, cvSysEnumEventCategoryCount>;
-		using EventCodeIndexHandlerMap = std::array<SysEventHandler, cvSysEnumEventCodeIndexCount>;
+		using EventBaseTypeHandlerMap = std::array<EventHandler, cvEnumEventBaseTypeCount>;
+		using EventCategoryHandlerMap = std::array<EventHandler, cvEnumEventCategoryCount>;
+		using EventCodeIndexHandlerMap = std::array<EventHandler, cvEnumEventCodeIndexCount>;
 
 		//
-		SysEventInputState _inputState;
+		EventInputState _inputState;
 		//
-		SysEventHandler _defaultHandler;
+		EventHandler _defaultHandler;
 		// Array of handlers registered for EventBaseType.
 		EventBaseTypeHandlerMap _handlerMapByBaseType;
 		// Array of handlers registered for EventCategory.
@@ -159,6 +161,7 @@ namespace ts3
 		EventCodeIndexHandlerMap _handlerMapByCodeIndex;
 	};
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_EVENT_CORE_H__

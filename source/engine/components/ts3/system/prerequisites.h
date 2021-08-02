@@ -29,37 +29,41 @@
 
 namespace ts3
 {
+namespace system
+{
 
-    class SysContext;
-	class SystemInterface;
+    class Context;
+	class temInterface;
 
 	template <typename TpObject>
-	using SysHandle = SharedHandle<TpObject>;
+	using Handle = SharedHandle<TpObject>;
 
-#define ts3DeclareSysHandle( pType ) \
+#define ts3DeclareHandle( pType ) \
 	using pType##Handle = struct pType *
 
-	ts3DeclareSysHandle( SysBaseObject );
-	ts3DeclareSysHandle( SysContext );
+	ts3DeclareHandle( BaseObject );
+	ts3DeclareHandle( Context );
 
 	/// @brief
-	class SysBaseObject : public DynamicInterface
+	class BaseObject : public DynamicInterface
 	{
 	public:
-		SysContextHandle const mSysContext;
+		ContextHandle const mContext;
 
-		explicit SysBaseObject( SysContextHandle pSysContext )
-		: mSysContext( std::move( pSysContext ) )
+		explicit BaseObject( ContextHandle pContext )
+		: mContext( std::move( pContext ) )
 		{}
 
-		virtual ~SysBaseObject() = default;
+		virtual ~BaseObject() = default;
 	};
 
 	template <typename TpObject, typename... TpArgs>
-	inline SysHandle<TpObject> sysCreateObject( TpArgs && ...pArgs )
+	inline Handle<TpObject> sysCreateObject( TpArgs && ...pArgs )
 	{
 		return createDynamicInterfaceObject<TpObject>( std::forward<TpArgs>( pArgs )... );
 	}
-}
+
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_PREREQUISITES_H__

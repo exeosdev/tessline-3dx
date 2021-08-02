@@ -6,8 +6,10 @@
 
 namespace ts3
 {
+namespace system
+{
 
-	enum class ESysX11MouseButtonID : enum_default_value_t
+	enum class EX11MouseButtonID : enum_default_value_t
 	{
 		Unknown,
 		Left,
@@ -21,6 +23,7 @@ namespace ts3
 		XBT2
 	};
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_X11_EVENT_CORE_H__

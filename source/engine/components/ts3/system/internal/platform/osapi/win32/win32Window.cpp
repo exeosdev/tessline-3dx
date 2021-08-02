@@ -1,35 +1,35 @@
 
-#include <ts3/system/windowSystem.h>
+#include <ts3/system/windowtem.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
 namespace ts3
 {
 
-	void _win32RegisterWndClass( SysWindowNativeData & pWindowNativeData );
-	void _win32UnregisterWndClass( SysWindowNativeData & pWindowNativeData );
-	DWORD _win32TranslateFrameStyle( SysWindowFrameStyle pStyle );
+	void _win32RegisterWndClass( WindowNativeData & pWindowNativeData );
+	void _win32UnregisterWndClass( WindowNativeData & pWindowNativeData );
+	DWORD _win32TranslateFrameStyle( WindowFrameStyle pStyle );
 	LRESULT __stdcall _win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 
 
-	void SysWindowManager::_sysInitialize()
+	void WindowManager::_sysInitialize()
 	{}
 
-	void SysWindowManager::_sysRelease() noexcept
+	void WindowManager::_sysRelease() noexcept
 	{}
 
 
-	void SysWindow::_sysInitialize( const SysWindowCreateInfo & pCreateInfo )
+	void Window::_sysInitialize( const WindowCreateInfo & pCreateInfo )
 	{
 		win32CreateWindow( mNativeData, pCreateInfo );
 		::ShowWindow( mNativeData.hwnd, SW_SHOWNORMAL );
 	}
 
-	void SysWindow::_sysRelease() noexcept
+	void Window::_sysRelease() noexcept
 	{
 		win32DestroyWindow( mNativeData );
 	}
 
-	void SysWindow::_sysGetClientAreaSize( SysWindowSize & pClientAreaSize ) const
+	void Window::_sysGetClientAreaSize( WindowSize & pClientAreaSize ) const
 	{
 		RECT clientRect;
 		::GetClientRect( mNativeData.hwnd, &clientRect );
@@ -38,7 +38,7 @@ namespace ts3
 		pClientAreaSize.y = clientRect.bottom - clientRect.top;
 	}
 
-	void SysWindow::_sysGetFrameSize( SysWindowSize & pFrameSize ) const
+	void Window::_sysGetFrameSize( WindowSize & pFrameSize ) const
 	{
 		RECT clientRect;
 		::GetClientRect( mNativeData.hwnd, &clientRect );
@@ -48,7 +48,7 @@ namespace ts3
 	}
 
 
-	void win32CreateWindow( SysWindowNativeData & pWindowNativeData, const SysWindowCreateInfo & pCreateInfo )
+	void win32CreateWindow( WindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo )
 	{
 		// Register window class. Will fetch it if already registered.
 		_win32RegisterWndClass( pWindowNativeData );
@@ -91,14 +91,14 @@ namespace ts3
 		pWindowNativeData.hwnd = windowHandle;
 	}
 
-	void win32DestroyWindow( SysWindowNativeData & pWindowNativeData )
+	void win32DestroyWindow( WindowNativeData & pWindowNativeData )
 	{
 		::DestroyWindow( pWindowNativeData.hwnd );
 		pWindowNativeData.hwnd = nullptr;
 		pWindowNativeData.wndClassID = 0;
 	}
 
-	void _win32RegisterWndClass( SysWindowNativeData & pWindowNativeData )
+	void _win32RegisterWndClass( WindowNativeData & pWindowNativeData )
 	{
 		//
 		const LPCSTR wndClassName = "TS3_SYSTEM_WNDCLS";
@@ -140,7 +140,7 @@ namespace ts3
 		pWindowNativeData.wndProcModuleHandle = wndProcModuleHandle;
 	}
 
-	void _win32UnregisterWndClass( SysWindowNativeData & pWindowNativeData )
+	void _win32UnregisterWndClass( WindowNativeData & pWindowNativeData )
 	{
 		::UnregisterClassA( pWindowNativeData.wndClassName, pWindowNativeData.wndProcModuleHandle );
 
@@ -149,7 +149,7 @@ namespace ts3
 		pWindowNativeData.wndProcModuleHandle = nullptr;
 	}
 
-	DWORD _win32TranslateFrameStyle( SysWindowFrameStyle pStyle )
+	DWORD _win32TranslateFrameStyle( WindowFrameStyle pStyle )
 	{
 		//
 		constexpr DWORD overlayFrameStyle = WS_POPUP;
@@ -165,19 +165,19 @@ namespace ts3
 
 		switch ( pStyle )
 		{
-			case SysWindowFrameStyle::Caption:
+			case WindowFrameStyle::Caption:
 				resultStyle = captionFrameStyle;
 				break;
 
-			case SysWindowFrameStyle::Fixed:
+			case WindowFrameStyle::Fixed:
 				resultStyle = fixedFrameStyle;
 				break;
 
-			case SysWindowFrameStyle::Overlay:
+			case WindowFrameStyle::Overlay:
 				resultStyle = overlayFrameStyle;
 				break;
 
-			case SysWindowFrameStyle::Resizeable:
+			case WindowFrameStyle::Resizeable:
 				resultStyle = resizeableFrameStyle;
 				break;
 

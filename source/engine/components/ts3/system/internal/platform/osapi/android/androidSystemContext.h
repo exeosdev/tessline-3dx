@@ -7,13 +7,13 @@
 namespace ts3
 {
 
-    struct SysContextNativeData
+    struct ContextNativeData
     {
         AndroidAppState * androidAppState = nullptr;
         ANativeWindow * androidNativeWindow = nullptr;
     };
 
-	struct SysContextNativeCreateInfo
+	struct ContextNativeCreateInfo
 	{
 	};
 

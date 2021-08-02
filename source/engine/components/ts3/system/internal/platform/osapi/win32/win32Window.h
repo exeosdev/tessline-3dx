@@ -7,15 +7,15 @@
 namespace ts3
 {
 
-	struct Win32SysWindowNativeData
+	struct Win32WindowNativeData
 	{
 		ATOM wndClassID = 0;
 		LPCSTR wndClassName = nullptr;
 		HMODULE wndProcModuleHandle = nullptr;
 	};
 
-	void win32CreateWindow( SysWindowNativeData & pWindowNativeData, const SysWindowCreateInfo & pCreateInfo );
-	void win32DestroyWindow( SysWindowNativeData & pWindowNativeData );
+	void win32CreateWindow( WindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo );
+	void win32DestroyWindow( WindowNativeData & pWindowNativeData );
 
 }
 

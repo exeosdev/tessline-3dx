@@ -6,48 +6,51 @@
 
 namespace ts3
 {
+namespace system
+{
 
-	struct SysEvent
+	struct Event
 	{
 		union
 		{
-			ESysEventCode                 code;
-			SysEvtBase                    commonData;
-			SysEvtAppActivityDisplayReady eAppActivityDisplayReady;
-			SysEvtAppActivityFocusGained  eAppActivityFocusGained;
-			SysEvtAppActivityFocusLost    eAppActivityFocusLost;
-			SysEvtAppActivityPause        eAppActivityPause;
-			SysEvtAppActivityResume       eAppActivityResume;
-			SysEvtAppActivityStart        eAppActivityStart;
-			SysEvtAppActivityStop         eAppActivityStop;
-			SysEvtAppActivityQuit         eAppActivityQuit;
-			SysEvtAppActivityTerminate    eAppActivityTerminate;
-			SysEvtInputGamepadAxis        eInputGamepadAxis;
-			SysEvtInputGamepadButton      eInputGamepadButton;
-			SysEvtInputGamepadState       eInputGamepadState;
-			SysEvtInputKeyboardKey        eInputKeyboardKey;
-			SysEvtInputMouseButton        eInputMouseButton;
-			SysEvtInputMouseMove          eInputMouseMove;
-			SysEvtInputMouseScroll        eInputMouseScroll;
-			SysEvtInputTouchDown          eInputTouchDown;
-			SysEvtInputTouchMove          eInputTouchMove;
-			SysEvtInputTouchUp            eInputTouchUp;
-			SysEvtWindowUpdateClose       eWindowUpdateClose;
-			SysEvtWindowUpdateFullscreen  eWindowUpdateFullscreen;
-			SysEvtWindowUpdateResize      eWindowUpdateResize;
-			SysEvtWindowUpdateVisibility  eWindowUpdateVisibility;
+			EEventCode                 code;
+			EvtBase                    commonData;
+			EvtAppActivityDisplayReady eAppActivityDisplayReady;
+			EvtAppActivityFocusGained  eAppActivityFocusGained;
+			EvtAppActivityFocusLost    eAppActivityFocusLost;
+			EvtAppActivityPause        eAppActivityPause;
+			EvtAppActivityResume       eAppActivityResume;
+			EvtAppActivityStart        eAppActivityStart;
+			EvtAppActivityStop         eAppActivityStop;
+			EvtAppActivityQuit         eAppActivityQuit;
+			EvtAppActivityTerminate    eAppActivityTerminate;
+			EvtInputGamepadAxis        eInputGamepadAxis;
+			EvtInputGamepadButton      eInputGamepadButton;
+			EvtInputGamepadState       eInputGamepadState;
+			EvtInputKeyboardKey        eInputKeyboardKey;
+			EvtInputMouseButton        eInputMouseButton;
+			EvtInputMouseMove          eInputMouseMove;
+			EvtInputMouseScroll        eInputMouseScroll;
+			EvtInputTouchDown          eInputTouchDown;
+			EvtInputTouchMove          eInputTouchMove;
+			EvtInputTouchUp            eInputTouchUp;
+			EvtWindowUpdateClose       eWindowUpdateClose;
+			EvtWindowUpdateFullscreen  eWindowUpdateFullscreen;
+			EvtWindowUpdateResize      eWindowUpdateResize;
+			EvtWindowUpdateVisibility  eWindowUpdateVisibility;
 		};
 
-		SysEvent()
-		: code{ E_SYS_EVENT_CODE_UNDEFINED }
+		Event()
+		: code{ E_EVENT_CODE_UNDEFINED }
 		{}
 
 		explicit operator bool() const
 		{
-			return code != E_SYS_EVENT_CODE_UNDEFINED;
+			return code != E_EVENT_CODE_UNDEFINED;
 		}
 	};
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_EVENT_OBJECT_H__

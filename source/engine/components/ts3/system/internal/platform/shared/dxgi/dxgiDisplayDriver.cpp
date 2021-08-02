@@ -6,28 +6,28 @@
 namespace ts3
 {
 
-	static DXGI_FORMAT _dxgiTranslateSysColorFormatToDXGIFormat( SysColorFormat pColorFormat );
+	static DXGI_FORMAT _dxgiTranslateGfxColorFormatToDXGIFormat( GfxColorFormat pColorFormat );
 
 
-	SysDisplayDriverDXGI::SysDisplayDriverDXGI( SysDisplayManagerHandle pDisplayManager ) noexcept
-	: SysDisplayDriver( pDisplayManager, ESysDsmDisplayDriverType::DXGI )
+	DisplayDriverDXGI::DisplayDriverDXGI( DisplayManagerHandle pDisplayManager ) noexcept
+	: DisplayDriver( pDisplayManager, EDsmDisplayDriverType::DXGI )
 	{}
 
-	SysDisplayDriverDXGI::~SysDisplayDriverDXGI() noexcept = default;
+	DisplayDriverDXGI::~DisplayDriverDXGI() noexcept = default;
 
-	ESysDsmDisplayDriverType SysDisplayDriverDXGI::queryDriverID() const noexcept
+	EDsmDisplayDriverType DisplayDriverDXGI::queryDriverID() const noexcept
 	{
-		return ESysDsmDisplayDriverType::DXGI;
+		return EDsmDisplayDriverType::DXGI;
 	}
 
-	SysDisplayDriverHandle SysDisplayDriverDXGI::create( SysDisplayManagerHandle pDisplayManager, const SysDisplayDriverCreateInfoDXGI & pCreateInfo )
+	DisplayDriverHandle DisplayDriverDXGI::create( DisplayManagerHandle pDisplayManager, const DisplayDriverCreateInfoDXGI & pCreateInfo )
 	{
-		auto displayDriver = sysCreateObject<SysDisplayDriverDXGI>( pDisplayManager );
+		auto displayDriver = sysCreateObject<DisplayDriverDXGI>( pDisplayManager );
 		displayDriver->initialize( pCreateInfo );
 		return displayDriver;
 	}
 
-	void SysDisplayDriverDXGI::initialize( const SysDisplayDriverCreateInfoDXGI & pCreateInfo )
+	void DisplayDriverDXGI::initialize( const DisplayDriverCreateInfoDXGI & pCreateInfo )
 	{
 		auto * dxgiDriverData = mNativeData.dxgi;
 
@@ -58,11 +58,11 @@ namespace ts3
 		}
 	}
 
-	void SysDisplayDriverDXGI::_sysResetInternalState()
+	void DisplayDriverDXGI::_sysResetInternalState()
 	{
 	}
 
-	void SysDisplayDriverDXGI::_sysEnumAdapterList()
+	void DisplayDriverDXGI::_sysEnumAdapterList()
 	{
 		auto * dxgiFactory = mNativeData.dxgi->dxgiFactory.Get();
 
@@ -103,17 +103,17 @@ namespace ts3
 
 			if( adapterIndex == 0 )
 			{
-				adapterInfo->adapterDesc.flags.set( E_SYS_DSM_ADAPTER_FLAG_PRIMARY_BIT );
+				adapterInfo->adapterDesc.flags.set( E_DSM_ADAPTER_FLAG_PRIMARY_BIT );
 			}
 
 			if( ( dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE ) != 0 )
 			{
-				adapterInfo->adapterDesc.flags.set( E_SYS_DSM_ADAPTER_FLAG_SOFTWARE_BIT );
+				adapterInfo->adapterDesc.flags.set( E_DSM_ADAPTER_FLAG_SOFTWARE_BIT );
 			}
 		}
 	}
 
-	void SysDisplayDriverDXGI::_sysEnumOutputList( SysDsmAdapter & pAdapter )
+	void DisplayDriverDXGI::_sysEnumOutputList( DsmAdapter & pAdapter )
 	{
 		auto * dxgiAdapter = pAdapter.nativeData.dxgi->dxgiAdapter.Get();
 
@@ -164,10 +164,10 @@ namespace ts3
 		}
 	}
 
-	void SysDisplayDriverDXGI::_sysEnumVideoModeList( SysDsmOutput & pOutput, SysColorFormat pFormat )
+	void DisplayDriverDXGI::_sysEnumVideoModeList( DsmOutput & pOutput, GfxColorFormat pFormat )
 	{
 		auto * dxgiOutput = pOutput.nativeData.dxgi->dxgiOutput.Get();
-		auto dxgiFormat = _dxgiTranslateSysColorFormatToDXGIFormat( pFormat );
+		auto dxgiFormat = _dxgiTranslateGfxColorFormatToDXGIFormat( pFormat );
 
 		//
 		if ( dxgiFormat == DXGI_FORMAT_UNKNOWN )
@@ -196,27 +196,27 @@ namespace ts3
 			throw 0;
 		}
 
-		sys_dsm_video_settings_hash_t prevSettingsHash = cvSysDsmVideoSettingsHashInvalid;
+		dsm_video_settings_hash_t prevSettingsHash = cvDsmVideoSettingsHashInvalid;
 
 		for ( auto & dxgiDisplayModeDesc : dxgiModeList )
 		{
 
-			SysDsmVideoSettings videoSettings;
+			DsmVideoSettings videoSettings;
 			videoSettings.resolution.x = static_cast<uint32>( dxgiDisplayModeDesc.Width );
 			videoSettings.resolution.y = static_cast<uint32>( dxgiDisplayModeDesc.Height );
 			videoSettings.refreshRate = static_cast<uint16>( dxgiDisplayModeDesc.RefreshRate.Numerator );
 
 			if( dxgiDisplayModeDesc.ScanlineOrdering == DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE )
 			{
-				videoSettings.flags.set( E_SYS_DSM_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT );
+				videoSettings.flags.set( E_DSM_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT );
 			}
 			else if( dxgiDisplayModeDesc.ScanlineOrdering == DXGI_MODE_SCANLINE_ORDER_LOWER_FIELD_FIRST )
 			{
-				videoSettings.flags.set( E_SYS_DSM_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT );
+				videoSettings.flags.set( E_DSM_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT );
 			}
 			else if( dxgiDisplayModeDesc.ScanlineOrdering == DXGI_MODE_SCANLINE_ORDER_UPPER_FIELD_FIRST )
 			{
-				videoSettings.flags.set( E_SYS_DSM_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT );
+				videoSettings.flags.set( E_DSM_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT );
 			}
 
 			auto settingsHash = sysDsmComputeVideoSettingsHash( pFormat, videoSettings );
@@ -232,16 +232,16 @@ namespace ts3
 		}
 	}
 
-	DXGI_FORMAT _dxgiTranslateSysColorFormatToDXGIFormat( SysColorFormat pColorFormat )
+	DXGI_FORMAT _dxgiTranslateGfxColorFormatToDXGIFormat( GfxColorFormat pColorFormat )
 	{
-		static const std::unordered_map<SysColorFormat, DXGI_FORMAT> colorDescMap =
+		static const std::unordered_map<GfxColorFormat, DXGI_FORMAT> colorDescMap =
 		{
-			{ SysColorFormat::B8G8R8       , DXGI_FORMAT_B8G8R8X8_UNORM      },
-			{ SysColorFormat::B8G8R8A8     , DXGI_FORMAT_B8G8R8A8_UNORM      },
-			{ SysColorFormat::B8G8R8A8SRGB , DXGI_FORMAT_B8G8R8X8_UNORM_SRGB },
-			{ SysColorFormat::R8G8B8A8     , DXGI_FORMAT_R8G8B8A8_UNORM      },
-			{ SysColorFormat::R8G8B8A8SRGB , DXGI_FORMAT_R8G8B8A8_UNORM_SRGB },
-			{ SysColorFormat::R10G10B10A2  , DXGI_FORMAT_R10G10B10A2_UNORM   },
+			{ GfxColorFormat::B8G8R8       , DXGI_FORMAT_B8G8R8X8_UNORM      },
+			{ GfxColorFormat::B8G8R8A8     , DXGI_FORMAT_B8G8R8A8_UNORM      },
+			{ GfxColorFormat::B8G8R8A8SRGB , DXGI_FORMAT_B8G8R8X8_UNORM_SRGB },
+			{ GfxColorFormat::R8G8B8A8     , DXGI_FORMAT_R8G8B8A8_UNORM      },
+			{ GfxColorFormat::R8G8B8A8SRGB , DXGI_FORMAT_R8G8B8A8_UNORM_SRGB },
+			{ GfxColorFormat::R10G10B10A2  , DXGI_FORMAT_R10G10B10A2_UNORM   },
 		};
 		return getMapValueOrDefault( colorDescMap, pColorFormat, DXGI_FORMAT_UNKNOWN );
 	}

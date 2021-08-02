@@ -5,7 +5,7 @@
 namespace ts3
 {
 
-    using SysNativeEvent = struct ANativeEvent;
+    using NativeEvent = struct ANativeEvent;
 
     constexpr int cvAndroidLooperWaitTimeoutImmediate = 0;
     constexpr int cvAndroidLooperWaitTimeoutInfinity = -1;
@@ -32,7 +32,7 @@ namespace ts3
         };
     };
 
-	struct SysEventSourceNativeData
+	struct EventSourceNativeData
 	{
 	};
 

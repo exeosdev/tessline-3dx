@@ -4,20 +4,20 @@
 namespace ts3
 {
 
-	sys_perf_counter_value_t nativePerfCounterQueryValue();
-	sys_perf_counter_res_t nativePerfCounterQueryResolution();
+	perf_counter_value_t nativePerfCounterQueryValue();
+	perf_counter_res_t nativePerfCounterQueryResolution();
 
-	sys_perf_counter_value_t SysPerfCounter::queryCurrentStamp()
+	perf_counter_value_t PerfCounter::queryCurrentStamp()
 	{
 		return nativePerfCounterQueryValue();
 	}
 
-	sys_perf_counter_res_t SysPerfCounter::queryResolution()
+	perf_counter_res_t PerfCounter::queryResolution()
 	{
 		return nativePerfCounterQueryResolution();
 	}
 
-	long double SysPerfCounter::convertToDuration( sys_perf_counter_value_t pStampDiff, const std::pair<native_int, native_int> & pUnitRatio )
+	long double PerfCounter::convertToDuration( perf_counter_value_t pStampDiff, const std::pair<native_int, native_int> & pUnitRatio )
 	{
 		// This is the resolution of the perf counter. It yields a value representing the number
 		// of "ticks" per second. This is needed to compute the time from the stamp difference.
@@ -39,7 +39,7 @@ namespace ts3
 		return resultNum / resultDenom;
 	}
 
-	sys_perf_counter_value_t SysPerfCounter::convertFromDuration( long double pDuration, const std::pair<native_int, native_int> & pUnitRatio )
+	perf_counter_value_t PerfCounter::convertFromDuration( long double pDuration, const std::pair<native_int, native_int> & pUnitRatio )
 	{
 		auto perfCounterResolution = queryResolution();
 
@@ -52,7 +52,7 @@ namespace ts3
 		auto resultNum = static_cast<long double>( pDuration ) * perfCounterResolution * pUnitRatio.first;
 		auto resultDenom = static_cast<long double>( pUnitRatio.second );
 
-		return static_cast<sys_perf_counter_value_t>( resultNum / resultDenom );
+		return static_cast<perf_counter_value_t>( resultNum / resultDenom );
 	}
 
 } // namespace ts3::system

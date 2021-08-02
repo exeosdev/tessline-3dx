@@ -1,32 +1,32 @@
 
-#include <ts3/system/internal/internalDisplayManager.h>
-#include <ts3/system/internal/internalSystemContext.h>
+#include <ts3/system/internal/internalDisplay.h>
+#include <ts3/system/internal/internaltemContext.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 namespace ts3
 {
 
-	void SysDisplayManager::_sysInitialize()
+	void DisplayManager::_sysInitialize()
 	{
 	}
 
-	void SysDisplayManager::_sysRelease() noexcept
+	void DisplayManager::_sysRelease() noexcept
 	{
 	}
 
-	void SysDisplayManager::_sysQueryDisplaySize( SysDisplaySize & pDisplaySize ) const
+	void DisplayManager::_sysQueryDisplaySize( DisplaySize & pDisplaySize ) const
 	{
 	}
 
-	void SysDisplayManager::_sysQueryMinWindowSize( SysDisplaySize & pMinWindowSize ) const
+	void DisplayManager::_sysQueryMinWindowSize( DisplaySize & pMinWindowSize ) const
 	{
 	}
 
-	void nativeDisplayManagerInitialize( SysDisplayManager & )
+	void nativeDisplayManagerInitialize( DisplayManager & )
 	{
 	}
 
-	void SysDisplayManagerImplProxy::nativeQueryDisplaySize( const SysDisplayManager & pDisplayManager, SysDisplaySize & pDisplaySize )
+	void DisplayManagerImplProxy::nativeQueryDisplaySize( const DisplayManager & pDisplayManager, DisplaySize & pDisplaySize )
 	{
         // Native window for the app is stored within the display manager.
         auto * androidNativeWindow = pDisplayManager.systemContext->nativeData->androidNativeWindow;
@@ -53,7 +53,7 @@ namespace ts3
         }
 	}
 
-	void SysDisplayManagerImplProxy::nativeQueryMinWindowSize( const SysDisplayManager & pDisplayManager, SysDisplaySize & pMinWindowSize )
+	void DisplayManagerImplProxy::nativeQueryMinWindowSize( const DisplayManager & pDisplayManager, DisplaySize & pMinWindowSize )
 	{
         nativeQueryDisplaySize( pDisplayManager, pMinWindowSize );
 	}

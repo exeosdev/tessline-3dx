@@ -6,6 +6,8 @@
 
 namespace ts3
 {
+namespace system
+{
 
 	struct X11SessionExtInfo
 	{
@@ -14,7 +16,7 @@ namespace ts3
 		std::string displayString;
 	};
 
-	struct SysContextNativeData
+	struct ContextNativeData
 	{
 		Display * display = nullptr;
 		Window rootWindow = cvXIDNone;
@@ -23,10 +25,11 @@ namespace ts3
 		X11SessionExtInfo sessionExtInfo;
 	};
 
-	struct SysContextNativeCreateInfo
+	struct ContextNativeCreateInfo
 	{
 	};
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_X11_SYSTEM_CONTEXT_H__

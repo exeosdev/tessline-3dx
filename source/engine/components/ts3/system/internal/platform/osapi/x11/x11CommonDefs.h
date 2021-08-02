@@ -9,6 +9,8 @@
 
 namespace ts3
 {
+namespace system
+{
 
     // Having these pretty common words replaced with a numbers tends
     // to be an issue, so we use some explicit enum constants instead
@@ -25,7 +27,7 @@ namespace ts3
     #undef Success
 
 
-    struct SysPlatformNativeData
+    struct PlatformNativeData
     {
         struct SessionInfo
         {
@@ -41,14 +43,15 @@ namespace ts3
         SessionInfo sessionInfo;
     };
 
-    struct SysPlatformNativeDataDeleter
+    struct PlatformNativeDataDeleter
     {
-        void operator()( SysPlatformNativeData * );
+        void operator()( PlatformNativeData * );
     };
 
-    using SysX11PlatformNativeData = SysPlatformNativeData;
-    using SysX11SessionInfo = SysPlatformNativeData::SessionInfo;
+    using X11PlatformNativeData = PlatformNativeData;
+    using X11SessionInfo = PlatformNativeData::SessionInfo;
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_X11_COMMON_DEFS_H__

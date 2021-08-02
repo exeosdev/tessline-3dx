@@ -6,25 +6,25 @@
 namespace ts3
 {
 
-	bool _win32TranslateAndDispatch( SysEventController & pEventController, const MSG & pMSG );
-	bool _win32TranslateAppOrWindowEvent( SysEventDispatcher & pEventDispatcher, const MSG & pMSG, SysEvent & pEvent );
-	bool _win32TranslateInputEvent( SysEventInputState & pInputState, const MSG & pMSG, SysEvent & pEvent );
-	bool _win32TranslateInputEventKeyboard( SysEventInputState & pInputState, const MSG & pMSG, SysEvent & pEvent );
-	bool _win32TranslateInputEventMouse( SysEventInputState & pInputState, const MSG & pMSG, SysEvent & pEvent );
-	bool _win32TranslateInputEventTouch( SysEventInputState & pInputState, const MSG & pMSG, SysEvent & pEvent );
-	SysKeyCode _win32GetSystemKeyCode( WPARAM pWparam );
-	Bitmask<SysMouseButtonFlagBits> _win32GetMouseButtonStateMask( WPARAM pWparam );
+	bool _win32TranslateAndDispatch( EventController & pEventController, const MSG & pMSG );
+	bool _win32TranslateAppOrWindowEvent( EventDispatcher & pEventDispatcher, const MSG & pMSG, Event & pEvent );
+	bool _win32TranslateInputEvent( EventInputState & pInputState, const MSG & pMSG, Event & pEvent );
+	bool _win32TranslateInputEventKeyboard( EventInputState & pInputState, const MSG & pMSG, Event & pEvent );
+	bool _win32TranslateInputEventMouse( EventInputState & pInputState, const MSG & pMSG, Event & pEvent );
+	bool _win32TranslateInputEventTouch( EventInputState & pInputState, const MSG & pMSG, Event & pEvent );
+	KeyCode _win32GettemKeyCode( WPARAM pWparam );
+	Bitmask<MouseButtonFlagBits> _win32GetMouseButtonStateMask( WPARAM pWparam );
 	LRESULT __stdcall _win32EventSourceIdleEventProc( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 	LRESULT __stdcall _win32EventSourceProxyEventProc( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 
 
-	void SysEventController::_sysInitialize()
+	void EventController::_sysInitialize()
 	{}
 
-	void SysEventController::_sysRelease()
+	void EventController::_sysRelease()
 	{}
 
-	void SysEventController::_sysAddEventSource( SysEventSource & pEventSource )
+	void EventController::_sysAddEventSource( EventSource & pEventSource )
 	{
 		auto eventControllerAddress = reinterpret_cast<LONG_PTR>( this );
 		::SetWindowLongPtrA( pEventSource.mEvtSrcNativeData.hwnd, GWLP_USERDATA, eventControllerAddress );
@@ -37,7 +37,7 @@ namespace ts3
 		::SetWindowPos( pEventSource.mEvtSrcNativeData.hwnd, nullptr, 0, 0, 0, 0, updateFlags );
 	}
 
-	void SysEventController::_sysRemoveEventSource( SysEventSource & pEventSource )
+	void EventController::_sysRemoveEventSource( EventSource & pEventSource )
 	{
 		auto wndEventProcAddress = reinterpret_cast<LONG_PTR>( _win32EventSourceIdleEventProc );
 		::SetWindowLongPtrA( pEventSource.mEvtSrcNativeData.hwnd, GWLP_WNDPROC, wndEventProcAddress );
@@ -47,7 +47,7 @@ namespace ts3
 		::SetWindowPos( pEventSource.mEvtSrcNativeData.hwnd, nullptr, 0, 0, 0, 0, updateFlags );
 	}
 
-	void SysEventController::_sysDispatchNextEvent()
+	void EventController::_sysDispatchNextEvent()
 	{
 		MSG pMSG;
 		if( ::PeekMessageA( &pMSG, nullptr, 0, 0, PM_REMOVE ) != FALSE )
@@ -57,7 +57,7 @@ namespace ts3
 		}
 	}
 
-	void SysEventController::_sysDispatchNextEventWait()
+	void EventController::_sysDispatchNextEventWait()
 	{
 		MSG pMSG;
 		if( ::GetMessageA( &pMSG, nullptr, 0, 0 ) != FALSE )
@@ -67,7 +67,7 @@ namespace ts3
 		}
 	}
 
-	void SysEventController::_sysDispatchQueuedEvents()
+	void EventController::_sysDispatchQueuedEvents()
 	{
 		MSG pMSG;
 		while( ::PeekMessageA( &pMSG, nullptr, 0, 0, PM_REMOVE ) != FALSE )
@@ -77,7 +77,7 @@ namespace ts3
 		}
 	}
 
-	void SysEventController::_sysDispatchQueuedEventsWait()
+	void EventController::_sysDispatchQueuedEventsWait()
 	{
 		uint32 fetchedEventsNum = 0;
 
@@ -98,11 +98,11 @@ namespace ts3
 
 
 
-	bool _win32TranslateAndDispatch( SysEventController & pEventController, const MSG & pMSG )
+	bool _win32TranslateAndDispatch( EventController & pEventController, const MSG & pMSG )
 	{
 		auto & dispatcher = pEventController.getActiveDispatcher();
 
-		SysEvent sysEvent;
+		Event sysEvent;
 
 		if( pMSG.message >= WM_KEYFIRST && pMSG.message <= WM_TOUCH )
 		{
@@ -125,7 +125,7 @@ namespace ts3
 		return true;
 	}
 
-	bool _win32TranslateAppOrWindowEvent( SysEventDispatcher & pEventDispatcher, const MSG & pMSG, SysEvent & pEvent )
+	bool _win32TranslateAppOrWindowEvent( EventDispatcher & pEventDispatcher, const MSG & pMSG, Event & pEvent )
 	{
 		switch ( pMSG.message )
 		{
@@ -137,13 +137,13 @@ namespace ts3
 			case WM_DESTROY:
 			{
 				auto & eWindowUpdateClose = pEvent.eWindowUpdateClose;
-				eWindowUpdateClose.eventCode = E_SYS_EVENT_CODE_WINDOW_UPDATE_CLOSE;
+				eWindowUpdateClose.eventCode = E_EVENT_CODE_WINDOW_UPDATE_CLOSE;
 				break;
 			}
 			case WM_QUIT:
 			{
 				auto & eAppActivityQuit = pEvent.eAppActivityQuit;
-				eAppActivityQuit.eventCode = E_SYS_EVENT_CODE_APP_ACTIVITY_QUIT;
+				eAppActivityQuit.eventCode = E_EVENT_CODE_APP_ACTIVITY_QUIT;
 				break;
 			}
 			default:
@@ -155,7 +155,7 @@ namespace ts3
 		return true;
 	}
 
-	bool _win32TranslateInputEvent( SysEventInputState & pInputState, const MSG & pMSG, SysEvent & pEvent )
+	bool _win32TranslateInputEvent( EventInputState & pInputState, const MSG & pMSG, Event & pEvent )
 	{
 		if( ( pMSG.message >= WM_KEYFIRST ) && ( pMSG.message <= WM_KEYLAST ) )
 		{
@@ -177,26 +177,26 @@ namespace ts3
 		}
 	}
 
-	bool _win32TranslateInputEventKeyboard( SysEventInputState & pInputState, const MSG & pMSG, SysEvent & pEvent )
+	bool _win32TranslateInputEventKeyboard( EventInputState & pInputState, const MSG & pMSG, Event & pEvent )
 	{
 		switch( pMSG.message )
 		{
 			case WM_KEYDOWN:
 			{
 				auto & eInputKeyboardKey = pEvent.eInputKeyboardKey;
-				eInputKeyboardKey.eventCode = E_SYS_EVENT_CODE_INPUT_KEYBOARD_KEY;
+				eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
 				eInputKeyboardKey.keyboardState = &( pInputState.keyboardState );
-				eInputKeyboardKey.keyAction = SysKeyActionType::Press;
-				eInputKeyboardKey.keyCode = _win32GetSystemKeyCode( pMSG.wParam );
+				eInputKeyboardKey.keyAction = KeyActionType::Press;
+				eInputKeyboardKey.keyCode = _win32GettemKeyCode( pMSG.wParam );
 				break;
 			}
 			case WM_KEYUP:
 			{
 				auto & eInputKeyboardKey = pEvent.eInputKeyboardKey;
-				eInputKeyboardKey.eventCode = E_SYS_EVENT_CODE_INPUT_KEYBOARD_KEY;
+				eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
 				eInputKeyboardKey.keyboardState = &( pInputState.keyboardState );
-				eInputKeyboardKey.keyAction = SysKeyActionType::Release;
-				eInputKeyboardKey.keyCode = _win32GetSystemKeyCode( pMSG.wParam );
+				eInputKeyboardKey.keyAction = KeyActionType::Release;
+				eInputKeyboardKey.keyCode = _win32GettemKeyCode( pMSG.wParam );
 				break;
 			}
 			default:
@@ -208,7 +208,7 @@ namespace ts3
 		return true;
 	}
 
-	bool _win32TranslateInputEventMouse( SysEventInputState & pInputState, const MSG & pMSG, SysEvent & pEvent )
+	bool _win32TranslateInputEventMouse( EventInputState & pInputState, const MSG & pMSG, Event & pEvent )
 	{
 		math::Vec2i32 cursorPos {
 			GET_X_LPARAM( pMSG.lParam ),
@@ -221,12 +221,12 @@ namespace ts3
 			{
 				auto & eInputMouseMove = pEvent.eInputMouseMove;
 
-				if ( pInputState.mouseLastRegPos == cvSysMousePosInvalid )
+				if ( pInputState.mouseLastRegPos == cvMousePosInvalid )
 				{
 					pInputState.mouseLastRegPos = cursorPos;
 				}
 
-				eInputMouseMove.eventCode = E_SYS_EVENT_CODE_INPUT_MOUSE_MOVE;
+				eInputMouseMove.eventCode = E_EVENT_CODE_INPUT_MOUSE_MOVE;
 				eInputMouseMove.cursorPos = cursorPos;
 				eInputMouseMove.buttonStateMask = _win32GetMouseButtonStateMask( pMSG.wParam );
 				eInputMouseMove.movementDelta = cursorPos - pInputState.mouseLastRegPos;
@@ -236,83 +236,83 @@ namespace ts3
 			case WM_LBUTTONDOWN:
 			{
 				auto & eInputMouseButton = pEvent.eInputMouseButton;
-				eInputMouseButton.eventCode = E_SYS_EVENT_CODE_INPUT_MOUSE_BUTTON;
+				eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 				eInputMouseButton.cursorPos = cursorPos;
-				eInputMouseButton.buttonAction = SysMouseButtonActionType::Click;
-				eInputMouseButton.buttonID = SysMouseButtonID::Left;
+				eInputMouseButton.buttonAction = MouseButtonActionType::Click;
+				eInputMouseButton.buttonID = MouseButtonID::Left;
 				eInputMouseButton.buttonStateMask = _win32GetMouseButtonStateMask( pMSG.wParam );
 				break;
 			}
 			case WM_LBUTTONUP:
 			{
 				auto & eInputMouseButton = pEvent.eInputMouseButton;
-				eInputMouseButton.eventCode = E_SYS_EVENT_CODE_INPUT_MOUSE_BUTTON;
+				eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 				eInputMouseButton.cursorPos = cursorPos;
-				eInputMouseButton.buttonAction = SysMouseButtonActionType::Release;
-				eInputMouseButton.buttonID = SysMouseButtonID::Left;
+				eInputMouseButton.buttonAction = MouseButtonActionType::Release;
+				eInputMouseButton.buttonID = MouseButtonID::Left;
 				eInputMouseButton.buttonStateMask = _win32GetMouseButtonStateMask( pMSG.wParam );
 				break;
 			}
 			case WM_LBUTTONDBLCLK:
 			{
-				pEvent.commonData.eventCode = E_SYS_EVENT_CODE_UNDEFINED;
+				pEvent.commonData.eventCode = E_EVENT_CODE_UNDEFINED;
 				break;
 			}
 			case WM_RBUTTONDOWN:
 			{
 				auto & eInputMouseButton = pEvent.eInputMouseButton;
-				eInputMouseButton.eventCode = E_SYS_EVENT_CODE_INPUT_MOUSE_BUTTON;
+				eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 				eInputMouseButton.cursorPos = cursorPos;
-				eInputMouseButton.buttonAction = SysMouseButtonActionType::Click;
-				eInputMouseButton.buttonID = SysMouseButtonID::Right;
+				eInputMouseButton.buttonAction = MouseButtonActionType::Click;
+				eInputMouseButton.buttonID = MouseButtonID::Right;
 				eInputMouseButton.buttonStateMask = _win32GetMouseButtonStateMask( pMSG.wParam );
 				break;
 			}
 			case WM_RBUTTONUP:
 			{
 				auto & eInputMouseButton = pEvent.eInputMouseButton;
-				eInputMouseButton.eventCode = E_SYS_EVENT_CODE_INPUT_MOUSE_BUTTON;
+				eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 				eInputMouseButton.cursorPos = cursorPos;
-				eInputMouseButton.buttonAction = SysMouseButtonActionType::Release;
-				eInputMouseButton.buttonID = SysMouseButtonID::Right;
+				eInputMouseButton.buttonAction = MouseButtonActionType::Release;
+				eInputMouseButton.buttonID = MouseButtonID::Right;
 				eInputMouseButton.buttonStateMask = _win32GetMouseButtonStateMask( pMSG.wParam );
 				break;
 			}
 			case WM_RBUTTONDBLCLK:
 			{
-				pEvent.commonData.eventCode = E_SYS_EVENT_CODE_UNDEFINED;
+				pEvent.commonData.eventCode = E_EVENT_CODE_UNDEFINED;
 				break;
 			}
 			case WM_MBUTTONDOWN:
 			{
 				auto & eInputMouseButton = pEvent.eInputMouseButton;
-				eInputMouseButton.eventCode = E_SYS_EVENT_CODE_INPUT_MOUSE_BUTTON;
+				eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 				eInputMouseButton.cursorPos = cursorPos;
-				eInputMouseButton.buttonAction = SysMouseButtonActionType::Click;
-				eInputMouseButton.buttonID = SysMouseButtonID::Middle;
+				eInputMouseButton.buttonAction = MouseButtonActionType::Click;
+				eInputMouseButton.buttonID = MouseButtonID::Middle;
 				eInputMouseButton.buttonStateMask = _win32GetMouseButtonStateMask( pMSG.wParam );
 				break;
 			}
 			case WM_MBUTTONUP:
 			{
 				auto & eInputMouseButton = pEvent.eInputMouseButton;
-				eInputMouseButton.eventCode = E_SYS_EVENT_CODE_INPUT_MOUSE_BUTTON;
+				eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 				eInputMouseButton.cursorPos = cursorPos;
-				eInputMouseButton.buttonAction = SysMouseButtonActionType::Release;
-				eInputMouseButton.buttonID = SysMouseButtonID::Middle;
+				eInputMouseButton.buttonAction = MouseButtonActionType::Release;
+				eInputMouseButton.buttonID = MouseButtonID::Middle;
 				eInputMouseButton.buttonStateMask = _win32GetMouseButtonStateMask( pMSG.wParam );
 				break;
 			}
 			case WM_MBUTTONDBLCLK:
 			{
-				pEvent.commonData.eventCode = E_SYS_EVENT_CODE_UNDEFINED;
+				pEvent.commonData.eventCode = E_EVENT_CODE_UNDEFINED;
 				break;
 			}
 			case WM_MOUSEWHEEL:
 			{
 				auto & eInputMouseScroll = pEvent.eInputMouseScroll;
-				pEvent.code = E_SYS_EVENT_CODE_INPUT_MOUSE_SCROLL;
-				eInputMouseScroll.eventCode = E_SYS_EVENT_CODE_INPUT_MOUSE_SCROLL;
+				pEvent.code = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
+				eInputMouseScroll.eventCode = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
 				eInputMouseScroll.scrollDelta.x = 0;
 				eInputMouseScroll.scrollDelta.y = static_cast<int32>( GET_WHEEL_DELTA_WPARAM( pMSG.wParam ) );
 				break;
@@ -320,180 +320,180 @@ namespace ts3
 			case WM_XBUTTONDOWN:
 			{
 				auto & eInputMouseButton = pEvent.eInputMouseButton;
-				eInputMouseButton.eventCode = E_SYS_EVENT_CODE_INPUT_MOUSE_BUTTON;
+				eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 				eInputMouseButton.cursorPos = cursorPos;
-				eInputMouseButton.buttonAction = SysMouseButtonActionType::Click;
-				eInputMouseButton.buttonID = ( GET_XBUTTON_WPARAM( pMSG.wParam ) == XBUTTON1 ) ? SysMouseButtonID::XB1 : SysMouseButtonID::XB2;
+				eInputMouseButton.buttonAction = MouseButtonActionType::Click;
+				eInputMouseButton.buttonID = ( GET_XBUTTON_WPARAM( pMSG.wParam ) == XBUTTON1 ) ? MouseButtonID::XB1 : MouseButtonID::XB2;
 				eInputMouseButton.buttonStateMask = _win32GetMouseButtonStateMask( pMSG.wParam );
 				break;
 			}
 			case WM_XBUTTONUP:
 			{
 				auto & eInputMouseButton = pEvent.eInputMouseButton;
-				eInputMouseButton.eventCode = E_SYS_EVENT_CODE_INPUT_MOUSE_BUTTON;
+				eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 				eInputMouseButton.cursorPos = cursorPos;
-				eInputMouseButton.buttonAction = SysMouseButtonActionType::Release;
-				eInputMouseButton.buttonID = ( GET_XBUTTON_WPARAM( pMSG.wParam ) == XBUTTON1 ) ? SysMouseButtonID::XB1 : SysMouseButtonID::XB2;
+				eInputMouseButton.buttonAction = MouseButtonActionType::Release;
+				eInputMouseButton.buttonID = ( GET_XBUTTON_WPARAM( pMSG.wParam ) == XBUTTON1 ) ? MouseButtonID::XB1 : MouseButtonID::XB2;
 				eInputMouseButton.buttonStateMask = _win32GetMouseButtonStateMask( pMSG.wParam );
 				break;
 			}
 			case WM_XBUTTONDBLCLK:
 			{
-				pEvent.commonData.eventCode = E_SYS_EVENT_CODE_UNDEFINED;
+				pEvent.commonData.eventCode = E_EVENT_CODE_UNDEFINED;
 				break;
 			}
 			case WM_MOUSEHWHEEL:
 			{
 				auto & eInputMouseScroll = pEvent.eInputMouseScroll;
-				eInputMouseScroll.eventCode = E_SYS_EVENT_CODE_INPUT_MOUSE_SCROLL;
+				eInputMouseScroll.eventCode = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
 				eInputMouseScroll.scrollDelta.x = static_cast<int32>( GET_WHEEL_DELTA_WPARAM( pMSG.wParam ) );
 				eInputMouseScroll.scrollDelta.y = 0;
 				break;
 			}
 		}
 
-		return pEvent.commonData.eventCode != E_SYS_EVENT_CODE_UNDEFINED;
+		return pEvent.commonData.eventCode != E_EVENT_CODE_UNDEFINED;
 	}
 
 #if defined( WM_TOUCH )
-	bool _win32TranslateInputEventTouch( SysEventInputState & pInputState, const MSG & pMSG, SysEvent & pEvent )
+	bool _win32TranslateInputEventTouch( EventInputState & pInputState, const MSG & pMSG, Event & pEvent )
 	{
 		return false;
 	}
 #endif
 
-	static const SysKeyCode asciiKeyCodeMap_08_7B[] =
+	static const KeyCode asciiKeyCodeMap_08_7B[] =
 	{
-		/* 0x0008 */ SysKeyCode::Backspace,
-		/* 0x00xx */ SysKeyCode::Tab,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Enter,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::ShiftLeft,
-		/* 0x00xx */ SysKeyCode::CtrlLeft,
-		/* 0x00xx */ SysKeyCode::AltLeft,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x0014 */ SysKeyCode::CapsLock,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x001B */ SysKeyCode::Escape,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x0020 */ SysKeyCode::Space,
-		/* 0x0021 */ SysKeyCode::PageUp,
-		/* 0x0022 */ SysKeyCode::PageDown,
-		/* 0x0023 */ SysKeyCode::End,
-		/* 0x0024 */ SysKeyCode::Home,
-		/* 0x0025 */ SysKeyCode::ArrowLeft,
-		/* 0x0026 */ SysKeyCode::ArrowUp,
-		/* 0x0027 */ SysKeyCode::ArrowRight,
-		/* 0x0028 */ SysKeyCode::ArrowDown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x002D */ SysKeyCode::Insert,
-		/* 0x002E */ SysKeyCode::Delete,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x0030 */ SysKeyCode::Num0,
-		/* 0x0031 */ SysKeyCode::Num1,
-		/* 0x0032 */ SysKeyCode::Num2,
-		/* 0x0033 */ SysKeyCode::Num3,
-		/* 0x0034 */ SysKeyCode::Num4,
-		/* 0x0035 */ SysKeyCode::Num5,
-		/* 0x0036 */ SysKeyCode::Num6,
-		/* 0x0037 */ SysKeyCode::Num7,
-		/* 0x0038 */ SysKeyCode::Num8,
-		/* 0x0039 */ SysKeyCode::Num9,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x0041 */ SysKeyCode::CharA,
-		/* 0x0042 */ SysKeyCode::CharB,
-		/* 0x0043 */ SysKeyCode::CharC,
-		/* 0x0044 */ SysKeyCode::CharD,
-		/* 0x0045 */ SysKeyCode::CharE,
-		/* 0x0046 */ SysKeyCode::CharF,
-		/* 0x0047 */ SysKeyCode::CharG,
-		/* 0x0048 */ SysKeyCode::CharH,
-		/* 0x0049 */ SysKeyCode::CharI,
-		/* 0x004A */ SysKeyCode::CharJ,
-		/* 0x004B */ SysKeyCode::CharK,
-		/* 0x004C */ SysKeyCode::CharL,
-		/* 0x004D */ SysKeyCode::CharM,
-		/* 0x004E */ SysKeyCode::CharN,
-		/* 0x004F */ SysKeyCode::CharO,
-		/* 0x0050 */ SysKeyCode::CharP,
-		/* 0x0051 */ SysKeyCode::CharQ,
-		/* 0x0052 */ SysKeyCode::CharR,
-		/* 0x0053 */ SysKeyCode::CharS,
-		/* 0x0054 */ SysKeyCode::CharT,
-		/* 0x0055 */ SysKeyCode::CharU,
-		/* 0x0056 */ SysKeyCode::CharV,
-		/* 0x0057 */ SysKeyCode::CharW,
-		/* 0x0058 */ SysKeyCode::CharX,
-		/* 0x0059 */ SysKeyCode::CharY,
-		/* 0x005A */ SysKeyCode::CharZ,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x00xx */ SysKeyCode::Unknown,
-		/* 0x0060 */ SysKeyCode::Numpad0,
-		/* 0x0061 */ SysKeyCode::Numpad1,
-		/* 0x0062 */ SysKeyCode::Numpad2,
-		/* 0x0063 */ SysKeyCode::Numpad3,
-		/* 0x0064 */ SysKeyCode::Numpad4,
-		/* 0x0065 */ SysKeyCode::Numpad5,
-		/* 0x0066 */ SysKeyCode::Numpad6,
-		/* 0x0067 */ SysKeyCode::Numpad7,
-		/* 0x0068 */ SysKeyCode::Numpad8,
-		/* 0x0069 */ SysKeyCode::Numpad9,
-		/* 0x006A */ SysKeyCode::NumpadMul,
-		/* 0x006B */ SysKeyCode::NumpadAdd,
-		/* 0x006C */ SysKeyCode::Unknown,
-		/* 0x006D */ SysKeyCode::NumpadSub,
-		/* 0x006E */ SysKeyCode::NumpadDot,
-		/* 0x006F */ SysKeyCode::NumpadDiv,
-		/* 0x0070 */ SysKeyCode::F1,
-		/* 0x0071 */ SysKeyCode::F2,
-		/* 0x0072 */ SysKeyCode::F3,
-		/* 0x0073 */ SysKeyCode::F4,
-		/* 0x0074 */ SysKeyCode::F5,
-		/* 0x0075 */ SysKeyCode::F6,
-		/* 0x0076 */ SysKeyCode::F7,
-		/* 0x0077 */ SysKeyCode::F8,
-		/* 0x0078 */ SysKeyCode::F9,
-		/* 0x0079 */ SysKeyCode::F10,
-		/* 0x007A */ SysKeyCode::F11,
-		/* 0x007B */ SysKeyCode::F12
+		/* 0x0008 */ KeyCode::Backspace,
+		/* 0x00xx */ KeyCode::Tab,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Enter,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::ShiftLeft,
+		/* 0x00xx */ KeyCode::CtrlLeft,
+		/* 0x00xx */ KeyCode::AltLeft,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x0014 */ KeyCode::CapsLock,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x001B */ KeyCode::Escape,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x0020 */ KeyCode::Space,
+		/* 0x0021 */ KeyCode::PageUp,
+		/* 0x0022 */ KeyCode::PageDown,
+		/* 0x0023 */ KeyCode::End,
+		/* 0x0024 */ KeyCode::Home,
+		/* 0x0025 */ KeyCode::ArrowLeft,
+		/* 0x0026 */ KeyCode::ArrowUp,
+		/* 0x0027 */ KeyCode::ArrowRight,
+		/* 0x0028 */ KeyCode::ArrowDown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x002D */ KeyCode::Insert,
+		/* 0x002E */ KeyCode::Delete,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x0030 */ KeyCode::Num0,
+		/* 0x0031 */ KeyCode::Num1,
+		/* 0x0032 */ KeyCode::Num2,
+		/* 0x0033 */ KeyCode::Num3,
+		/* 0x0034 */ KeyCode::Num4,
+		/* 0x0035 */ KeyCode::Num5,
+		/* 0x0036 */ KeyCode::Num6,
+		/* 0x0037 */ KeyCode::Num7,
+		/* 0x0038 */ KeyCode::Num8,
+		/* 0x0039 */ KeyCode::Num9,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x0041 */ KeyCode::CharA,
+		/* 0x0042 */ KeyCode::CharB,
+		/* 0x0043 */ KeyCode::CharC,
+		/* 0x0044 */ KeyCode::CharD,
+		/* 0x0045 */ KeyCode::CharE,
+		/* 0x0046 */ KeyCode::CharF,
+		/* 0x0047 */ KeyCode::CharG,
+		/* 0x0048 */ KeyCode::CharH,
+		/* 0x0049 */ KeyCode::CharI,
+		/* 0x004A */ KeyCode::CharJ,
+		/* 0x004B */ KeyCode::CharK,
+		/* 0x004C */ KeyCode::CharL,
+		/* 0x004D */ KeyCode::CharM,
+		/* 0x004E */ KeyCode::CharN,
+		/* 0x004F */ KeyCode::CharO,
+		/* 0x0050 */ KeyCode::CharP,
+		/* 0x0051 */ KeyCode::CharQ,
+		/* 0x0052 */ KeyCode::CharR,
+		/* 0x0053 */ KeyCode::CharS,
+		/* 0x0054 */ KeyCode::CharT,
+		/* 0x0055 */ KeyCode::CharU,
+		/* 0x0056 */ KeyCode::CharV,
+		/* 0x0057 */ KeyCode::CharW,
+		/* 0x0058 */ KeyCode::CharX,
+		/* 0x0059 */ KeyCode::CharY,
+		/* 0x005A */ KeyCode::CharZ,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x00xx */ KeyCode::Unknown,
+		/* 0x0060 */ KeyCode::Numpad0,
+		/* 0x0061 */ KeyCode::Numpad1,
+		/* 0x0062 */ KeyCode::Numpad2,
+		/* 0x0063 */ KeyCode::Numpad3,
+		/* 0x0064 */ KeyCode::Numpad4,
+		/* 0x0065 */ KeyCode::Numpad5,
+		/* 0x0066 */ KeyCode::Numpad6,
+		/* 0x0067 */ KeyCode::Numpad7,
+		/* 0x0068 */ KeyCode::Numpad8,
+		/* 0x0069 */ KeyCode::Numpad9,
+		/* 0x006A */ KeyCode::NumpadMul,
+		/* 0x006B */ KeyCode::NumpadAdd,
+		/* 0x006C */ KeyCode::Unknown,
+		/* 0x006D */ KeyCode::NumpadSub,
+		/* 0x006E */ KeyCode::NumpadDot,
+		/* 0x006F */ KeyCode::NumpadDiv,
+		/* 0x0070 */ KeyCode::F1,
+		/* 0x0071 */ KeyCode::F2,
+		/* 0x0072 */ KeyCode::F3,
+		/* 0x0073 */ KeyCode::F4,
+		/* 0x0074 */ KeyCode::F5,
+		/* 0x0075 */ KeyCode::F6,
+		/* 0x0076 */ KeyCode::F7,
+		/* 0x0077 */ KeyCode::F8,
+		/* 0x0078 */ KeyCode::F9,
+		/* 0x0079 */ KeyCode::F10,
+		/* 0x007A */ KeyCode::F11,
+		/* 0x007B */ KeyCode::F12
 	};
 
 
-	static const SysKeyCode asciiKeyCodeMap_A0_A5[] =
+	static const KeyCode asciiKeyCodeMap_A0_A5[] =
 	{
-		/* 0x00A0 */ SysKeyCode::ShiftLeft,
-		/* 0x00A1 */ SysKeyCode::ShiftRight,
-		/* 0x00A2 */ SysKeyCode::CtrlLeft,
-		/* 0x00A3 */ SysKeyCode::CtrlRight,
-		/* 0x00A4 */ SysKeyCode::AltLeft,
-		/* 0x00A5 */ SysKeyCode::AltRight,
+		/* 0x00A0 */ KeyCode::ShiftLeft,
+		/* 0x00A1 */ KeyCode::ShiftRight,
+		/* 0x00A2 */ KeyCode::CtrlLeft,
+		/* 0x00A3 */ KeyCode::CtrlRight,
+		/* 0x00A4 */ KeyCode::AltLeft,
+		/* 0x00A5 */ KeyCode::AltRight,
 	};
 
-	SysKeyCode _win32GetSystemKeyCode( WPARAM pWparam )
+	KeyCode _win32GettemKeyCode( WPARAM pWparam )
 	{
 		if ( ( pWparam >= 0x0008 ) && ( pWparam <= 0x007B ) )
 		{
@@ -507,12 +507,12 @@ namespace ts3
 			return asciiKeyCodeMap_A0_A5[baseIndex];
 		}
 
-		return SysKeyCode::Unknown;
+		return KeyCode::Unknown;
 	}
 
-	Bitmask<SysMouseButtonFlagBits> _win32GetMouseButtonStateMask( WPARAM pWparam )
+	Bitmask<MouseButtonFlagBits> _win32GetMouseButtonStateMask( WPARAM pWparam )
 	{
-		return static_cast<SysMouseButtonFlagBits>( static_cast<uint32>( pWparam ) & SYS_MOUSE_BUTTON_FLAG_ALL_BIT );
+		return static_cast<MouseButtonFlagBits>( static_cast<uint32>( pWparam ) & SYS_MOUSE_BUTTON_FLAG_ALL_BIT );
 	}
 
 	LRESULT __stdcall _win32EventSourceIdleEventProc( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam )
@@ -531,7 +531,7 @@ namespace ts3
 			systemEvent.wParam = pWparam;
 			systemEvent.lParam = pLparam;
 
-			auto * eventController = reinterpret_cast<SysEventController *>( windowUserData );
+			auto * eventController = reinterpret_cast<EventController *>( windowUserData );
 			_win32TranslateAndDispatch( *eventController, systemEvent );
 		}
 

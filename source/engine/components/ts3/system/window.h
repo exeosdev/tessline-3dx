@@ -7,38 +7,40 @@
 
 namespace ts3
 {
+namespace system
+{
 
-	ts3DeclareSysHandle( SysDisplayManager );
-	ts3DeclareSysHandle( SysWindow );
-	ts3DeclareSysHandle( SysWindowManager );
+	ts3DeclareHandle( DisplayManager );
+	ts3DeclareHandle( Window );
+	ts3DeclareHandle( WindowManager );
 
-	struct SysWindowCreateInfo;
-	struct SysWindowNativeData;
+	struct WindowCreateInfo;
+	struct WindowNativeData;
 
-	class SysDisplayManager;
-	class SysEventController;
+	class DisplayManager;
+	class EventController;
 
-	struct SysWindowCreateInfo
+	struct WindowCreateInfo
 	{
-		SysWindowProperties properties;
+		WindowProperties properties;
 	};
 
-	class SysWindowManager : public SysBaseObject
+	class WindowManager : public BaseObject
 	{
 	public:
-		SysDisplayManagerHandle const mDisplayManager;
+		DisplayManagerHandle const mDisplayManager;
 
-		explicit SysWindowManager( SysDisplayManagerHandle pDisplayManager ) noexcept;
-		virtual ~SysWindowManager() noexcept;
+		explicit WindowManager( DisplayManagerHandle pDisplayManager ) noexcept;
+		virtual ~WindowManager() noexcept;
 
-		static SysWindowManagerHandle create( SysDisplayManagerHandle pDisplayManager );
+		static WindowManagerHandle create( DisplayManagerHandle pDisplayManager );
 
-		SysWindowHandle createWindow( const SysWindowCreateInfo & pCreateInfo );
+		WindowHandle createWindow( const WindowCreateInfo & pCreateInfo );
 
-		bool validateWindowGeometry( SysWindowGeometry & pWindowGeometry ) const;
+		bool validateWindowGeometry( WindowGeometry & pWindowGeometry ) const;
 
-		TS3_PCL_ATTR_NO_DISCARD SysWindowSize queryDisplaySize() const;
-		TS3_PCL_ATTR_NO_DISCARD SysWindowSize queryMinWindowSize() const;
+		TS3_PCL_ATTR_NO_DISCARD WindowSize queryDisplaySize() const;
+		TS3_PCL_ATTR_NO_DISCARD WindowSize queryMinWindowSize() const;
 
 	private:
 		void _sysInitialize();
@@ -46,33 +48,34 @@ namespace ts3
 	};
 
 
-	TS3_SYSTEM_API SysWindowM
+	TS3_SYSTEM_API WindowM
 
-	TS3_SYSTEM_API SysWindowHandle sysCreateWindow( SysWindowManagerHandle pWindowManager, const SysWindowCreateInfo & pCreateInfo );
+	TS3_SYSTEM_API WindowHandle sysCreateWindow( WindowManagerHandle pWindowManager, const WindowCreateInfo & pCreateInfo );
 
-	class SysWindow : public SysBaseObject, public SysEventSource
+	class Window : public BaseObject, public EventSource
 	{
-		friend class SysWindowManager;
+		friend class WindowManager;
 
 	public:
-		SysWindowNativeData mNativeData;
-		SysWindowManagerHandle const mWindowManager;
+		WindowNativeData mNativeData;
+		WindowManagerHandle const mWindowManager;
 
-		explicit SysWindow( SysWindowManagerHandle pWindowManager ) noexcept;
-		virtual ~SysWindow() noexcept;
+		explicit Window( WindowManagerHandle pWindowManager ) noexcept;
+		virtual ~Window() noexcept;
 
-		static SysWindowHandle create( SysWindowManagerHandle pWindowManager, const SysWindowCreateInfo & pCreateInfo );
+		static WindowHandle create( WindowManagerHandle pWindowManager, const WindowCreateInfo & pCreateInfo );
 
-		TS3_PCL_ATTR_NO_DISCARD SysWindowSize getClientAreaSize() const;
-		TS3_PCL_ATTR_NO_DISCARD SysWindowSize getFrameSize() const;
+		TS3_PCL_ATTR_NO_DISCARD WindowSize getClientAreaSize() const;
+		TS3_PCL_ATTR_NO_DISCARD WindowSize getFrameSize() const;
 
 	private:
-		void _sysInitialize( const SysWindowCreateInfo & pCreateInfo );
+		void _sysInitialize( const WindowCreateInfo & pCreateInfo );
 		void _sysRelease() noexcept;
-		void _sysGetClientAreaSize( SysWindowSize & pClientAreaSize ) const;
-		void _sysGetFrameSize( SysWindowSize & pFrameSize ) const;
+		void _sysGetClientAreaSize( WindowSize & pClientAreaSize ) const;
+		void _sysGetFrameSize( WindowSize & pFrameSize ) const;
 	};
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_WINDOW_H__

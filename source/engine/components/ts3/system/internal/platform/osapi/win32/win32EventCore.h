@@ -8,12 +8,12 @@
 namespace ts3
 {
 
-	using SysNativeEvent = MSG;
+	using NativeEvent = MSG;
 
-	struct SysEventSourceNativeData
+	struct EventSourceNativeData
 	{
 		// Handle of the control which is the event emitter.
-		// System event emitter is strictly designed for windows and GL surfaces.
+		// tem event emitter is strictly designed for windows and GL surfaces.
 		HWND hwnd = nullptr;
 	};
 

@@ -9,38 +9,38 @@ namespace ts3
 
     void _androidOnAppCommand( AndroidAppState * pAppState, int32_t pCommand );
     int32_t _androidOnInputEvent( AndroidAppState * pAppState, AInputEvent * pInputEvent );
-	bool _androidTranslateAndDispatch( SysEventController & pEventController, ANativeEvent * pANativeEvent );
-    bool _androidTranslateAppCommand( AndroidAppState * pAppState, int32_t pCommand, SysEvent & pEvent );
-    bool _androidTranslateInputEvent( AndroidAppState * pAppState, AInputEvent * pInputEvent, SysEvent & pEvent );
-    bool _androidTranslateInputEventKey( AndroidAppState * pAppState, AInputEvent * pInputEvent, SysEvent & pEvent );
-    bool _androidTranslateInputEventTouch( AndroidAppState * pAppState, AInputEvent * pInputEvent, SysEvent & pEvent );
+	bool _androidTranslateAndDispatch( EventController & pEventController, ANativeEvent * pANativeEvent );
+    bool _androidTranslateAppCommand( AndroidAppState * pAppState, int32_t pCommand, Event & pEvent );
+    bool _androidTranslateInputEvent( AndroidAppState * pAppState, AInputEvent * pInputEvent, Event & pEvent );
+    bool _androidTranslateInputEventKey( AndroidAppState * pAppState, AInputEvent * pInputEvent, Event & pEvent );
+    bool _androidTranslateInputEventTouch( AndroidAppState * pAppState, AInputEvent * pInputEvent, Event & pEvent );
 
 
-	void SysEventController::_sysInitialize()
+	void EventController::_sysInitialize()
 	{
-		auto * appState = mSystemContext->nativeData.androidAppState;
+		auto * appState = mtemContext->nativeData.androidAppState;
 		appState->onAppCmd = _androidOnAppCommand;
 		appState->onInputEvent = _androidOnInputEvent;
 		appState->setUserData( SYS_ANDROID_APP_STATE_USER_DATA_INDEX_EVENT_CONTROLLER, &pEventController );
 	}
 
-	void SysEventController::_sysRelease()
+	void EventController::_sysRelease()
 	{}
 
-	void SysEventController::_sysAddEventSource( SysEventSource & pEventSource )
+	void EventController::_sysAddEventSource( EventSource & pEventSource )
 	{}
 
-	void SysEventController::_sysRemoveEventSource( SysEventSource & pEventSource )
+	void EventController::_sysRemoveEventSource( EventSource & pEventSource )
 	{}
 
-	void SysEventController::_sysDispatchNextEvent()
+	void EventController::_sysDispatchNextEvent()
 	{
 		// Note for Android event dispatching:
 		// We use a modified native_app_glue code from the NDK to handle the Activity <--> C++ flow.
 		// AndroidAppState (modified android_app struct) is the basic entity used to store any internal
 		// data (to avoid introducing our custom types into the low-level android stuff).
 
-		// AndroidAppState is always obtainable through SysContext - which is accessible everywhere.
+		// AndroidAppState is always obtainable through Context - which is accessible everywhere.
 		auto * appState = pEventController.systemContext->nativeData->androidAppState;
 
 		int events = 0;
@@ -69,7 +69,7 @@ namespace ts3
 		}
 	}
 
-	void SysEventController::_sysDispatchNextEventWait()
+	void EventController::_sysDispatchNextEventWait()
 	{
 		auto * appState = pEventController.systemContext->nativeData->androidAppState;
 		int events = 0;
@@ -90,7 +90,7 @@ namespace ts3
 		}
 	}
 
-	void SysEventController::_sysDispatchQueuedEvents()
+	void EventController::_sysDispatchQueuedEvents()
 	{
 		auto * appState = pEventController.systemContext->nativeData->androidAppState;
 		int events = 0;
@@ -111,7 +111,7 @@ namespace ts3
 		}
 	}
 
-	void SysEventController::_sysDispatchQueuedEventsWait()
+	void EventController::_sysDispatchQueuedEventsWait()
 	{
 		auto * appState = pEventController.systemContext->nativeData->androidAppState;
 		int events = 0;
@@ -142,9 +142,9 @@ namespace ts3
         // Event controller is always accessible through the user data within AndroidAppState.
         // We set it inside nativeInitializeEventController(). Events may be emitted after the
         // framework state is released, so the null-check is necessary.
-        if( auto * eventController = pAppState->getUserDataAs<SysEventController>( SYS_ANDROID_APP_STATE_USER_DATA_INDEX_EVENT_CONTROLLER ) )
+        if( auto * eventController = pAppState->getUserDataAs<EventController>( SYS_ANDROID_APP_STATE_USER_DATA_INDEX_EVENT_CONTROLLER ) )
         {
-            SysEventCoreImplProxy::internalTranslateAndDispatch( *eventController, androidEvent );
+            EventCoreImplProxy::internalTranslateAndDispatch( *eventController, androidEvent );
         }
     }
 
@@ -154,9 +154,9 @@ namespace ts3
         androidEvent.type = ANativeEventType::Input;
         androidEvent.eInputEvent = pInputEvent;
 
-        if( auto * eventController = pAppState->getUserDataAs<SysEventController>( SYS_ANDROID_APP_STATE_USER_DATA_INDEX_EVENT_CONTROLLER ) )
+        if( auto * eventController = pAppState->getUserDataAs<EventController>( SYS_ANDROID_APP_STATE_USER_DATA_INDEX_EVENT_CONTROLLER ) )
         {
-            if( SysEventCoreImplProxy::internalTranslateAndDispatch( *eventController, androidEvent ) )
+            if( EventCoreImplProxy::internalTranslateAndDispatch( *eventController, androidEvent ) )
             {
                 return 1;
             }
@@ -165,11 +165,11 @@ namespace ts3
         return 0;
     }
 
-	bool _androidTranslateAndDispatch( SysEventController & pEventController, ANativeEvent * pANativeEvent )
+	bool _androidTranslateAndDispatch( EventController & pEventController, ANativeEvent * pANativeEvent )
 	{
 		auto * androidAppState = pEventController.systemContext->nativeData->androidAppState;
 
-		SysEvent sysEvent;
+		Event sysEvent;
 
 		if( pNativeEvent.type == ANativeEventType::AppCommand )
 		{
@@ -191,9 +191,9 @@ namespace ts3
 		return false;
 	}
 
-    bool _androidTranslateAppCommand( AndroidAppState * pAppState, int32_t pCommand, SysEvent & pEvent )
+    bool _androidTranslateAppCommand( AndroidAppState * pAppState, int32_t pCommand, Event & pEvent )
     {
-        pEvent.code = E_SYS_EVENT_CODE_UNDEFINED;
+        pEvent.code = E_EVENT_CODE_UNDEFINED;
 
         switch( pCommand )
         {
@@ -205,19 +205,19 @@ namespace ts3
             {
                 if( pAppState->window != nullptr )
                 {
-                    pEvent.code = E_SYS_EVENT_CODE_APP_ACTIVITY_DISPLAY_READY;
+                    pEvent.code = E_EVENT_CODE_APP_ACTIVITY_DISPLAY_READY;
 
                 }
                 break;
             }
             case APP_CMD_TERM_WINDOW:
             {
-                pEvent.code = E_SYS_EVENT_CODE_WINDOW_UPDATE_CLOSE;
+                pEvent.code = E_EVENT_CODE_WINDOW_UPDATE_CLOSE;
                 break;
             }
             case APP_CMD_WINDOW_RESIZED:
             {
-                pEvent.code = E_SYS_EVENT_CODE_WINDOW_UPDATE_RESIZE;
+                pEvent.code = E_EVENT_CODE_WINDOW_UPDATE_RESIZE;
                 break;
             }
             case APP_CMD_WINDOW_REDRAW_NEEDED:
@@ -227,12 +227,12 @@ namespace ts3
             }
             case APP_CMD_GAINED_FOCUS:
             {
-                pEvent.code = E_SYS_EVENT_CODE_APP_ACTIVITY_FOCUS_GAINED;
+                pEvent.code = E_EVENT_CODE_APP_ACTIVITY_FOCUS_GAINED;
                 break;
             }
             case APP_CMD_LOST_FOCUS:
             {
-                pEvent.code = E_SYS_EVENT_CODE_APP_ACTIVITY_FOCUS_LOST;
+                pEvent.code = E_EVENT_CODE_APP_ACTIVITY_FOCUS_LOST;
                 break;
             }
             case APP_CMD_CONFIG_CHANGED:
@@ -242,12 +242,12 @@ namespace ts3
             }
             case APP_CMD_START:
             {
-                pEvent.code = E_SYS_EVENT_CODE_APP_ACTIVITY_START;
+                pEvent.code = E_EVENT_CODE_APP_ACTIVITY_START;
                 break;
             }
             case APP_CMD_RESUME:
             {
-                pEvent.code = E_SYS_EVENT_CODE_APP_ACTIVITY_RESUME;
+                pEvent.code = E_EVENT_CODE_APP_ACTIVITY_RESUME;
                 break;
             }
             case APP_CMD_SAVE_STATE:
@@ -256,22 +256,22 @@ namespace ts3
             }
             case APP_CMD_PAUSE:
             {
-                pEvent.code = E_SYS_EVENT_CODE_APP_ACTIVITY_PAUSE;
+                pEvent.code = E_EVENT_CODE_APP_ACTIVITY_PAUSE;
                 break;
             }
             case APP_CMD_STOP:
             {
-                pEvent.code = E_SYS_EVENT_CODE_APP_ACTIVITY_STOP;
+                pEvent.code = E_EVENT_CODE_APP_ACTIVITY_STOP;
                 break;
             }
             case APP_CMD_DESTROY:
             {
-                pEvent.code = E_SYS_EVENT_CODE_APP_ACTIVITY_QUIT;
+                pEvent.code = E_EVENT_CODE_APP_ACTIVITY_QUIT;
                 break;
             }
             case APP_CMD_USER_DESTROY_REQUESTED:
             {
-                pEvent.code = E_SYS_EVENT_CODE_APP_ACTIVITY_TERMINATE;
+                pEvent.code = E_EVENT_CODE_APP_ACTIVITY_TERMINATE;
                 break;
             }
             default:
@@ -283,7 +283,7 @@ namespace ts3
         return false;
     }
 
-    bool _androidTranslateInputEvent( AndroidAppState * pAppState, AInputEvent * pInputEvent, SysEvent & pEvent )
+    bool _androidTranslateInputEvent( AndroidAppState * pAppState, AInputEvent * pInputEvent, Event & pEvent )
     {
         auto eventType = AInputEvent_getType( pInputEvent );
 
@@ -299,12 +299,12 @@ namespace ts3
         return false;
     }
 
-    bool _androidTranslateInputEventKey( AndroidAppState * pAppState, AInputEvent * pInputEvent, SysEvent & pEvent )
+    bool _androidTranslateInputEventKey( AndroidAppState * pAppState, AInputEvent * pInputEvent, Event & pEvent )
     {
         return false;
     }
 
-    bool _androidTranslateInputEventTouch( AndroidAppState * pAppState, AInputEvent * pInputEvent, SysEvent & pEvent )
+    bool _androidTranslateInputEventTouch( AndroidAppState * pAppState, AInputEvent * pInputEvent, Event & pEvent )
     {
         return false;
     }

@@ -1,27 +1,27 @@
 
-#include <ts3/system/windowSystem.h>
+#include <ts3/system/windowtem.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 namespace ts3
 {
 
-	void SysWindowManager::_sysInitialize()
+	void WindowManager::_sysInitialize()
 	{}
 
-	void SysWindowManager::_sysRelease() noexcept
+	void WindowManager::_sysRelease() noexcept
 	{}
 
 
-	void SysWindow::_sysInitialize( const SysWindowCreateInfo & pCreateInfo )
+	void Window::_sysInitialize( const WindowCreateInfo & pCreateInfo )
 	{}
 
-	void SysWindow::_sysRelease() noexcept
+	void Window::_sysRelease() noexcept
 	{}
 
-	void SysWindow::_sysGetClientAreaSize( SysWindowSize & pClientAreaSize ) const
+	void Window::_sysGetClientAreaSize( WindowSize & pClientAreaSize ) const
 	{}
 
-	void SysWindow::_sysGetFrameSize( SysWindowSize & pFrameSize ) const
+	void Window::_sysGetFrameSize( WindowSize & pFrameSize ) const
 	{}
 
 }

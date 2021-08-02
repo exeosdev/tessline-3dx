@@ -14,29 +14,32 @@
 
 namespace ts3
 {
+namespace system
+{
 
-    struct SysGLDriver
+    struct GfxGLDriver
     {
-        SysGLDriverNativeData nativeData;
+        GfxGLDriverNativeData nativeData;
     };
 
-    struct SysGLSurface
+    struct GfxGLSurface
     {
-        SysGLSurfaceNativeData nativeData;
+        GfxGLSurfaceNativeData nativeData;
 
-        SysGLDriver * coreDevice;
+        GfxGLDriver * coreDevice;
     };
 
-    struct SysGLRenderContext
+    struct GfxGLRenderContext
     {
-        SysGLRenderContextNativeData nativeData;
+        GfxGLRenderContextNativeData nativeData;
 
-        SysGLDriver * coreDevice;
+        GfxGLDriver * coreDevice;
     };
 
 
-    TS3_PCL_ATTR_NO_DISCARD SysGLDriverHandle sysCreateGLDriver();
+    TS3_PCL_ATTR_NO_DISCARD GfxGLDriverHandle sysCreateGLDriver();
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_GFX_OPENGL_NATIVE_H__

@@ -6,15 +6,17 @@
 
 namespace ts3
 {
+namespace system
+{
 
-    struct SysWindowNativeData
+    struct WindowNativeData
     {
         Display * display = nullptr;
         Window xWindow = XID_None;
         Colormap xColormap = XID_None;
     };
 
-    struct SysX11WindowCreateInfo
+    struct X11WindowCreateInfo
     {
         Display * display = nullptr;
         int screenIndex = -1;
@@ -25,12 +27,13 @@ namespace ts3
         bool fullscreenMode = false;
     };
 
-    using SysX11WindowNativeData = SysWindowNativeData;
+    using X11WindowNativeData = WindowNativeData;
 
-	void sysX11CreateWindow( SysX11WindowNativeData & pWindowNativeData, const SysX11WindowCreateInfo & pCreateInfo );
-	void sysX11UpdateNewWindowState( SysX11WindowNativeData & pWindowNativeData, const SysX11WindowCreateInfo & pCreateInfo );
-	void sysX11DestroyWindow( SysX11WindowNativeData & pWindowNativeData );
+	void sysX11CreateWindow( X11WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo );
+	void sysX11UpdateNewWindowState( X11WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo );
+	void sysX11DestroyWindow( X11WindowNativeData & pWindowNativeData );
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_X11_WINDOW_H__

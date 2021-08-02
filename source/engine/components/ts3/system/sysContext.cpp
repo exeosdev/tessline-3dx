@@ -4,17 +4,17 @@
 namespace ts3
 {
 
-	SysContext::SysContext() noexcept = default;
+	Context::Context() noexcept = default;
 
-	SysContext::~SysContext() noexcept
+	Context::~Context() noexcept
 	{
 		_sysRelease();
 	}
 
 
-	SysContextHandle sysCreateContext( const SysContextCreateInfo & pCreateInfo )
+	ContextHandle sysCreateContext( const ContextCreateInfo & pCreateInfo )
 	{
-		auto sysContext = std::make_shared<SysContext>();
+		auto sysContext = std::make_shared<Context>();
 		sysContext->_sysInitialize( pCreateInfo );
 		return sysContext;
 	}

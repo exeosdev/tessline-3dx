@@ -15,15 +15,18 @@
 
 namespace ts3
 {
+namespace system
+{
 
-    struct SysWmWindow
+    struct WmWindow
     {
     };
 
-    struct SysWmWindowManager
+    struct WmWindowManager
     {
     };
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_WINDOW_NATIVE_H__

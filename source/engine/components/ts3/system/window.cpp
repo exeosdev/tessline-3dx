@@ -1,5 +1,5 @@
 
-#include "windowSystem.h"
+#include "windowtem.h"
 #include "displayManager.h"
 #include "eventCore.h"
 #include <ts3/stdext/utilities.h>
@@ -7,79 +7,79 @@
 namespace ts3
 {
 
-	SysWindowManager::SysWindowManager( SysDisplayManagerHandle pDisplayManager ) noexcept
-	: SysBaseObject( pDisplayManager->mSysContext )
+	WindowManager::WindowManager( DisplayManagerHandle pDisplayManager ) noexcept
+	: BaseObject( pDisplayManager->mContext )
 	, mDisplayManager( pDisplayManager )
 	{}
 
-	SysWindowManager::~SysWindowManager() noexcept
+	WindowManager::~WindowManager() noexcept
 	{
 		_sysRelease();
 	}
 
-	SysWindowManagerHandle SysWindowManager::create( SysDisplayManagerHandle pDisplayManager )
+	WindowManagerHandle WindowManager::create( DisplayManagerHandle pDisplayManager )
 	{
-		auto windowManager = sysCreateObject<SysWindowManager>( pDisplayManager );
+		auto windowManager = sysCreateObject<WindowManager>( pDisplayManager );
 		windowManager->_sysInitialize();
 		return windowManager;
 	}
 
-	SysWindowHandle SysWindowManager::createWindow( const SysWindowCreateInfo & pCreateInfo )
+	WindowHandle WindowManager::createWindow( const WindowCreateInfo & pCreateInfo )
 	{
-		SysWindowCreateInfo validatedCreateInfo;
+		WindowCreateInfo validatedCreateInfo;
 		validatedCreateInfo.properties = pCreateInfo.properties;
 
 		// Validate the form - position and size using requested style and display properties.
 		validateWindowGeometry( validatedCreateInfo.properties.geometry );
 
-		return SysWindow::create( getHandle<SysWindowManager>(), validatedCreateInfo );
+		return Window::create( getHandle<WindowManager>(), validatedCreateInfo );
 	}
 
-	bool SysWindowManager::validateWindowGeometry( SysWindowGeometry & pWindowGeometry ) const
+	bool WindowManager::validateWindowGeometry( WindowGeometry & pWindowGeometry ) const
 	{
 		return mDisplayManager->validateWindowGeometry( pWindowGeometry );
 	}
 
-	SysWindowSize SysWindowManager::queryDisplaySize() const
+	WindowSize WindowManager::queryDisplaySize() const
 	{
 		return mDisplayManager->queryDisplaySize();
 	}
 
-	SysWindowSize SysWindowManager::queryMinWindowSize() const
+	WindowSize WindowManager::queryMinWindowSize() const
 	{
 		return mDisplayManager->queryDisplaySize();
 	}
 
 
 
-	SysWindow::SysWindow( SysWindowManagerHandle pWindowManager ) noexcept
-	: SysBaseObject( pWindowManager->mSysContext )
-	, SysEventSource( mNativeData )
+	Window::Window( WindowManagerHandle pWindowManager ) noexcept
+	: BaseObject( pWindowManager->mContext )
+	, EventSource( mNativeData )
 	, mWindowManager( pWindowManager )
 	{}
 
-	SysWindow::~SysWindow() noexcept
+	Window::~Window() noexcept
 	{
 		_sysRelease();
 	}
 
-	SysWindowHandle SysWindow::create( SysWindowManagerHandle pWindowManager, const SysWindowCreateInfo & pCreateInfo )
+	WindowHandle Window::create( WindowManagerHandle pWindowManager, const WindowCreateInfo & pCreateInfo )
 	{
-		auto sysWindow = sysCreateObject<SysWindow>( pWindowManager );
+		auto sysWindow = sysCreateObject<Window>( pWindowManager );
 		sysWindow->_sysInitialize( pCreateInfo );
 		return sysWindow;
 	}
 
-	SysWindowSize SysWindow::getClientAreaSize() const
+	WindowSize Window::getClientAreaSize() const
 	{
-		SysWindowSize clientAreaSize;
+		WindowSize clientAreaSize;
 		_sysGetClientAreaSize( clientAreaSize );
 		return clientAreaSize;
 	}
 
-	SysWindowSize SysWindow::getFrameSize() const
+	WindowSize Window::getFrameSize() const
 	{
-		SysWindowSize frameSize;
+		WindowSize frameSize;
 		_sysGetFrameSize( frameSize );
 		return frameSize;
 	}

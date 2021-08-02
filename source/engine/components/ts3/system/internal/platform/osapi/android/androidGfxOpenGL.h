@@ -11,15 +11,15 @@
 namespace ts3
 {
 
-	struct SysGLSurfaceNativeData : public EGLSurfaceNativeData, public SysEventSourceNativeData
+	struct GfxGLSurfaceNativeData : public EGLSurfaceNativeData, public EventSourceNativeData
 	{
 	};
 
-	struct SysGLRenderContextNativeData : public EGLRenderContextNativeData
+	struct GfxGLRenderContextNativeData : public EGLRenderContextNativeData
 	{
 	};
 
-	struct SysGLDriverNativeData : public EGLDriverNativeData
+	struct GfxGLDriverNativeData : public EGLDriverNativeData
 	{
 	};
 

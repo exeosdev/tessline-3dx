@@ -16,8 +16,8 @@ set( TS3_SYSTEM_SRC_FILES
         "visual.h"
         "visual.cpp"
         "windowDefs.h"
-        "windowSystem.h"
-        "windowSystem.cpp"
+        "windowtem.h"
+        "windowtem.cpp"
         )
 
 if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_WINFAMILY} )
@@ -28,8 +28,8 @@ if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_WINFAMILY} )
             "internal/platform/shared/winfamily/winfamilyCommon.h"
             "internal/platform/shared/winfamily/winfamilyPerfCounter.h"
             "internal/platform/shared/winfamily/winfamilyPerfCounter.cpp"
-            "internal/platform/shared/winfamily/winfamilySystemUtils.h"
-            "internal/platform/shared/winfamily/winfamilySystemUtils.cpp"
+            "internal/platform/shared/winfamily/winfamilytemUtils.h"
+            "internal/platform/shared/winfamily/winfamilytemUtils.cpp"
             )
 endif()
 
@@ -70,7 +70,7 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
             "internal/platform/osapi/win32/win32EventCore.cpp"
             "internal/platform/osapi/win32/win32OpenGL.h"
             "internal/platform/osapi/win32/win32OpenGL.cpp"
-            "internal/platform/osapi/win32/win32SystemUtils.h"
+            "internal/platform/osapi/win32/win32temUtils.h"
             "internal/platform/osapi/win32/win32Window.h"
             "internal/platform/osapi/win32/win32Window.cpp"
             )

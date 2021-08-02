@@ -1,25 +1,25 @@
 
-#include <ts3/system/windowSystem.h>
+#include <ts3/system/windowtem.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
 namespace ts3
 {
 
-	void SysWindowManager::_sysInitialize()
+	void WindowManager::_sysInitialize()
 	{
-		auto & scNativeData = mSysContext->mNativeData;
+		auto & scNativeData = mContext->mNativeData;
 		scNativeData.wmpDeleteWindow = XInternAtom( scNativeData.display, "WM_DELETE_WINDOW", False );
 	}
 
-	void SysWindowManager::_sysRelease() noexcept
+	void WindowManager::_sysRelease() noexcept
 	{}
 
 
-	void SysWindow::_sysInitialize( const SysWindowCreateInfo & pCreateInfo )
+	void Window::_sysInitialize( const WindowCreateInfo & pCreateInfo )
 	{
-		auto & scNativeData = mSysContext->mNativeData;
+		auto & scNativeData = mContext->mNativeData;
 
-		SysX11WindowCreateInfo x11WindowCreateInfo;
+		X11WindowCreateInfo x11WindowCreateInfo;
 		x11WindowCreateInfo.commonProperties = pCreateInfo.properties;
 		x11WindowCreateInfo.display = scNativeData.display;
 		x11WindowCreateInfo.screenIndex = scNativeData.screenIndex;
@@ -32,10 +32,10 @@ namespace ts3
 		sysX11UpdateNewWindowState( mNativeData, x11WindowCreateInfo );
 	}
 
-	void SysWindow::_sysRelease() noexcept
+	void Window::_sysRelease() noexcept
 	{}
 
-	void SysWindow::_sysGetClientAreaSize( SysWindowSize & pClientAreaSize ) const
+	void Window::_sysGetClientAreaSize( WindowSize & pClientAreaSize ) const
 	{
 		XWindowAttributes windowAttributes;
 		XGetWindowAttributes( mNativeData.display,
@@ -46,7 +46,7 @@ namespace ts3
 		pClientAreaSize.y = windowAttributes.height - windowAttributes.border_width;
 	}
 
-	void SysWindow::_sysGetFrameSize( SysWindowSize & pFrameSize ) const
+	void Window::_sysGetFrameSize( WindowSize & pFrameSize ) const
 	{
 		XWindowAttributes windowAttributes;
 		XGetWindowAttributes( mNativeData.display,
@@ -58,7 +58,7 @@ namespace ts3
 	}
 
 
-	void sysX11CreateWindow( SysWindowNativeData & pWindowNativeData, const SysX11WindowCreateInfo & pCreateInfo )
+	void sysX11CreateWindow( WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo )
 	{
 		// Colormap for our window.
 		Colormap colormap = XCreateColormap( pCreateInfo.display,
@@ -120,7 +120,7 @@ namespace ts3
 		pWindowNativeData.colormap = colormap;
 	}
 
-	void sysX11UpdateNewWindowState( SysWindowNativeData & pWindowNativeData, const SysX11WindowCreateInfo & pCreateInfo )
+	void sysX11UpdateNewWindowState( WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo )
 	{
 		XMapWindow( pWindowNativeData.display, pWindowNativeData.xwindow );
 
@@ -135,7 +135,7 @@ namespace ts3
 		XFlush( pWindowNativeData.display );
 	}
 
-	void sysX11DestroyWindow( SysWindowNativeData & pWindowNativeData )
+	void sysX11DestroyWindow( WindowNativeData & pWindowNativeData )
 	{
 		XDestroyWindow( pWindowNativeData.display, pWindowNativeData.xwindow );
 		pWindowNativeData.xwindow = cvXIDNone;

@@ -7,51 +7,53 @@
 
 namespace ts3
 {
+namespace system
+{
 
-	template <sys_event_code_value_t tpEventCode>
-	struct SysEvtApp : public SysEvtBase
+	template <event_code_value_t tpEventCode>
+	struct EvtApp : public EvtBase
 	{
 	public:
-		SysEvtApp()
-			: SysEvtBase( tpEventCode )
+		EvtApp()
+			: EvtBase( tpEventCode )
 		{}
 
-		static_assert( ExfEnumGetEventCodeBaseType( tpEventCode ) == ESysEventBaseType::App );
+		static_assert( ExfEnumGetEventCodeBaseType( tpEventCode ) == EEventBaseType::App );
 	};
 
-	struct SysEvtAppActivityDisplayReady : public SysEvtApp<E_SYS_EVENT_CODE_APP_ACTIVITY_DISPLAY_READY>
+	struct EvtAppActivityDisplayReady : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_DISPLAY_READY>
 	{
 	};
 
-	struct SysEvtAppActivityFocusGained : public SysEvtApp<E_SYS_EVENT_CODE_APP_ACTIVITY_FOCUS_GAINED>
+	struct EvtAppActivityFocusGained : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_FOCUS_GAINED>
 	{
 	};
 
-	struct SysEvtAppActivityFocusLost : public SysEvtApp<E_SYS_EVENT_CODE_APP_ACTIVITY_FOCUS_LOST>
+	struct EvtAppActivityFocusLost : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_FOCUS_LOST>
 	{
 	};
 
-	struct SysEvtAppActivityPause : public SysEvtApp<E_SYS_EVENT_CODE_APP_ACTIVITY_PAUSE>
+	struct EvtAppActivityPause : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_PAUSE>
 	{
 	};
 
-	struct SysEvtAppActivityResume : public SysEvtApp<E_SYS_EVENT_CODE_APP_ACTIVITY_RESUME>
+	struct EvtAppActivityResume : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_RESUME>
 	{
 	};
 
-	struct SysEvtAppActivityStart : public SysEvtApp<E_SYS_EVENT_CODE_APP_ACTIVITY_START>
+	struct EvtAppActivityStart : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_START>
 	{
 	};
 
-	struct SysEvtAppActivityStop : public SysEvtApp<E_SYS_EVENT_CODE_APP_ACTIVITY_STOP>
+	struct EvtAppActivityStop : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_STOP>
 	{
 	};
 
-	struct SysEvtAppActivityQuit : public SysEvtApp<E_SYS_EVENT_CODE_APP_ACTIVITY_QUIT>
+	struct EvtAppActivityQuit : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_QUIT>
 	{
 	};
 
-	struct SysEvtAppActivityTerminate : public SysEvtApp<E_SYS_EVENT_CODE_APP_ACTIVITY_TERMINATE>
+	struct EvtAppActivityTerminate : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_TERMINATE>
 	{
 	};
 
@@ -59,13 +61,13 @@ namespace ts3
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	enum class SysKeyActionType : enum_default_value_t
+	enum class KeyActionType : enum_default_value_t
 	{
 		Press,
 		Release
 	};
 
-	enum class SysKeyCode : uint32
+	enum class KeyCode : uint32
 	{
 		Unknown = cxUint32Max,
 		Num0 = 0,
@@ -156,13 +158,13 @@ namespace ts3
 		_Reserved
 	};
 
-	inline constexpr auto cvEnumSysKeyCodeCount = static_cast< size_t >( SysKeyCode::_Reserved );
+	inline constexpr auto cvEnumKeyCodeCount = static_cast< size_t >( KeyCode::_Reserved );
 
-	struct SysKeyboardState
+	struct KeyboardState
 	{
 	};
 
-	enum SysMouseButtonFlagBits : uint32
+	enum MouseButtonFlagBits : uint32
 	{
 		SYS_MOUSE_BUTTON_FLAG_LEFT_BIT = 0x0001,
 		SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT = 0x0002,
@@ -172,7 +174,7 @@ namespace ts3
 		SYS_MOUSE_BUTTON_FLAG_ALL_BIT = 0x00FF
 	};
 
-	enum class SysMouseButtonID : enum_default_value_t
+	enum class MouseButtonID : enum_default_value_t
 	{
 		Unknown,
 		Left = static_cast<enum_default_value_t>( SYS_MOUSE_BUTTON_FLAG_LEFT_BIT ),
@@ -182,7 +184,7 @@ namespace ts3
 		XB2 = static_cast<enum_default_value_t>( SYS_MOUSE_BUTTON_FLAG_XB2_BIT ),
 	};
 
-	enum class SysMouseButtonActionType : enum_default_value_t
+	enum class MouseButtonActionType : enum_default_value_t
 	{
 		Click,
 		DoubleClick,
@@ -190,79 +192,79 @@ namespace ts3
 		Release
 	};
 
-	template <sys_event_code_value_t tpEventCode>
-	struct SysEvtInput : public SysEvtBase
+	template <event_code_value_t tpEventCode>
+	struct EvtInput : public EvtBase
 	{
 	public:
-		SysEvtInput()
-			: SysEvtBase( tpEventCode )
+		EvtInput()
+			: EvtBase( tpEventCode )
 		{}
 
-		static_assert( ExfEnumGetEventCodeBaseType( tpEventCode ) == ESysEventBaseType::Input );
+		static_assert( ExfEnumGetEventCodeBaseType( tpEventCode ) == EEventBaseType::Input );
 	};
 
-	struct SysEvtInputGamepadAxis : public SysEvtInput<E_SYS_EVENT_CODE_INPUT_GAMEPAD_AXIS>
+	struct EvtInputGamepadAxis : public EvtInput<E_EVENT_CODE_INPUT_GAMEPAD_AXIS>
 	{
 	};
 
 
-	struct SysEvtInputGamepadButton : public SysEvtInput<E_SYS_EVENT_CODE_INPUT_GAMEPAD_BUTTON>
+	struct EvtInputGamepadButton : public EvtInput<E_EVENT_CODE_INPUT_GAMEPAD_BUTTON>
 	{
 	};
 
-	struct SysEvtInputGamepadState : public SysEvtInput<E_SYS_EVENT_CODE_INPUT_GAMEPAD_STATE>
+	struct EvtInputGamepadState : public EvtInput<E_EVENT_CODE_INPUT_GAMEPAD_STATE>
 	{
 	};
 
-	struct SysEvtInputKeyboardKey : public SysEvtInput<E_SYS_EVENT_CODE_INPUT_KEYBOARD_KEY>
+	struct EvtInputKeyboardKey : public EvtInput<E_EVENT_CODE_INPUT_KEYBOARD_KEY>
 	{
 		//
-		SysKeyActionType keyAction;
+		KeyActionType keyAction;
 		//
-		SysKeyCode keyCode;
+		KeyCode keyCode;
 		//
-		const SysKeyboardState * keyboardState;
+		const KeyboardState * keyboardState;
 	};
 
-	struct SysEvtInputMouseButton : public SysEvtInput<E_SYS_EVENT_CODE_INPUT_MOUSE_BUTTON>
+	struct EvtInputMouseButton : public EvtInput<E_EVENT_CODE_INPUT_MOUSE_BUTTON>
 	{
 		//
-		SysMouseButtonActionType buttonAction;
+		MouseButtonActionType buttonAction;
 		//
-		SysMouseButtonID buttonID;
+		MouseButtonID buttonID;
 		//
-		Bitmask<SysMouseButtonFlagBits> buttonStateMask;
+		Bitmask<MouseButtonFlagBits> buttonStateMask;
 		//
 		uint32 multiClickSequenceLength;
 		//
 		math::Vec2i32 cursorPos;
 	};
 
-	struct SysEvtInputMouseMove : public SysEvtInput<E_SYS_EVENT_CODE_INPUT_MOUSE_MOVE>
+	struct EvtInputMouseMove : public EvtInput<E_EVENT_CODE_INPUT_MOUSE_MOVE>
 	{
 		//
-		Bitmask<SysMouseButtonFlagBits> buttonStateMask;
+		Bitmask<MouseButtonFlagBits> buttonStateMask;
 		//
 		math::Vec2i32 cursorPos;
 		//
 		math::Vec2i32 movementDelta;
 	};
 
-	struct SysEvtInputMouseScroll : public SysEvtInput<E_SYS_EVENT_CODE_INPUT_MOUSE_SCROLL>
+	struct EvtInputMouseScroll : public EvtInput<E_EVENT_CODE_INPUT_MOUSE_SCROLL>
 	{
 		//
 		math::Vec2i32 scrollDelta;
 	};
 
-	struct SysEvtInputTouchDown : public SysEvtInput<E_SYS_EVENT_CODE_INPUT_TOUCH_DOWN>
+	struct EvtInputTouchDown : public EvtInput<E_EVENT_CODE_INPUT_TOUCH_DOWN>
 	{
 	};
 
-	struct SysEvtInputTouchMove : public SysEvtInput<E_SYS_EVENT_CODE_INPUT_TOUCH_MOVE>
+	struct EvtInputTouchMove : public EvtInput<E_EVENT_CODE_INPUT_TOUCH_MOVE>
 	{
 	};
 
-	struct SysEvtInputTouchUp : public SysEvtInput<E_SYS_EVENT_CODE_INPUT_TOUCH_UP>
+	struct EvtInputTouchUp : public EvtInput<E_EVENT_CODE_INPUT_TOUCH_UP>
 	{
 	};
 
@@ -270,33 +272,34 @@ namespace ts3
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	template <sys_event_code_value_t tpEventCode>
-	struct SysEvtWindow : public SysEvtBase
+	template <event_code_value_t tpEventCode>
+	struct EvtWindow : public EvtBase
 	{
 	public:
-		SysEvtWindow()
-			: SysEvtBase( tpEventCode )
+		EvtWindow()
+			: EvtBase( tpEventCode )
 		{}
 
-		static_assert( ExfEnumGetEventCodeBaseType( tpEventCode ) == ESysEventBaseType::Window );
+		static_assert( ExfEnumGetEventCodeBaseType( tpEventCode ) == EEventBaseType::Window );
 	};
 
-	struct SysEvtWindowUpdateClose : public SysEvtWindow<E_SYS_EVENT_CODE_WINDOW_UPDATE_CLOSE>
+	struct EvtWindowUpdateClose : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_CLOSE>
 	{
 	};
 
-	struct SysEvtWindowUpdateFullscreen : public SysEvtWindow<E_SYS_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN>
+	struct EvtWindowUpdateFullscreen : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN>
 	{
 	};
 
-	struct SysEvtWindowUpdateResize : public SysEvtWindow<E_SYS_EVENT_CODE_WINDOW_UPDATE_RESIZE>
+	struct EvtWindowUpdateResize : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_RESIZE>
 	{
 	};
 
-	struct SysEvtWindowUpdateVisibility : public SysEvtWindow<E_SYS_EVENT_CODE_WINDOW_UPDATE_VISIBILITY>
+	struct EvtWindowUpdateVisibility : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY>
 	{
 	};
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_EVENT_TYPES_DEF_H__

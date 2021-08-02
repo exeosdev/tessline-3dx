@@ -7,7 +7,7 @@
 namespace ts3
 {
 
-	struct SysDisplayManagerNativeData
+	struct DisplayManagerNativeData
 	{
 	};
 

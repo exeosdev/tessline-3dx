@@ -13,7 +13,7 @@ namespace ts3
         SYS_ANDROID_APP_STATE_USER_DATA_INDEX_EVENT_CONTROLLER
     };
 
-    struct AndroidSysContextNativeData
+    struct AndroidContextNativeData
     {
         // Window associated with the main app's activity. It is provided by the system and
         // we do not own it, so, except some rare cases, (window updates, state transitions)
@@ -21,12 +21,12 @@ namespace ts3
         ANativeWindow * androidNativeWindow = nullptr;
     };
 
-    struct AndroidSysPlatformNativeDataDeleter
+    struct AndroidPlatformNativeDataDeleter
     {
     };
 
-    using SysPlatformNativeData = AndroidSysPlatformNativeData;
-    using SysPlatformNativeDataDeleter = AndroidSysPlatformNativeDataDeleter;
+    using PlatformNativeData = AndroidPlatformNativeData;
+    using PlatformNativeDataDeleter = AndroidPlatformNativeDataDeleter;
 
 }
 

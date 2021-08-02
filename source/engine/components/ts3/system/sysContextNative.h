@@ -5,44 +5,47 @@
 #include "sysContext.h"
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
-#  include "internal/platform/osapi/android/androidSystemContext.h"
+#  include "internal/platform/osapi/android/androidtemContext.h"
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
-#  include "internal/platform/osapi/win32/win32SystemContext.h"
+#  include "internal/platform/osapi/win32/win32temContext.h"
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
-#  include "internal/platform/osapi/x11/x11SystemContext.h"
+#  include "internal/platform/osapi/x11/x11temContext.h"
 #endif
 
 namespace ts3
 {
+namespace system
+{
 
-    enum ESysContextCreateFlags : uint32
+    enum EContextCreateFlags : uint32
     {
-        E_SYS_CONTEXT_CREATE_FLAG_INIT_DEFAULT = 0
+        E_CONTEXT_CREATE_FLAG_INIT_DEFAULT = 0
     };
 
-    struct SysContextCreateInfo : public SysContextNativeCreateInfo
+    struct ContextCreateInfo : public ContextNativeCreateInfo
     {
-        Bitmask<ESysContextCreateFlags> flags = E_SYS_CONTEXT_CREATE_FLAG_INIT_DEFAULT;
+        Bitmask<EContextCreateFlags> flags = E_CONTEXT_CREATE_FLAG_INIT_DEFAULT;
     };
 
     /// @brief
-    class SysContext
+    class Context
     {
-        friend SysContextHandle sysCreateContext( const SysContextCreateInfo & pCreateInfo );
+        friend ContextHandle sysCreateContext( const ContextCreateInfo & pCreateInfo );
 
     public:
-        SysContextNativeData mNativeData;
+        ContextNativeData mNativeData;
 
-        SysContext() noexcept;
-        ~SysContext() noexcept;
+        Context() noexcept;
+        ~Context() noexcept;
 
     private:
-        void _sysInitialize( const SysContextCreateInfo & pCreateInfo );
+        void _sysInitialize( const ContextCreateInfo & pCreateInfo );
         void _sysRelease() noexcept;
     };
 
-    SysContextHandle sysCreateContext( const SysContextCreateInfo & pCreateInfo );
+    ContextHandle sysCreateContext( const ContextCreateInfo & pCreateInfo );
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_SYS_CONTEXT_NATIVE_H__

@@ -8,9 +8,9 @@
 namespace ts3
 {
 
-    constexpr EGLConfig cvSysEGLInvalidConfigID = nullptr;
-    constexpr size_t cvSysEGLMaxEGLConfigsNum = 256u;
-    constexpr size_t cvSysEGLMaxEGLConfigAttributesNum = 64u;
+    constexpr EGLConfig cvEGLInvalidConfigID = nullptr;
+    constexpr size_t cvEGLMaxEGLConfigsNum = 256u;
+    constexpr size_t cvEGLMaxEGLConfigAttributesNum = 64u;
 
     struct EGLSurfaceNativeData
     {
@@ -34,10 +34,10 @@ namespace ts3
         Version eglVersion;
     };
 
-    void eglInitializeGLDriver( SysGLDriver & pDriver );
-    EGLConfig eglChooseCoreEGLConfig( EGLDisplay pDisplay, const SysVisualConfig & pVisualConfig );
-    void eglCreateSurface( SysGLSurface & pSurface, EGLDisplay pEGLDisplay, EGLNativeWindowType pWindow, EGLConfig pEGLConfig );
-    void eglCreateCoreContext( SysGLRenderContext & pContext, const SysGLRenderContextCreateInfo & pCreateInfo );
+    void eglInitializeGLDriver( GfxGLDriver & pDriver );
+    EGLConfig eglChooseCoreEGLConfig( EGLDisplay pDisplay, const GfxVisualConfig & pVisualConfig );
+    void eglCreateSurface( GfxGLSurface & pSurface, EGLDisplay pEGLDisplay, EGLNativeWindowType pWindow, EGLConfig pEGLConfig );
+    void eglCreateCoreContext( GfxGLRenderContext & pContext, const GfxGLRenderContextCreateInfo & pCreateInfo );
 
 }
 

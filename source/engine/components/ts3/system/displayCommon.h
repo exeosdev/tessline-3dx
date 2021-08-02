@@ -27,28 +27,30 @@
 
 namespace ts3
 {
+namespace system
+{
 
-	ts3DeclareSysHandle( SysDisplayDriver );
-	ts3DeclareSysHandle( SysDisplayManager );
+	ts3DeclareHandle( DisplayDriver );
+	ts3DeclareHandle( DisplayManager );
 
-	struct SysDsmAdapter;
-	struct SysDsmOutput;
-	struct SysDsmVideoMode;
-	struct SysWindowGeometry;
+	struct DsmAdapter;
+	struct DsmOutput;
+	struct DsmVideoMode;
+	struct WindowGeometry;
 
-	using sys_dsm_index_t = uint16;
-	using sys_dsm_output_id_t = uint32;
-	using sys_dsm_video_mode_id_t = uint64;
-	using sys_dsm_video_settings_hash_t = uint64;
-	using SysDisplaySize = math::Size2u;
+	using dsm_index_t = uint16;
+	using dsm_output_id_t = uint32;
+	using dsm_video_mode_id_t = uint64;
+	using dsm_video_settings_hash_t = uint64;
+	using DisplaySize = math::Size2u;
 
 	/// @brief Represents invalid display system index (of an adapter or an output, for example).
-	constexpr sys_dsm_index_t cvSysDsmIndexInvalid = Limits<sys_dsm_index_t>::maxValue;
+	constexpr dsm_index_t cvDsmIndexInvalid = Limits<dsm_index_t>::maxValue;
 
 	/// @brief Represents invalid display settings hash. Used to identify/report invalid and/or empty configurations.
-	constexpr sys_dsm_video_settings_hash_t cvSysDsmVideoSettingsHashInvalid = Limits<sys_dsm_video_settings_hash_t>::maxValue;
+	constexpr dsm_video_settings_hash_t cvDsmVideoSettingsHashInvalid = Limits<dsm_video_settings_hash_t>::maxValue;
 
-	enum class ESysDsmDisplayDriverType : enum_default_value_t
+	enum class EDsmDisplayDriverType : enum_default_value_t
 	{
 		// Unknown driver. Cannot be used as an input.
 		// Reported for an uninitialized driver object.
@@ -67,7 +69,7 @@ namespace ts3
 	};
 
 	/// @brief Represents ID of the vendor of the graphics adapter/device.
-	enum class ESysDsmAdapterVendorID : enum_default_value_t
+	enum class EDsmAdapterVendorID : enum_default_value_t
 	{
 		AMD = 1,
 		ARM,
@@ -80,63 +82,63 @@ namespace ts3
 	};
 
 	/// @brief
-	enum ESysDsmAdapterFlags : uint32
+	enum EDsmAdapterFlags : uint32
 	{
 		// Adapter is reported by system as the primary one.
-		E_SYS_DSM_ADAPTER_FLAG_PRIMARY_BIT = 0x1,
+		E_DSM_ADAPTER_FLAG_PRIMARY_BIT = 0x1,
 		// Adapter is a multi-node adapter (e.g. classic CF- or SLI-configured adapter set)
-		E_SYS_DSM_ADAPTER_FLAG_MULTI_NODE_BIT = 0x2,
+		E_DSM_ADAPTER_FLAG_MULTI_NODE_BIT = 0x2,
 		// Adapter is a software adapter. May indicate WARP-capable adapter in case of DXGI backend.
-		E_SYS_DSM_ADAPTER_FLAG_SOFTWARE_BIT = 0x4,
+		E_DSM_ADAPTER_FLAG_SOFTWARE_BIT = 0x4,
 	};
 
 	/// @brief
-	enum ESysDsmOutputFlags : uint32
+	enum EDsmOutputFlags : uint32
 	{
 		// Output is the primary output of an adapter
-		E_SYS_DSM_OUTPUT_FLAG_PRIMARY_BIT = 0x1
+		E_DSM_OUTPUT_FLAG_PRIMARY_BIT = 0x1
 	};
 
 	/// @brief
-	enum ESysDsmVideoSettingsFlags : uint16
+	enum EDsmVideoSettingsFlags : uint16
 	{
-		E_SYS_DSM_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT = 0x1,
-		E_SYS_DSM_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT = 0x2,
-		E_SYS_DSM_VIDEO_SETTINGS_FLAG_STEREO_BIT = 0x4
+		E_DSM_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT = 0x1,
+		E_DSM_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT = 0x2,
+		E_DSM_VIDEO_SETTINGS_FLAG_STEREO_BIT = 0x4
 	};
 
-	enum ESysDsmVideoSettingsFilterFlags : uint32
+	enum EDsmVideoSettingsFilterFlags : uint32
 	{
 		// If set, resolution is not used as a filter criterion.
-		E_SYS_DSM_VIDEO_MODE_FILTER_FLAG_RESOLUTION_IGNORE_BIT = 0x1,
+		E_DSM_VIDEO_MODE_FILTER_FLAG_RESOLUTION_IGNORE_BIT = 0x1,
 		// If set, resolution must match exactly for the mode to be included.
-		E_SYS_DSM_VIDEO_MODE_FILTER_FLAG_RESOLUTION_MATCH_EXACT_BIT = 0x2,
+		E_DSM_VIDEO_MODE_FILTER_FLAG_RESOLUTION_MATCH_EXACT_BIT = 0x2,
 		// If set, refresh rate is not used as a filter criterion.
-		E_SYS_DSM_VIDEO_MODE_FILTER_FLAG_REFRESH_RATE_IGNORE_BIT = 0x4,
+		E_DSM_VIDEO_MODE_FILTER_FLAG_REFRESH_RATE_IGNORE_BIT = 0x4,
 		// If set, refresh rate must match exactly for the mode to be included.
-		E_SYS_DSM_VIDEO_MODE_FILTER_FLAG_REFRESH_RATE_MATCH_EXACT_BIT = 0x8,
+		E_DSM_VIDEO_MODE_FILTER_FLAG_REFRESH_RATE_MATCH_EXACT_BIT = 0x8,
 		// If set, additional flags are not used as a filter criterion.
-		E_SYS_DSM_VIDEO_MODE_FILTER_FLAG_FLAGS_IGNORE_BIT = 0x40,
+		E_DSM_VIDEO_MODE_FILTER_FLAG_FLAGS_IGNORE_BIT = 0x40,
 	};
 
-	struct SysDsmScreenRect
+	struct DsmScreenRect
 	{
 		math::Vec2i32 offset;
 		math::Vec2u32 size;
 	};
 
 	/// @brief
-	struct SysDsmVideoSettings
+	struct DsmVideoSettings
 	{
 		math::Size2u resolution;
 		uint16 refreshRate = 0u;
-		Bitmask<ESysDsmVideoSettingsFlags> flags = 0u;
+		Bitmask<EDsmVideoSettingsFlags> flags = 0u;
 	};
 
-	constexpr SysDsmVideoSettings cvSysDsmVideoSettingsEmpty { { 0U, 0U }, 0U, 0U };
+	constexpr DsmVideoSettings cvDsmVideoSettingsEmpty { { 0U, 0U }, 0U, 0U };
 
 	/// @brief
-	struct SysDsmVideoSettingsFilter
+	struct DsmVideoSettingsFilter
 	{
 		// Reference settings used to filter video modes. By default, each property in a mode
 		// must be greater than or equal to the reference property (note for resolutions: both
@@ -145,67 +147,67 @@ namespace ts3
 		// Each property can be ignored by using its respective IGNORE flag. Also, "greater than
 		// or equal" condition can be changed to "equal" for a given property by setting MATCH_EXACT
 		// flag for that property.
-		SysDsmVideoSettings refSettings;
+		DsmVideoSettings refSettings;
 		// Filter flags used to control the process. Flags set by default: none.
-		Bitmask<ESysDsmVideoSettingsFilterFlags> flags = 0;
+		Bitmask<EDsmVideoSettingsFilterFlags> flags = 0;
 	};
 
-	constexpr SysDsmVideoSettingsFilter cvSysDsmVideoSettingsFilterNone { cvSysDsmVideoSettingsEmpty, 0U };
+	constexpr DsmVideoSettingsFilter cvDsmVideoSettingsFilterNone { cvDsmVideoSettingsEmpty, 0U };
 
-	struct SysDsmAdapterDesc
+	struct DsmAdapterDesc
 	{
-		ESysDsmDisplayDriverType driverType = ESysDsmDisplayDriverType::Unknown;
-		sys_dsm_index_t index = cvSysDsmIndexInvalid;
+		EDsmDisplayDriverType driverType = EDsmDisplayDriverType::Unknown;
+		dsm_index_t index = cvDsmIndexInvalid;
 		std::string name;
-		ESysDsmAdapterVendorID vendorID;
-		Bitmask<ESysDsmAdapterFlags> flags = 0u;
+		EDsmAdapterVendorID vendorID;
+		Bitmask<EDsmAdapterFlags> flags = 0u;
 		void * driverReserved = nullptr;
 	};
 
-	struct SysDsmOutputDesc
+	struct DsmOutputDesc
 	{
-		ESysDsmDisplayDriverType driverType = ESysDsmDisplayDriverType::Unknown;
-		sys_dsm_index_t index = cvSysDsmIndexInvalid;
-		sys_dsm_output_id_t id = 0u;
-		Bitmask<ESysDsmOutputFlags> flags = 0u;
+		EDsmDisplayDriverType driverType = EDsmDisplayDriverType::Unknown;
+		dsm_index_t index = cvDsmIndexInvalid;
+		dsm_output_id_t id = 0u;
+		Bitmask<EDsmOutputFlags> flags = 0u;
 		std::string name;
-		SysDsmScreenRect screenRect;
+		DsmScreenRect screenRect;
 		void * driverReserved = nullptr;
 	};
 
-	struct SysDsmVideoModeDesc
+	struct DsmVideoModeDesc
 	{
-		ESysDsmDisplayDriverType driverType = ESysDsmDisplayDriverType::Unknown;
-		sys_dsm_index_t index = cvSysDsmIndexInvalid;
-		sys_dsm_video_mode_id_t id = 0u;
-		sys_dsm_video_settings_hash_t settingsHash = 0u;
-		SysColorFormat format = SysColorFormat::Unknown;
-		SysDsmVideoSettings settings;
+		EDsmDisplayDriverType driverType = EDsmDisplayDriverType::Unknown;
+		dsm_index_t index = cvDsmIndexInvalid;
+		dsm_video_mode_id_t id = 0u;
+		dsm_video_settings_hash_t settingsHash = 0u;
+		GfxColorFormat format = GfxColorFormat::Unknown;
+		DsmVideoSettings settings;
 		void * driverReserved = nullptr;
 	};
 
-	union SysDsmOutputID
+	union DsmOutputID
 	{
 		struct
 		{
-			sys_dsm_index_t uAdapterIndex;
-			sys_dsm_index_t uOutputIndex;
+			dsm_index_t uAdapterIndex;
+			dsm_index_t uOutputIndex;
 		};
-		sys_dsm_output_id_t outputID = 0u;
+		dsm_output_id_t outputID = 0u;
 	};
 
-	union SysDsmVideoModeID
+	union DsmVideoModeID
 	{
 		struct
 		{
-			sys_dsm_output_id_t uOutputID;
-			sys_dsm_index_t uColorFormatIndex;
-			sys_dsm_index_t uModeIndex;
+			dsm_output_id_t uOutputID;
+			dsm_index_t uColorFormatIndex;
+			dsm_index_t uModeIndex;
 		};
-		sys_dsm_video_mode_id_t modeID = 0u;
+		dsm_video_mode_id_t modeID = 0u;
 	};
 
-	union SysDsmVideoModeHash
+	union DsmVideoModeHash
 	{
 		struct
 		{
@@ -215,34 +217,35 @@ namespace ts3
 			uint8 uFlags;
 			uint8 uColorFormatIndex;
 		};
-		sys_dsm_video_settings_hash_t modeHash = 0u;
+		dsm_video_settings_hash_t modeHash = 0u;
 	};
 
-	inline bool operator==( const SysDsmVideoSettings & pLhs, const SysDsmVideoSettings & pRhs )
+	inline bool operator==( const DsmVideoSettings & pLhs, const DsmVideoSettings & pRhs )
 	{
 		return ( pLhs.resolution == pRhs.resolution ) && ( pLhs.refreshRate == pRhs.refreshRate ) && ( pLhs.flags == pRhs.flags );
 	}
 
-	inline bool operator!=( const SysDsmVideoSettings & pLhs, const SysDsmVideoSettings & pRhs )
+	inline bool operator!=( const DsmVideoSettings & pLhs, const DsmVideoSettings & pRhs )
 	{
 		return ( pLhs.resolution != pRhs.resolution ) || ( pLhs.refreshRate != pRhs.refreshRate ) || ( pLhs.flags != pRhs.flags );
 	}
 
-	inline bool operator==( const SysDsmVideoSettingsFilter & pLhs, const SysDsmVideoSettingsFilter & pRhs )
+	inline bool operator==( const DsmVideoSettingsFilter & pLhs, const DsmVideoSettingsFilter & pRhs )
 	{
 		return ( pLhs.refSettings == pRhs.refSettings ) && ( pLhs.flags == pRhs.flags );
 	}
 
-	inline bool operator!=( const SysDsmVideoSettingsFilter & pLhs, const SysDsmVideoSettingsFilter & pRhs )
+	inline bool operator!=( const DsmVideoSettingsFilter & pLhs, const DsmVideoSettingsFilter & pRhs )
 	{
 		return ( pLhs.refSettings != pRhs.refSettings ) || ( pLhs.flags != pRhs.flags );
 	}
 
-	sys_dsm_video_settings_hash_t sysDsmComputeVideoSettingsHash( SysColorFormat pFormat, const SysDsmVideoSettings & pSettings );
+	dsm_video_settings_hash_t sysDsmComputeVideoSettingsHash( GfxColorFormat pFormat, const DsmVideoSettings & pSettings );
 
-	std::string sysDsmGetVideoSettingsString( SysColorFormat pFormat, const SysDsmVideoSettings & pSettings );
+	std::string sysDsmGetVideoSettingsString( GfxColorFormat pFormat, const DsmVideoSettings & pSettings );
 
-}
+} // namespace system
+} // namespace ts3
 
 #if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
 #  pragma clang diagnostic pop

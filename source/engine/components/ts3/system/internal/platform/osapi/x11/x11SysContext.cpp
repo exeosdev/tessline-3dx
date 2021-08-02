@@ -4,7 +4,7 @@
 namespace ts3
 {
 
-	void SysContext::_sysInitialize( const SysContextCreateInfo & pCreateInfo )
+	void Context::_sysInitialize( const ContextCreateInfo & pCreateInfo )
 	{
 		int thrInitStatus = ::XInitThreads();
 		if( thrInitStatus == False )
@@ -24,7 +24,7 @@ namespace ts3
 		mNativeData.sessionExtInfo.displayString = XDisplayString( xdisplay );
 	}
 
-	void SysContext::_sysRelease() noexcept
+	void Context::_sysRelease() noexcept
 	{
 		mNativeData.display = nullptr;
 		mNativeData.sessionExtInfo.connectionNumber = -1;

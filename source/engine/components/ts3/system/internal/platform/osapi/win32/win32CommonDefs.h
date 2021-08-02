@@ -11,17 +11,17 @@ namespace ts3
 	template <typename Tp>
 	using ComPtr = Microsoft::WRL::ComPtr<Tp>;
 
-    struct Win32SysContextNativeData
+    struct Win32ContextNativeData
     {
         HINSTANCE appExecModuleHandle;
     };
 
-    struct Win32SysPlatformNativeDataDeleter
+    struct Win32PlatformNativeDataDeleter
     {
     };
 
-    using SysPlatformNativeData = Win32SysPlatformNativeData;
-    using SysPlatformNativeDataDeleter = Win32SysPlatformNativeDataDeleter;
+    using PlatformNativeData = Win32PlatformNativeData;
+    using PlatformNativeDataDeleter = Win32PlatformNativeDataDeleter;
 
 }
 

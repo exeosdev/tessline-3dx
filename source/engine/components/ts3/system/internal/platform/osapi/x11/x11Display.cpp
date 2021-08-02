@@ -6,12 +6,12 @@
 namespace ts3
 {
 
-	void _x11EnumerateDisplayManagerConfiguration( SysDisplayManagerNativeData * pNativeData );
-	void _x11FreeDisplayManagerConfiguration( SysDisplayManagerNativeData * pNativeData );
+	void _x11EnumerateDisplayManagerConfiguration( DisplayManagerNativeData * pNativeData );
+	void _x11FreeDisplayManagerConfiguration( DisplayManagerNativeData * pNativeData );
 
-	void SysDisplayManager::_sysInitialize()
+	void DisplayManager::_sysInitialize()
 	{
-		auto & scNativeData = mSysContext->mNativeData;
+		auto & scNativeData = mContext->mNativeData;
 
 		if( scNativeData.screenIndex == -1 )
 		{
@@ -29,7 +29,7 @@ namespace ts3
 		_x11EnumerateDisplayManagerConfiguration( &mNativeData );
 	}
 
-	void SysDisplayManager::_sysRelease() noexcept
+	void DisplayManager::_sysRelease() noexcept
 	{
 		_x11FreeDisplayManagerConfiguration( &mNativeData );
 
@@ -39,7 +39,7 @@ namespace ts3
 		mNativeData.rootWindow = cvXIDNone;
 	}
 
-	void SysDisplayManager::_sysQueryDisplaySize( SysDisplaySize & pDisplaySize ) const
+	void DisplayManager::_sysQueryDisplaySize( DisplaySize & pDisplaySize ) const
 	{
 		// Ideally, we have XRR available here and can fetch the data from XRRMonitorInfo structure.
 		// With that approach, we can tell precisely the size of the default monitor (not the entire virtual screen).
@@ -64,14 +64,14 @@ namespace ts3
 		}
 	}
 
-	void SysDisplayManager::_sysQueryMinWindowSize( SysDisplaySize & pMinWindowSize ) const
+	void DisplayManager::_sysQueryMinWindowSize( DisplaySize & pMinWindowSize ) const
 	{
 		pMinWindowSize.x = 0u;
 		pMinWindowSize.y = 0u;
 	}
 
 
-	void _x11EnumerateDisplayManagerConfiguration( SysDisplayManagerNativeData * pNativeData )
+	void _x11EnumerateDisplayManagerConfiguration( DisplayManagerNativeData * pNativeData )
 	{
 		for ( int monitorIndex = 0; monitorIndex < pNativeData->xrrMonitorsNum; ++monitorIndex )
 		{
@@ -83,7 +83,7 @@ namespace ts3
 		}
 	}
 
-	void _x11FreeDisplayManagerConfiguration( SysDisplayManagerNativeData * pNativeData )
+	void _x11FreeDisplayManagerConfiguration( DisplayManagerNativeData * pNativeData )
 	{
 		pNativeData->xrrDefaultMonitorInfo = nullptr;
 	}

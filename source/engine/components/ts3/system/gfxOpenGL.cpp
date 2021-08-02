@@ -5,53 +5,53 @@
 namespace ts3
 {
 
-	SysGLSurface::SysGLSurface( SysGLDriverHandle pGLDriver ) noexcept
-	: SysBaseObject( pGLDriver->mSysContext )
-	, SysEventSource( mNativeData )
+	GfxGLSurface::GfxGLSurface( GfxGLDriverHandle pGLDriver ) noexcept
+	: BaseObject( pGLDriver->mContext )
+	, EventSource( mNativeData )
 	, mGLDriver( pGLDriver )
 	{}
 
-	SysGLSurface::~SysGLSurface() noexcept
+	GfxGLSurface::~GfxGLSurface() noexcept
 	{
 		_sysDestroy();
 	}
 
-	void SysGLSurface::swapBuffers()
+	void GfxGLSurface::swapBuffers()
 	{
 		_sysSwapBuffers();
 	}
 
-	SysWindowSize SysGLSurface::queryCurrentSize() const
+	WindowSize GfxGLSurface::queryCurrentSize() const
 	{
-		SysWindowSize windowSize;
+		WindowSize windowSize;
 		_sysQueryCurrentSize( windowSize );
 		return windowSize;
 	}
 
 
-	SysGLRenderContext::SysGLRenderContext( SysGLDriverHandle pGLDriver ) noexcept
-	: SysBaseObject( pGLDriver->mSysContext )
+	GfxGLRenderContext::GfxGLRenderContext( GfxGLDriverHandle pGLDriver ) noexcept
+	: BaseObject( pGLDriver->mContext )
 	, mGLDriver( pGLDriver )
 	{}
 
-	SysGLRenderContext::~SysGLRenderContext() noexcept
+	GfxGLRenderContext::~GfxGLRenderContext() noexcept
 	{
 		_sysDestroy();
 	}
 
-	void SysGLRenderContext::bindForCurrentThread( SysGLSurface & pTargetSurface )
+	void GfxGLRenderContext::bindForCurrentThread( GfxGLSurface & pTargetSurface )
 	{
 		_sysBindForCurrentThread( pTargetSurface );
 	}
 
-	bool SysGLRenderContext::validateCurrentBinding() const
+	bool GfxGLRenderContext::validateCurrentBinding() const
 	{
 		return _sysValidateCurrentBinding();
 	}
 
-	SysGLSystemVersionInfo SysGLRenderContext::querySystemVersionInfo() const
+	GfxGLtemVersionInfo GfxGLRenderContext::querytemVersionInfo() const
 	{
-		SysGLSystemVersionInfo systemVersionInfo;
+		GfxGLtemVersionInfo systemVersionInfo;
 
 		int majorVersion = 0;
 		glGetIntegerv( GL_MAJOR_VERSION, &majorVersion );
@@ -83,26 +83,26 @@ namespace ts3
 
 
 
-	SysGLDriver::SysGLDriver( SysDisplayManagerHandle pDisplayManager ) noexcept
-	: SysBaseObject( pDisplayManager->mSysContext )
+	GfxGLDriver::GfxGLDriver( DisplayManagerHandle pDisplayManager ) noexcept
+	: BaseObject( pDisplayManager->mContext )
 	, mDisplayManager( pDisplayManager )
 	, _primaryContext( nullptr )
 	{}
 
-	SysGLDriver::~SysGLDriver() noexcept = default;
+	GfxGLDriver::~GfxGLDriver() noexcept = default;
 
-	SysGLDriverHandle SysGLDriver::create( SysDisplayManagerHandle pDisplayManager )
+	GfxGLDriverHandle GfxGLDriver::create( DisplayManagerHandle pDisplayManager )
 	{
-		auto openglSubsystem = sysCreateObject<SysGLDriver>( pDisplayManager );
+		auto openglSubsystem = sysCreateObject<GfxGLDriver>( pDisplayManager );
 		return openglSubsystem;
 	}
 
-	void SysGLDriver::initializePlatform()
+	void GfxGLDriver::initializePlatform()
 	{
 		_sysInitializePlatform();
 	}
 
-	void SysGLDriver::releaseInitState( SysGLRenderContext & pGLRenderContext )
+	void GfxGLDriver::releaseInitState( GfxGLRenderContext & pGLRenderContext )
 	{
 		if( pGLRenderContext.mGLDriver.get() != this )
 		{
@@ -111,14 +111,14 @@ namespace ts3
 		_sysReleaseInitState();
 	}
 
-	SysGLSurfaceHandle SysGLDriver::createDisplaySurface( const SysGLSurfaceCreateInfo & pCreateInfo )
+	GfxGLSurfaceHandle GfxGLDriver::createDisplaySurface( const GfxGLSurfaceCreateInfo & pCreateInfo )
 	{
-		SysGLSurfaceCreateInfo validatedCreateInfo = pCreateInfo;
+		GfxGLSurfaceCreateInfo validatedCreateInfo = pCreateInfo;
 
-		if( pCreateInfo.flags.isSet( E_SYS_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
+		if( pCreateInfo.flags.isSet( E_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
 		{
-			validatedCreateInfo.windowGeometry.size = cvSysWindowSizeMax;
-			validatedCreateInfo.windowGeometry.frameStyle = SysWindowFrameStyle::Overlay;
+			validatedCreateInfo.windowGeometry.size = cvWindowSizeMax;
+			validatedCreateInfo.windowGeometry.frameStyle = WindowFrameStyle::Overlay;
 		}
 		else
 		{
@@ -129,25 +129,25 @@ namespace ts3
 
 		mDisplayManager->validateWindowGeometry( validatedCreateInfo.windowGeometry );
 
-		auto openglSurface = sysCreateObject<SysGLSurface>( getHandle<SysGLDriver>() );
+		auto openglSurface = sysCreateObject<GfxGLSurface>( getHandle<GfxGLDriver>() );
 
 		_sysCreateDisplaySurface( *openglSurface, validatedCreateInfo );
 
 		return openglSurface;
 	}
 
-	SysGLSurfaceHandle SysGLDriver::createDisplaySurfaceForCurrentThread()
+	GfxGLSurfaceHandle GfxGLDriver::createDisplaySurfaceForCurrentThread()
 	{
-		auto openglSurface = sysCreateObject<SysGLSurface>( getHandle<SysGLDriver>() );
+		auto openglSurface = sysCreateObject<GfxGLSurface>( getHandle<GfxGLDriver>() );
 
 		_sysCreateDisplaySurfaceForCurrentThread( *openglSurface );
 
 		return openglSurface;
 	}
 
-	SysGLRenderContextHandle SysGLDriver::createRenderContext( SysGLSurface & pSurface, const SysGLRenderContextCreateInfo & pCreateInfo )
+	GfxGLRenderContextHandle GfxGLDriver::createRenderContext( GfxGLSurface & pSurface, const GfxGLRenderContextCreateInfo & pCreateInfo )
 	{
-		SysGLRenderContextCreateInfo validatedCreateInfo = pCreateInfo;
+		GfxGLRenderContextCreateInfo validatedCreateInfo = pCreateInfo;
 
 		auto & targetAPIVersion = pCreateInfo.requiredAPIVersion;
 		if( ( targetAPIVersion == cvVersionInvalid  ) || ( targetAPIVersion == cvVersionUnknown  ) )
@@ -156,43 +156,43 @@ namespace ts3
 			validatedCreateInfo.requiredAPIVersion.minor = 0;
 		}
 
-		auto openglContext = sysCreateObject<SysGLRenderContext>( getHandle<SysGLDriver>() );
+		auto openglContext = sysCreateObject<GfxGLRenderContext>( getHandle<GfxGLDriver>() );
 
 		_sysCreateRenderContext( *openglContext, pSurface, validatedCreateInfo );
 
 		return openglContext;
 	}
 
-	SysGLRenderContextHandle SysGLDriver::createRenderContextForCurrentThread()
+	GfxGLRenderContextHandle GfxGLDriver::createRenderContextForCurrentThread()
 	{
-		auto openglContext = sysCreateObject<SysGLRenderContext>( getHandle<SysGLDriver>() );
+		auto openglContext = sysCreateObject<GfxGLRenderContext>( getHandle<GfxGLDriver>() );
 
 		_sysCreateRenderContextForCurrentThread( *openglContext );
 
 		return openglContext;
 	}
 
-	void SysGLDriver::setPrimaryContext( SysGLRenderContext & pPrimaryContext )
+	void GfxGLDriver::setPrimaryContext( GfxGLRenderContext & pPrimaryContext )
 	{
 		_primaryContext = &pPrimaryContext;
 	}
 
-	void SysGLDriver::resetPrimaryContext()
+	void GfxGLDriver::resetPrimaryContext()
 	{
 		_primaryContext = nullptr;
 	}
 
-	std::vector<SysDepthStencilFormat> SysGLDriver::querySupportedDepthStencilFormats( SysColorFormat pColorFormat )
+	std::vector<GfxDepthStencilFormat> GfxGLDriver::querySupportedDepthStencilFormats( GfxColorFormat pColorFormat )
 	{
 		return {};
 	}
 
-	std::vector<SysMSAAMode> SysGLDriver::querySupportedMSAAModes( SysColorFormat pColorFormat, SysDepthStencilFormat pDepthStencilFormat )
+	std::vector<GfxMSAAMode> GfxGLDriver::querySupportedMSAAModes( GfxColorFormat pColorFormat, GfxDepthStencilFormat pDepthStencilFormat )
 	{
 		return {};
 	}
 
-	SysGLRenderContext * SysGLDriver::getPrimaryContext() const
+	GfxGLRenderContext * GfxGLDriver::getPrimaryContext() const
 	{
 		return _primaryContext;
 	}

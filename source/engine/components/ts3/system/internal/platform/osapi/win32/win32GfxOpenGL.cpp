@@ -1,34 +1,34 @@
 
 #include <ts3/system/openGL.h>
-#include <ts3/system/windowSystem.h>
+#include <ts3/system/windowtem.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
 namespace ts3
 {
 
 	// Creates Win32 OpenGL surface using provided visual config.
-	void _win32CreateGLSurface( SysGLSurfaceNativeData & pGLSurfaceNativeData, const SysVisualConfig & pVisualConfig );
+	void _win32CreateGLSurface( GfxGLSurfaceNativeData & pGLSurfaceNativeData, const GfxVisualConfig & pVisualConfig );
 
 	// Destroys existing surface.
-	void _win32DestroyGLSurface( SysGLSurfaceNativeData & pGLSurfaceNativeData );
+	void _win32DestroyGLSurface( GfxGLSurfaceNativeData & pGLSurfaceNativeData );
 
 	// Selects matching pixel format for surface described with a PFD. Uses legacy API.
 	int _win32ChooseLegacyGLPixelFormat( HDC pGLSurfaceDC, PIXELFORMATDESCRIPTOR & pPfmtDescriptor );
 
 	// Selects matching pixel format for surface described with a VisualConfig. Uses new EXT API and supports stuff like MSAA.
-	int _win32ChooseCoreGLPixelFormat( HDC pGLSurfaceDC, const SysVisualConfig & pVisualConfig, PIXELFORMATDESCRIPTOR & pPfmtDescriptor );
+	int _win32ChooseCoreGLPixelFormat( HDC pGLSurfaceDC, const GfxVisualConfig & pVisualConfig, PIXELFORMATDESCRIPTOR & pPfmtDescriptor );
 
 	// Returns an array of pixel format IDs matching specified set of Win32 PF attributes.
 	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pGLSurfaceDC, int * pPixelFormatAttribList = nullptr );
 
 	// Returns an array of pixel format IDs matching specified VisualConfig structure.
-	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pGLSurfaceDC, const SysVisualConfig & pVisualConfig );
+	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pGLSurfaceDC, const GfxVisualConfig & pVisualConfig );
 
 	// Computes a "compatibility rate", i.e. how much the specified pixel format matches the visual.
-	int _win32GetPixelFormatMatchRate( HDC pGLSurfaceDC, int pPixelFormatIndex, const SysVisualConfig & pVisualConfig );
+	int _win32GetPixelFormatMatchRate( HDC pGLSurfaceDC, int pPixelFormatIndex, const GfxVisualConfig & pVisualConfig );
 
-	// Translation: SysVisualConfig --> array of WGL_* attributes required by the system API. Used for surface/context creation.
-	void _win32GetWGLAttribArrayForVisualConfig( const SysVisualConfig & pVisualConfig, int * pAttribArray );
+	// Translation: GfxVisualConfig --> array of WGL_* attributes required by the system API. Used for surface/context creation.
+	void _win32GetWGLAttribArrayForVisualConfig( const GfxVisualConfig & pVisualConfig, int * pAttribArray );
 
 	// Useful utility. Fetches values for a set of PF attributes. Uses templated array definition to resolve the size.
 	template <size_t tSize, typename TpOutput>
@@ -39,17 +39,17 @@ namespace ts3
 	}
 
 
-	void SysGLSurface::_sysDestroy() noexcept
+	void GfxGLSurface::_sysDestroy() noexcept
 	{
 		_win32DestroyGLSurface( mNativeData );
 	}
 
-	void SysGLSurface::_sysSwapBuffers()
+	void GfxGLSurface::_sysSwapBuffers()
 	{
 		::SwapBuffers( mNativeData.surfaceHandle );
 	}
 
-	void SysGLSurface::_sysQueryCurrentSize( SysWindowSize & pSize ) const
+	void GfxGLSurface::_sysQueryCurrentSize( WindowSize & pSize ) const
 	{
 		RECT clientRect;
 		::GetClientRect( mNativeData.hwnd, &clientRect );
@@ -58,7 +58,7 @@ namespace ts3
 	}
 
 
-	void SysGLRenderContext::_sysDestroy() noexcept
+	void GfxGLRenderContext::_sysDestroy() noexcept
 	{
 		if( mNativeData.contextHandle != nullptr )
 		{
@@ -73,48 +73,48 @@ namespace ts3
 		}
 	}
 
-	void SysGLRenderContext::_sysBindForCurrentThread( SysGLSurface & pTargetSurface )
+	void GfxGLRenderContext::_sysBindForCurrentThread( GfxGLSurface & pTargetSurface )
 	{
 		::wglMakeCurrent( pTargetSurface.mNativeData.surfaceHandle, mNativeData.contextHandle );
 	}
 
-	bool SysGLRenderContext::_sysValidateCurrentBinding() const
+	bool GfxGLRenderContext::_sysValidateCurrentBinding() const
 	{
 		auto currentContext = ::wglGetCurrentContext();
 		return mNativeData.contextHandle == currentContext;
 	}
 
 
-	void SysGLDriver::_sysInitializePlatform()
+	void GfxGLDriver::_sysInitializePlatform()
 	{
-		auto & openglSysInitState = mNativeData.initState;
+		auto & openglInitState = mNativeData.initState;
 
-		SysWindowCreateInfo tempWindowCreateInfo;
-		tempWindowCreateInfo.properties.geometry.position = cvSysWindowPositionOrigin;
-		tempWindowCreateInfo.properties.geometry.size = SysWindowSize( 600, 600 );
-		tempWindowCreateInfo.properties.geometry.frameStyle = SysWindowFrameStyle::Overlay;
+		WindowCreateInfo tempWindowCreateInfo;
+		tempWindowCreateInfo.properties.geometry.position = cvWindowPositionOrigin;
+		tempWindowCreateInfo.properties.geometry.size = WindowSize( 600, 600 );
+		tempWindowCreateInfo.properties.geometry.frameStyle = WindowFrameStyle::Overlay;
 
-		SysVisualConfig legacyVisualConfig;
-		legacyVisualConfig = sysDsmGetDefaultVisualConfigForSystemWindow();
-		legacyVisualConfig.flags.set( SYS_VISUAL_ATTRIB_FLAG_LEGACY_BIT );
+		GfxVisualConfig legacyVisualConfig;
+		legacyVisualConfig = sysGfxGetDefaultVisualConfigFortemWindow();
+		legacyVisualConfig.flags.set( SYS_GFX_VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
-		// Create a surface window. In case of Win32, SysGLSurfaceNativeData inherits from SysWindowNativeData
+		// Create a surface window. In case of Win32, GfxGLSurfaceNativeData inherits from WindowNativeData
 		// for this very reason: to allow treating surfaces as windows (as that's exactly the case on desktop).
-		win32CreateWindow( openglSysInitState.surfaceData, tempWindowCreateInfo );
+		win32CreateWindow( openglInitState.surfaceData, tempWindowCreateInfo );
 
 		// Create a surface. This sets up the PFD and configures HDC properly.
-		_win32CreateGLSurface( openglSysInitState.surfaceData, legacyVisualConfig );
+		_win32CreateGLSurface( openglInitState.surfaceData, legacyVisualConfig );
 
 		// Create legacy OpenGL context for initialization phase.
-		openglSysInitState.contextData.contextHandle = ::wglCreateContext( openglSysInitState.surfaceData.surfaceHandle );
-		if ( openglSysInitState.contextData.contextHandle == nullptr )
+		openglInitState.contextData.contextHandle = ::wglCreateContext( openglInitState.surfaceData.surfaceHandle );
+		if ( openglInitState.contextData.contextHandle == nullptr )
 		{
 			throw 0;
 		}
 
 		// Bind context as current, so GL calls may be used normally.
-		BOOL makeCurrentResult = ::wglMakeCurrent( openglSysInitState.surfaceData.surfaceHandle,
-		                                           openglSysInitState.contextData.contextHandle );
+		BOOL makeCurrentResult = ::wglMakeCurrent( openglInitState.surfaceData.surfaceHandle,
+		                                           openglInitState.contextData.contextHandle );
 
 		if ( makeCurrentResult == FALSE )
 		{
@@ -134,44 +134,44 @@ namespace ts3
 		}
 	}
 
-	void SysGLDriver::_sysReleaseInitState()
+	void GfxGLDriver::_sysReleaseInitState()
 	{
-		auto & openglSysInitState = mNativeData.initState;
+		auto & openglInitState = mNativeData.initState;
 
-		if( openglSysInitState.contextData.contextHandle != nullptr )
+		if( openglInitState.contextData.contextHandle != nullptr )
 		{
-			::wglDeleteContext( openglSysInitState.contextData.contextHandle );
-			openglSysInitState.contextData.contextHandle = nullptr;
+			::wglDeleteContext( openglInitState.contextData.contextHandle );
+			openglInitState.contextData.contextHandle = nullptr;
 		}
 
-		if( openglSysInitState.surfaceData.surfaceHandle != nullptr )
+		if( openglInitState.surfaceData.surfaceHandle != nullptr )
 		{
-			_win32DestroyGLSurface( openglSysInitState.surfaceData );
-			openglSysInitState.surfaceData.surfaceHandle = nullptr;
-			openglSysInitState.surfaceData.pixelFormatIndex = cvSysWin32InvalidPixelFormatIndex;
+			_win32DestroyGLSurface( openglInitState.surfaceData );
+			openglInitState.surfaceData.surfaceHandle = nullptr;
+			openglInitState.surfaceData.pixelFormatIndex = cvWin32InvalidPixelFormatIndex;
 		}
 
-		if( openglSysInitState.surfaceData.hwnd != nullptr )
+		if( openglInitState.surfaceData.hwnd != nullptr )
 		{
-			win32DestroyWindow( openglSysInitState.surfaceData );
-			openglSysInitState.surfaceData.hwnd = nullptr;
+			win32DestroyWindow( openglInitState.surfaceData );
+			openglInitState.surfaceData.hwnd = nullptr;
 		}
 	}
 
-	void SysGLDriver::_sysCreateDisplaySurface( SysGLSurface & pGLSurface, const SysGLSurfaceCreateInfo & pCreateInfo )
+	void GfxGLDriver::_sysCreateDisplaySurface( GfxGLSurface & pGLSurface, const GfxGLSurfaceCreateInfo & pCreateInfo )
 	{
-		SysWindowCreateInfo surfaceWindowCreateInfo;
+		WindowCreateInfo surfaceWindowCreateInfo;
 		surfaceWindowCreateInfo.properties.geometry = pCreateInfo.windowGeometry;
 		surfaceWindowCreateInfo.properties.title = "TS3 OpenGL Window";
 
 		win32CreateWindow( pGLSurface.mNativeData, surfaceWindowCreateInfo );
 		_win32CreateGLSurface( pGLSurface.mNativeData, pCreateInfo.visualConfig );
 
-		if( pCreateInfo.flags.isSet( E_SYS_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT ) )
+		if( pCreateInfo.flags.isSet( E_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT ) )
 		{
 			wglSwapIntervalEXT( -1 );
 		}
-		else if( pCreateInfo.flags.isSet( E_SYS_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT ) )
+		else if( pCreateInfo.flags.isSet( E_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT ) )
 		{
 			wglSwapIntervalEXT( 1 );
 		}
@@ -183,14 +183,14 @@ namespace ts3
 		::ShowWindow( pGLSurface.mNativeData.hwnd, SW_SHOWNORMAL );
 
 		// TODO: Workaround to properly work with current engine's implementation. That should be turned into an explicit flag.
-		if( pCreateInfo.flags.isSet( E_SYS_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
+		if( pCreateInfo.flags.isSet( E_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
 		{
 			::SetCapture( pGLSurface.mNativeData.hwnd );
 			::ShowCursor( FALSE );
 		}
 	}
 
-	void SysGLDriver::_sysCreateDisplaySurfaceForCurrentThread( SysGLSurface & pGLSurface )
+	void GfxGLDriver::_sysCreateDisplaySurfaceForCurrentThread( GfxGLSurface & pGLSurface )
 	{
 		auto surfaceHandle = ::wglGetCurrentDC();
 		if ( surfaceHandle == nullptr )
@@ -211,29 +211,29 @@ namespace ts3
 
 	}
 
-	void SysGLDriver::_sysCreateRenderContext( SysGLRenderContext & pGLRenderContext, SysGLSurface & pGLSurface, const SysGLRenderContextCreateInfo & pCreateInfo )
+	void GfxGLDriver::_sysCreateRenderContext( GfxGLRenderContext & pGLRenderContext, GfxGLSurface & pGLSurface, const GfxGLRenderContextCreateInfo & pCreateInfo )
 	{
 		int contextProfile = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
 		Bitmask<int> contextCreateFlags = 0;
 		HGLRC shareContextHandle = nullptr;
 
-		if ( pCreateInfo.targetAPIProfile == ESysGLAPIProfile::GLES )
+		if ( pCreateInfo.targetAPIProfile == EGfxGLAPIProfile::GLES )
 		{
 			contextProfile = WGL_CONTEXT_ES_PROFILE_BIT_EXT;
 		}
-		if ( pCreateInfo.targetAPIProfile == ESysGLAPIProfile::Legacy )
+		if ( pCreateInfo.targetAPIProfile == EGfxGLAPIProfile::Legacy )
 		{
 			contextProfile = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
 		}
-		if ( pCreateInfo.flags.isSet( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
+		if ( pCreateInfo.flags.isSet( E_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
 		{
 			contextCreateFlags |= WGL_CONTEXT_DEBUG_BIT_ARB;
 		}
-		if ( pCreateInfo.flags.isSet( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
+		if ( pCreateInfo.flags.isSet( E_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
 		{
 			contextCreateFlags |= WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
 		}
-		if ( pCreateInfo.flags.isSet( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
+		if ( pCreateInfo.flags.isSet( E_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
 		{
 			if( pCreateInfo.shareContext != nullptr )
 			{
@@ -267,7 +267,7 @@ namespace ts3
 		pGLRenderContext.mNativeData.contextHandle = contextHandle;
 	}
 
-	void SysGLDriver::_sysCreateRenderContextForCurrentThread( SysGLRenderContext & pGLRenderContext )
+	void GfxGLDriver::_sysCreateRenderContextForCurrentThread( GfxGLRenderContext & pGLRenderContext )
 	{
 		auto contextHandle = ::wglGetCurrentContext();
 		if ( contextHandle == nullptr )
@@ -278,7 +278,7 @@ namespace ts3
 	}
 
 
-	void _win32CreateGLSurface( SysGLSurfaceNativeData & pGLSurfaceNativeData, const SysVisualConfig & pVisualConfig )
+	void _win32CreateGLSurface( GfxGLSurfaceNativeData & pGLSurfaceNativeData, const GfxVisualConfig & pVisualConfig )
 	{
 		auto surfaceHandle = ::GetWindowDC( pGLSurfaceNativeData.hwnd );
 		pGLSurfaceNativeData.surfaceHandle = surfaceHandle;
@@ -288,7 +288,7 @@ namespace ts3
 		pixelFormatDescriptor.nSize = sizeof( PIXELFORMATDESCRIPTOR );
 		pixelFormatDescriptor.nVersion = 1;
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
+		if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
 		{
 			pGLSurfaceNativeData.pixelFormatIndex = _win32ChooseLegacyGLPixelFormat( surfaceHandle, pixelFormatDescriptor );
 		}
@@ -304,7 +304,7 @@ namespace ts3
 		}
 	}
 
-	void _win32DestroyGLSurface( SysGLSurfaceNativeData & pGLSurfaceNativeData )
+	void _win32DestroyGLSurface( GfxGLSurfaceNativeData & pGLSurfaceNativeData )
 	{
 		if ( pGLSurfaceNativeData.surfaceHandle != nullptr )
 		{
@@ -339,10 +339,10 @@ namespace ts3
 			pixelFormatIndex = ::ChoosePixelFormat( pGLSurfaceDC, &pPfmtDescriptor );
 		}
 
-		return ( pixelFormatIndex > 0 ) ? pixelFormatIndex : cvSysWin32InvalidPixelFormatIndex;
+		return ( pixelFormatIndex > 0 ) ? pixelFormatIndex : cvWin32InvalidPixelFormatIndex;
 	}
 
-	int _win32ChooseCoreGLPixelFormat( HDC pGLSurfaceDC, const SysVisualConfig & pVisualConfig, PIXELFORMATDESCRIPTOR & pPfmtDescriptor )
+	int _win32ChooseCoreGLPixelFormat( HDC pGLSurfaceDC, const GfxVisualConfig & pVisualConfig, PIXELFORMATDESCRIPTOR & pPfmtDescriptor )
 	{
 		auto pixelFormatList = _win32QueryCompatiblePixelFormatList( pGLSurfaceDC, pVisualConfig );
 
@@ -361,13 +361,13 @@ namespace ts3
 
 		int maxPixelFormatIndex = ::DescribePixelFormat( pGLSurfaceDC, bestPixelFormatID, sizeof( PIXELFORMATDESCRIPTOR ), &pPfmtDescriptor );
 
-		return ( maxPixelFormatIndex > 0 ) ? bestPixelFormatID : cvSysWin32InvalidPixelFormatIndex;
+		return ( maxPixelFormatIndex > 0 ) ? bestPixelFormatID : cvWin32InvalidPixelFormatIndex;
 	}
 
 	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pGLSurfaceDC, int * pPixelFormatAttribList )
 	{
 		// Output array where system will store IDs of enumerated pixel formats.
-		int pixelFormatArray[cvSysWin32MaxWGLPixelFormatsNum];
+		int pixelFormatArray[cvWin32MaxWGLPixelFormatsNum];
 		// Number of pixel formats returned by the system.
 		UINT returnedPixelFormatsNum = 0U;
 
@@ -375,7 +375,7 @@ namespace ts3
 		BOOL enumResult = ::wglChoosePixelFormatARB( pGLSurfaceDC,
 		                                             pPixelFormatAttribList,
 		                                             nullptr,
-		                                             cvSysWin32MaxWGLPixelFormatsNum,
+		                                             cvWin32MaxWGLPixelFormatsNum,
 		                                             pixelFormatArray,
 		                                             &returnedPixelFormatsNum );
 
@@ -391,29 +391,29 @@ namespace ts3
 		return result;
 	}
 
-	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pGLSurfaceDC, const SysVisualConfig & pVisualConfig )
+	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pGLSurfaceDC, const GfxVisualConfig & pVisualConfig )
 	{
 		// Array for WGL_..._ARB pixel format attributes.
-		int pixelFormatAttributes[cvSysWin32MaxWGLPixelFormatAttributesNum * 2];
+		int pixelFormatAttributes[cvWin32MaxWGLPixelFormatAttributesNum * 2];
 		// Translate provided visual config to a WGL attribute array.
 		_win32GetWGLAttribArrayForVisualConfig( pVisualConfig, pixelFormatAttributes );
 
 		return _win32QueryCompatiblePixelFormatList( pGLSurfaceDC, pixelFormatAttributes );
 	}
 
-	int _win32GetPixelFormatMatchRate( HDC pGLSurfaceDC, int pPixelFormatIndex, const SysVisualConfig & pVisualConfig )
+	int _win32GetPixelFormatMatchRate( HDC pGLSurfaceDC, int pPixelFormatIndex, const GfxVisualConfig & pVisualConfig )
 	{
 		int doubleBufferRequestedState = TRUE;
 		int stereoModeRequestedState = FALSE;
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
-			!pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
+		if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
+			!pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 		{
 			doubleBufferRequestedState = FALSE;
 		}
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
-			!pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
+		if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
+			!pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 		{
 			stereoModeRequestedState = TRUE;
 		}
@@ -460,7 +460,7 @@ namespace ts3
 		return matchRate;
 	}
 
-	void _win32GetWGLAttribArrayForVisualConfig( const SysVisualConfig & pVisualConfig, int * pAttribArray )
+	void _win32GetWGLAttribArrayForVisualConfig( const GfxVisualConfig & pVisualConfig, int * pAttribArray )
 	{
 		int attribIndex = 0;
 
@@ -476,29 +476,29 @@ namespace ts3
 		pAttribArray[attribIndex++] = WGL_PIXEL_TYPE_ARB;
 		pAttribArray[attribIndex++] = WGL_TYPE_RGBA_ARB;
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
+		if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 		{
 			pAttribArray[attribIndex++] = WGL_DOUBLE_BUFFER_ARB;
 			pAttribArray[attribIndex++] = GL_TRUE;
 		}
-		else if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
+		else if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
 		{
 			pAttribArray[attribIndex++] = WGL_DOUBLE_BUFFER_ARB;
 			pAttribArray[attribIndex++] = GL_FALSE;
 		}
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
+		if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 		{
 			pAttribArray[attribIndex++] = WGL_STEREO_ARB;
 			pAttribArray[attribIndex++] = GL_FALSE;
 		}
-		else if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
+		else if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
 		{
 			pAttribArray[attribIndex++] = WGL_STEREO_ARB;
 			pAttribArray[attribIndex++] = GL_TRUE;
 		}
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_SRGB_CAPABLE_BIT ) )
+		if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_SRGB_CAPABLE_BIT ) )
 		{
 			pAttribArray[attribIndex++] = WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB;
 			pAttribArray[attribIndex++] = GL_TRUE;

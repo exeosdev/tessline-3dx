@@ -5,40 +5,40 @@
 namespace ts3
 {
 	// Creates X11 OpenGL surface using provided window create attributes and visual config.
-	void _x11CreateGLWindowAndSurface( SysGLSurfaceNativeData & pGLSurfaceNativeData,
-	                                   SysX11WindowCreateInfo & pWindowCreateInfo,
-	                                   const SysVisualConfig & pVisualConfig );
+	void _x11CreateGLWindowAndSurface( GfxGLSurfaceNativeData & pGLSurfaceNativeData,
+	                                   X11WindowCreateInfo & pWindowCreateInfo,
+	                                   const GfxVisualConfig & pVisualConfig );
 
 	// Destroys existing surface and corresponding window.
-	void _x11DestroyGLWindowAndSurface( SysGLSurfaceNativeData & pGLSurfaceNativeData );
+	void _x11DestroyGLWindowAndSurface( GfxGLSurfaceNativeData & pGLSurfaceNativeData );
 
 	// Selects matching FBConfig for a GL surface. Format is selected using current system's configuration. Uses legacy API.
 	GLXFBConfig _x11ChooseLegacyGLFBConfig( Display * pDisplay, int pScreenIndex );
 
 	// Selects matching pixel format for surface described with a VisualConfig. Uses new EXT API and supports stuff like MSAA.
-	GLXFBConfig _x11ChooseCoreGLFBConfig( Display * pDisplay, int pScreenIndex, const SysVisualConfig & pVisualConfig );
+	GLXFBConfig _x11ChooseCoreGLFBConfig( Display * pDisplay, int pScreenIndex, const GfxVisualConfig & pVisualConfig );
 
 	// Returns an array of FBConfigs matching specified VisualConfig structure.
-	std::vector<GLXFBConfig> _x11QueryCompatibleFBConfigList( Display * pDisplay, int pScreenIndex, const SysVisualConfig & pVisualConfig );
+	std::vector<GLXFBConfig> _x11QueryCompatibleFBConfigList( Display * pDisplay, int pScreenIndex, const GfxVisualConfig & pVisualConfig );
 
 	// Computes a "compatibility rate", i.e. how much the specified FBConfig matches the visual.
-	int _x11GetFBConfigMatchRate( Display * pDisplay, int pScreenIndex, GLXFBConfig pFBConfig, const SysVisualConfig & pVisualConfig );
+	int _x11GetFBConfigMatchRate( Display * pDisplay, int pScreenIndex, GLXFBConfig pFBConfig, const GfxVisualConfig & pVisualConfig );
 
-	// Translation: SysVisualConfig --> array of GLX_* attributes required by the system API. Used for surface/context creation.
-	void _x11GetAttribArrayForVisualConfig( const SysVisualConfig & pVisualConfig, int * pAttribArray );
+	// Translation: GfxVisualConfig --> array of GLX_* attributes required by the system API. Used for surface/context creation.
+	void _x11GetAttribArrayForVisualConfig( const GfxVisualConfig & pVisualConfig, int * pAttribArray );
 
 
-	void SysGLSurface::_sysDestroy() noexcept
+	void GfxGLSurface::_sysDestroy() noexcept
 	{
 		_x11DestroyGLWindowAndSurface( mNativeData );
 	}
 
-	void SysGLSurface::_sysSwapBuffers()
+	void GfxGLSurface::_sysSwapBuffers()
 	{
 		glXSwapBuffers( mNativeData.display, mNativeData.xwindow );
 	}
 
-	void SysGLSurface::_sysQueryCurrentSize( SysWindowSize & pSize ) const
+	void GfxGLSurface::_sysQueryCurrentSize( WindowSize & pSize ) const
 	{
 		XWindowAttributes windowAttributes;
 		XGetWindowAttributes( mNativeData.display,
@@ -50,7 +50,7 @@ namespace ts3
 	}
 
 
-	void SysGLRenderContext::_sysDestroy() noexcept
+	void GfxGLRenderContext::_sysDestroy() noexcept
 	{
 		if( mNativeData.contextHandle != nullptr )
 		{
@@ -65,7 +65,7 @@ namespace ts3
 		}
 	}
 
-	void SysGLRenderContext::_sysBindForCurrentThread( SysGLSurface & pTargetSurface )
+	void GfxGLRenderContext::_sysBindForCurrentThread( GfxGLSurface & pTargetSurface )
 	{
 		::glXMakeContextCurrent( mNativeData.display,
 		                         pTargetSurface.mNativeData.xwindow,
@@ -73,17 +73,17 @@ namespace ts3
 		                         mNativeData.contextHandle );
 	}
 
-	bool SysGLRenderContext::_sysValidateCurrentBinding() const
+	bool GfxGLRenderContext::_sysValidateCurrentBinding() const
 	{
 		auto currentContext = ::glXGetCurrentContext();
 		return mNativeData.contextHandle == currentContext;
 	}
 
 
-	void SysGLDriver::_sysInitializePlatform()
+	void GfxGLDriver::_sysInitializePlatform()
 	{
-		auto & scNativeData = mSysContext->mNativeData;
-		auto & openglSysInitState = mNativeData.initState;
+		auto & scNativeData = mContext->mNativeData;
+		auto & openglInitState = mNativeData.initState;
 
 		int glxVersionMajor = 0;
 		int glxVersionMinor = 0;
@@ -93,20 +93,20 @@ namespace ts3
 			throw 0;
 		}
 
-		SysVisualConfig legacyVisualConfig;
-		legacyVisualConfig = sysDsmGetDefaultVisualConfigForSystemWindow();
-		legacyVisualConfig.flags.set( SYS_VISUAL_ATTRIB_FLAG_LEGACY_BIT );
+		GfxVisualConfig legacyVisualConfig;
+		legacyVisualConfig = sysGfxGetDefaultVisualConfigFortemWindow();
+		legacyVisualConfig.flags.set( SYS_GFX_VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
-		SysX11WindowCreateInfo x11WindowCreateInfo;
+		X11WindowCreateInfo x11WindowCreateInfo;
 		x11WindowCreateInfo.display = scNativeData.display;
 		x11WindowCreateInfo.screenIndex = scNativeData.screenIndex;
 		x11WindowCreateInfo.rootWindow = scNativeData.rootWindow;
 		x11WindowCreateInfo.wmpDeleteWindow = scNativeData.wmpDeleteWindow;
 
-		_x11CreateGLWindowAndSurface( openglSysInitState.surfaceData, x11WindowCreateInfo, legacyVisualConfig );
+		_x11CreateGLWindowAndSurface( openglInitState.surfaceData, x11WindowCreateInfo, legacyVisualConfig );
 
 		auto tempContextHandle = ::glXCreateContext( scNativeData.display,
-		                                             openglSysInitState.surfaceData.visualInfo,
+		                                             openglInitState.surfaceData.visualInfo,
 		                                             nullptr,
 		                                             True );
 		if ( tempContextHandle == nullptr )
@@ -114,13 +114,13 @@ namespace ts3
 			throw 0;
 		}
 
-		openglSysInitState.contextData.contextHandle = tempContextHandle;
-		openglSysInitState.contextData.display = scNativeData.display;
-		openglSysInitState.contextData.targetSurface = openglSysInitState.surfaceData.xwindow;
+		openglInitState.contextData.contextHandle = tempContextHandle;
+		openglInitState.contextData.display = scNativeData.display;
+		openglInitState.contextData.targetSurface = openglInitState.surfaceData.xwindow;
 
-		auto makeCurrentResult = ::glXMakeCurrent( openglSysInitState.contextData.display,
-		                                           openglSysInitState.contextData.targetSurface,
-		                                           openglSysInitState.contextData.contextHandle );
+		auto makeCurrentResult = ::glXMakeCurrent( openglInitState.contextData.display,
+		                                           openglInitState.contextData.targetSurface,
+		                                           openglInitState.contextData.contextHandle );
 		if ( makeCurrentResult == False )
 		{
 			throw 0;
@@ -133,48 +133,48 @@ namespace ts3
         }
 	}
 
-	void SysGLDriver::_sysReleaseInitState()
+	void GfxGLDriver::_sysReleaseInitState()
 	{
-		auto & openglSysInitState = mNativeData.initState;
+		auto & openglInitState = mNativeData.initState;
 
-		if( openglSysInitState.contextData.contextHandle != nullptr )
+		if( openglInitState.contextData.contextHandle != nullptr )
 		{
-			::glXDestroyContext( openglSysInitState.contextData.display, openglSysInitState.contextData.contextHandle );
-			openglSysInitState.contextData.contextHandle = nullptr;
-			openglSysInitState.contextData.targetSurface = cvXIDNone;
+			::glXDestroyContext( openglInitState.contextData.display, openglInitState.contextData.contextHandle );
+			openglInitState.contextData.contextHandle = nullptr;
+			openglInitState.contextData.targetSurface = cvXIDNone;
 		}
 
-		if( openglSysInitState.surfaceData.xwindow != cvXIDNone )
+		if( openglInitState.surfaceData.xwindow != cvXIDNone )
 		{
-			_x11DestroyGLWindowAndSurface( openglSysInitState.surfaceData );
-			openglSysInitState.surfaceData.fbConfig = nullptr;
+			_x11DestroyGLWindowAndSurface( openglInitState.surfaceData );
+			openglInitState.surfaceData.fbConfig = nullptr;
 		}
 
-		if( openglSysInitState.surfaceData.visualInfo != nullptr )
+		if( openglInitState.surfaceData.visualInfo != nullptr )
 		{
-			XFree( openglSysInitState.surfaceData.visualInfo );
-			openglSysInitState.surfaceData.visualInfo = nullptr;
+			XFree( openglInitState.surfaceData.visualInfo );
+			openglInitState.surfaceData.visualInfo = nullptr;
 		}
 	}
 
-	void SysGLDriver::_sysCreateDisplaySurface( SysGLSurface & pGLSurface, const SysGLSurfaceCreateInfo & pCreateInfo )
+	void GfxGLDriver::_sysCreateDisplaySurface( GfxGLSurface & pGLSurface, const GfxGLSurfaceCreateInfo & pCreateInfo )
 	{
-		auto & scNativeData = mSysContext->mNativeData;
+		auto & scNativeData = mContext->mNativeData;
 
-		SysX11WindowCreateInfo x11WindowCreateInfo;
+		X11WindowCreateInfo x11WindowCreateInfo;
 		x11WindowCreateInfo.commonProperties.geometry = pCreateInfo.windowGeometry;
 		x11WindowCreateInfo.commonProperties.title = "Exeos Framework OpenGL Window";
 		x11WindowCreateInfo.display = scNativeData.display;
 		x11WindowCreateInfo.screenIndex = scNativeData.screenIndex;
 		x11WindowCreateInfo.rootWindow = scNativeData.rootWindow;
 		x11WindowCreateInfo.wmpDeleteWindow = scNativeData.wmpDeleteWindow;
-		x11WindowCreateInfo.fullscreenMode = pCreateInfo.flags.isSet( E_SYS_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
+		x11WindowCreateInfo.fullscreenMode = pCreateInfo.flags.isSet( E_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 
 		_x11CreateGLWindowAndSurface( pGLSurface.mNativeData, x11WindowCreateInfo, pCreateInfo.visualConfig );
 		sysX11UpdateNewWindowState( pGLSurface.mNativeData, x11WindowCreateInfo );
 	}
 
-	void SysGLDriver::_sysCreateDisplaySurfaceForCurrentThread( SysGLSurface & pGLSurface )
+	void GfxGLDriver::_sysCreateDisplaySurfaceForCurrentThread( GfxGLSurface & pGLSurface )
 	{
 		pGLSurface.mNativeData.display = glXGetCurrentDisplay();
 		pGLSurface.mNativeData.xwindow = glXGetCurrentDrawable();
@@ -187,7 +187,7 @@ namespace ts3
 		pGLSurface.mNativeData.colormap = windowAttributes.colormap;
 	}
 
-	void SysGLDriver::_sysCreateRenderContext( SysGLRenderContext & pGLRenderContext, SysGLSurface & pGLSurface, const SysGLRenderContextCreateInfo & pCreateInfo )
+	void GfxGLDriver::_sysCreateRenderContext( GfxGLRenderContext & pGLRenderContext, GfxGLSurface & pGLSurface, const GfxGLRenderContextCreateInfo & pCreateInfo )
 	{
 		static PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsProc = nullptr;
 		static PFNGLXSWAPINTERVALEXTPROC glXSwapIntervalEXTProc = nullptr;
@@ -206,23 +206,23 @@ namespace ts3
 		Bitmask<int> contextCreateFlags = 0;
 		GLXContext shareContextHandle = nullptr;
 
-		if ( pCreateInfo.targetAPIProfile == ESysGLAPIProfile::GLES )
+		if ( pCreateInfo.targetAPIProfile == EGfxGLAPIProfile::GLES )
 		{
 			contextProfile = GLX_CONTEXT_ES_PROFILE_BIT_EXT;
 		}
-		if ( pCreateInfo.targetAPIProfile == ESysGLAPIProfile::Legacy )
+		if ( pCreateInfo.targetAPIProfile == EGfxGLAPIProfile::Legacy )
 		{
 			contextProfile = GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
 		}
-		if ( pCreateInfo.flags.isSet( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
+		if ( pCreateInfo.flags.isSet( E_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
 		{
 			contextCreateFlags |= GLX_CONTEXT_DEBUG_BIT_ARB;
 		}
-		if ( pCreateInfo.flags.isSet( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
+		if ( pCreateInfo.flags.isSet( E_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
 		{
 			contextCreateFlags |= GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
 		}
-		if ( pCreateInfo.flags.isSet( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
+		if ( pCreateInfo.flags.isSet( E_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
 		{
 			if( pCreateInfo.shareContext != nullptr )
 			{
@@ -260,7 +260,7 @@ namespace ts3
 		pGLRenderContext.mNativeData.contextHandle = contextHandle;
 	}
 
-	void SysGLDriver::_sysCreateRenderContextForCurrentThread( SysGLRenderContext & pGLRenderContext )
+	void GfxGLDriver::_sysCreateRenderContextForCurrentThread( GfxGLRenderContext & pGLRenderContext )
 	{
 		auto contextHandle = ::glXGetCurrentContext();
 		if ( contextHandle == nullptr )
@@ -271,13 +271,13 @@ namespace ts3
 	}
 
 	
-	void _x11CreateGLWindowAndSurface( SysGLSurfaceNativeData & pGLSurfaceNativeData,
-	                                   SysX11WindowCreateInfo & pWindowCreateInfo,
-	                                   const SysVisualConfig & pVisualConfig )
+	void _x11CreateGLWindowAndSurface( GfxGLSurfaceNativeData & pGLSurfaceNativeData,
+	                                   X11WindowCreateInfo & pWindowCreateInfo,
+	                                   const GfxVisualConfig & pVisualConfig )
 	{
 		GLXFBConfig windowFBConfig = nullptr;
 
-		if( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
+		if( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
 		{
 			windowFBConfig = _x11ChooseLegacyGLFBConfig( pWindowCreateInfo.display, pWindowCreateInfo.screenIndex );
 		}
@@ -306,7 +306,7 @@ namespace ts3
 		sysX11CreateWindow( pGLSurfaceNativeData, pWindowCreateInfo );
 	}
 
-	void _x11DestroyGLWindowAndSurface( SysGLSurfaceNativeData & pGLSurfaceNativeData )
+	void _x11DestroyGLWindowAndSurface( GfxGLSurfaceNativeData & pGLSurfaceNativeData )
 	{
 		XUnmapWindow( pGLSurfaceNativeData.display, pGLSurfaceNativeData.xwindow );
 		sysX11DestroyWindow( pGLSurfaceNativeData );
@@ -389,7 +389,7 @@ namespace ts3
 		return bestFBConfig;
 	}
 
-	GLXFBConfig _x11ChooseCoreGLFBConfig( Display * pDisplay, int pScreenIndex, const SysVisualConfig & pVisualConfig )
+	GLXFBConfig _x11ChooseCoreGLFBConfig( Display * pDisplay, int pScreenIndex, const GfxVisualConfig & pVisualConfig )
 	{
 		auto fbConfigList = _x11QueryCompatibleFBConfigList( pDisplay, pScreenIndex, pVisualConfig );
 
@@ -409,13 +409,13 @@ namespace ts3
 		return bestFBConfig;
 	}
 
-    static constexpr size_t cxSysX11MaxGLXFBConfigAttributesNum = 64u;
+    static constexpr size_t cxX11MaxGLXFBConfigAttributesNum = 64u;
 
-	std::vector<GLXFBConfig> _x11QueryCompatibleFBConfigList( Display * pDisplay, int pScreenIndex, const SysVisualConfig & pVisualConfig )
+	std::vector<GLXFBConfig> _x11QueryCompatibleFBConfigList( Display * pDisplay, int pScreenIndex, const GfxVisualConfig & pVisualConfig )
 	{
 		std::vector<GLXFBConfig> result;
 
-		int fbConfigAttribArray[cxSysX11MaxGLXFBConfigAttributesNum];
+		int fbConfigAttribArray[cxX11MaxGLXFBConfigAttributesNum];
 		_x11GetAttribArrayForVisualConfig( pVisualConfig, fbConfigAttribArray );
 
 		int pFBConfigListSize = 0;
@@ -450,19 +450,19 @@ namespace ts3
 		return result;
 	}
 
-	int _x11GetFBConfigMatchRate( Display * pDisplay, int pScreenIndex, GLXFBConfig pFBConfig, const SysVisualConfig & pVisualConfig )
+	int _x11GetFBConfigMatchRate( Display * pDisplay, int pScreenIndex, GLXFBConfig pFBConfig, const GfxVisualConfig & pVisualConfig )
 	{
 		int doubleBufferRequestedState = True;
 		int stereoModeRequestedState = False;
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
-		     !pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
+		if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
+		     !pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 		{
 			doubleBufferRequestedState = False;
 		}
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
-		     !pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
+		if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
+		     !pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 		{
 			stereoModeRequestedState = True;
 		}
@@ -495,7 +495,7 @@ namespace ts3
 		return matchRate;
 	}
 
-	void _x11GetAttribArrayForVisualConfig( const SysVisualConfig & pVisualConfig, int * pAttribArray )
+	void _x11GetAttribArrayForVisualConfig( const GfxVisualConfig & pVisualConfig, int * pAttribArray )
 	{
 		int attribIndex = 0;
 
@@ -511,23 +511,23 @@ namespace ts3
 		pAttribArray[attribIndex++] = GLX_X_VISUAL_TYPE;
 		pAttribArray[attribIndex++] = GLX_TRUE_COLOR;
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
+		if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 		{
 			pAttribArray[attribIndex++] = GLX_DOUBLEBUFFER;
 			pAttribArray[attribIndex++] = True;
 		}
-		else if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
+		else if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
 		{
 			pAttribArray[attribIndex++] = GLX_DOUBLEBUFFER;
 			pAttribArray[attribIndex++] = False;
 		}
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
+		if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 		{
 			pAttribArray[attribIndex++] = GLX_STEREO;
 			pAttribArray[attribIndex++] = False;
 		}
-		else if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
+		else if ( pVisualConfig.flags.isSet( SYS_GFX_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
 		{
 			pAttribArray[attribIndex++] = GLX_STEREO;
 			pAttribArray[attribIndex++] = True;

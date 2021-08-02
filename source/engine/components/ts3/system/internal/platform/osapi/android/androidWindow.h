@@ -7,7 +7,7 @@
 namespace ts3
 {
 
-	struct SysWindowNativeData : public SysEventSourceNativeData
+	struct WindowNativeData : public EventSourceNativeData
 	{
 	};
 

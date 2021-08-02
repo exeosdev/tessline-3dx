@@ -7,29 +7,29 @@
 namespace ts3
 {
 
-	struct SysDisplayDriverNativeDataDXGI
+	struct DisplayDriverNativeDataDXGI
 	{
 		ComPtr<IDXGIFactory1> dxgiFactory;
 	};
 
-	struct SysDsmAdapterNativeDataDXGI
+	struct DsmAdapterNativeDataDXGI
 	{
 		ComPtr<IDXGIAdapter1> dxgiAdapter;
 		DXGI_ADAPTER_DESC1  dxgiAdapterDesc;
 	};
 
-	struct SysDsmOutputNativeDataDXGI
+	struct DsmOutputNativeDataDXGI
 	{
 		ComPtr<IDXGIOutput1> dxgiOutput;
 		DXGI_OUTPUT_DESC  dxgiOutputDesc;
 	};
 
-	struct SysDsmVideoModeNativeDataDXGI
+	struct DsmVideoModeNativeDataDXGI
 	{
 		DXGI_MODE_DESC dxgiModeDesc;
 	};
 
-	struct SysDisplayDriverCreateInfoDXGI
+	struct DisplayDriverCreateInfoDXGI
 	{
 		IDXGIFactory * dxgiFactory = nullptr;
 	};

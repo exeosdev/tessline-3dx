@@ -6,26 +6,28 @@
 
 namespace ts3
 {
+namespace system
+{
 
-    ts3DeclareSysHandle( SysContext );
+    ts3DeclareHandle( Context );
 
-	enum ESysContextCreateFlags : uint32
+	enum EContextCreateFlags : uint32
 	{
-		E_SYS_CONTEXT_CREATE_FLAG_INIT_DEFAULT = 0
+		E_CONTEXT_CREATE_FLAG_INIT_DEFAULT = 0
 	};
 
-	struct SysContextCreateInfo
+	struct ContextCreateInfo
 	{
-		Bitmask<ESysContextCreateFlags> flags = E_SYS_CONTEXT_CREATE_FLAG_INIT_DEFAULT;
+		Bitmask<EContextCreateFlags> flags = E_CONTEXT_CREATE_FLAG_INIT_DEFAULT;
 	};
 
 	/// @brief
-	SysContextHandle sysCreateContext( const SysContextCreateInfo & pCreateInfo );
+	ContextHandle sysCreateContext( const ContextCreateInfo & pCreateInfo );
 
 	/// @brief
-	void sysDestroyContext( SysContextHandle pContext );
+	void sysDestroyContext( ContextHandle pContext );
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_SYS_CONTEXT_H__
-6

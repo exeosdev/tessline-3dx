@@ -1,22 +1,22 @@
 
 #include <ts3/system/internal/internalGfxOpenGL.h>
-#include <ts3/system/internal/internalSystemContext.h>
+#include <ts3/system/internal/internaltemContext.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 namespace ts3
 {
 
-    bool SysGLImplProxy::nativeInitializeGLDriver( SysGLDriver & pDriver )
+    bool GfxGLImplProxy::nativeInitializeGLDriver( GfxGLDriver & pDriver )
     {
         eglInitializeGLDriver( pDriver );
         pDriver.nativeData->androidNativeWindow = pDriver.systemContext->nativeData->androidNativeWindow;
         return true;
     }
 
-    void SysGLImplProxy::nativeReleaseGLDriverInitState( SysGLDriver & pDriver )
+    void GfxGLImplProxy::nativeReleaseGLDriverInitState( GfxGLDriver & pDriver )
     {}
 
-    void SysGLImplProxy::nativeCreateGLSurface( SysGLSurface & pSurface, const SysGLSurfaceCreateInfo & pCreateInfo )
+    void GfxGLImplProxy::nativeCreateGLSurface( GfxGLSurface & pSurface, const GfxGLSurfaceCreateInfo & pCreateInfo )
     {
         auto * driverNativeData = pSurface.driver->nativeData;
 
@@ -39,17 +39,17 @@ namespace ts3
         eglCreateSurface( pSurface, driverNativeData->display, driverNativeData->androidNativeWindow, fbConfig );
     }
 
-    void SysGLImplProxy::nativeCreateGLRenderContext( SysGLRenderContext & pContext, const SysGLRenderContextCreateInfo & pCreateInfo )
+    void GfxGLImplProxy::nativeCreateGLRenderContext( GfxGLRenderContext & pContext, const GfxGLRenderContextCreateInfo & pCreateInfo )
     {
         eglCreateCoreContext( pContext, pCreateInfo );
     }
 
-    void SysGLImplProxy::nativeSwapBuffers( SysGLSurface & pSurface )
+    void GfxGLImplProxy::nativeSwapBuffers( GfxGLSurface & pSurface )
     {
         ::eglSwapBuffers( pSurface.nativeData->display, pSurface.nativeData->surfaceHandle );
     }
 
-    void SysGLImplProxy::nativeBindContextForCurrentThread( SysGLRenderContext & pContext )
+    void GfxGLImplProxy::nativeBindContextForCurrentThread( GfxGLRenderContext & pContext )
     {
         ::eglMakeCurrent( pContext.nativeData->display,
                           pContext.nativeData->surfaceHandle,
