@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_SYS_CONTEXT_NATIVE_H__
 #define __TS3_SYSTEM_SYS_CONTEXT_NATIVE_H__
 
-#include "prerequisites.h"
+#include "sysContext.h"
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 #  include "internal/platform/osapi/android/androidSystemContext.h"

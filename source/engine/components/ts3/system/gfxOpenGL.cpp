@@ -5,10 +5,10 @@
 namespace ts3
 {
 
-	SysGLSurface::SysGLSurface( SysGLCoreDeviceHandle pGLCoreDevice ) noexcept
-	: SysBaseObject( pGLCoreDevice->mSysContext )
+	SysGLSurface::SysGLSurface( SysGLDriverHandle pGLDriver ) noexcept
+	: SysBaseObject( pGLDriver->mSysContext )
 	, SysEventSource( mNativeData )
-	, mGLCoreDevice( pGLCoreDevice )
+	, mGLDriver( pGLDriver )
 	{}
 
 	SysGLSurface::~SysGLSurface() noexcept
@@ -29,9 +29,9 @@ namespace ts3
 	}
 
 
-	SysGLRenderContext::SysGLRenderContext( SysGLCoreDeviceHandle pGLCoreDevice ) noexcept
-	: SysBaseObject( pGLCoreDevice->mSysContext )
-	, mGLCoreDevice( pGLCoreDevice )
+	SysGLRenderContext::SysGLRenderContext( SysGLDriverHandle pGLDriver ) noexcept
+	: SysBaseObject( pGLDriver->mSysContext )
+	, mGLDriver( pGLDriver )
 	{}
 
 	SysGLRenderContext::~SysGLRenderContext() noexcept
@@ -83,35 +83,35 @@ namespace ts3
 
 
 
-	SysGLCoreDevice::SysGLCoreDevice( SysDisplayManagerHandle pDisplayManager ) noexcept
+	SysGLDriver::SysGLDriver( SysDisplayManagerHandle pDisplayManager ) noexcept
 	: SysBaseObject( pDisplayManager->mSysContext )
 	, mDisplayManager( pDisplayManager )
 	, _primaryContext( nullptr )
 	{}
 
-	SysGLCoreDevice::~SysGLCoreDevice() noexcept = default;
+	SysGLDriver::~SysGLDriver() noexcept = default;
 
-	SysGLCoreDeviceHandle SysGLCoreDevice::create( SysDisplayManagerHandle pDisplayManager )
+	SysGLDriverHandle SysGLDriver::create( SysDisplayManagerHandle pDisplayManager )
 	{
-		auto openglSubsystem = sysCreateObject<SysGLCoreDevice>( pDisplayManager );
+		auto openglSubsystem = sysCreateObject<SysGLDriver>( pDisplayManager );
 		return openglSubsystem;
 	}
 
-	void SysGLCoreDevice::initializePlatform()
+	void SysGLDriver::initializePlatform()
 	{
 		_sysInitializePlatform();
 	}
 
-	void SysGLCoreDevice::releaseInitState( SysGLRenderContext & pGLRenderContext )
+	void SysGLDriver::releaseInitState( SysGLRenderContext & pGLRenderContext )
 	{
-		if( pGLRenderContext.mGLCoreDevice.get() != this )
+		if( pGLRenderContext.mGLDriver.get() != this )
 		{
 			throw 0;
 		}
 		_sysReleaseInitState();
 	}
 
-	SysGLSurfaceHandle SysGLCoreDevice::createDisplaySurface( const SysGLSurfaceCreateInfo & pCreateInfo )
+	SysGLSurfaceHandle SysGLDriver::createDisplaySurface( const SysGLSurfaceCreateInfo & pCreateInfo )
 	{
 		SysGLSurfaceCreateInfo validatedCreateInfo = pCreateInfo;
 
@@ -129,23 +129,23 @@ namespace ts3
 
 		mDisplayManager->validateWindowGeometry( validatedCreateInfo.windowGeometry );
 
-		auto openglSurface = sysCreateObject<SysGLSurface>( getHandle<SysGLCoreDevice>() );
+		auto openglSurface = sysCreateObject<SysGLSurface>( getHandle<SysGLDriver>() );
 
 		_sysCreateDisplaySurface( *openglSurface, validatedCreateInfo );
 
 		return openglSurface;
 	}
 
-	SysGLSurfaceHandle SysGLCoreDevice::createDisplaySurfaceForCurrentThread()
+	SysGLSurfaceHandle SysGLDriver::createDisplaySurfaceForCurrentThread()
 	{
-		auto openglSurface = sysCreateObject<SysGLSurface>( getHandle<SysGLCoreDevice>() );
+		auto openglSurface = sysCreateObject<SysGLSurface>( getHandle<SysGLDriver>() );
 
 		_sysCreateDisplaySurfaceForCurrentThread( *openglSurface );
 
 		return openglSurface;
 	}
 
-	SysGLRenderContextHandle SysGLCoreDevice::createRenderContext( SysGLSurface & pSurface, const SysGLRenderContextCreateInfo & pCreateInfo )
+	SysGLRenderContextHandle SysGLDriver::createRenderContext( SysGLSurface & pSurface, const SysGLRenderContextCreateInfo & pCreateInfo )
 	{
 		SysGLRenderContextCreateInfo validatedCreateInfo = pCreateInfo;
 
@@ -156,43 +156,43 @@ namespace ts3
 			validatedCreateInfo.requiredAPIVersion.minor = 0;
 		}
 
-		auto openglContext = sysCreateObject<SysGLRenderContext>( getHandle<SysGLCoreDevice>() );
+		auto openglContext = sysCreateObject<SysGLRenderContext>( getHandle<SysGLDriver>() );
 
 		_sysCreateRenderContext( *openglContext, pSurface, validatedCreateInfo );
 
 		return openglContext;
 	}
 
-	SysGLRenderContextHandle SysGLCoreDevice::createRenderContextForCurrentThread()
+	SysGLRenderContextHandle SysGLDriver::createRenderContextForCurrentThread()
 	{
-		auto openglContext = sysCreateObject<SysGLRenderContext>( getHandle<SysGLCoreDevice>() );
+		auto openglContext = sysCreateObject<SysGLRenderContext>( getHandle<SysGLDriver>() );
 
 		_sysCreateRenderContextForCurrentThread( *openglContext );
 
 		return openglContext;
 	}
 
-	void SysGLCoreDevice::setPrimaryContext( SysGLRenderContext & pPrimaryContext )
+	void SysGLDriver::setPrimaryContext( SysGLRenderContext & pPrimaryContext )
 	{
 		_primaryContext = &pPrimaryContext;
 	}
 
-	void SysGLCoreDevice::resetPrimaryContext()
+	void SysGLDriver::resetPrimaryContext()
 	{
 		_primaryContext = nullptr;
 	}
 
-	std::vector<SysDepthStencilFormat> SysGLCoreDevice::querySupportedDepthStencilFormats( SysColorFormat pColorFormat )
+	std::vector<SysDepthStencilFormat> SysGLDriver::querySupportedDepthStencilFormats( SysColorFormat pColorFormat )
 	{
 		return {};
 	}
 
-	std::vector<SysMSAAMode> SysGLCoreDevice::querySupportedMSAAModes( SysColorFormat pColorFormat, SysDepthStencilFormat pDepthStencilFormat )
+	std::vector<SysMSAAMode> SysGLDriver::querySupportedMSAAModes( SysColorFormat pColorFormat, SysDepthStencilFormat pDepthStencilFormat )
 	{
 		return {};
 	}
 
-	SysGLRenderContext * SysGLCoreDevice::getPrimaryContext() const
+	SysGLRenderContext * SysGLDriver::getPrimaryContext() const
 	{
 		return _primaryContext;
 	}

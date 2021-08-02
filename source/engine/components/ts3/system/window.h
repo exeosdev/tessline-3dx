@@ -5,14 +5,6 @@
 #include "eventCore.h"
 #include "windowDefs.h"
 
-#if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
-#  include "internal/platform/osapi/android/androidWindow.h"
-#elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
-#  include "internal/platform/osapi/win32/win32Window.h"
-#elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
-#  include "internal/platform/osapi/x11/x11Window.h"
-#endif
-
 namespace ts3
 {
 
@@ -52,6 +44,11 @@ namespace ts3
 		void _sysInitialize();
 		void _sysRelease() noexcept;
 	};
+
+
+	TS3_SYSTEM_API SysWindowM
+
+	TS3_SYSTEM_API SysWindowHandle sysCreateWindow( SysWindowManagerHandle pWindowManager, const SysWindowCreateInfo & pCreateInfo );
 
 	class SysWindow : public SysBaseObject, public SysEventSource
 	{

@@ -130,7 +130,7 @@ namespace ts3::gpuapi
 				contextCreateInfo.flags.set( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT );
 			}
 
-			auto sysGLRenderContext = pSysGLSurface->mGLCoreDevice->createRenderContext( *pSysGLSurface, contextCreateInfo );
+			auto sysGLRenderContext = pSysGLSurface->mGLDriver->createRenderContext( *pSysGLSurface, contextCreateInfo );
 
 			return sysGLRenderContext;
 		}

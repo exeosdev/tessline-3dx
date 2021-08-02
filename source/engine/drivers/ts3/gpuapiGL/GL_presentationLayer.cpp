@@ -6,7 +6,7 @@
 namespace ts3::gpuapi
 {
 
-	static SysGLSurfaceHandle createSysGLSurface( SysGLCoreDeviceHandle pSysGLCoreDevice, const GLPresentationLayerCreateInfo & pSCCreateInfo )
+	static SysGLSurfaceHandle createSysGLSurface( SysGLDriverHandle pSysGLDriver, const GLPresentationLayerCreateInfo & pSCCreateInfo )
 	{
 		try
 		{
@@ -31,7 +31,7 @@ namespace ts3::gpuapi
 				surfaceCreateInfo.flags.set( E_SYS_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT );
 			}
 
-			auto sysGLSurface = pSysGLCoreDevice->createDisplaySurface( surfaceCreateInfo );
+			auto sysGLSurface = pSysGLDriver->createDisplaySurface( surfaceCreateInfo );
 
 			return sysGLSurface;
 		}
@@ -64,7 +64,7 @@ namespace ts3::gpuapi
 
 	GLScreenPresentationLayerHandle GLScreenPresentationLayer::create( GLGPUDevice & pDevice, const GLPresentationLayerCreateInfo & pCreateInfo )
 	{
-		auto sysGLSurface = createSysGLSurface( pDevice.mSysGLCoreDevice, pCreateInfo );
+		auto sysGLSurface = createSysGLSurface( pDevice.mSysGLDriver, pCreateInfo );
 		ts3DebugAssert( sysGLSurface );
 
 		auto presentationLayer = createGPUAPIObject<GLScreenPresentationLayer>( pDevice, sysGLSurface );

@@ -23,7 +23,7 @@ namespace ts3
 		HGLRC contextHandle;
 	};
 
-	struct SysGLCoreDeviceNativeData
+	struct SysGLDriverNativeData
 	{
 		struct InitState
 		{

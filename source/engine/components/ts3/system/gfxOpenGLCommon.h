@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_GFX_OPENGL_DEFS_H__
-#define __TS3_SYSTEM_GFX_OPENGL_DEFS_H__
+#ifndef __TS3_SYSTEM_GFX_OPENGL_COMMON_H__
+#define __TS3_SYSTEM_GFX_OPENGL_COMMON_H__
 
 #include "visual.h"
 #include "windowDefs.h"
@@ -9,11 +9,11 @@
 namespace ts3
 {
 
-    struct SysGLCoreDeviceNativeData;
+    struct SysGLDriverNativeData;
     struct SysGLSurfaceNativeData;
     struct SysGLRenderContextNativeData;
 
-    ts3DeclareSysHandle( SysGLCoreDevice );
+    ts3DeclareSysHandle( SysGLDriver );
     ts3DeclareSysHandle( SysGLSurface );
     ts3DeclareSysHandle( SysGLRenderContext );
 
@@ -92,4 +92,4 @@ namespace ts3
 
 }
 
-#endif // __TS3_SYSTEM_GFX_OPENGL_DEFS_H__
+#endif // __TS3_SYSTEM_GFX_OPENGL_COMMON_H__

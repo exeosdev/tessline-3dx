@@ -14,7 +14,7 @@ namespace ts3::gpuapi
 	struct SystemDisplayManagerCreateInfo
 	{
 		ts3::SystemContext * exfSystemContext = nullptr;
-		ts3::ESysDisplayDriverType exfDisplayDriverType = ts3::ESysDisplayDriverType::Default;
+		ts3::ESysDsmDisplayDriverType exfDisplayDriverType = ts3::ESysDsmDisplayDriverType::Default;
 	};
 
 	/// @brief

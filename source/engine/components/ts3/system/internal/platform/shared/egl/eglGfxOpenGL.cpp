@@ -9,7 +9,7 @@ namespace ts3
 	void _internalEGLGetAttribArrayForVisualConfig( const SysVisualConfig & pVisualConfig, int * pAttribArray );
 	void _internalEGLValidateRequestedContextVersion( Version & pVersion );
 
-	void eglInitializeGLCoreDevice( SysGLCoreDevice & pDriver )
+	void eglInitializeGLDriver( SysGLDriver & pDriver )
 	{
 		EGLDisplay eglDisplay = ::eglGetDisplay( EGL_DEFAULT_DISPLAY );
 		
@@ -28,7 +28,7 @@ namespace ts3
 		pDriver.nativeData->eglVersion.minor = eglVersionMinor;
 	}
 
-	void eglReleaseGLCoreDevice( SysGLCoreDevice & pDriver )
+	void eglReleaseGLDriver( SysGLDriver & pDriver )
 	{
 		::eglTerminate( pDriver.nativeData->display );
 		pDriver.nativeData->display = EGL_NO_DISPLAY;

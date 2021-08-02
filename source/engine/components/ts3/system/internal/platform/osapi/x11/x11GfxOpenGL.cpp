@@ -80,7 +80,7 @@ namespace ts3
 	}
 
 
-	void SysGLCoreDevice::_sysInitializePlatform()
+	void SysGLDriver::_sysInitializePlatform()
 	{
 		auto & scNativeData = mSysContext->mNativeData;
 		auto & openglSysInitState = mNativeData.initState;
@@ -133,7 +133,7 @@ namespace ts3
         }
 	}
 
-	void SysGLCoreDevice::_sysReleaseInitState()
+	void SysGLDriver::_sysReleaseInitState()
 	{
 		auto & openglSysInitState = mNativeData.initState;
 
@@ -157,7 +157,7 @@ namespace ts3
 		}
 	}
 
-	void SysGLCoreDevice::_sysCreateDisplaySurface( SysGLSurface & pGLSurface, const SysGLSurfaceCreateInfo & pCreateInfo )
+	void SysGLDriver::_sysCreateDisplaySurface( SysGLSurface & pGLSurface, const SysGLSurfaceCreateInfo & pCreateInfo )
 	{
 		auto & scNativeData = mSysContext->mNativeData;
 
@@ -174,7 +174,7 @@ namespace ts3
 		sysX11UpdateNewWindowState( pGLSurface.mNativeData, x11WindowCreateInfo );
 	}
 
-	void SysGLCoreDevice::_sysCreateDisplaySurfaceForCurrentThread( SysGLSurface & pGLSurface )
+	void SysGLDriver::_sysCreateDisplaySurfaceForCurrentThread( SysGLSurface & pGLSurface )
 	{
 		pGLSurface.mNativeData.display = glXGetCurrentDisplay();
 		pGLSurface.mNativeData.xwindow = glXGetCurrentDrawable();
@@ -187,7 +187,7 @@ namespace ts3
 		pGLSurface.mNativeData.colormap = windowAttributes.colormap;
 	}
 
-	void SysGLCoreDevice::_sysCreateRenderContext( SysGLRenderContext & pGLRenderContext, SysGLSurface & pGLSurface, const SysGLRenderContextCreateInfo & pCreateInfo )
+	void SysGLDriver::_sysCreateRenderContext( SysGLRenderContext & pGLRenderContext, SysGLSurface & pGLSurface, const SysGLRenderContextCreateInfo & pCreateInfo )
 	{
 		static PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsProc = nullptr;
 		static PFNGLXSWAPINTERVALEXTPROC glXSwapIntervalEXTProc = nullptr;
@@ -260,7 +260,7 @@ namespace ts3
 		pGLRenderContext.mNativeData.contextHandle = contextHandle;
 	}
 
-	void SysGLCoreDevice::_sysCreateRenderContextForCurrentThread( SysGLRenderContext & pGLRenderContext )
+	void SysGLDriver::_sysCreateRenderContextForCurrentThread( SysGLRenderContext & pGLRenderContext )
 	{
 		auto contextHandle = ::glXGetCurrentContext();
 		if ( contextHandle == nullptr )

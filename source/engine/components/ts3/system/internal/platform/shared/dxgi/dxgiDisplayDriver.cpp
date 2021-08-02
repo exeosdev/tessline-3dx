@@ -10,14 +10,14 @@ namespace ts3
 
 
 	SysDisplayDriverDXGI::SysDisplayDriverDXGI( SysDisplayManagerHandle pDisplayManager ) noexcept
-	: SysDisplayDriver( pDisplayManager, ESysDisplayDriverType::DXGI )
+	: SysDisplayDriver( pDisplayManager, ESysDsmDisplayDriverType::DXGI )
 	{}
 
 	SysDisplayDriverDXGI::~SysDisplayDriverDXGI() noexcept = default;
 
-	ESysDisplayDriverType SysDisplayDriverDXGI::queryDriverID() const noexcept
+	ESysDsmDisplayDriverType SysDisplayDriverDXGI::queryDriverID() const noexcept
 	{
-		return ESysDisplayDriverType::DXGI;
+		return ESysDsmDisplayDriverType::DXGI;
 	}
 
 	SysDisplayDriverHandle SysDisplayDriverDXGI::create( SysDisplayManagerHandle pDisplayManager, const SysDisplayDriverCreateInfoDXGI & pCreateInfo )

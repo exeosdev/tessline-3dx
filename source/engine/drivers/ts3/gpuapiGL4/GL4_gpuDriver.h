@@ -17,7 +17,7 @@ namespace ts3::gpuapi
 	class TS3GX_GL4_CLASS GL4GPUDriver final : public GLGPUDriver
 	{
 	public:
-		explicit GL4GPUDriver( SysGLCoreDeviceHandle pSysGLCoreDevice );
+		explicit GL4GPUDriver( SysGLDriverHandle pSysGLDriver );
 		virtual ~GL4GPUDriver();
 
 		virtual DisplayManagerHandle createDefaultDisplayManager() override;

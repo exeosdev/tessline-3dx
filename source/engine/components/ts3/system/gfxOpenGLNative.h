@@ -15,27 +15,27 @@
 namespace ts3
 {
 
-    struct SysGLCoreDevice
+    struct SysGLDriver
     {
-        SysGLCoreDeviceNativeData nativeData;
+        SysGLDriverNativeData nativeData;
     };
 
     struct SysGLSurface
     {
         SysGLSurfaceNativeData nativeData;
 
-        SysGLCoreDevice * coreDevice;
+        SysGLDriver * coreDevice;
     };
 
     struct SysGLRenderContext
     {
         SysGLRenderContextNativeData nativeData;
 
-        SysGLCoreDevice * coreDevice;
+        SysGLDriver * coreDevice;
     };
 
 
-    TS3_PCL_ATTR_NO_DISCARD SysGLCoreDeviceHandle sysCreateGLCoreDevice();
+    TS3_PCL_ATTR_NO_DISCARD SysGLDriverHandle sysCreateGLDriver();
 
 }
 

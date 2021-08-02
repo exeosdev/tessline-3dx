@@ -19,7 +19,7 @@ namespace ts3
 	{
 	};
 
-	struct SysGLCoreDeviceNativeData : public EGLCoreDeviceNativeData
+	struct SysGLDriverNativeData : public EGLDriverNativeData
 	{
 	};
 

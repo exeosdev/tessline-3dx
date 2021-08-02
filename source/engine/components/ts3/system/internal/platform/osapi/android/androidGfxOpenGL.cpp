@@ -6,14 +6,14 @@
 namespace ts3
 {
 
-    bool SysGLImplProxy::nativeInitializeGLCoreDevice( SysGLCoreDevice & pDriver )
+    bool SysGLImplProxy::nativeInitializeGLDriver( SysGLDriver & pDriver )
     {
-        eglInitializeGLCoreDevice( pDriver );
+        eglInitializeGLDriver( pDriver );
         pDriver.nativeData->androidNativeWindow = pDriver.systemContext->nativeData->androidNativeWindow;
         return true;
     }
 
-    void SysGLImplProxy::nativeReleaseGLCoreDeviceInitState( SysGLCoreDevice & pDriver )
+    void SysGLImplProxy::nativeReleaseGLDriverInitState( SysGLDriver & pDriver )
     {}
 
     void SysGLImplProxy::nativeCreateGLSurface( SysGLSurface & pSurface, const SysGLSurfaceCreateInfo & pCreateInfo )

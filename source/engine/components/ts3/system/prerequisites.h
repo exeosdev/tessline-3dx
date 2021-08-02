@@ -37,7 +37,7 @@ namespace ts3
 	using SysHandle = SharedHandle<TpObject>;
 
 #define ts3DeclareSysHandle( pType ) \
-	class pType; using pType##Handle = SysHandle<pType>
+	using pType##Handle = struct pType *
 
 	ts3DeclareSysHandle( SysBaseObject );
 	ts3DeclareSysHandle( SysContext );

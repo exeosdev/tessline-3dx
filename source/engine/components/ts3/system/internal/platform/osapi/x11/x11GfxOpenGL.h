@@ -6,8 +6,6 @@
 #include <GL/glx.h>
 #include <GL/glxext.h>
 
-#define EPC_SYS_ID X11
-
 namespace ts3
 {
 
@@ -24,7 +22,7 @@ namespace ts3
 		GLXContext contextHandle = nullptr;
 	};
 
-	struct SysGLCoreDeviceNativeData
+	struct SysGLDriverNativeData
 	{
 		struct InitState
 		{
@@ -35,7 +33,7 @@ namespace ts3
 		InitState * initState = nullptr;
 	};
 
-    using SysX11GLCoreDeviceNativeData = SysGLCoreDeviceNativeData;
+    using SysX11GLDriverNativeData = SysGLDriverNativeData;
     using SysX11GLSurfaceNativeData = SysGLSurfaceNativeData;
     using SysX11GLRenderContextNativeData = SysGLRenderContextNativeData;
 
