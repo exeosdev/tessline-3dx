@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_DISPLAY_NATIVE_H__
 #define __TS3_SYSTEM_DISPLAY_NATIVE_H__
 
-#include "displayCommon.h"
+#include "display.h"
 #include "coreSessionContextNative.h"
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )

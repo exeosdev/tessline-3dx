@@ -10,28 +10,28 @@ namespace ts3
 namespace system
 {
 
-	ts3DeclareHandle( Window );
-	ts3DeclareHandle( WindowManager );
+	ts3DeclareHandle( WmWindow );
+	ts3DeclareHandle( WmWindowManager );
 
-	using WindowPos = math::Pos2i;
-	using WindowSize = math::Size2u;
+	using WmWindowPos = math::Pos2i;
+	using WmWindowSize = math::Size2u;
 	using WindowNativeHandle = uint64;
 
 	/// @brief Predefined window position: auto. When used, window is spawned centered.
-	constexpr WindowPos cvWindowPositionAuto { -1, -1 };
+	constexpr WmWindowPos cvWindowPositionAuto { -1, -1 };
 
 	/// @brief Predefined window position: origin. When used, window is spawned at the origin point (0,0).
-	constexpr WindowPos cvWindowPositionOrigin { 0, 0 };
+	constexpr WmWindowPos cvWindowPositionOrigin { 0, 0 };
 
 	/// @brief Predefined window size: auto. When used, window size is selected by the implementation.
-	constexpr WindowSize cvWindowSizeAuto { 0, 0 };
+	constexpr WmWindowSize cvWindowSizeAuto { 0, 0 };
 
 	/// @brief Predefined window size: max. When used, window size is the maximum size allowed by the system.
 	/// Max size usually means the current size of the screen, but selected frame style may affect this (Win32).
-	constexpr WindowSize cvWindowSizeMax { cxUint32Max, cxUint32Max };
+	constexpr WmWindowSize cvWindowSizeMax { cxUint32Max, cxUint32Max };
 
 	/// @brief Window styles supported by the system.
-	enum class WindowFrameStyle : enum_default_value_t
+	enum class WmWindowFrameStyle : enum_default_value_t
 	{
 		// Title-bar only window, no system menu, non-resizeable, no close or minimize button.
 		Caption,
@@ -46,17 +46,17 @@ namespace system
 	};
 
 	/// @brief
-	struct WindowGeometry
+	struct WmWindowGeometry
 	{
-		WindowPos position;
-		WindowSize size;
-		WindowFrameStyle frameStyle;
+		WmWindowPos position;
+		WmWindowSize size;
+		WmWindowFrameStyle frameStyle;
 	};
 
 	/// @brief
-	struct WindowProperties
+	struct WmWindowProperties
 	{
-		WindowGeometry geometry;
+		WmWindowGeometry geometry;
 		std::string title;
 	};
 

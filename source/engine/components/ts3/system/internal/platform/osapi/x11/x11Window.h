@@ -2,21 +2,28 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_X11_WINDOW_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_X11_WINDOW_H__
 
-#include "x11EventCore.h"
+#include "x11CommonDefs.h"
 
 namespace ts3
 {
 namespace system
 {
 
-    struct WindowNativeData
+    struct WmWindowNativeData
     {
         Display * display = nullptr;
         Window xWindow = XID_None;
         Colormap xColormap = XID_None;
     };
 
-    struct X11WindowCreateInfo
+    struct WmWindowManagerNativeData
+    {
+        Display * display = nullptr;
+        Window xWindow = XID_None;
+        Colormap xColormap = XID_None;
+    };
+
+    struct X11WmWindowCreateInfo
     {
         Display * display = nullptr;
         int screenIndex = -1;
@@ -27,11 +34,12 @@ namespace system
         bool fullscreenMode = false;
     };
 
-    using X11WindowNativeData = WindowNativeData;
+    using X11WmWindowNativeData = WmWindowNativeData;
+    using X11WmWindowManagerNativeData = WmWindowManagerNativeData;
 
-	void sysX11CreateWindow( X11WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo );
-	void sysX11UpdateNewWindowState( X11WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo );
-	void sysX11DestroyWindow( X11WindowNativeData & pWindowNativeData );
+    void x11CreateWindow( X11WmWindowNativeData & pWindowNativeData, const X11WmWindowCreateInfo & pCreateInfo );
+    void x11UpdateNewWindowState( X11WmWindowNativeData & pWindowNativeData, const X11WmWindowCreateInfo & pCreateInfo );
+    void x11DestroyWindow( X11WmWindowNativeData & pWindowNativeData );
 
 } // namespace system
 } // namespace ts3

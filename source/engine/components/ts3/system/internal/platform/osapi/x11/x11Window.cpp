@@ -5,17 +5,17 @@
 namespace ts3
 {
 
-	void WindowManager::_sysInitialize()
+	void WmWindowManager::_sysInitialize()
 	{
 		auto & scNativeData = mContext->mNativeData;
 		scNativeData.wmpDeleteWindow = XInternAtom( scNativeData.display, "WM_DELETE_WINDOW", False );
 	}
 
-	void WindowManager::_sysRelease() noexcept
+	void WmWindowManager::_sysRelease() noexcept
 	{}
 
 
-	void Window::_sysInitialize( const WindowCreateInfo & pCreateInfo )
+	void Window::_sysInitialize( const WmWindowCreateInfo & pCreateInfo )
 	{
 		auto & scNativeData = mContext->mNativeData;
 
@@ -35,7 +35,7 @@ namespace ts3
 	void Window::_sysRelease() noexcept
 	{}
 
-	void Window::_sysGetClientAreaSize( WindowSize & pClientAreaSize ) const
+	void Window::_sysGetClientAreaSize( WmWindowSize & pClientAreaSize ) const
 	{
 		XWindowAttributes windowAttributes;
 		XGetWindowAttributes( mNativeData.display,
@@ -46,7 +46,7 @@ namespace ts3
 		pClientAreaSize.y = windowAttributes.height - windowAttributes.border_width;
 	}
 
-	void Window::_sysGetFrameSize( WindowSize & pFrameSize ) const
+	void Window::_sysGetFrameSize( WmWindowSize & pFrameSize ) const
 	{
 		XWindowAttributes windowAttributes;
 		XGetWindowAttributes( mNativeData.display,

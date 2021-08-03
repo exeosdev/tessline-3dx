@@ -49,7 +49,7 @@ namespace ts3
 		::SwapBuffers( mNativeData.surfaceHandle );
 	}
 
-	void GfxGLSurface::_sysQueryCurrentSize( WindowSize & pSize ) const
+	void GfxGLSurface::_sysQueryCurrentSize( WmWindowSize & pSize ) const
 	{
 		RECT clientRect;
 		::GetClientRect( mNativeData.hwnd, &clientRect );
@@ -89,13 +89,13 @@ namespace ts3
 	{
 		auto & openglInitState = mNativeData.initState;
 
-		WindowCreateInfo tempWindowCreateInfo;
+		WmWindowCreateInfo tempWindowCreateInfo;
 		tempWindowCreateInfo.properties.geometry.position = cvWindowPositionOrigin;
-		tempWindowCreateInfo.properties.geometry.size = WindowSize( 600, 600 );
-		tempWindowCreateInfo.properties.geometry.frameStyle = WindowFrameStyle::Overlay;
+		tempWindowCreateInfo.properties.geometry.size = WmWindowSize( 600, 600 );
+		tempWindowCreateInfo.properties.geometry.frameStyle = WmWindowFrameStyle::Overlay;
 
 		GfxVisualConfig legacyVisualConfig;
-		legacyVisualConfig = sysGfxGetDefaultVisualConfigFortemWindow();
+		legacyVisualConfig = gfxGetDefaultVisualConfigFortemWindow();
 		legacyVisualConfig.flags.set( SYS_GFX_VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
 		// Create a surface window. In case of Win32, GfxGLSurfaceNativeData inherits from WindowNativeData
@@ -160,7 +160,7 @@ namespace ts3
 
 	void GfxGLDriver::_sysCreateDisplaySurface( GfxGLSurface & pGLSurface, const GfxGLSurfaceCreateInfo & pCreateInfo )
 	{
-		WindowCreateInfo surfaceWindowCreateInfo;
+		WmWindowCreateInfo surfaceWindowCreateInfo;
 		surfaceWindowCreateInfo.properties.geometry = pCreateInfo.windowGeometry;
 		surfaceWindowCreateInfo.properties.title = "TS3 OpenGL Window";
 

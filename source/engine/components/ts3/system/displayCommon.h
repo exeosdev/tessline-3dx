@@ -30,7 +30,7 @@ namespace system
 	struct DsmAdapter;
 	struct DsmOutput;
 	struct DsmVideoMode;
-	struct WindowGeometry;
+	struct WmWindowGeometry;
 
 	using dsm_index_t = uint16;
 	using dsm_output_id_t = uint32;
@@ -151,7 +151,7 @@ namespace system
 	struct DsmAdapterDesc
 	{
 		EDsmDisplayDriverType driverType = EDsmDisplayDriverType::Unknown;
-		dsm_index_t index = cvDsmIndexInvalid;
+		dsm_index_t index = cxDsmIndexInvalid;
 		std::string name;
 		EDsmAdapterVendorID vendorID;
 		Bitmask<EDsmAdapterFlags> flags = 0u;
@@ -161,7 +161,7 @@ namespace system
 	struct DsmOutputDesc
 	{
 		EDsmDisplayDriverType driverType = EDsmDisplayDriverType::Unknown;
-		dsm_index_t index = cvDsmIndexInvalid;
+		dsm_index_t index = cxDsmIndexInvalid;
 		dsm_output_id_t id = 0u;
 		Bitmask<EDsmOutputFlags> flags = 0u;
 		std::string name;
@@ -172,7 +172,7 @@ namespace system
 	struct DsmVideoModeDesc
 	{
 		EDsmDisplayDriverType driverType = EDsmDisplayDriverType::Unknown;
-		dsm_index_t index = cvDsmIndexInvalid;
+		dsm_index_t index = cxDsmIndexInvalid;
 		dsm_video_mode_id_t id = 0u;
 		dsm_video_settings_hash_t settingsHash = 0u;
 		GfxColorFormat format = GfxColorFormat::Unknown;
@@ -234,9 +234,9 @@ namespace system
 		return ( pLhs.refSettings != pRhs.refSettings ) || ( pLhs.flags != pRhs.flags );
 	}
 
-	dsm_video_settings_hash_t sysDsmComputeVideoSettingsHash( GfxColorFormat pFormat, const DsmVideoSettings & pSettings );
+	dsm_video_settings_hash_t dsmComputeVideoSettingsHash( GfxColorFormat pFormat, const DsmVideoSettings & pSettings );
 
-	std::string sysDsmGetVideoSettingsString( GfxColorFormat pFormat, const DsmVideoSettings & pSettings );
+	std::string dsmGetVideoSettingsString( GfxColorFormat pFormat, const DsmVideoSettings & pSettings );
 
 } // namespace system
 } // namespace ts3

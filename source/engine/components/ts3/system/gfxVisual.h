@@ -110,19 +110,19 @@ namespace system
 	};
 
     /// @brief Returns a ColorDesc structure representation of a specified ColorFormat.
-	TS3_SYSTEM_API const GfxColorDesc & sysGfxGetDescForColorFormat( GfxColorFormat pFormat );
+	TS3_SYSTEM_API const GfxColorDesc & gfxGetDescForColorFormat( GfxColorFormat pFormat );
 
     /// @brief Returns a DepthStencilDesc structure representation of a specified DepthStencilFormat.
-	TS3_SYSTEM_API const GfxDepthStencilDesc & sysGfxGetDescForDepthStencilFormat( GfxDepthStencilFormat pFormat );
+	TS3_SYSTEM_API const GfxDepthStencilDesc & gfxGetDescForDepthStencilFormat( GfxDepthStencilFormat pFormat );
 
     /// @brief Returns an MSAADesc structure representation of a specified MSAAMode.
-	TS3_SYSTEM_API const GfxMSAADesc & sysGfxGetDescForMSAAMode( GfxMSAAMode pMode );
+	TS3_SYSTEM_API const GfxMSAADesc & gfxGetDescForMSAAMode( GfxMSAAMode pMode );
 
     /// @brief Returns a ColorDesc structure representation of a specified ColorFormat.
-	TS3_SYSTEM_API const GfxVisualConfig & sysGfxGetDefaultVisualConfigFortemWindow();
+	TS3_SYSTEM_API const GfxVisualConfig & gfxGetDefaultVisualConfigFortemWindow();
 
     ///
-	TS3_SYSTEM_API bool sysGfxCheckColorFormatCompatibility( GfxColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha );
+	TS3_SYSTEM_API bool gfxCheckColorFormatCompatibility( GfxColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha );
 
 } // namespace system
 } // namespace ts3

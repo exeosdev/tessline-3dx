@@ -15,7 +15,7 @@ namespace ts3
 	static const GfxColorDesc sColorDescR10G10B10A2  { { 10, 10, 10, 2 }, 32, GfxColorSpace::Linear };
 	static const GfxColorDesc sColorDescUnknown      { { 0, 0, 0, 0 }, 0 };
 
-    const GfxColorDesc & sysGfxGetDescForColorFormat( GfxColorFormat pFormat )
+    const GfxColorDesc & gfxGetDescForColorFormat( GfxColorFormat pFormat )
     {
     	static const std::unordered_map<GfxColorFormat, GfxColorDesc> colorDescMap =
 	    {
@@ -37,7 +37,7 @@ namespace ts3
 	static const GfxDepthStencilDesc sDepthStencilDescD32FS8  { 32, 8 };
 	static const GfxDepthStencilDesc sDepthStencilDescUnknown { 0,  0 };
 
-    const GfxDepthStencilDesc & sysGfxGetDescForDepthStencilFormat( GfxDepthStencilFormat pFormat )
+    const GfxDepthStencilDesc & gfxGetDescForDepthStencilFormat( GfxDepthStencilFormat pFormat )
     {
 	    static const std::unordered_map<GfxDepthStencilFormat, GfxDepthStencilDesc> depthStencilDescMap =
 	    {
@@ -58,7 +58,7 @@ namespace ts3
 	static const GfxMSAADesc sMSAADescX8   { 1, 8  };
 	static const GfxMSAADesc sMSAADescX16  { 1, 16 };
 
-    const GfxMSAADesc & sysGfxGetDescForMSAAMode( GfxMSAAMode pMode )
+    const GfxMSAADesc & gfxGetDescForMSAAMode( GfxMSAAMode pMode )
     {
 	    static const std::unordered_map<GfxMSAAMode, GfxMSAADesc> msaaModeMap =
 	    {
@@ -71,7 +71,7 @@ namespace ts3
 	    return getMapValueOrDefault( msaaModeMap, pMode, sMSAADescNone );
     }
 
-	const GfxVisualConfig & sysGfxGetDefaultVisualConfigFortemWindow()
+	const GfxVisualConfig & gfxGetDefaultVisualConfigFortemWindow()
 	{
 		// Default GfxVisualConfig for creating a system-level window.
 		static const GfxVisualConfig sVisualConfigWindowDefault
@@ -89,7 +89,7 @@ namespace ts3
 
 	bool sysDsmCheckColorFormatCompatibility( GfxColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha )
 	{
-		const auto & colorDesc = sysGfxGetDescForColorFormat( pFormat );
+		const auto & colorDesc = gfxGetDescForColorFormat( pFormat );
 		const auto & rgba = colorDesc.rgba;
 		// Format matches with a color spec if all channels have the exact same size.
 		return ( rgba.u8Red == pRed ) && ( rgba.u8Green == pGreen ) && ( rgba.u8Blue == pBlue ) && ( rgba.u8Alpha == pAlpha );

@@ -2,8 +2,9 @@
 #ifndef __TS3_SYSTEM_WINDOW_NATIVE_H__
 #define __TS3_SYSTEM_WINDOW_NATIVE_H__
 
-#include "windowCommon.h"
+#include "window.h"
 #include <ts3/math/vector.h>
+#include <ts3/stdext/concurrentStack.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 #  include "internal/platform/osapi/android/androidWindow.h"
@@ -20,10 +21,14 @@ namespace system
 
     struct WmWindow
     {
+        WmWindowNativeData nativeData;
+
+        WmWindowManagerHandle windowManager = nullptr;
     };
 
     struct WmWindowManager
     {
+        DsmDisplayManagerHandle displayManager = nullptr;
     };
 
 } // namespace system

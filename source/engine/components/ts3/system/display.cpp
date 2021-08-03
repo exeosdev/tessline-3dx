@@ -1,5 +1,6 @@
 
 #include "displayNative.h"
+#include "windowCommon.h"
 
 namespace ts3
 {
@@ -69,10 +70,11 @@ namespace system
     }
 
     bool dsmDisplayManagerValidateWindowGeometry( DsmDisplayManagerHandle pDisplayManager,
-                                                  const WindowGeometry & pWindowGeometry )
+                                                  const math::Pos2i & pWindowPosition,
+                                                  const math::Size2u & pWindowSize )
     {
-        const auto & framePos = pWindowGeometry.position;
-        const auto & frameSize = pWindowGeometry.size;
+        const auto & framePos = pWindowPosition;
+        const auto & frameSize = pWindowSize;
 
         auto screenSize = dsmDisplayManagerQueryDisplaySize( pDisplayManager );
         auto minWindowSize = dsmDisplayManagerQueryMinWindowSize( pDisplayManager );
@@ -112,15 +114,16 @@ namespace system
     }
 
     bool dsmDisplayManagerValidateWindowGeometry( DsmDisplayManagerHandle pDisplayManager,
-                                                  WindowGeometry & pWindowGeometry )
+                                                  math::Pos2i & pWindowPosition,
+                                                  math::Size2u & pWindowSize )
     {
-        auto originalPos = pWindowGeometry.position;
-        auto originalSize = pWindowGeometry.size;
-        auto & framePos = pWindowGeometry.position;
-        auto & frameSize = pWindowGeometry.size;
+        auto originalPos = pWindowPosition;
+        auto originalSize = pWindowSize;
+        auto & framePos = pWindowPosition;
+        auto & frameSize = pWindowSize;
 
-        auto screenSize = queryDisplaySize();
-        auto minWindowSize = queryMinWindowSize();
+        auto screenSize = dsmDisplayManagerQueryDisplaySize( pDisplayManager );
+        auto minWindowSize = dsmDisplayManagerQueryMinWindowSize( pDisplayManager );
 
         if ( frameSize == cvWindowSizeMax )
         {

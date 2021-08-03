@@ -27,6 +27,8 @@
 #  endif
 #endif
 
+#define TS3_SYSTEM_API_NODISCARD TS3_SYSTEM_API TS3_PCL_ATTR_NO_DISCARD
+
 namespace ts3
 {
 namespace system

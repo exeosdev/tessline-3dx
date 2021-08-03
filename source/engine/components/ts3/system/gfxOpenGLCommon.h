@@ -49,7 +49,7 @@ namespace system
 
     /// @brief Represents combined info about the current OpenGL subsystem version.
     /// Basically, this struct stores the output from all version-related GL queries.
-    struct GfxGLtemVersionInfo
+    struct GfxGLSystemVersionInfo
     {
     public:
         // Numeric version of the GL (GL_VERSION_MAJOR.GL_VERSION_MINOR)
@@ -73,7 +73,7 @@ namespace system
         //
         GfxVisualConfig visualConfig;
         //
-        WindowGeometry windowGeometry;
+        WmWindowGeometry windowGeometry;
         //
         Bitmask<EGfxGLSurfaceCreateFlags> flags = 0;
     };

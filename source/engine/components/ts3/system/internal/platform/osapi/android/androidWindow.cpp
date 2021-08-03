@@ -5,23 +5,23 @@
 namespace ts3
 {
 
-	void WindowManager::_sysInitialize()
+	void WmWindowManager::_sysInitialize()
 	{}
 
-	void WindowManager::_sysRelease() noexcept
+	void WmWindowManager::_sysRelease() noexcept
 	{}
 
 
-	void Window::_sysInitialize( const WindowCreateInfo & pCreateInfo )
+	void Window::_sysInitialize( const WmWindowCreateInfo & pCreateInfo )
 	{}
 
 	void Window::_sysRelease() noexcept
 	{}
 
-	void Window::_sysGetClientAreaSize( WindowSize & pClientAreaSize ) const
+	void Window::_sysGetClientAreaSize( WmWindowSize & pClientAreaSize ) const
 	{}
 
-	void Window::_sysGetFrameSize( WindowSize & pFrameSize ) const
+	void Window::_sysGetFrameSize( WmWindowSize & pFrameSize ) const
 	{}
 
 }

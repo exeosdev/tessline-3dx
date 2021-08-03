@@ -38,7 +38,7 @@ namespace ts3
 		glXSwapBuffers( mNativeData.display, mNativeData.xwindow );
 	}
 
-	void GfxGLSurface::_sysQueryCurrentSize( WindowSize & pSize ) const
+	void GfxGLSurface::_sysQueryCurrentSize( WmWindowSize & pSize ) const
 	{
 		XWindowAttributes windowAttributes;
 		XGetWindowAttributes( mNativeData.display,
@@ -94,7 +94,7 @@ namespace ts3
 		}
 
 		GfxVisualConfig legacyVisualConfig;
-		legacyVisualConfig = sysGfxGetDefaultVisualConfigFortemWindow();
+		legacyVisualConfig = gfxGetDefaultVisualConfigFortemWindow();
 		legacyVisualConfig.flags.set( SYS_GFX_VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
 		X11WindowCreateInfo x11WindowCreateInfo;

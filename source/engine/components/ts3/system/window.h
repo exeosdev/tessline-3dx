@@ -2,8 +2,7 @@
 #ifndef __TS3_SYSTEM_WINDOW_H__
 #define __TS3_SYSTEM_WINDOW_H__
 
-#include "eventCore.h"
-#include "windowDefs.h"
+#include "windowCommon.h"
 
 namespace ts3
 {
@@ -11,69 +10,30 @@ namespace system
 {
 
 	ts3DeclareHandle( DsmDisplayManager );
-	ts3DeclareHandle( Window );
-	ts3DeclareHandle( WindowManager );
+	ts3DeclareHandle( WmWindow );
+	ts3DeclareHandle( WmWindowManager );
 
-	struct WindowCreateInfo;
-	struct WindowNativeData;
-
-	class DsmDisplayManager;
-	class EventController;
-
-	struct WindowCreateInfo
+	struct WmWindowCreateInfo
 	{
-		WindowProperties properties;
+		WmWindowProperties properties;
 	};
 
-	class WindowManager : public BaseObject
-	{
-	public:
-		DisplayManagerHandle const mDisplayManager;
+	TS3_SYSTEM_API_NODISCARD WmWindowManagerHandle wmCreateWindowManager( DsmDisplayManagerHandle pDisplayManager );
 
-		explicit WindowManager( DisplayManagerHandle pDisplayManager ) noexcept;
-		virtual ~WindowManager() noexcept;
+	TS3_SYSTEM_API void wmDestroyWindowManager( WmWindowManagerHandle pWindowManager );
 
-		static WindowManagerHandle create( DisplayManagerHandle pDisplayManager );
+	TS3_SYSTEM_API_NODISCARD WmWindowHandle wmCreateWindow( WmWindowManagerHandle pWindowManager,
+                                                                          const WmWindowCreateInfo & pCreateInfo );
 
-		WindowHandle createWindow( const WindowCreateInfo & pCreateInfo );
+	TS3_SYSTEM_API_NODISCARD WmWindowSize wmWindowGetClientAreaSize( WmWindowHandle pWindow );
 
-		bool validateWindowGeometry( WindowGeometry & pWindowGeometry ) const;
+	TS3_SYSTEM_API_NODISCARD WmWindowSize wmWindowGetFrameSize( WmWindowHandle pWindow );
 
-		TS3_PCL_ATTR_NO_DISCARD WindowSize queryDisplaySize() const;
-		TS3_PCL_ATTR_NO_DISCARD WindowSize queryMinWindowSize() const;
+	TS3_SYSTEM_API_NODISCARD bool wmWindowManagerValidateWindowGeometry( WmWindowManagerHandle pWindowManager,
+                                                                                       const WmWindowGeometry & pWindowGeometry );
 
-	private:
-		void _sysInitialize();
-		void _sysRelease() noexcept;
-	};
-
-
-	TS3_SYSTEM_API WindowM
-
-	TS3_SYSTEM_API WindowHandle sysCreateWindow( WindowManagerHandle pWindowManager, const WindowCreateInfo & pCreateInfo );
-
-	class Window : public BaseObject, public EventSource
-	{
-		friend class WindowManager;
-
-	public:
-		WindowNativeData mNativeData;
-		WindowManagerHandle const mWindowManager;
-
-		explicit Window( WindowManagerHandle pWindowManager ) noexcept;
-		virtual ~Window() noexcept;
-
-		static WindowHandle create( WindowManagerHandle pWindowManager, const WindowCreateInfo & pCreateInfo );
-
-		TS3_PCL_ATTR_NO_DISCARD WindowSize getClientAreaSize() const;
-		TS3_PCL_ATTR_NO_DISCARD WindowSize getFrameSize() const;
-
-	private:
-		void _sysInitialize( const WindowCreateInfo & pCreateInfo );
-		void _sysRelease() noexcept;
-		void _sysGetClientAreaSize( WindowSize & pClientAreaSize ) const;
-		void _sysGetFrameSize( WindowSize & pFrameSize ) const;
-	};
+	TS3_SYSTEM_API bool wmWindowManagerValidateWindowGeometry( WmWindowManagerHandle pWindowManager,
+                                                               WmWindowGeometry & pWindowGeometry );
 
 } // namespace system
 } // namespace ts3

@@ -4,8 +4,10 @@
 
 namespace ts3
 {
+namespace system
+{
 
-	dsm_video_settings_hash_t sysDsmComputeVideoSettingsHash( GfxColorFormat pFormat, const DsmVideoSettings & pSettings )
+    dsm_video_settings_hash_t dsmComputeVideoSettingsHash( GfxColorFormat pFormat, const DsmVideoSettings & pSettings )
 	{
 		DsmVideoModeHash modeHashGen;
 		modeHashGen.uResWidth = static_cast<uint16>( pSettings.resolution.x );
@@ -13,12 +15,13 @@ namespace ts3
 		modeHashGen.uRefreshRate = static_cast<uint16>( pSettings.refreshRate );
 		modeHashGen.uFlags = static_cast<uint8>( pSettings.flags );
 		modeHashGen.uColorFormatIndex = static_cast<uint8>( pFormat );
-		return modeHashGen.modeHash;;
+		return modeHashGen.modeHash;
 	}
 
-	std::string sysDsmGetVideoSettingsString( GfxColorFormat pFormat, const DsmVideoSettings & pSettings )
+	std::string dsmGetVideoSettingsString( GfxColorFormat pFormat, const DsmVideoSettings & pSettings )
 	{
 		return {};
 	}
 
-}
+} // namespace system
+} // namespace ts3

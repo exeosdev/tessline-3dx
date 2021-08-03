@@ -7,18 +7,18 @@ namespace ts3
 
 	void _win32RegisterWndClass( WindowNativeData & pWindowNativeData );
 	void _win32UnregisterWndClass( WindowNativeData & pWindowNativeData );
-	DWORD _win32TranslateFrameStyle( WindowFrameStyle pStyle );
+	DWORD _win32TranslateFrameStyle( WmWindowFrameStyle pStyle );
 	LRESULT __stdcall _win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 
 
-	void WindowManager::_sysInitialize()
+	void WmWindowManager::_sysInitialize()
 	{}
 
-	void WindowManager::_sysRelease() noexcept
+	void WmWindowManager::_sysRelease() noexcept
 	{}
 
 
-	void Window::_sysInitialize( const WindowCreateInfo & pCreateInfo )
+	void Window::_sysInitialize( const WmWindowCreateInfo & pCreateInfo )
 	{
 		win32CreateWindow( mNativeData, pCreateInfo );
 		::ShowWindow( mNativeData.hwnd, SW_SHOWNORMAL );
@@ -29,7 +29,7 @@ namespace ts3
 		win32DestroyWindow( mNativeData );
 	}
 
-	void Window::_sysGetClientAreaSize( WindowSize & pClientAreaSize ) const
+	void Window::_sysGetClientAreaSize( WmWindowSize & pClientAreaSize ) const
 	{
 		RECT clientRect;
 		::GetClientRect( mNativeData.hwnd, &clientRect );
@@ -38,7 +38,7 @@ namespace ts3
 		pClientAreaSize.y = clientRect.bottom - clientRect.top;
 	}
 
-	void Window::_sysGetFrameSize( WindowSize & pFrameSize ) const
+	void Window::_sysGetFrameSize( WmWindowSize & pFrameSize ) const
 	{
 		RECT clientRect;
 		::GetClientRect( mNativeData.hwnd, &clientRect );
@@ -48,7 +48,7 @@ namespace ts3
 	}
 
 
-	void win32CreateWindow( WindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo )
+	void win32CreateWindow( WindowNativeData & pWindowNativeData, const WmWindowCreateInfo & pCreateInfo )
 	{
 		// Register window class. Will fetch it if already registered.
 		_win32RegisterWndClass( pWindowNativeData );
@@ -149,7 +149,7 @@ namespace ts3
 		pWindowNativeData.wndProcModuleHandle = nullptr;
 	}
 
-	DWORD _win32TranslateFrameStyle( WindowFrameStyle pStyle )
+	DWORD _win32TranslateFrameStyle( WmWindowFrameStyle pStyle )
 	{
 		//
 		constexpr DWORD overlayFrameStyle = WS_POPUP;
@@ -165,19 +165,19 @@ namespace ts3
 
 		switch ( pStyle )
 		{
-			case WindowFrameStyle::Caption:
+			case WmWindowFrameStyle::Caption:
 				resultStyle = captionFrameStyle;
 				break;
 
-			case WindowFrameStyle::Fixed:
+			case WmWindowFrameStyle::Fixed:
 				resultStyle = fixedFrameStyle;
 				break;
 
-			case WindowFrameStyle::Overlay:
+			case WmWindowFrameStyle::Overlay:
 				resultStyle = overlayFrameStyle;
 				break;
 
-			case WindowFrameStyle::Resizeable:
+			case WmWindowFrameStyle::Resizeable:
 				resultStyle = resizeableFrameStyle;
 				break;
 

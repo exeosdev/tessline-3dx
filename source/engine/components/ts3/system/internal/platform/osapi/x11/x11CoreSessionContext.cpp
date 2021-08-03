@@ -1,35 +1,42 @@
 
-#include <ts3/system/systemContext.h>
+#include <ts3/system/coreSessionContextNative.h>
 
 namespace ts3
 {
+namespace system
+{
 
-	void Context::_sysInitialize( const CoreSessionContextCreateInfo & pCreateInfo )
+    void _nativeCoreSessionContextInitialize( CoreSessionContext & pContext, const CoreSessionContextCreateInfo & pCreateInfo )
 	{
+        auto & cscNativeData = pContext.nativeData;
+
 		int thrInitStatus = ::XInitThreads();
 		if( thrInitStatus == False )
 		{
 			throw 0;
 		}
 
-		auto * xdisplay = ::XOpenDisplay( nullptr );
-		if( xdisplay == nullptr )
+		auto * xDisplay = ::XOpenDisplay( nullptr );
+		if( xDisplay == nullptr )
 		{
 			throw 0;
 		}
 
-		mNativeData.display = xdisplay;
-		mNativeData.sessionExtInfo.connectionNumber = XConnectionNumber( xdisplay );
-		mNativeData.sessionExtInfo.vendorName = XServerVendor( xdisplay );
-		mNativeData.sessionExtInfo.displayString = XDisplayString( xdisplay );
+		cscNativeData.display = xDisplay;
+		cscNativeData.sessionInfo.connectionNumber = XConnectionNumber( xDisplay );
+		cscNativeData.sessionInfo.vendorName = XServerVendor( xDisplay );
+		cscNativeData.sessionInfo.displayString = XDisplayString( xDisplay );
 	}
 
-	void Context::_sysRelease() noexcept
+	void _nativeCoreSessionContextRelease( CoreSessionContext & pContext )
 	{
-		mNativeData.display = nullptr;
-		mNativeData.sessionExtInfo.connectionNumber = -1;
-		mNativeData.sessionExtInfo.vendorName.clear();
-		mNativeData.sessionExtInfo.displayString.clear();
+        auto & cscNativeData = pContext.nativeData;
+
+		cscNativeData.display = nullptr;
+		cscNativeData.sessionInfo.connectionNumber = -1;
+		cscNativeData.sessionInfo.vendorName.clear();
+		cscNativeData.sessionInfo.displayString.clear();
 	}
 
-}
+} // namespace system
+} // namespace ts3

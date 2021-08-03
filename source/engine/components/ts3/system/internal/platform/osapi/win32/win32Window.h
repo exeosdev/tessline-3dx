@@ -14,7 +14,7 @@ namespace ts3
 		HMODULE wndProcModuleHandle = nullptr;
 	};
 
-	void win32CreateWindow( WindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo );
+	void win32CreateWindow( WindowNativeData & pWindowNativeData, const WmWindowCreateInfo & pCreateInfo );
 	void win32DestroyWindow( WindowNativeData & pWindowNativeData );
 
 }

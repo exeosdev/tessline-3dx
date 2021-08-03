@@ -21,9 +21,9 @@ namespace ts3
 		_sysSwapBuffers();
 	}
 
-	WindowSize GfxGLSurface::queryCurrentSize() const
+	WmWindowSize GfxGLSurface::queryCurrentSize() const
 	{
-		WindowSize windowSize;
+		WmWindowSize windowSize;
 		_sysQueryCurrentSize( windowSize );
 		return windowSize;
 	}
@@ -49,9 +49,9 @@ namespace ts3
 		return _sysValidateCurrentBinding();
 	}
 
-	GfxGLtemVersionInfo GfxGLRenderContext::querytemVersionInfo() const
+	GfxGLSystemVersionInfo GfxGLRenderContext::querytemVersionInfo() const
 	{
-		GfxGLtemVersionInfo systemVersionInfo;
+		GfxGLSystemVersionInfo systemVersionInfo;
 
 		int majorVersion = 0;
 		glGetIntegerv( GL_MAJOR_VERSION, &majorVersion );
@@ -118,7 +118,7 @@ namespace ts3
 		if( pCreateInfo.flags.isSet( E_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
 		{
 			validatedCreateInfo.windowGeometry.size = cvWindowSizeMax;
-			validatedCreateInfo.windowGeometry.frameStyle = WindowFrameStyle::Overlay;
+			validatedCreateInfo.windowGeometry.frameStyle = WmWindowFrameStyle::Overlay;
 		}
 		else
 		{

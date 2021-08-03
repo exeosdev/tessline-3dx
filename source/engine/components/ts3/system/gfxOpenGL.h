@@ -15,7 +15,7 @@ namespace system
 		//
 		GfxVisualConfig visualConfig;
 		//
-		WindowGeometry windowGeometry;
+		WmWindowGeometry windowGeometry;
 		//
 		Bitmask<EGfxGLSurfaceCreateFlags> flags = 0;
 	};
@@ -34,47 +34,47 @@ namespace system
 	};
 
 	/// @brief
-	TS3_SYSTEM_API GfxGLDriverHandle sysGfxCreateGLDriver();
+	TS3_SYSTEM_API_NODISCARD GfxGLDriverHandle gfxCreateGLDriver();
 
 	/// @brief Initializes core OpenGL state and system-level interfaces.
 	/// This method also creates any additionally required
-	TS3_SYSTEM_API void sysGfxGLDriverInitializePlatform( GfxGLDriverHandle pGLDriver );
+	TS3_SYSTEM_API void gfxGLDriverInitializePlatform( GfxGLDriverHandle pGLDriver );
 
 	/// @brief Releases temporary init state created automatically by the library. Context must be a valid GL context.
 	/// Call this method after you have created actual display surface and context. It's not mandatory, (everything
 	/// will be released at shutdown anyway), but on some platforms this could free some extra memory and release
 	/// couple system-level interfaces.
-	TS3_SYSTEM_API void sysGfxGLDriverReleaseInitState( GfxGLRenderContext & pGLRenderContext );
+	TS3_SYSTEM_API void gfxGLDriverReleaseInitState( GfxGLRenderContext & pGLRenderContext );
 
 	/// @brief
-	TS3_SYSTEM_API GfxGLSurfaceHandle sysGfxGLDriverCreateDisplaySurface( GfxGLDriverHandle pGLDriver,
+	TS3_SYSTEM_API_NODISCARD GfxGLSurfaceHandle gfxGLDriverCreateDisplaySurface( GfxGLDriverHandle pGLDriver,
                                                                        const GfxGLSurfaceCreateInfo & pCreateInfo );
 
 	/// @brief
-	TS3_SYSTEM_API GfxGLSurfaceHandle sysGfxGLDriverCreateDisplaySurfaceForCurrentThread( GfxGLDriverHandle pGLDriver );
+	TS3_SYSTEM_API_NODISCARD GfxGLSurfaceHandle gfxGLDriverCreateDisplaySurfaceForCurrentThread( GfxGLDriverHandle pGLDriver );
 
 	/// @brief
-	TS3_SYSTEM_API GfxGLRenderContextHandle sysGfxGLDriverCreateRenderContext( GfxGLDriverHandle pGLDriver,
+	TS3_SYSTEM_API_NODISCARD GfxGLRenderContextHandle gfxGLDriverCreateRenderContext( GfxGLDriverHandle pGLDriver,
                                                                             GfxGLSurface & pSurface,
                                                                             const GfxGLRenderContextCreateInfo & pCreateInfo );
 
 	/// @brief
-	TS3_SYSTEM_API GfxGLRenderContextHandle sysGfxGLDriverCreateRenderContextForCurrentThread( GfxGLDriverHandle pGLDriver );
+	TS3_SYSTEM_API_NODISCARD GfxGLRenderContextHandle gfxGLDriverCreateRenderContextForCurrentThread( GfxGLDriverHandle pGLDriver );
 
 	/// @brief
-	TS3_SYSTEM_API std::vector<GfxDepthStencilFormat> sysGfxGLDriverQuerySupportedDepthStencilFormats( GfxColorFormat pColorFormat );
+	TS3_SYSTEM_API_NODISCARD std::vector<GfxDepthStencilFormat> gfxGLDriverQuerySupportedDepthStencilFormats( GfxColorFormat pColorFormat );
 
 	/// @brief
-	TS3_SYSTEM_API std::vector<GfxMSAAMode> sysGfxGLDriverQuerySupportedMSAAModes( GfxColorFormat pColorFormat,
+	TS3_SYSTEM_API_NODISCARD std::vector<GfxMSAAMode> gfxGLDriverQuerySupportedMSAAModes( GfxColorFormat pColorFormat,
                                                                                 GfxDepthStencilFormat pDepthStencilFormat );
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/// @brief
-	TS3_SYSTEM_API void sysGfxGLSurfaceSwapBuffers( GfxGLSurfaceHandle pGLSurface );
+	TS3_SYSTEM_API void gfxGLSurfaceSwapBuffers( GfxGLSurfaceHandle pGLSurface );
 
 	/// @brief
-	TS3_SYSTEM_API TS3_PCL_ATTR_NO_DISCARD WindowSize sysGfxGLSurfaceQueryRenderAreaSize( GfxGLSurfaceHandle pGLSurface );
+	TS3_SYSTEM_API_NODISCARD WmWindowSize gfxGLSurfaceQueryRenderAreaSize( GfxGLSurfaceHandle pGLSurface );
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -82,10 +82,10 @@ namespace system
 	TS3_SYSTEM_API void sysGLRenderContextBindForCurrentThread( GfxGLRenderContextHandle pGLRenderContext );
 
 	/// @brief
-	TS3_SYSTEM_API bool sysGLRenderContextValidateCurrentBinding( GfxGLRenderContextHandle pGLRenderContext );
+	TS3_SYSTEM_API_NODISCARD bool sysGLRenderContextValidateCurrentBinding( GfxGLRenderContextHandle pGLRenderContext );
 
 	/// @brief
-	TS3_SYSTEM_API GfxGLtemVersionInfo sysGLRenderContextQuerytemVersionInfo( GfxGLRenderContextHandle pGLRenderContext );
+	TS3_SYSTEM_API_NODISCARD GfxGLSystemVersionInfo sysGLRenderContextQuerySystemVersionInfo( GfxGLRenderContextHandle pGLRenderContext );
 
 } // namespace system
 } // namespace ts3

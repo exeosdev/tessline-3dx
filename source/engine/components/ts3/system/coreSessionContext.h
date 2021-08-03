@@ -22,10 +22,10 @@ namespace system
 	};
 
 	/// @brief
-	CoreSessionContextHandle createCoreSessionContext( const CoreSessionContextCreateInfo & pCreateInfo );
+	TS3_SYSTEM_API_NODISCARD CoreSessionContextHandle createCoreSessionContext( const CoreSessionContextCreateInfo & pCreateInfo );
 
 	/// @brief
-	void destroyCoreSessionContext( CoreSessionContextHandle pContext );
+	TS3_SYSTEM_API void destroyCoreSessionContext( CoreSessionContextHandle pContext );
 
 } // namespace system
 } // namespace ts3
