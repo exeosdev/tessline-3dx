@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_X11_DISPLAY_XRR_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_X11_DISPLAY_XRR_H__
 
-#include "x11Common.h"
+#include "x11CommonDefs.h"
 #include <X11/extensions/Xrandr.h>
 
 namespace ts3
@@ -14,7 +14,7 @@ namespace system
 	{
 		Version xrrVersion = cvVersionUnknown;
 		Display * display = nullptr;
-		Window rootWindow = cvXIDNone;
+		Window rootWindow = XID_None;
 		int screenIndex = -1;
 		XRRScreenResources * xrrScreenResources = nullptr;
 		XRRMonitorInfo * xrrMonitorList = nullptr;

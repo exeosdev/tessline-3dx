@@ -5,13 +5,13 @@
 namespace ts3
 {
 
-	void DisplayManager::_sysInitialize()
+	void DsmDisplayManager::_sysInitialize()
 	{}
 
-	void DisplayManager::_sysRelease() noexcept
+	void DsmDisplayManager::_sysRelease() noexcept
 	{}
 
-	void DisplayManager::_sysQueryDisplaySize( DisplaySize & pDisplaySize ) const
+	void DsmDisplayManager::_sysQueryDisplaySize( DisplaySize & pDisplaySize ) const
 	{
 		auto screenWidth = ::GettemMetrics( SM_CXSCREEN );
 		auto screenHeight = ::GettemMetrics( SM_CYSCREEN );
@@ -19,7 +19,7 @@ namespace ts3
 		pDisplaySize.y = static_cast<uint32>( screenHeight );
 	}
 
-	void DisplayManager::_sysQueryMinWindowSize( DisplaySize & pMinWindowSize ) const
+	void DsmDisplayManager::_sysQueryMinWindowSize( DisplaySize & pMinWindowSize ) const
 	{
 		auto minWindowWidth = ::GettemMetrics( SM_CXMIN );
 		auto minWindowHeight = ::GettemMetrics( SM_CYMIN );

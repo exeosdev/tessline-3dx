@@ -10,14 +10,14 @@ namespace ts3
 namespace system
 {
 
-	ts3DeclareHandle( DisplayManager );
+	ts3DeclareHandle( DsmDisplayManager );
 	ts3DeclareHandle( Window );
 	ts3DeclareHandle( WindowManager );
 
 	struct WindowCreateInfo;
 	struct WindowNativeData;
 
-	class DisplayManager;
+	class DsmDisplayManager;
 	class EventController;
 
 	struct WindowCreateInfo

@@ -4,7 +4,7 @@
 namespace ts3
 {
 
-	void Context::_sysInitialize( const ContextCreateInfo & pCreateInfo )
+	void Context::_sysInitialize( const CoreSessionContextCreateInfo & pCreateInfo )
 	{
 		int thrInitStatus = ::XInitThreads();
 		if( thrInitStatus == False )

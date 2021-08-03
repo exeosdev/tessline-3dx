@@ -2,16 +2,11 @@
 #ifndef __TS3_SYSTEM_DISPLAY_COMMON_H__
 #define __TS3_SYSTEM_DISPLAY_COMMON_H__
 
-#include "visual.h"
+#include "gfxVisual.h"
+
 #include <ts3/math/vectorOps.h>
 #include <ts3/stdext/bitmask.h>
 #include <ts3/stdext/uuid.h>
-
-#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINFAMILY )
-#  define TS3_SYSTEM_DISPLAY_DRIVER_SUPPORT_DXGI 1
-#else
-#  define TS3_SYSTEM_DISPLAY_DRIVER_SUPPORT_DXGI 0
-#endif
 
 #if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
 #  pragma clang diagnostic push
@@ -30,8 +25,7 @@ namespace ts3
 namespace system
 {
 
-	ts3DeclareHandle( DisplayDriver );
-	ts3DeclareHandle( DisplayManager );
+    ts3DeclareHandle( DsmDisplayManager );
 
 	struct DsmAdapter;
 	struct DsmOutput;
@@ -45,10 +39,10 @@ namespace system
 	using DisplaySize = math::Size2u;
 
 	/// @brief Represents invalid display system index (of an adapter or an output, for example).
-	constexpr dsm_index_t cvDsmIndexInvalid = Limits<dsm_index_t>::maxValue;
+	constexpr dsm_index_t cxDsmIndexInvalid = Limits<dsm_index_t>::maxValue;
 
 	/// @brief Represents invalid display settings hash. Used to identify/report invalid and/or empty configurations.
-	constexpr dsm_video_settings_hash_t cvDsmVideoSettingsHashInvalid = Limits<dsm_video_settings_hash_t>::maxValue;
+	constexpr dsm_video_settings_hash_t cxDsmVideoSettingsHashInvalid = Limits<dsm_video_settings_hash_t>::maxValue;
 
 	enum class EDsmDisplayDriverType : enum_default_value_t
 	{

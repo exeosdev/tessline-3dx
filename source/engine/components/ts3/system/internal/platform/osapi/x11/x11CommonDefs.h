@@ -26,31 +26,6 @@ namespace system
     #undef None
     #undef Success
 
-
-    struct PlatformNativeData
-    {
-        struct SessionInfo
-        {
-            int connectionNumber;
-            std::string vendorName;
-            std::string displayString;
-        };
-
-        Display * display = nullptr;
-        Window rootWindow = XID_None;
-        int screenIndex = -1;
-        Atom wmpDeleteWindow = -1;
-        SessionInfo sessionInfo;
-    };
-
-    struct PlatformNativeDataDeleter
-    {
-        void operator()( PlatformNativeData * );
-    };
-
-    using X11PlatformNativeData = PlatformNativeData;
-    using X11SessionInfo = PlatformNativeData::SessionInfo;
-
 } // namespace system
 } // namespace ts3
 

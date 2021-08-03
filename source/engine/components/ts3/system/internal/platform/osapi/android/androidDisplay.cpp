@@ -6,27 +6,27 @@
 namespace ts3
 {
 
-	void DisplayManager::_sysInitialize()
+	void DsmDisplayManager::_sysInitialize()
 	{
 	}
 
-	void DisplayManager::_sysRelease() noexcept
+	void DsmDisplayManager::_sysRelease() noexcept
 	{
 	}
 
-	void DisplayManager::_sysQueryDisplaySize( DisplaySize & pDisplaySize ) const
+	void DsmDisplayManager::_sysQueryDisplaySize( DisplaySize & pDisplaySize ) const
 	{
 	}
 
-	void DisplayManager::_sysQueryMinWindowSize( DisplaySize & pMinWindowSize ) const
+	void DsmDisplayManager::_sysQueryMinWindowSize( DisplaySize & pMinWindowSize ) const
 	{
 	}
 
-	void nativeDisplayManagerInitialize( DisplayManager & )
+	void nativeDisplayManagerInitialize( DsmDisplayManager & )
 	{
 	}
 
-	void DisplayManagerImplProxy::nativeQueryDisplaySize( const DisplayManager & pDisplayManager, DisplaySize & pDisplaySize )
+	void DisplayManagerImplProxy::nativeQueryDisplaySize( const DsmDisplayManager & pDisplayManager, DisplaySize & pDisplaySize )
 	{
         // Native window for the app is stored within the display manager.
         auto * androidNativeWindow = pDisplayManager.systemContext->nativeData->androidNativeWindow;
@@ -53,7 +53,7 @@ namespace ts3
         }
 	}
 
-	void DisplayManagerImplProxy::nativeQueryMinWindowSize( const DisplayManager & pDisplayManager, DisplaySize & pMinWindowSize )
+	void DisplayManagerImplProxy::nativeQueryMinWindowSize( const DsmDisplayManager & pDisplayManager, DisplaySize & pMinWindowSize )
 	{
         nativeQueryDisplaySize( pDisplayManager, pMinWindowSize );
 	}

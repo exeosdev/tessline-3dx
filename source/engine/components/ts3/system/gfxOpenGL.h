@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_GFX_OPENGL_H__
 #define __TS3_SYSTEM_GFX_OPENGL_H__
 
-#include "openGLDefs.h"
+#include "gfxOpenGLCommon.h"
 
 namespace ts3
 {

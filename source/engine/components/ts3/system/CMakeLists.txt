@@ -1,23 +1,33 @@
 
 set( TS3_SYSTEM_SRC_FILES
+        "coreSessionContext.h"
+        "coreSessionContext.cpp"
+        "coreSessionContextNative.h"
+        "display.h"
+        "display.cpp"
+        "displayCommon.h"
+        "displayCommon.cpp"
+        "displayNative.h"
         "dynamicLib.h"
         "dynamicLib.cpp"
-        "eventDefs.h"
+        "eventCommon.h"
         "eventCore.h"
         "eventCore.cpp"
-        "eventTypesDef.h"
-        "openGL.h"
-        "openGL.cpp"
+        "eventObject.h"
+        "eventTypes.h"
+        "gfxOpenGL.h"
+        "gfxOpenGL.cpp"
+        "gfxOpenGLCommon.h"
+        "gfxOpenGLNative.h"
+        "gfxVisual.h"
+        "gfxVisual.cpp"
         "perfCounter.h"
         "perfCounter.cpp"
         "prerequisites.h"
-        "systemContext.h"
-        "systemContext.cpp"
-        "visual.h"
-        "visual.cpp"
-        "windowDefs.h"
-        "windowtem.h"
-        "windowtem.cpp"
+        "window.h"
+        "window.cpp"
+        "windowCommon.h"
+        "windowNative.h"
         )
 
 if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_WINFAMILY} )
@@ -28,8 +38,8 @@ if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_WINFAMILY} )
             "internal/platform/shared/winfamily/winfamilyCommon.h"
             "internal/platform/shared/winfamily/winfamilyPerfCounter.h"
             "internal/platform/shared/winfamily/winfamilyPerfCounter.cpp"
-            "internal/platform/shared/winfamily/winfamilytemUtils.h"
-            "internal/platform/shared/winfamily/winfamilytemUtils.cpp"
+            "internal/platform/shared/winfamily/winfamilySysUtils.h"
+            "internal/platform/shared/winfamily/winfamilySysUtils.cpp"
             )
 endif()
 
@@ -70,7 +80,7 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
             "internal/platform/osapi/win32/win32EventCore.cpp"
             "internal/platform/osapi/win32/win32OpenGL.h"
             "internal/platform/osapi/win32/win32OpenGL.cpp"
-            "internal/platform/osapi/win32/win32temUtils.h"
+            "internal/platform/osapi/win32/win32SysUtils.h"
             "internal/platform/osapi/win32/win32Window.h"
             "internal/platform/osapi/win32/win32Window.cpp"
             )
@@ -79,11 +89,17 @@ endif()
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
-            "internal/platform/osapi/x11/x11Common.h"
+            "internal/platform/osapi/x11/x11CommonDefs.h"
+            "internal/platform/osapi/x11/x11CoreSessionContext.h"
+            "internal/platform/osapi/x11/x11CoreSessionContext.cpp"
+            "internal/platform/osapi/x11/x11Display.h"
+            "internal/platform/osapi/x11/x11Display.cpp"
+            "internal/platform/osapi/x11/x11DisplayXRR.h"
+            "internal/platform/osapi/x11/x11DisplayXRR.cpp"
             "internal/platform/osapi/x11/x11EventCore.h"
             "internal/platform/osapi/x11/x11EventCore.cpp"
-            "internal/platform/osapi/x11/x11OpenGL.h"
-            "internal/platform/osapi/x11/x11OpenGL.cpp"
+            "internal/platform/osapi/x11/x11GfxOpenGL.h"
+            "internal/platform/osapi/x11/x11GfxOpenGL.cpp"
             "internal/platform/osapi/x11/x11Window.h"
             "internal/platform/osapi/x11/x11Window.cpp"
             )

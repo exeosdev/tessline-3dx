@@ -1,7 +1,8 @@
 
-#ifndef __TS3_SYSTEM_DISPLAY_MANAGER_H__
-#define __TS3_SYSTEM_DISPLAY_MANAGER_H__
+#ifndef __TS3_SYSTEM_DISPLAY_H__
+#define __TS3_SYSTEM_DISPLAY_H__
 
+#include "coreSessionContext.h"
 #include "displayCommon.h"
 
 namespace ts3
@@ -9,43 +10,25 @@ namespace ts3
 namespace system
 {
 
-    ts3DeclareHandle( DsmDisplayManager );
+    TS3_SYSTEM_API TS3_PCL_ATTR_NO_DISCARD DsmDisplayManagerHandle dsmCreateDisplayManager( CoreSessionContextHandle pCSContext );
 
-    DsmDisplayManager sysDsmInitializeDisplayManager;
+    TS3_SYSTEM_API void dsmDestroyDisplayManager( DsmDisplayManagerHandle pDisplayManager );
 
-	class DisplayManager : public BaseObject
-	{
-	public:
-		DisplayManagerNativeData mNativeData;
+    TS3_SYSTEM_API TS3_PCL_ATTR_NO_DISCARD DisplaySize dsmDisplayManagerQueryDisplaySize( DsmDisplayManagerHandle pDisplayManager );
 
-		explicit DisplayManager( ContextHandle pContext ) noexcept;
-		virtual ~DisplayManager() noexcept;
+    TS3_SYSTEM_API TS3_PCL_ATTR_NO_DISCARD DisplaySize dsmDisplayManagerQueryMinWindowSize( DsmDisplayManagerHandle pDisplayManager );
 
-		static DisplayManagerHandle create( ContextHandle pContext );
+    TS3_SYSTEM_API TS3_PCL_ATTR_NO_DISCARD bool dsmDisplayManagerCheckDriverSupport( EDsmDisplayDriverType pDriverID );
 
-	#if( TS3_SYSTEM_DISPLAY_DRIVER_SUPPORT_DXGI )
-		DisplayDriverHandle createDisplayDriverDXGI( const DisplayDriverCreateInfoDXGI & pCreateInfo );
-	#endif
+    TS3_SYSTEM_API TS3_PCL_ATTR_NO_DISCARD EDsmDisplayDriverType dsmDisplayManagerResolveDisplayDriverID( EDsmDisplayDriverType pDriverID );
 
-		DisplayDriverHandle createDisplayDriverGeneric();
+    TS3_SYSTEM_API TS3_PCL_ATTR_NO_DISCARD bool dsmDisplayManagerValidateWindowGeometry( DsmDisplayManagerHandle pDisplayManager,
+                                                                                         const WindowGeometry & pWindowGeometry );
 
-		bool validateWindowGeometry( WindowGeometry & pWindowGeometry ) const;
-
-		TS3_PCL_ATTR_NO_DISCARD DisplaySize queryDisplaySize() const;
-		TS3_PCL_ATTR_NO_DISCARD DisplaySize queryMinWindowSize() const;
-
-		static bool checkDisplayDriverSupport( EDsmDisplayDriverType pDriverID );
-
-		static EDsmDisplayDriverType resolveDisplayDriverID( EDsmDisplayDriverType pDriverID );
-
-	private:
-		void _sysInitialize();
-		void _sysRelease() noexcept;
-		void _sysQueryDisplaySize( DisplaySize & pDisplaySize ) const;
-		void _sysQueryMinWindowSize( DisplaySize & pMinWindowSize ) const;
-	};
+    TS3_SYSTEM_API bool dsmDisplayManagerValidateWindowGeometry( DsmDisplayManagerHandle pDisplayManager,
+                                                                 WindowGeometry & pWindowGeometry );
 
 } // namespace system
 } // namespace ts3
 
-#endif // __TS3_SYSTEM_DISPLAY_MANAGER_H__
+#endif // __TS3_SYSTEM_DISPLAY_H__

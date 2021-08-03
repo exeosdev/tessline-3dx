@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_SYSTEM_UTILS_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_SYSTEM_UTILS_H__
 
-#include "../../shared/winfamily/winfamilytemUtils.h"
+#include "../../shared/winfamily/winfamilySysUtils.h"
 
 namespace ts3
 {

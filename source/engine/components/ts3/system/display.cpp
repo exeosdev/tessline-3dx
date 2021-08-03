@@ -1,144 +1,166 @@
 
-#include "displayDriver.h"
-#include "displayManager.h"
-#include "windowDefs.h"
+#include "displayNative.h"
 
 namespace ts3
 {
+namespace system
+{
 
-	DisplayManager::DisplayManager( ContextHandle pContext ) noexcept
-	: BaseObject( pContext )
-	{}
+    void _nativeDsmDisplayManagerInitialize( DsmDisplayManager & pDisplayManager );
+    void _nativeDsmDisplayManagerRelease( DsmDisplayManager & pDisplayManager );
+    void _nativeDsmDisplayManagerQueryDisplaySize( DsmDisplayManager & pDisplayManager, DisplaySize & pOutDisplaySize );
+    void _nativeDsmDisplayManagerQueryMinWindowSize( DsmDisplayManager & pDisplayManager, DisplaySize & pOutMinWindowSize );
+    
+    DsmDisplayManagerHandle dsmInitializeDisplayManager( CoreSessionContextHandle pCSContext )
+    {
+        auto * displayManager = new DsmDisplayManager();
+        _nativeDsmDisplayManagerInitialize( *displayManager );
+        return displayManager;
+    }
 
-	DisplayManager::~DisplayManager() noexcept
-	{
-		_sysRelease();
-	}
+    void dsmDestroyDisplayManager( DsmDisplayManagerHandle pDisplayManager )
+    {
+        if( !pDisplayManager )
+        {
+            return;
+        }
 
-	DisplayManagerHandle DisplayManager::create( ContextHandle pContext )
-	{
-		auto displayManager = sysCreateObject<DisplayManager>( pContext );
-		displayManager->_sysInitialize();
-		return displayManager;
-	}
+        _nativeDsmDisplayManagerRelease( *pDisplayManager );
+        delete pDisplayManager;
+    }
 
-#if( TS3_SYSTEM_DISPLAY_DRIVER_SUPPORT_DXGI )
-	DisplayDriverHandle DisplayManager::createDisplayDriverDXGI( const DisplayDriverCreateInfoDXGI & pCreateInfo )
-	{
-		return DisplayDriverDXGI::create( getHandle<DisplayManager>(), pCreateInfo );
-	}
-#endif
+    DisplaySize dsmDisplayManagerQueryDisplaySize( DsmDisplayManagerHandle pDisplayManager )
+    {
+        DisplaySize result;
+        _nativeDsmDisplayManagerQueryDisplaySize( *pDisplayManager, result );
+        return result;
+    }
 
-	DisplayDriverHandle DisplayManager::createDisplayDriverGeneric()
-	{
-		return DisplayDriverGeneric::create( getHandle<DisplayManager>() );
-	}
+    DisplaySize dsmDisplayManagerQueryMinWindowSize( DsmDisplayManagerHandle pDisplayManager )
+    {
+        DisplaySize result;
+        _nativeDsmDisplayManagerQueryMinWindowSize( *pDisplayManager, result );
+        return result;
+    }
 
-	bool DisplayManager::validateWindowGeometry( WindowGeometry & pWindowGeometry ) const
-	{
-		auto originalPos = pWindowGeometry.position;
-		auto originalSize = pWindowGeometry.size;
-		auto & framePos = pWindowGeometry.position;
-		auto & frameSize = pWindowGeometry.size;
+    bool dsmDisplayManagerCheckDriverSupport( EDsmDisplayDriverType pDriverID )
+    {
+        return true;
+    }
 
-		auto screenSize = queryDisplaySize();
-		auto minWindowSize = queryMinWindowSize();
+    EDsmDisplayDriverType dsmDisplayManagerResolveDisplayDriverID( EDsmDisplayDriverType pDriverID )
+    {
+        EDsmDisplayDriverType resolvedDriverID = EDsmDisplayDriverType::Unknown;
 
-		if ( frameSize == cvWindowSizeMax )
-		{
-			// Window size exceeds the screen size - clamp the size.
-			frameSize.x = screenSize.x;
-			frameSize.y = screenSize.y;
-		}
-		else if ( ( frameSize.x == 0 ) || ( frameSize.y == 0 ) )
-		{
-			// Any dimension set to 0 means "use default size". By default,
-			// we just use the ratio of the screen and 70% of its dimensions.
-			frameSize.x = static_cast<uint32>( screenSize.x * 0.7f );
-			frameSize.y = static_cast<uint32>( screenSize.y * 0.7f );
-		}
-		else
-		{
-			// Size of the window must be less than the size of the screen...
-			frameSize.x = getMinOf( frameSize.x, screenSize.x );
-			frameSize.y = getMinOf( frameSize.y, screenSize.y );
+        if( pDriverID == EDsmDisplayDriverType::Generic )
+        {
+            resolvedDriverID = EDsmDisplayDriverType::Generic;
+        }
+        else if( pDriverID == EDsmDisplayDriverType::Default )
+        {
+            // TODO
+        }
+        else if( pDriverID == EDsmDisplayDriverType::DXGI )
+        {
+            // TODO
+        }
 
-			// ... but at the same time bigger than the minimum allowed size (Win32-specific, really).
-			frameSize.x = getMaxOf( frameSize.x, minWindowSize.x );
-			frameSize.y = getMaxOf( frameSize.y, minWindowSize.y );
-		}
+        return resolvedDriverID;
+    }
 
-		if ( ( framePos.x < 0 ) || ( framePos.y < 0 ) )
-		{
-			framePos.x = ( screenSize.x - frameSize.x ) / 2;
-			framePos.y = ( screenSize.y - frameSize.y ) / 2;
-		}
-		else
-		{
-			int32 maxPosX = screenSize.x - frameSize.x;
-			int32 maxPosY = screenSize.y - frameSize.y;
-			framePos.x = getMinOf( framePos.x, maxPosX );
-			framePos.y = getMinOf( framePos.y, maxPosY );
-		}
+    bool dsmDisplayManagerValidateWindowGeometry( DsmDisplayManagerHandle pDisplayManager,
+                                                  const WindowGeometry & pWindowGeometry )
+    {
+        const auto & framePos = pWindowGeometry.position;
+        const auto & frameSize = pWindowGeometry.size;
 
-		return ( framePos != originalPos ) || ( frameSize != originalSize );
-	}
+        auto screenSize = dsmDisplayManagerQueryDisplaySize( pDisplayManager );
+        auto minWindowSize = dsmDisplayManagerQueryMinWindowSize( pDisplayManager );
 
-	DisplaySize DisplayManager::queryDisplaySize() const
-	{
-		DisplaySize displaySize;
-		_sysQueryDisplaySize( displaySize );
-		return displaySize;
-	}
+        if ( frameSize == cvWindowSizeMax )
+        {
+            return false;
+        }
+        else if ( ( frameSize.x == 0 ) || ( frameSize.y == 0 ) )
+        {
+            return false;
+        }
+        else if ( ( frameSize.x > screenSize.x ) || ( frameSize.y > screenSize.y ) )
+        {
+            return false;
+        }
+        else if ( ( frameSize.x < minWindowSize.x ) || ( frameSize.y < minWindowSize.y ) )
+        {
+            return false;
+        }
 
-	DisplaySize DisplayManager::queryMinWindowSize() const
-	{
-		DisplaySize minWindowSize;
-		_sysQueryMinWindowSize( minWindowSize );
-		return minWindowSize;
-	}
+        if ( ( framePos.x < 0 ) || ( framePos.y < 0 ) )
+        {
+            return false;
+        }
+        else
+        {
+            int32 maxPosX = screenSize.x - frameSize.x;
+            int32 maxPosY = screenSize.y - frameSize.y;
+            if ( ( framePos.x > maxPosX ) || ( framePos.y > maxPosY ) )
+            {
+                return false;
+            }
+        }
 
-	bool DisplayManager::checkDisplayDriverSupport( EDsmDisplayDriverType pDriverID )
-	{
-		switch( pDriverID )
-		{
-			case EDsmDisplayDriverType::Generic:
-				return true;
+        return true;
+    }
 
-			case EDsmDisplayDriverType::DXGI:
-				return TS3_SYSTEM_DISPLAY_DRIVER_SUPPORT_DXGI != 0;
+    bool dsmDisplayManagerValidateWindowGeometry( DsmDisplayManagerHandle pDisplayManager,
+                                                  WindowGeometry & pWindowGeometry )
+    {
+        auto originalPos = pWindowGeometry.position;
+        auto originalSize = pWindowGeometry.size;
+        auto & framePos = pWindowGeometry.position;
+        auto & frameSize = pWindowGeometry.size;
 
-			default:
-				break;
-		}
+        auto screenSize = queryDisplaySize();
+        auto minWindowSize = queryMinWindowSize();
 
-		return false;
-	}
+        if ( frameSize == cvWindowSizeMax )
+        {
+            // Window size exceeds the screen size - clamp the size.
+            frameSize.x = screenSize.x;
+            frameSize.y = screenSize.y;
+        }
+        else if ( ( frameSize.x == 0 ) || ( frameSize.y == 0 ) )
+        {
+            // Any dimension set to 0 means "use default size". By default,
+            // we just use the ratio of the screen and 70% of its dimensions.
+            frameSize.x = static_cast<uint32>( screenSize.x * 0.7f );
+            frameSize.y = static_cast<uint32>( screenSize.y * 0.7f );
+        }
+        else
+        {
+            // Size of the window must be less than the size of the screen...
+            frameSize.x = getMinOf( frameSize.x, screenSize.x );
+            frameSize.y = getMinOf( frameSize.y, screenSize.y );
 
-	EDsmDisplayDriverType DisplayManager::resolveDisplayDriverID( EDsmDisplayDriverType pDriverID )
-	{
-		EDsmDisplayDriverType resolvedDriverID = EDsmDisplayDriverType::Unknown;
+            // ... but at the same time bigger than the minimum allowed size (Win32-specific, really).
+            frameSize.x = getMaxOf( frameSize.x, minWindowSize.x );
+            frameSize.y = getMaxOf( frameSize.y, minWindowSize.y );
+        }
 
-		if( pDriverID == EDsmDisplayDriverType::Generic )
-		{
-			resolvedDriverID = EDsmDisplayDriverType::Generic;
-		}
-		else if( pDriverID == EDsmDisplayDriverType::Default )
-		{
-		#if( TS3_SYSTEM_DISPLAY_DRIVER_SUPPORT_DXGI )
-			resolvedDriverID = EDsmDisplayDriverType::DXGI;
-		#else
-			resolvedDriverID = EDsmDisplayDriverType::Generic;
-		#endif
-		}
-	#if( TS3_SYSTEM_DISPLAY_DRIVER_SUPPORT_DXGI )
-		else if( pDriverID == EDsmDisplayDriverType::DXGI )
-		{
-			resolvedDriverID = EDsmDisplayDriverType::DXGI;
-		}
-	#endif
+        if ( ( framePos.x < 0 ) || ( framePos.y < 0 ) )
+        {
+            framePos.x = ( screenSize.x - frameSize.x ) / 2;
+            framePos.y = ( screenSize.y - frameSize.y ) / 2;
+        }
+        else
+        {
+            int32 maxPosX = screenSize.x - frameSize.x;
+            int32 maxPosY = screenSize.y - frameSize.y;
+            framePos.x = getMinOf( framePos.x, maxPosX );
+            framePos.y = getMinOf( framePos.y, maxPosY );
+        }
 
-		return resolvedDriverID;
-	}
+        return ( framePos != originalPos ) || ( frameSize != originalSize );
+    }
 
-}
+} // namespace system
+} // namespace ts3

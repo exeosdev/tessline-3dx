@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_GFX_OPENGL_COMMON_H__
 #define __TS3_SYSTEM_GFX_OPENGL_COMMON_H__
 
-#include "visual.h"
+#include "gfxVisual.h"
 #include "windowDefs.h"
 #include <GL/glew.h>
 
