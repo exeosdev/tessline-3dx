@@ -2,14 +2,14 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_X11_CORE_SESSION_CONTEXT_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_X11_CORE_SESSION_CONTEXT_H__
 
-#include "x11CommonDefs.h"
+#include "x11Common.h"
 
 namespace ts3
 {
 namespace system
 {
 
-	struct CoreSessionContextNativeData
+	struct SysContextNativeData
 	{
 	    struct SessionInfo
         {
@@ -25,8 +25,8 @@ namespace system
 	    Atom wmpDeleteWindow = -1;
 	};
 
-	using X11CoreSessionContextNativeData = CoreSessionContextNativeData;
-	using X11SessionInfo = CoreSessionContextNativeData::SessionInfo;
+	using X11SysContextNativeData = SysContextNativeData;
+	using X11SessionInfo = SysContextNativeData::SessionInfo;
 
 } // namespace system
 } // namespace ts3

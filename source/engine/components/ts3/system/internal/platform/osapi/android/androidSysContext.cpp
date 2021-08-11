@@ -4,7 +4,7 @@
 namespace ts3
 {
 
-	void Context::_sysInitialize( const CoreSessionContextCreateInfo & pCreateInfo )
+	void Context::_sysInitialize( const SysContextCreateInfo & pCreateInfo )
 	{}
 
 	void Context::_sysRelease() noexcept

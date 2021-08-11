@@ -1,22 +1,22 @@
 
-#include <ts3/system/internal/internalGfxOpenGL.h>
+#include <ts3/system/internal/internalOpenGL.h>
 #include <ts3/system/internal/internaltemContext.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 namespace ts3
 {
 
-    bool GfxGLImplProxy::nativeInitializeGLDriver( GfxGLDriver & pDriver )
+    bool GLImplProxy::nativeInitializeGLDriver( GLDriver & pDriver )
     {
         eglInitializeGLDriver( pDriver );
         pDriver.nativeData->androidNativeWindow = pDriver.systemContext->nativeData->androidNativeWindow;
         return true;
     }
 
-    void GfxGLImplProxy::nativeReleaseGLDriverInitState( GfxGLDriver & pDriver )
+    void GLImplProxy::nativeReleaseGLDriverInitState( GLDriver & pDriver )
     {}
 
-    void GfxGLImplProxy::nativeCreateGLSurface( GfxGLSurface & pSurface, const GfxGLSurfaceCreateInfo & pCreateInfo )
+    void GLImplProxy::nativeCreateGLSurface( GLDisplaySurface & pSurface, const GLSurfaceCreateInfo & pCreateInfo )
     {
         auto * driverNativeData = pSurface.driver->nativeData;
 
@@ -39,17 +39,17 @@ namespace ts3
         eglCreateSurface( pSurface, driverNativeData->display, driverNativeData->androidNativeWindow, fbConfig );
     }
 
-    void GfxGLImplProxy::nativeCreateGLRenderContext( GfxGLRenderContext & pContext, const GfxGLRenderContextCreateInfo & pCreateInfo )
+    void GLImplProxy::nativeCreateGLRenderContext( GLRenderContext & pContext, const GLRenderContextCreateInfo & pCreateInfo )
     {
         eglCreateCoreContext( pContext, pCreateInfo );
     }
 
-    void GfxGLImplProxy::nativeSwapBuffers( GfxGLSurface & pSurface )
+    void GLImplProxy::nativeSwapBuffers( GLDisplaySurface & pSurface )
     {
         ::eglSwapBuffers( pSurface.nativeData->display, pSurface.nativeData->surfaceHandle );
     }
 
-    void GfxGLImplProxy::nativeBindContextForCurrentThread( GfxGLRenderContext & pContext )
+    void GLImplProxy::nativeBindContextForCurrentThread( GLRenderContext & pContext )
     {
         ::eglMakeCurrent( pContext.nativeData->display,
                           pContext.nativeData->surfaceHandle,

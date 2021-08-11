@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_DISPLAY_COMMON_H__
 #define __TS3_SYSTEM_DISPLAY_COMMON_H__
 
-#include "gfxVisual.h"
+#include "visual.h"
 
 #include <ts3/math/vectorOps.h>
 #include <ts3/stdext/bitmask.h>
@@ -25,21 +25,14 @@ namespace ts3
 namespace system
 {
 
-    ts3DeclareHandle( DsmDisplayManager );
-
-	struct DsmAdapter;
-	struct DsmOutput;
-	struct DsmVideoMode;
-	struct WmWindowGeometry;
-
 	using dsm_index_t = uint16;
 	using dsm_output_id_t = uint32;
 	using dsm_video_mode_id_t = uint64;
 	using dsm_video_settings_hash_t = uint64;
 	using DisplaySize = math::Size2u;
 
-	/// @brief Represents invalid display system index (of an adapter or an output, for example).
-	constexpr dsm_index_t cxDsmIndexInvalid = Limits<dsm_index_t>::maxValue;
+    /// @brief Represents invalid display system index (of an adapter or an output, for example).
+    constexpr dsm_index_t cxDsmIndexInvalid = Limits<dsm_index_t>::maxValue;
 
 	/// @brief Represents invalid display settings hash. Used to identify/report invalid and/or empty configurations.
 	constexpr dsm_video_settings_hash_t cxDsmVideoSettingsHashInvalid = Limits<dsm_video_settings_hash_t>::maxValue;
@@ -175,7 +168,7 @@ namespace system
 		dsm_index_t index = cxDsmIndexInvalid;
 		dsm_video_mode_id_t id = 0u;
 		dsm_video_settings_hash_t settingsHash = 0u;
-		GfxColorFormat format = GfxColorFormat::Unknown;
+		ColorFormat format = ColorFormat::Unknown;
 		DsmVideoSettings settings;
 		void * driverReserved = nullptr;
 	};
@@ -234,9 +227,9 @@ namespace system
 		return ( pLhs.refSettings != pRhs.refSettings ) || ( pLhs.flags != pRhs.flags );
 	}
 
-	dsm_video_settings_hash_t dsmComputeVideoSettingsHash( GfxColorFormat pFormat, const DsmVideoSettings & pSettings );
+	dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DsmVideoSettings & pSettings );
 
-	std::string dsmGetVideoSettingsString( GfxColorFormat pFormat, const DsmVideoSettings & pSettings );
+	std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DsmVideoSettings & pSettings );
 
 } // namespace system
 } // namespace ts3

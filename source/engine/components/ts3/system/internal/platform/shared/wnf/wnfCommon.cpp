@@ -5,11 +5,11 @@
 namespace ts3
 {
 
-	std::string winfGetHresultErrorMessage( HRESULT pHResult )
+    std::string wnfQueryHresultErrorMessage( HRESULT pHResult )
 	{
 		_com_error comError{ pHResult };
 		_bstr_t comErrorString{ comError.ErrorMessage() };
-		return std::string( static_cast<const char*>( comErrorString ) );
+		return { static_cast<const char*>( comErrorString ) };
 	}
 
 }

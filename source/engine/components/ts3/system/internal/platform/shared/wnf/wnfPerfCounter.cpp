@@ -1,5 +1,5 @@
 
-#include "winfamilyPerfCounter.h"
+#include "wnfPerfCounter.h"
 
 #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINFAMILY )
 namespace ts3

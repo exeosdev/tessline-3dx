@@ -7,7 +7,7 @@ namespace ts3
 namespace system
 {
 
-    dsm_video_settings_hash_t dsmComputeVideoSettingsHash( GfxColorFormat pFormat, const DsmVideoSettings & pSettings )
+    dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DsmVideoSettings & pSettings )
 	{
 		DsmVideoModeHash modeHashGen;
 		modeHashGen.uResWidth = static_cast<uint16>( pSettings.resolution.x );
@@ -18,7 +18,7 @@ namespace system
 		return modeHashGen.modeHash;
 	}
 
-	std::string dsmGetVideoSettingsString( GfxColorFormat pFormat, const DsmVideoSettings & pSettings )
+	std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DsmVideoSettings & pSettings )
 	{
 		return {};
 	}

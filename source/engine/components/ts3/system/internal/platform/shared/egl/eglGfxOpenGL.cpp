@@ -1,15 +1,15 @@
 
-#include <ts3/system/internal/internalGfxOpenGL.h>
+#include <ts3/system/internal/internalOpenGL.h>
 
 namespace ts3
 {
 
-	std::vector<EGLConfig> _internalEGLQueryCompatibleEGLConfigList( EGLDisplay pDisplay, const GfxVisualConfig & pVisualConfig );
-	int _internalEGLGetEGLConfigMatchRate( EGLDisplay pDisplay, EGLConfig pEGLConfig, const GfxVisualConfig & pVisualConfig );
-	void _internalEGLGetAttribArrayForVisualConfig( const GfxVisualConfig & pVisualConfig, int * pAttribArray );
+	std::vector<EGLConfig> _internalEGLQueryCompatibleEGLConfigList( EGLDisplay pDisplay, const VisualConfig & pVisualConfig );
+	int _internalEGLGetEGLConfigMatchRate( EGLDisplay pDisplay, EGLConfig pEGLConfig, const VisualConfig & pVisualConfig );
+	void _internalEGLGetAttribArrayForVisualConfig( const VisualConfig & pVisualConfig, int * pAttribArray );
 	void _internalEGLValidateRequestedContextVersion( Version & pVersion );
 
-	void eglInitializeGLDriver( GfxGLDriver & pDriver )
+	void eglInitializeGLDriver( GLDriver & pDriver )
 	{
 		EGLDisplay eglDisplay = ::eglGetDisplay( EGL_DEFAULT_DISPLAY );
 		
@@ -28,13 +28,13 @@ namespace ts3
 		pDriver.nativeData->eglVersion.minor = eglVersionMinor;
 	}
 
-	void eglReleaseGLDriver( GfxGLDriver & pDriver )
+	void eglReleaseGLDriver( GLDriver & pDriver )
 	{
 		::eglTerminate( pDriver.nativeData->display );
 		pDriver.nativeData->display = EGL_NO_DISPLAY;
 	}
 
-	EGLConfig eglChooseCoreEGLConfig( EGLDisplay pDisplay, const GfxVisualConfig & pVisualConfig )
+	EGLConfig eglChooseCoreEGLConfig( EGLDisplay pDisplay, const VisualConfig & pVisualConfig )
 	{
 		auto EGLConfigList = _internalEGLQueryCompatibleEGLConfigList( pDisplay, pVisualConfig );
 
@@ -54,7 +54,7 @@ namespace ts3
 		return bestEGLConfig;
 	}
 
-	void eglCreateSurface( GfxGLSurface & pSurface, EGLDisplay pEGLDisplay, EGLNativeWindowType pWindow, EGLConfig pEGLConfig )
+	void eglCreateSurface( GLDisplaySurface & pSurface, EGLDisplay pEGLDisplay, EGLNativeWindowType pWindow, EGLConfig pEGLConfig )
 	{
 		EGLSurface surfaceHandle = ::eglCreateWindowSurface( pEGLDisplay,
 															 pEGLConfig,
@@ -72,7 +72,7 @@ namespace ts3
 		pSurface.nativeData->fbConfig = pEGLConfig;
 	}
 
-	void eglCreateCoreContext( GfxGLRenderContext & pContext, const GfxGLRenderContextCreateInfo & pCreateInfo )
+	void eglCreateCoreContext( GLRenderContext & pContext, const GLRenderContextCreateInfo & pCreateInfo )
 	{
 		auto * surfaceNativeData = pCreateInfo.displaySurface->nativeData;
 
@@ -80,19 +80,19 @@ namespace ts3
 		Bitmask<int> contextCreateFlags = 0;
 		EGLRenderContext shareContextHandle = nullptr;
 
-		if ( pCreateInfo.targetAPIProfile == EGfxGLAPIProfile::Legacy )
+		if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::Legacy )
 		{
 			contextProfile = EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT;
 		}
-		if ( pCreateInfo.flags.isSet( E_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
+		if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
 		{
 			contextCreateFlags |= EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR;
 		}
-		if ( pCreateInfo.flags.isSet( E_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
+		if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
 		{
 			contextCreateFlags |= EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE_BIT_KHR;
 		}
-		if ( pCreateInfo.flags.isSet( E_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
+		if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
 		{
 			if( pCreateInfo.shareContext != nullptr )
 			{
@@ -147,7 +147,7 @@ namespace ts3
 						  pContext.nativeData->contextHandle );
 	}
 
-    std::vector<EGLConfig> _internalEGLQueryCompatibleEGLConfigList( EGLDisplay pDisplay, const GfxVisualConfig & pVisualConfig )
+    std::vector<EGLConfig> _internalEGLQueryCompatibleEGLConfigList( EGLDisplay pDisplay, const VisualConfig & pVisualConfig )
     {
         std::vector<EGLConfig> result;
 
@@ -177,7 +177,7 @@ namespace ts3
         return result;
     }
 
-	int _internalEGLGetEGLConfigMatchRate( EGLDisplay pDisplay, EGLConfig pEGLConfig, const GfxVisualConfig & pVisualConfig )
+	int _internalEGLGetEGLConfigMatchRate( EGLDisplay pDisplay, EGLConfig pEGLConfig, const VisualConfig & pVisualConfig )
 	{
 		int matchRate = 0;
         int EGLConfigAttribValue = 0;
@@ -194,7 +194,7 @@ namespace ts3
 		return matchRate;
 	}
 
-	void _internalEGLGetAttribArrayForVisualConfig( const GfxVisualConfig & pVisualConfig, int * pAttribArray )
+	void _internalEGLGetAttribArrayForVisualConfig( const VisualConfig & pVisualConfig, int * pAttribArray )
 	{
 		int attribIndex = 0;
 

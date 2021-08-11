@@ -11,20 +11,20 @@ namespace ts3
 namespace system
 {
 
-	struct GfxGLSurfaceNativeData : public WindowNativeData
+	struct GLSurfaceNativeData : public WindowNativeData
 	{
 		GLXFBConfig fbConfig = nullptr;
 		XVisualInfo * visualInfo = nullptr;
 	};
 
-	struct GfxGLRenderContextNativeData
+	struct GLRenderContextNativeData
 	{
 		Display * display = nullptr;
 		GLXDrawable targetSurface = XID_None;
 		GLXContext contextHandle = nullptr;
 	};
 
-	struct GfxGLDriverNativeData
+	struct GLDriverNativeData
 	{
 		struct InitState
 		{
@@ -35,9 +35,9 @@ namespace system
 		InitState * initState = nullptr;
 	};
 
-    using X11GLDriverNativeData = GfxGLDriverNativeData;
-    using X11GLSurfaceNativeData = GfxGLSurfaceNativeData;
-    using X11GLRenderContextNativeData = GfxGLRenderContextNativeData;
+    using X11GLDriverNativeData = GLDriverNativeData;
+    using X11GLSurfaceNativeData = GLSurfaceNativeData;
+    using X11GLRenderContextNativeData = GLRenderContextNativeData;
 
 } // namespace system
 } // namespace ts3

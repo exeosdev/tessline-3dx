@@ -12,7 +12,7 @@ namespace system
     void _nativeDsmDisplayManagerQueryDisplaySize( DsmDisplayManager & pDisplayManager, DisplaySize & pOutDisplaySize );
     void _nativeDsmDisplayManagerQueryMinWindowSize( DsmDisplayManager & pDisplayManager, DisplaySize & pOutMinWindowSize );
     
-    DsmDisplayManagerHandle dsmInitializeDisplayManager( CoreSessionContextHandle pCSContext )
+    DsmDisplayManagerHandle dsmInitializeDisplayManager( SysContextHandle pSysContext )
     {
         auto * displayManager = new DsmDisplayManager();
         _nativeDsmDisplayManagerInitialize( *displayManager );

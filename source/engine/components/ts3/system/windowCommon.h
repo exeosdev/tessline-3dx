@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_WINDOW_DEFS_H__
 #define __TS3_SYSTEM_WINDOW_DEFS_H__
 
-#include "gfxVisual.h"
+#include "visual.h"
 #include <ts3/math/vector.h>
 
 namespace ts3

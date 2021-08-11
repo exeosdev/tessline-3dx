@@ -6,7 +6,7 @@
 namespace ts3
 {
 
-	static DXGI_FORMAT _dxgiTranslateGfxColorFormatToDXGIFormat( GfxColorFormat pColorFormat );
+	static DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( ColorFormat pColorFormat );
 
 
 	DisplayDriverDXGI::DisplayDriverDXGI( DisplayManagerHandle pDisplayManager ) noexcept
@@ -164,10 +164,10 @@ namespace ts3
 		}
 	}
 
-	void DisplayDriverDXGI::_sysEnumVideoModeList( DsmOutput & pOutput, GfxColorFormat pFormat )
+	void DisplayDriverDXGI::_sysEnumVideoModeList( DsmOutput & pOutput, ColorFormat pFormat )
 	{
 		auto * dxgiOutput = pOutput.nativeData.dxgi->dxgiOutput.Get();
-		auto dxgiFormat = _dxgiTranslateGfxColorFormatToDXGIFormat( pFormat );
+		auto dxgiFormat = _dxgiTranslateColorFormatToDXGIFormat( pFormat );
 
 		//
 		if ( dxgiFormat == DXGI_FORMAT_UNKNOWN )
@@ -232,16 +232,16 @@ namespace ts3
 		}
 	}
 
-	DXGI_FORMAT _dxgiTranslateGfxColorFormatToDXGIFormat( GfxColorFormat pColorFormat )
+	DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( ColorFormat pColorFormat )
 	{
-		static const std::unordered_map<GfxColorFormat, DXGI_FORMAT> colorDescMap =
+		static const std::unordered_map<ColorFormat, DXGI_FORMAT> colorDescMap =
 		{
-			{ GfxColorFormat::B8G8R8       , DXGI_FORMAT_B8G8R8X8_UNORM      },
-			{ GfxColorFormat::B8G8R8A8     , DXGI_FORMAT_B8G8R8A8_UNORM      },
-			{ GfxColorFormat::B8G8R8A8SRGB , DXGI_FORMAT_B8G8R8X8_UNORM_SRGB },
-			{ GfxColorFormat::R8G8B8A8     , DXGI_FORMAT_R8G8B8A8_UNORM      },
-			{ GfxColorFormat::R8G8B8A8SRGB , DXGI_FORMAT_R8G8B8A8_UNORM_SRGB },
-			{ GfxColorFormat::R10G10B10A2  , DXGI_FORMAT_R10G10B10A2_UNORM   },
+			{ ColorFormat::B8G8R8       , DXGI_FORMAT_B8G8R8X8_UNORM      },
+			{ ColorFormat::B8G8R8A8     , DXGI_FORMAT_B8G8R8A8_UNORM      },
+			{ ColorFormat::B8G8R8A8SRGB , DXGI_FORMAT_B8G8R8X8_UNORM_SRGB },
+			{ ColorFormat::R8G8B8A8     , DXGI_FORMAT_R8G8B8A8_UNORM      },
+			{ ColorFormat::R8G8B8A8SRGB , DXGI_FORMAT_R8G8B8A8_UNORM_SRGB },
+			{ ColorFormat::R10G10B10A2  , DXGI_FORMAT_R10G10B10A2_UNORM   },
 		};
 		return getMapValueOrDefault( colorDescMap, pColorFormat, DXGI_FORMAT_UNKNOWN );
 	}

@@ -12,7 +12,7 @@ namespace system
 
 	void _nativeDsmDisplayManagerInitialize( DsmDisplayManager & pDisplayManager )
 	{
-	    auto & cscNativeData = pDisplayManager.csContext->nativeData;
+	    auto & cscNativeData = pDisplayManager.sysContext->nativeData;
 
 	    if( cscNativeData.screenIndex == -1 )
 	    {

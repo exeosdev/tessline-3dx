@@ -34,36 +34,26 @@ namespace ts3
 namespace system
 {
 
-    class Context;
-	class temInterface;
-
 	template <typename TpObject>
 	using Handle = SharedHandle<TpObject>;
 
-#define ts3DeclareHandle( pType ) \
-	using pType##Handle = struct pType *
+	/// @brief Declares the handle type for a given system class.
+	/// The handle's type name is created by appending 'Handle' suffix to a given class name.
+	/// For example: ts3SysDeclareHandle( MyType ) will produce a declaration for 'MyTypeHandle'.
+    #define ts3SysDeclareHandle( pType ) \
+        using pType##Handle = Handle<class pType>
 
-	ts3DeclareHandle( BaseObject );
-	ts3DeclareHandle( Context );
+    /// @brief Declares the native types for a given system class: its proxy class and native data struct.
+    /// For a given class name (assume MyType) this macro is replaced with two forward declarations:
+    /// - struct MyTypeNativeData: a struct containing native, os-specific data, declared at os-specific level
+    /// - class MyTypeNativeProxy: a class which yields the actual implementation and is used by MyType internally
+    #define ts3SysDeclareNativeTypes( pType ) \
+        struct pType##NativeData; \
+        class pType##NativeProxy
 
-	/// @brief
-	class BaseObject : public DynamicInterface
-	{
-	public:
-		ContextHandle const mContext;
-
-		explicit BaseObject( ContextHandle pContext )
-		: mContext( std::move( pContext ) )
-		{}
-
-		virtual ~BaseObject() = default;
-	};
-
-	template <typename TpObject, typename... TpArgs>
-	inline Handle<TpObject> sysCreateObject( TpArgs && ...pArgs )
-	{
-		return createDynamicInterfaceObject<TpObject>( std::forward<TpArgs>( pArgs )... );
-	}
+    // These two types need to be visible everywhere.
+    ts3SysDeclareHandle( SysContext );
+    ts3SysDeclareHandle( SysObject );
 
 } // namespace system
 } // namespace ts3

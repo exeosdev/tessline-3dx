@@ -5,23 +5,23 @@
 namespace ts3
 {
 
-	GfxGLSurface::GfxGLSurface( GfxGLDriverHandle pGLDriver ) noexcept
+	GLDisplaySurface::GLDisplaySurface( GLDriverHandle pGLDriver ) noexcept
 	: BaseObject( pGLDriver->mContext )
 	, EventSource( mNativeData )
 	, mGLDriver( pGLDriver )
 	{}
 
-	GfxGLSurface::~GfxGLSurface() noexcept
+	GLDisplaySurface::~GLDisplaySurface() noexcept
 	{
 		_sysDestroy();
 	}
 
-	void GfxGLSurface::swapBuffers()
+	void GLDisplaySurface::swapBuffers()
 	{
 		_sysSwapBuffers();
 	}
 
-	WmWindowSize GfxGLSurface::queryCurrentSize() const
+	WmWindowSize GLDisplaySurface::queryCurrentSize() const
 	{
 		WmWindowSize windowSize;
 		_sysQueryCurrentSize( windowSize );
@@ -29,29 +29,29 @@ namespace ts3
 	}
 
 
-	GfxGLRenderContext::GfxGLRenderContext( GfxGLDriverHandle pGLDriver ) noexcept
+	GLRenderContext::GLRenderContext( GLDriverHandle pGLDriver ) noexcept
 	: BaseObject( pGLDriver->mContext )
 	, mGLDriver( pGLDriver )
 	{}
 
-	GfxGLRenderContext::~GfxGLRenderContext() noexcept
+	GLRenderContext::~GLRenderContext() noexcept
 	{
 		_sysDestroy();
 	}
 
-	void GfxGLRenderContext::bindForCurrentThread( GfxGLSurface & pTargetSurface )
+	void GLRenderContext::bindForCurrentThread( GLDisplaySurface & pTargetSurface )
 	{
 		_sysBindForCurrentThread( pTargetSurface );
 	}
 
-	bool GfxGLRenderContext::validateCurrentBinding() const
+	bool GLRenderContext::validateCurrentBinding() const
 	{
 		return _sysValidateCurrentBinding();
 	}
 
-	GfxGLSystemVersionInfo GfxGLRenderContext::querytemVersionInfo() const
+	GLSystemVersionInfo GLRenderContext::querytemVersionInfo() const
 	{
-		GfxGLSystemVersionInfo systemVersionInfo;
+		GLSystemVersionInfo systemVersionInfo;
 
 		int majorVersion = 0;
 		glGetIntegerv( GL_MAJOR_VERSION, &majorVersion );
@@ -83,26 +83,26 @@ namespace ts3
 
 
 
-	GfxGLDriver::GfxGLDriver( DisplayManagerHandle pDisplayManager ) noexcept
+	GLDriver::GLDriver( DisplayManagerHandle pDisplayManager ) noexcept
 	: BaseObject( pDisplayManager->mContext )
 	, mDisplayManager( pDisplayManager )
 	, _primaryContext( nullptr )
 	{}
 
-	GfxGLDriver::~GfxGLDriver() noexcept = default;
+	GLDriver::~GLDriver() noexcept = default;
 
-	GfxGLDriverHandle GfxGLDriver::create( DisplayManagerHandle pDisplayManager )
+	GLDriverHandle GLDriver::create( DisplayManagerHandle pDisplayManager )
 	{
-		auto openglSubsystem = sysCreateObject<GfxGLDriver>( pDisplayManager );
+		auto openglSubsystem = sysCreateObject<GLDriver>( pDisplayManager );
 		return openglSubsystem;
 	}
 
-	void GfxGLDriver::initializePlatform()
+	void GLDriver::initializePlatform()
 	{
 		_sysInitializePlatform();
 	}
 
-	void GfxGLDriver::releaseInitState( GfxGLRenderContext & pGLRenderContext )
+	void GLDriver::releaseInitState( GLRenderContext & pGLRenderContext )
 	{
 		if( pGLRenderContext.mGLDriver.get() != this )
 		{
@@ -111,11 +111,11 @@ namespace ts3
 		_sysReleaseInitState();
 	}
 
-	GfxGLSurfaceHandle GfxGLDriver::createDisplaySurface( const GfxGLSurfaceCreateInfo & pCreateInfo )
+	GLDisplaySurfaceHandle GLDriver::createDisplaySurface( const GLSurfaceCreateInfo & pCreateInfo )
 	{
-		GfxGLSurfaceCreateInfo validatedCreateInfo = pCreateInfo;
+		GLSurfaceCreateInfo validatedCreateInfo = pCreateInfo;
 
-		if( pCreateInfo.flags.isSet( E_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
+		if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
 		{
 			validatedCreateInfo.windowGeometry.size = cvWindowSizeMax;
 			validatedCreateInfo.windowGeometry.frameStyle = WmWindowFrameStyle::Overlay;
@@ -129,25 +129,25 @@ namespace ts3
 
 		mDisplayManager->validateWindowGeometry( validatedCreateInfo.windowGeometry );
 
-		auto openglSurface = sysCreateObject<GfxGLSurface>( getHandle<GfxGLDriver>() );
+		auto openglSurface = sysCreateObject<GLDisplaySurface>( getHandle<GLDriver>() );
 
 		_sysCreateDisplaySurface( *openglSurface, validatedCreateInfo );
 
 		return openglSurface;
 	}
 
-	GfxGLSurfaceHandle GfxGLDriver::createDisplaySurfaceForCurrentThread()
+	GLDisplaySurfaceHandle GLDriver::createDisplaySurfaceForCurrentThread()
 	{
-		auto openglSurface = sysCreateObject<GfxGLSurface>( getHandle<GfxGLDriver>() );
+		auto openglSurface = sysCreateObject<GLDisplaySurface>( getHandle<GLDriver>() );
 
 		_sysCreateDisplaySurfaceForCurrentThread( *openglSurface );
 
 		return openglSurface;
 	}
 
-	GfxGLRenderContextHandle GfxGLDriver::createRenderContext( GfxGLSurface & pSurface, const GfxGLRenderContextCreateInfo & pCreateInfo )
+	GLRenderContextHandle GLDriver::createRenderContext( GLDisplaySurface & pSurface, const GLRenderContextCreateInfo & pCreateInfo )
 	{
-		GfxGLRenderContextCreateInfo validatedCreateInfo = pCreateInfo;
+		GLRenderContextCreateInfo validatedCreateInfo = pCreateInfo;
 
 		auto & targetAPIVersion = pCreateInfo.requiredAPIVersion;
 		if( ( targetAPIVersion == cvVersionInvalid  ) || ( targetAPIVersion == cvVersionUnknown  ) )
@@ -156,43 +156,43 @@ namespace ts3
 			validatedCreateInfo.requiredAPIVersion.minor = 0;
 		}
 
-		auto openglContext = sysCreateObject<GfxGLRenderContext>( getHandle<GfxGLDriver>() );
+		auto openglContext = sysCreateObject<GLRenderContext>( getHandle<GLDriver>() );
 
 		_sysCreateRenderContext( *openglContext, pSurface, validatedCreateInfo );
 
 		return openglContext;
 	}
 
-	GfxGLRenderContextHandle GfxGLDriver::createRenderContextForCurrentThread()
+	GLRenderContextHandle GLDriver::createRenderContextForCurrentThread()
 	{
-		auto openglContext = sysCreateObject<GfxGLRenderContext>( getHandle<GfxGLDriver>() );
+		auto openglContext = sysCreateObject<GLRenderContext>( getHandle<GLDriver>() );
 
 		_sysCreateRenderContextForCurrentThread( *openglContext );
 
 		return openglContext;
 	}
 
-	void GfxGLDriver::setPrimaryContext( GfxGLRenderContext & pPrimaryContext )
+	void GLDriver::setPrimaryContext( GLRenderContext & pPrimaryContext )
 	{
 		_primaryContext = &pPrimaryContext;
 	}
 
-	void GfxGLDriver::resetPrimaryContext()
+	void GLDriver::resetPrimaryContext()
 	{
 		_primaryContext = nullptr;
 	}
 
-	std::vector<GfxDepthStencilFormat> GfxGLDriver::querySupportedDepthStencilFormats( GfxColorFormat pColorFormat )
+	std::vector<DepthStencilFormat> GLDriver::querySupportedDepthStencilFormats( ColorFormat pColorFormat )
 	{
 		return {};
 	}
 
-	std::vector<GfxMSAAMode> GfxGLDriver::querySupportedMSAAModes( GfxColorFormat pColorFormat, GfxDepthStencilFormat pDepthStencilFormat )
+	std::vector<MSAAMode> GLDriver::querySupportedMSAAModes( ColorFormat pColorFormat, DepthStencilFormat pDepthStencilFormat )
 	{
 		return {};
 	}
 
-	GfxGLRenderContext * GfxGLDriver::getPrimaryContext() const
+	GLRenderContext * GLDriver::getPrimaryContext() const
 	{
 		return _primaryContext;
 	}

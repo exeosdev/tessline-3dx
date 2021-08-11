@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_DISPLAY_H__
 #define __TS3_SYSTEM_DISPLAY_H__
 
-#include "coreSessionContext.h"
+#include "sysContext.h"
 #include "displayCommon.h"
 
 namespace ts3
@@ -10,25 +10,30 @@ namespace ts3
 namespace system
 {
 
-    TS3_SYSTEM_API_NODISCARD DsmDisplayManagerHandle dsmCreateDisplayManager( CoreSessionContextHandle pCSContext );
+    /// @brief
+    class DisplayManager
+    {
+    public:
+        TS3_PCL_ATTR_NO_DISCARD DisplaySize queryDisplaySize();
 
-    TS3_SYSTEM_API void dsmDestroyDisplayManager( DsmDisplayManagerHandle pDisplayManager );
+        TS3_PCL_ATTR_NO_DISCARD DisplaySize queryMinWindowSize();
 
-    TS3_SYSTEM_API_NODISCARD DisplaySize dsmDisplayManagerQueryDisplaySize( DsmDisplayManagerHandle pDisplayManager );
+        TS3_PCL_ATTR_NO_DISCARD bool checkDriverSupport( EDsmDisplayDriverType pDriverID );
 
-    TS3_SYSTEM_API_NODISCARD DisplaySize dsmDisplayManagerQueryMinWindowSize( DsmDisplayManagerHandle pDisplayManager );
+        TS3_PCL_ATTR_NO_DISCARD EDsmDisplayDriverType resolveDisplayDriverID( EDsmDisplayDriverType pDriverID );
 
-    TS3_SYSTEM_API_NODISCARD bool dsmDisplayManagerCheckDriverSupport( EDsmDisplayDriverType pDriverID );
+        TS3_PCL_ATTR_NO_DISCARD bool checkWindowGeometry( const math::Pos2i & pWindowPosition,
+                                                          const math::Size2u & pWindowSize );
 
-    TS3_SYSTEM_API_NODISCARD EDsmDisplayDriverType dsmDisplayManagerResolveDisplayDriverID( EDsmDisplayDriverType pDriverID );
+        TS3_PCL_ATTR_NO_DISCARD bool validateWindowGeometry( math::Pos2i & pWindowPosition,
+                                                             math::Size2u & pWindowSize );
+    };
 
-    TS3_SYSTEM_API_NODISCARD bool dsmDisplayManagerValidateWindowGeometry( DsmDisplayManagerHandle pDisplayManager,
-                                                                           const math::Pos2i & pWindowPosition,
-                                                                           const math::Size2u & pWindowSize );
-
-    TS3_SYSTEM_API bool dsmDisplayManagerValidateWindowGeometry( DsmDisplayManagerHandle pDisplayManager,
-                                                                 math::Pos2i & pWindowPosition,
-                                                                 math::Size2u & pWindowSize );
+    /// @brief
+    class DisplayDriver
+    {
+    public:
+    };
 
 } // namespace system
 } // namespace ts3

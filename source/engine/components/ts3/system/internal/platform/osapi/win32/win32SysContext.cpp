@@ -1,12 +1,12 @@
 
-#include <ts3/system/coreSessionContextNative.h>
+#include <ts3/system/sysContextNative.h>
 
 namespace ts3
 {
 namespace system
 {
 
-    void _nativeCoreSessionContextInitialize( CoreSessionContext & pContext, const CoreSessionContextCreateInfo & pCreateInfo )
+    void _nativeSysContextInitialize( SysContext & pContext, const SysContextCreateInfo & pCreateInfo )
 	{
         auto & cscNativeData = pContext.nativeData;
 
@@ -28,7 +28,7 @@ namespace system
 		cscNativeData.sessionInfo.displayString = XDisplayString( xDisplay );
 	}
 
-	void _nativeCoreSessionContextRelease( CoreSessionContext & pContext )
+	void _nativeSysContextRelease( SysContext & pContext )
 	{
         auto & cscNativeData = pContext.nativeData;
 

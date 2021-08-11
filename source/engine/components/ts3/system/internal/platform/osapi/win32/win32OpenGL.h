@@ -12,23 +12,23 @@ namespace ts3
 	inline constexpr size_t cvWin32MaxWGLPixelFormatsNum = 256u;
 	inline constexpr size_t cvWin32MaxWGLPixelFormatAttributesNum = 64u;
 
-	struct GfxGLSurfaceNativeData : public WindowNativeData
+	struct GLSurfaceNativeData : public WindowNativeData
 	{
 		HDC surfaceHandle;
 		int pixelFormatIndex;
 	};
 
-	struct GfxGLRenderContextNativeData
+	struct GLRenderContextNativeData
 	{
 		HGLRC contextHandle;
 	};
 
-	struct GfxGLDriverNativeData
+	struct GLDriverNativeData
 	{
 		struct InitState
 		{
-			GfxGLSurfaceNativeData surfaceData;
-			GfxGLRenderContextNativeData contextData;
+			GLSurfaceNativeData surfaceData;
+			GLRenderContextNativeData contextData;
 		};
 
 		InitState initState;

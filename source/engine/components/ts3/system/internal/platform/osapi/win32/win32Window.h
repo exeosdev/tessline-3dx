@@ -7,7 +7,7 @@
 namespace ts3
 {
 
-	struct Win32WindowNativeData
+	struct WmWindowNativeData
 	{
 		ATOM wndClassID = 0;
 		LPCSTR wndClassName = nullptr;

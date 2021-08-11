@@ -1,8 +1,9 @@
 
 set( TS3_SYSTEM_SRC_FILES
-        "coreSessionContext.h"
-        "coreSessionContext.cpp"
-        "coreSessionContextNative.h"
+        "sysContext.h"
+        "sysContext.cpp"
+        "sysContextNative.h"
+        "sysContextNative.cpp"
         "display.h"
         "display.cpp"
         "displayCommon.h"
@@ -15,12 +16,12 @@ set( TS3_SYSTEM_SRC_FILES
         "eventCore.cpp"
         "eventObject.h"
         "eventTypes.h"
-        "gfxOpenGL.h"
-        "gfxOpenGL.cpp"
-        "gfxOpenGLCommon.h"
-        "gfxOpenGLNative.h"
-        "gfxVisual.h"
-        "gfxVisual.cpp"
+        "openGL.h"
+        "openGL.cpp"
+        "openGLCommon.h"
+        "openGLNative.h"
+        "visual.h"
+        "visual.cpp"
         "perfCounter.h"
         "perfCounter.cpp"
         "prerequisites.h"
@@ -35,11 +36,10 @@ if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_WINFAMILY} )
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/shared/dxgi/dxgiDisplayDriver.h"
             "internal/platform/shared/dxgi/dxgiDisplayDriver.cpp"
-            "internal/platform/shared/winfamily/winfamilyCommon.h"
-            "internal/platform/shared/winfamily/winfamilyPerfCounter.h"
-            "internal/platform/shared/winfamily/winfamilyPerfCounter.cpp"
-            "internal/platform/shared/winfamily/winfamilySysUtils.h"
-            "internal/platform/shared/winfamily/winfamilySysUtils.cpp"
+            "internal/platform/shared/wnf/wnfCommon.h"
+            "internal/platform/shared/wnf/wnfCommon.cpp"
+            "internal/platform/shared/wnf/wnfPerfCounter.h"
+            "internal/platform/shared/wnf/wnfPerfCounter.cpp"
             )
 endif()
 
@@ -54,8 +54,8 @@ endif()
 if( "${CM_EBS_SYSCONF_TARGET_FLAG_OSF_GLAPI}" STREQUAL "EGL" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
-            "internal/platform/shared/egl/eglGfxOpenGL.h"
-            "internal/platform/shared/egl/eglGfxOpenGL.cpp"
+            "internal/platform/shared/egl/eglOpenGL.h"
+            "internal/platform/shared/egl/eglOpenGL.cpp"
             )
 endif()
 
@@ -76,11 +76,15 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/osapi/win32/win32Common.h"
+            "internal/platform/osapi/win32/win32Common.cpp"
+            "internal/platform/osapi/win32/win32SysContext.h"
+            "internal/platform/osapi/win32/win32SysContext.cpp"
+            "internal/platform/osapi/win32/win32Display.h"
+            "internal/platform/osapi/win32/win32Display.cpp"
             "internal/platform/osapi/win32/win32EventCore.h"
             "internal/platform/osapi/win32/win32EventCore.cpp"
             "internal/platform/osapi/win32/win32OpenGL.h"
             "internal/platform/osapi/win32/win32OpenGL.cpp"
-            "internal/platform/osapi/win32/win32SysUtils.h"
             "internal/platform/osapi/win32/win32Window.h"
             "internal/platform/osapi/win32/win32Window.cpp"
             )
@@ -90,16 +94,16 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/osapi/x11/x11CommonDefs.h"
-            "internal/platform/osapi/x11/x11CoreSessionContext.h"
-            "internal/platform/osapi/x11/x11CoreSessionContext.cpp"
+            "internal/platform/osapi/x11/x11SysContext.h"
+            "internal/platform/osapi/x11/x11SysContext.cpp"
             "internal/platform/osapi/x11/x11Display.h"
             "internal/platform/osapi/x11/x11Display.cpp"
             "internal/platform/osapi/x11/x11DisplayXRR.h"
             "internal/platform/osapi/x11/x11DisplayXRR.cpp"
             "internal/platform/osapi/x11/x11EventCore.h"
             "internal/platform/osapi/x11/x11EventCore.cpp"
-            "internal/platform/osapi/x11/x11GfxOpenGL.h"
-            "internal/platform/osapi/x11/x11GfxOpenGL.cpp"
+            "internal/platform/osapi/x11/x11OpenGL.h"
+            "internal/platform/osapi/x11/x11OpenGL.cpp"
             "internal/platform/osapi/x11/x11Window.h"
             "internal/platform/osapi/x11/x11Window.cpp"
             )

@@ -34,10 +34,10 @@ namespace ts3
         Version eglVersion;
     };
 
-    void eglInitializeGLDriver( GfxGLDriver & pDriver );
-    EGLConfig eglChooseCoreEGLConfig( EGLDisplay pDisplay, const GfxVisualConfig & pVisualConfig );
-    void eglCreateSurface( GfxGLSurface & pSurface, EGLDisplay pEGLDisplay, EGLNativeWindowType pWindow, EGLConfig pEGLConfig );
-    void eglCreateCoreContext( GfxGLRenderContext & pContext, const GfxGLRenderContextCreateInfo & pCreateInfo );
+    void eglInitializeGLDriver( GLDriver & pDriver );
+    EGLConfig eglChooseCoreEGLConfig( EGLDisplay pDisplay, const VisualConfig & pVisualConfig );
+    void eglCreateSurface( GLDisplaySurface & pSurface, EGLDisplay pEGLDisplay, EGLNativeWindowType pWindow, EGLConfig pEGLConfig );
+    void eglCreateCoreContext( GLRenderContext & pContext, const GLRenderContextCreateInfo & pCreateInfo );
 
 }
 
