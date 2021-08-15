@@ -18,14 +18,14 @@ namespace system
 {
 
     /// @brief
-    class SysContextNativeProxy : public SysContext
+    class SysContextNativeProxy
     {
     public:
-        SysContextNativeProxy();
-        virtual ~SysContextNativeProxy();
+        SysContextNativeData mNativeData;
 
-    private:
-        SysContextNativeData _nativeData;
+    public:
+        SysContextNativeProxy( SysContext * pParentObject );
+        virtual ~SysContextNativeProxy();
     };
 
     /// @brief

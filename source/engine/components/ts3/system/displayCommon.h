@@ -25,6 +25,9 @@ namespace ts3
 namespace system
 {
 
+    ts3SysDeclareHandle( DisplayManager );
+    ts3SysDeclareHandle( DisplayDriver );
+
 	using dsm_index_t = uint16;
 	using dsm_output_id_t = uint32;
 	using dsm_video_mode_id_t = uint64;

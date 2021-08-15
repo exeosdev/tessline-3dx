@@ -3,6 +3,7 @@
 #define __TS3_SYSTEM_DISPLAY_H__
 
 #include "sysContext.h"
+#include "sysObject.h"
 #include "displayCommon.h"
 
 namespace ts3
@@ -11,9 +12,12 @@ namespace system
 {
 
     /// @brief
-    class DisplayManager
+    class DisplayManager : public SysObject
     {
     public:
+        DisplayManager( SysContextHandle pSysContext );
+        virtual ~DisplayManager();
+
         TS3_PCL_ATTR_NO_DISCARD DisplaySize queryDisplaySize();
 
         TS3_PCL_ATTR_NO_DISCARD DisplaySize queryMinWindowSize();
@@ -25,14 +29,16 @@ namespace system
         TS3_PCL_ATTR_NO_DISCARD bool checkWindowGeometry( const math::Pos2i & pWindowPosition,
                                                           const math::Size2u & pWindowSize );
 
-        TS3_PCL_ATTR_NO_DISCARD bool validateWindowGeometry( math::Pos2i & pWindowPosition,
-                                                             math::Size2u & pWindowSize );
+        bool validateWindowGeometry( math::Pos2i & pWindowPosition,
+                                     math::Size2u & pWindowSize );
     };
 
     /// @brief
-    class DisplayDriver
+    class DisplayDriver : public SysObject
     {
     public:
+        DisplayDriver( DisplayManagerHandle pDisplayManager );
+        virtual ~DisplayDriver();
     };
 
 } // namespace system

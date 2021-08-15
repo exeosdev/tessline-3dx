@@ -8,33 +8,33 @@ namespace ts3
 namespace system
 {
 
-    void _nativeWmCreateWindow( WmWindow & pWindow, const WmWindowCreateInfo & pCreateInfo );
-    void _nativeWmWindowGetClientAreaSize( WmWindow & pWindow, WmWindowSize & pOutSize );
-    void _nativeWmWindowGetFrameSize( WmWindow & pWindow, WmWindowSize & pOutSize );
+    void _nativeWmCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo );
+    void _nativeWmWindowGetClientAreaSize( Window & pWindow, WindowSize & pOutSize );
+    void _nativeWmWindowGetFrameSize( Window & pWindow, WindowSize & pOutSize );
     
-    WmWindowManagerHandle wmCreateWindowManager( DsmDisplayManagerHandle pDisplayManager )
+    WindowManagerHandle wmCreateWindowManager( DsmDisplayManagerHandle pDisplayManager )
     {
-        auto * windowManager = new WmWindowManager();
+        auto * windowManager = new WindowManager();
         windowManager->displayManager = pDisplayManager;
 
         return windowManager;
     }
 
-    void wmDestroyWindowManager( WmWindowManagerHandle pWindowManager )
+    void wmDestroyWindowManager( WindowManagerHandle pWindowManager )
     {
         pWindowManager->displayManager = nullptr;
         delete pWindowManager;
     }
 
-    WmWindowHandle wmCreateWindow( WmWindowManagerHandle pWindowManager,
-                                   const WmWindowCreateInfo & pCreateInfo )
+    WindowHandle wmCreateWindow( WindowManagerHandle pWindowManager,
+                                   const WindowCreateInfo & pCreateInfo )
    {
-        WmWindowCreateInfo validatedCreateInfo;
+        WindowCreateInfo validatedCreateInfo;
         validatedCreateInfo.properties = pCreateInfo.properties;
 
         wmWindowManagerValidateWindowGeometry( pWindowManager, validatedCreateInfo.properties.geometry );
 
-        auto * window = new WmWindow();
+        auto * window = new Window();
         window->windowManager = pWindowManager;
 
         _nativeWmCreateWindow( *window, validatedCreateInfo );
@@ -42,30 +42,30 @@ namespace system
         return window;
    }
 
-    WmWindowSize wmWindowGetClientAreaSize( WmWindowHandle pWindow )
+    WindowSize wmWindowGetClientAreaSize( WindowHandle pWindow )
     {
-        WmWindowSize result;
+        WindowSize result;
         _nativeWmWindowGetClientAreaSize( *pWindow, result );
         return result;
     }
 
-    WmWindowSize wmWindowGetFrameSize( WmWindowHandle pWindow )
+    WindowSize wmWindowGetFrameSize( WindowHandle pWindow )
     {
-        WmWindowSize result;
+        WindowSize result;
         _nativeWmWindowGetFrameSize( *pWindow, result );
         return result;
     }
 
-    bool wmWindowManagerValidateWindowGeometry( WmWindowManagerHandle pWindowManager,
-                                                const WmWindowGeometry & pWindowGeometry )
+    bool wmWindowManagerValidateWindowGeometry( WindowManagerHandle pWindowManager,
+                                                const WindowGeometry & pWindowGeometry )
     {
         return dsmDisplayManagerValidateWindowGeometry( pWindowManager->displayManager,
                                                         pWindowGeometry.position,
                                                         pWindowGeometry.size );
     }
 
-    bool wmWindowManagerValidateWindowGeometry( WmWindowManagerHandle pWindowManager,
-                                                WmWindowGeometry & pWindowGeometry )
+    bool wmWindowManagerValidateWindowGeometry( WindowManagerHandle pWindowManager,
+                                                WindowGeometry & pWindowGeometry )
     {
         return dsmDisplayManagerValidateWindowGeometry( pWindowManager->displayManager,
                                                         pWindowGeometry.position,

@@ -30,16 +30,14 @@ namespace system
     {
     public:
         SysContextNativeProxy * const mNativeProxy = nullptr;
-        SysContextNativeData * const mNativeData = nullptr;
+        SysContextNativeData * const mNativeDataPtr = nullptr;
 
     public:
-        SysContext( SysContextNativeProxy & pNativeProxy,
-                        SysContextNativeData & pNativeData )
-        : mNativeProxy( &pNativeProxy )
-        , mNativeData( &pNativeData )
-        {}
+        explicit SysContext( std::unique_ptr<SysContextNativeProxy> pNativeProxy );
+        virtual ~SysContext();
 
-        virtual ~SysContext() = default;
+    private:
+        std::unique_ptr<SysContextNativeProxy> _nativeProxy;
     };
 
 } // namespace system

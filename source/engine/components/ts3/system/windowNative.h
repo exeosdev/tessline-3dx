@@ -19,14 +19,14 @@ namespace ts3
 namespace system
 {
 
-    struct WmWindow
+    struct Window
     {
-        WmWindowNativeData nativeData;
+        WindowNativeData nativeData;
 
-        WmWindowManagerHandle windowManager = nullptr;
+        WindowManagerHandle windowManager = nullptr;
     };
 
-    struct WmWindowManager
+    struct WindowManager
     {
         DsmDisplayManagerHandle displayManager = nullptr;
     };

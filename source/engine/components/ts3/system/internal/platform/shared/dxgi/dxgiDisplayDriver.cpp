@@ -22,7 +22,7 @@ namespace ts3
 
 	DisplayDriverHandle DisplayDriverDXGI::create( DisplayManagerHandle pDisplayManager, const DisplayDriverCreateInfoDXGI & pCreateInfo )
 	{
-		auto displayDriver = sysCreateObject<DisplayDriverDXGI>( pDisplayManager );
+		auto displayDriver =  createSysObject<DisplayDriverDXGI>( pDisplayManager );
 		displayDriver->initialize( pCreateInfo );
 		return displayDriver;
 	}

@@ -10,30 +10,30 @@ namespace system
 {
 
 	ts3DeclareHandle( DsmDisplayManager );
-	ts3DeclareHandle( WmWindow );
-	ts3DeclareHandle( WmWindowManager );
+	ts3DeclareHandle( Window );
+	ts3DeclareHandle( WindowManager );
 
-	struct WmWindowCreateInfo
+	struct WindowCreateInfo
 	{
 		WmWindowProperties properties;
 	};
 
-	TS3_SYSTEM_API_NODISCARD WmWindowManagerHandle wmCreateWindowManager( DsmDisplayManagerHandle pDisplayManager );
+	TS3_SYSTEM_API_NODISCARD WindowManagerHandle wmCreateWindowManager( DsmDisplayManagerHandle pDisplayManager );
 
-	TS3_SYSTEM_API void wmDestroyWindowManager( WmWindowManagerHandle pWindowManager );
+	TS3_SYSTEM_API void wmDestroyWindowManager( WindowManagerHandle pWindowManager );
 
-	TS3_SYSTEM_API_NODISCARD WmWindowHandle wmCreateWindow( WmWindowManagerHandle pWindowManager,
-                                                                          const WmWindowCreateInfo & pCreateInfo );
+	TS3_SYSTEM_API_NODISCARD WindowHandle wmCreateWindow( WindowManagerHandle pWindowManager,
+                                                                          const WindowCreateInfo & pCreateInfo );
 
-	TS3_SYSTEM_API_NODISCARD WmWindowSize wmWindowGetClientAreaSize( WmWindowHandle pWindow );
+	TS3_SYSTEM_API_NODISCARD WindowSize wmWindowGetClientAreaSize( WindowHandle pWindow );
 
-	TS3_SYSTEM_API_NODISCARD WmWindowSize wmWindowGetFrameSize( WmWindowHandle pWindow );
+	TS3_SYSTEM_API_NODISCARD WindowSize wmWindowGetFrameSize( WindowHandle pWindow );
 
-	TS3_SYSTEM_API_NODISCARD bool wmWindowManagerValidateWindowGeometry( WmWindowManagerHandle pWindowManager,
-                                                                                       const WmWindowGeometry & pWindowGeometry );
+	TS3_SYSTEM_API_NODISCARD bool wmWindowManagerValidateWindowGeometry( WindowManagerHandle pWindowManager,
+                                                                                       const WindowGeometry & pWindowGeometry );
 
-	TS3_SYSTEM_API bool wmWindowManagerValidateWindowGeometry( WmWindowManagerHandle pWindowManager,
-                                                               WmWindowGeometry & pWindowGeometry );
+	TS3_SYSTEM_API bool wmWindowManagerValidateWindowGeometry( WindowManagerHandle pWindowManager,
+                                                               WindowGeometry & pWindowGeometry );
 
 } // namespace system
 } // namespace ts3

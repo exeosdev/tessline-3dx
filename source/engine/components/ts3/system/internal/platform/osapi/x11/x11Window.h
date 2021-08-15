@@ -9,14 +9,14 @@ namespace ts3
 namespace system
 {
 
-    struct WmWindowNativeData
+    struct WindowNativeData
     {
         Display * display = nullptr;
         Window xWindow = XID_None;
         Colormap xColormap = XID_None;
     };
 
-    struct WmWindowManagerNativeData
+    struct WindowManagerNativeData
     {
         Display * display = nullptr;
         Window xWindow = XID_None;
@@ -34,8 +34,8 @@ namespace system
         bool fullscreenMode = false;
     };
 
-    using X11WmWindowNativeData = WmWindowNativeData;
-    using X11WmWindowManagerNativeData = WmWindowManagerNativeData;
+    using X11WmWindowNativeData = WindowNativeData;
+    using X11WmWindowManagerNativeData = WindowManagerNativeData;
 
     void x11CreateWindow( X11WmWindowNativeData & pWindowNativeData, const X11WmWindowCreateInfo & pCreateInfo );
     void x11UpdateNewWindowState( X11WmWindowNativeData & pWindowNativeData, const X11WmWindowCreateInfo & pCreateInfo );

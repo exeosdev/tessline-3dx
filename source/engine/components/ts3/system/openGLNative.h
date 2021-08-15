@@ -17,27 +17,53 @@ namespace ts3
 namespace system
 {
 
+    /// @brief
     class GLSystemDriverNativeProxy
     {
-        GLSystemDriverNativeData nativeData;
+    public:
+        GLSystemDriverNativeData mNativeData;
+
+    public:
+        GLSystemDriverNativeProxy( GLSystemDriver * pParentObject );
+        virtual ~GLSystemDriverNativeProxy();
+
+        void initializePlatform();
+        void releaseInitState( GLRenderContext & pGLRenderContext );
+        void createDisplaySurface( GLDisplaySurface & pSurfaceObject, const GLSurfaceCreateInfo & pCreateInfo );
+        void createDisplaySurfaceForCurrentThread( GLDisplaySurface & pSurfaceObject );
+        void createRenderContext( GLRenderContext & pRenderContext, GLDisplaySurface & pSurface,
+                                  const GLRenderContextCreateInfo & pCreateInfo );
+        void createRenderContextForCurrentThread( GLRenderContext & pRenderContext, GLDisplaySurface & pSurface );
     };
 
-    class GLSurfaceNativeProxy
+    /// @brief
+    class GLDisplaySurfaceNativeProxy
     {
-        GLSurfaceNativeData nativeData;
+    public:
+        GLDisplaySurfaceNativeData mNativeData;
 
-        GLDriver * driver = nullptr;
+    public:
+        GLDisplaySurfaceNativeProxy();
+        virtual ~GLDisplaySurfaceNativeProxy();
+
+        void swapBuffers();
+        WindowSize queryRenderAreaSize() const;
+        bool querySurfaceBindStatus() const;
     };
 
+    /// @brief
     class GLRenderContextNativeProxy
     {
-        GLRenderContextNativeData nativeData;
+    public:
+        GLRenderContextNativeData mNativeData;
 
-        GLDriver * driver = nullptr;
+    public:
+        GLRenderContextNativeProxy();
+        virtual ~GLRenderContextNativeProxy();
+
+        void bindForCurrentThread();
+        bool validateCurrentBinding() const;
     };
-
-
-    TS3_PCL_ATTR_NO_DISCARD GLDriverHandle sysCreateGLDriver();
 
 } // namespace system
 } // namespace ts3

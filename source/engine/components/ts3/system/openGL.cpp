@@ -1,9 +1,188 @@
 
-#include "openGL.h"
-#include "displayManager.h"
+#include "openGLNative.h"
+#include "display.h"
 
 namespace ts3
 {
+namespace system
+{
+
+    GLSystemDriver::GLSystemDriver( DisplayManagerHandle pDisplayManager )
+    : SysObject( pDisplayManager->mSysContext )
+    , mDisplayManager( std::move( pDisplayManager ) )
+    , _nativeProxy( new GLSystemDriverNativeProxy( this ) )
+    {}
+
+    GLSystemDriver::~GLSystemDriver() = default;
+
+    void GLSystemDriver::initializePlatform()
+    {}
+
+    void GLSystemDriver::releaseInitState( GLRenderContext & pGLRenderContext )
+    {}
+
+    GLDisplaySurfaceHandle GLSystemDriver::createDisplaySurface( const GLSurfaceCreateInfo & pCreateInfo )
+    {
+        GLSurfaceCreateInfo validatedCreateInfo = pCreateInfo;
+
+        if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
+        {
+            validatedCreateInfo.windowGeometry.size = cvWindowSizeMax;
+            validatedCreateInfo.windowGeometry.frameStyle = WindowFrameStyle::Overlay;
+        }
+        else
+        {
+            validatedCreateInfo.windowGeometry.position = pCreateInfo.windowGeometry.position;
+            validatedCreateInfo.windowGeometry.size = pCreateInfo.windowGeometry.size;
+            validatedCreateInfo.windowGeometry.frameStyle = pCreateInfo.windowGeometry.frameStyle;
+        }
+
+        mDisplayManager->validateWindowGeometry( validatedCreateInfo.windowGeometry.position,
+                                                 validatedCreateInfo.windowGeometry.size );
+
+        auto openglSurface = createSysObject<GLDisplaySurface>( getHandle<GLSystemDriver>() );
+
+        _nativeProxy->createDisplaySurface( *openglSurface, validatedCreateInfo );
+
+        return openglSurface;
+    }
+
+    GLDisplaySurfaceHandle GLSystemDriver::createDisplaySurfaceForCurrentThread( GLDisplaySurfaceHandle pTargetSurface )
+    {
+        if( pTargetSurface )
+        {
+            if( pTargetSurface->isValid() )
+            {
+                pTargetSurface = nullptr;
+            }
+            if( !pTargetSurface->checkDriver( *this ) )
+            {
+                pTargetSurface = nullptr;
+            }
+        }
+
+        if( !pTargetSurface )
+        {
+            pTargetSurface = createSysObject<GLDisplaySurface>( getHandle<GLSystemDriver>() );
+        }
+
+        _nativeProxy->createDisplaySurfaceForCurrentThread( *pTargetSurface );
+
+        return pTargetSurface;
+    }
+
+    GLRenderContextHandle GLSystemDriver::createRenderContext( GLDisplaySurface & pSurface,
+                                                               const GLRenderContextCreateInfo & pCreateInfo )
+    {
+        GLRenderContextCreateInfo validatedCreateInfo = pCreateInfo;
+
+        if( ( pCreateInfo.requiredAPIVersion == cvVersionInvalid  ) || ( pCreateInfo.requiredAPIVersion == cvVersionUnknown  ) )
+        {
+            validatedCreateInfo.requiredAPIVersion.major = 1;
+            validatedCreateInfo.requiredAPIVersion.minor = 0;
+        }
+
+        auto openglContext =  createSysObject<GLRenderContext>( getHandle<GLSystemDriver>() );
+
+        _nativeProxy->createRenderContext( *openglContext, pSurface, validatedCreateInfo );
+
+        return openglContext;
+    }
+
+    GLRenderContextHandle GLSystemDriver::createRenderContextForCurrentThread( GLRenderContextHandle pTargetContext )
+    {
+        if( pTargetContext )
+        {
+            if( pTargetContext->isValid() )
+            {
+                pTargetContext = nullptr;
+            }
+            if( !pTargetContext->checkDriver( *this ) )
+            {
+                pTargetContext = nullptr;
+            }
+        }
+
+        if( !pTargetContext )
+        {
+            pTargetContext = createSysObject<GLRenderContext>( getHandle<GLSystemDriver>() );
+        }
+
+        return pTargetContext;
+    }
+
+    std::vector<DepthStencilFormat> GLSystemDriver::querySupportedDepthStencilFormats( ColorFormat pColorFormat ) const
+    {
+        return {};
+    }
+
+    std::vector<MSAAMode> GLSystemDriver::uerySupportedMSAAModes( ColorFormat pColorFormat,
+                                                                  DepthStencilFormat pDepthStencilFormat ) const
+    {
+        return {};
+    }
+
+
+    GLRenderContext::GLDisplaySurface( GLSystemDriverHandle pDriver )
+    {}
+
+    GLRenderContext::~GLDisplaySurface() = default;
+
+    void GLRenderContext::swapBuffers()
+    {}
+
+    WindowSize GLRenderContext::queryRenderAreaSize() const
+    {}
+
+    bool GLRenderContext::querySurfaceBindStatus() const
+    {}
+
+
+
+    GLRenderContext::GLRenderContext( GLSystemDriverHandle pDriver )
+    {}
+
+    GLRenderContext::~GLRenderContext() = default;
+
+    void GLRenderContext::bindForCurrentThread()
+    {}
+
+    bool GLRenderContext::validateCurrentBinding() const
+    {}
+
+    GLSystemVersionInfo GLRenderContext::querySystemVersionInfo() const
+    {
+        GLSystemVersionInfo systemVersionInfo;
+
+        int majorVersion = 0;
+        glGetIntegerv( GL_MAJOR_VERSION, &majorVersion );
+        systemVersionInfo.apiVersion.major = static_cast< uint16 >( majorVersion );
+
+        int minorVersion = 0;
+        glGetIntegerv( GL_MINOR_VERSION, &minorVersion );
+        systemVersionInfo.apiVersion.minor = static_cast< uint16 >( minorVersion );
+
+        if ( const auto * versionStr = glGetString( GL_VERSION ) )
+        {
+            systemVersionInfo.apiVersionStr.assign( reinterpret_cast<const char *>( versionStr ) );
+        }
+        if ( const auto * glslVersionStr = glGetString( GL_SHADING_LANGUAGE_VERSION ) )
+        {
+            systemVersionInfo.glslVersionStr.assign( reinterpret_cast<const char *>( glslVersionStr ) );
+        }
+        if ( const auto * rendererNameStr = glGetString( GL_RENDERER ) )
+        {
+            systemVersionInfo.rendererName.assign( reinterpret_cast<const char *>( rendererNameStr ) );
+        }
+        if ( const auto * vendorNameStr = glGetString( GL_VENDOR ) )
+        {
+            systemVersionInfo.vendorName.assign( reinterpret_cast<const char *>( vendorNameStr ) );
+        }
+
+        return systemVersionInfo;
+    }
+
+
 
 	GLDisplaySurface::GLDisplaySurface( GLDriverHandle pGLDriver ) noexcept
 	: BaseObject( pGLDriver->mContext )
@@ -51,39 +230,11 @@ namespace ts3
 
 	GLSystemVersionInfo GLRenderContext::querytemVersionInfo() const
 	{
-		GLSystemVersionInfo systemVersionInfo;
-
-		int majorVersion = 0;
-		glGetIntegerv( GL_MAJOR_VERSION, &majorVersion );
-		systemVersionInfo.apiVersion.major = static_cast< uint16 >( majorVersion );
-
-		int minorVersion = 0;
-		glGetIntegerv( GL_MINOR_VERSION, &minorVersion );
-		systemVersionInfo.apiVersion.minor = static_cast< uint16 >( minorVersion );
-
-		if ( const auto * versionStr = glGetString( GL_VERSION ) )
-		{
-			systemVersionInfo.apiVersionStr.assign( reinterpret_cast<const char *>( versionStr ) );
-		}
-		if ( const auto * glslVersionStr = glGetString( GL_SHADING_LANGUAGE_VERSION ) )
-		{
-			systemVersionInfo.glslVersionStr.assign( reinterpret_cast<const char *>( glslVersionStr ) );
-		}
-		if ( const auto * rendererNameStr = glGetString( GL_RENDERER ) )
-		{
-			systemVersionInfo.rendererName.assign( reinterpret_cast<const char *>( rendererNameStr ) );
-		}
-		if ( const auto * vendorNameStr = glGetString( GL_VENDOR ) )
-		{
-			systemVersionInfo.vendorName.assign( reinterpret_cast<const char *>( vendorNameStr ) );
-		}
-
-		return systemVersionInfo;
 	}
 
 
 
-	GLDriver::GLDriver( DisplayManagerHandle pDisplayManager ) noexcept
+	/*GLDriver::GLDriver( DisplayManagerHandle pDisplayManager ) noexcept
 	: BaseObject( pDisplayManager->mContext )
 	, mDisplayManager( pDisplayManager )
 	, _primaryContext( nullptr )
@@ -93,7 +244,7 @@ namespace ts3
 
 	GLDriverHandle GLDriver::create( DisplayManagerHandle pDisplayManager )
 	{
-		auto openglSubsystem = sysCreateObject<GLDriver>( pDisplayManager );
+		auto openglSubsystem =  createSysObject<GLDriver>( pDisplayManager );
 		return openglSubsystem;
 	}
 
@@ -118,7 +269,7 @@ namespace ts3
 		if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
 		{
 			validatedCreateInfo.windowGeometry.size = cvWindowSizeMax;
-			validatedCreateInfo.windowGeometry.frameStyle = WmWindowFrameStyle::Overlay;
+			validatedCreateInfo.windowGeometry.frameStyle = WindowFrameStyle::Overlay;
 		}
 		else
 		{
@@ -129,7 +280,7 @@ namespace ts3
 
 		mDisplayManager->validateWindowGeometry( validatedCreateInfo.windowGeometry );
 
-		auto openglSurface = sysCreateObject<GLDisplaySurface>( getHandle<GLDriver>() );
+		auto openglSurface =  createSysObject<GLDisplaySurface>( getHandle<GLDriver>() );
 
 		_sysCreateDisplaySurface( *openglSurface, validatedCreateInfo );
 
@@ -138,7 +289,7 @@ namespace ts3
 
 	GLDisplaySurfaceHandle GLDriver::createDisplaySurfaceForCurrentThread()
 	{
-		auto openglSurface = sysCreateObject<GLDisplaySurface>( getHandle<GLDriver>() );
+		auto openglSurface =  createSysObject<GLDisplaySurface>( getHandle<GLDriver>() );
 
 		_sysCreateDisplaySurfaceForCurrentThread( *openglSurface );
 
@@ -156,7 +307,7 @@ namespace ts3
 			validatedCreateInfo.requiredAPIVersion.minor = 0;
 		}
 
-		auto openglContext = sysCreateObject<GLRenderContext>( getHandle<GLDriver>() );
+		auto openglContext =  createSysObject<GLRenderContext>( getHandle<GLDriver>() );
 
 		_sysCreateRenderContext( *openglContext, pSurface, validatedCreateInfo );
 
@@ -165,7 +316,7 @@ namespace ts3
 
 	GLRenderContextHandle GLDriver::createRenderContextForCurrentThread()
 	{
-		auto openglContext = sysCreateObject<GLRenderContext>( getHandle<GLDriver>() );
+		auto openglContext =  createSysObject<GLRenderContext>( getHandle<GLDriver>() );
 
 		_sysCreateRenderContextForCurrentThread( *openglContext );
 
@@ -195,6 +346,7 @@ namespace ts3
 	GLRenderContext * GLDriver::getPrimaryContext() const
 	{
 		return _primaryContext;
-	}
+	}*/
 
-}
+} // namespace system
+} // namespace ts3

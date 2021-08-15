@@ -49,7 +49,7 @@ namespace ts3
 		::SwapBuffers( mNativeData.surfaceHandle );
 	}
 
-	void GLDisplaySurface::_sysQueryCurrentSize( WmWindowSize & pSize ) const
+	void GLDisplaySurface::_sysQueryCurrentSize( WindowSize & pSize ) const
 	{
 		RECT clientRect;
 		::GetClientRect( mNativeData.hwnd, &clientRect );
@@ -91,8 +91,8 @@ namespace ts3
 
 		WmWindowCreateInfo tempWindowCreateInfo;
 		tempWindowCreateInfo.properties.geometry.position = cvWindowPositionOrigin;
-		tempWindowCreateInfo.properties.geometry.size = WmWindowSize( 600, 600 );
-		tempWindowCreateInfo.properties.geometry.frameStyle = WmWindowFrameStyle::Overlay;
+		tempWindowCreateInfo.properties.geometry.size = WindowSize( 600, 600 );
+		tempWindowCreateInfo.properties.geometry.frameStyle = WindowFrameStyle::Overlay;
 
 		VisualConfig legacyVisualConfig;
 		legacyVisualConfig = gfxGetDefaultVisualConfigForSysWindow();

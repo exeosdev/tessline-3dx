@@ -38,7 +38,7 @@ namespace ts3
 		glXSwapBuffers( mNativeData.display, mNativeData.xwindow );
 	}
 
-	void GLDisplaySurface::_sysQueryCurrentSize( WmWindowSize & pSize ) const
+	void GLDisplaySurface::_sysQueryCurrentSize( WindowSize & pSize ) const
 	{
 		XWindowAttributes windowAttributes;
 		XGetWindowAttributes( mNativeData.display,

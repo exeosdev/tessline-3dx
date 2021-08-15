@@ -16,9 +16,9 @@ namespace ts3
 
 	EventControllerHandle EventController::create( ContextHandle pContext )
 	{
-		auto eventController = sysCreateObject<EventController>( pContext );
+		auto eventController =  createSysObject<EventController>( pContext );
 
-		eventController->_defaultDispatcher = sysCreateObject<EventDispatcher>( eventController );
+		eventController->_defaultDispatcher =  createSysObject<EventDispatcher>( eventController );
 		eventController->_activeDispatcher = eventController->_defaultDispatcher.get();
 
 		eventController->_sysInitialize();
@@ -128,7 +128,7 @@ namespace ts3
 
 	EventDispatcherHandle EventDispatcher::create( EventControllerHandle pEventController )
 	{
-		auto eventDispatcher = sysCreateObject<EventDispatcher>( pEventController );
+		auto eventDispatcher =  createSysObject<EventDispatcher>( pEventController );
 		return eventDispatcher;
 	}
 

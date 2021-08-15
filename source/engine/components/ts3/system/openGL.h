@@ -10,13 +10,15 @@ namespace ts3
 namespace system
 {
 
+    ts3SysDeclareHandle( DisplayManager );
+
     /// @brief Contains parameters used to specify how a GL display surface should be created.
     struct GLSurfaceCreateInfo
     {
         //
         VisualConfig visualConfig;
         //
-        WmWindowGeometry windowGeometry;
+        WindowGeometry windowGeometry;
         //
         Bitmask<EGLSurfaceCreateFlags> flags = 0;
     };
@@ -37,8 +39,11 @@ namespace system
     class GLSystemDriver : public SysObject
     {
     public:
-        GLSystemDriver();
-        virtual ~GLSystemDriver() = default;
+        DisplayManagerHandle const mDisplayManager;
+
+    public:
+        GLSystemDriver( DisplayManagerHandle pDisplayManager );
+        virtual ~GLSystemDriver();
 
         /// @brief Initializes core OpenGL state and system-level interfaces.
         /// This method also creates any additionally required
@@ -52,7 +57,7 @@ namespace system
 
         /// @brief Creates a system OpenGL surface (usually - a window) with a configuration matching specified requirements.
         /// @param pCreateInfo CreateInfo struct with a surface specification (VisualConfig, window geometry, etc.)
-        TS3_PCL_ATTR_NO_DISCARD GLDisplaySurfaceHandle createDisplaySurface( const GLSurfaceCreateInfo & pCreateInfo ) const;
+        TS3_PCL_ATTR_NO_DISCARD GLDisplaySurfaceHandle createDisplaySurface( const GLSurfaceCreateInfo & pCreateInfo );
 
         /// @brief Creates a GLDisplaySurface object, that wraps currently bound surface for the current thread.
         /// @param pTargetSurface Existing surface object to be used. If null, a new GLDisplaySurface will be created.
@@ -63,12 +68,13 @@ namespace system
         /// method will throw an exception with EXC_NOT_SUPPORTED code.
         /// @note The surface specified as pTargetSurface is just a hint and may be discarded. Always use returned handle!
         /// @note If no surface is currently bound, null handle is returned, regardless of the value of pTargetSurface.
-        TS3_PCL_ATTR_NO_DISCARD GLDisplaySurfaceHandle createDisplaySurfaceForCurrentThread( GLDisplaySurfaceHandle pTargetSurface = nullptr ) const;
+        TS3_PCL_ATTR_NO_DISCARD GLDisplaySurfaceHandle createDisplaySurfaceForCurrentThread( GLDisplaySurfaceHandle pTargetSurface = nullptr );
 
         /// @brief Creates a system OpenGL render context with a configuration matching specified requirements.
         /// @param pSurface Surface to be used for context creation. Context can be bound to any surface compatible with this one.
         /// @param pCreateInfo CreateInfo struct with a context specification (OpenGL API version, profile, etc.)
-        TS3_PCL_ATTR_NO_DISCARD GLRenderContextHandle createRenderContext( GLDisplaySurface & pSurface, const GLRenderContextCreateInfo & pCreateInfo ) const;
+        TS3_PCL_ATTR_NO_DISCARD GLRenderContextHandle createRenderContext( GLDisplaySurface & pSurface,
+                                                                           const GLRenderContextCreateInfo & pCreateInfo );
 
         /// @brief Creates a GLRenderContext object, that wraps currently bound context for the current thread.
         /// @param pTargetContext Existing context object to be used. If null, a new GLRenderContext will be created.
@@ -76,7 +82,7 @@ namespace system
         /// bound OpenGL render context. See description of createDisplaySurfaceForCurrentThread() for details.
         /// @note The context specified as pTargetContext is just a hint and may be discarded. Always use returned handle!
         /// @note If no context is currently bound, null handle is returned, regardless of the value of pTargetContext.
-        TS3_PCL_ATTR_NO_DISCARD GLRenderContextHandle createRenderContextForCurrentThread( GLRenderContextHandle pTargetContext = nullptr ) const;
+        TS3_PCL_ATTR_NO_DISCARD GLRenderContextHandle createRenderContextForCurrentThread( GLRenderContextHandle pTargetContext = nullptr );
 
         /// @brief
         TS3_PCL_ATTR_NO_DISCARD std::vector<DepthStencilFormat> querySupportedDepthStencilFormats( ColorFormat pColorFormat ) const;
@@ -84,6 +90,17 @@ namespace system
         /// @brief
         TS3_PCL_ATTR_NO_DISCARD std::vector<MSAAMode> querySupportedMSAAModes( ColorFormat pColorFormat,
                                                                                DepthStencilFormat pDepthStencilFormat ) const;
+
+        /// @brief
+        TS3_PCL_ATTR_NO_DISCARD GLSystemDriverNativeProxy * getNativeProxy() const;
+
+    private:
+        GLSystemDriverNativeData & getNativeData();
+
+        const GLSystemDriverNativeData & getNativeData() const;
+
+    private:
+        std::unique_ptr<GLSystemDriverNativeProxy> _nativeProxy;
     };
 
     class GLDisplaySurface : public SysObject
@@ -93,18 +110,24 @@ namespace system
 
     public:
         GLDisplaySurface( GLSystemDriverHandle pDriver );
-        virtual ~GLDisplaySurface() = default;
+        virtual ~GLDisplaySurface();
 
         /// @brief
         void swapBuffers();
 
         /// @brief
-        TS3_PCL_ATTR_NO_DISCARD WmWindowSize queryRenderAreaSize() const;
+        TS3_PCL_ATTR_NO_DISCARD WindowSize queryRenderAreaSize() const;
 
         /// @brief Returns a boolean value indicating whether this surface is currently bound as the target surface.
         /// This method checks currently bound surface handle (for the current thread) against internal handle of this
         /// surface object. Result indicates whether they match (i,e, if the surface is bound for rendering via GL API).
         TS3_PCL_ATTR_NO_DISCARD bool querySurfaceBindStatus() const;
+
+        /// @brief
+        TS3_PCL_ATTR_NO_DISCARD bool checkDriver( const GLSystemDriver & pDriver ) const;
+
+        /// @brief
+        TS3_PCL_ATTR_NO_DISCARD bool isValid() const;
     };
 
     class GLRenderContext
@@ -114,7 +137,7 @@ namespace system
 
     public:
         GLRenderContext( GLSystemDriverHandle pDriver );
-        virtual ~GLRenderContext() = default;
+        virtual ~GLRenderContext();
 
         /// @brief
         void bindForCurrentThread();
@@ -124,6 +147,12 @@ namespace system
 
         /// @brief
         TS3_PCL_ATTR_NO_DISCARD GLSystemVersionInfo querySystemVersionInfo() const;
+
+        /// @brief
+        TS3_PCL_ATTR_NO_DISCARD bool checkDriver( const GLSystemDriver & pDriver ) const;
+
+        /// @brief
+        TS3_PCL_ATTR_NO_DISCARD bool isValid() const;
     };
 
 } // namespace system

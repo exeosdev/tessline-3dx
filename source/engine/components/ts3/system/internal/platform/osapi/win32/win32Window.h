@@ -6,17 +6,20 @@
 
 namespace ts3
 {
+namespace system
+{
 
-	struct WmWindowNativeData
+	struct WindowNativeData
 	{
 		ATOM wndClassID = 0;
 		LPCSTR wndClassName = nullptr;
 		HMODULE wndProcModuleHandle = nullptr;
 	};
 
-	void win32CreateWindow( WindowNativeData & pWindowNativeData, const WmWindowCreateInfo & pCreateInfo );
+	void win32CreateWindow( WindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo );
 	void win32DestroyWindow( WindowNativeData & pWindowNativeData );
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_WINDOW_H__
