@@ -82,7 +82,7 @@ namespace system
 
 
 	GLDisplaySurfaceNativeImpl::GLDisplaySurfaceNativeImpl( GLSystemDriverHandle pDriver )
-	: GLDisplaySurface( pDriver )
+	: GLDisplaySurface( std::move( pDriver ) )
 	{}
 
 	GLDisplaySurfaceNativeImpl::~GLDisplaySurfaceNativeImpl()
@@ -96,20 +96,14 @@ namespace system
 	void GLDisplaySurfaceNativeImpl::_nativeDestroy()
 	{}
 
-	WindowSize GLDisplaySurfaceNativeImpl::_nativeQueryRenderAreaSize() const
+	void GLDisplaySurfaceNativeImpl::_nativeQueryRenderAreaSize( WindowSize & pOutSize ) const
 	{
 	    RECT clientRect;
 	    ::GetClientRect( mNativeData.hwnd, &clientRect );
 
-	    WindowSize result;
-	    result.x = clientRect.right - clientRect.left;
-	    result.y = clientRect.bottom - clientRect.top;
-
-	    return result;
+	    pOutSize.x = clientRect.right - clientRect.left;
+	    pOutSize.y = clientRect.bottom - clientRect.top;
 	}
-
-	bool GLDisplaySurfaceNativeImpl::_nativeQuerySurfaceBindStatus() const
-	{}
 
 
 	GLRenderContextNativeImpl::GLRenderContextNativeImpl( GLSystemDriverHandle pDriver )

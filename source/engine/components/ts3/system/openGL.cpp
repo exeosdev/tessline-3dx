@@ -114,7 +114,7 @@ namespace system
 
         if( !pTargetContext )
         {
-            pTargetContext = createSysObject<GLRenderContext>( getHandle<GLSystemDriver>() );
+            pTargetContext = createSysObject<GLRenderContextNativeImpl>( getHandle<GLSystemDriver>() );
         }
 
         _nativeCreateRenderContextForCurrentThread( *pTargetContext );
@@ -127,36 +127,61 @@ namespace system
         return {};
     }
 
-    std::vector<MSAAMode> GLSystemDriver::uerySupportedMSAAModes( ColorFormat pColorFormat,
-                                                                  DepthStencilFormat pDepthStencilFormat ) const
+    std::vector<MSAAMode> GLSystemDriver::querySupportedMSAAModes( ColorFormat pColorFormat,
+                                                                   DepthStencilFormat pDepthStencilFormat ) const
     {
         return {};
     }
 
 
+    GLDisplaySurface::GLDisplaySurface( GLSystemDriverHandle pDriver )
+    : SysObject( pDriver->mSysContext )
+    {}
+
+    GLDisplaySurface::~GLDisplaySurface() = default;
+
+    void GLDisplaySurface::swapBuffers()
+    {
+        if( !isValid() )
+        {
+            throw 0;
+        }
+        _nativeSwapBuffers();
+    }
+
+    bool GLDisplaySurface::checkDriver( const GLSystemDriver & pDriver ) const
+    {
+        return mDriver.get() == &pDriver;
+    }
+
+    WindowSize GLDisplaySurface::queryRenderAreaSize() const
+    {
+        if( !isValid() )
+        {
+            throw 0;
+        }
+
+        WindowSize result;
+        _nativeQueryRenderAreaSize( result );
+
+        return result;
+    }
+
+
     GLRenderContext::GLRenderContext( GLSystemDriverHandle pDriver )
-    {}
-
-    GLRenderContext::~GLDisplaySurface() = default;
-
-    void GLRenderContext::swapBuffers()
-    {}
-
-    WindowSize GLRenderContext::queryRenderAreaSize() const
-    {}
-
-    bool GLRenderContext::querySurfaceBindStatus() const
-    {}
-
-
-
-    GLRenderContext::GLRenderContext( GLSystemDriverHandle pDriver )
+    : SysObject( pDriver->mSysContext )
     {}
 
     GLRenderContext::~GLRenderContext() = default;
 
     void GLRenderContext::bindForCurrentThread( const GLDisplaySurface & pSurface )
-    {}
+    {
+        if( !isValid() )
+        {
+            throw 0;
+        }
+        _nativeBindForCurrentThread( pSurface );
+    }
 
     GLSystemVersionInfo GLRenderContext::querySystemVersionInfo() const
     {
@@ -192,179 +217,22 @@ namespace system
 
     bool GLRenderContext::checkDriver( const GLSystemDriver & pDriver ) const
     {
+        return mDriver.get() == &pDriver;
     }
 
     bool GLRenderContext::isCurrent() const
-    {}
+    {
+        if( !isValid() )
+        {
+            return false;
+        }
+        return _nativeIsCurrent();
+    }
 
     bool GLRenderContext::isValid() const
-    {}
-
-
-
-	GLDisplaySurface::GLDisplaySurface( GLDriverHandle pGLDriver ) noexcept
-	: BaseObject( pGLDriver->mContext )
-	, EventSource( mNativeData )
-	, mGLDriver( pGLDriver )
-	{}
-
-	GLDisplaySurface::~GLDisplaySurface() noexcept
-	{
-		_sysDestroy();
-	}
-
-	void GLDisplaySurface::swapBuffers()
-	{
-		_sysSwapBuffers();
-	}
-
-	WmWindowSize GLDisplaySurface::queryCurrentSize() const
-	{
-		WmWindowSize windowSize;
-		_sysQueryCurrentSize( windowSize );
-		return windowSize;
-	}
-
-
-	GLRenderContext::GLRenderContext( GLDriverHandle pGLDriver ) noexcept
-	: BaseObject( pGLDriver->mContext )
-	, mGLDriver( pGLDriver )
-	{}
-
-	GLRenderContext::~GLRenderContext() noexcept
-	{
-		_sysDestroy();
-	}
-
-	void GLRenderContext::bindForCurrentThread( GLDisplaySurface & pTargetSurface )
-	{
-		_sysBindForCurrentThread( pTargetSurface );
-	}
-
-	bool GLRenderContext::validateCurrentBinding() const
-	{
-		return _sysValidateCurrentBinding();
-	}
-
-	GLSystemVersionInfo GLRenderContext::querytemVersionInfo() const
-	{
-	}
-
-
-
-	/*GLDriver::GLDriver( DisplayManagerHandle pDisplayManager ) noexcept
-	: BaseObject( pDisplayManager->mContext )
-	, mDisplayManager( pDisplayManager )
-	, _primaryContext( nullptr )
-	{}
-
-	GLDriver::~GLDriver() noexcept = default;
-
-	GLDriverHandle GLDriver::create( DisplayManagerHandle pDisplayManager )
-	{
-		auto openglSubsystem =  createSysObject<GLDriver>( pDisplayManager );
-		return openglSubsystem;
-	}
-
-	void GLDriver::initializePlatform()
-	{
-		_sysInitializePlatform();
-	}
-
-	void GLDriver::releaseInitState( GLRenderContext & pGLRenderContext )
-	{
-		if( pGLRenderContext.mGLDriver.get() != this )
-		{
-			throw 0;
-		}
-		_sysReleaseInitState();
-	}
-
-	GLDisplaySurfaceHandle GLDriver::createDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo )
-	{
-		GLSurfaceCreateInfo validatedCreateInfo = pCreateInfo;
-
-		if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
-		{
-			validatedCreateInfo.windowGeometry.size = cvWindowSizeMax;
-			validatedCreateInfo.windowGeometry.frameStyle = WindowFrameStyle::Overlay;
-		}
-		else
-		{
-			validatedCreateInfo.windowGeometry.position = pCreateInfo.windowGeometry.position;
-			validatedCreateInfo.windowGeometry.size = pCreateInfo.windowGeometry.size;
-			validatedCreateInfo.windowGeometry.frameStyle = pCreateInfo.windowGeometry.frameStyle;
-		}
-
-		mDisplayManager->validateWindowGeometry( validatedCreateInfo.windowGeometry );
-
-		auto openglSurface =  createSysObject<GLDisplaySurface>( getHandle<GLDriver>() );
-
-		_sysCreateDisplaySurface( *openglSurface, validatedCreateInfo );
-
-		return openglSurface;
-	}
-
-	GLDisplaySurfaceHandle GLDriver::createDisplaySurfaceForCurrentThread()
-	{
-		auto openglSurface =  createSysObject<GLDisplaySurface>( getHandle<GLDriver>() );
-
-		_sysCreateDisplaySurfaceForCurrentThread( *openglSurface );
-
-		return openglSurface;
-	}
-
-	GLRenderContextHandle GLDriver::createRenderContext( GLDisplaySurface & pSurface, const GLRenderContextCreateInfo & pCreateInfo )
-	{
-		GLRenderContextCreateInfo validatedCreateInfo = pCreateInfo;
-
-		auto & targetAPIVersion = pCreateInfo.requiredAPIVersion;
-		if( ( targetAPIVersion == cvVersionInvalid  ) || ( targetAPIVersion == cvVersionUnknown  ) )
-		{
-			validatedCreateInfo.requiredAPIVersion.major = 1;
-			validatedCreateInfo.requiredAPIVersion.minor = 0;
-		}
-
-		auto openglContext =  createSysObject<GLRenderContext>( getHandle<GLDriver>() );
-
-		_sysCreateRenderContext( *openglContext, pSurface, validatedCreateInfo );
-
-		return openglContext;
-	}
-
-	GLRenderContextHandle GLDriver::createRenderContextForCurrentThread()
-	{
-		auto openglContext =  createSysObject<GLRenderContext>( getHandle<GLDriver>() );
-
-		_sysCreateRenderContextForCurrentThread( *openglContext );
-
-		return openglContext;
-	}
-
-	void GLDriver::setPrimaryContext( GLRenderContext & pPrimaryContext )
-	{
-		_primaryContext = &pPrimaryContext;
-	}
-
-	void GLDriver::resetPrimaryContext()
-	{
-		_primaryContext = nullptr;
-	}
-
-	std::vector<DepthStencilFormat> GLDriver::querySupportedDepthStencilFormats( ColorFormat pColorFormat )
-	{
-		return {};
-	}
-
-	std::vector<MSAAMode> GLDriver::querySupportedMSAAModes( ColorFormat pColorFormat, DepthStencilFormat pDepthStencilFormat )
-	{
-		return {};
-	}
-
-	GLRenderContext * GLDriver::getPrimaryContext() const
-	{
-		return _primaryContext;
-	}*/
+    {
+        return _nativeIsValid();
+    }
 
 } // namespace system
 } // namespace ts3

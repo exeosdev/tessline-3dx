@@ -132,11 +132,6 @@ namespace system
         /// @brief
         TS3_PCL_ATTR_NO_DISCARD WindowSize queryRenderAreaSize() const;
 
-        /// @brief Returns a boolean value indicating whether this surface is currently bound as the target surface.
-        /// This method checks currently bound surface handle (for the current thread) against internal handle of this
-        /// surface object. Result indicates whether they match (i,e, if the surface is bound for rendering via GL API).
-        TS3_PCL_ATTR_NO_DISCARD bool querySurfaceBindStatus() const;
-
         /// @brief
         TS3_PCL_ATTR_NO_DISCARD bool checkDriver( const GLSystemDriver & pDriver ) const;
 
@@ -146,8 +141,7 @@ namespace system
     private:
         virtual void _nativeSwapBuffers() = 0;
         virtual void _nativeDestroy() = 0;
-        virtual WindowSize _nativeQueryRenderAreaSize() const = 0;
-        virtual bool _nativeQuerySurfaceBindStatus() const = 0;
+        virtual void _nativeQueryRenderAreaSize( WindowSize & pOutSize ) const = 0;
     };
 
     class GLRenderContext : public SysObject
