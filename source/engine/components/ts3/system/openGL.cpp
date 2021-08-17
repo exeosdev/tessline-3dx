@@ -40,7 +40,7 @@ namespace system
         mDisplayManager->validateWindowGeometry( validatedCreateInfo.windowGeometry.position,
                                                  validatedCreateInfo.windowGeometry.size );
 
-        auto openglSurface = createSysObject<GLDisplaySurface>( getHandle<GLSystemDriver>() );
+        auto openglSurface = createSysObject<GLDisplaySurfaceNativeImpl>( getHandle<GLSystemDriver>() );
 
         _nativeCreateDisplaySurface( *openglSurface, validatedCreateInfo );
 
@@ -63,7 +63,7 @@ namespace system
 
         if( !pTargetSurface )
         {
-            pTargetSurface = createSysObject<GLDisplaySurface>( getHandle<GLSystemDriver>() );
+            pTargetSurface = createSysObject<GLDisplaySurfaceNativeImpl>( getHandle<GLSystemDriver>() );
         }
 
         _nativeCreateDisplaySurfaceForCurrentThread( *pTargetSurface );
@@ -82,7 +82,7 @@ namespace system
             validatedCreateInfo.requiredAPIVersion.minor = 0;
         }
 
-        auto openglContext =  createSysObject<GLRenderContext>( getHandle<GLSystemDriver>() );
+        auto openglContext =  createSysObject<GLRenderContextNativeImpl>( getHandle<GLSystemDriver>() );
 
         _nativeCreateRenderContext( *openglContext, validatedCreateInfo );
 
