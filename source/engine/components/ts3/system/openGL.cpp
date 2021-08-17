@@ -10,7 +10,6 @@ namespace system
     GLSystemDriver::GLSystemDriver( DisplayManagerHandle pDisplayManager )
     : SysObject( pDisplayManager->mSysContext )
     , mDisplayManager( std::move( pDisplayManager ) )
-    , _nativeProxy( new GLSystemDriverNativeProxy( this ) )
     {}
 
     GLSystemDriver::~GLSystemDriver() = default;
@@ -21,9 +20,10 @@ namespace system
     void GLSystemDriver::releaseInitState( GLRenderContext & pGLRenderContext )
     {}
 
-    GLDisplaySurfaceHandle GLSystemDriver::createDisplaySurface( const GLSurfaceCreateInfo & pCreateInfo )
+
+    GLDisplaySurfaceHandle GLSystemDriver::createDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo )
     {
-        GLSurfaceCreateInfo validatedCreateInfo = pCreateInfo;
+        GLDisplaySurfaceCreateInfo validatedCreateInfo = pCreateInfo;
 
         if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
         {
@@ -42,7 +42,7 @@ namespace system
 
         auto openglSurface = createSysObject<GLDisplaySurface>( getHandle<GLSystemDriver>() );
 
-        _nativeProxy->createDisplaySurface( *openglSurface, validatedCreateInfo );
+        _nativeCreateDisplaySurface( *openglSurface, validatedCreateInfo );
 
         return openglSurface;
     }
@@ -66,7 +66,7 @@ namespace system
             pTargetSurface = createSysObject<GLDisplaySurface>( getHandle<GLSystemDriver>() );
         }
 
-        _nativeProxy->createDisplaySurfaceForCurrentThread( *pTargetSurface );
+        _nativeCreateDisplaySurfaceForCurrentThread( *pTargetSurface );
 
         return pTargetSurface;
     }
@@ -84,22 +84,31 @@ namespace system
 
         auto openglContext =  createSysObject<GLRenderContext>( getHandle<GLSystemDriver>() );
 
-        _nativeProxy->createRenderContext( *openglContext, pSurface, validatedCreateInfo );
+        _nativeCreateRenderContext( *openglContext, validatedCreateInfo );
 
         return openglContext;
     }
 
     GLRenderContextHandle GLSystemDriver::createRenderContextForCurrentThread( GLRenderContextHandle pTargetContext )
     {
+        // If the caller specifies target context, it means it should be used
+        // as a container for the context data instead of creating a new one.
+        // We perform a simple validation first to see if its state is correct.
         if( pTargetContext )
         {
-            if( pTargetContext->isValid() )
-            {
-                pTargetContext = nullptr;
-            }
+            // Check if the parent GL Driver is this driver. This must be true for all existing objects used
+            // with a given driver. If that doesn't match, something is seriously broken. If that happens,
+            // we simply discard the specified context which will cause creation of a new one.
             if( !pTargetContext->checkDriver( *this ) )
             {
                 pTargetContext = nullptr;
+            }
+            // If the context is a valid context, we destroy the internal data so everything is properly
+            // released at the system level too. We cannot destroy the whole GLContext, as that's the idea
+            // behind this function - recreate a context without invalidating logical object's references.
+            else if( pTargetContext->isValid() )
+            {
+                pTargetContext->destroy();
             }
         }
 
@@ -107,6 +116,8 @@ namespace system
         {
             pTargetContext = createSysObject<GLRenderContext>( getHandle<GLSystemDriver>() );
         }
+
+        _nativeCreateRenderContextForCurrentThread( *pTargetContext );
 
         return pTargetContext;
     }
@@ -123,7 +134,7 @@ namespace system
     }
 
 
-    GLRenderContext::GLDisplaySurface( GLSystemDriverHandle pDriver )
+    GLRenderContext::GLRenderContext( GLSystemDriverHandle pDriver )
     {}
 
     GLRenderContext::~GLDisplaySurface() = default;
@@ -144,10 +155,7 @@ namespace system
 
     GLRenderContext::~GLRenderContext() = default;
 
-    void GLRenderContext::bindForCurrentThread()
-    {}
-
-    bool GLRenderContext::validateCurrentBinding() const
+    void GLRenderContext::bindForCurrentThread( const GLDisplaySurface & pSurface )
     {}
 
     GLSystemVersionInfo GLRenderContext::querySystemVersionInfo() const
@@ -181,6 +189,16 @@ namespace system
 
         return systemVersionInfo;
     }
+
+    bool GLRenderContext::checkDriver( const GLSystemDriver & pDriver ) const
+    {
+    }
+
+    bool GLRenderContext::isCurrent() const
+    {}
+
+    bool GLRenderContext::isValid() const
+    {}
 
 
 
@@ -262,7 +280,7 @@ namespace system
 		_sysReleaseInitState();
 	}
 
-	GLDisplaySurfaceHandle GLDriver::createDisplaySurface( const GLSurfaceCreateInfo & pCreateInfo )
+	GLDisplaySurfaceHandle GLDriver::createDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo )
 	{
 		GLSurfaceCreateInfo validatedCreateInfo = pCreateInfo;
 

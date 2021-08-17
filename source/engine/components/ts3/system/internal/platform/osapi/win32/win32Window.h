@@ -11,9 +11,10 @@ namespace system
 
 	struct WindowNativeData
 	{
-		ATOM wndClassID = 0;
-		LPCSTR wndClassName = nullptr;
-		HMODULE wndProcModuleHandle = nullptr;
+	    HWND hwnd;
+		ATOM wndClsID = 0;
+		LPCSTR wndClsName = nullptr;
+		HMODULE moduleHandle = nullptr;
 	};
 
 	void win32CreateWindow( WindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo );

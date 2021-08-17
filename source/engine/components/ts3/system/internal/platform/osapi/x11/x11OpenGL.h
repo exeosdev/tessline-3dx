@@ -11,7 +11,7 @@ namespace ts3
 namespace system
 {
 
-	struct GLSurfaceNativeData : public WindowNativeData
+	struct GLDisplaySurfaceNativeData : public WindowNativeData
 	{
 		GLXFBConfig fbConfig = nullptr;
 		XVisualInfo * visualInfo = nullptr;
@@ -36,7 +36,7 @@ namespace system
 	};
 
     using X11GLDriverNativeData = GLDriverNativeData;
-    using X11GLSurfaceNativeData = GLSurfaceNativeData;
+    using X11GLSurfaceNativeData = GLDisplaySurfaceNativeData;
     using X11GLRenderContextNativeData = GLRenderContextNativeData;
 
 } // namespace system

@@ -5,12 +5,12 @@
 namespace ts3
 {
 	// Creates X11 OpenGL surface using provided window create attributes and visual config.
-	void _x11CreateGLWindowAndSurface( GLSurfaceNativeData & pGLSurfaceNativeData,
+	void _x11CreateGLWindowAndSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData,
 	                                   X11WindowCreateInfo & pWindowCreateInfo,
 	                                   const VisualConfig & pVisualConfig );
 
 	// Destroys existing surface and corresponding window.
-	void _x11DestroyGLWindowAndSurface( GLSurfaceNativeData & pGLSurfaceNativeData );
+	void _x11DestroyGLWindowAndSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData );
 
 	// Selects matching FBConfig for a GL surface. Format is selected using current system's configuration. Uses legacy API.
 	GLXFBConfig _x11ChooseLegacyGLFBConfig( Display * pDisplay, int pScreenIndex );
@@ -157,7 +157,7 @@ namespace ts3
 		}
 	}
 
-	void GLDriver::_sysCreateDisplaySurface( GLDisplaySurface & pGLSurface, const GLSurfaceCreateInfo & pCreateInfo )
+	void GLDriver::_sysCreateDisplaySurface( GLDisplaySurface & pGLSurface, const GLDisplaySurfaceCreateInfo & pCreateInfo )
 	{
 		auto & scNativeData = mContext->mNativeData;
 
@@ -271,7 +271,7 @@ namespace ts3
 	}
 
 	
-	void _x11CreateGLWindowAndSurface( GLSurfaceNativeData & pGLSurfaceNativeData,
+	void _x11CreateGLWindowAndSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData,
 	                                   X11WindowCreateInfo & pWindowCreateInfo,
 	                                   const VisualConfig & pVisualConfig )
 	{
@@ -306,7 +306,7 @@ namespace ts3
 		sysX11CreateWindow( pGLSurfaceNativeData, pWindowCreateInfo );
 	}
 
-	void _x11DestroyGLWindowAndSurface( GLSurfaceNativeData & pGLSurfaceNativeData )
+	void _x11DestroyGLWindowAndSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData )
 	{
 		XUnmapWindow( pGLSurfaceNativeData.display, pGLSurfaceNativeData.xwindow );
 		sysX11DestroyWindow( pGLSurfaceNativeData );

@@ -11,7 +11,7 @@
 namespace ts3
 {
 
-	struct GLSurfaceNativeData : public EGLSurfaceNativeData, public EventSourceNativeData
+	struct GLDisplaySurfaceNativeData : public EGLSurfaceNativeData, public EventSourceNativeData
 	{
 	};
 

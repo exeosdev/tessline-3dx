@@ -16,7 +16,7 @@ namespace ts3
     void GLImplProxy::nativeReleaseGLDriverInitState( GLDriver & pDriver )
     {}
 
-    void GLImplProxy::nativeCreateGLSurface( GLDisplaySurface & pSurface, const GLSurfaceCreateInfo & pCreateInfo )
+    void GLImplProxy::nativeCreateGLSurface( GLDisplaySurface & pSurface, const GLDisplaySurfaceCreateInfo & pCreateInfo )
     {
         auto * driverNativeData = pSurface.driver->nativeData;
 

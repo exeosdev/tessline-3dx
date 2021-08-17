@@ -31,7 +31,7 @@ namespace ts3
 	}
 
 	template <typename TpTarget, typename TpSrc>
-	inline std::shared_ptr<TpTarget> dynamic_pointer_cast_check( std::shared_ptr<TpSrc> pSource )
+	inline std::shared_ptr<TpTarget> dynamic_shared_ptr_cast_check( std::shared_ptr<TpSrc> pSource )
 	{
 		if( auto targetPtr = std::dynamic_pointer_cast<TpTarget>( std::move( pSource ) ) )
 		{
@@ -42,7 +42,7 @@ namespace ts3
 	}
 
 	template <typename TpTarget, typename TpSrc>
-	inline std::shared_ptr<TpTarget> dynamic_pointer_cast_throw( std::shared_ptr<TpSrc> pSource )
+	inline std::shared_ptr<TpTarget> dynamic_shared_ptr_cast_throw( std::shared_ptr<TpSrc> pSource )
 	{
 		if( auto targetPtr = std::dynamic_pointer_cast<TpTarget>( std::move( pSource ) ) )
 		{

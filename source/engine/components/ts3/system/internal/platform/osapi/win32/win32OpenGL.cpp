@@ -1,16 +1,18 @@
 
-#include <ts3/system/openGL.h>
-#include <ts3/system/windowtem.h>
+#include <ts3/system/openGLNative.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
 namespace ts3
 {
+namespace system
+{
+
 
 	// Creates Win32 OpenGL surface using provided visual config.
-	void _win32CreateGLSurface( GLSurfaceNativeData & pGLSurfaceNativeData, const VisualConfig & pVisualConfig );
+	void _win32CreateGLSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData, const VisualConfig & pVisualConfig );
 
 	// Destroys existing surface.
-	void _win32DestroyGLSurface( GLSurfaceNativeData & pGLSurfaceNativeData );
+	void _win32DestroyGLSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData );
 
 	// Selects matching pixel format for surface described with a PFD. Uses legacy API.
 	int _win32ChooseLegacyGLPixelFormat( HDC pGLSurfaceDC, PIXELFORMATDESCRIPTOR & pPfmtDescriptor );
@@ -36,6 +38,112 @@ namespace ts3
 	{
 		BOOL result = wglGetPixelFormatAttribivARB( pGLSurfaceDC, pPixelFormatIndex, 0, tSize, pAttributes, &( pOutput[0] ) );
 		return result != FALSE;
+	}
+
+
+	GLSystemDriverNativeImpl::GLSystemDriverNativeImpl(  DisplayManagerHandle pDisplayManager  )
+	: GLSystemDriver( pDisplayManager )
+	{}
+
+	GLSystemDriverNativeImpl::~GLSystemDriverNativeImpl()
+	{}
+
+	void GLSystemDriverNativeImpl::_nativeInitializePlatform()
+	{}
+
+	void GLSystemDriverNativeImpl::_nativeReleaseInitState( GLRenderContext & pRenderContext )
+	{}
+
+	void GLSystemDriverNativeImpl::_nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo )
+	{}
+
+	void GLSystemDriverNativeImpl::_nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface )
+	{}
+
+	void GLSystemDriverNativeImpl::_nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLRenderContextCreateInfo & pCreateInfo )
+	{}
+
+	void GLSystemDriverNativeImpl::_nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext )
+	{}
+
+	bool GLSystemDriverNativeImpl::_nativeIsRenderContextBound() const
+	{
+	    auto currentContext = ::wglGetCurrentContext();
+	    return currentContext != nullptr;
+	}
+
+	bool GLSystemDriverNativeImpl::_nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const
+	{
+	    auto * renderContextNative = pRenderContext.getInterface<GLRenderContextNativeImpl>();
+
+	    auto currentContext = ::wglGetCurrentContext();
+	    return currentContext == renderContextNative->mNativeData.contextHandle;
+	}
+
+
+	GLDisplaySurfaceNativeImpl::GLDisplaySurfaceNativeImpl( GLSystemDriverHandle pDriver )
+	: GLDisplaySurface( pDriver )
+	{}
+
+	GLDisplaySurfaceNativeImpl::~GLDisplaySurfaceNativeImpl()
+	{}
+
+	void GLDisplaySurfaceNativeImpl::_nativeSwapBuffers()
+	{
+	    ::SwapBuffers( mNativeData.surfaceHandle );
+	}
+
+	void GLDisplaySurfaceNativeImpl::_nativeDestroy()
+	{}
+
+	WindowSize GLDisplaySurfaceNativeImpl::_nativeQueryRenderAreaSize() const
+	{
+	    RECT clientRect;
+	    ::GetClientRect( mNativeData.hwnd, &clientRect );
+
+	    WindowSize result;
+	    result.x = clientRect.right - clientRect.left;
+	    result.y = clientRect.bottom - clientRect.top;
+
+	    return result;
+	}
+
+	bool GLDisplaySurfaceNativeImpl::_nativeQuerySurfaceBindStatus() const
+	{}
+
+
+	GLRenderContextNativeImpl::GLRenderContextNativeImpl( GLSystemDriverHandle pDriver )
+	: GLRenderContext( pDriver )
+	{}
+
+	GLRenderContextNativeImpl::~GLRenderContextNativeImpl()
+	{}
+
+	void GLRenderContextNativeImpl::_nativeBindForCurrentThread( const GLDisplaySurface & pSurface )
+	{
+	    auto * displaySurfaceNative = pSurface.getInterface<GLDisplaySurfaceNativeImpl>();
+	    ::wglMakeCurrent( displaySurfaceNative->mNativeData.surfaceHandle, mNativeData.contextHandle );
+	}
+
+	void GLRenderContextNativeImpl::_nativeDestroy()
+	{
+	    if( mNativeData.contextHandle != nullptr )
+	    {
+	        if( _nativeIsCurrent() )
+	        {
+	            ::wglMakeCurrent( nullptr, nullptr );
+	        }
+
+	        ::wglDeleteContext( mNativeData.contextHandle );
+
+	        mNativeData.contextHandle = nullptr;
+	    }
+	}
+
+	bool GLRenderContextNativeImpl::_nativeValidateCurrentBinding() const
+	{
+	    auto currentContext = ::wglGetCurrentContext();
+	    return mNativeData.contextHandle == currentContext;
 	}
 
 
@@ -98,7 +206,7 @@ namespace ts3
 		legacyVisualConfig = gfxGetDefaultVisualConfigForSysWindow();
 		legacyVisualConfig.flags.set( SYS_VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
-		// Create a surface window. In case of Win32, GLSurfaceNativeData inherits from WindowNativeData
+		// Create a surface window. In case of Win32, GLDisplaySurfaceNativeData inherits from WindowNativeData
 		// for this very reason: to allow treating surfaces as windows (as that's exactly the case on desktop).
 		win32CreateWindow( openglInitState.surfaceData, tempWindowCreateInfo );
 
@@ -158,7 +266,7 @@ namespace ts3
 		}
 	}
 
-	void GLDriver::_sysCreateDisplaySurface( GLDisplaySurface & pGLSurface, const GLSurfaceCreateInfo & pCreateInfo )
+	void GLDriver::_sysCreateDisplaySurface( GLDisplaySurface & pGLSurface, const GLDisplaySurfaceCreateInfo & pCreateInfo )
 	{
 		WmWindowCreateInfo surfaceWindowCreateInfo;
 		surfaceWindowCreateInfo.properties.geometry = pCreateInfo.windowGeometry;
@@ -278,7 +386,7 @@ namespace ts3
 	}
 
 
-	void _win32CreateGLSurface( GLSurfaceNativeData & pGLSurfaceNativeData, const VisualConfig & pVisualConfig )
+	void _win32CreateGLSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData, const VisualConfig & pVisualConfig )
 	{
 		auto surfaceHandle = ::GetWindowDC( pGLSurfaceNativeData.hwnd );
 		pGLSurfaceNativeData.surfaceHandle = surfaceHandle;
@@ -304,7 +412,7 @@ namespace ts3
 		}
 	}
 
-	void _win32DestroyGLSurface( GLSurfaceNativeData & pGLSurfaceNativeData )
+	void _win32DestroyGLSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData )
 	{
 		if ( pGLSurfaceNativeData.surfaceHandle != nullptr )
 		{
@@ -544,5 +652,6 @@ namespace ts3
 		pAttribArray[attribIndex] = 0;
 	}
 
-}
+} // namespace system
+} // namespace ts3
 #endif

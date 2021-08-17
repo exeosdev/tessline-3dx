@@ -18,51 +18,55 @@ namespace system
 {
 
     /// @brief
-    class GLSystemDriverNativeProxy
+    class GLSystemDriverNativeImpl : public GLSystemDriver
     {
     public:
         GLSystemDriverNativeData mNativeData;
 
     public:
-        GLSystemDriverNativeProxy( GLSystemDriver * pParentObject );
-        virtual ~GLSystemDriverNativeProxy();
+        GLSystemDriverNativeImpl( DisplayManagerHandle pDisplayManager );
+        virtual ~GLSystemDriverNativeImpl();
 
-        void initializePlatform();
-        void releaseInitState( GLRenderContext & pGLRenderContext );
-        void createDisplaySurface( GLDisplaySurface & pSurfaceObject, const GLSurfaceCreateInfo & pCreateInfo );
-        void createDisplaySurfaceForCurrentThread( GLDisplaySurface & pSurfaceObject );
-        void createRenderContext( GLRenderContext & pRenderContext, GLDisplaySurface & pSurface,
-                                  const GLRenderContextCreateInfo & pCreateInfo );
-        void createRenderContextForCurrentThread( GLRenderContext & pRenderContext, GLDisplaySurface & pSurface );
+        virtual void _nativeInitializePlatform() override;
+        virtual void _nativeReleaseInitState( GLRenderContext & pRenderContext ) override;
+        virtual void _nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo ) override;
+        virtual void _nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface ) override;
+        virtual void _nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLRenderContextCreateInfo & pCreateInfo ) override;
+        virtual void _nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext ) override;
+        virtual bool _nativeIsRenderContextBound() const override;
+        virtual bool _nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const override;
     };
 
     /// @brief
-    class GLDisplaySurfaceNativeProxy
+    class GLDisplaySurfaceNativeImpl : public GLDisplaySurface
     {
     public:
         GLDisplaySurfaceNativeData mNativeData;
 
     public:
-        GLDisplaySurfaceNativeProxy();
-        virtual ~GLDisplaySurfaceNativeProxy();
+        GLDisplaySurfaceNativeImpl( GLSystemDriverHandle pDriver );
+        virtual ~GLDisplaySurfaceNativeImpl();
 
-        void swapBuffers();
-        WindowSize queryRenderAreaSize() const;
-        bool querySurfaceBindStatus() const;
+        virtual void _nativeSwapBuffers() override;
+        virtual void _nativeDestroy() override;
+        virtual WindowSize _nativeQueryRenderAreaSize() const override;
+        virtual bool _nativeQuerySurfaceBindStatus() const override;
     };
 
     /// @brief
-    class GLRenderContextNativeProxy
+    class GLRenderContextNativeImpl : public GLRenderContext
     {
     public:
         GLRenderContextNativeData mNativeData;
 
     public:
-        GLRenderContextNativeProxy();
-        virtual ~GLRenderContextNativeProxy();
+        GLRenderContextNativeImpl( GLSystemDriverHandle pDriver );
+        virtual ~GLRenderContextNativeImpl();
 
-        void bindForCurrentThread();
-        bool validateCurrentBinding() const;
+        virtual void _nativeBindForCurrentThread( const GLDisplaySurface & pSurface ) override;
+        virtual void _nativeDestroy() override;
+        virtual bool _nativeIsCurrent() const override;
+        virtual bool _nativeIsValid() const override;
     };
 
 } // namespace system
