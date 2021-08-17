@@ -95,7 +95,7 @@ namespace ts3
 
 		VisualConfig legacyVisualConfig;
 		legacyVisualConfig = gfxGetDefaultVisualConfigForSysWindow();
-		legacyVisualConfig.flags.set( SYS_VISUAL_ATTRIB_FLAG_LEGACY_BIT );
+		legacyVisualConfig.flags.set( VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
 		X11WindowCreateInfo x11WindowCreateInfo;
 		x11WindowCreateInfo.display = scNativeData.display;
@@ -277,7 +277,7 @@ namespace ts3
 	{
 		GLXFBConfig windowFBConfig = nullptr;
 
-		if( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
+		if( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
 		{
 			windowFBConfig = _x11ChooseLegacyGLFBConfig( pWindowCreateInfo.display, pWindowCreateInfo.screenIndex );
 		}
@@ -455,14 +455,14 @@ namespace ts3
 		int doubleBufferRequestedState = True;
 		int stereoModeRequestedState = False;
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
-		     !pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
+		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
+		     !pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 		{
 			doubleBufferRequestedState = False;
 		}
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
-		     !pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
+		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
+		     !pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 		{
 			stereoModeRequestedState = True;
 		}
@@ -511,23 +511,23 @@ namespace ts3
 		pAttribArray[attribIndex++] = GLX_X_VISUAL_TYPE;
 		pAttribArray[attribIndex++] = GLX_TRUE_COLOR;
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
+		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 		{
 			pAttribArray[attribIndex++] = GLX_DOUBLEBUFFER;
 			pAttribArray[attribIndex++] = True;
 		}
-		else if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
+		else if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
 		{
 			pAttribArray[attribIndex++] = GLX_DOUBLEBUFFER;
 			pAttribArray[attribIndex++] = False;
 		}
 
-		if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
+		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 		{
 			pAttribArray[attribIndex++] = GLX_STEREO;
 			pAttribArray[attribIndex++] = False;
 		}
-		else if ( pVisualConfig.flags.isSet( SYS_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
+		else if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
 		{
 			pAttribArray[attribIndex++] = GLX_STEREO;
 			pAttribArray[attribIndex++] = True;

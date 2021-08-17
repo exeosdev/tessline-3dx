@@ -82,7 +82,7 @@ namespace ts3
 			DepthStencilFormat::D24S8,
 			sMSAADescNone,
 			MSAAMode::Unknown,
-			SYS_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT
+			VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT
 		};
 		return sVisualConfigWindowDefault;
 	}

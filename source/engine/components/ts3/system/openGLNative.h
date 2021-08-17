@@ -50,6 +50,7 @@ namespace system
         virtual void _nativeSwapBuffers() override;
         virtual void _nativeDestroy() override;
         virtual void _nativeQueryRenderAreaSize( WindowSize & pOutSize ) const override;
+        virtual bool _nativeIsValid() const override;
     };
 
     /// @brief

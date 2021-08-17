@@ -16,7 +16,7 @@ namespace system
 
 	struct GLDisplaySurfaceNativeData : public WindowNativeData
 	{
-		HDC surfaceHandle;
+		HDC hdc;
 		int pixelFormatIndex;
 	};
 

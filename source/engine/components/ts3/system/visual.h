@@ -58,17 +58,17 @@ namespace system
 		// - If StereoDisplay and MonoDisplay are both set, MonoDisplay is used. If none is set, MonoDisplay is used.
 
 		//
-		SYS_VISUAL_ATTRIB_FLAG_LEGACY_BIT = 0x0001,
+		VISUAL_ATTRIB_FLAG_LEGACY_BIT = 0x0001,
 		// Visual supports double buffering.
-		SYS_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT = 0x0100,
+		VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT = 0x0100,
 		// Visual does not support double buffering.
-		SYS_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT = 0x0200,
+		VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT = 0x0200,
 		// Visual is sRGB-capable.
-		SYS_VISUAL_ATTRIB_FLAG_SRGB_CAPABLE_BIT = 0x1000,
+		VISUAL_ATTRIB_FLAG_SRGB_CAPABLE_BIT = 0x1000,
 		// Visual has the stereoscopic display mode.
-		SYS_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT = 0x0400,
+		VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT = 0x0400,
 		// Visual has the classic, monoscopic display mode.
-		SYS_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT = 0x0800,
+		VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT = 0x0800,
 	};
 
 	struct ColorDesc

@@ -142,6 +142,7 @@ namespace system
         virtual void _nativeSwapBuffers() = 0;
         virtual void _nativeDestroy() = 0;
         virtual void _nativeQueryRenderAreaSize( WindowSize & pOutSize ) const = 0;
+        virtual bool _nativeIsValid() const = 0;
     };
 
     class GLRenderContext : public SysObject

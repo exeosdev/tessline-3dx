@@ -2,7 +2,8 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_WINDOW_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_WINDOW_H__
 
-#include "win32EventCore.h"
+#include <ts3/system/window.h>
+#include "win32Common.h"
 
 namespace ts3
 {
