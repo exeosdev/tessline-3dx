@@ -10,34 +10,34 @@ namespace system
 
 
 	// Creates Win32 OpenGL surface using provided visual config.
-	void _win32CreateGLSurface( GLDisplaySurfaceNativeData & pSurfaceNativeData, const VisualConfig & pVisualConfig );
+	void _win32CreateGLSurface( GLDisplaySurfaceNativeData & pDisplaySurfaceNativeData, const VisualConfig & pVisualConfig );
 
 	// Destroys existing surface.
-	void _win32DestroyGLSurface( GLDisplaySurfaceNativeData & pSurfaceNativeData );
+	void _win32DestroyGLSurface( GLDisplaySurfaceNativeData & pDisplaySurfaceNativeData );
 
 	// Selects matching pixel format for surface described with a PFD. Uses legacy API.
-	int _win32ChooseLegacyGLPixelFormat( HDC pSurfaceDC, PIXELFORMATDESCRIPTOR & pPfmtDescriptor );
+	int _win32ChooseLegacyGLPixelFormat( HDC pDisplaySurfaceDC, PIXELFORMATDESCRIPTOR & pPfmtDescriptor );
 
 	// Selects matching pixel format for surface described with a VisualConfig. Uses new EXT API and supports stuff like MSAA.
-	int _win32ChooseCoreGLPixelFormat( HDC pSurfaceDC, const VisualConfig & pVisualConfig, PIXELFORMATDESCRIPTOR & pPfmtDescriptor );
+	int _win32ChooseCoreGLPixelFormat( HDC pDisplaySurfaceDC, const VisualConfig & pVisualConfig, PIXELFORMATDESCRIPTOR & pPfmtDescriptor );
 
 	// Returns an array of pixel format IDs matching specified set of Win32 PF attributes.
-	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pSurfaceDC, int * pPixelFormatAttribList = nullptr );
+	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pDisplaySurfaceDC, int * pPixelFormatAttribList = nullptr );
 
 	// Returns an array of pixel format IDs matching specified VisualConfig structure.
-	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pSurfaceDC, const VisualConfig & pVisualConfig );
+	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pDisplaySurfaceDC, const VisualConfig & pVisualConfig );
 
 	// Computes a "compatibility rate", i.e. how much the specified pixel format matches the visual.
-	int _win32GetPixelFormatMatchRate( HDC pSurfaceDC, int pPixelFormatIndex, const VisualConfig & pVisualConfig );
+	int _win32GetPixelFormatMatchRate( HDC pDisplaySurfaceDC, int pPixelFormatIndex, const VisualConfig & pVisualConfig );
 
 	// Translation: VisualConfig --> array of WGL_* attributes required by the system API. Used for surface/context creation.
 	void _win32GetWGLAttribArrayForVisualConfig( const VisualConfig & pVisualConfig, int * pAttribArray );
 
 	// Useful utility. Fetches values for a set of PF attributes. Uses templated array definition to resolve the size.
 	template <size_t tSize, typename TpOutput>
-	inline bool _win32QueryPixelFormatAttributes( HDC pSurfaceDC, int pPixelFormatIndex, const int( &pAttributes )[tSize], TpOutput & pOutput )
+	inline bool _win32QueryPixelFormatAttributes( HDC pDisplaySurfaceDC, int pPixelFormatIndex, const int( &pAttributes )[tSize], TpOutput & pOutput )
 	{
-		BOOL result = wglGetPixelFormatAttribivARB( pSurfaceDC, pPixelFormatIndex, 0, tSize, pAttributes, &( pOutput[0] ) );
+		BOOL result = wglGetPixelFormatAttribivARB( pDisplaySurfaceDC, pPixelFormatIndex, 0, tSize, pAttributes, &( pOutput[0] ) );
 		return result != FALSE;
 	}
 
@@ -64,7 +64,7 @@ namespace system
 
 	    // Create a surface window. In case of Win32, GLDisplaySurfaceNativeData inherits from WindowNativeData
 	    // for this very reason: to allow treating surfaces as windows (as that's exactly the case on desktop).
-	    win32CreateWindow( openglInitState.surfaceData, tempWindowCreateInfo );
+	    nativeWin32CreateWindow( openglInitState.surfaceData, tempWindowCreateInfo );
 
 	    // Create a surface. This sets up the PFD and configures HDC properly.
 	    _win32CreateGLSurface( openglInitState.surfaceData, legacyVisualConfig );
@@ -117,7 +117,7 @@ namespace system
 
 	    if( openglInitState.surfaceData.hwnd != nullptr )
 	    {
-	        win32DestroyWindow( openglInitState.surfaceData );
+	        nativeWin32DestroyWindow( openglInitState.surfaceData );
 	        openglInitState.surfaceData.hwnd = nullptr;
 	    }
 	}
@@ -130,7 +130,7 @@ namespace system
 	    surfaceWindowCreateInfo.properties.geometry = pCreateInfo.windowGeometry;
 	    surfaceWindowCreateInfo.properties.title = "TS3 OpenGL Window";
 
-	    win32CreateWindow( displaySurfaceNative->mNativeData, surfaceWindowCreateInfo );
+	    nativeWin32CreateWindow( displaySurfaceNative->mNativeData, surfaceWindowCreateInfo );
 	    _win32CreateGLSurface( displaySurfaceNative->mNativeData, pCreateInfo.visualConfig );
 
 	    if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT ) )
@@ -158,25 +158,27 @@ namespace system
 
 	void GLSystemDriverNativeImpl::_nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface )
 	{
+	    auto * displaySurfaceNative = pDisplaySurface.getInterface<GLDisplaySurfaceNativeImpl>();
+	    
 	    auto hdc = ::wglGetCurrentDC();
 	    if ( hdc == nullptr )
 	    {
 	        throw 0;
 	    }
 
-	    pSurface.mNativeData.hdc = hdc;
-	    pSurface.mNativeData.hwnd = ::WindowFromDC( hdc );
-	    pSurface.mNativeData.pixelFormatIndex = ::GetPixelFormat( hdc );
+	    displaySurfaceNative->mNativeData.hdc = hdc;
+	    displaySurfaceNative->mNativeData.hwnd = ::WindowFromDC( hdc );
+	    displaySurfaceNative->mNativeData.pixelFormatIndex = ::GetPixelFormat( hdc );
 
 	    CHAR surfaceWindowClassName[256];
-	    ::GetClassNameA( pSurface.mNativeData.hwnd, surfaceWindowClassName, 255 );
-	    auto wndProcModuleHandle = ::GetWindowLongPtrA( pSurface.mNativeData.hwnd, GWLP_HINSTANCE );
+	    ::GetClassNameA( displaySurfaceNative->mNativeData.hwnd, surfaceWindowClassName, 255 );
+	    auto wndProcModuleHandle = ::GetWindowLongPtrA( displaySurfaceNative->mNativeData.hwnd, GWLP_HINSTANCE );
 
-	    pSurface.mNativeData.wndClassName = surfaceWindowClassName;
-	    pSurface.mNativeData.wndProcModuleHandle = reinterpret_cast<HMODULE>( wndProcModuleHandle );
+	    displaySurfaceNative->mNativeData.wndClsName = surfaceWindowClassName;
+	    displaySurfaceNative->mNativeData.moduleHandle = reinterpret_cast<HMODULE>( wndProcModuleHandle );
 	}
 
-	void GLSystemDriverNativeImpl::_nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLRenderContextCreateInfo & pCreateInfo )
+	void GLSystemDriverNativeImpl::_nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLDisplaySurface & pDisplaySurface, const GLRenderContextCreateInfo & pCreateInfo )
 	{
 	    int contextProfile = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
 	    Bitmask<int> contextCreateFlags = 0;
@@ -200,9 +202,10 @@ namespace system
 	    }
 	    if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
 	    {
-	        if( pCreateInfo.shareContext != nullptr )
+	        if( pCreateInfo.shareContext )
 	        {
-	            shareContextHandle = pCreateInfo.shareContext->mNativeData.contextHandle;
+	            auto * shareContextNative = pCreateInfo.shareContext->getInterface<GLRenderContextNativeImpl>();
+	            shareContextHandle = shareContextNative->mNativeData.contextHandle;
 	        }
 	    }
 
@@ -220,7 +223,8 @@ namespace system
             FALSE
         };
 
-	    HGLRC contextHandle = wglCreateContextAttribsARB( pSurface.mNativeData.hdc,
+	    auto * displaySurfaceNative = pDisplaySurface.getInterface<GLDisplaySurfaceNativeImpl>();
+	    HGLRC contextHandle = wglCreateContextAttribsARB( displaySurfaceNative->mNativeData.hdc,
                                                           shareContextHandle,
                                                           &( contextAttribs[0] ) );
 
@@ -229,17 +233,20 @@ namespace system
 	        throw 0;
 	    }
 
-	    pGLRenderContext.mNativeData.contextHandle = contextHandle;
+	    auto * renderContextNative = pRenderContext.getInterface<GLRenderContextNativeImpl>();
+	    renderContextNative->mNativeData.contextHandle = contextHandle;
 	}
 
 	void GLSystemDriverNativeImpl::_nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext )
 	{
+	    auto * renderContextNative = pRenderContext.getInterface<GLRenderContextNativeImpl>();
+
 	    auto contextHandle = ::wglGetCurrentContext();
 	    if ( contextHandle == nullptr )
 	    {
 	        throw 0;
 	    }
-	    pGLRenderContext.mNativeData.contextHandle = contextHandle;
+	    renderContextNative->mNativeData.contextHandle = contextHandle;
 	}
 
 	bool GLSystemDriverNativeImpl::_nativeIsRenderContextBound() const
@@ -296,9 +303,9 @@ namespace system
 	GLRenderContextNativeImpl::~GLRenderContextNativeImpl()
 	{}
 
-	void GLRenderContextNativeImpl::_nativeBindForCurrentThread( const GLDisplaySurface & pSurface )
+	void GLRenderContextNativeImpl::_nativeBindForCurrentThread( const GLDisplaySurface & pDisplaySurface )
 	{
-	    auto * displaySurfaceNative = pSurface.getInterface<GLDisplaySurfaceNativeImpl>();
+	    auto * displaySurfaceNative = pDisplaySurface.getInterface<GLDisplaySurfaceNativeImpl>();
 	    ::wglMakeCurrent( displaySurfaceNative->mNativeData.hdc, mNativeData.contextHandle );
 	}
 
@@ -331,10 +338,10 @@ namespace system
 	}
 
 
-	void _win32CreateGLSurface( GLDisplaySurfaceNativeData & pSurfaceNativeData, const VisualConfig & pVisualConfig )
+	void _win32CreateGLSurface( GLDisplaySurfaceNativeData & pDisplaySurfaceNativeData, const VisualConfig & pVisualConfig )
 	{
-		auto hdc = ::GetWindowDC( pSurfaceNativeData.hwnd );
-		pSurfaceNativeData.hdc = hdc;
+		auto hdc = ::GetWindowDC( pDisplaySurfaceNativeData.hwnd );
+		pDisplaySurfaceNativeData.hdc = hdc;
 
 		PIXELFORMATDESCRIPTOR pixelFormatDescriptor;
 		memset( &pixelFormatDescriptor, 0, sizeof( PIXELFORMATDESCRIPTOR ) );
@@ -343,32 +350,32 @@ namespace system
 
 		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
 		{
-			pSurfaceNativeData.pixelFormatIndex = _win32ChooseLegacyGLPixelFormat( hdc, pixelFormatDescriptor );
+			pDisplaySurfaceNativeData.pixelFormatIndex = _win32ChooseLegacyGLPixelFormat( hdc, pixelFormatDescriptor );
 		}
 		else
 		{
-			pSurfaceNativeData.pixelFormatIndex = _win32ChooseCoreGLPixelFormat( hdc, pVisualConfig, pixelFormatDescriptor );
+			pDisplaySurfaceNativeData.pixelFormatIndex = _win32ChooseCoreGLPixelFormat( hdc, pVisualConfig, pixelFormatDescriptor );
 		}
 
-		BOOL spfResult = ::SetPixelFormat( hdc, pSurfaceNativeData.pixelFormatIndex, &pixelFormatDescriptor );
+		BOOL spfResult = ::SetPixelFormat( hdc, pDisplaySurfaceNativeData.pixelFormatIndex, &pixelFormatDescriptor );
 		if ( spfResult == FALSE )
 		{
 			throw 0;
 		}
 	}
 
-	void _win32DestroyGLSurface( GLDisplaySurfaceNativeData & pSurfaceNativeData )
+	void _win32DestroyGLSurface( GLDisplaySurfaceNativeData & pDisplaySurfaceNativeData )
 	{
-		if ( pSurfaceNativeData.hdc != nullptr )
+		if ( pDisplaySurfaceNativeData.hdc != nullptr )
 		{
-			::ReleaseDC( pSurfaceNativeData.hwnd, pSurfaceNativeData.hdc );
+			::ReleaseDC( pDisplaySurfaceNativeData.hwnd, pDisplaySurfaceNativeData.hdc );
 
-			pSurfaceNativeData.hdc = nullptr;
-			pSurfaceNativeData.pixelFormatIndex = 0;
+			pDisplaySurfaceNativeData.hdc = nullptr;
+			pDisplaySurfaceNativeData.pixelFormatIndex = 0;
 		}
 	}
 
-	int _win32ChooseLegacyGLPixelFormat( HDC pSurfaceDC, PIXELFORMATDESCRIPTOR & pPfmtDescriptor )
+	int _win32ChooseLegacyGLPixelFormat( HDC pDisplaySurfaceDC, PIXELFORMATDESCRIPTOR & pPfmtDescriptor )
 	{
 		// For legacy pixel format, we first try the most reasonable one:
 		// 24-bit color (RGB8) with 8-bit alpha channel and 32-bit combined
@@ -383,28 +390,28 @@ namespace system
 		pPfmtDescriptor.iPixelType = PFD_TYPE_RGBA;
 		pPfmtDescriptor.dwFlags = PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW | PFD_DOUBLEBUFFER;
 
-		int pixelFormatIndex = ::ChoosePixelFormat( pSurfaceDC, &pPfmtDescriptor );
+		int pixelFormatIndex = ::ChoosePixelFormat( pDisplaySurfaceDC, &pPfmtDescriptor );
 
 		if ( pixelFormatIndex == 0 )
 		{
 			pPfmtDescriptor.cColorBits = 24; // 24-bit color, no alpha, no explicit RGB
 			pPfmtDescriptor.cDepthBits = 32; // 32-bit depth buffer, no stencil attachment
-			pixelFormatIndex = ::ChoosePixelFormat( pSurfaceDC, &pPfmtDescriptor );
+			pixelFormatIndex = ::ChoosePixelFormat( pDisplaySurfaceDC, &pPfmtDescriptor );
 		}
 
 		return ( pixelFormatIndex > 0 ) ? pixelFormatIndex : cvWin32InvalidPixelFormatIndex;
 	}
 
-	int _win32ChooseCoreGLPixelFormat( HDC pSurfaceDC, const VisualConfig & pVisualConfig, PIXELFORMATDESCRIPTOR & pPfmtDescriptor )
+	int _win32ChooseCoreGLPixelFormat( HDC pDisplaySurfaceDC, const VisualConfig & pVisualConfig, PIXELFORMATDESCRIPTOR & pPfmtDescriptor )
 	{
-		auto pixelFormatList = _win32QueryCompatiblePixelFormatList( pSurfaceDC, pVisualConfig );
+		auto pixelFormatList = _win32QueryCompatiblePixelFormatList( pDisplaySurfaceDC, pVisualConfig );
 
 		int bestMatchRate = 0;
 		int bestPixelFormatID = 0;
 
 		for ( auto pixelFormatID : pixelFormatList )
 		{
-			int matchRate = _win32GetPixelFormatMatchRate( pSurfaceDC, pixelFormatID, pVisualConfig );
+			int matchRate = _win32GetPixelFormatMatchRate( pDisplaySurfaceDC, pixelFormatID, pVisualConfig );
 			if ( matchRate > bestMatchRate )
 			{
 				bestMatchRate = matchRate;
@@ -412,12 +419,12 @@ namespace system
 			}
 		}
 
-		int maxPixelFormatIndex = ::DescribePixelFormat( pSurfaceDC, bestPixelFormatID, sizeof( PIXELFORMATDESCRIPTOR ), &pPfmtDescriptor );
+		int maxPixelFormatIndex = ::DescribePixelFormat( pDisplaySurfaceDC, bestPixelFormatID, sizeof( PIXELFORMATDESCRIPTOR ), &pPfmtDescriptor );
 
 		return ( maxPixelFormatIndex > 0 ) ? bestPixelFormatID : cvWin32InvalidPixelFormatIndex;
 	}
 
-	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pSurfaceDC, int * pPixelFormatAttribList )
+	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pDisplaySurfaceDC, int * pPixelFormatAttribList )
 	{
 		// Output array where system will store IDs of enumerated pixel formats.
 		int pixelFormatArray[cvWin32MaxWGLPixelFormatsNum];
@@ -425,7 +432,7 @@ namespace system
 		UINT returnedPixelFormatsNum = 0U;
 
 		// Enumerate pixel formats.
-		BOOL enumResult = ::wglChoosePixelFormatARB( pSurfaceDC,
+		BOOL enumResult = ::wglChoosePixelFormatARB( pDisplaySurfaceDC,
 		                                             pPixelFormatAttribList,
 		                                             nullptr,
 		                                             cvWin32MaxWGLPixelFormatsNum,
@@ -444,17 +451,17 @@ namespace system
 		return result;
 	}
 
-	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pSurfaceDC, const VisualConfig & pVisualConfig )
+	std::vector<int> _win32QueryCompatiblePixelFormatList( HDC pDisplaySurfaceDC, const VisualConfig & pVisualConfig )
 	{
 		// Array for WGL_..._ARB pixel format attributes.
 		int pixelFormatAttributes[cvWin32MaxWGLPixelFormatAttributesNum * 2];
 		// Translate provided visual config to a WGL attribute array.
 		_win32GetWGLAttribArrayForVisualConfig( pVisualConfig, pixelFormatAttributes );
 
-		return _win32QueryCompatiblePixelFormatList( pSurfaceDC, pixelFormatAttributes );
+		return _win32QueryCompatiblePixelFormatList( pDisplaySurfaceDC, pixelFormatAttributes );
 	}
 
-	int _win32GetPixelFormatMatchRate( HDC pSurfaceDC, int pPixelFormatIndex, const VisualConfig & pVisualConfig )
+	int _win32GetPixelFormatMatchRate( HDC pDisplaySurfaceDC, int pPixelFormatIndex, const VisualConfig & pVisualConfig )
 	{
 		int doubleBufferRequestedState = TRUE;
 		int stereoModeRequestedState = FALSE;
@@ -481,7 +488,7 @@ namespace system
 		};
 
 		std::array<int, staticArraySize( controlAttribArray )> attribValueArray{};
-		if( !_win32QueryPixelFormatAttributes( pSurfaceDC, pPixelFormatIndex, controlAttribArray, attribValueArray ) )
+		if( !_win32QueryPixelFormatAttributes( pDisplaySurfaceDC, pPixelFormatIndex, controlAttribArray, attribValueArray ) )
 		{
 			return -1;
 		}

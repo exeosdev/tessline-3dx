@@ -20,13 +20,13 @@ namespace ts3
 
 	void Window::_sysInitialize( const WindowCreateInfo & pCreateInfo )
 	{
-		win32CreateWindow( mNativeData, pCreateInfo );
+		nativeWin32CreateWindow( mNativeData, pCreateInfo );
 		::ShowWindow( mNativeData.hwnd, SW_SHOWNORMAL );
 	}
 
 	void Window::_sysRelease() noexcept
 	{
-		win32DestroyWindow( mNativeData );
+		nativeWin32DestroyWindow( mNativeData );
 	}
 
 	void Window::_sysGetClientAreaSize( WindowSize & pClientAreaSize ) const
@@ -48,7 +48,7 @@ namespace ts3
 	}
 
 
-	void win32CreateWindow( WindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo )
+	void nativeWin32CreateWindow( WindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo )
 	{
 		// Register window class. Will fetch it if already registered.
 		_win32RegisterWndClass( pWindowNativeData );
@@ -91,7 +91,7 @@ namespace ts3
 		pWindowNativeData.hwnd = windowHandle;
 	}
 
-	void win32DestroyWindow( WindowNativeData & pWindowNativeData )
+	void nativeWin32DestroyWindow( WindowNativeData & pWindowNativeData )
 	{
 		::DestroyWindow( pWindowNativeData.hwnd );
 		pWindowNativeData.hwnd = nullptr;

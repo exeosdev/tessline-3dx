@@ -108,7 +108,7 @@ namespace system
         virtual void _nativeReleaseInitState( GLRenderContext & pRenderContext ) = 0;
         virtual void _nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo ) = 0;
         virtual void _nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface ) = 0;
-        virtual void _nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLRenderContextCreateInfo & pCreateInfo ) = 0;
+        virtual void _nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLDisplaySurface & pSurface, const GLRenderContextCreateInfo & pCreateInfo ) = 0;
         virtual void _nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext ) = 0;
         virtual bool _nativeIsRenderContextBound() const = 0;
         virtual bool _nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const = 0;

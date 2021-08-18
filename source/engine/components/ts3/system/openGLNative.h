@@ -31,7 +31,7 @@ namespace system
         virtual void _nativeReleaseInitState( GLRenderContext & pRenderContext ) override;
         virtual void _nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo ) override;
         virtual void _nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface ) override;
-        virtual void _nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLRenderContextCreateInfo & pCreateInfo ) override;
+        virtual void _nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLDisplaySurface & pSurface, const GLRenderContextCreateInfo & pCreateInfo ) override;
         virtual void _nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext ) override;
         virtual bool _nativeIsRenderContextBound() const override;
         virtual bool _nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const override;

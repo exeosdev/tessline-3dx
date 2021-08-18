@@ -23,7 +23,7 @@ namespace system
         Colormap xColormap = XID_None;
     };
 
-    struct X11WmWindowCreateInfo
+    struct X11WindowCreateInfo
     {
         Display * display = nullptr;
         int screenIndex = -1;
@@ -34,12 +34,12 @@ namespace system
         bool fullscreenMode = false;
     };
 
-    using X11WmWindowNativeData = WindowNativeData;
-    using X11WmWindowManagerNativeData = WindowManagerNativeData;
+    using X11WindowNativeData = WindowNativeData;
+    using X11WindowManagerNativeData = WindowManagerNativeData;
 
-    void x11CreateWindow( X11WmWindowNativeData & pWindowNativeData, const X11WmWindowCreateInfo & pCreateInfo );
-    void x11UpdateNewWindowState( X11WmWindowNativeData & pWindowNativeData, const X11WmWindowCreateInfo & pCreateInfo );
-    void x11DestroyWindow( X11WmWindowNativeData & pWindowNativeData );
+    void x11CreateWindow( X11WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo );
+    void x11UpdateNewWindowState( X11WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo );
+    void x11DestroyWindow( X11WindowNativeData & pWindowNativeData );
 
 } // namespace system
 } // namespace ts3

@@ -10,9 +10,6 @@ namespace ts3
 namespace system
 {
 
-	ts3DeclareHandle( Window );
-	ts3DeclareHandle( WindowManager );
-
 	using WindowPos = math::Pos2i;
 	using WindowSize = math::Size2u;
 	using WindowNativeHandle = uint64;
@@ -48,15 +45,15 @@ namespace system
 	/// @brief
 	struct WindowGeometry
 	{
-		WmWindowPos position;
-		WmWindowSize size;
-		WmWindowFrameStyle frameStyle;
+		WindowPos position;
+		WindowSize size;
+		WindowFrameStyle frameStyle;
 	};
 
 	/// @brief
 	struct WindowProperties
 	{
-		WmWindowGeometry geometry;
+		WindowGeometry geometry;
 		std::string title;
 	};
 

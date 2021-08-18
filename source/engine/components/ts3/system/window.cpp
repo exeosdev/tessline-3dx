@@ -8,9 +8,9 @@ namespace ts3
 namespace system
 {
 
-    void _nativeWmCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo );
-    void _nativeWmWindowGetClientAreaSize( Window & pWindow, WindowSize & pOutSize );
-    void _nativeWmWindowGetFrameSize( Window & pWindow, WindowSize & pOutSize );
+    void _nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo );
+    void _nativeWindowGetClientAreaSize( Window & pWindow, WindowSize & pOutSize );
+    void _nativeWindowGetFrameSize( Window & pWindow, WindowSize & pOutSize );
     
     WindowManagerHandle wmCreateWindowManager( DsmDisplayManagerHandle pDisplayManager )
     {
@@ -37,7 +37,7 @@ namespace system
         auto * window = new Window();
         window->windowManager = pWindowManager;
 
-        _nativeWmCreateWindow( *window, validatedCreateInfo );
+        _nativeCreateWindow( *window, validatedCreateInfo );
 
         return window;
    }
@@ -45,14 +45,14 @@ namespace system
     WindowSize wmWindowGetClientAreaSize( WindowHandle pWindow )
     {
         WindowSize result;
-        _nativeWmWindowGetClientAreaSize( *pWindow, result );
+        _nativeWindowGetClientAreaSize( *pWindow, result );
         return result;
     }
 
     WindowSize wmWindowGetFrameSize( WindowHandle pWindow )
     {
         WindowSize result;
-        _nativeWmWindowGetFrameSize( *pWindow, result );
+        _nativeWindowGetFrameSize( *pWindow, result );
         return result;
     }
 

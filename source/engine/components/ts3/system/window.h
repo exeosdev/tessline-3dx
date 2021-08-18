@@ -9,13 +9,9 @@ namespace ts3
 namespace system
 {
 
-	ts3DeclareHandle( DsmDisplayManager );
-	ts3DeclareHandle( Window );
-	ts3DeclareHandle( WindowManager );
-
 	struct WindowCreateInfo
 	{
-		WmWindowProperties properties;
+		WindowProperties properties;
 	};
 
 	TS3_SYSTEM_API_NODISCARD WindowManagerHandle wmCreateWindowManager( DsmDisplayManagerHandle pDisplayManager );
