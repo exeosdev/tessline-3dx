@@ -10,14 +10,14 @@ namespace ts3
 
 
 	DisplayDriverDXGI::DisplayDriverDXGI( DisplayManagerHandle pDisplayManager ) noexcept
-	: DisplayDriver( pDisplayManager, EDsmDisplayDriverType::DXGI )
+	: DisplayDriver( pDisplayManager, EDisplayDriverType::DXGI )
 	{}
 
 	DisplayDriverDXGI::~DisplayDriverDXGI() noexcept = default;
 
-	EDsmDisplayDriverType DisplayDriverDXGI::queryDriverID() const noexcept
+	EDisplayDriverType DisplayDriverDXGI::queryDriverID() const noexcept
 	{
-		return EDsmDisplayDriverType::DXGI;
+		return EDisplayDriverType::DXGI;
 	}
 
 	DisplayDriverHandle DisplayDriverDXGI::create( DisplayManagerHandle pDisplayManager, const DisplayDriverCreateInfoDXGI & pCreateInfo )
@@ -103,17 +103,17 @@ namespace ts3
 
 			if( adapterIndex == 0 )
 			{
-				adapterInfo->adapterDesc.flags.set( E_DSM_ADAPTER_FLAG_PRIMARY_BIT );
+				adapterInfo->adapterDesc.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
 			}
 
 			if( ( dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE ) != 0 )
 			{
-				adapterInfo->adapterDesc.flags.set( E_DSM_ADAPTER_FLAG_SOFTWARE_BIT );
+				adapterInfo->adapterDesc.flags.set( E_DISPLAY_ADAPTER_FLAG_SOFTWARE_BIT );
 			}
 		}
 	}
 
-	void DisplayDriverDXGI::_sysEnumOutputList( DsmAdapter & pAdapter )
+	void DisplayDriverDXGI::_sysEnumOutputList( DisplayAdapter & pAdapter )
 	{
 		auto * dxgiAdapter = pAdapter.nativeData.dxgi->dxgiAdapter.Get();
 
@@ -164,7 +164,7 @@ namespace ts3
 		}
 	}
 
-	void DisplayDriverDXGI::_sysEnumVideoModeList( DsmOutput & pOutput, ColorFormat pFormat )
+	void DisplayDriverDXGI::_sysEnumVideoModeList( DisplayOutput & pOutput, ColorFormat pFormat )
 	{
 		auto * dxgiOutput = pOutput.nativeData.dxgi->dxgiOutput.Get();
 		auto dxgiFormat = _dxgiTranslateColorFormatToDXGIFormat( pFormat );
@@ -196,27 +196,27 @@ namespace ts3
 			throw 0;
 		}
 
-		dsm_video_settings_hash_t prevSettingsHash = cvDsmVideoSettingsHashInvalid;
+		dsm_video_settings_hash_t prevSettingsHash = cvDisplayVideoSettingsHashInvalid;
 
 		for ( auto & dxgiDisplayModeDesc : dxgiModeList )
 		{
 
-			DsmVideoSettings videoSettings;
+			DisplayVideoSettings videoSettings;
 			videoSettings.resolution.x = static_cast<uint32>( dxgiDisplayModeDesc.Width );
 			videoSettings.resolution.y = static_cast<uint32>( dxgiDisplayModeDesc.Height );
 			videoSettings.refreshRate = static_cast<uint16>( dxgiDisplayModeDesc.RefreshRate.Numerator );
 
 			if( dxgiDisplayModeDesc.ScanlineOrdering == DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE )
 			{
-				videoSettings.flags.set( E_DSM_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT );
+				videoSettings.flags.set( E_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT );
 			}
 			else if( dxgiDisplayModeDesc.ScanlineOrdering == DXGI_MODE_SCANLINE_ORDER_LOWER_FIELD_FIRST )
 			{
-				videoSettings.flags.set( E_DSM_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT );
+				videoSettings.flags.set( E_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT );
 			}
 			else if( dxgiDisplayModeDesc.ScanlineOrdering == DXGI_MODE_SCANLINE_ORDER_UPPER_FIELD_FIRST )
 			{
-				videoSettings.flags.set( E_DSM_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT );
+				videoSettings.flags.set( E_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT );
 			}
 
 			auto settingsHash = sysDsmComputeVideoSettingsHash( pFormat, videoSettings );

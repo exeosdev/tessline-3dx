@@ -9,7 +9,7 @@ namespace ts3
 namespace system
 {
 
-	struct DsmDisplayManagerNativeData : public XRRCommonDriverData
+	struct DisplayManagerNativeData : public XRRCommonDriverData
 	{
 		XRRMonitorInfo * xrrDefaultMonitorInfo = nullptr;
 	};

@@ -12,7 +12,7 @@ namespace system
     void _nativeWindowGetClientAreaSize( Window & pWindow, WindowSize & pOutSize );
     void _nativeWindowGetFrameSize( Window & pWindow, WindowSize & pOutSize );
     
-    WindowManagerHandle wmCreateWindowManager( DsmDisplayManagerHandle pDisplayManager )
+    WindowManagerHandle wmCreateWindowManager( DisplayManagerHandle pDisplayManager )
     {
         auto * windowManager = new WindowManager();
         windowManager->displayManager = pDisplayManager;

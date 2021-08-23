@@ -28,7 +28,7 @@ namespace system
 
     struct WindowManager
     {
-        DsmDisplayManagerHandle displayManager = nullptr;
+        DisplayManagerHandle displayManager = nullptr;
     };
 
 } // namespace system

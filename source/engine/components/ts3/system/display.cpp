@@ -7,91 +7,91 @@ namespace ts3
 namespace system
 {
 
-    void _nativeDsmDisplayManagerInitialize( DsmDisplayManager & pDisplayManager );
-    void _nativeDsmDisplayManagerRelease( DsmDisplayManager & pDisplayManager );
-    void _nativeDsmDisplayManagerQueryDisplaySize( DsmDisplayManager & pDisplayManager, DisplaySize & pOutDisplaySize );
-    void _nativeDsmDisplayManagerQueryMinWindowSize( DsmDisplayManager & pDisplayManager, DisplaySize & pOutMinWindowSize );
-    
-    DsmDisplayManagerHandle dsmInitializeDisplayManager( SysContextHandle pSysContext )
-    {
-        auto * displayManager = new DsmDisplayManager();
-        _nativeDsmDisplayManagerInitialize( *displayManager );
-        return displayManager;
-    }
+    DisplayManager::DisplayManager( SysContextHandle pSysContext )
+    : SysObject( std::move( pSysContext ) )
+    {}
 
-    void dsmDestroyDisplayManager( DsmDisplayManagerHandle pDisplayManager )
-    {
-        if( !pDisplayManager )
-        {
-            return;
-        }
+    DisplayManager::~DisplayManager()
+    {}
 
-        _nativeDsmDisplayManagerRelease( *pDisplayManager );
-        delete pDisplayManager;
-    }
-
-    DisplaySize dsmDisplayManagerQueryDisplaySize( DsmDisplayManagerHandle pDisplayManager )
+    DisplaySize DisplayManager::queryDefaultDisplaySize() const
     {
         DisplaySize result;
-        _nativeDsmDisplayManagerQueryDisplaySize( *pDisplayManager, result );
+        _nativeQueryDefaultDisplaySize( result );
         return result;
     }
 
-    DisplaySize dsmDisplayManagerQueryMinWindowSize( DsmDisplayManagerHandle pDisplayManager )
+    DisplaySize DisplayManager::queryMinWindowSize() const
     {
         DisplaySize result;
-        _nativeDsmDisplayManagerQueryMinWindowSize( *pDisplayManager, result );
+        _nativeQueryMinWindowSize( result );
         return result;
     }
 
-    bool dsmDisplayManagerCheckDriverSupport( EDsmDisplayDriverType pDriverID )
+    bool DisplayManager::checkDriverSupport( EDisplayDriverType pDriverID ) const
     {
-        return true;
+        // The default driver is always supported. If no driver is available on
+        // a given system, DisplayManager will fail to create in the first place,
+        if( pDriverID == EDisplayDriverType::Default )
+        {
+            return true;
+        }
+
+        // Resolve the driver ID. This will return EDisplayDriverType::Unknown
+        // if the specified driver is not supported on the current system.
+        auto resolvedDriverID = resolveDisplayDriverID( pDriverID );
+
+        return resolvedDriverID != EDisplayDriverType::Unknown;
     }
 
-    EDsmDisplayDriverType dsmDisplayManagerResolveDisplayDriverID( EDsmDisplayDriverType pDriverID )
+    EDisplayDriverType DisplayManager::resolveDisplayDriverID( EDisplayDriverType pDriverID ) const
     {
-        EDsmDisplayDriverType resolvedDriverID = EDsmDisplayDriverType::Unknown;
+        EDisplayDriverType resolvedDriverID = EDisplayDriverType::Unknown;
 
-        if( pDriverID == EDsmDisplayDriverType::Generic )
+        if( pDriverID == EDisplayDriverType::Generic )
         {
-            resolvedDriverID = EDsmDisplayDriverType::Generic;
+            resolvedDriverID = EDisplayDriverType::Generic;
         }
-        else if( pDriverID == EDsmDisplayDriverType::Default )
+        else if( pDriverID == EDisplayDriverType::Default )
         {
-            // TODO
+        #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINFAMILY )
+            resolvedDriverID = EDisplayDriverType::DXGI;
+        #else
+            resolvedDriverID = EDisplayDriverType::Generic;
+        #endif
         }
-        else if( pDriverID == EDsmDisplayDriverType::DXGI )
+        #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINFAMILY )
+        else if( pDriverID == EDisplayDriverType::DXGI )
         {
-            // TODO
+            resolvedDriverID = EDisplayDriverType::DXGI;
         }
+        #endif
 
         return resolvedDriverID;
     }
 
-    bool dsmDisplayManagerValidateWindowGeometry( DsmDisplayManagerHandle pDisplayManager,
-                                                  const math::Pos2i & pWindowPosition,
-                                                  const math::Size2u & pWindowSize )
+    bool DisplayManager::checkWindowGeometry( const math::Pos2i & pWindowPosition,
+                                              const math::Size2u & pWindowSize ) const
     {
         const auto & framePos = pWindowPosition;
         const auto & frameSize = pWindowSize;
 
-        auto screenSize = dsmDisplayManagerQueryDisplaySize( pDisplayManager );
-        auto minWindowSize = dsmDisplayManagerQueryMinWindowSize( pDisplayManager );
+        auto screenSize = queryDefaultDisplaySize();
+        auto minWindowSize = queryMinWindowSize();
 
         if ( frameSize == cvWindowSizeMax )
         {
             return false;
         }
-        else if ( ( frameSize.x == 0 ) || ( frameSize.y == 0 ) )
+        if ( ( frameSize.x == 0 ) || ( frameSize.y == 0 ) )
         {
             return false;
         }
-        else if ( ( frameSize.x > screenSize.x ) || ( frameSize.y > screenSize.y ) )
+        if ( ( frameSize.x > screenSize.x ) || ( frameSize.y > screenSize.y ) )
         {
             return false;
         }
-        else if ( ( frameSize.x < minWindowSize.x ) || ( frameSize.y < minWindowSize.y ) )
+        if ( ( frameSize.x < minWindowSize.x ) || ( frameSize.y < minWindowSize.y ) )
         {
             return false;
         }
@@ -102,8 +102,8 @@ namespace system
         }
         else
         {
-            int32 maxPosX = screenSize.x - frameSize.x;
-            int32 maxPosY = screenSize.y - frameSize.y;
+            auto maxPosX = static_cast<int32>( screenSize.x - frameSize.x );
+            auto maxPosY = static_cast<int32>( screenSize.y - frameSize.y );
             if ( ( framePos.x > maxPosX ) || ( framePos.y > maxPosY ) )
             {
                 return false;
@@ -113,17 +113,16 @@ namespace system
         return true;
     }
 
-    bool dsmDisplayManagerValidateWindowGeometry( DsmDisplayManagerHandle pDisplayManager,
-                                                  math::Pos2i & pWindowPosition,
-                                                  math::Size2u & pWindowSize )
+    bool DisplayManager::validateWindowGeometry( math::Pos2i & pWindowPosition,
+                                                 math::Size2u & pWindowSize ) const
     {
         auto originalPos = pWindowPosition;
         auto originalSize = pWindowSize;
         auto & framePos = pWindowPosition;
         auto & frameSize = pWindowSize;
 
-        auto screenSize = dsmDisplayManagerQueryDisplaySize( pDisplayManager );
-        auto minWindowSize = dsmDisplayManagerQueryMinWindowSize( pDisplayManager );
+        auto screenSize = queryDefaultDisplaySize();
+        auto minWindowSize = queryMinWindowSize();
 
         if ( frameSize == cvWindowSizeMax )
         {
@@ -135,8 +134,8 @@ namespace system
         {
             // Any dimension set to 0 means "use default size". By default,
             // we just use the ratio of the screen and 70% of its dimensions.
-            frameSize.x = static_cast<uint32>( screenSize.x * 0.7f );
-            frameSize.y = static_cast<uint32>( screenSize.y * 0.7f );
+            frameSize.x = static_cast<uint32>( screenSize.x * 0.7 );
+            frameSize.y = static_cast<uint32>( screenSize.y * 0.7 );
         }
         else
         {
@@ -151,13 +150,13 @@ namespace system
 
         if ( ( framePos.x < 0 ) || ( framePos.y < 0 ) )
         {
-            framePos.x = ( screenSize.x - frameSize.x ) / 2;
-            framePos.y = ( screenSize.y - frameSize.y ) / 2;
+            framePos.x = static_cast<int32>( ( screenSize.x - frameSize.x ) / 2 );
+            framePos.y = static_cast<int32>( ( screenSize.y - frameSize.y ) / 2 );
         }
         else
         {
-            int32 maxPosX = screenSize.x - frameSize.x;
-            int32 maxPosY = screenSize.y - frameSize.y;
+            auto maxPosX = static_cast<int32>( screenSize.x - frameSize.x );
+            auto maxPosY = static_cast<int32>( screenSize.y - frameSize.y );
             framePos.x = getMinOf( framePos.x, maxPosX );
             framePos.y = getMinOf( framePos.y, maxPosY );
         }

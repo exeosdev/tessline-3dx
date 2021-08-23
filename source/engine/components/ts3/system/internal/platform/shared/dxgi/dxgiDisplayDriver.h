@@ -12,19 +12,19 @@ namespace ts3
 		ComPtr<IDXGIFactory1> dxgiFactory;
 	};
 
-	struct DsmAdapterNativeDataDXGI
+	struct DisplayAdapterNativeDataDXGI
 	{
 		ComPtr<IDXGIAdapter1> dxgiAdapter;
 		DXGI_ADAPTER_DESC1  dxgiAdapterDesc;
 	};
 
-	struct DsmOutputNativeDataDXGI
+	struct DisplayOutputNativeDataDXGI
 	{
 		ComPtr<IDXGIOutput1> dxgiOutput;
 		DXGI_OUTPUT_DESC  dxgiOutputDesc;
 	};
 
-	struct DsmVideoModeNativeDataDXGI
+	struct DisplayVideoModeNativeDataDXGI
 	{
 		DXGI_MODE_DESC dxgiModeDesc;
 	};

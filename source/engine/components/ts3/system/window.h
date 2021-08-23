@@ -14,7 +14,7 @@ namespace system
 		WindowProperties properties;
 	};
 
-	TS3_SYSTEM_API_NODISCARD WindowManagerHandle wmCreateWindowManager( DsmDisplayManagerHandle pDisplayManager );
+	TS3_SYSTEM_API_NODISCARD WindowManagerHandle wmCreateWindowManager( DisplayManagerHandle pDisplayManager );
 
 	TS3_SYSTEM_API void wmDestroyWindowManager( WindowManagerHandle pWindowManager );
 

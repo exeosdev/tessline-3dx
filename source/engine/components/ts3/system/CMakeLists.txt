@@ -20,6 +20,7 @@ set( TS3_SYSTEM_SRC_FILES
         "openGL.cpp"
         "openGLCommon.h"
         "openGLNative.h"
+        "openGLNative.cpp"
         "visual.h"
         "visual.cpp"
         "perfCounter.h"

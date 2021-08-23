@@ -7,9 +7,9 @@ namespace ts3
 namespace system
 {
 
-    dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DsmVideoSettings & pSettings )
+    dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings )
 	{
-		DsmVideoModeHash modeHashGen;
+		DisplayVideoModeHash modeHashGen;
 		modeHashGen.uResWidth = static_cast<uint16>( pSettings.resolution.x );
 		modeHashGen.uResHeight = static_cast<uint16>( pSettings.resolution.x );
 		modeHashGen.uRefreshRate = static_cast<uint16>( pSettings.refreshRate );
@@ -18,7 +18,7 @@ namespace system
 		return modeHashGen.modeHash;
 	}
 
-	std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DsmVideoSettings & pSettings )
+	std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings )
 	{
 		return {};
 	}

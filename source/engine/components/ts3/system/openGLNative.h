@@ -24,7 +24,7 @@ namespace system
         GLSystemDriverNativeData mNativeData;
 
     public:
-        GLSystemDriverNativeImpl( DisplayManagerHandle pDisplayManager );
+        explicit GLSystemDriverNativeImpl( DisplayManagerHandle pDisplayManager );
         virtual ~GLSystemDriverNativeImpl();
 
         virtual void _nativeInitializePlatform() override;
@@ -44,7 +44,7 @@ namespace system
         GLDisplaySurfaceNativeData mNativeData;
 
     public:
-        GLDisplaySurfaceNativeImpl( GLSystemDriverHandle pDriver );
+        explicit GLDisplaySurfaceNativeImpl( GLSystemDriverHandle pDriver );
         virtual ~GLDisplaySurfaceNativeImpl();
 
         virtual void _nativeSwapBuffers() override;
@@ -60,7 +60,7 @@ namespace system
         GLRenderContextNativeData mNativeData;
 
     public:
-        GLRenderContextNativeImpl( GLSystemDriverHandle pDriver );
+        explicit GLRenderContextNativeImpl( GLSystemDriverHandle pDriver );
         virtual ~GLRenderContextNativeImpl();
 
         virtual void _nativeBindForCurrentThread( const GLDisplaySurface & pSurface ) override;

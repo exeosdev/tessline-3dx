@@ -6,11 +6,14 @@
 
 namespace ts3
 {
+namespace system
+{
 
-	struct DsmDisplayManagerNativeData
+	struct DisplayManagerNativeData
 	{
 	};
 
-}
+} // namespace system
+} // namespace ts3
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_DISPLAY_H__

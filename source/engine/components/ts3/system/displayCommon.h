@@ -32,207 +32,165 @@ namespace system
 	using dsm_output_id_t = uint32;
 	using dsm_video_mode_id_t = uint64;
 	using dsm_video_settings_hash_t = uint64;
+	using DisplayOffset = math::Pos2i;
 	using DisplaySize = math::Size2u;
 
     /// @brief Represents invalid display system index (of an adapter or an output, for example).
-    constexpr dsm_index_t cxDsmIndexInvalid = Limits<dsm_index_t>::maxValue;
+    constexpr dsm_index_t CX_DSM_INDEX_INVALID = Limits<dsm_index_t>::maxValue;
 
 	/// @brief Represents invalid display settings hash. Used to identify/report invalid and/or empty configurations.
-	constexpr dsm_video_settings_hash_t cxDsmVideoSettingsHashInvalid = Limits<dsm_video_settings_hash_t>::maxValue;
+	constexpr dsm_video_settings_hash_t CX_DSM_VIDEO_SETTINGS_HASH_INVALID = Limits<dsm_video_settings_hash_t>::maxValue;
 
-	enum class EDsmDisplayDriverType : enum_default_value_t
+	/// @brief Specifies supported types of drivers available through a DisplayManager.
+	/// Driver support is platform-specific and some of them may not be available on some systems.
+	/// The default driver is always supported - if a certain platform does not support the required
+	///  display-related functionality, DisplayManager creation will fail with NotSupported error.
+	enum class EDisplayDriverType : enum_default_value_t
 	{
 		// Unknown driver. Cannot be used as an input.
 		// Reported for an uninitialized driver object.
 		Unknown,
+
 		// Native, platform-specific driver. Implemented either with dedicated
 		// libraries (like SDL) or low-level system API (Win32, XF86, XRR, Cocoa).
-		// Available on all platforms.
+		// Platform availability: All
 		Generic,
+
 		// Microsoft DXGI driver. Specific DXGI version depends on the platform.
 		// Platform availability: Win32, UWP
 		DXGI,
-		// Default driver. Actual type is platform-dependent:
+
+		// SDL-based driver implemented using only the library's functionality.
+		// Provided for compliance tests and for compatibility reasons.
+		// Platform availability: Linux, macOS
+		SDL,
+
+		// Default driver. Actual type is platform-specific, but it must resolve
+		// to a driver type which is always supported on the current platform.
+		// Most likely, the actual driver type will be as follows:
 		// - Win32/UWP: DXGI
 		// - Linux/Android/macOS/iOS: Generic
-		Default,
+		Default = 0xFFFF,
 	};
 
 	/// @brief Represents ID of the vendor of the graphics adapter/device.
-	enum class EDsmAdapterVendorID : enum_default_value_t
+	enum class EDisplayAdapterVendorID : enum_default_value_t
 	{
-		AMD = 1,
+	    Unknown,
+		AMD,
 		ARM,
 		Google,
 		Intel,
 		Microsoft,
 		Nvidia,
 		Qualcomm,
-		Unknown = 0,
 	};
 
 	/// @brief
-	enum EDsmAdapterFlags : uint32
+	enum EDisplayAdapterFlags : uint32
 	{
 		// Adapter is reported by system as the primary one.
-		E_DSM_ADAPTER_FLAG_PRIMARY_BIT = 0x1,
+		E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT = 0x1,
 		// Adapter is a multi-node adapter (e.g. classic CF- or SLI-configured adapter set)
-		E_DSM_ADAPTER_FLAG_MULTI_NODE_BIT = 0x2,
+		E_DISPLAY_ADAPTER_FLAG_MULTI_NODE_BIT = 0x2,
 		// Adapter is a software adapter. May indicate WARP-capable adapter in case of DXGI backend.
-		E_DSM_ADAPTER_FLAG_SOFTWARE_BIT = 0x4,
+		E_DISPLAY_ADAPTER_FLAG_SOFTWARE_BIT = 0x4,
 	};
 
 	/// @brief
-	enum EDsmOutputFlags : uint32
+	enum EDisplayOutputFlags : uint32
 	{
 		// Output is the primary output of an adapter
-		E_DSM_OUTPUT_FLAG_PRIMARY_BIT = 0x1
+		E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT = 0x1
 	};
 
 	/// @brief
-	enum EDsmVideoSettingsFlags : uint16
+	enum EDisplayVideoSettingsFlags : uint16
 	{
-		E_DSM_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT = 0x1,
-		E_DSM_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT = 0x2,
-		E_DSM_VIDEO_SETTINGS_FLAG_STEREO_BIT = 0x4
+		E_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT = 0x1,
+		E_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT = 0x2,
+		E_DISPLAY_VIDEO_SETTINGS_FLAG_STEREO_BIT = 0x4
 	};
 
-	enum EDsmVideoSettingsFilterFlags : uint32
+	enum EDisplayVideoSettingsFilterFlags : uint32
 	{
 		// If set, resolution is not used as a filter criterion.
-		E_DSM_VIDEO_MODE_FILTER_FLAG_RESOLUTION_IGNORE_BIT = 0x1,
+		E_DISPLAY_VIDEO_SETTINGS_FILTER_FLAG_RESOLUTION_IGNORE_BIT = 0x1,
 		// If set, resolution must match exactly for the mode to be included.
-		E_DSM_VIDEO_MODE_FILTER_FLAG_RESOLUTION_MATCH_EXACT_BIT = 0x2,
+		E_DISPLAY_VIDEO_SETTINGS_FILTER_FLAG_RESOLUTION_MATCH_EXACT_BIT = 0x2,
 		// If set, refresh rate is not used as a filter criterion.
-		E_DSM_VIDEO_MODE_FILTER_FLAG_REFRESH_RATE_IGNORE_BIT = 0x4,
+		E_DISPLAY_VIDEO_SETTINGS_FILTER_FLAG_REFRESH_RATE_IGNORE_BIT = 0x4,
 		// If set, refresh rate must match exactly for the mode to be included.
-		E_DSM_VIDEO_MODE_FILTER_FLAG_REFRESH_RATE_MATCH_EXACT_BIT = 0x8,
+		E_DISPLAY_VIDEO_SETTINGS_FILTER_FLAG_REFRESH_RATE_MATCH_EXACT_BIT = 0x8,
 		// If set, additional flags are not used as a filter criterion.
-		E_DSM_VIDEO_MODE_FILTER_FLAG_FLAGS_IGNORE_BIT = 0x40,
+		E_DISPLAY_VIDEO_SETTINGS_FILTER_FLAG_FLAGS_IGNORE_BIT = 0x40,
 	};
 
-	struct DsmScreenRect
+	struct ScreenRect
 	{
-		math::Vec2i32 offset;
-		math::Vec2u32 size;
+	    DisplayOffset offset;
+		DisplaySize size;
 	};
 
 	/// @brief
-	struct DsmVideoSettings
+	struct DisplayVideoSettings
 	{
-		math::Size2u resolution;
+	    DisplaySize resolution;
 		uint16 refreshRate = 0u;
-		Bitmask<EDsmVideoSettingsFlags> flags = 0u;
+		Bitmask<EDisplayVideoSettingsFlags> flags = 0u;
 	};
 
-	constexpr DsmVideoSettings cvDsmVideoSettingsEmpty { { 0U, 0U }, 0U, 0U };
+	constexpr DisplayVideoSettings cvDisplayVideoSettingsEmpty { { 0U, 0U }, 0U, 0U };
 
 	/// @brief
-	struct DsmVideoSettingsFilter
+	struct DisplayVideoSettingsFilter
 	{
 		// Reference settings used to filter video modes. By default, each property in a mode
 		// must be greater than or equal to the reference property (note for resolutions: both
 		// dimensions must be >=, i.e. 1024x768 satisfies 1024x600, but 1280x720 does not satisfy
-		// 1152x864). This does not apply to flags, which must have exact same bits set.
+		// 1152x864). This does not apply to the flags, which must have exact same bits set.
 		// Each property can be ignored by using its respective IGNORE flag. Also, "greater than
 		// or equal" condition can be changed to "equal" for a given property by setting MATCH_EXACT
 		// flag for that property.
-		DsmVideoSettings refSettings;
+		DisplayVideoSettings refSettings;
 		// Filter flags used to control the process. Flags set by default: none.
-		Bitmask<EDsmVideoSettingsFilterFlags> flags = 0;
+		Bitmask<EDisplayVideoSettingsFilterFlags> flags = 0;
 	};
 
-	constexpr DsmVideoSettingsFilter cvDsmVideoSettingsFilterNone { cvDsmVideoSettingsEmpty, 0U };
+	constexpr DisplayVideoSettingsFilter cvDisplayVideoSettingsFilterNone { cvDisplayVideoSettingsEmpty, 0U };
 
-	struct DsmAdapterDesc
+	struct DisplayAdapterDesc
 	{
-		EDsmDisplayDriverType driverType = EDsmDisplayDriverType::Unknown;
-		dsm_index_t index = cxDsmIndexInvalid;
+		EDisplayDriverType driverType = EDisplayDriverType::Unknown;
+		dsm_index_t index = CX_DSM_INDEX_INVALID;
 		std::string name;
-		EDsmAdapterVendorID vendorID;
-		Bitmask<EDsmAdapterFlags> flags = 0u;
-		void * driverReserved = nullptr;
+		EDisplayAdapterVendorID vendorID;
+		Bitmask<EDisplayAdapterFlags> flags = 0u;
 	};
 
-	struct DsmOutputDesc
+	struct DisplayOutputDesc
 	{
-		EDsmDisplayDriverType driverType = EDsmDisplayDriverType::Unknown;
-		dsm_index_t index = cxDsmIndexInvalid;
+		EDisplayDriverType driverType = EDisplayDriverType::Unknown;
+		dsm_index_t index = CX_DSM_INDEX_INVALID;
 		dsm_output_id_t id = 0u;
-		Bitmask<EDsmOutputFlags> flags = 0u;
+		Bitmask<EDisplayOutputFlags> flags = 0u;
 		std::string name;
-		DsmScreenRect screenRect;
-		void * driverReserved = nullptr;
+		ScreenRect screenRect;
 	};
 
-	struct DsmVideoModeDesc
+	struct DisplayVideoModeDesc
 	{
-		EDsmDisplayDriverType driverType = EDsmDisplayDriverType::Unknown;
-		dsm_index_t index = cxDsmIndexInvalid;
+		EDisplayDriverType driverType = EDisplayDriverType::Unknown;
+		dsm_index_t index = CX_DSM_INDEX_INVALID;
 		dsm_video_mode_id_t id = 0u;
 		dsm_video_settings_hash_t settingsHash = 0u;
 		ColorFormat format = ColorFormat::Unknown;
-		DsmVideoSettings settings;
-		void * driverReserved = nullptr;
+		DisplayVideoSettings settings;
 	};
 
-	union DsmOutputID
-	{
-		struct
-		{
-			dsm_index_t uAdapterIndex;
-			dsm_index_t uOutputIndex;
-		};
-		dsm_output_id_t outputID = 0u;
-	};
+	dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
-	union DsmVideoModeID
-	{
-		struct
-		{
-			dsm_output_id_t uOutputID;
-			dsm_index_t uColorFormatIndex;
-			dsm_index_t uModeIndex;
-		};
-		dsm_video_mode_id_t modeID = 0u;
-	};
-
-	union DsmVideoModeHash
-	{
-		struct
-		{
-			uint16 uResWidth;
-			uint16 uResHeight;
-			uint16 uRefreshRate;
-			uint8 uFlags;
-			uint8 uColorFormatIndex;
-		};
-		dsm_video_settings_hash_t modeHash = 0u;
-	};
-
-	inline bool operator==( const DsmVideoSettings & pLhs, const DsmVideoSettings & pRhs )
-	{
-		return ( pLhs.resolution == pRhs.resolution ) && ( pLhs.refreshRate == pRhs.refreshRate ) && ( pLhs.flags == pRhs.flags );
-	}
-
-	inline bool operator!=( const DsmVideoSettings & pLhs, const DsmVideoSettings & pRhs )
-	{
-		return ( pLhs.resolution != pRhs.resolution ) || ( pLhs.refreshRate != pRhs.refreshRate ) || ( pLhs.flags != pRhs.flags );
-	}
-
-	inline bool operator==( const DsmVideoSettingsFilter & pLhs, const DsmVideoSettingsFilter & pRhs )
-	{
-		return ( pLhs.refSettings == pRhs.refSettings ) && ( pLhs.flags == pRhs.flags );
-	}
-
-	inline bool operator!=( const DsmVideoSettingsFilter & pLhs, const DsmVideoSettingsFilter & pRhs )
-	{
-		return ( pLhs.refSettings != pRhs.refSettings ) || ( pLhs.flags != pRhs.flags );
-	}
-
-	dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DsmVideoSettings & pSettings );
-
-	std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DsmVideoSettings & pSettings );
+	std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
 } // namespace system
 } // namespace ts3

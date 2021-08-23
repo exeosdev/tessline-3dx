@@ -42,13 +42,6 @@ namespace system
 	}
 
 
-	GLSystemDriverNativeImpl::GLSystemDriverNativeImpl(  DisplayManagerHandle pDisplayManager  )
-	: GLSystemDriver( pDisplayManager )
-	{}
-
-	GLSystemDriverNativeImpl::~GLSystemDriverNativeImpl()
-	{}
-
 	void GLSystemDriverNativeImpl::_nativeInitializePlatform()
 	{
 	    auto & openglInitState = mNativeData.initState;
@@ -264,13 +257,6 @@ namespace system
 	}
 
 
-	GLDisplaySurfaceNativeImpl::GLDisplaySurfaceNativeImpl( GLSystemDriverHandle pDriver )
-	: GLDisplaySurface( std::move( pDriver ) )
-	{}
-
-	GLDisplaySurfaceNativeImpl::~GLDisplaySurfaceNativeImpl()
-	{}
-
 	void GLDisplaySurfaceNativeImpl::_nativeSwapBuffers()
 	{
 	    ::SwapBuffers( mNativeData.hdc );
@@ -295,13 +281,6 @@ namespace system
 	    return mNativeData.hdc != nullptr;
 	}
 
-
-	GLRenderContextNativeImpl::GLRenderContextNativeImpl( GLSystemDriverHandle pDriver )
-	: GLRenderContext( pDriver )
-	{}
-
-	GLRenderContextNativeImpl::~GLRenderContextNativeImpl()
-	{}
 
 	void GLRenderContextNativeImpl::_nativeBindForCurrentThread( const GLDisplaySurface & pDisplaySurface )
 	{
