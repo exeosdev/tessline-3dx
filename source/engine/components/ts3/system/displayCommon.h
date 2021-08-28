@@ -173,29 +173,26 @@ namespace system
 		EDisplayAdapterVendorID vendorID = EDisplayAdapterVendorID::Unknown;
 		Bitmask<EDisplayAdapterFlags> flags = 0u;
 		std::string name;
-		DisplayAdapter * adapter = nullptr;
 	};
 
 	struct DisplayOutputDesc
 	{
 		EDisplayDriverType driverType = EDisplayDriverType::Unknown;
 		dsm_index_t outputIndex = CX_DSM_INDEX_INVALID;
-		dsm_output_id_t id = 0u;
+		dsm_output_id_t outputID = 0u;
 		Bitmask<EDisplayOutputFlags> flags = 0u;
 		std::string name;
 		ScreenRect screenRect;
-		DisplayOutput * output = nullptr;
 	};
 
 	struct DisplayVideoModeDesc
 	{
 		EDisplayDriverType driverType = EDisplayDriverType::Unknown;
 		dsm_index_t videoModeIndex = CX_DSM_INDEX_INVALID;
-		dsm_video_mode_id_t id = 0u;
+		dsm_video_mode_id_t videoModeID = 0u;
 		dsm_video_settings_hash_t settingsHash = 0u;
 		ColorFormat format = ColorFormat::Unknown;
 		DisplayVideoSettings settings;
-		DisplayVideoMode * videoMode = nullptr;
 	};
 
 	using DisplayAdapterList = std::vector<DisplayAdapter *>;

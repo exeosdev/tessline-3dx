@@ -9,6 +9,7 @@ set( TS3_SYSTEM_SRC_FILES
         "displayDriver.h"
         "displayDriver.cpp"
         "displayDriverNative.h"
+        "displayDriverNative.cpp"
         "displayManager.h"
         "displayManager.cpp"
         "displayManagerNative.h"

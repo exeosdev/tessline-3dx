@@ -4,6 +4,8 @@
 
 #include "displayDriver.h"
 #include "sysContextNative.h"
+
+#include <deque>
 #include <unordered_map>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
@@ -26,6 +28,11 @@ namespace ts3
 {
 namespace system
 {
+
+    class DisplayDriverNativeImpl;
+    class DisplayAdapterNativeImpl;
+    class DisplayOutputNativeImpl;
+    class DisplayVideoModeNativeImpl;
 
     struct DisplayDriverNativeData
     {
@@ -125,32 +132,86 @@ namespace system
         return ( pLhs.refSettings != pRhs.refSettings ) || ( pLhs.flags != pRhs.flags );
     }
 
-    struct DisplayVideoModeInstance
+    class DisplayVideoModeNativeImpl : public DisplayVideoMode
     {
-        DisplayVideoModeHandle videoMode;
-        DisplayVideoModeDesc videoModeDesc;
-        DisplayVideoModeNativeData videoModeNativeData;
+    public:
+        DisplayVideoModeDesc mDesc;
+        DisplayVideoModeNativeData mNativeData;
+
+    public:
+        DisplayVideoModeNativeImpl( DisplayOutputNativeImpl * pOutput );
+        virtual ~DisplayVideoModeNativeImpl();
     };
 
-    struct DisplayOutputInstance
+    class DisplayOutputNativeImpl : public DisplayOutput
     {
-        using VideoModeList = std::vector<DisplayVideoModeInstance>;
-        using VideoModeMap = std::unordered_map<ColorFormat, VideoModeList>;
-        DisplayOutputHandle output;
-        DisplayOutputDesc outputDesc;
-        DisplayOutputNativeData outputNativeData;
+    public:
+        DisplayOutputDesc mDesc;
+        DisplayOutputNativeData mNativeData;
+
+    public:
+        DisplayOutputNativeImpl( DisplayAdapterNativeImpl * pAdapter );
+        virtual ~DisplayOutputNativeImpl();
+
+    protected:
+        struct VideoModesData
+        {
+            using VideoModeStorage = std::deque<DisplayVideoModeNativeImpl>;
+            using VideoModeIndexArray = std::vector<DisplayVideoModeNativeImpl *>;
+
+            VideoModeStorage storage;
+            VideoModeIndexArray indexArray;
+        };
+
+        using VideoModesDataMap = std::unordered_map<ColorFormat, VideoModesData>;
+
+        VideoModesDataMap _videoModesDataMap;
     };
 
-    struct DisplayAdapterInstance
+    class DisplayAdapterNativeImpl : public DisplayAdapter
     {
-        using OutputList = std::vector<DisplayOutputInstance>;
-        DisplayAdapterHandle adapter;
-        DisplayAdapterDesc adapterDesc;
-        DisplayAdapterNativeData adapterNativeData;
+    public:
+        DisplayAdapterDesc mDesc;
+        DisplayAdapterNativeData mNativeData;
+
+    public:
+        DisplayAdapterNativeImpl( DisplayDriverNativeImpl * pDisplayDriver );
+        virtual ~DisplayAdapterNativeImpl();
+
+    protected:
+        struct OutputsData
+        {
+            using OutputStorage = std::deque<DisplayOutputNativeImpl>;
+            using OutputIndexArray = std::vector<DisplayOutputNativeImpl *>;
+
+            OutputStorage storage;
+            OutputIndexArray indexArray;
+        };
+
+        OutputsData _outputsData;
     };
 
-    class DisplayDriverImplProxy : public DisplayDriver
+    class DisplayDriverNativeImpl : public DisplayDriver
     {
+    protected:
+        DisplayAdapterNativeImpl * addAdapter();
+
+        DisplayOutputNativeImpl * addOutput( DisplayAdapterNativeImpl & pAdapter );
+
+        DisplayVideoModeNativeImpl * addVideoMode( DisplayOutputNativeImpl & pOutputData,
+                                                   ColorFormat pColorFormat );
+
+    protected:
+        struct AdaptersData
+        {
+            using AdapterStorage = std::deque<DisplayAdapterNativeImpl>;
+            using AdapterIndexArray = std::vector<DisplayAdapterNativeImpl>;
+
+            AdapterStorage storage;
+            AdapterIndexArray indexArray;
+        };
+
+        AdaptersData _adaptersData;
     };
 
 } // namespace system

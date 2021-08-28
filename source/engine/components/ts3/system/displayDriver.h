@@ -11,6 +11,11 @@ namespace ts3
 namespace system
 {
 
+    struct DisplayDriverNativeData;
+    struct DisplayAdapterNativeData;
+    struct DisplayOutputNativeData;
+    struct DisplayVideoModeNativeData;
+
     ts3SysDeclareHandle( DisplayAdapter );
     ts3SysDeclareHandle( DisplayOutput );
     ts3SysDeclareHandle( DisplayVideoMode );
@@ -19,10 +24,13 @@ namespace system
     class DisplayDriver : public SysObject
     {
     public:
-        DisplayManagerHandle const mDisplayManager;
+        DisplayManager * const mDisplayManager;
+        EDisplayDriverType const mDriverType;
 
     public:
-        DisplayDriver( DisplayManagerHandle pDisplayManager );
+        DisplayDriver( DisplayManagerHandle pDisplayManager,
+                       const DisplayDriverNativeData & pNativeData );
+
         virtual ~DisplayDriver();
 
         void syncDisplayTopology();
@@ -34,9 +42,6 @@ namespace system
 
         TS3_PCL_ATTR_NO_DISCARD const DisplayAdapterList & getAdapterList() const;
         TS3_PCL_ATTR_NO_DISCARD const DisplayOutputList & getOutputList( dsm_index_t pAdapterIndex ) const;
-        TS3_PCL_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList( dsm_output_id_t pOutputID ) const;
-        TS3_PCL_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList( dsm_index_t pAdapterIndex,
-                                                                               dsm_index_t pOutputIndex ) const;
 
         TS3_PCL_ATTR_NO_DISCARD DisplayAdapter * getAdapter( dsm_index_t pAdapterIndex ) const;
         TS3_PCL_ATTR_NO_DISCARD DisplayAdapter * getDefaultAdapter() const;
@@ -50,6 +55,8 @@ namespace system
                                                             const DisplayVideoSettings & pSettings ) const;
 
         TS3_PCL_ATTR_NO_DISCARD static dsm_output_id_t queryOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex );
+
+        TS3_PCL_ATTR_NO_DISCARD static ColorFormat resolveSystemColorFormat( ColorFormat pColorFormat );
     };
 
     /// @brief
@@ -60,20 +67,13 @@ namespace system
         const DisplayAdapterDesc * const mAdapterDesc;
 
     public:
-        DisplayAdapter( DisplayDriverHandle pDisplayDriver, const DisplayAdapterDesc & pAdapterDesc );
+        DisplayAdapter( DisplayDriver * pDisplayDriver,
+                        const DisplayAdapterDesc & pAdapterDesc,
+                        const DisplayAdapterNativeData & pNativeData );
+
         virtual ~DisplayAdapter();
 
         void enumerateOutputs();
-
-        TS3_PCL_ATTR_NO_DISCARD uint32 checkVideoSettingsSupported( const DisplayVideoSettings & pVideoSettings ) const;
-
-        TS3_PCL_ATTR_NO_DISCARD uint32 checkVideoSettingsSupported( ColorFormat pColorFormat,
-                                                                    const DisplayVideoSettings & pVideoSettings ) const;
-
-        TS3_PCL_ATTR_NO_DISCARD DisplayOutputList getVideoSettingsCompatibleOutputList( const DisplayVideoSettings & pVideoSettings ) const;
-
-        TS3_PCL_ATTR_NO_DISCARD DisplayOutputList getVideoSettingsCompatibleOutputList( ColorFormat pColorFormat,
-                                                                                        const DisplayVideoSettings & pVideoSettings ) const;
 
         TS3_PCL_ATTR_NO_DISCARD const DisplayOutputList & getOutputList() const;
 
@@ -94,16 +94,16 @@ namespace system
         const DisplayOutputDesc * const mOutputDesc;
 
     public:
-        DisplayOutput( DisplayAdapterHandle pDisplayAdapter, const DisplayOutputDesc & pOutputDesc );
+        DisplayOutput( DisplayAdapterHandle pDisplayAdapter,
+                       const DisplayOutputDesc & pOutputDesc,
+                       const DisplayOutputNativeData & pNativeData );
+
         virtual ~DisplayOutput();
 
-        TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupported( const DisplayVideoSettings & pVideoSettings ) const;
+        TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupported( const DisplayVideoSettings & pVideoSettings,
+                                                                  ColorFormat pColorFormat = ColorFormat::SystemNative ) const;
 
-        TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupported( ColorFormat pColorFormat,
-                                                                  const DisplayVideoSettings & pVideoSettings ) const;
-
-        TS3_PCL_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList() const;
-        TS3_PCL_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList( ColorFormat pColorFormat ) const;
+        TS3_PCL_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList( ColorFormat pColorFormat = ColorFormat::SystemNative) const;
 
         TS3_PCL_ATTR_NO_DISCARD bool isActive() const;
         TS3_PCL_ATTR_NO_DISCARD bool isPrimaryOutput() const;
@@ -118,7 +118,10 @@ namespace system
         const DisplayVideoModeDesc * const mVideoModeDesc;
 
     public:
-        DisplayVideoMode( DisplayOutputHandle pDisplayOutput, const DisplayVideoModeDesc & pVideoModeDesc );
+        DisplayVideoMode( DisplayOutputHandle pDisplayOutput,
+                          const DisplayVideoModeDesc & pVideoModeDesc,
+                          const DisplayVideoModeNativeData & pNativeData );
+
         virtual ~DisplayVideoMode();
     };
 
