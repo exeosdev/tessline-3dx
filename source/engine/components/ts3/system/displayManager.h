@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_DISPLAY_H__
-#define __TS3_SYSTEM_DISPLAY_H__
+#ifndef __TS3_SYSTEM_DISPLAY_MANAGER_H__
+#define __TS3_SYSTEM_DISPLAY_MANAGER_H__
 
 #include "sysContext.h"
 #include "sysObject.h"
@@ -149,4 +149,4 @@ namespace system
 } // namespace system
 } // namespace ts3
 
-#endif // __TS3_SYSTEM_DISPLAY_H__
+#endif // __TS3_SYSTEM_DISPLAY_MANAGER_H__

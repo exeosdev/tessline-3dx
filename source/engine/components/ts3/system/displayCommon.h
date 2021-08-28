@@ -20,6 +20,9 @@
 #  pragma warning( disable: 4201 )  // 'Nonstandard extension used: nameless struct/union'
 #endif
 
+#define TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI 1
+#define TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL 0
+
 namespace ts3
 {
 namespace system
@@ -27,6 +30,10 @@ namespace system
 
     ts3SysDeclareHandle( DisplayManager );
     ts3SysDeclareHandle( DisplayDriver );
+
+    class DisplayAdapter;
+    class DisplayOutput;
+    class DisplayVideoMode;
 
 	using dsm_index_t = uint16;
 	using dsm_output_id_t = uint32;
@@ -162,31 +169,38 @@ namespace system
 	struct DisplayAdapterDesc
 	{
 		EDisplayDriverType driverType = EDisplayDriverType::Unknown;
-		dsm_index_t index = CX_DSM_INDEX_INVALID;
-		std::string name;
-		EDisplayAdapterVendorID vendorID;
+		dsm_index_t adapterIndex = CX_DSM_INDEX_INVALID;
+		EDisplayAdapterVendorID vendorID = EDisplayAdapterVendorID::Unknown;
 		Bitmask<EDisplayAdapterFlags> flags = 0u;
+		std::string name;
+		DisplayAdapter * adapter = nullptr;
 	};
 
 	struct DisplayOutputDesc
 	{
 		EDisplayDriverType driverType = EDisplayDriverType::Unknown;
-		dsm_index_t index = CX_DSM_INDEX_INVALID;
+		dsm_index_t outputIndex = CX_DSM_INDEX_INVALID;
 		dsm_output_id_t id = 0u;
 		Bitmask<EDisplayOutputFlags> flags = 0u;
 		std::string name;
 		ScreenRect screenRect;
+		DisplayOutput * output = nullptr;
 	};
 
 	struct DisplayVideoModeDesc
 	{
 		EDisplayDriverType driverType = EDisplayDriverType::Unknown;
-		dsm_index_t index = CX_DSM_INDEX_INVALID;
+		dsm_index_t videoModeIndex = CX_DSM_INDEX_INVALID;
 		dsm_video_mode_id_t id = 0u;
 		dsm_video_settings_hash_t settingsHash = 0u;
 		ColorFormat format = ColorFormat::Unknown;
 		DisplayVideoSettings settings;
+		DisplayVideoMode * videoMode = nullptr;
 	};
+
+	using DisplayAdapterList = std::vector<DisplayAdapter *>;
+	using DisplayOutputList = std::vector<DisplayOutput *>;
+	using DisplayVideoModeList = std::vector<DisplayVideoMode *>;
 
 	dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
 

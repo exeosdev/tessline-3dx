@@ -9,7 +9,7 @@ namespace system
 
     dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings )
 	{
-		DisplayVideoModeHash modeHashGen;
+		DisplayVideoSettingsHash modeHashGen;
 		modeHashGen.uResWidth = static_cast<uint16>( pSettings.resolution.x );
 		modeHashGen.uResHeight = static_cast<uint16>( pSettings.resolution.x );
 		modeHashGen.uRefreshRate = static_cast<uint16>( pSettings.refreshRate );

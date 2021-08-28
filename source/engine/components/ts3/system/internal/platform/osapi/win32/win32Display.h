@@ -9,9 +9,25 @@ namespace ts3
 namespace system
 {
 
-	struct DisplayManagerNativeData
+    struct DisplayManagerNativeData
 	{
 	};
+
+    struct DisplayDriverNativeDataGeneric
+    {
+    };
+
+	struct DisplayVideoModeNativeDataGeneric
+    {
+    };
+
+	struct DisplayOutputNativeDataGeneric
+    {
+    };
+
+	struct DisplayAdapterNativeDataGeneric
+    {
+    };
 
 } // namespace system
 } // namespace ts3

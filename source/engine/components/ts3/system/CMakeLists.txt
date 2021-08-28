@@ -4,11 +4,14 @@ set( TS3_SYSTEM_SRC_FILES
         "sysContext.cpp"
         "sysContextNative.h"
         "sysContextNative.cpp"
-        "display.h"
-        "display.cpp"
         "displayCommon.h"
         "displayCommon.cpp"
-        "displayNative.h"
+        "displayDriver.h"
+        "displayDriver.cpp"
+        "displayDriverNative.h"
+        "displayManager.h"
+        "displayManager.cpp"
+        "displayManagerNative.h"
         "dynamicLib.h"
         "dynamicLib.cpp"
         "eventCommon.h"
@@ -35,8 +38,8 @@ set( TS3_SYSTEM_SRC_FILES
 if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_WINFAMILY} )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
-            "internal/platform/shared/dxgi/dxgiDisplayDriver.h"
-            "internal/platform/shared/dxgi/dxgiDisplayDriver.cpp"
+            "internal/platform/shared/dxgi/dxgiDisplay.h"
+            "internal/platform/shared/dxgi/dxgiDisplay.cpp"
             "internal/platform/shared/wnf/wnfCommon.h"
             "internal/platform/shared/wnf/wnfCommon.cpp"
             "internal/platform/shared/wnf/wnfPerfCounter.h"

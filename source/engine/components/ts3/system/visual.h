@@ -18,7 +18,8 @@ namespace system
 		B8G8R8A8SRGB,
 		R8G8B8A8,
 		R8G8B8A8SRGB,
-		R10G10B10A2
+		R10G10B10A2,
+		SystemNative,
 	};
 
 	enum class ColorSpace : uint32
