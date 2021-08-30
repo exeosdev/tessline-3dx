@@ -6,55 +6,21 @@
 namespace ts3::system
 {
 
+    static void _dxgiInitializeDriver( DisplayDriverDXGI & pDriverDXGI );
 	static DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( ColorFormat pColorFormat );
 
 
-	DisplayDriverNativeImplDXGI::DisplayDriverNativeImplDXGI( DisplayManager * pDisplayManager )
-	: DisplayDriverNativeImpl( pDisplayManager, EDisplayDriverType::DXGI )
-	{}
-
-	DisplayDriverNativeImplDXGI::~DisplayDriverNativeImplDXGI() = default;
-
-	void DisplayDriverNativeImplDXGI::_drvInitialize()
+	DisplayDriverDXGI::DisplayDriverDXGI( DisplayManager * pDisplayManager )
+	: DisplayDriver( pDisplayManager, EDisplayDriverType::DXGI )
 	{
-	    ts3DebugAssert( mNativeData.dxgi );
-	    auto & dxgiDriverData = *( mNativeData.dxgi );
-
-	    if( dxgiDriverData.dxgiFactory == nullptr )
-	    {
-	        Bitmask<UINT> dxgiFactoryCreateFlags = 0;
-		#if ( TS3_DEBUG )
-	        dxgiFactoryCreateFlags.set( DXGI_CREATE_FACTORY_DEBUG );
-		#endif
-
-	        ComPtr<IDXGIFactory2> dxgiFactory2;
-	        auto hResult = ::CreateDXGIFactory2( dxgiFactoryCreateFlags, IID_PPV_ARGS( &dxgiFactory2 ) );
-
-	        if( SUCCEEDED( hResult ) )
-	        {
-	            dxgiDriverData.dxgiFactory = dxgiFactory2;
-	        }
-	        else
-	        {
-	            ComPtr<IDXGIFactory1> dxgiFactory1;
-	            hResult = ::CreateDXGIFactory1( IID_PPV_ARGS( &dxgiFactory1 ) );
-
-	            if( FAILED( hResult ) )
-	            {
-	                throw 0;
-	            }
-
-	            dxgiDriverData.dxgiFactory = dxgiFactory1;
-	        }
-	    }
+	    _dxgiInitializeDriver( *this );
 	}
 
-	void DisplayDriverNativeImplDXGI::_drvRelease()
-	{}
+	DisplayDriverDXGI::~DisplayDriverDXGI() = default;
 
-	void DisplayDriverNativeImplDXGI::_drvEnumAdapters()
+	void DisplayDriverDXGI::_nativeEnumAdapters()
 	{
-	    auto * dxgiFactory = mNativeData.dxgi->dxgiFactory.Get();
+	    auto * dxgiFactory = mPrivate->nativeDataPriv.dxgi->dxgiFactory.Get();
 
 	    for( UINT adapterIndex = 0u; ; ++adapterIndex )
 	    {
@@ -87,25 +53,25 @@ namespace ts3::system
 	        }
 
 	        auto * adapterObject = addAdapter();
-	        adapterObject->mNativeData.dxgi->dxgiAdapter = dxgiAdapter;
-	        adapterObject->mNativeData.dxgi->dxgiAdapterDesc = dxgiAdapterDesc;
-	        adapterObject->mDescPriv.name = _bstr_t( dxgiAdapterDesc.Description );
+	        adapterObject->mPrivate->nativeDataPriv.dxgi->dxgiAdapter = dxgiAdapter;
+	        adapterObject->mPrivate->nativeDataPriv.dxgi->dxgiAdapterDesc = dxgiAdapterDesc;
+	        adapterObject->mPrivate->descPriv.name = _bstr_t( dxgiAdapterDesc.Description );
 
 	        if( adapterIndex == 0 )
 	        {
-	            adapterObject->mDescPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
+	            adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
 	        }
 
 	        if( ( dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE ) != 0 )
 	        {
-	            adapterObject->mDescPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_SOFTWARE_BIT );
+	            adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_SOFTWARE_BIT );
 	        }
 	    }
 	}
 
-	void DisplayDriverNativeImplDXGI::_drvEnumOutputs( DisplayAdapterNativeImpl & pAdapter )
+	void DisplayDriverDXGI::_nativeEnumOutputs( DisplayAdapter & pAdapter )
 	{
-	    auto * dxgiAdapter = pAdapter.mNativeData.dxgi->dxgiAdapter.Get();
+	    auto * dxgiAdapter = pAdapter.mPrivate->nativeDataPriv.dxgi->dxgiAdapter.Get();
 
 	    for( UINT outputIndex = 0u; ; ++outputIndex )
 	    {
@@ -144,19 +110,19 @@ namespace ts3::system
 	        }
 
 	        auto * outputObject = addOutput( pAdapter );
-	        outputObject->mNativeData.dxgi->dxgiOutput = dxgiOutput1;
-	        outputObject->mNativeData.dxgi->dxgiOutputDesc = dxgiOutputDesc;
-	        outputObject->mDescPriv.name = _bstr_t( dxgiOutputDesc.DeviceName );
-	        outputObject->mDescPriv.screenRect.offset.x = dxgiOutputDesc.DesktopCoordinates.left;
-	        outputObject->mDescPriv.screenRect.offset.y = dxgiOutputDesc.DesktopCoordinates.top;
-	        outputObject->mDescPriv.screenRect.size.x = dxgiOutputDesc.DesktopCoordinates.right - dxgiOutputDesc.DesktopCoordinates.left;
-	        outputObject->mDescPriv.screenRect.size.y = dxgiOutputDesc.DesktopCoordinates.bottom - dxgiOutputDesc.DesktopCoordinates.top;
+	        outputObject->mPrivate->nativeDataPriv.dxgi->dxgiOutput = dxgiOutput1;
+	        outputObject->mPrivate->nativeDataPriv.dxgi->dxgiOutputDesc = dxgiOutputDesc;
+	        outputObject->mPrivate->descPriv.name = _bstr_t( dxgiOutputDesc.DeviceName );
+	        outputObject->mPrivate->descPriv.screenRect.offset.x = dxgiOutputDesc.DesktopCoordinates.left;
+	        outputObject->mPrivate->descPriv.screenRect.offset.y = dxgiOutputDesc.DesktopCoordinates.top;
+	        outputObject->mPrivate->descPriv.screenRect.size.x = dxgiOutputDesc.DesktopCoordinates.right - dxgiOutputDesc.DesktopCoordinates.left;
+	        outputObject->mPrivate->descPriv.screenRect.size.y = dxgiOutputDesc.DesktopCoordinates.bottom - dxgiOutputDesc.DesktopCoordinates.top;
 	    }
 	}
 
-	void DisplayDriverNativeImplDXGI::_drvEnumVideoModes( DisplayOutputNativeImpl & pOutput, ColorFormat pColorFormat )
+	void DisplayDriverDXGI::_nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
 	{
-	    auto * dxgiOutput = pOutput.mNativeData.dxgi->dxgiOutput.Get();
+	    auto * dxgiOutput = pOutput.mPrivate->nativeDataPriv.dxgi->dxgiOutput.Get();
 	    auto dxgiFormat = _dxgiTranslateColorFormatToDXGIFormat( pColorFormat );
 
 	    if ( dxgiFormat == DXGI_FORMAT_UNKNOWN )
@@ -217,9 +183,43 @@ namespace ts3::system
 	        }
 
 	        auto * videoMode = addVideoMode( pOutput, pColorFormat );
-	        videoMode->mNativeData.dxgi->dxgiModeDesc = dxgiDisplayModeDesc;
-	        videoMode->mDescPriv.settings = videoSettings;
-	        videoMode->mDescPriv.settingsHash = settingsHash;
+	        videoMode->mPrivate->nativeDataPriv.dxgi->dxgiModeDesc = dxgiDisplayModeDesc;
+	        videoMode->mPrivate->descPriv.settings = videoSettings;
+	        videoMode->mPrivate->descPriv.settingsHash = settingsHash;
+	    }
+	}
+
+	void _dxgiInitializeDriver( DisplayDriverDXGI & pDriverDXGI )
+	{
+	    ts3DebugAssert( pDriverDXGI.mPrivate->nativeDataPriv.dxgi );
+	    auto & dxgiDriverData = *( pDriverDXGI.mPrivate->nativeDataPriv.dxgi );
+
+	    if( dxgiDriverData.dxgiFactory == nullptr )
+	    {
+	        Bitmask<UINT> dxgiFactoryCreateFlags = 0;
+		#if ( TS3_DEBUG )
+	        dxgiFactoryCreateFlags.set( DXGI_CREATE_FACTORY_DEBUG );
+		#endif
+
+	        ComPtr<IDXGIFactory2> dxgiFactory2;
+	        auto hResult = ::CreateDXGIFactory2( dxgiFactoryCreateFlags, IID_PPV_ARGS( &dxgiFactory2 ) );
+
+	        if( SUCCEEDED( hResult ) )
+	        {
+	            dxgiDriverData.dxgiFactory = dxgiFactory2;
+	        }
+	        else
+	        {
+	            ComPtr<IDXGIFactory1> dxgiFactory1;
+	            hResult = ::CreateDXGIFactory1( IID_PPV_ARGS( &dxgiFactory1 ) );
+
+	            if( FAILED( hResult ) )
+	            {
+	                throw 0;
+	            }
+
+	            dxgiDriverData.dxgiFactory = dxgiFactory1;
+	        }
 	    }
 	}
 

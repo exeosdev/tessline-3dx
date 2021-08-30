@@ -9,13 +9,18 @@
 namespace ts3::system
 {
 
-    ts3SysDeclareHandle( DisplayAdapter );
-    ts3SysDeclareHandle( DisplayOutput );
-    ts3SysDeclareHandle( DisplayVideoMode );
+    struct DisplayManagerNativeData;
+
+    ts3SysDeclareHandle( DisplayManager );
 
     /// @brief
     class DisplayManager : public SysObject
     {
+    public:
+        struct ObjectPrivateData;
+        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        const DisplayManagerNativeData * const mNativeData = nullptr;
+
     public:
         explicit DisplayManager( SysContextHandle pSysContext );
         virtual ~DisplayManager();
@@ -35,8 +40,8 @@ namespace ts3::system
                                      math::Size2u & pWindowSize ) const;
 
     private:
-        virtual void _nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const = 0;
-        virtual void _nativeQueryMinWindowSize( DisplaySize & pOutSize ) const = 0;
+        void _nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const;
+        void _nativeQueryMinWindowSize( DisplaySize & pOutSize ) const;
     };
 
 } // namespace ts3::system

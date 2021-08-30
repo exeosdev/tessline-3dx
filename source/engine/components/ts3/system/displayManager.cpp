@@ -1,5 +1,5 @@
 
-#include "displayNative.h"
+#include "displayManagerNative.h"
 #include "windowCommon.h"
 
 namespace ts3::system
@@ -7,6 +7,8 @@ namespace ts3::system
 
     DisplayManager::DisplayManager( SysContextHandle pSysContext )
     : SysObject( std::move( pSysContext ) )
+    , mPrivate( std::make_unique<ObjectPrivateData>() )
+    , mNativeData( &( mPrivate->nativeDataPriv ) )
     {}
 
     DisplayManager::~DisplayManager()

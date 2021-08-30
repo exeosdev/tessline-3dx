@@ -7,10 +7,6 @@
 namespace ts3::system
 {
 
-    struct DisplayManagerNativeData
-	{
-	};
-
     struct DisplayDriverNativeDataGeneric
     {
     };

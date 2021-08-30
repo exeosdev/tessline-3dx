@@ -65,12 +65,12 @@ namespace ts3::system
     , mDesc( &( mPrivate->descPriv ) )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
     {
-        dsmInitializeNativeData( &mNativeData, mDisplayDriver->mDriverType );
+        dsmInitializeNativeData( &( mPrivate->nativeDataPriv ), mDisplayDriver->mDriverType );
     }
 
     DisplayOutput::~DisplayOutput()
     {
-        dsmReleaseNativeData( &mNativeData, mDisplayDriver->mDriverType );
+        dsmReleaseNativeData( &( mPrivate->nativeDataPriv ), mDisplayDriver->mDriverType );
     }
 
     const DisplayVideoModeList & DisplayOutput::getVideoModeList( ColorFormat pColorFormat ) const
@@ -100,12 +100,12 @@ namespace ts3::system
     , mDesc( &( mPrivate->descPriv ) )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
     {
-        dsmInitializeNativeData( &mNativeData, mDisplayDriver->mDriverType );
+        dsmInitializeNativeData( &( mPrivate->nativeDataPriv ), mDisplayDriver->mDriverType );
     }
 
     DisplayVideoMode::~DisplayVideoMode()
     {
-        dsmReleaseNativeData( &mNativeData, mDisplayDriver->mDriverType );
+        dsmReleaseNativeData( &( mPrivate->nativeDataPriv ), mDisplayDriver->mDriverType );
     }
 
 
@@ -122,7 +122,7 @@ namespace ts3::system
 
     DisplayDriver::~DisplayDriver()
     {
-        dsmReleaseNativeData( &mNativeData, mDriverType );
+        dsmReleaseNativeData( &( mPrivate->nativeDataPriv ), mDriverType );
     }
 
     void DisplayDriver::initializeDisplayConfiguration()
@@ -191,7 +191,7 @@ namespace ts3::system
 
         auto & adapter = mPrivate->adapterStorage.emplace_back( this );
         adapter.mPrivate->descPriv.driverType = mDriverType;
-        adapter.mPrivate->descPriv.adapterIndex = adapterIndex;
+        adapter.mPrivate->descPriv.adapterIndex = static_cast<dsm_index_t>( adapterIndex );
 
         ts3DebugAssert( mPrivate->adapterList.empty() );
 
@@ -208,7 +208,7 @@ namespace ts3::system
 
         auto & output = pAdapter.mPrivate->outputStorage.emplace_back( &pAdapter );
         output.mPrivate->descPriv.driverType = mDriverType;
-        output.mPrivate->descPriv.outputIndex = outputIndex;
+        output.mPrivate->descPriv.outputIndex = outputIDGen.uOutputIndex;
         output.mPrivate->descPriv.outputID = outputIDGen.outputID;
 
         ts3DebugAssert( pAdapter.mPrivate->outputList.empty() );
@@ -229,7 +229,7 @@ namespace ts3::system
 
         auto & videoMode = colorFormatData.videoModeStorage.emplace_back( &pOutput );
         videoMode.mPrivate->descPriv.driverType = mDriverType;
-        videoMode.mPrivate->descPriv.videoModeIndex = videoModeIndex;
+        videoMode.mPrivate->descPriv.videoModeIndex = videoModeIDGen.uModeIndex;
         videoMode.mPrivate->descPriv.videoModeID = videoModeIDGen.modeID;
         videoMode.mPrivate->descPriv.colorFormat = pColorFormat;
 

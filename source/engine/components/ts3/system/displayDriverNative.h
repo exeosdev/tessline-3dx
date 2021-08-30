@@ -195,17 +195,6 @@ namespace ts3::system
             dsm_index_t uOutputIndex;
         };
         dsm_output_id_t outputID = 0u;
-
-//        DisplayOutputID() = default;
-//
-//        explicit DisplayOutputID( dsm_output_id_t pOutputID )
-//        : outputID( pOutputID )
-//        {}
-//
-//        DisplayOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex )
-//        : uAdapterIndex( pAdapterIndex )
-//        , uOutputIndex( pOutputIndex )
-//        {}
     };
 
     inline constexpr dsm_index_t dsmExtractOutputIDAdapterIndex( dsm_output_id_t pOutputID )
@@ -330,7 +319,7 @@ namespace ts3::system
                     break;
                 }
 			#endif
-			#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
+			#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
                 case EDisplayDriverType::SDL:
                 {
                     if( pNativeData->sdl != nullptr )
