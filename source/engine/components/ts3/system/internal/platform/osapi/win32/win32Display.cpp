@@ -21,9 +21,27 @@ namespace ts3::system
     //		pMinWindowSize.y = static_cast<uint32>( minWindowHeight );
     //	}
 
-    DisplayAdapterNativeImpl * _win32FindAdapterByUUID( DisplayDriverNativeImplGeneric & pDisplayDriver, const std::string & pUUID );
-    DisplayOutputNativeImpl * _win32FindOutputForDeviceID( DisplayAdapterNativeImpl * pAdapter, const char * pDeviceID );
+    // Returns a pointer to an existing adapter with a specified UUID (DeviceKey).
+    DisplayAdapterNativeImpl * _win32FindAdapterByUUID( DisplayDriverNativeImplGeneric & pDriver, const std::string & pUUID );
+
+    // Returns a pointer to an existing output of a specified adapter with a given output name (DeviceID);
+    DisplayOutputNativeImpl * _win32FindOutputForDeviceID( DisplayAdapterNativeImpl & pAdapter, const char * pDeviceID );
+
+    // Returns a name for an output by extracting the output part from the DisplayDevice registry key.
     std::string _win32GetAdapterOutputName( const std::string & pAdapterRegistryKey );
+
+
+    DisplayDriverNativeImplGeneric::DisplayDriverNativeImplGeneric( DisplayManager * pDisplayManager )
+    : DisplayDriverNativeImpl( pDisplayManager, EDisplayDriverType::Generic )
+    {}
+
+    DisplayDriverNativeImplGeneric::~DisplayDriverNativeImplGeneric() = default;
+
+    void DisplayDriverNativeImplGeneric::_drvInitialize()
+    {}
+
+    void DisplayDriverNativeImplGeneric::_drvRelease()
+    {}
 
     // -- Note on adapters enumeration:
     // Without the awesome DXGI, EnumDisplayDevices is the only reliable way of enumerating the display stuff.
@@ -35,7 +53,7 @@ namespace ts3::system
     // 2) \\Registry\\Machine\\System\\CurrentControlSet\\Control\\Video\\{79BD17DD-B591-11EA-B520-AC9E17ECDDE5}\\0001
     // So, to enumerate adapters properly, we must check the UUID of the adapter to not duplicate the entries.
     // See SysDisplayDriverGenericImplProxy::nativeEnumAdapterList below.
-    void DisplayDriverNativeImplGeneric::_nativeEnumAdapters()
+    void DisplayDriverNativeImplGeneric::_drvEnumAdapters()
     {
         // Represents information about a display device in the system. String properties have the following meaning:
         // ::DeviceID - PCI-specific ID, not really interesting
@@ -101,7 +119,7 @@ namespace ts3::system
         {
             // Output name matches the DISPLAY_DEVICEA::DeviceName property of its adapter.
             // Find
-            auto * outputObject = _win32FindOutputForDeviceID( adapterObject, gdiMonitorInfo.szDevice );
+            auto * outputObject = _win32FindOutputForDeviceID( *adapterObject, gdiMonitorInfo.szDevice );
 
             if( outputObject != nullptr )
             {
@@ -124,7 +142,7 @@ namespace ts3::system
     // the information it gives is rather poor (limited to output's name) and there seem to be no obvious way to get
     // an extended info using that name. So, instead, we enumerate all monitors in the system using EnumDisplayMonitors
     // and then use the associated device's name to properly add it.
-    void DisplayDriverNativeImplGeneric::_nativeEnumOutputs( DisplayAdapterNativeImpl & pAdapter )
+    void DisplayDriverNativeImplGeneric::_drvEnumOutputs( DisplayAdapterNativeImpl & pAdapter )
     {
         DISPLAY_DEVICEA gdiOutputInfo;
         gdiOutputInfo.cb = sizeof( DISPLAY_DEVICEA );
@@ -164,7 +182,7 @@ namespace ts3::system
         }
     }
 
-    void DisplayDriverNativeImplGeneric::_nativeEnumVideoModes( DisplayOutputNativeImpl & pOutput, ColorFormat pColorFormat )
+    void DisplayDriverNativeImplGeneric::_drvEnumVideoModes( DisplayOutputNativeImpl & pOutput, ColorFormat pColorFormat )
     {
         DEVMODEA displayMode;
         displayMode.dmSize = sizeof( DEVMODEA );
@@ -211,15 +229,15 @@ namespace ts3::system
         }
     }
 
-    DisplayAdapterNativeImpl * _win32FindAdapterByUUID( DisplayDriverNativeImplGeneric & pDisplayDriver, const std::string & pUUID )
+    DisplayAdapterNativeImpl * _win32FindAdapterByUUID( DisplayDriverNativeImplGeneric & pDriver, const std::string & pUUID )
     {
-        auto adapterIter = std::find_if( pDisplayDriver.mAdapterStorage.begin(),
-                                         pDisplayDriver.mAdapterStorage.end(),
+        auto adapterIter = std::find_if( pDriver.mAdapterStorage.begin(),
+                                         pDriver.mAdapterStorage.end(),
                                          [&pUUID]( const DisplayAdapterNativeImpl & pAdapter ) -> bool {
                                              return pAdapter.mNativeData.generic->adapterUUID == pUUID;
                                          });
 
-        return ( adapterIter != pDisplayDriver.mAdapterStorage.end() ) ? &( *adapterIter ) : nullptr;
+        return ( adapterIter != pDriver.mAdapterStorage.end() ) ? &( *adapterIter ) : nullptr;
     }
 
     DisplayOutputNativeImpl * _win32FindOutputForDeviceID( DisplayAdapterNativeImpl & pAdapter, const char * pDeviceID )

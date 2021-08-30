@@ -29,11 +29,6 @@ namespace ts3::system
 		DXGI_MODE_DESC dxgiModeDesc;
 	};
 
-	struct DisplayDriverCreateInfoDXGI
-	{
-		IDXGIFactory * dxgiFactory = nullptr;
-	};
-
 } // namespace ts3::system
 
 #endif // __TS3_SYSTEM_DXGI_DISPLAY_DRIVER_H__

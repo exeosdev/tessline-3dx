@@ -52,6 +52,89 @@ namespace ts3::system
         dsmReleaseNativeData( &mNativeData, mDriverType );
     }
 
+    void DisplayDriverNativeImpl::_nativeInitialize()
+    {
+        _drvInitialize();
+    }
+    void DisplayDriverNativeImpl::_nativeRelease()
+    {
+        _drvRelease();
+    }
+
+    void DisplayDriverNativeImpl::_nativeResetDisplayConfiguration()
+    {
+        mAdapterStorage.clear();
+        mAdapterList.clear();
+    }
+
+    void DisplayDriverNativeImpl::_nativeSyncDisplayConfiguration()
+    {
+        ts3DebugAssert( mAdapterStorage.empty() && mAdapterList.empty() );
+
+        _drvEnumAdapters();
+
+        if( mAdapterList.empty() )
+        {
+            // Report
+            return;
+        }
+
+        for( auto & adapter : mAdapterStorage )
+        {
+            _drvEnumOutputs( adapter );
+
+            if( adapter.isPrimaryAdapter() )
+            {
+                mPrimaryAdapter = &adapter;
+            }
+
+            if( adapter.mOutputList.empty() )
+            {
+                // Warn: no active outputs found for 'adapter'
+                continue;
+            }
+
+            for( auto & output : adapter.mOutputStorage )
+            {
+                _drvEnumVideoModes( output, ColorFormat::SystemNative );
+
+                if( output.isPrimaryOutput() )
+                {
+                    adapter.mPrimaryOutput = &output;
+                }
+
+                if( output.mColorFormatMap[ColorFormat::SystemNative].videoModeList.empty() )
+                {
+                    // Warn: no supported display modes found for 'adapter'
+                    continue;
+                }
+            }
+        }
+    }
+
+    const DisplayAdapterList & DisplayDriverNativeImpl::_nativeGetAdapterList() const
+    {
+        return mAdapterList;
+    }
+
+    const DisplayOutputList & DisplayDriverNativeImpl::_nativeGetOutputList( dsm_index_t pAdapterIndex ) const
+    {
+        const auto & adapter = mAdapterStorage.at( pAdapterIndex );
+        return adapter.mOutputList;
+    }
+
+    const DisplayVideoModeList & DisplayDriverNativeImpl::_nativeGetVideoModeList( dsm_output_id_t pOutputID, ColorFormat pColorFormat ) const
+    {
+        DisplayOutputID outputIDGen;
+        outputIDGen.outputID = pOutputID;
+
+        const auto & adapter = mAdapterStorage.at( outputIDGen.uAdapterIndex );
+        const auto & output = adapter.mOutputStorage.at( outputIDGen.uOutputIndex );
+        const auto & colorFormatData = output.mColorFormatMap.at( pColorFormat );
+
+        return colorFormatData.videoModeList;
+    }
+
     DisplayAdapterNativeImpl * DisplayDriverNativeImpl::addAdapter()
     {
         const auto adapterIndex = mAdapterStorage.size();

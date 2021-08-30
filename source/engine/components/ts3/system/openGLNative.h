@@ -45,10 +45,10 @@ namespace ts3::system
         explicit GLDisplaySurfaceNativeImpl( GLSystemDriverHandle pDriver );
         virtual ~GLDisplaySurfaceNativeImpl();
 
-        virtual void _nativeSwapBuffers() override;
-        virtual void _nativeDestroy() override;
-        virtual void _nativeQueryRenderAreaSize( WindowSize & pOutSize ) const override;
-        virtual bool _nativeIsValid() const override;
+        virtual void _nativeSwapBuffers() override final;
+        virtual void _nativeDestroy() override final;
+        virtual void _nativeQueryRenderAreaSize( WindowSize & pOutSize ) const override final;
+        virtual bool _nativeIsValid() const override final;
     };
 
     /// @brief
@@ -61,10 +61,10 @@ namespace ts3::system
         explicit GLRenderContextNativeImpl( GLSystemDriverHandle pDriver );
         virtual ~GLRenderContextNativeImpl();
 
-        virtual void _nativeBindForCurrentThread( const GLDisplaySurface & pSurface ) override;
-        virtual void _nativeDestroy() override;
-        virtual bool _nativeIsCurrent() const override;
-        virtual bool _nativeIsValid() const override;
+        virtual void _nativeBindForCurrentThread( const GLDisplaySurface & pSurface ) override final;
+        virtual void _nativeDestroy() override final;
+        virtual bool _nativeIsCurrent() const override final;
+        virtual bool _nativeIsValid() const override final;
     };
 
 } // namespace ts3::system

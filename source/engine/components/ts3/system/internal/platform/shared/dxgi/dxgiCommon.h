@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_DXGI_COMMON_H__
 #define __TS3_SYSTEM_DXGI_COMMON_H__
 
-#include "../winfamily/winfamilyCommon.h"
+#include "../wnf/wnfCommon.h"
 
 #include <dxgi.h>
 #include <dxgi1_2.h>

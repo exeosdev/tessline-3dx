@@ -142,6 +142,7 @@ namespace ts3::system
         return ( pLhs.refSettings != pRhs.refSettings ) || ( pLhs.flags != pRhs.flags );
     }
 
+    /// @brief Native-level implementation class for DisplayVideoMode. Introduces NativeData.
     class DisplayVideoModeNativeImpl : public DisplayVideoMode
     {
     public:
@@ -178,6 +179,7 @@ namespace ts3::system
         DisplayAdapterNativeData mNativeData;
         std::deque<DisplayOutputNativeImpl> mOutputStorage;
         DisplayOutputList mOutputList;
+        DisplayOutputNativeImpl * mPrimaryOutput = nullptr;
 
     public:
         explicit DisplayAdapterNativeImpl( DisplayDriverNativeImpl * pDisplayDriver );
@@ -190,6 +192,7 @@ namespace ts3::system
         DisplayDriverNativeData mNativeData;
         std::deque<DisplayAdapterNativeImpl> mAdapterStorage;
         DisplayAdapterList mAdapterList;
+        DisplayAdapterNativeImpl * mPrimaryAdapter = nullptr;
 
     public:
         DisplayDriverNativeImpl( DisplayManager * pDisplayManager,
@@ -200,21 +203,67 @@ namespace ts3::system
     protected:
         DisplayAdapterNativeImpl * addAdapter();
         DisplayOutputNativeImpl * addOutput( DisplayAdapterNativeImpl & pAdapter );
-        DisplayVideoModeNativeImpl * addVideoMode( DisplayOutputNativeImpl & pOutputData, ColorFormat pColorFormat );
+        DisplayVideoModeNativeImpl * addVideoMode( DisplayOutputNativeImpl & pOutput, ColorFormat pColorFormat );
 
     private:
-        virtual void _nativeEnumAdapters() = 0;
-        virtual void _nativeEnumOutputs( DisplayAdapterNativeImpl & pAdapter ) = 0;
-        virtual void _nativeEnumVideoModes( DisplayOutputNativeImpl & pOutputData, ColorFormat pColorFormat ) = 0;
+        virtual void _nativeInitialize() override final;
+        virtual void _nativeRelease() override final;
+        virtual void _nativeResetDisplayConfiguration() override final;
+        virtual void _nativeSyncDisplayConfiguration() override final;
+        virtual const DisplayAdapterList & _nativeGetAdapterList() const override final;
+        virtual const DisplayOutputList & _nativeGetOutputList( dsm_index_t pAdapterIndex ) const override final;
+        virtual const DisplayVideoModeList & _nativeGetVideoModeList( dsm_output_id_t pOutputID, ColorFormat pColorFormat ) const override final;
+
+        virtual void _drvInitialize() = 0;
+        virtual void _drvRelease() = 0;
+        virtual void _drvEnumAdapters() = 0;
+        virtual void _drvEnumOutputs( DisplayAdapterNativeImpl & pAdapter ) = 0;
+        virtual void _drvEnumVideoModes( DisplayOutputNativeImpl & pOutput, ColorFormat pColorFormat ) = 0;
     };
 
     class DisplayDriverNativeImplGeneric : public DisplayDriverNativeImpl
     {
+    public:
+        explicit DisplayDriverNativeImplGeneric( DisplayManager * pDisplayManager );
+        virtual ~DisplayDriverNativeImplGeneric();
+
     private:
-        virtual void _nativeEnumAdapters() override final;
-        virtual void _nativeEnumOutputs( DisplayAdapterNativeImpl & pAdapter ) override final;
-        virtual void _nativeEnumVideoModes( DisplayOutputNativeImpl & pOutputData, ColorFormat pColorFormat ) override final;
+        virtual void _drvInitialize() override final;
+        virtual void _drvRelease() override final;
+        virtual void _drvEnumAdapters() override final;
+        virtual void _drvEnumOutputs( DisplayAdapterNativeImpl & pAdapter ) override final;
+        virtual void _drvEnumVideoModes( DisplayOutputNativeImpl & pOutput, ColorFormat pColorFormat ) override final;
     };
+
+#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
+    class DisplayDriverNativeImplDXGI : public DisplayDriverNativeImpl
+    {
+    public:
+        explicit DisplayDriverNativeImplDXGI( DisplayManager * pDisplayManager );
+        virtual ~DisplayDriverNativeImplDXGI();
+
+    private:
+        virtual void _drvInitialize() override final;
+        virtual void _drvRelease() override final;
+        virtual void _drvEnumAdapters() override final;
+        virtual void _drvEnumOutputs( DisplayAdapterNativeImpl & pAdapter ) override final;
+        virtual void _drvEnumVideoModes( DisplayOutputNativeImpl & pOutput, ColorFormat pColorFormat ) override final;
+    };
+#endif
+
+#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
+    class DisplayDriverNativeImplSDL : public DisplayDriverNativeImpl
+    {
+    public:
+        explicit DisplayDriverNativeImplSDL( DisplayManager * pDisplayManager );
+        virtual ~DisplayDriverNativeImplSDL();
+
+    private:
+        virtual void _drvEnumAdapters() override final;
+        virtual void _drvEnumOutputs( DisplayAdapterNativeImpl & pAdapter ) override final;
+        virtual void _drvEnumVideoModes( DisplayOutputNativeImpl & pOutput, ColorFormat pColorFormat ) override final;
+    };
+#endif
 
     template <typename TpNativeData>
     inline void dsmInitializeNativeData( TpNativeData * pNativeData, EDisplayDriverType pDriverType )
