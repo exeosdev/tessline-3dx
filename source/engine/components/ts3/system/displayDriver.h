@@ -22,21 +22,20 @@ namespace ts3::system
     class DisplayDriver : public SysObject
     {
     public:
+        struct DriverPrivateData;
         DisplayManager * const mDisplayManager;
         EDisplayDriverType const mDriverType;
+        std::unique_ptr<DriverPrivateData> const mPrivateData;
+        const DisplayDriverNativeData * const mNativeData;
 
     public:
-        DisplayDriver( DisplayManager * pDisplayManager,
-                       EDisplayDriverType pDriverType );
-
+        DisplayDriver( DisplayManager * pDisplayManager, EDisplayDriverType pDriverType );
         virtual ~DisplayDriver();
 
         void initialize();
-
         void release();
 
         void resetDisplayConfiguration();
-
         void syncDisplayConfiguration();
 
         TS3_PCL_ATTR_NO_DISCARD const DisplayAdapterList & getAdapterList() const;
@@ -52,27 +51,30 @@ namespace ts3::system
 
         TS3_PCL_ATTR_NO_DISCARD static ColorFormat resolveSystemColorFormat( ColorFormat pColorFormat );
 
+    protected:
+        DisplayAdapter * registerAdapter();
+        DisplayOutput * registerOutput( DisplayAdapter & pAdapter );
+        DisplayVideoMode * registerVideoMode( DisplayOutput & pOutput, ColorFormat pColorFormat );
+
     private:
         virtual void _nativeInitialize() = 0;
         virtual void _nativeRelease() = 0;
         virtual void _nativeResetDisplayConfiguration() = 0;
         virtual void _nativeSyncDisplayConfiguration() = 0;
-        virtual const DisplayAdapterList & _nativeGetAdapterList() const = 0;
-        virtual const DisplayOutputList & _nativeGetOutputList( dsm_index_t pAdapterIndex ) const = 0;
-        virtual const DisplayVideoModeList & _nativeGetVideoModeList( dsm_output_id_t pOutputID, ColorFormat pColorFormat ) const = 0;
     };
 
     /// @brief
     class DisplayAdapter : public SysObject
     {
     public:
+        struct AdapterPrivateData;
         DisplayDriver * const mDisplayDriver;
+        std::unique_ptr<AdapterPrivateData> const mPrivateData;
         const DisplayAdapterDesc * const mDesc;
+        const DisplayAdapterNativeData * const mNativeData;
 
     public:
-        DisplayAdapter( DisplayDriver * pDisplayDriver,
-                        const DisplayAdapterDesc & pAdapterDesc );
-
+        explicit DisplayAdapter( DisplayDriver * pDisplayDriver );
         virtual ~DisplayAdapter();
 
         void enumerateOutputs();
@@ -91,14 +93,15 @@ namespace ts3::system
     class DisplayOutput : public SysObject
     {
     public:
+        struct OutputPrivateData;
         DisplayDriver * const mDisplayDriver;
         DisplayAdapter * const mParentAdapter;
+        std::unique_ptr<OutputPrivateData> const mPrivateData;
         const DisplayOutputDesc * const mDesc;
+        const DisplayOutputNativeData * const mNativeData;
 
     public:
-        DisplayOutput( DisplayAdapter * pDisplayAdapter,
-                       const DisplayOutputDesc & pOutputDesc );
-
+        explicit DisplayOutput( DisplayAdapter * pDisplayAdapter );
         virtual ~DisplayOutput();
 
         TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupported( const DisplayVideoSettings & pVideoSettings,
@@ -114,14 +117,15 @@ namespace ts3::system
     class DisplayVideoMode : public SysObject
     {
     public:
+        struct VideoModePrivateData;
         DisplayDriver * const mDisplayDriver;
         DisplayOutput * const mParentOutput;
+        std::unique_ptr<VideoModePrivateData> const mPrivateData;
         const DisplayVideoModeDesc * const mDesc;
+        const DisplayVideoModeNativeData * const mNativeData;
 
     public:
-        DisplayVideoMode( DisplayOutput * pDisplayOutput,
-                          const DisplayVideoModeDesc & pVideoModeDesc );
-
+        explicit DisplayVideoMode( DisplayOutput * pDisplayOutput );
         virtual ~DisplayVideoMode();
     };
 

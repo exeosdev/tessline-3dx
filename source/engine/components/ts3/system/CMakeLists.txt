@@ -9,7 +9,6 @@ set( TS3_SYSTEM_SRC_FILES
         "displayDriver.h"
         "displayDriver.cpp"
         "displayDriverNative.h"
-        "displayDriverNative.cpp"
         "displayManager.h"
         "displayManager.cpp"
         "displayManagerNative.h"
@@ -39,8 +38,8 @@ set( TS3_SYSTEM_SRC_FILES
 if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_WINFAMILY} )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
-            "internal/platform/shared/dxgi/dxgiDisplay.h"
-            "internal/platform/shared/dxgi/dxgiDisplay.cpp"
+            "internal/platform/shared/dxgi/dxgiDisplayDriver.h"
+            "internal/platform/shared/dxgi/dxgiDisplayDriver.cpp"
             "internal/platform/shared/wnf/wnfCommon.h"
             "internal/platform/shared/wnf/wnfCommon.cpp"
             "internal/platform/shared/wnf/wnfPerfCounter.h"
@@ -84,8 +83,8 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
             "internal/platform/osapi/win32/win32Common.cpp"
             "internal/platform/osapi/win32/win32SysContext.h"
             "internal/platform/osapi/win32/win32SysContext.cpp"
-            "internal/platform/osapi/win32/win32Display.h"
-            "internal/platform/osapi/win32/win32Display.cpp"
+            "internal/platform/osapi/win32/win32DisplayDriver.h"
+            "internal/platform/osapi/win32/win32DisplayDriver.cpp"
             "internal/platform/osapi/win32/win32EventCore.h"
             "internal/platform/osapi/win32/win32EventCore.cpp"
             "internal/platform/osapi/win32/win32OpenGL.h"
