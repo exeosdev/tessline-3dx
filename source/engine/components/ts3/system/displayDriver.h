@@ -19,65 +19,18 @@ namespace ts3::system
     ts3SysDeclareHandle( DisplayVideoMode );
 
     /// @brief
-    class DisplayDriver : public SysObject
+    class DisplayAdapter
     {
     public:
-        struct DriverPrivateData;
-        DisplayManager * const mDisplayManager;
-        EDisplayDriverType const mDriverType;
-        std::unique_ptr<DriverPrivateData> const mPrivateData;
-        const DisplayDriverNativeData * const mNativeData;
-
-    public:
-        DisplayDriver( DisplayManager * pDisplayManager, EDisplayDriverType pDriverType );
-        virtual ~DisplayDriver();
-
-        void initialize();
-        void release();
-
-        void resetDisplayConfiguration();
-        void syncDisplayConfiguration();
-
-        TS3_PCL_ATTR_NO_DISCARD const DisplayAdapterList & getAdapterList() const;
-        TS3_PCL_ATTR_NO_DISCARD const DisplayOutputList & getOutputList( dsm_index_t pAdapterIndex ) const;
-
-        TS3_PCL_ATTR_NO_DISCARD DisplayAdapter * getAdapter( dsm_index_t pAdapterIndex ) const;
-        TS3_PCL_ATTR_NO_DISCARD DisplayAdapter * getDefaultAdapter() const;
-        TS3_PCL_ATTR_NO_DISCARD DisplayOutput * getDefaultOutput( dsm_index_t pAdapterIndex = CX_DSM_INDEX_INVALID ) const;
-
-        TS3_PCL_ATTR_NO_DISCARD bool isInitialized() const;
-
-        TS3_PCL_ATTR_NO_DISCARD static dsm_output_id_t queryOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex );
-
-        TS3_PCL_ATTR_NO_DISCARD static ColorFormat resolveSystemColorFormat( ColorFormat pColorFormat );
-
-    protected:
-        DisplayAdapter * registerAdapter();
-        DisplayOutput * registerOutput( DisplayAdapter & pAdapter );
-        DisplayVideoMode * registerVideoMode( DisplayOutput & pOutput, ColorFormat pColorFormat );
-
-    private:
-        virtual void _nativeInitialize() = 0;
-        virtual void _nativeRelease() = 0;
-        virtual void _nativeResetDisplayConfiguration() = 0;
-        virtual void _nativeSyncDisplayConfiguration() = 0;
-    };
-
-    /// @brief
-    class DisplayAdapter : public SysObject
-    {
-    public:
-        struct AdapterPrivateData;
+        struct ObjectPrivateData;
         DisplayDriver * const mDisplayDriver;
-        std::unique_ptr<AdapterPrivateData> const mPrivateData;
-        const DisplayAdapterDesc * const mDesc;
-        const DisplayAdapterNativeData * const mNativeData;
+        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        const DisplayAdapterDesc * const mDesc = nullptr;
+        const DisplayAdapterNativeData * const mNativeData = nullptr;
 
     public:
         explicit DisplayAdapter( DisplayDriver * pDisplayDriver );
         virtual ~DisplayAdapter();
-
-        void enumerateOutputs();
 
         TS3_PCL_ATTR_NO_DISCARD const DisplayOutputList & getOutputList() const;
 
@@ -90,15 +43,15 @@ namespace ts3::system
     };
 
     /// @brief
-    class DisplayOutput : public SysObject
+    class DisplayOutput
     {
     public:
-        struct OutputPrivateData;
+        struct ObjectPrivateData;
         DisplayDriver * const mDisplayDriver;
         DisplayAdapter * const mParentAdapter;
-        std::unique_ptr<OutputPrivateData> const mPrivateData;
-        const DisplayOutputDesc * const mDesc;
-        const DisplayOutputNativeData * const mNativeData;
+        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        const DisplayOutputDesc * const mDesc = nullptr;
+        const DisplayOutputNativeData * const mNativeData = nullptr;
 
     public:
         explicit DisplayOutput( DisplayAdapter * pDisplayAdapter );
@@ -114,19 +67,74 @@ namespace ts3::system
     };
 
     /// @brief
-    class DisplayVideoMode : public SysObject
+    class DisplayVideoMode
     {
     public:
-        struct VideoModePrivateData;
+        struct ObjectPrivateData;
         DisplayDriver * const mDisplayDriver;
         DisplayOutput * const mParentOutput;
-        std::unique_ptr<VideoModePrivateData> const mPrivateData;
-        const DisplayVideoModeDesc * const mDesc;
-        const DisplayVideoModeNativeData * const mNativeData;
+        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        const DisplayVideoModeDesc * const mDesc = nullptr;
+        const DisplayVideoModeNativeData * const mNativeData = nullptr;
 
     public:
         explicit DisplayVideoMode( DisplayOutput * pDisplayOutput );
         virtual ~DisplayVideoMode();
+    };
+
+    /// @brief
+    class DisplayDriver : public SysObject
+    {
+    public:
+        struct ObjectPrivateData;
+        DisplayManager * const mDisplayManager;
+        EDisplayDriverType const mDriverType;
+        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        const DisplayDriverNativeData * const mNativeData = nullptr;
+
+    public:
+        DisplayDriver( DisplayManager * pDisplayManager,
+                       EDisplayDriverType pDriverType );
+
+        virtual ~DisplayDriver();
+
+        void initializeDisplayConfiguration();
+        void resetDisplayConfiguration();
+
+        void enumVideoModes( dsm_output_id_t pOutputID, ColorFormat pColorFormat );
+
+        TS3_PCL_ATTR_NO_DISCARD const DisplayAdapterList & getAdapterList() const;
+        TS3_PCL_ATTR_NO_DISCARD const DisplayOutputList & getOutputList( dsm_index_t pAdapterIndex ) const;
+
+        TS3_PCL_ATTR_NO_DISCARD DisplayAdapter * getAdapter( dsm_index_t pAdapterIndex ) const;
+        TS3_PCL_ATTR_NO_DISCARD DisplayAdapter * getDefaultAdapter() const;
+        TS3_PCL_ATTR_NO_DISCARD DisplayOutput * getDefaultOutput( dsm_index_t pAdapterIndex = CX_DSM_INDEX_INVALID ) const;
+        TS3_PCL_ATTR_NO_DISCARD DisplayOutput * getOutput( dsm_output_id_t pOutputID ) const;
+
+        TS3_PCL_ATTR_NO_DISCARD static dsm_output_id_t queryOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex );
+
+        TS3_PCL_ATTR_NO_DISCARD static ColorFormat resolveSystemColorFormat( ColorFormat pColorFormat );
+
+    protected:
+        DisplayAdapter * addAdapter();
+        DisplayOutput * addOutput( DisplayAdapter & pAdapter );
+        DisplayVideoMode * addVideoMode( DisplayOutput & pOutput, ColorFormat pColorFormat );
+
+    private:
+        void _initializeDisplayConfiguration();
+        void _resetDisplayConfiguration();
+
+        void _enumAdapters();
+        void _enumOutputs( DisplayAdapter & pAdapter );
+        void _enumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat );
+
+        virtual void _nativeEnumAdapters() = 0;
+        virtual void _nativeEnumOutputs( DisplayAdapter & pAdapter ) = 0;
+        virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) = 0;
+
+        virtual void _nativeDestroyAdapter( DisplayAdapter & pAdapter ) = 0;
+        virtual void _nativeDestroyOutput( DisplayOutput & pOutput ) = 0;
+        virtual void _nativeDestroyVideoMode( DisplayVideoMode & pVideoMode ) = 0;
     };
 
 } // namespace ts3::system

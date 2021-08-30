@@ -27,15 +27,13 @@ namespace ts3::system
 	class SysContext
     {
     public:
-        SysContextNativeProxy * const mNativeProxy = nullptr;
-        SysContextNativeData * const mNativeDataPtr = nullptr;
+        struct ContextPrivateData;
+        std::unique_ptr<ContextPrivateData> const mPrivateData;
+        const SysContextNativeData * const mNativeData = nullptr;
 
     public:
-        explicit SysContext( std::unique_ptr<SysContextNativeProxy> pNativeProxy );
-        virtual ~SysContext();
-
-    private:
-        std::unique_ptr<SysContextNativeProxy> _nativeProxy;
+        SysContext();
+        ~SysContext();
     };
 
 } // namespace ts3::system

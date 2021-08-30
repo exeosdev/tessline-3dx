@@ -12,13 +12,10 @@ namespace ts3::system
 	    HINSTANCE appExecModuleHandle;
 	};
 
-	struct SysContextNativeProxyCreateInfo
+	struct SysContextNativeCreateInfo
     {
 	    HINSTANCE appExecModuleHandle;
     };
-
-	using Win32SysContextNativeData = SysContextNativeData;
-	using Win32SysContextNativeProxyCreateInfo = SysContextNativeProxyCreateInfo;
 
 } // namespace ts3::system
 

@@ -41,13 +41,14 @@ namespace ts3::system
     #define ts3SysDeclareHandle( pType ) \
         using pType##Handle = Handle<class pType>
 
-    /// @brief Declares the native types for a given system class: its proxy class and native data struct.
+    /// @brief Declares the native types for a given system class: its NativeImpl class and native data struct.
     /// For a given class name (assume MyType) this macro is replaced with two forward declarations:
     /// - struct MyTypeNativeData: a struct containing native, os-specific data, declared at os-specific level
-    /// - class MyTypeNativeProxy: a class which yields the actual implementation and is used by MyType internally
+    /// - class MyTypeNativeImpl: a sub-class, defined in a native layer (where OS-specific headers are fetched),
+    ///   which yields the actual implementation (used to hide OS details from public API).
     #define ts3SysDeclareNativeTypes( pType ) \
         struct pType##NativeData; \
-        class pType##NativeProxy
+        class pType##NativeImpl
 
     // These two types need to be visible everywhere.
     ts3SysDeclareHandle( SysContext );

@@ -22,10 +22,10 @@ namespace ts3::system
     //	}
 
     // Returns a pointer to an existing adapter with a specified UUID (DeviceKey).
-    DisplayAdapterNativeImpl * _win32FindAdapterByUUID( DisplayDriverNativeImplGeneric & pDriver, const std::string & pUUID );
+    DisplayAdapter * _win32FindAdapterByUUID( DisplayDriverNativeImplGeneric & pDriver, const std::string & pUUID );
 
     // Returns a pointer to an existing output of a specified adapter with a given output name (DeviceID);
-    DisplayOutputNativeImpl * _win32FindOutputForDeviceID( DisplayAdapterNativeImpl & pAdapter, const char * pDeviceID );
+    DisplayOutput * _win32FindOutputForDeviceID( DisplayAdapter & pAdapter, const char * pDeviceID );
 
     // Returns a name for an output by extracting the output part from the DisplayDevice registry key.
     std::string _win32GetAdapterOutputName( const std::string & pAdapterRegistryKey );
@@ -91,16 +91,16 @@ namespace ts3::system
 
             if( adapterObject == nullptr )
             {
-                adapterObject = addAdapter();
-                adapterObject->mNativeData.generic->adapterUUID = std::move( adapterUUID );
-                adapterObject->mNativeData.generic->adapterName = gdiDeviceInfo.DeviceString;
-                adapterObject->mNativeData.generic->displayDeviceID = gdiDeviceInfo.DeviceName;
-                adapterObject->mNativeData.generic->gdiDeviceInfo = gdiDeviceInfo;
-                adapterObject->mDescPriv.name = _bstr_t( gdiDeviceInfo.DeviceString );
+                adapterObject = registerAdapter();
+                adapterObject->mPrivateData->nativeDataPriv.generic->adapterUUID = std::move( adapterUUID );
+                adapterObject->mPrivateData->nativeDataPriv.generic->adapterName = gdiDeviceInfo.DeviceString;
+                adapterObject->mPrivateData->nativeDataPriv.generic->displayDeviceID = gdiDeviceInfo.DeviceName;
+                adapterObject->mPrivateData->nativeDataPriv.generic->gdiDeviceInfo = gdiDeviceInfo;
+                adapterObject->mPrivateData->descPriv.name = _bstr_t( gdiDeviceInfo.DeviceString );
 
                 if( ( gdiDeviceInfo.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE ) == DISPLAY_DEVICE_PRIMARY_DEVICE )
                 {
-                    adapterObject->mDescPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
+                    adapterObject->mPrivateData->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
                 }
             }
         }
@@ -110,7 +110,7 @@ namespace ts3::system
     // Actual initialization must be performed here - EnumDisplayOutput just wraps things up and returns.
     static BOOL CALLBACK _win32MonitorEnumProc( HMONITOR hMonitor, HDC hDC, LPRECT monitorRect, LPARAM enumProcParam )
     {
-        auto * adapterObject = reinterpret_cast<DisplayAdapterNativeImpl *>( enumProcParam );
+        auto * adapterObject = reinterpret_cast<DisplayAdapter *>( enumProcParam );
 
         MONITORINFOEXA gdiMonitorInfo;
         gdiMonitorInfo.cbSize = sizeof( MONITORINFOEXA );
@@ -123,12 +123,12 @@ namespace ts3::system
 
             if( outputObject != nullptr )
             {
-                outputObject->mNativeData.generic->gdiOutputMonitor = hMonitor;
-                outputObject->mDescPriv.name = _bstr_t( gdiMonitorInfo.szDevice );
-                outputObject->mDescPriv.screenRect.offset.x = gdiMonitorInfo.rcMonitor.left;
-                outputObject->mDescPriv.screenRect.offset.y = gdiMonitorInfo.rcMonitor.top;
-                outputObject->mDescPriv.screenRect.size.x = gdiMonitorInfo.rcMonitor.right - gdiMonitorInfo.rcMonitor.left;
-                outputObject->mDescPriv.screenRect.size.y = gdiMonitorInfo.rcMonitor.bottom - gdiMonitorInfo.rcMonitor.top;
+                outputObject->mPrivateData->nativeDataPriv.generic->gdiOutputMonitor = hMonitor;
+                outputObject->mPrivateData->descPriv.name = _bstr_t( gdiMonitorInfo.szDevice );
+                outputObject->mPrivateData->descPriv.screenRect.offset.x = gdiMonitorInfo.rcMonitor.left;
+                outputObject->mPrivateData->descPriv.screenRect.offset.y = gdiMonitorInfo.rcMonitor.top;
+                outputObject->mPrivateData->descPriv.screenRect.size.x = gdiMonitorInfo.rcMonitor.right - gdiMonitorInfo.rcMonitor.left;
+                outputObject->mPrivateData->descPriv.screenRect.size.y = gdiMonitorInfo.rcMonitor.bottom - gdiMonitorInfo.rcMonitor.top;
             }
         }
 
@@ -142,7 +142,7 @@ namespace ts3::system
     // the information it gives is rather poor (limited to output's name) and there seem to be no obvious way to get
     // an extended info using that name. So, instead, we enumerate all monitors in the system using EnumDisplayMonitors
     // and then use the associated device's name to properly add it.
-    void DisplayDriverNativeImplGeneric::_drvEnumOutputs( DisplayAdapterNativeImpl & pAdapter )
+    void DisplayDriverNativeImplGeneric::_drvEnumOutputs( DisplayAdapter & pAdapter )
     {
         DISPLAY_DEVICEA gdiOutputInfo;
         gdiOutputInfo.cb = sizeof( DISPLAY_DEVICEA );
@@ -150,7 +150,7 @@ namespace ts3::system
         for( UINT displayOutputIndex = 0; ; ++displayOutputIndex )
         {
             //
-            auto * displayDeviceID = pAdapter.mNativeData.generic->displayDeviceID.c_str();
+            auto * displayDeviceID = pAdapter.mPrivateData->nativeDataPriv.generic->displayDeviceID.c_str();
             //
             BOOL result = ::EnumDisplayDevicesA( displayDeviceID, displayOutputIndex, &gdiOutputInfo, 0 );
 
@@ -164,13 +164,13 @@ namespace ts3::system
                 continue;
             }
 
-            auto * outputObject = addOutput( pAdapter );
-            outputObject->mNativeData.generic->displayDeviceID = displayDeviceID;
-            outputObject->mNativeData.generic->outputID = gdiOutputInfo.DeviceName;
+            auto * outputObject = registerOutput( pAdapter );
+            outputObject->mPrivateData->nativeDataPriv.generic->displayDeviceID = displayDeviceID;
+            outputObject->mPrivateData->nativeDataPriv.generic->outputID = gdiOutputInfo.DeviceName;
 
             if( ( gdiOutputInfo.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE ) == DISPLAY_DEVICE_PRIMARY_DEVICE )
             {
-                outputObject->mDescPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
+                outputObject->mPrivateData->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
             }
         }
 
@@ -182,7 +182,7 @@ namespace ts3::system
         }
     }
 
-    void DisplayDriverNativeImplGeneric::_drvEnumVideoModes( DisplayOutputNativeImpl & pOutput, ColorFormat pColorFormat )
+    void DisplayDriverNativeImplGeneric::_drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
     {
         DEVMODEA displayMode;
         displayMode.dmSize = sizeof( DEVMODEA );
@@ -192,7 +192,7 @@ namespace ts3::system
 
         for( UINT displayModeIndex = 0; ; ++displayModeIndex )
         {
-            auto * outputName = pOutput.mNativeData.generic->displayDeviceID.c_str();
+            auto * outputName = pOutput.mPrivateData->nativeDataPriv.generic->displayDeviceID.c_str();
             BOOL edsResult = ::EnumDisplaySettingsExA( outputName, displayModeIndex, &displayMode, 0 );
 
             if( edsResult == FALSE )
@@ -220,35 +220,44 @@ namespace ts3::system
                 continue;
             }
 
-            auto * videoModeObject = addVideoMode( pOutput, pColorFormat );
-            videoModeObject->mNativeData.generic->gdiModeInfo = displayMode;
-            videoModeObject->mDescPriv.settings = videoSettings;
-            videoModeObject->mDescPriv.settingsHash = settingsHash;
+            auto * videoModeObject = registerVideoMode( pOutput, pColorFormat );
+            videoModeObject->mPrivateData->nativeDataPriv.generic->gdiModeInfo = displayMode;
+            videoModeObject->mPrivateData->descPriv.settings = videoSettings;
+            videoModeObject->mPrivateData->descPriv.settingsHash = settingsHash;
 
             prevSettingsHash = settingsHash;
         }
     }
+    
+    void DisplayDriverNativeImplGeneric::_drvDestroyAdapter( DisplayAdapter & pAdapter )
+    {}
 
-    DisplayAdapterNativeImpl * _win32FindAdapterByUUID( DisplayDriverNativeImplGeneric & pDriver, const std::string & pUUID )
+    void DisplayDriverNativeImplGeneric::_drvDestroyOutput( DisplayOutput & pOutput )
+    {}
+
+    void DisplayDriverNativeImplGeneric::_drvDestroyVideoMode( DisplayVideoMode & pVideoMode )
+    {}
+
+    DisplayAdapter * _win32FindAdapterByUUID( DisplayDriverNativeImplGeneric & pDriver, const std::string & pUUID )
     {
-        auto adapterIter = std::find_if( pDriver.mAdapterStorage.begin(),
-                                         pDriver.mAdapterStorage.end(),
-                                         [&pUUID]( const DisplayAdapterNativeImpl & pAdapter ) -> bool {
-                                             return pAdapter.mNativeData.generic->adapterUUID == pUUID;
+        auto adapterIter = std::find_if( pDriver.mPrivateData->adapterList.begin(),
+                                         pDriver.mPrivateData->adapterList.end(),
+                                         [&pUUID]( const DisplayAdapter & pAdapter ) -> bool {
+                                             return pAdapter.mNativeData->generic->adapterUUID == pUUID;
                                          });
 
-        return ( adapterIter != pDriver.mAdapterStorage.end() ) ? &( *adapterIter ) : nullptr;
+        return ( adapterIter != pDriver.mPrivateData->adapterList.end() ) ? adapterIter->get() : nullptr;
     }
 
-    DisplayOutputNativeImpl * _win32FindOutputForDeviceID( DisplayAdapterNativeImpl & pAdapter, const char * pDeviceID )
+    DisplayOutput * _win32FindOutputForDeviceID( DisplayAdapter & pAdapter, const char * pDeviceID )
     {
-        auto outputIter = std::find_if( pAdapter.mOutputStorage.begin(),
-                                        pAdapter.mOutputStorage.end(),
-                                        [pDeviceID]( const DisplayOutputNativeImpl & pOutput ) -> bool {
-                                            return pOutput.mNativeData.generic->displayDeviceID == pDeviceID;
+        auto outputIter = std::find_if( pAdapter.mPrivateData->outputList.begin(),
+                                        pAdapter.mPrivateData->outputList.end(),
+                                        [pDeviceID]( const DisplayOutput & pOutput ) -> bool {
+                                            return pOutput.mNativeData->generic->displayDeviceID == pDeviceID;
                                         });
 
-        return ( outputIter != pAdapter.mOutputStorage.end() ) ? &( *outputIter ) : nullptr;
+        return ( outputIter != pAdapter.mPrivateData->outputList.end() ) ? outputIter->get() : nullptr;
     }
 
     std::string _win32GetAdapterOutputName( const std::string & pAdapterRegistryKey )

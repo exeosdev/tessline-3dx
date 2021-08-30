@@ -37,7 +37,9 @@ namespace ts3::system
     class GLSystemDriver : public SysObject
     {
     public:
+        struct DriverPrivateData;
         DisplayManagerHandle const mDisplayManager;
+        std::unique_ptr<DriverPrivateData> const mPrivateData;
 
     public:
         GLSystemDriver( DisplayManagerHandle pDisplayManager );
@@ -95,13 +97,7 @@ namespace ts3::system
         /// @brief
         TS3_PCL_ATTR_NO_DISCARD bool isRenderContextBound( GLRenderContextHandle pRenderContext ) const;
 
-    friendapi: // For friended types
-        GLSystemDriverNativeData & getNativeData();
-
-        const GLSystemDriverNativeData & getNativeData() const;
-
     private: // For implementation
-
         virtual void _nativeInitializePlatform() = 0;
         virtual void _nativeReleaseInitState( GLRenderContext & pRenderContext ) = 0;
         virtual void _nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo ) = 0;

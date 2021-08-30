@@ -13,10 +13,6 @@ namespace ts3::system
     ts3SysDeclareHandle( GLDisplaySurface );
     ts3SysDeclareHandle( GLRenderContext );
 
-    ts3SysDeclareNativeTypes( GLSystemDriver );
-    ts3SysDeclareNativeTypes( GLDisplaySurface );
-    ts3SysDeclareNativeTypes( GLRenderContext );
-
     /// @brief
     enum EGLSurfaceCreateFlags : uint32
     {

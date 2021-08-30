@@ -1,6 +1,6 @@
 
 #include "openGLNative.h"
-#include "display.h"
+#include "displayManager.h"
 
 namespace ts3::system
 {
@@ -231,5 +231,26 @@ namespace ts3::system
     {
         return _nativeIsValid();
     }
+
+
+    GLSystemDriverNativeImpl::GLSystemDriverNativeImpl(  DisplayManagerHandle pDisplayManager  )
+    : GLSystemDriver( std::move( pDisplayManager ) )
+    {}
+
+    GLSystemDriverNativeImpl::~GLSystemDriverNativeImpl() = default;
+
+
+    GLDisplaySurfaceNativeImpl::GLDisplaySurfaceNativeImpl( GLSystemDriverHandle pDriver )
+    : GLDisplaySurface( std::move( pDriver ) )
+    {}
+
+    GLDisplaySurfaceNativeImpl::~GLDisplaySurfaceNativeImpl() = default;
+
+
+    GLRenderContextNativeImpl::GLRenderContextNativeImpl( GLSystemDriverHandle pDriver )
+    : GLRenderContext( std::move( pDriver ) )
+    {}
+
+    GLRenderContextNativeImpl::~GLRenderContextNativeImpl() = default;
 
 } // namespace ts3::system

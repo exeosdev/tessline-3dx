@@ -5,44 +5,128 @@
 namespace ts3::system
 {
 
-    DisplayDriver::DisplayDriver( DisplayManager * pDisplayManager, EDisplayDriverType pDriverType )
+
+    DisplayAdapter::DisplayAdapter( DisplayDriver * pDriver )
+    : mDisplayDriver( pDriver )
+    , mPrivate( std::make_unique<ObjectPrivateData>() )
+    , mDesc( &( mPrivate->descPriv ) )
+    , mNativeData( &( mPrivate->nativeDataPriv ) )
+    {
+        dsmInitializeNativeData( &( mPrivate->nativeDataPriv ), mDisplayDriver->mDriverType );
+    }
+
+    DisplayAdapter::~DisplayAdapter()
+    {
+        dsmReleaseNativeData( &( mPrivate->nativeDataPriv ), mDisplayDriver->mDriverType );
+    }
+
+    const DisplayOutputList & DisplayAdapter::getOutputList() const
+    {
+        return mPrivate->outputList;
+    }
+
+    DisplayOutput * DisplayAdapter::getOutput( dsm_index_t pOutputIndex ) const
+    {
+        if( pOutputIndex == CX_DSM_INDEX_DEFAULT )
+        {
+            return mPrivate->primaryOutput;
+        }
+        else
+        {
+            return mPrivate->outputList.at( pOutputIndex );
+        }
+    }
+
+    DisplayOutput * DisplayAdapter::getDefaultOutput() const
+    {
+        return mPrivate->primaryOutput;
+    }
+
+    bool DisplayAdapter::isActive() const
+    {
+        return true;
+    }
+
+    bool DisplayAdapter::isPrimaryAdapter() const
+    {
+        return mPrivate->descPriv.flags.isSet( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
+    }
+
+    bool DisplayAdapter::hasActiveOutputs() const
+    {}
+
+
+    DisplayOutput::DisplayOutput( DisplayAdapter * pAdapter )
+    : mDisplayDriver( pAdapter->mDisplayDriver )
+    , mParentAdapter( pAdapter )
+    , mPrivate( std::make_unique<ObjectPrivateData>() )
+    , mDesc( &( mPrivate->descPriv ) )
+    , mNativeData( &( mPrivate->nativeDataPriv ) )
+    {
+        dsmInitializeNativeData( &mNativeData, mDisplayDriver->mDriverType );
+    }
+
+    DisplayOutput::~DisplayOutput()
+    {
+        dsmReleaseNativeData( &mNativeData, mDisplayDriver->mDriverType );
+    }
+
+
+    DisplayVideoMode::DisplayVideoMode( DisplayOutput * pOutput )
+    : mDisplayDriver( pOutput->mDisplayDriver )
+    , mParentOutput( pOutput )
+    , mPrivate( std::make_unique<ObjectPrivateData>() )
+    , mDesc( &( mPrivate->descPriv ) )
+    , mNativeData( &( mPrivate->nativeDataPriv ) )
+    {
+        dsmInitializeNativeData( &mNativeData, mDisplayDriver->mDriverType );
+    }
+
+    DisplayVideoMode::~DisplayVideoMode()
+    {
+        dsmReleaseNativeData( &mNativeData, mDisplayDriver->mDriverType );
+    }
+
+
+    DisplayDriver::DisplayDriver( DisplayManager * pDisplayManager,
+                                  EDisplayDriverType pDriverType )
     : SysObject( pDisplayManager->mSysContext )
     , mDisplayManager( pDisplayManager )
     , mDriverType( pDriverType )
-    , mPrivateData( std::make_unique<DriverPrivateData>() )
-    , mNativeData( &( mPrivateData->nativeDataPriv ) )
+    , mPrivate( std::make_unique<ObjectPrivateData>() )
+    , mNativeData( &( mPrivate->nativeDataPriv ) )
     {
-        dsmInitializeNativeData( &( mPrivateData->nativeDataPriv ), mDriverType );
+        dsmInitializeNativeData( &( mPrivate->nativeDataPriv ), mDriverType );
     }
 
     DisplayDriver::~DisplayDriver()
     {
-        dsmReleaseNativeData( &( mPrivateData->nativeDataPriv ), mDriverType );
+        dsmReleaseNativeData( &mNativeData, mDriverType );
     }
 
-    void DisplayDriver::initialize()
+    void DisplayDriver::initializeDisplayConfiguration()
     {
-        _nativeInitialize();
-    }
+        if( !mPrivate->adapterStorage.empty() )
+        {
+            _resetDisplayConfiguration();
+        }
 
-    void DisplayDriver::release()
-    {
-        _nativeRelease();
+        _initializeDisplayConfiguration();
     }
 
     void DisplayDriver::resetDisplayConfiguration()
     {
-        _nativeResetDisplayConfiguration();
+        _resetDisplayConfiguration();
     }
 
-    void DisplayDriver::syncDisplayConfiguration()
+    void DisplayDriver::enumVideoModes( dsm_output_id_t pOutputID, ColorFormat pColorFormat )
     {
-        _nativeSyncDisplayConfiguration();
+
     }
 
     const DisplayAdapterList & DisplayDriver::getAdapterList() const
     {
-        return mPrivateData->adapterRefIndex;
+        return mPrivate->adapterList;
     }
 
     const DisplayOutputList & DisplayDriver::getOutputList( dsm_index_t pAdapterIndex ) const
@@ -55,18 +139,17 @@ namespace ts3::system
     {
         if( pAdapterIndex == CX_DSM_INDEX_INVALID )
         {
-            return mPrivateData->primaryAdapter;
+            return mPrivate->primaryAdapter;
         }
         else
         {
-            auto * adapter = mPrivateData->adapterRefIndex.at( pAdapterIndex );
-            return adapter;
+            return mPrivate->adapterList.at( pAdapterIndex );
         }
     }
 
     DisplayAdapter * DisplayDriver::getDefaultAdapter() const
     {
-        return mPrivateData->primaryAdapter;
+        return mPrivate->primaryAdapter;
     }
 
     DisplayOutput * DisplayDriver::getDefaultOutput( dsm_index_t pAdapterIndex ) const
@@ -75,222 +158,137 @@ namespace ts3::system
         return adapter->getDefaultOutput();
     }
 
-    DisplayAdapter * DisplayDriver::registerAdapter()
-    {
-        const auto adapterIndex = mPrivateData->adapterList.size();
-
-        auto adapter = createSysObject<DisplayAdapter>( this );
-        mPrivateData->adapterList.push_back( adapter );
-        adapter->mPrivateData->descPriv.driverType = mDriverType;
-        adapter->mPrivateData->descPriv.adapterIndex = adapterIndex;
-
-        mPrivateData->adapterRefIndex.push_back( adapter.get() );
-        ts3DebugAssert( mPrivateData->adapterList.size() == mPrivateData->adapterRefIndex.size() );
-
-        return adapter.get();
-    }
-
-    DisplayOutput * DisplayDriver::registerOutput( DisplayAdapter & pAdapter )
-    {
-        const auto outputIndex = pAdapter.mPrivateData->outputList.size();
-
-        DisplayOutputID outputIDGen;
-        outputIDGen.uAdapterIndex = pAdapter.mPrivateData->descPriv.adapterIndex;
-        outputIDGen.uOutputIndex = static_cast<dsm_index_t>( outputIndex );
-
-        auto output = createSysObject<DisplayOutput>( &pAdapter );
-        pAdapter.mPrivateData->outputList.push_back( output );
-        output->mPrivateData->descPriv.driverType = mDriverType;
-        output->mPrivateData->descPriv.outputIndex = outputIndex;
-        output->mPrivateData->descPriv.outputID = outputIDGen.outputID;
-
-        pAdapter.mPrivateData->outputRefIndex.push_back( output.get() );
-        ts3DebugAssert( pAdapter.mPrivateData->outputList.size() == pAdapter.mPrivateData->outputRefIndex.size() );
-
-        return output.get();
-    }
-
-    DisplayVideoMode * DisplayDriver::registerVideoMode( DisplayOutput & pOutput, ColorFormat pColorFormat )
-    {
-        auto & colorFormatData = pOutput.mPrivateData->colorFormatMap[pColorFormat];
-
-        const auto videoModeIndex = colorFormatData.videoModeList.size();
-
-        DisplayVideoModeID videoModeIDGen;
-        videoModeIDGen.uOutputID = pOutput.mPrivateData->descPriv.outputID;
-        videoModeIDGen.uColorFormatIndex = static_cast<dsm_index_t>( pColorFormat );
-        videoModeIDGen.uModeIndex = static_cast<dsm_index_t>( videoModeIndex );
-
-        auto videoMode = createSysObject<DisplayVideoMode>( &pOutput );
-        colorFormatData.videoModeList.push_back( videoMode );
-        videoMode->mPrivateData->descPriv.driverType = mDriverType;
-        videoMode->mPrivateData->descPriv.videoModeIndex = videoModeIndex;
-        videoMode->mPrivateData->descPriv.videoModeID = videoModeIDGen.modeID;
-        videoMode->mPrivateData->descPriv.colorFormat = pColorFormat;
-
-        colorFormatData.videoModeRefIndex.push_back( videoMode.get() );
-        ts3DebugAssert( colorFormatData.videoModeList.size() == colorFormatData.videoModeRefIndex.size() );
-
-        return videoMode.get();
-    }
-
-
-    DisplayAdapter::DisplayAdapter( DisplayDriver * pDriver )
-    : SysObject( pDriver->mSysContext )
-    , mDisplayDriver( pDriver )
-    , mPrivateData( std::make_unique<AdapterPrivateData>() )
-    , mDesc( &( mPrivateData->descPriv ) )
-    , mNativeData( &( mPrivateData->nativeDataPriv ) )
-    {
-        dsmInitializeNativeData( &( mPrivateData->nativeDataPriv ), mDisplayDriver->mDriverType );
-    }
-
-    DisplayAdapter::~DisplayAdapter()
-    {
-        dsmReleaseNativeData( &( mPrivateData->nativeDataPriv ), mDisplayDriver->mDriverType );
-    }
-
-
-    DisplayOutput::DisplayOutput( DisplayAdapter * pAdapter )
-    : SysObject( pAdapter->mSysContext )
-    , mDisplayDriver( pAdapter->mDisplayDriver )
-    , mParentAdapter( pAdapter )
-    , mPrivateData( std::make_unique<OutputPrivateData>() )
-    , mDesc( &( mPrivateData->descPriv ) )
-    , mNativeData( &( mPrivateData->nativeDataPriv ) )
-    {
-        dsmInitializeNativeData( &mNativeData, mDisplayDriver->mDriverType );
-    }
-
-    DisplayOutput::~DisplayOutput()
-    {
-        dsmReleaseNativeData( &mNativeData, mDisplayDriver->mDriverType );
-    }
-
-
-    DisplayVideoMode::DisplayVideoMode( DisplayOutput * pOutput )
-    : SysObject( pOutput->mSysContext )
-    , mDisplayDriver( pOutput->mDisplayDriver )
-    , mParentOutput( pOutput )
-    , mPrivateData( std::make_unique<VideoModePrivateData>() )
-    , mDesc( &( mPrivateData->descPriv ) )
-    , mNativeData( &( mPrivateData->nativeDataPriv ) )
-    {
-        dsmInitializeNativeData( &mNativeData, mDisplayDriver->mDriverType );
-    }
-
-    DisplayVideoMode::~DisplayVideoMode()
-    {
-        dsmReleaseNativeData( &mNativeData, mDisplayDriver->mDriverType );
-    }
-
-
-    DisplayDriverNativeImpl::DisplayDriverNativeImpl( DisplayManager * pDisplayManager, EDisplayDriverType pDriverType )
-    : DisplayDriver( pDisplayManager, pDriverType )
-    {}
-
-    DisplayDriverNativeImpl::~DisplayDriverNativeImpl()
-    {}
-
-    void DisplayDriverNativeImpl::_nativeInitialize()
-    void DisplayDriverNativeImpl::_nativeRelease()
-    void DisplayDriverNativeImpl::_nativeResetDisplayConfiguration()
-    void DisplayDriverNativeImpl::_nativeSyncDisplayConfiguration()
-
-
-
-    DisplayDriverNativeImpl::DisplayDriverNativeImpl( DisplayManager * pDisplayManager, EDisplayDriverType pDriverType )
-    : DisplayDriver( pDisplayManager, pDriverType )
-    {
-    }
-
-    DisplayDriver::~DisplayDriver()
-    {
-        dsmReleaseNativeData( &mNativeData, mDriverType );
-    }
-
-    void DisplayDriver::_nativeInitialize()
-    {
-        _drvInitialize();
-    }
-
-    void DisplayDriver::_nativeRelease()
-    {
-        _drvRelease();
-    }
-
-    void DisplayDriver::_nativeResetDisplayConfiguration()
-    {
-        mAdapterStorage.clear();
-        mAdapterList.clear();
-    }
-
-    void DisplayDriver::_nativeSyncDisplayConfiguration()
-    {
-        ts3DebugAssert( mAdapterStorage.empty() && mAdapterList.empty() );
-
-        _drvEnumAdapters();
-
-        if( mAdapterList.empty() )
-        {
-            // Report
-            return;
-        }
-
-        for( auto & adapter : mAdapterStorage )
-        {
-            _drvEnumOutputs( adapter );
-
-            if( adapter.isPrimaryAdapter() )
-            {
-                mPrimaryAdapter = &adapter;
-            }
-
-            if( adapter.mOutputList.empty() )
-            {
-                // Warn: no active outputs found for 'adapter'
-                continue;
-            }
-
-            for( auto & output : adapter.mOutputStorage )
-            {
-                _drvEnumVideoModes( output, ColorFormat::SystemNative );
-
-                if( output.isPrimaryOutput() )
-                {
-                    adapter.mPrimaryOutput = &output;
-                }
-
-                if( output.mColorFormatMap[ColorFormat::SystemNative].videoModeList.empty() )
-                {
-                    // Warn: no supported display modes found for 'adapter'
-                    continue;
-                }
-            }
-        }
-    }
-
-    const DisplayAdapterList & DisplayDriver::_nativeGetAdapterList() const
-    {
-        return mAdapterList;
-    }
-
-    const DisplayOutputList & DisplayDriver::_nativeGetOutputList( dsm_index_t pAdapterIndex ) const
-    {
-        const auto & adapter = mAdapterStorage.at( pAdapterIndex );
-        return adapter.mOutputList;
-    }
-
-    const DisplayVideoModeList & DisplayDriver::_nativeGetVideoModeList( dsm_output_id_t pOutputID, ColorFormat pColorFormat ) const
+    DisplayOutput * DisplayDriver::getOutput( dsm_output_id_t pOutputID ) const
     {
         DisplayOutputID outputIDGen;
         outputIDGen.outputID = pOutputID;
 
-        const auto & adapter = mAdapterStorage.at( outputIDGen.uAdapterIndex );
-        const auto & output = adapter.mOutputStorage.at( outputIDGen.uOutputIndex );
-        const auto & colorFormatData = output.mColorFormatMap.at( pColorFormat );
+        auto * adapter = getAdapter( outputIDGen.uAdapterIndex );
+        auto & output = adapter->mPrivate->outputStorage.at( outputIDGen.uOutputIndex );
 
-        return colorFormatData.videoModeList;
+        return &output;
+    }
+
+    DisplayAdapter * DisplayDriver::addAdapter()
+    {
+        const auto adapterIndex = mPrivate->adapterStorage.size();
+
+        auto & adapter = mPrivate->adapterStorage.emplace_back( this );
+        adapter.mPrivate->descPriv.driverType = mDriverType;
+        adapter.mPrivate->descPriv.adapterIndex = adapterIndex;
+
+        ts3DebugAssert( mPrivate->adapterList.empty() );
+
+        return &adapter;
+    }
+
+    DisplayOutput * DisplayDriver::addOutput( DisplayAdapter & pAdapter )
+    {
+        const auto outputIndex = pAdapter.mPrivate->outputStorage.size();
+
+        DisplayOutputID outputIDGen;
+        outputIDGen.uAdapterIndex = pAdapter.mPrivate->descPriv.adapterIndex;
+        outputIDGen.uOutputIndex = static_cast<dsm_index_t>( outputIndex );
+
+        auto & output = pAdapter.mPrivate->outputStorage.emplace_back( &pAdapter );
+        output.mPrivate->descPriv.driverType = mDriverType;
+        output.mPrivate->descPriv.outputIndex = outputIndex;
+        output.mPrivate->descPriv.outputID = outputIDGen.outputID;
+
+        ts3DebugAssert( pAdapter.mPrivate->outputList.empty() );
+
+        return &output;
+    }
+
+    DisplayVideoMode * DisplayDriver::addVideoMode( DisplayOutput & pOutput, ColorFormat pColorFormat )
+    {
+        auto & colorFormatData = pOutput.mPrivate->colorFormatMap[pColorFormat];
+
+        const auto videoModeIndex = colorFormatData.videoModeStorage.size();
+
+        DisplayVideoModeID videoModeIDGen;
+        videoModeIDGen.uOutputID = pOutput.mPrivate->descPriv.outputID;
+        videoModeIDGen.uColorFormatIndex = static_cast<dsm_index_t>( pColorFormat );
+        videoModeIDGen.uModeIndex = static_cast<dsm_index_t>( videoModeIndex );
+
+        auto & videoMode = colorFormatData.videoModeStorage.emplace_back( &pOutput );
+        videoMode.mPrivate->descPriv.driverType = mDriverType;
+        videoMode.mPrivate->descPriv.videoModeIndex = videoModeIndex;
+        videoMode.mPrivate->descPriv.videoModeID = videoModeIDGen.modeID;
+        videoMode.mPrivate->descPriv.colorFormat = pColorFormat;
+
+        ts3DebugAssert( colorFormatData.videoModeList.empty() );
+
+        return &videoMode;
+    }
+
+    void DisplayDriver::_initializeDisplayConfiguration()
+    {
+        _enumAdapters();
+        for( auto & adapter : mPrivate->adapterStorage )
+        {
+            _enumOutputs( adapter );
+            for( auto & output : adapter.mPrivate->outputStorage )
+            {
+                _enumVideoModes( output, ColorFormat::SystemNative );
+            }
+        }
+    }
+
+    void DisplayDriver::_resetDisplayConfiguration()
+    {
+    }
+
+    void DisplayDriver::_enumAdapters()
+    {
+        _nativeEnumAdapters();
+
+        if( !mPrivate->adapterStorage.empty() )
+        {
+            mPrivate->adapterList.reserve( mPrivate->adapterStorage.size() );
+            for( auto & adapter : mPrivate->adapterStorage )
+            {
+                if( adapter.isPrimaryAdapter() )
+                {
+                    mPrivate->primaryAdapter = &adapter;
+                }
+                mPrivate->adapterList.push_back( &adapter );
+            }
+        }
+    }
+
+    void DisplayDriver::_enumOutputs( DisplayAdapter & pAdapter )
+    {
+        _nativeEnumOutputs( pAdapter );
+
+        if( !pAdapter.mPrivate->outputStorage.empty() )
+        {
+            pAdapter.mPrivate->outputList.reserve( pAdapter.mPrivate->outputStorage.size() );
+            for( auto & output : pAdapter.mPrivate->outputStorage )
+            {
+                if( output.isPrimaryOutput() )
+                {
+                    pAdapter.mPrivate->primaryOutput = &output;
+                }
+                pAdapter.mPrivate->outputList.push_back( &output );
+            }
+        }
+
+    }
+
+    void DisplayDriver::_enumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
+    {
+        _nativeEnumVideoModes( pOutput, pColorFormat );
+
+        auto & colorFormatData = pOutput.mPrivate->colorFormatMap[pColorFormat];
+        if( !colorFormatData.videoModeStorage.empty() )
+        {
+            colorFormatData.videoModeList.reserve( colorFormatData.videoModeStorage.size() );
+            for( auto & videoMode : colorFormatData.videoModeStorage )
+            {
+                colorFormatData.videoModeList.push_back( &videoMode );
+            }
+        }
     }
 
 

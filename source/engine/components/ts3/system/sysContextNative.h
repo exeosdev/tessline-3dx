@@ -15,19 +15,13 @@
 namespace ts3::system
 {
 
-    /// @brief
-    class SysContextNativeProxy
+    struct SysContext::ContextPrivateData
     {
-    public:
-        SysContextNativeData mNativeData;
-
-    public:
-        SysContextNativeProxy( SysContext * pParentObject );
-        virtual ~SysContextNativeProxy();
+        SysContextNativeData nativeDataPriv;
     };
 
     /// @brief
-    TS3_SYSTEM_API_NODISCARD SysContextHandle initializeSysContext( const SysContextNativeProxyCreateInfo & pCreateInfo );
+    TS3_SYSTEM_API_NODISCARD SysContextHandle creInitializeSystemContext( const SysContextNativeCreateInfo & pCreateInfo );
 
     /// @brief
     TS3_SYSTEM_API void releaseSysContext( SysContextHandle pContext );
