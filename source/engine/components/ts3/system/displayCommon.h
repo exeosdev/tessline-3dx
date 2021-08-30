@@ -41,10 +41,13 @@ namespace ts3::system
 	using DisplaySize = math::Size2u;
 
 	/// @brief Represents invalid display system index (of an adapter or an output, for example).
-	constexpr dsm_index_t CX_DSM_INDEX_INVALID = Limits<dsm_index_t>::maxValue;
+	constexpr dsm_index_t CX_DSM_INDEX_INVALID = Limits<dsm_index_t>::maxValue - 1;
 
-	/// @brief Represents invalid display system index (of an adapter or an output, for example).
-	constexpr dsm_index_t CX_DSM_INDEX_DEFAULT = Limits<dsm_index_t>::maxValue - 1;
+	/// @brief
+	constexpr dsm_index_t CX_DSM_INDEX_DEFAULT = Limits<dsm_index_t>::maxValue;
+
+	/// @brief
+	constexpr dsm_output_id_t CX_DSM_OUTPUT_ID_DEFAULT = Limits<dsm_output_id_t>::maxValue;
 
 	/// @brief Represents invalid display settings hash. Used to identify/report invalid and/or empty configurations.
 	constexpr dsm_video_settings_hash_t CX_DSM_VIDEO_SETTINGS_HASH_INVALID = Limits<dsm_video_settings_hash_t>::maxValue;

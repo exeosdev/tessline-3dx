@@ -74,12 +74,17 @@ namespace ts3::system
     }
 
     const DisplayVideoModeList & DisplayOutput::getVideoModeList( ColorFormat pColorFormat ) const
-    {}
+    {
+        auto colorFormat = dsmResolveSystemColorFormat( pColorFormat );
+        auto & colorFormatData = mPrivate->colorFormatMap.at( colorFormat );
+        return colorFormatData.videoModeList;
+    }
 
     bool DisplayOutput::isActive() const
     {
         auto nativeColorFormat = dsmResolveSystemColorFormat( ColorFormat::SystemNative );
-        return !mPrivate->colorFormatMap[nativeColorFormat].videoModeStorage.empty();
+        auto & colorFormatData = mPrivate->colorFormatMap.at( nativeColorFormat );
+        return !colorFormatData.videoModeStorage.empty();
     }
 
     bool DisplayOutput::isPrimaryOutput() const
@@ -126,7 +131,6 @@ namespace ts3::system
         {
             _resetDisplayConfiguration();
         }
-
         _initializeDisplayConfiguration();
     }
 
@@ -137,7 +141,9 @@ namespace ts3::system
 
     void DisplayDriver::enumVideoModes( dsm_output_id_t pOutputID, ColorFormat pColorFormat )
     {
-
+        auto * output = _getOutput( pOutputID );
+        _resetVideoModeData( *output, pColorFormat );
+        _enumVideoModes( *output, pColorFormat );
     }
 
     const DisplayAdapterList & DisplayDriver::getAdapterList() const
@@ -153,7 +159,7 @@ namespace ts3::system
 
     DisplayAdapter * DisplayDriver::getAdapter( dsm_index_t pAdapterIndex ) const
     {
-        if( pAdapterIndex == CX_DSM_INDEX_INVALID )
+        if( pAdapterIndex == CX_DSM_INDEX_DEFAULT )
         {
             return mPrivate->primaryAdapter;
         }
@@ -176,13 +182,7 @@ namespace ts3::system
 
     DisplayOutput * DisplayDriver::getOutput( dsm_output_id_t pOutputID ) const
     {
-        DisplayOutputID outputIDGen;
-        outputIDGen.outputID = pOutputID;
-
-        auto * adapter = getAdapter( outputIDGen.uAdapterIndex );
-        auto & output = adapter->mPrivate->outputStorage.at( outputIDGen.uOutputIndex );
-
-        return &output;
+        return _getOutput( pOutputID );
     }
 
     DisplayAdapter * DisplayDriver::addAdapter()
@@ -273,8 +273,24 @@ namespace ts3::system
         mPrivate->adapterStorage.clear();
     }
 
+    void DisplayDriver::_resetVideoModeData( DisplayOutput & pOutput, ColorFormat pColorFormat )
+    {
+        auto colorFormat = dsmResolveSystemColorFormat( pColorFormat );
+        auto & colorFormatData = pOutput.mPrivate->colorFormatMap[colorFormat];
+
+        for( auto & videoMode : colorFormatData.videoModeStorage )
+        {
+            _nativeDestroyVideoMode( videoMode );
+        }
+
+        colorFormatData.videoModeList.clear();
+        colorFormatData.videoModeStorage.clear();
+    }
+
     void DisplayDriver::_enumAdapters()
     {
+        ts3DebugAssert( mPrivate->adapterStorage.empty() );
+
         _nativeEnumAdapters();
 
         if( !mPrivate->adapterStorage.empty() )
@@ -304,6 +320,8 @@ namespace ts3::system
 
     void DisplayDriver::_enumOutputs( DisplayAdapter & pAdapter )
     {
+        ts3DebugAssert( pAdapter.mPrivate->outputStorage.empty() );
+
         _nativeEnumOutputs( pAdapter );
 
         if( !pAdapter.mPrivate->outputStorage.empty() )
@@ -334,9 +352,11 @@ namespace ts3::system
 
     void DisplayDriver::_enumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
     {
+        auto & colorFormatData = pOutput.mPrivate->colorFormatMap[pColorFormat];
+        ts3DebugAssert( colorFormatData.videoModeStorage.empty() );
+
         _nativeEnumVideoModes( pOutput, pColorFormat );
 
-        auto & colorFormatData = pOutput.mPrivate->colorFormatMap[pColorFormat];
         if( !colorFormatData.videoModeStorage.empty() )
         {
             colorFormatData.videoModeList.reserve( colorFormatData.videoModeStorage.size() );
@@ -344,6 +364,33 @@ namespace ts3::system
             {
                 colorFormatData.videoModeList.push_back( &videoMode );
             }
+        }
+    }
+
+    DisplayAdapter * DisplayDriver::_getAdapter( dsm_index_t pAdapterIndex ) const
+    {
+        if( pAdapterIndex == CX_DSM_INDEX_DEFAULT )
+        {
+            return mPrivate->primaryAdapter;
+        }
+        else
+        {
+            return mPrivate->adapterList.at( pAdapterIndex );
+        }
+    }
+
+    DisplayOutput * DisplayDriver::_getOutput( dsm_output_id_t pOutputID ) const
+    {
+        auto * adapter = _getAdapter( dsmExtractOutputIDAdapterIndex( pOutputID ) );
+        auto outputIndex = dsmExtractOutputIDOutputrIndex( pOutputID );
+
+        if( outputIndex == CX_DSM_INDEX_DEFAULT )
+        {
+            return adapter->mPrivate->primaryOutput;
+        }
+        else
+        {
+            return adapter->mPrivate->outputList.at( outputIndex );
         }
     }
 

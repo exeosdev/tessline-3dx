@@ -123,10 +123,14 @@ namespace ts3::system
     private:
         void _initializeDisplayConfiguration();
         void _resetDisplayConfiguration();
+        void _resetVideoModeData( DisplayOutput & pOutput, ColorFormat pColorFormat );
 
         void _enumAdapters();
         void _enumOutputs( DisplayAdapter & pAdapter );
         void _enumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat );
+
+        DisplayAdapter * _getAdapter( dsm_index_t pAdapterIndex ) const;
+        DisplayOutput * _getOutput( dsm_output_id_t pOutputID ) const;
 
         virtual void _nativeEnumAdapters() = 0;
         virtual void _nativeEnumOutputs( DisplayAdapter & pAdapter ) = 0;
