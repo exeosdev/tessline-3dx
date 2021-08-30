@@ -28,17 +28,12 @@ namespace system
         EDisplayDriverType const mDriverType;
 
     public:
-        DisplayDriver( DisplayManagerHandle pDisplayManager,
-                       const DisplayDriverNativeData & pNativeData );
+        DisplayDriver( DisplayManager * pDisplayManager,
+                       EDisplayDriverType pDriverType );
 
         virtual ~DisplayDriver();
 
-        void syncDisplayTopology();
-
-        const DisplayAdapterList & enumAdapterList();
-        const DisplayOutputList & enumOutputList( dsm_index_t pAdapterIndex );
-        const DisplayVideoModeList & enumVideoModeList( dsm_output_id_t pOutputID );
-        const DisplayVideoModeList & enumVideoModeList( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex );
+        void refreshDisplayConfiguration();
 
         TS3_PCL_ATTR_NO_DISCARD const DisplayAdapterList & getAdapterList() const;
         TS3_PCL_ATTR_NO_DISCARD const DisplayOutputList & getOutputList( dsm_index_t pAdapterIndex ) const;
@@ -57,6 +52,9 @@ namespace system
         TS3_PCL_ATTR_NO_DISCARD static dsm_output_id_t queryOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex );
 
         TS3_PCL_ATTR_NO_DISCARD static ColorFormat resolveSystemColorFormat( ColorFormat pColorFormat );
+
+    private:
+        virtual void _nativeSyncDisplayTopology() = 0;
     };
 
     /// @brief
@@ -64,12 +62,11 @@ namespace system
     {
     public:
         DisplayDriver * const mDisplayDriver;
-        const DisplayAdapterDesc * const mAdapterDesc;
+        const DisplayAdapterDesc * const mDesc;
 
     public:
         DisplayAdapter( DisplayDriver * pDisplayDriver,
-                        const DisplayAdapterDesc & pAdapterDesc,
-                        const DisplayAdapterNativeData & pNativeData );
+                        const DisplayAdapterDesc & pAdapterDesc );
 
         virtual ~DisplayAdapter();
 
@@ -91,12 +88,11 @@ namespace system
     public:
         DisplayDriver * const mDisplayDriver;
         DisplayAdapter * const mParentAdapter;
-        const DisplayOutputDesc * const mOutputDesc;
+        const DisplayOutputDesc * const mDesc;
 
     public:
-        DisplayOutput( DisplayAdapterHandle pDisplayAdapter,
-                       const DisplayOutputDesc & pOutputDesc,
-                       const DisplayOutputNativeData & pNativeData );
+        DisplayOutput( DisplayAdapter * pDisplayAdapter,
+                       const DisplayOutputDesc & pOutputDesc );
 
         virtual ~DisplayOutput();
 
@@ -115,12 +111,11 @@ namespace system
     public:
         DisplayDriver * const mDisplayDriver;
         DisplayOutput * const mParentOutput;
-        const DisplayVideoModeDesc * const mVideoModeDesc;
+        const DisplayVideoModeDesc * const mDesc;
 
     public:
-        DisplayVideoMode( DisplayOutputHandle pDisplayOutput,
-                          const DisplayVideoModeDesc & pVideoModeDesc,
-                          const DisplayVideoModeNativeData & pNativeData );
+        DisplayVideoMode( DisplayOutput * pDisplayOutput,
+                          const DisplayVideoModeDesc & pVideoModeDesc );
 
         virtual ~DisplayVideoMode();
     };

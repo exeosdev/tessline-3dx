@@ -36,45 +36,57 @@ namespace system
 
     struct DisplayDriverNativeData
     {
-        DisplayDriverNativeDataGeneric * ndGeneric = nullptr;
+        using GenericType = DisplayDriverNativeDataGeneric;
+        DisplayDriverNativeDataGeneric * generic = nullptr;
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
-        DisplayDriverNativeDataDXGI * ndDXGI = nullptr;
+        using DXGIType = DisplayDriverNativeDataDXGI;
+        DisplayDriverNativeDataDXGI * dxgi = nullptr;
     #endif
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
-        DisplayDriverNativeDataSDL * ndSDL = nullptr;
+        using SDLType = DisplayDriverNativeDataSDL;
+        DisplayDriverNativeDataSDL * sdl = nullptr;
     #endif
     };
 
     struct DisplayVideoModeNativeData
     {
-        DisplayVideoModeNativeDataGeneric * ndGeneric = nullptr;
+        using GenericType = DisplayVideoModeNativeDataGeneric;
+        DisplayVideoModeNativeDataGeneric * generic = nullptr;
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
-        DisplayVideoModeNativeDataDXGI * ndDXGI = nullptr;
+        using DXGIType = DisplayVideoModeNativeDataDXGI;
+        DisplayVideoModeNativeDataDXGI * dxgi = nullptr;
     #endif
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
-        DisplayVideoModeNativeDataSDL * ndSDL = nullptr;
+        using SDLType = DisplayVideoModeNativeDataSDL;
+        DisplayVideoModeNativeDataSDL * sdl = nullptr;
     #endif
     };
 
     struct DisplayOutputNativeData
     {
-        DisplayOutputNativeDataGeneric * ndGeneric = nullptr;
+        using GenericType = DisplayOutputNativeDataGeneric;
+        DisplayOutputNativeDataGeneric * generic = nullptr;
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
-        DisplayOutputNativeDataDXGI * ndDXGI = nullptr;
+        using DXGIType = DisplayOutputNativeDataDXGI;
+        DisplayOutputNativeDataDXGI * dxgi = nullptr;
     #endif
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
-        DisplayOutputNativeDataSDL * ndSDL = nullptr;
+        using SDLType = DisplayOutputNativeDataSDL;
+        DisplayOutputNativeDataSDL * sdl = nullptr;
     #endif
     };
 
     struct DisplayAdapterNativeData
     {
-        DisplayAdapterNativeDataGeneric * ndGeneric = nullptr;
+        using GenericType = DisplayAdapterNativeDataGeneric;
+            DisplayAdapterNativeDataGeneric * generic = nullptr;
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
-        DisplayAdapterNativeDataDXGI * ndDXGI = nullptr;
+        using DXGIType = DisplayAdapterNativeDataDXGI;
+        DisplayAdapterNativeDataDXGI * dxgi = nullptr;
     #endif
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
-        DisplayAdapterNativeDataSDL * ndSDL = nullptr;
+        using SDLType = DisplayAdapterNativeDataSDL;
+        DisplayAdapterNativeDataSDL * sdl = nullptr;
     #endif
     };
 
@@ -135,84 +147,158 @@ namespace system
     class DisplayVideoModeNativeImpl : public DisplayVideoMode
     {
     public:
-        DisplayVideoModeDesc mDesc;
+        DisplayVideoModeDesc mDescPriv;
         DisplayVideoModeNativeData mNativeData;
 
     public:
-        DisplayVideoModeNativeImpl( DisplayOutputNativeImpl * pOutput );
+        explicit DisplayVideoModeNativeImpl( DisplayOutputNativeImpl * pOutput );
         virtual ~DisplayVideoModeNativeImpl();
     };
 
     class DisplayOutputNativeImpl : public DisplayOutput
     {
     public:
-        DisplayOutputDesc mDesc;
-        DisplayOutputNativeData mNativeData;
-
-    public:
-        DisplayOutputNativeImpl( DisplayAdapterNativeImpl * pAdapter );
-        virtual ~DisplayOutputNativeImpl();
-
-    protected:
-        struct VideoModesData
+        struct ColorFormatData
         {
-            using VideoModeStorage = std::deque<DisplayVideoModeNativeImpl>;
-            using VideoModeIndexArray = std::vector<DisplayVideoModeNativeImpl *>;
-
-            VideoModeStorage storage;
-            VideoModeIndexArray indexArray;
+            std::deque<DisplayVideoModeNativeImpl> videoModeStorage;
+            DisplayVideoModeList videoModeList;
         };
 
-        using VideoModesDataMap = std::unordered_map<ColorFormat, VideoModesData>;
+        DisplayOutputDesc mDescPriv;
+        DisplayOutputNativeData mNativeData;
+        std::unordered_map<ColorFormat, ColorFormatData> mColorFormatMap;
 
-        VideoModesDataMap _videoModesDataMap;
+    public:
+        explicit DisplayOutputNativeImpl( DisplayAdapterNativeImpl * pAdapter );
+        virtual ~DisplayOutputNativeImpl();
     };
 
     class DisplayAdapterNativeImpl : public DisplayAdapter
     {
     public:
-        DisplayAdapterDesc mDesc;
+        DisplayAdapterDesc mDescPriv;
         DisplayAdapterNativeData mNativeData;
+        std::deque<DisplayOutputNativeImpl> mOutputStorage;
+        DisplayOutputList mOutputList;
 
     public:
-        DisplayAdapterNativeImpl( DisplayDriverNativeImpl * pDisplayDriver );
+        explicit DisplayAdapterNativeImpl( DisplayDriverNativeImpl * pDisplayDriver );
         virtual ~DisplayAdapterNativeImpl();
-
-    protected:
-        struct OutputsData
-        {
-            using OutputStorage = std::deque<DisplayOutputNativeImpl>;
-            using OutputIndexArray = std::vector<DisplayOutputNativeImpl *>;
-
-            OutputStorage storage;
-            OutputIndexArray indexArray;
-        };
-
-        OutputsData _outputsData;
     };
 
     class DisplayDriverNativeImpl : public DisplayDriver
     {
+    public:
+        DisplayDriverNativeData mNativeData;
+        std::deque<DisplayAdapterNativeImpl> mAdapterStorage;
+        DisplayAdapterList mAdapterList;
+
+    public:
+        DisplayDriverNativeImpl( DisplayManager * pDisplayManager,
+                                 EDisplayDriverType pDriverType );
+
+        virtual ~DisplayDriverNativeImpl();
+
     protected:
         DisplayAdapterNativeImpl * addAdapter();
-
         DisplayOutputNativeImpl * addOutput( DisplayAdapterNativeImpl & pAdapter );
+        DisplayVideoModeNativeImpl * addVideoMode( DisplayOutputNativeImpl & pOutputData, ColorFormat pColorFormat );
 
-        DisplayVideoModeNativeImpl * addVideoMode( DisplayOutputNativeImpl & pOutputData,
-                                                   ColorFormat pColorFormat );
-
-    protected:
-        struct AdaptersData
-        {
-            using AdapterStorage = std::deque<DisplayAdapterNativeImpl>;
-            using AdapterIndexArray = std::vector<DisplayAdapterNativeImpl>;
-
-            AdapterStorage storage;
-            AdapterIndexArray indexArray;
-        };
-
-        AdaptersData _adaptersData;
+    private:
+        virtual void _nativeEnumAdapters() = 0;
+        virtual void _nativeEnumOutputs( DisplayAdapterNativeImpl & pAdapter ) = 0;
+        virtual void _nativeEnumVideoModes( DisplayOutputNativeImpl & pOutputData, ColorFormat pColorFormat ) = 0;
     };
+
+    class DisplayDriverNativeImplGeneric : public DisplayDriverNativeImpl
+    {
+    private:
+        virtual void _nativeEnumAdapters() override final;
+        virtual void _nativeEnumOutputs( DisplayAdapterNativeImpl & pAdapter ) override final;
+        virtual void _nativeEnumVideoModes( DisplayOutputNativeImpl & pOutputData, ColorFormat pColorFormat ) override final;
+    };
+
+    template <typename TpNativeData>
+    inline void dsmInitializeNativeData( TpNativeData * pNativeData, EDisplayDriverType pDriverType )
+    {
+        try
+        {
+            switch ( pDriverType )
+            {
+                case EDisplayDriverType::Generic:
+                {
+                    pNativeData->generic = new typename TpNativeData::GenericType();
+                    break;
+                }
+			#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
+			    case EDisplayDriverType::DXGI:
+                {
+                    pNativeData->dxgi = new typename TpNativeData::DXGIType();
+                    break;
+                }
+			#endif
+			#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
+			    case EDisplayDriverType::SDL:
+                {
+                    pNativeData->sdl = new typename TpNativeData::SDLType();
+                    break;
+                }
+			#endif
+			default:
+			{
+			    throw 0;
+			}
+            }
+        }
+        catch( ... )
+        {
+        }
+    }
+
+    template <typename TpNativeData>
+    inline void dsmReleaseNativeData( TpNativeData * pNativeData, EDisplayDriverType pDriverType )
+    {
+        try
+        {
+            switch( pDriverType )
+            {
+                case EDisplayDriverType::Generic:
+                {
+                    if( pNativeData->generic != nullptr )
+                    {
+                        delete pNativeData->generic;
+                        pNativeData->generic = nullptr;
+                    }
+                    break;
+                }
+			#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
+			    case EDisplayDriverType::DXGI:
+                {
+                    if( pNativeData->dxgi != nullptr )
+                    {
+                        delete pNativeData->dxgi;
+                        pNativeData->dxgi = nullptr;
+                    }
+                    break;
+                }
+			#endif
+			#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
+                case EDisplayDriverType::SDL:
+                {
+                    if( pNativeData->sdl != nullptr )
+                    {
+                        delete pNativeData->sdl;
+                        pNativeData->sdl = nullptr;
+                    }
+                    break;
+                }
+			#endif
+            }
+        }
+        catch( ... )
+        {
+        }
+    }
 
 } // namespace system
 } // namespace ts3

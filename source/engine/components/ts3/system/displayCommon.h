@@ -191,7 +191,7 @@ namespace system
 		dsm_index_t videoModeIndex = CX_DSM_INDEX_INVALID;
 		dsm_video_mode_id_t videoModeID = 0u;
 		dsm_video_settings_hash_t settingsHash = 0u;
-		ColorFormat format = ColorFormat::Unknown;
+		ColorFormat colorFormat = ColorFormat::Unknown;
 		DisplayVideoSettings settings;
 	};
 

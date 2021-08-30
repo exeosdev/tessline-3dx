@@ -17,16 +17,24 @@ namespace system
     {
     };
 
-	struct DisplayVideoModeNativeDataGeneric
+	struct DisplayAdapterNativeDataGeneric
     {
+	    DISPLAY_DEVICEA gdiDeviceInfo;
+	    std::string adapterUUID;
+	    std::string adapterName;
+	    std::string displayDeviceID;
     };
 
 	struct DisplayOutputNativeDataGeneric
     {
+	    HMONITOR gdiOutputMonitor;
+	    std::string displayDeviceID;
+	    std::string outputID;
     };
 
-	struct DisplayAdapterNativeDataGeneric
+	struct DisplayVideoModeNativeDataGeneric
     {
+	    DEVMODEA gdiModeInfo;
     };
 
 } // namespace system
