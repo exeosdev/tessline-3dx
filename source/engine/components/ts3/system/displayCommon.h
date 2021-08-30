@@ -200,9 +200,12 @@ namespace ts3::system
 	using DisplayOutputList = std::vector<DisplayOutput *>;
 	using DisplayVideoModeList = std::vector<DisplayVideoMode *>;
 
-	dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
+	TS3_PCL_ATTR_NO_DISCARD dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
-	std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
+	TS3_PCL_ATTR_NO_DISCARD std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
+
+	TS3_PCL_ATTR_NO_DISCARD ColorFormat dsmResolveSystemColorFormat( ColorFormat pColorFormat );
+
 
 } // namespace ts3::system
 

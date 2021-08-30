@@ -44,7 +44,7 @@ namespace ts3::system
 
     bool DisplayAdapter::isActive() const
     {
-        return true;
+        return !mPrivate->outputStorage.empty();
     }
 
     bool DisplayAdapter::isPrimaryAdapter() const
@@ -53,7 +53,9 @@ namespace ts3::system
     }
 
     bool DisplayAdapter::hasActiveOutputs() const
-    {}
+    {
+        return mPrivate->activeOutputsNum > 0;
+    }
 
 
     DisplayOutput::DisplayOutput( DisplayAdapter * pAdapter )
@@ -69,6 +71,20 @@ namespace ts3::system
     DisplayOutput::~DisplayOutput()
     {
         dsmReleaseNativeData( &mNativeData, mDisplayDriver->mDriverType );
+    }
+
+    const DisplayVideoModeList & DisplayOutput::getVideoModeList( ColorFormat pColorFormat ) const
+    {}
+
+    bool DisplayOutput::isActive() const
+    {
+        auto nativeColorFormat = dsmResolveSystemColorFormat( ColorFormat::SystemNative );
+        return !mPrivate->colorFormatMap[nativeColorFormat].videoModeStorage.empty();
+    }
+
+    bool DisplayOutput::isPrimaryOutput() const
+    {
+        return mPrivate->descPriv.flags.isSet( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
     }
 
 
@@ -237,6 +253,24 @@ namespace ts3::system
 
     void DisplayDriver::_resetDisplayConfiguration()
     {
+        for( auto & adapter : mPrivate->adapterStorage )
+        {
+            for( auto & output : adapter.mPrivate->outputStorage )
+            {
+                for( auto & colorFormatData : output.mPrivate->colorFormatMap )
+                {
+                    for( auto & videoMode : colorFormatData.second.videoModeStorage )
+                    {
+                        _nativeDestroyVideoMode( videoMode );
+                    }
+                    colorFormatData.second.videoModeStorage.clear();
+                    colorFormatData.second.videoModeList.clear();
+                }
+                output.mPrivate->colorFormatMap.clear();
+            }
+            adapter.mPrivate->outputStorage.clear();
+        }
+        mPrivate->adapterStorage.clear();
     }
 
     void DisplayDriver::_enumAdapters()
@@ -248,11 +282,22 @@ namespace ts3::system
             mPrivate->adapterList.reserve( mPrivate->adapterStorage.size() );
             for( auto & adapter : mPrivate->adapterStorage )
             {
+                if( adapter.isActive() )
+                {
+                    mPrivate->activeAdaptersNum += 1;
+                }
                 if( adapter.isPrimaryAdapter() )
                 {
                     mPrivate->primaryAdapter = &adapter;
                 }
                 mPrivate->adapterList.push_back( &adapter );
+            }
+
+            if( !mPrivate->primaryAdapter )
+            {
+                auto & firstAdapter = mPrivate->adapterStorage[0];
+                firstAdapter.mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
+                mPrivate->primaryAdapter = &firstAdapter;
             }
         }
     }
@@ -266,11 +311,22 @@ namespace ts3::system
             pAdapter.mPrivate->outputList.reserve( pAdapter.mPrivate->outputStorage.size() );
             for( auto & output : pAdapter.mPrivate->outputStorage )
             {
+                if( output.isActive() )
+                {
+                    pAdapter.mPrivate->activeOutputsNum += 1;
+                }
                 if( output.isPrimaryOutput() )
                 {
                     pAdapter.mPrivate->primaryOutput = &output;
                 }
                 pAdapter.mPrivate->outputList.push_back( &output );
+            }
+
+            if( !pAdapter.mPrivate->primaryOutput )
+            {
+                auto & firstOutput = pAdapter.mPrivate->outputStorage[0];
+                firstOutput.mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
+                pAdapter.mPrivate->primaryOutput = &firstOutput;
             }
         }
 
