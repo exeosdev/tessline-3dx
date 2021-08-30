@@ -12,9 +12,7 @@
 #  include "internal/platform/osapi/x11/x11SysContext.h"
 #endif
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     /// @brief
@@ -34,7 +32,6 @@ namespace system
     /// @brief
     TS3_SYSTEM_API void releaseSysContext( SysContextHandle pContext );
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_CORE_SESSION_CONTEXT_NATIVE_H__

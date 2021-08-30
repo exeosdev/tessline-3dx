@@ -13,9 +13,7 @@
 #  include "internal/platform/osapi/x11/x11Display.h"
 #endif
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     union DisplayManagerNativeData

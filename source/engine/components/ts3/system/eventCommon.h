@@ -43,9 +43,7 @@
 #define ExfEnumValidateEventCode( pEventCode ) \
 	( ( ( event_code_value_t )( pEventCode ) & TS3_ENUM_EVENT_CODE_CONTROL_KEY ) == TS3_ENUM_EVENT_CODE_CONTROL_KEY )
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
 	ts3DeclareHandle( EventSource );
@@ -178,7 +176,6 @@ namespace system
 		{}
 	};
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_EVENT_DEFS_H__

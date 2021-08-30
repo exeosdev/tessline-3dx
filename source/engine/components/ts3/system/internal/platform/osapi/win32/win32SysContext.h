@@ -4,9 +4,7 @@
 
 #include "win32Common.h"
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
 	struct SysContextNativeData
@@ -22,7 +20,6 @@ namespace system
 	using Win32SysContextNativeData = SysContextNativeData;
 	using Win32SysContextNativeProxyCreateInfo = SysContextNativeProxyCreateInfo;
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_X11_CORE_SESSION_CONTEXT_H__

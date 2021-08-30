@@ -5,9 +5,7 @@
 #include "prerequisites.h"
 #include <ts3/stdext/chrono.h>
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
 	/// @brief Type used to represent the resolution of a PerfCounter.
@@ -47,7 +45,6 @@ namespace system
 	    return convertFromDuration( pDuration.count(), DurationTraits<tpPeriod>::unitRatio );
 	}
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PERF_COUNTER_H__

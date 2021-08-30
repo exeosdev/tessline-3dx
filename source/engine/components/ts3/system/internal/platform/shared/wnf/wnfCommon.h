@@ -7,9 +7,7 @@
 #include <comdef.h>
 #include <wrl/client.h>
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
 	template <typename Tp>
@@ -17,7 +15,6 @@ namespace system
 
 	std::string wnfQueryHresultErrorMessage( HRESULT pHResult );
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PLATFORM_SHARED_WNF_COMMON_H__

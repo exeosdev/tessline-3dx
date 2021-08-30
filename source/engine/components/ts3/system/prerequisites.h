@@ -29,9 +29,7 @@
 
 #define TS3_SYSTEM_API_NODISCARD TS3_SYSTEM_API TS3_PCL_ATTR_NO_DISCARD
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
 	template <typename TpObject>
@@ -55,7 +53,6 @@ namespace system
     ts3SysDeclareHandle( SysContext );
     ts3SysDeclareHandle( SysObject );
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PREREQUISITES_H__

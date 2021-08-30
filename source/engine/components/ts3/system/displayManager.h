@@ -6,9 +6,7 @@
 #include "sysObject.h"
 #include "displayCommon.h"
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     ts3SysDeclareHandle( DisplayAdapter );
@@ -41,7 +39,6 @@ namespace system
         virtual void _nativeQueryMinWindowSize( DisplaySize & pOutSize ) const = 0;
     };
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_DISPLAY_MANAGER_H__

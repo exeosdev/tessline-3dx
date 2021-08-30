@@ -4,9 +4,7 @@
 
 #include "win32Common.h"
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     struct WindowCreateInfo;
@@ -23,7 +21,6 @@ namespace system
 	void nativeWin32CreateWindow( WindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo );
 	void nativeWin32DestroyWindow( WindowNativeData & pWindowNativeData );
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_WINDOW_H__

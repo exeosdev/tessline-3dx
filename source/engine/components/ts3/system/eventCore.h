@@ -14,9 +14,7 @@
 #  include "internal/platform/osapi/x11/x11EventCore.h"
 #endif
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
 	// Represents invalid mouse position. Used as a default value for last position registered.
@@ -161,7 +159,6 @@ namespace system
 		EventCodeIndexHandlerMap _handlerMapByCodeIndex;
 	};
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_EVENT_CORE_H__

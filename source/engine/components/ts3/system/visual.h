@@ -5,9 +5,7 @@
 #include "prerequisites.h"
 #include <ts3/math/color.h>
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
 	enum class ColorFormat : uint32
@@ -125,7 +123,6 @@ namespace system
     ///
 	TS3_SYSTEM_API bool gfxCheckColorFormatCompatibility( ColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha );
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_VISUAL_H__

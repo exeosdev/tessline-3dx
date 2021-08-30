@@ -1,9 +1,7 @@
 
 #include "displayDriverNative.h"
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     DisplayVideoModeNativeImpl::DisplayVideoModeNativeImpl( DisplayOutputNativeImpl * pOutput )
@@ -111,5 +109,4 @@ namespace system
         return &videoMode;
     }
 
-}
-}
+} // namespace ts3::system

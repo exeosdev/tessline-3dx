@@ -12,9 +12,7 @@
 #  include "internal/platform/osapi/x11/x11OpenGL.h"
 #endif
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     /// @brief
@@ -69,7 +67,6 @@ namespace system
         virtual bool _nativeIsValid() const override;
     };
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_GFX_OPENGL_NATIVE_H__

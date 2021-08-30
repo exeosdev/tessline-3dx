@@ -6,9 +6,7 @@
 #include "windowCommon.h"
 #include <GL/glew.h>
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     ts3SysDeclareHandle( GLSystemDriver );
@@ -67,7 +65,6 @@ namespace system
         std::string toString() const;
     };
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_GFX_OPENGL_COMMON_H__

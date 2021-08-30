@@ -24,9 +24,7 @@
 #  include "internal/platform/shared/sdl/sdlDisplay.h"
 #endif
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     class DisplayDriverNativeImpl;
@@ -300,7 +298,6 @@ namespace system
         }
     }
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_DISPLAY_DRIVER_NATIVE_H__

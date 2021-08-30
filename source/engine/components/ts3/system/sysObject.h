@@ -4,9 +4,7 @@
 
 #include "prerequisites.h"
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     /// @brief Base class for all system classes
@@ -33,7 +31,6 @@ namespace system
         return createDynamicInterfaceObject<TpObject>( std::forward<TpArgs>( pArgs )... );
     }
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_SYS_OBJECT_H__

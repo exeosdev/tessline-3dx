@@ -4,7 +4,7 @@
 
 #include "dxgiCommon.h"
 
-namespace ts3
+namespace ts3::system
 {
 
 	struct DisplayDriverNativeDataDXGI
@@ -34,6 +34,6 @@ namespace ts3
 		IDXGIFactory * dxgiFactory = nullptr;
 	};
 
-}
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_DXGI_DISPLAY_DRIVER_H__

@@ -23,9 +23,7 @@
 #define TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI 1
 #define TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL 0
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     ts3SysDeclareHandle( DisplayManager );
@@ -203,8 +201,7 @@ namespace system
 
 	std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
 #  pragma clang diagnostic pop

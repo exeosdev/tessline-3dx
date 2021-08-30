@@ -5,9 +5,7 @@
 #include "openGLCommon.h"
 #include "sysObject.h"
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     ts3SysDeclareHandle( DisplayManager );
@@ -179,7 +177,6 @@ namespace system
         virtual bool _nativeIsValid() const = 0;
     };
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_GFX_OPENGL_H__

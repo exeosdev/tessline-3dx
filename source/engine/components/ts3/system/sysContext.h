@@ -4,9 +4,7 @@
 
 #include "prerequisites.h"
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     ts3SysDeclareHandle( SysContext );
@@ -40,7 +38,6 @@ namespace system
         std::unique_ptr<SysContextNativeProxy> _nativeProxy;
     };
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_CORE_SESSION_CONTEXT_H__

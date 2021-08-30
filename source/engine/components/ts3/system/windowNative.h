@@ -14,9 +14,7 @@
 #  include "internal/platform/osapi/x11/x11Window.h"
 #endif
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     struct Window
@@ -31,7 +29,6 @@ namespace system
         DisplayManagerHandle displayManager = nullptr;
     };
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_WINDOW_NATIVE_H__

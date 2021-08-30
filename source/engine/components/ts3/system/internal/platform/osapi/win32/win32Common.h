@@ -7,14 +7,11 @@
 #include <comdef.h>
 #include <windows.h>
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
 
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_COMMON_DEFS_H__

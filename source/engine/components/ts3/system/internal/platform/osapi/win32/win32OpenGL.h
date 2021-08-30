@@ -5,9 +5,7 @@
 #include "win32Window.h"
 #include <GL/wglew.h>
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
 	inline constexpr int cvWin32InvalidPixelFormatIndex = -1;
@@ -36,7 +34,6 @@ namespace system
 		InitState initState;
 	};
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_GFX_OPENGL_H__

@@ -5,7 +5,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-namespace ts3
+namespace ts3::system
 {
 
     constexpr EGLConfig cvEGLInvalidConfigID = nullptr;
@@ -39,6 +39,6 @@ namespace ts3
     void eglCreateSurface( GLDisplaySurface & pSurface, EGLDisplay pEGLDisplay, EGLNativeWindowType pWindow, EGLConfig pEGLConfig );
     void eglCreateCoreContext( GLRenderContext & pContext, const GLRenderContextCreateInfo & pCreateInfo );
 
-}
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_EGL_GFX_OPENGL_H__

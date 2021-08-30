@@ -5,9 +5,7 @@
 #include "eventDefs.h"
 #include <ts3/math/vector.h>
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
 	template <event_code_value_t tpEventCode>
@@ -299,7 +297,6 @@ namespace system
 	{
 	};
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_EVENT_TYPES_DEF_H__
