@@ -15,56 +15,20 @@
 namespace ts3::system
 {
 
-    /// @brief
-    class GLSystemDriverNativeImpl : public GLSystemDriver
+
+    struct GLSystemDriver::ObjectPrivateData
     {
-    public:
-        GLSystemDriverNativeData mNativeData;
-
-    public:
-        explicit GLSystemDriverNativeImpl( DisplayManagerHandle pDisplayManager );
-        virtual ~GLSystemDriverNativeImpl();
-
-        virtual void _nativeInitializePlatform() override;
-        virtual void _nativeReleaseInitState( GLRenderContext & pRenderContext ) override;
-        virtual void _nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo ) override;
-        virtual void _nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface ) override;
-        virtual void _nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLDisplaySurface & pSurface, const GLRenderContextCreateInfo & pCreateInfo ) override;
-        virtual void _nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext ) override;
-        virtual bool _nativeIsRenderContextBound() const override;
-        virtual bool _nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const override;
+        GLSystemDriverNativeData nativeDataPriv;
     };
 
-    /// @brief
-    class GLDisplaySurfaceNativeImpl : public GLDisplaySurface
+    struct GLDisplaySurface::ObjectPrivateData
     {
-    public:
-        GLDisplaySurfaceNativeData mNativeData;
-
-    public:
-        explicit GLDisplaySurfaceNativeImpl( GLSystemDriverHandle pDriver );
-        virtual ~GLDisplaySurfaceNativeImpl();
-
-        virtual void _nativeSwapBuffers() override final;
-        virtual void _nativeDestroy() override final;
-        virtual void _nativeQueryRenderAreaSize( WindowSize & pOutSize ) const override final;
-        virtual bool _nativeIsValid() const override final;
+        GLDisplaySurfaceNativeData nativeDataPriv;
     };
 
-    /// @brief
-    class GLRenderContextNativeImpl : public GLRenderContext
+    struct GLRenderContext::ObjectPrivateData
     {
-    public:
-        GLRenderContextNativeData mNativeData;
-
-    public:
-        explicit GLRenderContextNativeImpl( GLSystemDriverHandle pDriver );
-        virtual ~GLRenderContextNativeImpl();
-
-        virtual void _nativeBindForCurrentThread( const GLDisplaySurface & pSurface ) override final;
-        virtual void _nativeDestroy() override final;
-        virtual bool _nativeIsCurrent() const override final;
-        virtual bool _nativeIsValid() const override final;
+        GLRenderContextNativeData nativeDataPriv;
     };
 
 } // namespace ts3::system

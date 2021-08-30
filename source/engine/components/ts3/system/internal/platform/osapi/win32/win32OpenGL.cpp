@@ -40,9 +40,9 @@ namespace ts3::system
 	}
 
 
-	void GLSystemDriverNativeImpl::_nativeInitializePlatform()
+	void GLSystemDriver::_nativeInitializePlatform()
 	{
-	    auto & openglInitState = mNativeData.initState;
+	    auto & openglInitState = mPrivate->nativeDataPriv.initState;
 
 	    WindowCreateInfo tempWindowCreateInfo;
 	    tempWindowCreateInfo.properties.geometry.position = cvWindowPositionOrigin;
@@ -89,9 +89,9 @@ namespace ts3::system
 	    }
 	}
 
-	void GLSystemDriverNativeImpl::_nativeReleaseInitState( GLRenderContext & pRenderContext )
+	void GLSystemDriver::_nativeReleaseInitState( GLRenderContext & pRenderContext )
 	{
-	    auto & openglInitState = mNativeData.initState;
+	    auto & openglInitState = mPrivate->nativeDataPriv.initState;
 
 	    if( openglInitState.contextData.contextHandle != nullptr )
 	    {
@@ -113,16 +113,14 @@ namespace ts3::system
 	    }
 	}
 
-	void GLSystemDriverNativeImpl::_nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo )
+	void GLSystemDriver::_nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo )
 	{
-	    auto * displaySurfaceNative = pDisplaySurface.getInterface<GLDisplaySurfaceNativeImpl>();
-
 	    WindowCreateInfo surfaceWindowCreateInfo;
 	    surfaceWindowCreateInfo.properties.geometry = pCreateInfo.windowGeometry;
 	    surfaceWindowCreateInfo.properties.title = "TS3 OpenGL Window";
 
-	    nativeWin32CreateWindow( displaySurfaceNative->mNativeData, surfaceWindowCreateInfo );
-	    _win32CreateGLSurface( displaySurfaceNative->mNativeData, pCreateInfo.visualConfig );
+	    nativeWin32CreateWindow( pDisplaySurface.mPrivate->nativeDataPriv, surfaceWindowCreateInfo );
+	    _win32CreateGLSurface( pDisplaySurface.mPrivate->nativeDataPriv, pCreateInfo.visualConfig );
 
 	    if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT ) )
 	    {
@@ -137,39 +135,37 @@ namespace ts3::system
 	        wglSwapIntervalEXT( 0 );
 	    }
 
-	    ::ShowWindow( displaySurfaceNative->mNativeData.hwnd, SW_SHOWNORMAL );
+	    ::ShowWindow( pDisplaySurface.mPrivate->nativeDataPriv.hwnd, SW_SHOWNORMAL );
 
 	    // TODO: Workaround to properly work with current engine's implementation. That should be turned into an explicit flag.
 	    if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
 	    {
-	        ::SetCapture( displaySurfaceNative->mNativeData.hwnd );
+	        ::SetCapture( pDisplaySurface.mPrivate->nativeDataPriv.hwnd );
 	        ::ShowCursor( FALSE );
 	    }
 	}
 
-	void GLSystemDriverNativeImpl::_nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface )
+	void GLSystemDriver::_nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface )
 	{
-	    auto * displaySurfaceNative = pDisplaySurface.getInterface<GLDisplaySurfaceNativeImpl>();
-	    
 	    auto hdc = ::wglGetCurrentDC();
 	    if ( hdc == nullptr )
 	    {
 	        throw 0;
 	    }
 
-	    displaySurfaceNative->mNativeData.hdc = hdc;
-	    displaySurfaceNative->mNativeData.hwnd = ::WindowFromDC( hdc );
-	    displaySurfaceNative->mNativeData.pixelFormatIndex = ::GetPixelFormat( hdc );
+	    pDisplaySurface.mPrivate->nativeDataPriv.hdc = hdc;
+	    pDisplaySurface.mPrivate->nativeDataPriv.hwnd = ::WindowFromDC( hdc );
+	    pDisplaySurface.mPrivate->nativeDataPriv.pixelFormatIndex = ::GetPixelFormat( hdc );
 
 	    CHAR surfaceWindowClassName[256];
-	    ::GetClassNameA( displaySurfaceNative->mNativeData.hwnd, surfaceWindowClassName, 255 );
-	    auto wndProcModuleHandle = ::GetWindowLongPtrA( displaySurfaceNative->mNativeData.hwnd, GWLP_HINSTANCE );
+	    ::GetClassNameA( pDisplaySurface.mPrivate->nativeDataPriv.hwnd, surfaceWindowClassName, 255 );
+	    auto wndProcModuleHandle = ::GetWindowLongPtrA( pDisplaySurface.mPrivate->nativeDataPriv.hwnd, GWLP_HINSTANCE );
 
-	    displaySurfaceNative->mNativeData.wndClsName = surfaceWindowClassName;
-	    displaySurfaceNative->mNativeData.moduleHandle = reinterpret_cast<HMODULE>( wndProcModuleHandle );
+	    pDisplaySurface.mPrivate->nativeDataPriv.wndClsName = surfaceWindowClassName;
+	    pDisplaySurface.mPrivate->nativeDataPriv.moduleHandle = reinterpret_cast<HMODULE>( wndProcModuleHandle );
 	}
 
-	void GLSystemDriverNativeImpl::_nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLDisplaySurface & pDisplaySurface, const GLRenderContextCreateInfo & pCreateInfo )
+	void GLSystemDriver::_nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLDisplaySurface & pDisplaySurface, const GLRenderContextCreateInfo & pCreateInfo )
 	{
 	    int contextProfile = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
 	    Bitmask<int> contextCreateFlags = 0;
@@ -195,8 +191,7 @@ namespace ts3::system
 	    {
 	        if( pCreateInfo.shareContext )
 	        {
-	            auto * shareContextNative = pCreateInfo.shareContext->getInterface<GLRenderContextNativeImpl>();
-	            shareContextHandle = shareContextNative->mNativeData.contextHandle;
+	            shareContextHandle = pCreateInfo.shareContext->mPrivate->nativeDataPriv.contextHandle;
 	        }
 	    }
 
@@ -214,8 +209,7 @@ namespace ts3::system
             FALSE
         };
 
-	    auto * displaySurfaceNative = pDisplaySurface.getInterface<GLDisplaySurfaceNativeImpl>();
-	    HGLRC contextHandle = wglCreateContextAttribsARB( displaySurfaceNative->mNativeData.hdc,
+	    HGLRC contextHandle = wglCreateContextAttribsARB( pDisplaySurface.mPrivate->nativeDataPriv.hdc,
                                                           shareContextHandle,
                                                           &( contextAttribs[0] ) );
 
@@ -224,71 +218,66 @@ namespace ts3::system
 	        throw 0;
 	    }
 
-	    auto * renderContextNative = pRenderContext.getInterface<GLRenderContextNativeImpl>();
-	    renderContextNative->mNativeData.contextHandle = contextHandle;
+	    pRenderContext.mPrivate->nativeDataPriv.contextHandle = contextHandle;
 	}
 
-	void GLSystemDriverNativeImpl::_nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext )
+	void GLSystemDriver::_nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext )
 	{
-	    auto * renderContextNative = pRenderContext.getInterface<GLRenderContextNativeImpl>();
-
 	    auto contextHandle = ::wglGetCurrentContext();
 	    if ( contextHandle == nullptr )
 	    {
 	        throw 0;
 	    }
-	    renderContextNative->mNativeData.contextHandle = contextHandle;
+	    pRenderContext.mPrivate->nativeDataPriv.contextHandle = contextHandle;
 	}
 
-	bool GLSystemDriverNativeImpl::_nativeIsRenderContextBound() const
+	bool GLSystemDriver::_nativeIsRenderContextBound() const
 	{
 	    auto currentContext = ::wglGetCurrentContext();
 	    return currentContext != nullptr;
 	}
 
-	bool GLSystemDriverNativeImpl::_nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const
+	bool GLSystemDriver::_nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const
 	{
-	    auto * renderContextNative = pRenderContext.getInterface<GLRenderContextNativeImpl>();
-
 	    auto currentContext = ::wglGetCurrentContext();
-	    return currentContext == renderContextNative->mNativeData.contextHandle;
+	    return currentContext == pRenderContext.mPrivate->nativeDataPriv.contextHandle;
 	}
 
 
-	void GLDisplaySurfaceNativeImpl::_nativeSwapBuffers()
+	void GLDisplaySurface::_nativeSwapBuffers()
 	{
-	    ::SwapBuffers( mNativeData.hdc );
+	    ::SwapBuffers( mPrivate->nativeDataPriv.hdc );
 	}
 
-	void GLDisplaySurfaceNativeImpl::_nativeDestroy()
+	void GLDisplaySurface::_nativeDestroy()
 	{
-	    _win32DestroyGLSurface( mNativeData );
+	    _win32DestroyGLSurface( mPrivate->nativeDataPriv );
 	}
 
-	void GLDisplaySurfaceNativeImpl::_nativeQueryRenderAreaSize( WindowSize & pOutSize ) const
+	void GLDisplaySurface::_nativeQueryRenderAreaSize( WindowSize & pOutSize ) const
 	{
 	    RECT clientRect;
-	    ::GetClientRect( mNativeData.hwnd, &clientRect );
+	    ::GetClientRect( mPrivate->nativeDataPriv.hwnd, &clientRect );
 
 	    pOutSize.x = clientRect.right - clientRect.left;
 	    pOutSize.y = clientRect.bottom - clientRect.top;
 	}
 
-	bool GLDisplaySurfaceNativeImpl::_nativeIsValid() const
+	bool GLDisplaySurface::_nativeIsValid() const
 	{
-	    return mNativeData.hdc != nullptr;
+	    return mPrivate->nativeDataPriv.hdc != nullptr;
 	}
 
 
-	void GLRenderContextNativeImpl::_nativeBindForCurrentThread( const GLDisplaySurface & pDisplaySurface )
+	void GLRenderContext::_nativeBindForCurrentThread( const GLDisplaySurface & pDisplaySurface )
 	{
-	    auto * displaySurfaceNative = pDisplaySurface.getInterface<GLDisplaySurfaceNativeImpl>();
-	    ::wglMakeCurrent( displaySurfaceNative->mNativeData.hdc, mNativeData.contextHandle );
+	    auto * displaySurfaceNative = pDisplaySurface.getInterface<GLDisplaySurface>();
+	    ::wglMakeCurrent( displaySurfaceNative->mPrivate->nativeDataPriv.hdc, mPrivate->nativeDataPriv.contextHandle );
 	}
 
-	void GLRenderContextNativeImpl::_nativeDestroy()
+	void GLRenderContext::_nativeDestroy()
 	{
-	    if( mNativeData.contextHandle != nullptr )
+	    if( mPrivate->nativeDataPriv.contextHandle != nullptr )
 	    {
 	        if( _nativeIsCurrent() )
 	        {
@@ -297,21 +286,21 @@ namespace ts3::system
 	            ::wglMakeCurrent( nullptr, nullptr );
 	        }
 
-	        ::wglDeleteContext( mNativeData.contextHandle );
+	        ::wglDeleteContext( mPrivate->nativeDataPriv.contextHandle );
 
-	        mNativeData.contextHandle = nullptr;
+	        mPrivate->nativeDataPriv.contextHandle = nullptr;
 	    }
 	}
 
-	bool GLRenderContextNativeImpl::_nativeIsCurrent() const
+	bool GLRenderContext::_nativeIsCurrent() const
 	{
 	    auto currentContext = ::wglGetCurrentContext();
-	    return mNativeData.contextHandle == currentContext;
+	    return mPrivate->nativeDataPriv.contextHandle == currentContext;
 	}
 
-	bool GLRenderContextNativeImpl::_nativeIsValid() const
+	bool GLRenderContext::_nativeIsValid() const
 	{
-	    return mNativeData.contextHandle != nullptr;
+	    return mPrivate->nativeDataPriv.contextHandle != nullptr;
 	}
 
 

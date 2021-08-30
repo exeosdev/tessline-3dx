@@ -8,6 +8,10 @@
 namespace ts3::system
 {
 
+    struct GLSystemDriverNativeData;
+    struct GLDisplaySurfaceNativeData;
+    struct GLRenderContextNativeData;
+
     ts3SysDeclareHandle( DisplayManager );
 
     /// @brief Contains parameters used to specify how a GL display surface should be created.
@@ -37,9 +41,10 @@ namespace ts3::system
     class GLSystemDriver : public SysObject
     {
     public:
-        struct DriverPrivateData;
+        struct ObjectPrivateData;
         DisplayManagerHandle const mDisplayManager;
-        std::unique_ptr<DriverPrivateData> const mPrivateData;
+        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        const GLSystemDriverNativeData * const mNativeData;
 
     public:
         GLSystemDriver( DisplayManagerHandle pDisplayManager );
@@ -98,23 +103,26 @@ namespace ts3::system
         TS3_PCL_ATTR_NO_DISCARD bool isRenderContextBound( GLRenderContextHandle pRenderContext ) const;
 
     private: // For implementation
-        virtual void _nativeInitializePlatform() = 0;
-        virtual void _nativeReleaseInitState( GLRenderContext & pRenderContext ) = 0;
-        virtual void _nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo ) = 0;
-        virtual void _nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface ) = 0;
-        virtual void _nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLDisplaySurface & pSurface, const GLRenderContextCreateInfo & pCreateInfo ) = 0;
-        virtual void _nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext ) = 0;
-        virtual bool _nativeIsRenderContextBound() const = 0;
-        virtual bool _nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const = 0;
+        virtual void _nativeInitializePlatform();
+        virtual void _nativeReleaseInitState( GLRenderContext & pRenderContext );
+        virtual void _nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo );
+        virtual void _nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface );
+        virtual void _nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLDisplaySurface & pSurface, const GLRenderContextCreateInfo & pCreateInfo );
+        virtual void _nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext );
+        virtual bool _nativeIsRenderContextBound() const;
+        virtual bool _nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const;
     };
 
     class GLDisplaySurface : public SysObject
     {
     public:
-        GLSystemDriverHandle const mDriver;
+        struct ObjectPrivateData;
+        GLSystemDriver * const mDriver;
+        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        const GLDisplaySurfaceNativeData * const mNativeData;
 
     public:
-        GLDisplaySurface( GLSystemDriverHandle pDriver );
+        explicit GLDisplaySurface( GLSystemDriver * pDriver );
         virtual ~GLDisplaySurface();
 
         /// @brief
@@ -133,19 +141,22 @@ namespace ts3::system
         TS3_PCL_ATTR_NO_DISCARD bool isValid() const;
 
     private:
-        virtual void _nativeSwapBuffers() = 0;
-        virtual void _nativeDestroy() = 0;
-        virtual void _nativeQueryRenderAreaSize( WindowSize & pOutSize ) const = 0;
-        virtual bool _nativeIsValid() const = 0;
+        void _nativeSwapBuffers();
+        void _nativeDestroy();
+        void _nativeQueryRenderAreaSize( WindowSize & pOutSize ) const;
+        bool _nativeIsValid() const;
     };
 
     class GLRenderContext : public SysObject
     {
     public:
-        GLSystemDriverHandle const mDriver;
+        struct ObjectPrivateData;
+        GLSystemDriver * const mDriver;
+        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        const GLRenderContextNativeData * const mNativeData;
 
     public:
-        GLRenderContext( GLSystemDriverHandle pDriver );
+        explicit GLRenderContext( GLSystemDriver * pDriver );
         virtual ~GLRenderContext();
 
         /// @brief
@@ -167,10 +178,10 @@ namespace ts3::system
         TS3_PCL_ATTR_NO_DISCARD bool isValid() const;
 
     private:
-        virtual void _nativeBindForCurrentThread( const GLDisplaySurface & pSurface ) = 0;
-        virtual void _nativeDestroy() = 0;
-        virtual bool _nativeIsCurrent() const = 0;
-        virtual bool _nativeIsValid() const = 0;
+        virtual void _nativeBindForCurrentThread( const GLDisplaySurface & pSurface );
+        virtual void _nativeDestroy();
+        virtual bool _nativeIsCurrent() const;
+        virtual bool _nativeIsValid() const;
     };
 
 } // namespace ts3::system
