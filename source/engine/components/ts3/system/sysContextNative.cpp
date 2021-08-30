@@ -1,9 +1,7 @@
 
 #include "sysContextNative.h"
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     SysContextNativeProxy::SysContextNativeProxy()
@@ -13,5 +11,4 @@ namespace system
     SysContextNativeProxy::~SysContextNativeProxy()
     {}
 
-}
-}
+} // namespace ts3::system

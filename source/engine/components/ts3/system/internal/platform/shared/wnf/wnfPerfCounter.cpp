@@ -2,7 +2,7 @@
 #include "wnfPerfCounter.h"
 
 #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINFAMILY )
-namespace ts3
+namespace ts3::system
 {
 
 	perf_counter_value_t nativePerfCounterQueryValue()
@@ -30,5 +30,5 @@ namespace ts3
 		return perfCounterFrequency;
 	}
 
-} // namespace ts3
+} // namespace ts3::system
 #endif

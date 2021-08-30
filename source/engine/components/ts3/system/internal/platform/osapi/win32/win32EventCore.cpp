@@ -3,7 +3,7 @@
 #include <ts3/math/vectorOps.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
-namespace ts3
+namespace ts3::system
 {
 
 	bool _win32TranslateAndDispatch( EventController & pEventController, const MSG & pMSG );
@@ -538,5 +538,5 @@ namespace ts3
 		return ::DefWindowProcA( pHWND, pMessage, pWparam, pLparam );
 	}
 
-}
+} // namespace ts3::system
 #endif

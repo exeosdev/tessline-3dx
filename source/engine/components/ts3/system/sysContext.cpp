@@ -1,9 +1,7 @@
 
 #include "sysContextNative.h"
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     SysContext::SysContext( std::unique_ptr<SysContextNativeProxy> pNativeProxy )
@@ -30,5 +28,4 @@ namespace system
 //        delete pContext;
 //    }
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system

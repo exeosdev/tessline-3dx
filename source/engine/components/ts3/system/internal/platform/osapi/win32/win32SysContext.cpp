@@ -1,9 +1,8 @@
 
 #include <ts3/system/sysContextNative.h>
 
-namespace ts3
-{
-namespace system
+#if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
+namespace ts3::system
 {
 
     void _nativeSysContextInitialize( SysContext & pContext, const SysContextCreateInfo & pCreateInfo )
@@ -38,5 +37,5 @@ namespace system
 		cscNativeData.sessionInfo.displayString.clear();
 	}
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
+#endif

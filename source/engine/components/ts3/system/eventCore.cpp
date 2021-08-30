@@ -1,7 +1,7 @@
 
 #include "eventCore.h"
 
-namespace ts3
+namespace ts3::system
 {
 
 	EventController::EventController( ContextHandle pContext ) noexcept
@@ -318,4 +318,4 @@ namespace ts3
 		pInputState.mouseLastRegPos = pMouseButtonEvent.cursorPos;
 	}
 
-}
+} // namespace ts3::system

@@ -1,8 +1,8 @@
 
-#include <ts3/system/windowtem.h>
+#include <ts3/system/windowNative.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
-namespace ts3
+namespace ts3::system
 {
 
 	void _win32RegisterWndClass( WindowNativeData & pWindowNativeData );
@@ -194,5 +194,5 @@ namespace ts3
 		return ::DefWindowProcA( pHWND, pMessage, pWparam, pLparam );
 	}
 
-}
+} // namespace ts3::system
 #endif

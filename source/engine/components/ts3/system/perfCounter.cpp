@@ -1,7 +1,7 @@
 
 #include "perfCounter.h"
 
-namespace ts3
+namespace ts3::system
 {
 
 	perf_counter_value_t nativePerfCounterQueryValue();

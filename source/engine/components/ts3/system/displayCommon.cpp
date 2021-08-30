@@ -2,9 +2,7 @@
 #include "displayCommon.h"
 #include <sstream>
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings )
@@ -23,5 +21,4 @@ namespace system
 		return {};
 	}
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system

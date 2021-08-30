@@ -2,9 +2,7 @@
 #include <ts3/system/displayDriverNative.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     //	void DisplayManager::_sysQueryDisplaySize( DisplaySize & pDisplaySize ) const
@@ -241,6 +239,5 @@ namespace system
         return pAdapterRegistryKey.substr( 0, lastSepPos );
     }
     
-}
-}
+} // namespace ts3::system
 #endif

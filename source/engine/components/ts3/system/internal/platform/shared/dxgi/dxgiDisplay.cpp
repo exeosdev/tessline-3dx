@@ -3,7 +3,7 @@
 #include <ts3/stdext/mapUtils.h>
 #include <comdef.h> // For _bstr_t
 
-namespace ts3
+namespace ts3::system
 {
 
 	static DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( ColorFormat pColorFormat );

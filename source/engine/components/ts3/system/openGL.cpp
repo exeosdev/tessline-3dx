@@ -2,9 +2,7 @@
 #include "openGLNative.h"
 #include "display.h"
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     GLSystemDriver::GLSystemDriver( DisplayManagerHandle pDisplayManager )
@@ -234,5 +232,4 @@ namespace system
         return _nativeIsValid();
     }
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system

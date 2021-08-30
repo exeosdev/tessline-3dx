@@ -1,9 +1,7 @@
 
 #include "openGLNative.h"
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     GLSystemDriverNativeImpl::GLSystemDriverNativeImpl(  DisplayManagerHandle pDisplayManager  )
@@ -26,5 +24,4 @@ namespace system
 
     GLRenderContextNativeImpl::~GLRenderContextNativeImpl() = default;
 
-}
-}
+} // namespace ts3::system

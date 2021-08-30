@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <ts3/stdext/mapUtils.h>
 
-namespace ts3
+namespace ts3::system
 {
 
 	// ColorDesc representation of values in ColorFormat enumeration.
@@ -95,4 +95,4 @@ namespace ts3
 		return ( rgba.u8Red == pRed ) && ( rgba.u8Green == pGreen ) && ( rgba.u8Blue == pBlue ) && ( rgba.u8Alpha == pAlpha );
 	}
 
-}
+} // namespace ts3::system

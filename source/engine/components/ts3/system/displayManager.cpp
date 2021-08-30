@@ -2,9 +2,7 @@
 #include "displayNative.h"
 #include "windowCommon.h"
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     DisplayManager::DisplayManager( SysContextHandle pSysContext )
@@ -164,5 +162,4 @@ namespace system
         return ( framePos != originalPos ) || ( frameSize != originalSize );
     }
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system

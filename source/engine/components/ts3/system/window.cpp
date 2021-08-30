@@ -3,9 +3,7 @@
 #include "displayNative.h"
 #include <ts3/stdext/utilities.h>
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
     void _nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo );
@@ -72,5 +70,4 @@ namespace system
                                                         pWindowGeometry.size );
     }
 
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
