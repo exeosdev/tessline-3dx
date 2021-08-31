@@ -92,10 +92,11 @@ namespace ts3::system
         std::unique_ptr<ObjectPrivateData> const mPrivate;
         const DisplayDriverNativeData * const mNativeData = nullptr;
 
-    public:
+    protected:
         DisplayDriver( DisplayManager * pDisplayManager,
                        EDisplayDriverType pDriverType );
 
+    public:
         virtual ~DisplayDriver();
 
         void initializeDisplayConfiguration();

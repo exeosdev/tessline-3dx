@@ -15,16 +15,29 @@
 namespace ts3::system
 {
 
+    /// @brief
+    enum ESysContextCreateFlags : uint32
+    {
+        E_CORE_SESSION_CONTEXT_CREATE_FLAG_INIT_DEFAULT = 0
+    };
+
+    /// @brief
+    struct SysContextCreateInfo
+    {
+        SysContextCreateInfoNativeParams nativeParams;
+        Bitmask<ESysContextCreateFlags> flags = E_CORE_SESSION_CONTEXT_CREATE_FLAG_INIT_DEFAULT;
+    };
+
     struct SysContext::ContextPrivateData
     {
         SysContextNativeData nativeDataPriv;
     };
 
     /// @brief
-    TS3_SYSTEM_API_NODISCARD SysContextHandle creInitializeSystemContext( const SysContextNativeCreateInfo & pCreateInfo );
+    TS3_SYSTEM_API_NODISCARD SysContextHandle creCreateSystemContext( const SysContextCreateInfo & pCreateInfo );
 
     /// @brief
-    TS3_SYSTEM_API void releaseSysContext( SysContextHandle pContext );
+    TS3_SYSTEM_API void creDestroySysContext( SysContextHandle pContext );
 
 } // namespace ts3::system
 

@@ -83,6 +83,8 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
             "internal/platform/osapi/win32/win32SysContext.cpp"
             "internal/platform/osapi/win32/win32DisplayDriver.h"
             "internal/platform/osapi/win32/win32DisplayDriver.cpp"
+            "internal/platform/osapi/win32/win32DisplayManager.h"
+            "internal/platform/osapi/win32/win32DisplayManager.cpp"
             #"internal/platform/osapi/win32/win32EventCore.h"
             #"internal/platform/osapi/win32/win32EventCore.cpp"
             "internal/platform/osapi/win32/win32OpenGL.h"

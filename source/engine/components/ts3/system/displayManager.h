@@ -11,7 +11,7 @@ namespace ts3::system
 
     struct DisplayManagerNativeData;
 
-    ts3SysDeclareHandle( DisplayManager );
+    ts3SysDeclareHandle( DisplayDriver );
     ts3SysDeclareHandle( DisplayManager );
 
     /// @brief
@@ -26,13 +26,15 @@ namespace ts3::system
         explicit DisplayManager( SysContextHandle pSysContext );
         virtual ~DisplayManager();
 
-        TS3_PCL_ATTR_NO_DISCARD DisplaySize queryDefaultDisplaySize() const;
-
-        TS3_PCL_ATTR_NO_DISCARD DisplaySize queryMinWindowSize() const;
+        TS3_PCL_ATTR_NO_DISCARD DisplayDriverHandle createDisplayDriver( EDisplayDriverType pDriverID );
 
         TS3_PCL_ATTR_NO_DISCARD bool checkDriverSupport( EDisplayDriverType pDriverID ) const;
 
         TS3_PCL_ATTR_NO_DISCARD EDisplayDriverType resolveDisplayDriverID( EDisplayDriverType pDriverID ) const;
+
+        TS3_PCL_ATTR_NO_DISCARD DisplaySize queryDefaultDisplaySize() const;
+
+        TS3_PCL_ATTR_NO_DISCARD DisplaySize queryMinWindowSize() const;
 
         TS3_PCL_ATTR_NO_DISCARD bool checkWindowGeometry( const math::Pos2i & pWindowPosition,
                                                           const math::Size2u & pWindowSize ) const;

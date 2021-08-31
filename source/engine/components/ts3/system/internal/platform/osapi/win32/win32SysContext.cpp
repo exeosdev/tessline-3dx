@@ -5,37 +5,17 @@
 namespace ts3::system
 {
 
-    void _nativeSysContextInitialize( SysContext & pContext, const SysContextCreateInfo & pCreateInfo )
-	{
-        auto & cscNativeData = pContext.nativeData;
+    void SysContext::_nativeInitialize()
+    {
+        auto & nativeData = mPrivate->nativeDataPriv;
+        nativeData.appExecModuleHandle = ::GetModuleHandleA( nullptr );
+    }
 
-		int thrInitStatus = ::XInitThreads();
-		if( thrInitStatus == False )
-		{
-			throw 0;
-		}
-
-		auto * xDisplay = ::XOpenDisplay( nullptr );
-		if( xDisplay == nullptr )
-		{
-			throw 0;
-		}
-
-		cscNativeData.display = xDisplay;
-		cscNativeData.sessionInfo.connectionNumber = XConnectionNumber( xDisplay );
-		cscNativeData.sessionInfo.vendorName = XServerVendor( xDisplay );
-		cscNativeData.sessionInfo.displayString = XDisplayString( xDisplay );
-	}
-
-	void _nativeSysContextRelease( SysContext & pContext )
-	{
-        auto & cscNativeData = pContext.nativeData;
-
-		cscNativeData.display = nullptr;
-		cscNativeData.sessionInfo.connectionNumber = -1;
-		cscNativeData.sessionInfo.vendorName.clear();
-		cscNativeData.sessionInfo.displayString.clear();
-	}
+    void SysContext::_nativeRelease() noexcept
+    {
+        auto & nativeData = mPrivate->nativeDataPriv;
+        nativeData.appExecModuleHandle = nullptr;
+    }
 
 } // namespace ts3::system
 #endif

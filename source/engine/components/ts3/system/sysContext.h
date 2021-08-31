@@ -7,33 +7,25 @@
 namespace ts3::system
 {
 
+    struct SysContextNativeData;
+
     ts3SysDeclareHandle( SysContext );
-
-    ts3SysDeclareNativeTypes( SysContext );
-
-    /// @brief
-	enum ESysContextCreateFlags : uint32
-	{
-		E_CORE_SESSION_CONTEXT_CREATE_FLAG_INIT_DEFAULT = 0
-	};
-
-	/// @brief
-	struct SysContextCreateInfo
-	{
-		Bitmask<ESysContextCreateFlags> flags = E_CORE_SESSION_CONTEXT_CREATE_FLAG_INIT_DEFAULT;
-	};
 
 	/// @brief
 	class SysContext
     {
     public:
         struct ContextPrivateData;
-        std::unique_ptr<ContextPrivateData> const mPrivateData;
+        std::unique_ptr<ContextPrivateData> const mPrivate;
         const SysContextNativeData * const mNativeData = nullptr;
 
     public:
         SysContext();
         ~SysContext();
+
+    private:
+        void _nativeInitialize();
+        void _nativeRelease() noexcept;
     };
 
 } // namespace ts3::system

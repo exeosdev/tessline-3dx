@@ -4,6 +4,8 @@
 
 #include "displayManager.h"
 #include "sysContextNative.h"
+#include <functional>
+#include <map>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 #  include "internal/platform/osapi/android/androidDisplayManager.h"
@@ -16,9 +18,13 @@
 namespace ts3::system
 {
 
+    using DisplayDriverFactoryCallback = std::function<DisplayDriverHandle()>;
+    using DisplayDriverFactoryMap = std::map<EDisplayDriverType, DisplayDriverFactoryCallback>;
+
     struct DisplayManager::ObjectPrivateData
     {
         DisplayManagerNativeData nativeDataPriv;
+        DisplayDriverFactoryMap driverFactoryMap;
     };
 
 } // namespace ts3::system

@@ -1,5 +1,6 @@
 
 #include "displayManagerNative.h"
+#include "displayDriverNative.h"
 #include "windowCommon.h"
 
 namespace ts3::system
@@ -9,23 +10,37 @@ namespace ts3::system
     : SysObject( std::move( pSysContext ) )
     , mPrivate( std::make_unique<ObjectPrivateData>() )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
-    {}
+    {
+        mPrivate->driverFactoryMap[EDisplayDriverType::Generic] = [this]() {
+            return createSysObject<DisplayDriverGeneric>( this );
+        };
+    #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
+        mPrivate->driverFactoryMap[EDisplayDriverType::DXGI] = [this]() {
+            return createSysObject<DisplayDriverDXGI>( this );
+        };
+    #endif
+    #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
+        mPrivate->driverFactoryMap[EDisplayDriverType::SDL] = [this]() {
+            return createSysObject<DisplayDriverSDL>( this );
+        };
+    #endif
+    }
 
     DisplayManager::~DisplayManager()
     {}
 
-    DisplaySize DisplayManager::queryDefaultDisplaySize() const
+    DisplayDriverHandle DisplayManager::createDisplayDriver( EDisplayDriverType pDriverID )
     {
-        DisplaySize result;
-        _nativeQueryDefaultDisplaySize( result );
-        return result;
-    }
+        pDriverID = resolveDisplayDriverID( pDriverID );
+        if( pDriverID == EDisplayDriverType::Unknown )
+        {
+            return nullptr;
+        }
 
-    DisplaySize DisplayManager::queryMinWindowSize() const
-    {
-        DisplaySize result;
-        _nativeQueryMinWindowSize( result );
-        return result;
+        auto & factoryCallback = mPrivate->driverFactoryMap.at( pDriverID );
+        auto displayDriver = factoryCallback();
+
+        return displayDriver;
     }
 
     bool DisplayManager::checkDriverSupport( EDisplayDriverType pDriverID ) const
@@ -68,6 +83,20 @@ namespace ts3::system
         #endif
 
         return resolvedDriverID;
+    }
+
+    DisplaySize DisplayManager::queryDefaultDisplaySize() const
+    {
+        DisplaySize result;
+        _nativeQueryDefaultDisplaySize( result );
+        return result;
+    }
+
+    DisplaySize DisplayManager::queryMinWindowSize() const
+    {
+        DisplaySize result;
+        _nativeQueryMinWindowSize( result );
+        return result;
     }
 
     bool DisplayManager::checkWindowGeometry( const math::Pos2i & pWindowPosition,

@@ -296,5 +296,4 @@ namespace ts3::system
         return _nativeIsValid();
     }
 
-
 } // namespace ts3::system

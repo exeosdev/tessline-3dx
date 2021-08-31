@@ -12,7 +12,7 @@ namespace ts3::system
 	    HINSTANCE appExecModuleHandle;
 	};
 
-	struct SysContextNativeCreateInfo
+	struct SysContextCreateInfoNativeParams
     {
 	    HINSTANCE appExecModuleHandle;
     };

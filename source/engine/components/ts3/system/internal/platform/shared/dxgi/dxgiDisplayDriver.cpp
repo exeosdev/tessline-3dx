@@ -189,6 +189,16 @@ namespace ts3::system
 	    }
 	}
 
+	void DisplayDriverDXGI::_nativeDestroyAdapter( DisplayAdapter & pAdapter )
+	{}
+
+	void DisplayDriverDXGI::_nativeDestroyOutput( DisplayOutput & pOutput )
+	{}
+
+	void DisplayDriverDXGI::_nativeDestroyVideoMode( DisplayVideoMode & pVideoMode )
+	{}
+
+
 	void _dxgiInitializeDriver( DisplayDriverDXGI & pDriverDXGI )
 	{
 	    ts3DebugAssert( pDriverDXGI.mPrivate->nativeDataPriv.dxgi );

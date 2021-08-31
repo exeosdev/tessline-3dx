@@ -44,7 +44,7 @@ namespace ts3::system
 
     bool DisplayAdapter::isActive() const
     {
-        return !mPrivate->outputStorage.empty();
+        return true;
     }
 
     bool DisplayAdapter::isPrimaryAdapter() const
@@ -76,15 +76,13 @@ namespace ts3::system
     const DisplayVideoModeList & DisplayOutput::getVideoModeList( ColorFormat pColorFormat ) const
     {
         auto colorFormat = dsmResolveSystemColorFormat( pColorFormat );
-        auto & colorFormatData = mPrivate->colorFormatMap.at( colorFormat );
+        auto & colorFormatData = mPrivate->colorFormatMap[colorFormat];
         return colorFormatData.videoModeList;
     }
 
     bool DisplayOutput::isActive() const
     {
-        auto nativeColorFormat = dsmResolveSystemColorFormat( ColorFormat::SystemNative );
-        auto & colorFormatData = mPrivate->colorFormatMap.at( nativeColorFormat );
-        return !colorFormatData.videoModeStorage.empty();
+        return true;
     }
 
     bool DisplayOutput::isPrimaryOutput() const
@@ -342,7 +340,7 @@ namespace ts3::system
 
             if( !pAdapter.mPrivate->primaryOutput )
             {
-                auto & firstOutput = pAdapter.mPrivate->outputStorage[0];
+                auto & firstOutput = pAdapter.mPrivate->outputStorage.front();
                 firstOutput.mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
                 pAdapter.mPrivate->primaryOutput = &firstOutput;
             }

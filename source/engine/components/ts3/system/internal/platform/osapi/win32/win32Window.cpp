@@ -75,24 +75,6 @@ namespace ts3::system
 	    pOutSize.y = resultRect.bottom - resultRect.top;
 	}
 
-	void Window::_sysGetClientAreaSize( WindowSize & pClientAreaSize ) const
-	{
-		RECT clientRect;
-		::GetClientRect( mNativeData.hwnd, &clientRect );
-
-		pClientAreaSize.x = clientRect.right - clientRect.left;
-		pClientAreaSize.y = clientRect.bottom - clientRect.top;
-	}
-
-	void Window::_sysGetFrameSize( WindowSize & pFrameSize ) const
-	{
-		RECT clientRect;
-		::GetClientRect( mNativeData.hwnd, &clientRect );
-
-		pFrameSize.x = clientRect.right - clientRect.left;
-		pFrameSize.y = clientRect.bottom - clientRect.top;
-	}
-
 
 	void nativeWin32CreateWindow( WindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo )
 	{
