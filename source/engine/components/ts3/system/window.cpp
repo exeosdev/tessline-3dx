@@ -26,6 +26,8 @@ namespace ts3::system
         windowRef->mPrivate->windowManagerListRef = windowRef;
 
         _nativeCreateWindow( *windowRef, validatedCreateInfo );
+
+        return &( *windowRef );
     }
 
     void WindowManager::destroyWindow( Window & pWindow )

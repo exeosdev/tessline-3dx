@@ -62,7 +62,7 @@ namespace ts3::system
 
         /// @brief Creates a system OpenGL surface (usually - a window) with a configuration matching specified requirements.
         /// @param pCreateInfo CreateInfo struct with a surface specification (VisualConfig, window geometry, etc.)
-        TS3_PCL_ATTR_NO_DISCARD GLDisplaySurfaceHandle createDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo );
+        TS3_PCL_ATTR_NO_DISCARD GLDisplaySurface * createDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo );
 
         /// @brief Creates a GLDisplaySurface object, that wraps currently bound surface for the current thread.
         /// @param pTargetSurface Existing surface object to be used. If null, a new GLDisplaySurface will be created.
@@ -73,13 +73,13 @@ namespace ts3::system
         /// method will throw an exception with EXC_NOT_SUPPORTED code.
         /// @note The surface specified as pTargetSurface is just a hint and may be discarded. Always use returned handle!
         /// @note If no surface is currently bound, null handle is returned, regardless of the value of pTargetSurface.
-        TS3_PCL_ATTR_NO_DISCARD GLDisplaySurfaceHandle createDisplaySurfaceForCurrentThread( GLDisplaySurfaceHandle pTargetSurface = nullptr );
+        TS3_PCL_ATTR_NO_DISCARD GLDisplaySurface * createDisplaySurfaceForCurrentThread( GLDisplaySurface * pTargetSurface = nullptr );
 
         /// @brief Creates a system OpenGL render context with a configuration matching specified requirements.
         /// @param pSurface Surface to be used for context creation. Context can be bound to any surface compatible with this one.
         /// @param pCreateInfo CreateInfo struct with a context specification (OpenGL API version, profile, etc.)
-        TS3_PCL_ATTR_NO_DISCARD GLRenderContextHandle createRenderContext( GLDisplaySurface & pSurface,
-                                                                           const GLRenderContextCreateInfo & pCreateInfo );
+        TS3_PCL_ATTR_NO_DISCARD GLRenderContext * createRenderContext( GLDisplaySurface & pSurface,
+                                                                       const GLRenderContextCreateInfo & pCreateInfo );
 
         /// @brief Creates a GLRenderContext object, that wraps currently bound context for the current thread.
         /// @param pTargetContext Existing context object to be used. If null, a new GLRenderContext will be created.
@@ -87,7 +87,7 @@ namespace ts3::system
         /// bound OpenGL render context. See description of createDisplaySurfaceForCurrentThread() for details.
         /// @note The context specified as pTargetContext is just a hint and may be discarded. Always use returned handle!
         /// @note If no context is currently bound, null handle is returned, regardless of the value of pTargetContext.
-        TS3_PCL_ATTR_NO_DISCARD GLRenderContextHandle createRenderContextForCurrentThread( GLRenderContextHandle pTargetContext = nullptr );
+        TS3_PCL_ATTR_NO_DISCARD GLRenderContext * createRenderContextForCurrentThread( GLRenderContext * pTargetContext = nullptr );
 
         /// @brief
         TS3_PCL_ATTR_NO_DISCARD std::vector<DepthStencilFormat> querySupportedDepthStencilFormats( ColorFormat pColorFormat ) const;
@@ -100,20 +100,27 @@ namespace ts3::system
         TS3_PCL_ATTR_NO_DISCARD bool isRenderContextBound() const;
 
         /// @brief
-        TS3_PCL_ATTR_NO_DISCARD bool isRenderContextBound( GLRenderContextHandle pRenderContext ) const;
+        TS3_PCL_ATTR_NO_DISCARD bool isRenderContextBound( GLRenderContext & pRenderContext ) const;
+
+
+        TS3_SYSTEM_API_NODISCARD bool isDisplaySurfaceValid( GLDisplaySurface & pDisplaySurface ) const;
+
+        TS3_SYSTEM_API_NODISCARD bool isRenderContextValid( GLRenderContext & pRenderContext ) const;
 
     private: // For implementation
-        virtual void _nativeInitializePlatform();
-        virtual void _nativeReleaseInitState( GLRenderContext & pRenderContext );
-        virtual void _nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo );
-        virtual void _nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface );
-        virtual void _nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLDisplaySurface & pSurface, const GLRenderContextCreateInfo & pCreateInfo );
-        virtual void _nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext );
-        virtual bool _nativeIsRenderContextBound() const;
-        virtual bool _nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const;
+        void _nativeInitializePlatform();
+        void _nativeReleaseInitState( GLRenderContext & pRenderContext );
+        void _nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo );
+        void _nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface );
+        void _nativeDestroyDisplaySurface( GLDisplaySurface & pDisplaySurface );
+        void _nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLDisplaySurface & pSurface, const GLRenderContextCreateInfo & pCreateInfo );
+        void _nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext );
+        void _nativeDestroyRenderContext( GLRenderContext & pRenderContext );
+        bool _nativeIsRenderContextBound() const;
+        bool _nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const;
     };
 
-    class GLDisplaySurface : public SysObject
+    class GLDisplaySurface
     {
     public:
         struct ObjectPrivateData;
@@ -147,7 +154,7 @@ namespace ts3::system
         bool _nativeIsValid() const;
     };
 
-    class GLRenderContext : public SysObject
+    class GLRenderContext
     {
     public:
         struct ObjectPrivateData;

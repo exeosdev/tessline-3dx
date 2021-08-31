@@ -271,8 +271,8 @@ namespace ts3::system
 
 	void GLRenderContext::_nativeBindForCurrentThread( const GLDisplaySurface & pDisplaySurface )
 	{
-	    auto * displaySurfaceNative = pDisplaySurface.getInterface<GLDisplaySurface>();
-	    ::wglMakeCurrent( displaySurfaceNative->mPrivate->nativeDataPriv.hdc, mPrivate->nativeDataPriv.contextHandle );
+	    ::wglMakeCurrent( pDisplaySurface.mPrivate->nativeDataPriv.hdc,
+                          mPrivate->nativeDataPriv.contextHandle );
 	}
 
 	void GLRenderContext::_nativeDestroy()

@@ -3,6 +3,7 @@
 #define __TS3_SYSTEM_GFX_OPENGL_NATIVE_H__
 
 #include "openGL.h"
+#include <list>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 #  include "internal/platform/osapi/android/androidOpenGL.h"
@@ -15,20 +16,29 @@
 namespace ts3::system
 {
 
-
     struct GLSystemDriver::ObjectPrivateData
     {
+        using GLDisplaySurfaceList = std::list<GLDisplaySurface>;
+        using GLRenderContextList = std::list<GLRenderContext>;
         GLSystemDriverNativeData nativeDataPriv;
+        GLDisplaySurfaceList displaySurfaceList;
+        GLRenderContextList renderContextList;
     };
 
     struct GLDisplaySurface::ObjectPrivateData
     {
+        using GLDisplaySurfaceRef = GLSystemDriver::ObjectPrivateData::GLDisplaySurfaceList::iterator;
         GLDisplaySurfaceNativeData nativeDataPriv;
+        GLDisplaySurfaceRef driverListRef;
+        bool internalOwnershipFlag = true;
     };
 
     struct GLRenderContext::ObjectPrivateData
     {
+        using GLRenderContextRef = GLSystemDriver::ObjectPrivateData::GLRenderContextList::iterator;
         GLRenderContextNativeData nativeDataPriv;
+        GLRenderContextRef driverListRef;
+        bool internalOwnershipFlag = true;
     };
 
 } // namespace ts3::system
