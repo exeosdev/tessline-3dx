@@ -19,7 +19,7 @@ namespace ts3::gpuapi
 	public:
 		VkInstance const mVkInstance = nullptr;
 		
-		explicit VKGPUDriver( ts3::SystemContext * pExfSystemContext );
+		explicit VKGPUDriver( ts3::SysContext * pExfSysContext );
 		virtual ~VKGPUDriver();
 
 		virtual GPUDeviceHandle createDevice( const GPUDeviceCreateInfo & pCreateInfo ) override;

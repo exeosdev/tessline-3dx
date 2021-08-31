@@ -6,7 +6,7 @@
 namespace ts3::gpuapi
 {
 
-	static SysGLSurfaceHandle createSysGLSurface( SysGLDriverHandle pSysGLDriver, const GLPresentationLayerCreateInfo & pSCCreateInfo )
+	static SysGLDisplaySurfaceHandle createSysGLSurface( SysGLDriverHandle pSysGLDriver, const GLPresentationLayerCreateInfo & pSCCreateInfo )
 	{
 		try
 		{
@@ -19,16 +19,16 @@ namespace ts3::gpuapi
 
 			if( pSCCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT ) )
 			{
-				surfaceCreateInfo.flags.set( E_SYS_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
+				surfaceCreateInfo.flags.set( E_SYS_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 			}
 
 			if( pSCCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_SYNC_MODE_ADAPTIVE_BIT ) )
 			{
-				surfaceCreateInfo.flags.set( E_SYS_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT );
+				surfaceCreateInfo.flags.set( E_SYS_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT );
 			}
 			else if( pSCCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_SYNC_MODE_VERTICAL_BIT ) )
 			{
-				surfaceCreateInfo.flags.set( E_SYS_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT );
+				surfaceCreateInfo.flags.set( E_SYS_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT );
 			}
 
 			auto sysGLSurface = pSysGLDriver->createDisplaySurface( surfaceCreateInfo );
@@ -43,7 +43,7 @@ namespace ts3::gpuapi
 		return nullptr;
 	}
 
-	GLPresentationLayer::GLPresentationLayer( GLGPUDevice & pDevice, SysGLSurfaceHandle pSysGLSurface )
+	GLPresentationLayer::GLPresentationLayer( GLGPUDevice & pDevice, SysGLDisplaySurfaceHandle pSysGLSurface )
 	: PresentationLayer( pDevice )
 	, mSysGLSurface( pSysGLSurface )
 	{ }
@@ -56,7 +56,7 @@ namespace ts3::gpuapi
 	}
 
 
-	GLScreenPresentationLayer::GLScreenPresentationLayer( GLGPUDevice & pDevice, SysGLSurfaceHandle pSysGLSurface )
+	GLScreenPresentationLayer::GLScreenPresentationLayer( GLGPUDevice & pDevice, SysGLDisplaySurfaceHandle pSysGLSurface )
 	: GLPresentationLayer( pDevice, pSysGLSurface )
 	{ }
 

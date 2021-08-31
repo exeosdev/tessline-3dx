@@ -10,7 +10,7 @@ namespace ts3::gpuapi
 	GPUDriverHandle DX12GPUDriverInterface::createDriver( const GPUDriverCreateInfo & pCreateInfo )
 	{
 		DX12GPUDriverCreateInfo dx12CreateInfo;
-		dx12CreateInfo.exfSystemContext = pCreateInfo.exfSystemContext;
+		dx12CreateInfo.exfSysContext = pCreateInfo.exfSysContext;
 		dx12CreateInfo.configFlags = pCreateInfo.configFlags;
 
 		return DX12GPUDriver::create( dx12CreateInfo );

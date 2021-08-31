@@ -6,8 +6,8 @@
 namespace ts3::gpuapi
 {
 
-	DX12GPUDriver::DX12GPUDriver( ts3::SystemContext * pExfSystemContext )
-	: DXGPUDriver( pExfSystemContext )
+	DX12GPUDriver::DX12GPUDriver( ts3::SysContext * pExfSysContext )
+	: DXGPUDriver( pExfSysContext )
 	{ }
 
 	DX12GPUDriver::~DX12GPUDriver()
@@ -21,7 +21,7 @@ namespace ts3::gpuapi
 			GPU_DRIVER_CONFIG_FLAG_DISABLE_MULTI_THREAD_ACCESS_BIT |
 			GPU_DRIVER_CONFIG_FLAG_USE_REFERENCE_DRIVER_BIT;
 
-		auto dx12GPUDriver = createGPUAPIObject<DX12GPUDriver>( pCreateInfo.exfSystemContext );
+		auto dx12GPUDriver = createGPUAPIObject<DX12GPUDriver>( pCreateInfo.exfSysContext );
 		dx12GPUDriver->setConfigFlags( pCreateInfo.configFlags & dx12SupportedGPUConfigFlags );
 
 		return dx12GPUDriver;
@@ -29,7 +29,7 @@ namespace ts3::gpuapi
 
 	DisplayManagerHandle DX12GPUDriver::createDefaultDisplayManager()
 	{
-		auto * exfDisplayManager = mExfSystemContext->getDisplayManager();
+		auto * exfDisplayManager = mExfSysContext->getDisplayManager();
 
 		ts3::SysDisplayDriverCreateInfoDXGI dxgiDriverCreateInfo;
 

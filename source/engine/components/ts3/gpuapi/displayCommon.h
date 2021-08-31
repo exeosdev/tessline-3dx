@@ -17,21 +17,21 @@ namespace ts3::gpuapi
 
 	enum EAdapterFlags : uint32
 	{
-		E_ADAPTER_FLAG_PRIMARY_BIT = static_cast<uint32>( ts3::E_SYS_DSM_ADAPTER_FLAG_PRIMARY_BIT ),
-		E_ADAPTER_FLAG_MULTI_NODE_BIT = static_cast<uint32>( ts3::E_SYS_DSM_ADAPTER_FLAG_MULTI_NODE_BIT ),
-		E_ADAPTER_FLAG_SOFTWARE_BIT = static_cast<uint32>( ts3::E_SYS_DSM_ADAPTER_FLAG_SOFTWARE_BIT ),
+		E_ADAPTER_FLAG_PRIMARY_BIT = static_cast<uint32>( ts3::E_SYS_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT ),
+		E_ADAPTER_FLAG_MULTI_NODE_BIT = static_cast<uint32>( ts3::E_SYS_DISPLAY_ADAPTER_FLAG_MULTI_NODE_BIT ),
+		E_ADAPTER_FLAG_SOFTWARE_BIT = static_cast<uint32>( ts3::E_SYS_DISPLAY_ADAPTER_FLAG_SOFTWARE_BIT ),
 	};
 
 	enum EOutputFlags : uint32
 	{
-		E_OUTPUT_FLAG_PRIMARY_BIT = static_cast<uint32>( ts3::E_SYS_DSM_OUTPUT_FLAG_PRIMARY_BIT )
+		E_OUTPUT_FLAG_PRIMARY_BIT = static_cast<uint32>( ts3::E_SYS_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT )
 	};
 
 	enum EVideoSettingsFlags : uint16
 	{
-		E_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT = static_cast<uint32>( ts3::E_SYS_DSM_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT ),
-		E_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT = static_cast<uint32>( ts3::E_SYS_DSM_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT ),
-		E_VIDEO_SETTINGS_FLAG_STEREO_BIT = static_cast<uint32>( ts3::E_SYS_DSM_VIDEO_SETTINGS_FLAG_STEREO_BIT )
+		E_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT = static_cast<uint32>( ts3::E_SYS_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT ),
+		E_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT = static_cast<uint32>( ts3::E_SYS_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT ),
+		E_VIDEO_SETTINGS_FLAG_STEREO_BIT = static_cast<uint32>( ts3::E_SYS_DISPLAY_VIDEO_SETTINGS_FLAG_STEREO_BIT )
 	};
 
 	enum EDisplayConfigurationFlags : uint32
@@ -66,7 +66,7 @@ namespace ts3::gpuapi
 	{
 		display_system_id_t id = cvDisplaySystemIDInvalid;
 		std::string name;
-		ts3::SysDsmScreenRect screenRect;
+		ts3::SysScreenRect screenRect;
 		Bitmask<EOutputFlags> flags = 0u;
 	};
 
@@ -77,46 +77,46 @@ namespace ts3::gpuapi
 		VideoSettings settings;
 	};
 
-	inline EAdapterFlags translateSysAdapterFlags( Bitmask<ts3::ESysDsmAdapterFlags> pSysAdapterFlags )
+	inline EAdapterFlags translateSysAdapterFlags( Bitmask<ts3::ESysDisplayAdapterFlags> pSysAdapterFlags )
 	{
 		Bitmask<EAdapterFlags> result = 0;
-		if( pSysAdapterFlags.isSet( ts3::E_SYS_DSM_ADAPTER_FLAG_PRIMARY_BIT ) )
+		if( pSysAdapterFlags.isSet( ts3::E_SYS_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT ) )
 		{
 			result.set( E_ADAPTER_FLAG_PRIMARY_BIT );
 		}
-		if( pSysAdapterFlags.isSet( ts3::E_SYS_DSM_ADAPTER_FLAG_MULTI_NODE_BIT ) )
+		if( pSysAdapterFlags.isSet( ts3::E_SYS_DISPLAY_ADAPTER_FLAG_MULTI_NODE_BIT ) )
 		{
 			result.set( E_ADAPTER_FLAG_MULTI_NODE_BIT );
 		}
-		if( pSysAdapterFlags.isSet( ts3::E_SYS_DSM_ADAPTER_FLAG_SOFTWARE_BIT ) )
+		if( pSysAdapterFlags.isSet( ts3::E_SYS_DISPLAY_ADAPTER_FLAG_SOFTWARE_BIT ) )
 		{
 			result.set( E_ADAPTER_FLAG_SOFTWARE_BIT );
 		}
 		return result;
 	}
 
-	inline EOutputFlags translateSysOutputFlags( Bitmask<ts3::ESysDsmOutputFlags> pSysOutputFlags )
+	inline EOutputFlags translateSysOutputFlags( Bitmask<ts3::ESysDisplayOutputFlags> pSysOutputFlags )
 	{
 		Bitmask<EOutputFlags> result = 0;
-		if( pSysOutputFlags.isSet( ts3::E_SYS_DSM_OUTPUT_FLAG_PRIMARY_BIT ) )
+		if( pSysOutputFlags.isSet( ts3::E_SYS_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT ) )
 		{
 			result.set( E_OUTPUT_FLAG_PRIMARY_BIT );
 		}
 		return result;
 	}
 
-	inline EVideoSettingsFlags translateSysVideoSettingsFlags( Bitmask<ts3::ESysDsmVideoSettingsFlags> pSysVideoSettingsFlags )
+	inline EVideoSettingsFlags translateSysVideoSettingsFlags( Bitmask<ts3::ESysDisplayVideoSettingsFlags> pSysVideoSettingsFlags )
 	{
 		Bitmask<EVideoSettingsFlags> result = 0;
-		if( pSysVideoSettingsFlags.isSet( ts3::E_SYS_DSM_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT ) )
+		if( pSysVideoSettingsFlags.isSet( ts3::E_SYS_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT ) )
 		{
 			result.set( E_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT );
 		}
-		if( pSysVideoSettingsFlags.isSet( ts3::E_SYS_DSM_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT ) )
+		if( pSysVideoSettingsFlags.isSet( ts3::E_SYS_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT ) )
 		{
 			result.set( E_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT );
 		}
-		if( pSysVideoSettingsFlags.isSet( ts3::E_SYS_DSM_VIDEO_SETTINGS_FLAG_STEREO_BIT ) )
+		if( pSysVideoSettingsFlags.isSet( ts3::E_SYS_DISPLAY_VIDEO_SETTINGS_FLAG_STEREO_BIT ) )
 		{
 			result.set( E_VIDEO_SETTINGS_FLAG_STEREO_BIT );
 		}

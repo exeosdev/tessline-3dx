@@ -5,8 +5,8 @@
 namespace ts3::gpuapi
 {
 
-	VKGPUDriver::VKGPUDriver( ts3::SystemContext * pExfSystemContext )
-	: GPUDriver( pExfSystemContext )
+	VKGPUDriver::VKGPUDriver( ts3::SysContext * pExfSysContext )
+	: GPUDriver( pExfSysContext )
 	{ }
 
 	VKGPUDriver::~VKGPUDriver()
@@ -14,7 +14,7 @@ namespace ts3::gpuapi
 
 	VKGPUDriverHandle VKGPUDriver::create( const VKGPUDriverCreateInfo & pCreateInfo )
 	{
-		return createGPUAPIObject<VKGPUDriver>( pCreateInfo.exfSystemContext );
+		return createGPUAPIObject<VKGPUDriver>( pCreateInfo.exfSysContext );
 	}
 
 	GPUDeviceHandle VKGPUDriver::createDevice( const GPUDeviceCreateInfo & pCreateInfo )

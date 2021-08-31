@@ -5,7 +5,7 @@
 #define __TS3DRIVER_GPUAPI_VKCOMMON_PREREQUISITES_H__
 
 #include <ts3/gpuapi/memory/commonMemoryDefs.h>
-#include <ts3/system/gfxVulkan.h>
+#include <ts3/system/vulkan.h>
 
 #if( TS3_BUILD_STATIC )
 #  define TS3GX_VKCOMMON_API

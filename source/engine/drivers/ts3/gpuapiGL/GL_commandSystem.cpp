@@ -60,7 +60,7 @@ namespace ts3::gpuapi
 		return cmdSyncObject;
 	}
 
-	void GLCommandSystem::setTargetGLSurface( SysGLSurfaceHandle pSysGLSurface )
+	void GLCommandSystem::setTargetGLSurface( SysGLDisplaySurfaceHandle pSysGLSurface )
 	{
 		// Surface is required to create a GL context. Since CommandSystem is bound to a device
 		// and PresentationLayer is created when device is already available, there is no way
@@ -103,7 +103,7 @@ namespace ts3::gpuapi
 		return true;
 	}
 
-	SysGLRenderContextHandle GLCommandSystem::createSysGLRenderContext( GLGPUDevice & pGLGPUDevice, SysGLSurfaceHandle pSysGLSurface )
+	SysGLRenderContextHandle GLCommandSystem::createSysGLRenderContext( GLGPUDevice & pGLGPUDevice, SysGLDisplaySurfaceHandle pSysGLSurface )
 	{
 		SysGLRenderContextHandle sysGLRenderContext = nullptr;
 
@@ -111,23 +111,23 @@ namespace ts3::gpuapi
 		{
 			SysGLRenderContextCreateInfo contextCreateInfo;
 			contextCreateInfo.shareContext = nullptr;
-			contextCreateInfo.flags.set( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
+			contextCreateInfo.flags.set( E_SYS_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
 
 		#if( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL43 )
 			contextCreateInfo.requiredAPIVersion.major = 4;
 			contextCreateInfo.requiredAPIVersion.minor = 3;
 			contextCreateInfo.targetAPIProfile = ESysGLAPIProfile::Core;
-			contextCreateInfo.flags.set( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT );
+			contextCreateInfo.flags.set( E_SYS_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT );
 		#elif( TS3GX_GL_TARGET == TS3GX_GL_TARGET_ES31 )
 			contextCreateInfo.requiredAPIVersion.major = 3;
 			contextCreateInfo.requiredAPIVersion.minor = 1;
 			contextCreateInfo.targetAPIProfile = ESysGLAPIProfile::GLES;
-			contextCreateInfo.flags.set( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
+			contextCreateInfo.flags.set( E_SYS_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
 		#endif
 
 			if( pGLGPUDevice.isDebugDevice() )
 			{
-				contextCreateInfo.flags.set( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT );
+				contextCreateInfo.flags.set( E_SYS_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT );
 			}
 
 			auto sysGLRenderContext = pSysGLSurface->mGLDriver->createRenderContext( *pSysGLSurface, contextCreateInfo );

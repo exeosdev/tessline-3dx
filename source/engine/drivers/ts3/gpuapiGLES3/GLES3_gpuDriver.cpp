@@ -6,7 +6,7 @@
 namespace ts3::gpuapi
 {
 
-	GLES3GPUDriver::GLES3GPUDriver( ts3::SysGfxGLDriver * pExfGLDriver )
+	GLES3GPUDriver::GLES3GPUDriver( ts3::SysGLDriver * pExfGLDriver )
 	: GLGPUDriver( pExfGLDriver )
 	{ }
 
@@ -15,7 +15,7 @@ namespace ts3::gpuapi
 
 	GLES3GPUDriverHandle GLES3GPUDriver::create( const GLES3GPUDriverCreateInfo & pCreateInfo )
 	{
-		auto * exfGLDriver = initializeExfGLDriver( pCreateInfo.exfSystemContext );
+		auto * exfGLDriver = initializeExfGLDriver( pCreateInfo.exfSysContext );
 		if( exfGLDriver == nullptr )
 		{
 			return nullptr;

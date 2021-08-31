@@ -10,7 +10,7 @@ namespace ts3::gpuapi
 	GPUDriverHandle VK10GPUDriverInterface::createDriver( const GPUDriverCreateInfo & pCreateInfo )
 	{
 		VKGPUDriverCreateInfo vk10CreateInfo;
-		vk10CreateInfo.exfSystemContext = pCreateInfo.exfSystemContext;
+		vk10CreateInfo.exfSysContext = pCreateInfo.exfSysContext;
 		vk10CreateInfo.initFlags = pCreateInfo.initFlags;
 
 		return VKGPUDriver::create( vk10CreateInfo );

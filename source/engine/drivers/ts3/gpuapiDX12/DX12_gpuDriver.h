@@ -18,7 +18,7 @@ namespace ts3::gpuapi
 	class TS3GX_DX12_CLASS DX12GPUDriver final : public DXGPUDriver
 	{
 	public:
-		explicit DX12GPUDriver( ts3::SystemContext * pExfSystemContext );
+		explicit DX12GPUDriver( ts3::SysContext * pExfSysContext );
 		virtual ~DX12GPUDriver();
 
 		virtual DisplayManagerHandle createDefaultDisplayManager() override;

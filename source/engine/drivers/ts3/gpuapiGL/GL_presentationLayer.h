@@ -21,10 +21,10 @@ namespace ts3::gpuapi
 	class TS3GX_GL_CLASS GLPresentationLayer : public PresentationLayer
 	{
 	public:
-		SysGLSurfaceHandle const mSysGLSurface;
+		SysGLDisplaySurfaceHandle const mSysGLSurface;
 
 	public:
-		GLPresentationLayer( GLGPUDevice & pDevice, SysGLSurfaceHandle pSysGLSurface );
+		GLPresentationLayer( GLGPUDevice & pDevice, SysGLDisplaySurfaceHandle pSysGLSurface );
 		virtual ~GLPresentationLayer();
 
 		virtual SysEventSource * querySysEventSourceObject() const noexcept override;
@@ -33,7 +33,7 @@ namespace ts3::gpuapi
 	class GLScreenPresentationLayer final : public GLPresentationLayer
 	{
 	public:
-		GLScreenPresentationLayer( GLGPUDevice & pDevice, SysGLSurfaceHandle pSysGLSurface );
+		GLScreenPresentationLayer( GLGPUDevice & pDevice, SysGLDisplaySurfaceHandle pSysGLSurface );
 		virtual ~GLScreenPresentationLayer();
 
 		virtual void bindRenderTarget( CommandContext * pCmdContext ) override;
