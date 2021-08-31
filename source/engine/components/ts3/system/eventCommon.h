@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_EVENT_DEFS_H__
-#define __TS3_SYSTEM_EVENT_DEFS_H__
+#ifndef __TS3_SYSTEM_EVENT_COMMON_H__
+#define __TS3_SYSTEM_EVENT_COMMON_H__
 
 #include "perfCounter.h"
 #include <functional>
@@ -45,10 +45,6 @@
 
 namespace ts3::system
 {
-
-	ts3DeclareHandle( EventSource );
-	ts3DeclareHandle( EventController );
-	ts3DeclareHandle( EventDispatcher );
 
 	struct Event;
 
@@ -178,4 +174,4 @@ namespace ts3::system
 
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_EVENT_DEFS_H__
+#endif // __TS3_SYSTEM_EVENT_COMMON_H__

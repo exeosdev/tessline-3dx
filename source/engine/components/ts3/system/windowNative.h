@@ -3,8 +3,7 @@
 #define __TS3_SYSTEM_WINDOW_NATIVE_H__
 
 #include "window.h"
-#include <ts3/math/vector.h>
-#include <ts3/stdext/concurrentStack.h>
+#include <list>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 #  include "internal/platform/osapi/android/androidWindow.h"
@@ -17,16 +16,19 @@
 namespace ts3::system
 {
 
-    struct Window
-    {
-        WindowNativeData nativeData;
+    using WindowList = std::list<Window>;
+    using WindowRef = std::list<Window>::iterator;
 
-        WindowManagerHandle windowManager = nullptr;
+    struct WindowManager::ObjectPrivateData
+    {
+        WindowManagerNativeData nativeDataPriv;
+        WindowList windowList;
     };
 
-    struct WindowManager
+    struct Window::ObjectPrivateData
     {
-        DisplayManagerHandle displayManager = nullptr;
+        WindowNativeData nativeDataPriv;
+        WindowRef windowManagerListRef;
     };
 
 } // namespace ts3::system

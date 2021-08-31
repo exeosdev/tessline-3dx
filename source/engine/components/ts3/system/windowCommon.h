@@ -8,6 +8,9 @@
 namespace ts3::system
 {
 
+    class Window;
+    class WindowManager;
+
 	using WindowPos = math::Pos2i;
 	using WindowSize = math::Size2u;
 	using WindowNativeHandle = uint64;
@@ -39,6 +42,12 @@ namespace ts3::system
 		// Default style is the one which is most convenient for rendering - fixed frame.
 		Default = static_cast< enum_default_value_t >( Fixed )
 	};
+
+	enum class WindowSizeMode : enum_default_value_t
+    {
+	    ClientArea,
+	    FrameRect
+    };
 
 	/// @brief
 	struct WindowGeometry

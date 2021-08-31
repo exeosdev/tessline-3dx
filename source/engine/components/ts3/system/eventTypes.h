@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_EVENT_TYPES_DEF_H__
 #define __TS3_SYSTEM_EVENT_TYPES_DEF_H__
 
-#include "eventDefs.h"
+#include "eventCommon.h"
 #include <ts3/math/vector.h>
 
 namespace ts3::system
@@ -275,7 +275,7 @@ namespace ts3::system
 	{
 	public:
 		EvtWindow()
-			: EvtBase( tpEventCode )
+        : EvtBase( tpEventCode )
 		{}
 
 		static_assert( ExfEnumGetEventCodeBaseType( tpEventCode ) == EEventBaseType::Window );

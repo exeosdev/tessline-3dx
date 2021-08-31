@@ -12,6 +12,7 @@ namespace ts3::system
     struct DisplayManagerNativeData;
 
     ts3SysDeclareHandle( DisplayManager );
+    ts3SysDeclareHandle( DisplayManager );
 
     /// @brief
     class DisplayManager : public SysObject

@@ -11,22 +11,68 @@ namespace ts3::system
 	LRESULT __stdcall _win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 
 
-	void WindowManager::_sysInitialize()
-	{}
-
-	void WindowManager::_sysRelease() noexcept
-	{}
-
-
-	void Window::_sysInitialize( const WindowCreateInfo & pCreateInfo )
+	void WindowManager::_nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo )
 	{
-		nativeWin32CreateWindow( mNativeData, pCreateInfo );
-		::ShowWindow( mNativeData.hwnd, SW_SHOWNORMAL );
+	    nativeWin32CreateWindow( pWindow.mPrivate->nativeDataPriv, pCreateInfo );
+
+	    ::ShowWindow( pWindow.mPrivate->nativeDataPriv.hwnd, SW_SHOWNORMAL );
 	}
 
-	void Window::_sysRelease() noexcept
+	void WindowManager::_nativeDestroyWindow( Window & pWindow )
 	{
-		nativeWin32DestroyWindow( mNativeData );
+	    nativeWin32DestroyWindow( pWindow.mPrivate->nativeDataPriv );
+	}
+
+	void WindowManager::_nativeRemoveWindow( Window & pWindow )
+	{
+	    // TODO
+	}
+
+
+	void Window::_nativeResize( const WindowSize & pNewWindowSize, WindowSizeMode pSizeMode )
+	{
+	    RECT windowRect;
+	    windowRect.left = 0;
+	    windowRect.top = 0;
+	    windowRect.right = pNewWindowSize.x;
+	    windowRect.bottom = pNewWindowSize.y;
+
+	    if( pSizeMode == WindowSizeMode::ClientArea )
+	    {
+	        auto windowStyle = ::GetWindowLongA( mNativeData->hwnd, GWL_STYLE );
+	        ::AdjustWindowRect( &windowRect, windowStyle, FALSE );
+	    }
+
+	    ::SetWindowPos( mNativeData->hwnd,
+                        nullptr,
+                        0, // X coordinate
+                        0, // Y coordinate
+                        static_cast<int>( windowRect.right - windowRect.left ), // Width of the frame
+                        static_cast<int>( windowRect.bottom - windowRect.top ), // Height of the frame
+                        SWP_NOZORDER | SWP_FRAMECHANGED );
+	}
+
+	void Window::_nativeSetTitleText( const std::string & pTitleText )
+	{}
+
+	void Window::_nativeUpdateGeometry( const WindowGeometry & pWindowGeometry )
+	{}
+
+	void Window::_nativeGetSize( WindowSizeMode pSizeMode, WindowSize & pOutSize ) const
+	{
+	    RECT resultRect;
+
+	    if( pSizeMode == WindowSizeMode::ClientArea )
+	    {
+	        ::GetClientRect( mNativeData->hwnd, &resultRect );
+	    }
+	    else
+	    {
+	        ::GetWindowRect( mNativeData->hwnd, &resultRect );
+	    }
+
+	    pOutSize.x = resultRect.right - resultRect.left;
+	    pOutSize.y = resultRect.bottom - resultRect.top;
 	}
 
 	void Window::_sysGetClientAreaSize( WindowSize & pClientAreaSize ) const
@@ -68,7 +114,7 @@ namespace ts3::system
 		auto frameHeight = windowRect.bottom - windowRect.top;
 
 		HWND windowHandle = ::CreateWindowExA( WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW,
-		                                       pWindowNativeData.wndClassName,
+		                                       pWindowNativeData.wndClsName,
 		                                       pCreateInfo.properties.title.c_str(),
 		                                       win32FrameStyle,
 		                                       framePosX,
@@ -77,7 +123,7 @@ namespace ts3::system
 		                                       frameHeight,
 		                                       nullptr,
 		                                       nullptr,
-		                                       pWindowNativeData.wndProcModuleHandle,
+		                                       pWindowNativeData.moduleHandle,
 		                                       &pWindowNativeData );
 
 		if ( windowHandle == nullptr )
@@ -85,8 +131,13 @@ namespace ts3::system
 			throw 0;
 		}
 
-		UINT updateFlags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED;
-		::SetWindowPos( windowHandle, nullptr, 0, 0, 0, 0, updateFlags );
+		::SetWindowPos( windowHandle,
+                        nullptr,
+                        0, // X coordinate
+                        0, // Y coordinate
+                        0, // Width of the frame
+                        0, // Height of the frame
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
 
 		pWindowNativeData.hwnd = windowHandle;
 	}
@@ -94,8 +145,9 @@ namespace ts3::system
 	void nativeWin32DestroyWindow( WindowNativeData & pWindowNativeData )
 	{
 		::DestroyWindow( pWindowNativeData.hwnd );
+
 		pWindowNativeData.hwnd = nullptr;
-		pWindowNativeData.wndClassID = 0;
+		pWindowNativeData.wndClsID = 0;
 	}
 
 	void _win32RegisterWndClass( WindowNativeData & pWindowNativeData )
@@ -133,20 +185,20 @@ namespace ts3::system
 				throw 0;
 			}
 
-			pWindowNativeData.wndClassID = wndClassID;
+			pWindowNativeData.wndClsID = wndClassID;
 		}
 
-		pWindowNativeData.wndClassName = wndClassName;
-		pWindowNativeData.wndProcModuleHandle = wndProcModuleHandle;
+		pWindowNativeData.wndClsName = wndClassName;
+		pWindowNativeData.moduleHandle = wndProcModuleHandle;
 	}
 
 	void _win32UnregisterWndClass( WindowNativeData & pWindowNativeData )
 	{
-		::UnregisterClassA( pWindowNativeData.wndClassName, pWindowNativeData.wndProcModuleHandle );
+	    ::UnregisterClassA( pWindowNativeData.wndClsName, pWindowNativeData.moduleHandle );
 
-		pWindowNativeData.wndClassID = 0;
-		pWindowNativeData.wndClassName = nullptr;
-		pWindowNativeData.wndProcModuleHandle = nullptr;
+	    pWindowNativeData.wndClsID = 0;
+		pWindowNativeData.wndClsName = nullptr;
+		pWindowNativeData.moduleHandle = nullptr;
 	}
 
 	DWORD _win32TranslateFrameStyle( WindowFrameStyle pStyle )

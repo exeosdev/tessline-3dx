@@ -18,6 +18,10 @@ namespace ts3::system
 		HMODULE moduleHandle = nullptr;
 	};
 
+	struct WindowManagerNativeData
+    {
+    };
+
 	void nativeWin32CreateWindow( WindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo );
 	void nativeWin32DestroyWindow( WindowNativeData & pWindowNativeData );
 

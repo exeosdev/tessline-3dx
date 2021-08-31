@@ -1,73 +1,85 @@
 
 #include "windowNative.h"
-#include "displayNative.h"
+#include "displayManager.h"
 #include <ts3/stdext/utilities.h>
 
 namespace ts3::system
 {
 
-    void _nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo );
-    void _nativeWindowGetClientAreaSize( Window & pWindow, WindowSize & pOutSize );
-    void _nativeWindowGetFrameSize( Window & pWindow, WindowSize & pOutSize );
-    
-    WindowManagerHandle wmCreateWindowManager( DisplayManagerHandle pDisplayManager )
+    WindowManager::WindowManager( DisplayManagerHandle pDisplayManager )
+    : SysObject( pDisplayManager->mSysContext )
+    , mDisplayManager( pDisplayManager )
+    , mPrivate( std::make_unique<ObjectPrivateData>() )
+    , mNativeData( &( mPrivate->nativeDataPriv ) )
+    {}
+
+    WindowManager::~WindowManager() = default;
+
+    Window * WindowManager::createWindow( const WindowCreateInfo & pCreateInfo )
     {
-        auto * windowManager = new WindowManager();
-        windowManager->displayManager = pDisplayManager;
-
-        return windowManager;
-    }
-
-    void wmDestroyWindowManager( WindowManagerHandle pWindowManager )
-    {
-        pWindowManager->displayManager = nullptr;
-        delete pWindowManager;
-    }
-
-    WindowHandle wmCreateWindow( WindowManagerHandle pWindowManager,
-                                   const WindowCreateInfo & pCreateInfo )
-   {
         WindowCreateInfo validatedCreateInfo;
         validatedCreateInfo.properties = pCreateInfo.properties;
 
-        wmWindowManagerValidateWindowGeometry( pWindowManager, validatedCreateInfo.properties.geometry );
+        validateWindowGeometryUpdate( validatedCreateInfo.properties.geometry );
 
-        auto * window = new Window();
-        window->windowManager = pWindowManager;
+        auto windowRef = mPrivate->windowList.emplace( mPrivate->windowList.end(), this );
+        windowRef->mPrivate->windowManagerListRef = windowRef;
 
-        _nativeCreateWindow( *window, validatedCreateInfo );
-
-        return window;
-   }
-
-    WindowSize wmWindowGetClientAreaSize( WindowHandle pWindow )
-    {
-        WindowSize result;
-        _nativeWindowGetClientAreaSize( *pWindow, result );
-        return result;
+        _nativeCreateWindow( *windowRef, validatedCreateInfo );
     }
 
-    WindowSize wmWindowGetFrameSize( WindowHandle pWindow )
+    void WindowManager::destroyWindow( Window & pWindow )
     {
-        WindowSize result;
-        _nativeWindowGetFrameSize( *pWindow, result );
-        return result;
+        if( !isWindowValid( pWindow ) )
+        {
+            throw 0;
+        }
+
+        _nativeDestroyWindow( pWindow );
+
+        mPrivate->windowList.erase( pWindow.mPrivate->windowManagerListRef );
     }
 
-    bool wmWindowManagerValidateWindowGeometry( WindowManagerHandle pWindowManager,
-                                                const WindowGeometry & pWindowGeometry )
+    void WindowManager::removeWindow( Window & pWindow )
     {
-        return dsmDisplayManagerValidateWindowGeometry( pWindowManager->displayManager,
-                                                        pWindowGeometry.position,
-                                                        pWindowGeometry.size );
+        if( !isWindowValid( pWindow ) )
+        {
+            throw 0;
+        }
+
+        _nativeRemoveWindow( pWindow );
+
+        mPrivate->windowList.erase( pWindow.mPrivate->windowManagerListRef );
     }
 
-    bool wmWindowManagerValidateWindowGeometry( WindowManagerHandle pWindowManager,
-                                                WindowGeometry & pWindowGeometry )
+    bool WindowManager::isWindowValid( Window & pWindow ) const
     {
-        return dsmDisplayManagerValidateWindowGeometry( pWindowManager->displayManager,
-                                                        pWindowGeometry.position,
-                                                        pWindowGeometry.size );
+        auto windowIter = mPrivate->windowList.begin();
+        auto windowEndIter = mPrivate->windowList.end();
+
+        while( windowIter != windowEndIter )
+        {
+            if( pWindow.mPrivate->windowManagerListRef == windowIter )
+            {
+                if( &( *windowIter ) == &pWindow )
+                {
+                    return true;
+                }
+            }
+            ++windowIter;
+        }
+
+        return false;
+    }
+
+    bool WindowManager::validateWindowGeometry( const WindowGeometry & pWindowGeometry ) const
+    {
+        return true;
+    }
+
+    bool WindowManager::validateWindowGeometryUpdate( WindowGeometry & pWindowGeometry ) const
+    {
+        return true;
     }
 
 } // namespace ts3::system
