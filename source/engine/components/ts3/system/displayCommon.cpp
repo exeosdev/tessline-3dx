@@ -85,9 +85,4 @@ namespace ts3::system
         return strStream.str();
 	}
 
-	ColorFormat dsmResolveSystemColorFormat( ColorFormat pColorFormat )
-	{
-        return ColorFormat::B8G8R8A8;
-	}
-
 } // namespace ts3::system

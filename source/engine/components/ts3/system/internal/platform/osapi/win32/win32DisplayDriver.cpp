@@ -57,12 +57,6 @@ namespace ts3::system
                 break;
             }
 
-            // We care only about adapters with active outputs (i.e. monitors used in the current display topology).
-            if( ( gdiDeviceInfo.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP ) == 0 )
-            {
-                continue;
-            }
-
             // Extract adapter UUID from the registry key. Devices referring to the same adapter have the same adapter UUID.
             auto adapterUUID = getUUIDString( gdiDeviceInfo.DeviceKey );
 
@@ -176,28 +170,35 @@ namespace ts3::system
 
     void DisplayDriverGeneric::_nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
     {
-        DEVMODEA displayMode;
-        displayMode.dmSize = sizeof( DEVMODEA );
-        displayMode.dmDriverExtra = 0;
+        const auto & colorFormatDesc = vsxGetDescForColorFormat( pColorFormat );
+
+        DEVMODEA gdiDevMode;
+        gdiDevMode.dmSize = sizeof( DEVMODEA );
+        gdiDevMode.dmDriverExtra = 0;
 
         dsm_video_settings_hash_t prevSettingsHash = CX_DSM_VIDEO_SETTINGS_HASH_INVALID;
 
         for( UINT displayModeIndex = 0; ; ++displayModeIndex )
         {
             auto * outputName = pOutput.mPrivate->nativeDataPriv.generic->displayDeviceID.c_str();
-            BOOL edsResult = ::EnumDisplaySettingsExA( outputName, displayModeIndex, &displayMode, 0 );
+            BOOL edsResult = ::EnumDisplaySettingsExA( outputName, displayModeIndex, &gdiDevMode, 0 );
 
             if( edsResult == FALSE )
             {
                 break;
             }
 
-            DisplayVideoSettings videoSettings;
-            videoSettings.resolution.x = static_cast<uint32>( displayMode.dmPelsWidth );
-            videoSettings.resolution.y = static_cast<uint32>( displayMode.dmPelsHeight );
-            videoSettings.refreshRate = static_cast<uint16>( displayMode.dmDisplayFrequency );
+            if( gdiDevMode.dmBitsPerPel != colorFormatDesc.size )
+            {
+                continue;
+            }
 
-            if( makeBitmask( displayMode.dmDisplayFlags ).isSet( DM_INTERLACED ) )
+            DisplayVideoSettings videoSettings;
+            videoSettings.resolution.x = static_cast<uint32>( gdiDevMode.dmPelsWidth );
+            videoSettings.resolution.y = static_cast<uint32>( gdiDevMode.dmPelsHeight );
+            videoSettings.refreshRate = static_cast<uint16>( gdiDevMode.dmDisplayFrequency );
+
+            if( makeBitmask( gdiDevMode.dmDisplayFlags ).isSet( DM_INTERLACED ) )
             {
                 videoSettings.flags.set( E_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT );
             }
@@ -213,7 +214,7 @@ namespace ts3::system
             }
 
             auto * videoModeObject = addVideoMode( pOutput, pColorFormat );
-            videoModeObject->mPrivate->nativeDataPriv.generic->gdiModeInfo = displayMode;
+            videoModeObject->mPrivate->nativeDataPriv.generic->gdiModeInfo = gdiDevMode;
             videoModeObject->mPrivate->descPriv.settings = videoSettings;
             videoModeObject->mPrivate->descPriv.settingsHash = settingsHash;
 
@@ -236,28 +237,44 @@ namespace ts3::system
         ( pVideoMode );
     }
 
+    ColorFormat DisplayDriverGeneric::_nativeGetSystemDefaultColorFormat() const
+    {
+        return ColorFormat::B8G8R8A8;
+    }
+
+    ArrayView<const ColorFormat> DisplayDriverGeneric::_nativeGetSupportedColorFormatList() const
+    {
+        static const ColorFormat sColorFormatArray[] =
+        {
+            ColorFormat::B8G8R8,
+            ColorFormat::B8G8R8A8,
+        };
+        return bindArrayView( sColorFormatArray );
+    }
+
+
     DisplayAdapter * _win32FindAdapterByUUID( DisplayDriverGeneric & pDriver, const std::string & pUUID )
     {
         auto adapterIter = std::find_if(
-            pDriver.mPrivate->adapterStorage.begin(),
-            pDriver.mPrivate->adapterStorage.end(),
+            pDriver.mPrivate->adapterInternalStorage.begin(),
+            pDriver.mPrivate->adapterInternalStorage.end(),
             [&pUUID]( const DisplayAdapter & pAdapter ) -> bool {
                 return pAdapter.mNativeData->generic->adapterUUID == pUUID;
             });
 
-        return ( adapterIter != pDriver.mPrivate->adapterStorage.end() ) ? &( *adapterIter ) : nullptr;
+        return ( adapterIter != pDriver.mPrivate->adapterInternalStorage.end() ) ? &( *adapterIter ) : nullptr;
     }
 
     DisplayOutput * _win32FindOutputForDeviceID( DisplayAdapter & pAdapter, const char * pDeviceID )
     {
         auto outputIter = std::find_if(
-            pAdapter.mPrivate->outputStorage.begin(),
-            pAdapter.mPrivate->outputStorage.end(),
+            pAdapter.mPrivate->outputInternalStorage.begin(),
+            pAdapter.mPrivate->outputInternalStorage.end(),
             [pDeviceID]( const DisplayOutput & pOutput ) -> bool {
                 return pOutput.mNativeData->generic->displayDeviceID == pDeviceID;
             });
 
-        return ( outputIter != pAdapter.mPrivate->outputStorage.end() ) ? &( *outputIter ) : nullptr;
+        return ( outputIter != pAdapter.mPrivate->outputInternalStorage.end() ) ? &( *outputIter ) : nullptr;
     }
 
     std::string _win32GetAdapterOutputName( const std::string & pAdapterRegistryKey )

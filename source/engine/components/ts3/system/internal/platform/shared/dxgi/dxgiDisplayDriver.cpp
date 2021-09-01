@@ -238,6 +238,25 @@ namespace ts3::system
 	    ( pVideoMode );
 	}
 
+	ColorFormat DisplayDriverDXGI::_nativeGetSystemDefaultColorFormat() const
+    {
+	    return ColorFormat::B8G8R8A8;
+    }
+
+	ArrayView<const ColorFormat> DisplayDriverDXGI::_nativeGetSupportedColorFormatList() const
+    {
+	    static const ColorFormat sColorFormatArray[] =
+        {
+            ColorFormat::B8G8R8,
+            ColorFormat::B8G8R8A8,
+            ColorFormat::B8G8R8A8SRGB,
+            ColorFormat::R8G8B8A8,
+            ColorFormat::R8G8B8A8SRGB,
+            ColorFormat::R10G10B10A2,
+        };
+	    return bindArrayView( sColorFormatArray );
+    }
+
 
 	void _dxgiInitializeDriver( DisplayDriverDXGI & pDriverDXGI )
 	{

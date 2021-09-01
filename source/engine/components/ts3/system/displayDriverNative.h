@@ -7,6 +7,7 @@
 
 #include <deque>
 #include <unordered_map>
+#include <unordered_set>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 #  include "internal/platform/osapi/android/androidDisplayDriver.h"
@@ -86,7 +87,7 @@ namespace ts3::system
     struct DisplayDriver::ObjectPrivateData
     {
         DisplayDriverNativeData nativeDataPriv;
-        std::deque<DisplayAdapter> adapterStorage;
+        std::deque<DisplayAdapter> adapterInternalStorage;
         DisplayAdapterList adapterList;
         uint32 activeAdaptersNum = 0;
         DisplayAdapter * primaryAdapter = nullptr;
@@ -96,7 +97,7 @@ namespace ts3::system
     {
         DisplayAdapterDesc descPriv;
         DisplayAdapterNativeData nativeDataPriv;
-        std::deque<DisplayOutput> outputStorage;
+        std::deque<DisplayOutput> outputInternalStorage;
         DisplayOutputList outputList;
         uint32 activeOutputsNum = 0;
         DisplayOutput * primaryOutput = nullptr;
@@ -107,7 +108,7 @@ namespace ts3::system
         struct ColorFormatData
         {
             ColorFormat colorFormat;
-            std::deque<DisplayVideoMode> videoModeStorage;
+            std::deque<DisplayVideoMode> videoModeInternalStorage;
             DisplayVideoModeList videoModeList;
         };
 
@@ -115,36 +116,27 @@ namespace ts3::system
         DisplayOutputNativeData nativeDataPriv;
         std::unordered_map<ColorFormat, ColorFormatData> _colorFormatMap;
 
-        std::unordered_map<ColorFormat, ColorFormatData> & getColorFormatMap()
-        {
-            return _colorFormatMap;
-        }
-
         ColorFormatData & getColorFormatData( ColorFormat pColorFormat )
         {
-            auto colorFormat = dsmResolveSystemColorFormat( pColorFormat );
-            auto colorFormatDataRef = _colorFormatMap.find( colorFormat );
-
+            auto colorFormatDataRef = _colorFormatMap.find( pColorFormat );
             if( colorFormatDataRef == _colorFormatMap.end() )
             {
-                auto insertRes = _colorFormatMap.insert( {colorFormat, ColorFormatData{}} );
+                auto insertRes = _colorFormatMap.insert( {pColorFormat, ColorFormatData{}} );
                 colorFormatDataRef = insertRes.first;
-                colorFormatDataRef->second.colorFormat = colorFormat;
+                colorFormatDataRef->second.colorFormat = pColorFormat;
             }
-
             return colorFormatDataRef->second;
-        }
-
-        std::deque<DisplayVideoMode> & getVideoModeStorage( ColorFormat pColorFormat )
-        {
-            auto & colorFormatData = getColorFormatData( pColorFormat );
-            return colorFormatData.videoModeStorage;
         }
 
         DisplayVideoModeList & getVideoModeList( ColorFormat pColorFormat )
         {
             auto & colorFormatData = getColorFormatData( pColorFormat );
             return colorFormatData.videoModeList;
+        }
+
+        void resetColorFormatMap()
+        {
+            _colorFormatMap.clear();
         }
     };
 
@@ -168,6 +160,9 @@ namespace ts3::system
         virtual void _nativeDestroyAdapter( DisplayAdapter & pAdapter ) override final;
         virtual void _nativeDestroyOutput( DisplayOutput & pOutput ) override final;
         virtual void _nativeDestroyVideoMode( DisplayVideoMode & pVideoMode ) override final;
+
+        virtual ColorFormat _nativeGetSystemDefaultColorFormat() const override final;
+        virtual ArrayView<const ColorFormat> _nativeGetSupportedColorFormatList() const override final;
     };
 
 #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
@@ -185,6 +180,9 @@ namespace ts3::system
         virtual void _nativeDestroyAdapter( DisplayAdapter & pAdapter ) override final;
         virtual void _nativeDestroyOutput( DisplayOutput & pOutput ) override final;
         virtual void _nativeDestroyVideoMode( DisplayVideoMode & pVideoMode ) override final;
+
+        virtual ColorFormat _nativeGetSystemDefaultColorFormat() const override final;
+        virtual ArrayView<const ColorFormat> _nativeGetSupportedColorFormatList() const override final;
     };
 #endif
 
@@ -203,6 +201,9 @@ namespace ts3::system
         virtual void _nativeDestroyAdapter( DisplayAdapter & pAdapter ) override final;
         virtual void _nativeDestroyOutput( DisplayOutput & pOutput ) override final;
         virtual void _nativeDestroyVideoMode( DisplayVideoMode & pVideoMode ) override final;
+
+        virtual ColorFormat _nativeGetSystemDefaultColorFormat() const override final;
+        virtual ArrayView<const ColorFormat> _nativeGetSupportedColorFormatList() const override final;
     };
 #endif
 
@@ -234,7 +235,7 @@ namespace ts3::system
         return DisplayOutputID{ pOutputID }.uAdapterIndex;
     }
 
-    inline constexpr dsm_index_t dsmExtractOutputIDOutputrIndex( dsm_output_id_t pOutputID )
+    inline constexpr dsm_index_t dsmExtractOutputIDOutputIndex( dsm_output_id_t pOutputID )
     {
         return DisplayOutputID{ pOutputID }.uOutputIndex;
     }

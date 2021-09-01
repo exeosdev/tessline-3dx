@@ -66,6 +66,8 @@ namespace ts3::system
 
         TS3_PCL_ATTR_NO_DISCARD bool isActiveOutput() const;
         TS3_PCL_ATTR_NO_DISCARD bool isPrimaryOutput() const;
+
+        TS3_PCL_ATTR_NO_DISCARD bool isColorFormatSupported( ColorFormat pColorFormat ) const;
     };
 
     /// @brief
@@ -104,7 +106,7 @@ namespace ts3::system
         void initializeDisplayConfiguration();
         void resetDisplayConfiguration();
 
-        void enumVideoModes( dsm_output_id_t pOutputID, ColorFormat pColorFormat );
+        TS3_PCL_ATTR_NO_DISCARD ColorFormat resolveColorFormat( ColorFormat pColorFormat ) const;
 
         TS3_PCL_ATTR_NO_DISCARD const DisplayAdapterList & getAdapterList() const;
         TS3_PCL_ATTR_NO_DISCARD const DisplayOutputList & getOutputList( dsm_index_t pAdapterIndex ) const;
@@ -113,11 +115,13 @@ namespace ts3::system
         TS3_PCL_ATTR_NO_DISCARD DisplayAdapter * getDefaultAdapter() const;
         TS3_PCL_ATTR_NO_DISCARD DisplayOutput * getDefaultOutput( dsm_index_t pAdapterIndex = CX_DSM_INDEX_DEFAULT ) const;
         TS3_PCL_ATTR_NO_DISCARD DisplayOutput * getOutput( dsm_output_id_t pOutputID ) const;
+        TS3_PCL_ATTR_NO_DISCARD ColorFormat getSystemDefaultColorFormat() const;
+        TS3_PCL_ATTR_NO_DISCARD ArrayView<const ColorFormat> getSupportedColorFormatList() const;
 
         TS3_PCL_ATTR_NO_DISCARD bool hasActiveAdapters() const;
         TS3_PCL_ATTR_NO_DISCARD bool hasAnyAdapters() const;
 
-        TS3_PCL_ATTR_NO_DISCARD std::string dumpDisplayConfiguration( const std::string & pLinePrefix = {} ) const;
+        TS3_PCL_ATTR_NO_DISCARD std::string generateConfigurationDump( const std::string & pLinePrefix = {} ) const;
 
     protected:
         DisplayAdapter * addAdapter();
@@ -127,7 +131,6 @@ namespace ts3::system
     private:
         void _initializeDisplayConfiguration();
         void _resetDisplayConfiguration();
-        void _resetVideoModeData( DisplayOutput & pOutput, ColorFormat pColorFormat );
 
         void _enumAdapters();
         void _enumOutputs( DisplayAdapter & pAdapter );
@@ -143,6 +146,9 @@ namespace ts3::system
         virtual void _nativeDestroyAdapter( DisplayAdapter & pAdapter ) = 0;
         virtual void _nativeDestroyOutput( DisplayOutput & pOutput ) = 0;
         virtual void _nativeDestroyVideoMode( DisplayVideoMode & pVideoMode ) = 0;
+
+        virtual ColorFormat _nativeGetSystemDefaultColorFormat() const = 0;
+        virtual ArrayView<const ColorFormat> _nativeGetSupportedColorFormatList() const = 0;
     };
 
 } // namespace ts3::system

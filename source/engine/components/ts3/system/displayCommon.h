@@ -5,6 +5,7 @@
 #include "visual.h"
 
 #include <ts3/math/vectorOps.h>
+#include <ts3/stdext/arrayView.h>
 #include <ts3/stdext/bitmask.h>
 #include <ts3/stdext/uuid.h>
 
@@ -239,8 +240,6 @@ namespace ts3::system
 	TS3_PCL_ATTR_NO_DISCARD dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
 	TS3_PCL_ATTR_NO_DISCARD std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
-
-	TS3_PCL_ATTR_NO_DISCARD ColorFormat dsmResolveSystemColorFormat( ColorFormat pColorFormat );
 
 
 } // namespace ts3::system
