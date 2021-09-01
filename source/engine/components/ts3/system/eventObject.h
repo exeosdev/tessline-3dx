@@ -7,7 +7,7 @@
 namespace ts3::system
 {
 
-	struct Event
+	struct EventObject
 	{
 		union
 		{
@@ -38,7 +38,7 @@ namespace ts3::system
 			EvtWindowUpdateVisibility  eWindowUpdateVisibility;
 		};
 
-		Event()
+		EventObject()
 		: code{ E_EVENT_CODE_UNDEFINED }
 		{}
 

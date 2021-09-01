@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_EVENT_TYPES_DEF_H__
-#define __TS3_SYSTEM_EVENT_TYPES_DEF_H__
+#ifndef __TS3_SYSTEM_EVENT_CORE_TYPES_H__
+#define __TS3_SYSTEM_EVENT_CORE_TYPES_H__
 
 #include "eventCommon.h"
 #include <ts3/math/vector.h>
@@ -12,11 +12,9 @@ namespace ts3::system
 	struct EvtApp : public EvtBase
 	{
 	public:
-		EvtApp()
-			: EvtBase( tpEventCode )
+	    constexpr EvtApp()
+        : EvtBase( tpEventCode )
 		{}
-
-		static_assert( ExfEnumGetEventCodeBaseType( tpEventCode ) == EEventBaseType::App );
 	};
 
 	struct EvtAppActivityDisplayReady : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_DISPLAY_READY>
@@ -194,8 +192,8 @@ namespace ts3::system
 	struct EvtInput : public EvtBase
 	{
 	public:
-		EvtInput()
-			: EvtBase( tpEventCode )
+	    constexpr EvtInput()
+        : EvtBase( tpEventCode )
 		{}
 
 		static_assert( ExfEnumGetEventCodeBaseType( tpEventCode ) == EEventBaseType::Input );
@@ -274,7 +272,7 @@ namespace ts3::system
 	struct EvtWindow : public EvtBase
 	{
 	public:
-		EvtWindow()
+	    constexpr EvtWindow()
         : EvtBase( tpEventCode )
 		{}
 
@@ -299,4 +297,4 @@ namespace ts3::system
 
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_EVENT_TYPES_DEF_H__
+#endif // __TS3_SYSTEM_EVENT_CORE_TYPES_H__

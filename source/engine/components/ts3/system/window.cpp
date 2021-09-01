@@ -84,4 +84,47 @@ namespace ts3::system
         return true;
     }
 
+
+    Window::Window( WindowManager * pWindowManager )
+    : mWindowManager( pWindowManager )
+    , mPrivate( std::make_unique<ObjectPrivateData>() )
+    , mNativeData( &( mPrivate->nativeDataPriv ) )
+    {}
+
+    Window::~Window() = default;
+
+    void Window::resizeClientArea( const WindowSize & pNewWindowSize )
+    {
+        _nativeResize( pNewWindowSize, WindowSizeMode::ClientArea );
+    }
+
+    void Window::resizeFrame( const WindowSize & pNewWindowSize )
+    {
+        _nativeResize( pNewWindowSize, WindowSizeMode::FrameRect );
+    }
+
+    void Window::setTitleText( const std::string & pTitleText )
+    {
+        _nativeSetTitleText( pTitleText );
+    }
+
+    void Window::updateGeometry( const WindowGeometry & pWindowGeometry )
+    {
+        _nativeUpdateGeometry( pWindowGeometry );
+    }
+
+    WindowSize Window::getClientAreaSize() const
+    {
+        WindowSize result;
+        _nativeGetSize( WindowSizeMode::ClientArea, result );
+        return result;
+    }
+
+    WindowSize Window::getFrameSize() const
+    {
+        WindowSize result;
+        _nativeGetSize( WindowSizeMode::FrameRect, result );
+        return result;
+    }
+
 } // namespace ts3::system
