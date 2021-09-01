@@ -12,7 +12,7 @@ namespace ts3
 {
 
     /// @brief Represents max value which can be stored in the size_t type.
-	constexpr size_t cxMaxSize = static_cast< size_t >( -1 );
+	constexpr size_t CX_MAX_SIZE = static_cast< size_t >( -1 );
 
 }
 

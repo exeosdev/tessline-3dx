@@ -99,7 +99,7 @@ namespace ts3
 			return reinterpret_cast<TpResult *>( bufferBytePtr );
 		}
 
-		void fillBytes( byte pValue, size_t pFillCount = cxMaxSize, size_t pFillOffset = 0 )
+		void fillBytes( byte pValue, size_t pFillCount = CX_MAX_SIZE, size_t pFillOffset = 0 )
 		{
 			if( pFillOffset >= _bufferLength )
 			{

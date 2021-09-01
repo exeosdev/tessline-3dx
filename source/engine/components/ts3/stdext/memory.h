@@ -204,7 +204,7 @@ namespace ts3
 	}
 
 	template <typename Tp>
-	inline void memZero( std::vector<Tp> & pVector, size_t pZeroOffset = 0, size_t pZeroCount = cxMaxSize )
+	inline void memZero( std::vector<Tp> & pVector, size_t pZeroOffset = 0, size_t pZeroCount = CX_MAX_SIZE )
 	{
 		const auto vectorSize = pVector.size();
 		pZeroCount = getMinOf( pZeroCount, vectorSize );

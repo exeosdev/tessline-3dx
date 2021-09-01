@@ -12,6 +12,7 @@ set( TS3_STDEXT_SRC_FILES
         "sortedArray.h"
         "staticAlgo.h"
         "staticLimits.h"
+        "stringExt.h"
         "stringUtils.h"
         "syncCommon.h"
         "syncCommon.cpp"
