@@ -17,7 +17,7 @@ namespace ts3::system
 {
 
     // Represents invalid mouse position. Used as a default value for last position registered.
-    constexpr math::Vec2i32 cvMousePosInvalid { cxInt32Max, cxInt32Max };
+    constexpr math::Vec2i32 cvMousePosInvalid { CX_INT32_MAX, CX_INT32_MAX };
 
     enum EEventConfigFlags : uint32
     {

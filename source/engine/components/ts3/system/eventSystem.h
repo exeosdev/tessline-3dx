@@ -3,6 +3,7 @@
 #define __TS3_SYSTEM_EVENT_SYSTEM_H__
 
 #include "eventCommon.h"
+#include "sysObject.h"
 #include <ts3/math/vector.h>
 
 namespace ts3::system

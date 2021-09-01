@@ -11,6 +11,9 @@ namespace ts3::system
 	struct EventObject;
 	struct NativeEvent;
 
+	class EventController;
+	class EventDispatcher;
+
 	/// @brief
 	using EventHandler = std::function<bool( EventObject & )>;
 

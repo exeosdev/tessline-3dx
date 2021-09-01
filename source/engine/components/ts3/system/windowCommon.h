@@ -26,7 +26,7 @@ namespace ts3::system
 
 	/// @brief Predefined window size: max. When used, window size is the maximum size allowed by the system.
 	/// Max size usually means the current size of the screen, but selected frame style may affect this (Win32).
-	constexpr WindowSize cvWindowSizeMax { cxUint32Max, cxUint32Max };
+	constexpr WindowSize cvWindowSizeMax { CX_UINT32_MAX, CX_UINT32_MAX };
 
 	/// @brief Window styles supported by the system.
 	enum class WindowFrameStyle : enum_default_value_t

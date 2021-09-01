@@ -65,7 +65,7 @@ namespace ts3::system
 
 	enum class KeyCode : uint32
 	{
-		Unknown = cxUint32Max,
+		Unknown = CX_UINT32_MAX,
 		Num0 = 0,
 		Num1,
 		Num2,
