@@ -43,10 +43,19 @@ namespace ts3::system
 		Default = static_cast< enum_default_value_t >( Fixed )
 	};
 
+	/// @brief
 	enum class WindowSizeMode : enum_default_value_t
     {
 	    ClientArea,
 	    FrameRect
+    };
+
+	/// @brief
+	enum class WindowVisibilityMode : enum_default_value_t
+    {
+	    Hidden,
+	    VisibleDefault,
+	    Visible
     };
 
 	/// @brief
