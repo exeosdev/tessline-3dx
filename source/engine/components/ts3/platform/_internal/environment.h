@@ -365,9 +365,6 @@
 #elif defined( __MINGW64__ )
 #
 #  include <cstdlib>
-#  define makestr(x) #x
-#  pragma message( makestr(__MINGW64_VERSION_MAJOR) )
-#  pragma message( makestr(__MINGW64_VERSION_MINOR) )
 #
 #  define TS3_PCL_COMPILER TS3_PCL_COMPILER_MINGW64_UV
 #

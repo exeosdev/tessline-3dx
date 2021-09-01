@@ -40,6 +40,10 @@ namespace ts3::math
 		, u8Alpha( 255u )
 		{}
 
+		constexpr RGBAColor( uint32 pU32Code ) noexcept
+		: u32Code( pU32Code )
+		{}
+
 		constexpr RGBAColor( uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha = 0xFF ) noexcept
 		: u8Red( pRed )
 		, u8Green( pGreen )

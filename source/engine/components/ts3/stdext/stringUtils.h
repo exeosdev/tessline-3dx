@@ -17,12 +17,12 @@ namespace ts3
     template <>
     struct CharConv<char>
     {
-        static int toLower( char pChar )
+        static inline int toLower( char pChar )
         {
             return std::tolower( pChar );
         }
 
-        static int toUpper( char pChar )
+        static inline int toUpper( char pChar )
         {
             return std::toupper( pChar );
         }
@@ -31,12 +31,12 @@ namespace ts3
     template <>
     struct CharConv<wchar_t>
     {
-        static wint_t toLower( wchar_t pChar )
+        static inline wint_t toLower( wchar_t pChar )
         {
             return std::towlower( pChar );
         }
 
-        static wint_t toUpper( wchar_t pChar )
+        static inline wint_t toUpper( wchar_t pChar )
         {
             return std::towupper( pChar );
         }
@@ -50,7 +50,7 @@ namespace ts3
     template <>
     struct StringConv<char>
     {
-        inline std::basic_string<char> convert( const wchar_t * pInput, size_t pInputLength )
+        static inline std::basic_string<char> convert( const wchar_t * pInput, size_t pInputLength )
         {
             const auto convBufferLength = pInputLength * 4;
 
@@ -62,18 +62,18 @@ namespace ts3
             return std::basic_string<char>( convBuffer.data(), outputLength );
         }
 
-        inline std::basic_string<char> convert( const wchar_t * pInput )
+        static inline std::basic_string<char> convert( const wchar_t * pInput )
         {
             const auto inputLength = wcslen( pInput );
             return convert( pInput, inputLength );
         }
 
-        inline std::basic_string<char> convert( const std::basic_string<wchar_t> & pInput )
+        static inline std::basic_string<char> convert( const std::basic_string<wchar_t> & pInput )
         {
             return convert( pInput.data(), pInput.length() );
         }
 
-        inline std::basic_string<char> convert( std::basic_string<char> pInput )
+        static inline std::basic_string<char> convert( std::basic_string<char> pInput )
         {
             return std::basic_string<char>( std::move( pInput ) );
         }
@@ -82,7 +82,7 @@ namespace ts3
     template <>
     struct StringConv<wchar_t>
     {
-        inline std::basic_string<wchar_t> convert( const char * pInput, size_t pInputLength )
+        static inline std::basic_string<wchar_t> convert( const char * pInput, size_t pInputLength )
         {
             const auto convBufferLength = pInputLength;
 
@@ -94,18 +94,18 @@ namespace ts3
             return std::basic_string<wchar_t>( convBuffer.data(), outputLength );
         }
 
-        inline std::basic_string<wchar_t> convert( const char * pInput )
+        static inline std::basic_string<wchar_t> convert( const char * pInput )
         {
             const auto inputLength = strlen( pInput );
             return convert( pInput, inputLength );
         }
 
-        inline std::basic_string<wchar_t> convert( const std::basic_string<char> & pInput )
+        static inline std::basic_string<wchar_t> convert( const std::basic_string<char> & pInput )
         {
             return convert( pInput.data(), pInput.length() );
         }
 
-        inline std::basic_string<wchar_t> convert( std::basic_string<wchar_t> pInput )
+        static inline std::basic_string<wchar_t> convert( std::basic_string<wchar_t> pInput )
         {
             return std::basic_string<wchar_t>( std::move( pInput ) );
         }
