@@ -24,7 +24,7 @@ namespace ts3::system
 
     public:
         explicit DisplayManager( SysContextHandle pSysContext );
-        virtual ~DisplayManager();
+        virtual ~DisplayManager() noexcept;
 
         TS3_PCL_ATTR_NO_DISCARD DisplayDriverHandle createDisplayDriver( EDisplayDriverType pDriverID );
 

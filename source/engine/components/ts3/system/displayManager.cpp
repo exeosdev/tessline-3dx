@@ -26,8 +26,7 @@ namespace ts3::system
     #endif
     }
 
-    DisplayManager::~DisplayManager()
-    {}
+    DisplayManager::~DisplayManager() noexcept = default;
 
     DisplayDriverHandle DisplayManager::createDisplayDriver( EDisplayDriverType pDriverID )
     {
