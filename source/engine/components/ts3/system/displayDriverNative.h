@@ -115,7 +115,7 @@ namespace ts3::system
         DisplayOutputNativeData nativeDataPriv;
         std::unordered_map<ColorFormat, ColorFormatData> _colorFormatMap;
 
-        std::unordered_map<ColorFormat, ColorFormatData> & getColorFromatMap()
+        std::unordered_map<ColorFormat, ColorFormatData> & getColorFormatMap()
         {
             return _colorFormatMap;
         }

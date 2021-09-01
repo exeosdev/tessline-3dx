@@ -42,7 +42,7 @@ namespace ts3::system
         return mPrivate->primaryOutput;
     }
 
-    bool DisplayAdapter::isActive() const
+    bool DisplayAdapter::isActiveAdapter() const
     {
         return mPrivate->descPriv.flags.isSet( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
     }
@@ -55,6 +55,11 @@ namespace ts3::system
     bool DisplayAdapter::hasActiveOutputs() const
     {
         return mPrivate->activeOutputsNum > 0;
+    }
+
+    bool DisplayAdapter::hasAnyOutputs() const
+    {
+        return !mPrivate->outputStorage.empty();
     }
 
 
@@ -83,7 +88,7 @@ namespace ts3::system
         return mPrivate->getVideoModeList( pColorFormat );
     }
 
-    bool DisplayOutput::isActive() const
+    bool DisplayOutput::isActiveOutput() const
     {
         return mPrivate->descPriv.flags.isSet( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
     }
@@ -186,18 +191,28 @@ namespace ts3::system
         return _getOutput( pOutputID );
     }
 
+    bool DisplayDriver::hasActiveAdapters() const
+    {
+        return mPrivate->activeAdaptersNum > 0;
+    }
+
+    bool DisplayDriver::hasAnyAdapters() const
+    {
+        return !mPrivate->adapterStorage.empty();
+    }
+
     std::string DisplayDriver::dumpDisplayConfiguration( const std::string & pLinePrefix ) const
     {
         const auto adaptersNum = mPrivate->adapterStorage.size();
         const auto displayDevicesNum = adaptersNum * 2;
         const auto averageDisplayModesNum = 16;
         const auto averageLineLength = 40 + pLinePrefix.length();
-        const auto strReserveSize = displayDevicesNum * averageLineLength + ( displayDevicesNum * averageDisplayModesNum * averageLineLength );
+        const auto strReserveSize = ( displayDevicesNum * averageDisplayModesNum + displayDevicesNum ) * averageLineLength;
 
         std::string result;
         result.reserve( strReserveSize );
 
-        if( mPrivate->adapterStorage.empty() )
+        if( hasAnyAdapters() )
         {
             result.append( pLinePrefix );
             result.append( "<empty>" );
@@ -213,7 +228,7 @@ namespace ts3::system
                 result.append( pLinePrefix );
                 result.append( adapter->mDesc->toString() );
 
-                if( adapter->mPrivate->outputStorage.empty() )
+                if( adapter->hasAnyOutputs() )
                 {
                     result.append( 1, '\n' );
                     result.append( pLinePrefix );
@@ -228,6 +243,11 @@ namespace ts3::system
                         result.append( pLinePrefix );
                         result.append( 1, '\t' );
                         result.append( output->mDesc->toString() );
+
+                        for( const auto & colorFormatMap : output->mPrivate->getColorFormatMap() )
+                        {
+
+                        }
 
                         for( const auto * displayMode : output->getVideoModeList() )
                         {
@@ -316,7 +336,7 @@ namespace ts3::system
         {
             for( auto & output : adapter.mPrivate->outputStorage )
             {
-                auto & colorFormatMap = output.mPrivate->getColorFromatMap();
+                auto & colorFormatMap = output.mPrivate->getColorFormatMap();
                 for( auto & colorFormatData : colorFormatMap )
                 {
                     for( auto & videoMode : colorFormatData.second.videoModeStorage )
@@ -358,7 +378,7 @@ namespace ts3::system
             mPrivate->adapterList.reserve( mPrivate->adapterStorage.size() );
             for( auto & adapter : mPrivate->adapterStorage )
             {
-                if( adapter.isActive() )
+                if( adapter.isActiveAdapter() )
                 {
                     mPrivate->activeAdaptersNum += 1;
                 }
@@ -389,7 +409,7 @@ namespace ts3::system
             pAdapter.mPrivate->outputList.reserve( pAdapter.mPrivate->outputStorage.size() );
             for( auto & output : pAdapter.mPrivate->outputStorage )
             {
-                if( output.isActive() )
+                if( output.isActiveOutput() )
                 {
                     pAdapter.mPrivate->activeOutputsNum += 1;
                 }

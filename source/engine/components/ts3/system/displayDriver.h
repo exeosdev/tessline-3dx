@@ -37,9 +37,10 @@ namespace ts3::system
         TS3_PCL_ATTR_NO_DISCARD DisplayOutput * getOutput( dsm_index_t pOutputIndex ) const;
         TS3_PCL_ATTR_NO_DISCARD DisplayOutput * getDefaultOutput() const;
 
-        TS3_PCL_ATTR_NO_DISCARD bool isActive() const;
+        TS3_PCL_ATTR_NO_DISCARD bool isActiveAdapter() const;
         TS3_PCL_ATTR_NO_DISCARD bool isPrimaryAdapter() const;
         TS3_PCL_ATTR_NO_DISCARD bool hasActiveOutputs() const;
+        TS3_PCL_ATTR_NO_DISCARD bool hasAnyOutputs() const;
     };
 
     /// @brief
@@ -57,16 +58,13 @@ namespace ts3::system
         explicit DisplayOutput( DisplayAdapter * pDisplayAdapter );
         virtual ~DisplayOutput();
 
-        TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupported( const DisplayVideoSettings & pVideoSettings ) const;
-
-        TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupported( const DisplayVideoSettings & pVideoSettings,
-                                                                  ColorFormat pColorFormat ) const;
+        TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings ) const;
+        TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings, ColorFormat pColorFormat ) const;
 
         TS3_PCL_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList() const;
-
         TS3_PCL_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList( ColorFormat pColorFormat ) const;
 
-        TS3_PCL_ATTR_NO_DISCARD bool isActive() const;
+        TS3_PCL_ATTR_NO_DISCARD bool isActiveOutput() const;
         TS3_PCL_ATTR_NO_DISCARD bool isPrimaryOutput() const;
     };
 
@@ -113,8 +111,11 @@ namespace ts3::system
 
         TS3_PCL_ATTR_NO_DISCARD DisplayAdapter * getAdapter( dsm_index_t pAdapterIndex ) const;
         TS3_PCL_ATTR_NO_DISCARD DisplayAdapter * getDefaultAdapter() const;
-        TS3_PCL_ATTR_NO_DISCARD DisplayOutput * getDefaultOutput( dsm_index_t pAdapterIndex = CX_DSM_INDEX_INVALID ) const;
+        TS3_PCL_ATTR_NO_DISCARD DisplayOutput * getDefaultOutput( dsm_index_t pAdapterIndex = CX_DSM_INDEX_DEFAULT ) const;
         TS3_PCL_ATTR_NO_DISCARD DisplayOutput * getOutput( dsm_output_id_t pOutputID ) const;
+
+        TS3_PCL_ATTR_NO_DISCARD bool hasActiveAdapters() const;
+        TS3_PCL_ATTR_NO_DISCARD bool hasAnyAdapters() const;
 
         TS3_PCL_ATTR_NO_DISCARD std::string dumpDisplayConfiguration( const std::string & pLinePrefix = {} ) const;
 
