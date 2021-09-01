@@ -1,7 +1,7 @@
 
 #include <ts3/system/displayDriverNative.h>
 #include <ts3/stdext/mapUtils.h>
-#include <comdef.h> // For _bstr_t
+#include <ts3/stdext/stringUtils.h>
 
 namespace ts3::system
 {
@@ -55,7 +55,7 @@ namespace ts3::system
 	        auto * adapterObject = addAdapter();
 	        adapterObject->mPrivate->nativeDataPriv.dxgi->dxgiAdapter = dxgiAdapter;
 	        adapterObject->mPrivate->nativeDataPriv.dxgi->dxgiAdapterDesc = dxgiAdapterDesc;
-	        adapterObject->mPrivate->descPriv.name = _bstr_t( dxgiAdapterDesc.Description );
+	        adapterObject->mPrivate->descPriv.name = strUtils::convertStringRepresentation<char>( dxgiAdapterDesc.Description );
 
 	        if( adapterIndex == 0 )
 	        {
@@ -112,7 +112,7 @@ namespace ts3::system
 	        auto * outputObject = addOutput( pAdapter );
 	        outputObject->mPrivate->nativeDataPriv.dxgi->dxgiOutput = dxgiOutput1;
 	        outputObject->mPrivate->nativeDataPriv.dxgi->dxgiOutputDesc = dxgiOutputDesc;
-	        outputObject->mPrivate->descPriv.name = _bstr_t( dxgiOutputDesc.DeviceName );
+	        outputObject->mPrivate->descPriv.name = strUtils::convertStringRepresentation<char>( dxgiOutputDesc.DeviceName );
 	        outputObject->mPrivate->descPriv.screenRect.offset.x = dxgiOutputDesc.DesktopCoordinates.left;
 	        outputObject->mPrivate->descPriv.screenRect.offset.y = dxgiOutputDesc.DesktopCoordinates.top;
 	        outputObject->mPrivate->descPriv.screenRect.size.x = dxgiOutputDesc.DesktopCoordinates.right - dxgiOutputDesc.DesktopCoordinates.left;
@@ -123,6 +123,7 @@ namespace ts3::system
 	void DisplayDriverDXGI::_nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
 	{
 	    auto * dxgiOutput = pOutput.mPrivate->nativeDataPriv.dxgi->dxgiOutput.Get();
+	    printf("%u\n", (uint32)pColorFormat);
 	    auto dxgiFormat = _dxgiTranslateColorFormatToDXGIFormat( pColorFormat );
 
 	    if ( dxgiFormat == DXGI_FORMAT_UNKNOWN )

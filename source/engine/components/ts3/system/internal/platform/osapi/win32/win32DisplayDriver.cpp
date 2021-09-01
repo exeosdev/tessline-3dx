@@ -1,5 +1,6 @@
 
 #include <ts3/system/displayDriverNative.h>
+#include <ts3/stdext/stringUtils.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
 namespace ts3::system
@@ -74,7 +75,7 @@ namespace ts3::system
                 adapterObject->mPrivate->nativeDataPriv.generic->adapterName = gdiDeviceInfo.DeviceString;
                 adapterObject->mPrivate->nativeDataPriv.generic->displayDeviceID = gdiDeviceInfo.DeviceName;
                 adapterObject->mPrivate->nativeDataPriv.generic->gdiDeviceInfo = gdiDeviceInfo;
-                adapterObject->mPrivate->descPriv.name = _bstr_t( gdiDeviceInfo.DeviceString );
+                adapterObject->mPrivate->descPriv.name = strUtils::convertStringRepresentation<char>( gdiDeviceInfo.DeviceString );
 
                 if( ( gdiDeviceInfo.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE ) == DISPLAY_DEVICE_PRIMARY_DEVICE )
                 {
@@ -102,7 +103,7 @@ namespace ts3::system
             if( outputObject != nullptr )
             {
                 outputObject->mPrivate->nativeDataPriv.generic->gdiOutputMonitor = hMonitor;
-                outputObject->mPrivate->descPriv.name = _bstr_t( gdiMonitorInfo.szDevice );
+                outputObject->mPrivate->descPriv.name = strUtils::convertStringRepresentation<char>( gdiMonitorInfo.szDevice );
                 outputObject->mPrivate->descPriv.screenRect.offset.x = gdiMonitorInfo.rcMonitor.left;
                 outputObject->mPrivate->descPriv.screenRect.offset.y = gdiMonitorInfo.rcMonitor.top;
                 outputObject->mPrivate->descPriv.screenRect.size.x = gdiMonitorInfo.rcMonitor.right - gdiMonitorInfo.rcMonitor.left;

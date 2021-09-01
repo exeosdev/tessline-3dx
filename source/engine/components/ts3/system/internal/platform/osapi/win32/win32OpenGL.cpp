@@ -50,7 +50,7 @@ namespace ts3::system
 	    tempWindowCreateInfo.properties.geometry.frameStyle = WindowFrameStyle::Overlay;
 
 	    VisualConfig legacyVisualConfig;
-	    legacyVisualConfig = visualGetDefaultVisualConfigForSysWindow();
+	    legacyVisualConfig = vsxGetDefaultVisualConfigForSysWindow();
 	    legacyVisualConfig.flags.set( VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
 	    // Create a surface window. In case of Win32, GLDisplaySurfaceNativeData inherits from WindowNativeData
