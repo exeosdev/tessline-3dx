@@ -5,6 +5,21 @@
 namespace ts3::system
 {
 
+    std::string DisplayAdapterDesc::toString() const
+    {
+        return {};
+    }
+
+    std::string DisplayOutputDesc::toString() const
+    {
+        return {};
+    }
+
+    std::string DisplayVideoModeDesc::toString() const
+    {
+        return {};
+    }
+
     dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings )
 	{
 		DisplayVideoSettingsHash hashValueGen;
@@ -18,7 +33,12 @@ namespace ts3::system
 
 	std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings )
 	{
-		return {};
+        auto & colorFormatDesc = vsxGetDescForColorFormat( pFormat );
+
+        std::stringstream strStream;
+        strStream << pSettings.resolution.x << "x" << pSettings.resolution.y;
+        strStream << ":" << colorFormatDesc.size << "bpp@" << pSettings.refreshRate << "Hz";
+        return strStream.str();
 	}
 
 	ColorFormat dsmResolveSystemColorFormat( ColorFormat pColorFormat )

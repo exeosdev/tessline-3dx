@@ -106,25 +106,44 @@ namespace ts3::system
     {
         struct ColorFormatData
         {
+            ColorFormat colorFormat;
             std::deque<DisplayVideoMode> videoModeStorage;
             DisplayVideoModeList videoModeList;
         };
 
         DisplayOutputDesc descPriv;
         DisplayOutputNativeData nativeDataPriv;
-        std::unordered_map<ColorFormat, ColorFormatData> colorFormatMap;
+        std::unordered_map<ColorFormat, ColorFormatData> _colorFormatMap;
+
+        std::unordered_map<ColorFormat, ColorFormatData> & getColorFromatMap()
+        {
+            return _colorFormatMap;
+        }
+
+        ColorFormatData & getColorFormatData( ColorFormat pColorFormat )
+        {
+            auto colorFormat = dsmResolveSystemColorFormat( pColorFormat );
+            auto colorFormatDataRef = _colorFormatMap.find( colorFormat );
+
+            if( colorFormatDataRef == _colorFormatMap.end() )
+            {
+                auto insertRes = _colorFormatMap.insert( {colorFormat, ColorFormatData{}} );
+                colorFormatDataRef = insertRes.first;
+                colorFormatDataRef->second.colorFormat = colorFormat;
+            }
+
+            return colorFormatDataRef->second;
+        }
 
         std::deque<DisplayVideoMode> & getVideoModeStorage( ColorFormat pColorFormat )
         {
-            auto colorFormat = dsmResolveSystemColorFormat( pColorFormat );
-            auto & colorFormatData = colorFormatMap[colorFormat];
+            auto & colorFormatData = getColorFormatData( pColorFormat );
             return colorFormatData.videoModeStorage;
         }
 
         DisplayVideoModeList & getVideoModeList( ColorFormat pColorFormat )
         {
-            auto colorFormat = dsmResolveSystemColorFormat( pColorFormat );
-            auto & colorFormatData = colorFormatMap[colorFormat];
+            auto & colorFormatData = getColorFormatData( pColorFormat );
             return colorFormatData.videoModeList;
         }
     };
@@ -194,21 +213,30 @@ namespace ts3::system
             dsm_index_t uAdapterIndex;
             dsm_index_t uOutputIndex;
         };
-        dsm_output_id_t outputID = 0u;
+        dsm_output_id_t outputID;
+
+        constexpr DisplayOutputID()
+        : outputID( 0u )
+        {}
+
+        constexpr DisplayOutputID( dsm_output_id_t pOutputID )
+        : outputID( pOutputID )
+        {}
+
+        constexpr DisplayOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex )
+        : uAdapterIndex( pAdapterIndex )
+        , uOutputIndex( pOutputIndex )
+        {}
     };
 
     inline constexpr dsm_index_t dsmExtractOutputIDAdapterIndex( dsm_output_id_t pOutputID )
     {
-        DisplayOutputID outputIDGen;
-        outputIDGen.outputID = pOutputID;
-        return outputIDGen.uAdapterIndex;
+        return DisplayOutputID{ pOutputID }.uAdapterIndex;
     }
 
     inline constexpr dsm_index_t dsmExtractOutputIDOutputrIndex( dsm_output_id_t pOutputID )
     {
-        DisplayOutputID outputIDGen;
-        outputIDGen.outputID = pOutputID;
-        return outputIDGen.uOutputIndex;
+        return DisplayOutputID{ pOutputID }.uOutputIndex;
     }
 
     union DisplayVideoModeID
@@ -234,26 +262,6 @@ namespace ts3::system
         };
         dsm_video_settings_hash_t hashValue = 0u;
     };
-
-    inline bool operator==( const DisplayVideoSettings & pLhs, const DisplayVideoSettings & pRhs )
-    {
-        return ( pLhs.resolution == pRhs.resolution ) && ( pLhs.refreshRate == pRhs.refreshRate ) && ( pLhs.flags == pRhs.flags );
-    }
-
-    inline bool operator!=( const DisplayVideoSettings & pLhs, const DisplayVideoSettings & pRhs )
-    {
-        return ( pLhs.resolution != pRhs.resolution ) || ( pLhs.refreshRate != pRhs.refreshRate ) || ( pLhs.flags != pRhs.flags );
-    }
-
-    inline bool operator==( const DisplayVideoSettingsFilter & pLhs, const DisplayVideoSettingsFilter & pRhs )
-    {
-        return ( pLhs.refSettings == pRhs.refSettings ) && ( pLhs.flags == pRhs.flags );
-    }
-
-    inline bool operator!=( const DisplayVideoSettingsFilter & pLhs, const DisplayVideoSettingsFilter & pRhs )
-    {
-        return ( pLhs.refSettings != pRhs.refSettings ) || ( pLhs.flags != pRhs.flags );
-    }
 
     template <typename TpNativeData>
     inline void dsmInitializeNativeData( TpNativeData * pNativeData, EDisplayDriverType pDriverType )

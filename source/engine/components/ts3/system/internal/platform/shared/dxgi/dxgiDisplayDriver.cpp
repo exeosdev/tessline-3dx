@@ -56,15 +56,21 @@ namespace ts3::system
 	        adapterObject->mPrivate->nativeDataPriv.dxgi->dxgiAdapter = dxgiAdapter;
 	        adapterObject->mPrivate->nativeDataPriv.dxgi->dxgiAdapterDesc = dxgiAdapterDesc;
 	        adapterObject->mPrivate->descPriv.name = strUtils::convertStringRepresentation<char>( dxgiAdapterDesc.Description );
+	        adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
 
 	        if( adapterIndex == 0 )
 	        {
 	            adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
 	        }
 
-	        if( ( dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE ) != 0 )
+	        Bitmask<DXGI_ADAPTER_FLAG> dxgiAdapterFlags = dxgiAdapterDesc.Flags;
+	        if( dxgiAdapterFlags.isSet( DXGI_ADAPTER_FLAG_SOFTWARE ) )
 	        {
 	            adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_SOFTWARE_BIT );
+	        }
+	        else if( !dxgiAdapterFlags.isSet( DXGI_ADAPTER_FLAG_REMOTE ) )
+	        {
+	            adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_HARDWARE_BIT );
 	        }
 	    }
 	}
@@ -117,6 +123,11 @@ namespace ts3::system
 	        outputObject->mPrivate->descPriv.screenRect.offset.y = dxgiOutputDesc.DesktopCoordinates.top;
 	        outputObject->mPrivate->descPriv.screenRect.size.x = dxgiOutputDesc.DesktopCoordinates.right - dxgiOutputDesc.DesktopCoordinates.left;
 	        outputObject->mPrivate->descPriv.screenRect.size.y = dxgiOutputDesc.DesktopCoordinates.bottom - dxgiOutputDesc.DesktopCoordinates.top;
+
+	        if( dxgiOutputDesc.AttachedToDesktop )
+	        {
+	            outputObject->mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
+	        }
 	    }
 	}
 

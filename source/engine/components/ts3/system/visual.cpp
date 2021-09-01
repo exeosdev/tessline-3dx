@@ -7,15 +7,28 @@ namespace ts3::system
 {
 
 	// ColorDesc representation of values in ColorFormat enumeration.
-	static const ColorDesc sColorDescB8G8R8       { { 8,  8,  8,  0 }, 24, ColorSpace::Linear };
-    static const ColorDesc sColorDescB8G8R8A8     { { 8,  8,  8,  8 }, 32, ColorSpace::Linear };
-    static const ColorDesc sColorDescB8G8R8A8SRGB { { 8,  8,  8,  8 }, 24, ColorSpace::SRGB };
-    static const ColorDesc sColorDescR8G8B8A8     { { 8,  8,  8,  8 }, 32, ColorSpace::Linear };
-	static const ColorDesc sColorDescR8G8B8A8SRGB { { 8,  8,  8,  8 }, 32, ColorSpace::SRGB };
-	static const ColorDesc sColorDescR10G10B10A2  { { 10, 10, 10, 2 }, 32, ColorSpace::Linear };
-	static const ColorDesc sColorDescUnknown      { { 0, 0, 0, 0 }, 0 };
+	static const ColorDesc sColorDescB8G8R8 {
+	    math::RGBAColorU8{ 8,  8,  8,  0 }, 24, ColorSpace::Linear };
 
-    const ColorDesc & gfxGetDescForColorFormat( ColorFormat pFormat )
+    static const ColorDesc sColorDescB8G8R8A8 {
+        math::RGBAColorU8{ 8,  8,  8,  8 }, 32, ColorSpace::Linear };
+
+    static const ColorDesc sColorDescB8G8R8A8SRGB {
+        math::RGBAColorU8{ 8,  8,  8,  8 }, 24, ColorSpace::SRGB };
+
+    static const ColorDesc sColorDescR8G8B8A8 {
+        math::RGBAColorU8{ 8,  8,  8,  8 }, 32, ColorSpace::Linear };
+
+	static const ColorDesc sColorDescR8G8B8A8SRGB {
+	    math::RGBAColorU8{ 8,  8,  8,  8 }, 32, ColorSpace::SRGB };
+
+	static const ColorDesc sColorDescR10G10B10A2 {
+	    math::RGBAColorU8{ 10, 10, 10, 2 }, 32, ColorSpace::Linear };
+
+	static const ColorDesc sColorDescUnknown {
+	    math::RGBAColorU8{ 0, 0, 0, 0 }, 0, ColorSpace::Unknown };
+
+	const ColorDesc & vsxGetDescForColorFormat( ColorFormat pFormat )
     {
     	static const std::unordered_map<ColorFormat, ColorDesc> colorDescMap =
 	    {
@@ -30,14 +43,14 @@ namespace ts3::system
     }
 
 	// DepthStencilDesc representation of values in DepthStencilFormat enumeration.
-	static const DepthStencilDesc sDepthStencilDescD16     { 16, 0 };
-	static const DepthStencilDesc sDepthStencilDescD24S8   { 24, 8 };
-	static const DepthStencilDesc sDepthStencilDescD24X8   { 24, 0 };
-	static const DepthStencilDesc sDepthStencilDescD32F    { 32, 0 };
-	static const DepthStencilDesc sDepthStencilDescD32FS8  { 32, 8 };
-	static const DepthStencilDesc sDepthStencilDescUnknown { 0,  0 };
+	static const DepthStencilDesc sDepthStencilDescD16     { 16 , 0 };
+	static const DepthStencilDesc sDepthStencilDescD24S8   { 24 , 8 };
+	static const DepthStencilDesc sDepthStencilDescD24X8   { 24 , 0 };
+	static const DepthStencilDesc sDepthStencilDescD32F    { 32 , 0 };
+	static const DepthStencilDesc sDepthStencilDescD32FS8  { 32 , 8 };
+	static const DepthStencilDesc sDepthStencilDescUnknown { 0  , 0 };
 
-    const DepthStencilDesc & gfxGetDescForDepthStencilFormat( DepthStencilFormat pFormat )
+	const DepthStencilDesc & vsxGetDescForDepthStencilFormat( DepthStencilFormat pFormat )
     {
 	    static const std::unordered_map<DepthStencilFormat, DepthStencilDesc> depthStencilDescMap =
 	    {
@@ -58,7 +71,7 @@ namespace ts3::system
 	static const MSAADesc sMSAADescX8   { 1, 8  };
 	static const MSAADesc sMSAADescX16  { 1, 16 };
 
-    const MSAADesc & gfxGetDescForMSAAMode( MSAAMode pMode )
+	const MSAADesc & vsxGetDescForMSAAMode( MSAAMode pMode )
     {
 	    static const std::unordered_map<MSAAMode, MSAADesc> msaaModeMap =
 	    {
@@ -71,7 +84,7 @@ namespace ts3::system
 	    return getMapValueOrDefault( msaaModeMap, pMode, sMSAADescNone );
     }
 
-	const VisualConfig & gfxGetDefaultVisualConfigForSysWindow()
+    const VisualConfig & vsxGetDefaultVisualConfigForSysWindow()
 	{
 		// Default VisualConfig for creating a system-level window.
 		static const VisualConfig sVisualConfigWindowDefault
@@ -87,9 +100,9 @@ namespace ts3::system
 		return sVisualConfigWindowDefault;
 	}
 
-	bool sysDsmCheckColorFormatCompatibility( ColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha )
+	bool vsxCheckColorFormatCompatibility( ColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha )
 	{
-		const auto & colorDesc = gfxGetDescForColorFormat( pFormat );
+	    const auto & colorDesc = vsxGetDescForColorFormat( pFormat );
 		const auto & rgba = colorDesc.rgba;
 		// Format matches with a color spec if all channels have the exact same size.
 		return ( rgba.u8Red == pRed ) && ( rgba.u8Green == pGreen ) && ( rgba.u8Blue == pBlue ) && ( rgba.u8Alpha == pAlpha );

@@ -57,10 +57,14 @@ namespace ts3::system
         explicit DisplayOutput( DisplayAdapter * pDisplayAdapter );
         virtual ~DisplayOutput();
 
-        TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupported( const DisplayVideoSettings & pVideoSettings,
-                                                                  ColorFormat pColorFormat = ColorFormat::SystemNative ) const;
+        TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupported( const DisplayVideoSettings & pVideoSettings ) const;
 
-        TS3_PCL_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList( ColorFormat pColorFormat = ColorFormat::SystemNative) const;
+        TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupported( const DisplayVideoSettings & pVideoSettings,
+                                                                  ColorFormat pColorFormat ) const;
+
+        TS3_PCL_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList() const;
+
+        TS3_PCL_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList( ColorFormat pColorFormat ) const;
 
         TS3_PCL_ATTR_NO_DISCARD bool isActive() const;
         TS3_PCL_ATTR_NO_DISCARD bool isPrimaryOutput() const;

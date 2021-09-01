@@ -108,20 +108,20 @@ namespace ts3::system
 		Bitmask<VisualAttribFlags> flags;
 	};
 
-    /// @brief Returns a ColorDesc structure representation of a specified ColorFormat.
-	TS3_SYSTEM_API const ColorDesc & visualGetDescForColorFormat( ColorFormat pFormat );
+	/// @brief Returns a ColorDesc structure representation of a specified ColorFormat.
+	TS3_SYSTEM_API const ColorDesc & vsxGetDescForColorFormat( ColorFormat pFormat );
 
     /// @brief Returns a DepthStencilDesc structure representation of a specified DepthStencilFormat.
-    TS3_SYSTEM_API const DepthStencilDesc & visualGetDescForDepthStencilFormat( DepthStencilFormat pFormat );
+    TS3_SYSTEM_API const DepthStencilDesc & vsxGetDescForDepthStencilFormat( DepthStencilFormat pFormat );
 
     /// @brief Returns an MSAADesc structure representation of a specified MSAAMode.
-    TS3_SYSTEM_API const MSAADesc & visualGetDescForMSAAMode( MSAAMode pMode );
+    TS3_SYSTEM_API const MSAADesc & vsxGetDescForMSAAMode( MSAAMode pMode );
 
     /// @brief Returns a ColorDesc structure representation of a specified ColorFormat.
-    TS3_SYSTEM_API const VisualConfig & visualGetDefaultVisualConfigForSysWindow();
+    TS3_SYSTEM_API const VisualConfig & vsxGetDefaultVisualConfigForSysWindow();
 
     ///
-	TS3_SYSTEM_API bool gfxCheckColorFormatCompatibility( ColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha );
+    TS3_SYSTEM_API bool vsxCheckColorFormatCompatibility( ColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha );
 
 } // namespace ts3::system
 

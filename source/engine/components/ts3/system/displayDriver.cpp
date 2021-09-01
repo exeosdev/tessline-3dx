@@ -44,7 +44,7 @@ namespace ts3::system
 
     bool DisplayAdapter::isActive() const
     {
-        return true;
+        return mPrivate->descPriv.flags.isSet( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
     }
 
     bool DisplayAdapter::isPrimaryAdapter() const
@@ -75,14 +75,12 @@ namespace ts3::system
 
     const DisplayVideoModeList & DisplayOutput::getVideoModeList( ColorFormat pColorFormat ) const
     {
-        auto colorFormat = dsmResolveSystemColorFormat( pColorFormat );
-        auto & colorFormatData = mPrivate->colorFormatMap[colorFormat];
-        return colorFormatData.videoModeList;
+        return mPrivate->getVideoModeList( pColorFormat );
     }
 
     bool DisplayOutput::isActive() const
     {
-        return true;
+        return mPrivate->descPriv.flags.isSet( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
     }
 
     bool DisplayOutput::isPrimaryOutput() const
@@ -216,7 +214,7 @@ namespace ts3::system
 
     DisplayVideoMode * DisplayDriver::addVideoMode( DisplayOutput & pOutput, ColorFormat pColorFormat )
     {
-        auto & colorFormatData = pOutput.mPrivate->colorFormatMap[pColorFormat];
+        auto & colorFormatData = pOutput.mPrivate->getColorFormatData( pColorFormat );
 
         const auto videoModeIndex = colorFormatData.videoModeStorage.size();
 
@@ -229,7 +227,7 @@ namespace ts3::system
         videoMode.mPrivate->descPriv.driverType = mDriverType;
         videoMode.mPrivate->descPriv.videoModeIndex = videoModeIDGen.uModeIndex;
         videoMode.mPrivate->descPriv.videoModeID = videoModeIDGen.modeID;
-        videoMode.mPrivate->descPriv.colorFormat = pColorFormat;
+        videoMode.mPrivate->descPriv.colorFormat = colorFormatData.colorFormat;
 
         ts3DebugAssert( colorFormatData.videoModeList.empty() );
 
@@ -255,7 +253,8 @@ namespace ts3::system
         {
             for( auto & output : adapter.mPrivate->outputStorage )
             {
-                for( auto & colorFormatData : output.mPrivate->colorFormatMap )
+                auto & colorFormatMap = output.mPrivate->getColorFromatMap();
+                for( auto & colorFormatData : colorFormatMap )
                 {
                     for( auto & videoMode : colorFormatData.second.videoModeStorage )
                     {
@@ -264,7 +263,7 @@ namespace ts3::system
                     colorFormatData.second.videoModeStorage.clear();
                     colorFormatData.second.videoModeList.clear();
                 }
-                output.mPrivate->colorFormatMap.clear();
+                colorFormatMap.clear();
             }
             adapter.mPrivate->outputStorage.clear();
         }
@@ -274,7 +273,7 @@ namespace ts3::system
     void DisplayDriver::_resetVideoModeData( DisplayOutput & pOutput, ColorFormat pColorFormat )
     {
         auto colorFormat = dsmResolveSystemColorFormat( pColorFormat );
-        auto & colorFormatData = pOutput.mPrivate->colorFormatMap[colorFormat];
+        auto & colorFormatData = pOutput.mPrivate->getColorFormatData( pColorFormat );
 
         for( auto & videoMode : colorFormatData.videoModeStorage )
         {
@@ -340,7 +339,7 @@ namespace ts3::system
 
             if( !pAdapter.mPrivate->primaryOutput )
             {
-                auto & firstOutput = pAdapter.mPrivate->outputStorage.front();
+                auto & firstOutput = pAdapter.mPrivate->outputStorage[0];
                 firstOutput.mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
                 pAdapter.mPrivate->primaryOutput = &firstOutput;
             }
@@ -350,10 +349,10 @@ namespace ts3::system
 
     void DisplayDriver::_enumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
     {
-        auto & colorFormatData = pOutput.mPrivate->colorFormatMap[pColorFormat];
+        auto & colorFormatData = pOutput.mPrivate->getColorFormatData( pColorFormat );
         ts3DebugAssert( colorFormatData.videoModeStorage.empty() );
 
-        _nativeEnumVideoModes( pOutput, pColorFormat );
+        _nativeEnumVideoModes( pOutput, colorFormatData.colorFormat );
 
         if( !colorFormatData.videoModeStorage.empty() )
         {

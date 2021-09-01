@@ -100,19 +100,26 @@ namespace ts3::system
 	/// @brief
 	enum EDisplayAdapterFlags : uint32
 	{
-		// Adapter is reported by system as the primary one.
-		E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT = 0x1,
-		// Adapter is a multi-node adapter (e.g. classic CF- or SLI-configured adapter set)
-		E_DISPLAY_ADAPTER_FLAG_MULTI_NODE_BIT = 0x2,
-		// Adapter is a software adapter. May indicate WARP-capable adapter in case of DXGI backend.
-		E_DISPLAY_ADAPTER_FLAG_SOFTWARE_BIT = 0x4,
+	    // Adapter is active. The meaning of this flag is driver-specific - do not assume an active adapter
+	    // to have, for example, any active outputs. Use DisplayAdapter::hasActiveOutputs() to check that.
+	    E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT = 0x1,
+	    // Adapter is a primary/default adapter in the system.
+	    E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT = 0x2,
+		// Adapter is a software adapter.
+		E_DISPLAY_ADAPTER_FLAG_HARDWARE_BIT = 0x4,
+		// Adapter is a software adapter. May indicate WARP-capable adapter in case of a DXGI driver.
+		E_DISPLAY_ADAPTER_FLAG_SOFTWARE_BIT = 0x8,
+		// Adapter is a multi-node adapter (e.g. classic CF- or SLI-configured adapter set).
+		E_DISPLAY_ADAPTER_FLAG_MULTI_NODE_BIT = 0x10,
 	};
 
 	/// @brief
 	enum EDisplayOutputFlags : uint32
 	{
-		// Output is the primary output of an adapter
-		E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT = 0x1
+	    // Output is active. In most cases it means the output is connected to the desktop.
+	    E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT = 0x1,
+		// Output is the primary output of an adapter.
+		E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT = 0x2
 	};
 
 	/// @brief
@@ -151,6 +158,16 @@ namespace ts3::system
 		Bitmask<EDisplayVideoSettingsFlags> flags = 0u;
 	};
 
+	inline bool operator==( const DisplayVideoSettings & pLhs, const DisplayVideoSettings & pRhs )
+	{
+	    return ( pLhs.resolution == pRhs.resolution ) && ( pLhs.refreshRate == pRhs.refreshRate ) && ( pLhs.flags == pRhs.flags );
+	}
+
+	inline bool operator!=( const DisplayVideoSettings & pLhs, const DisplayVideoSettings & pRhs )
+	{
+	    return ( pLhs.resolution != pRhs.resolution ) || ( pLhs.refreshRate != pRhs.refreshRate ) || ( pLhs.flags != pRhs.flags );
+	}
+
 	constexpr DisplayVideoSettings cvDisplayVideoSettingsEmpty { { 0U, 0U }, 0U, 0U };
 
 	/// @brief
@@ -168,6 +185,16 @@ namespace ts3::system
 		Bitmask<EDisplayVideoSettingsFilterFlags> flags = 0;
 	};
 
+	inline bool operator==( const DisplayVideoSettingsFilter & pLhs, const DisplayVideoSettingsFilter & pRhs )
+	{
+	    return ( pLhs.refSettings == pRhs.refSettings ) && ( pLhs.flags == pRhs.flags );
+	}
+
+	inline bool operator!=( const DisplayVideoSettingsFilter & pLhs, const DisplayVideoSettingsFilter & pRhs )
+	{
+	    return ( pLhs.refSettings != pRhs.refSettings ) || ( pLhs.flags != pRhs.flags );
+	}
+
 	constexpr DisplayVideoSettingsFilter cvDisplayVideoSettingsFilterNone { cvDisplayVideoSettingsEmpty, 0U };
 
 	struct DisplayAdapterDesc
@@ -177,6 +204,8 @@ namespace ts3::system
 		EDisplayAdapterVendorID vendorID = EDisplayAdapterVendorID::Unknown;
 		Bitmask<EDisplayAdapterFlags> flags = 0u;
 		std::string name;
+
+		std::string toString() const;
 	};
 
 	struct DisplayOutputDesc
@@ -187,6 +216,8 @@ namespace ts3::system
 		Bitmask<EDisplayOutputFlags> flags = 0u;
 		std::string name;
 		ScreenRect screenRect;
+
+		std::string toString() const;
 	};
 
 	struct DisplayVideoModeDesc
@@ -197,6 +228,8 @@ namespace ts3::system
 		dsm_video_settings_hash_t settingsHash = 0u;
 		ColorFormat colorFormat = ColorFormat::Unknown;
 		DisplayVideoSettings settings;
+
+		std::string toString() const;
 	};
 
 	using DisplayAdapterList = std::vector<DisplayAdapter *>;
