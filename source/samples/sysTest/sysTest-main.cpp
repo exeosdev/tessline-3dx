@@ -14,6 +14,10 @@ int main( int pArgc, const char ** pArgv )
     auto ddrv = dmgr->createDisplayDriver( ts3::system::EDisplayDriverType::Generic );
 
     ddrv->initializeDisplayConfiguration();
+    auto dcdump = ddrv->dumpDisplayConfiguration();
 
+    printf( "%s\n", dcdump.c_str() );
+
+    system("pause");
     return 0;
 }

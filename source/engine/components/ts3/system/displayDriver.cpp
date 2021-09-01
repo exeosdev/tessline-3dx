@@ -73,6 +73,11 @@ namespace ts3::system
         dsmReleaseNativeData( &( mPrivate->nativeDataPriv ), mDisplayDriver->mDriverType );
     }
 
+    const DisplayVideoModeList & DisplayOutput::getVideoModeList() const
+    {
+        return mPrivate->getVideoModeList( ColorFormat::SystemNative );
+    }
+
     const DisplayVideoModeList & DisplayOutput::getVideoModeList( ColorFormat pColorFormat ) const
     {
         return mPrivate->getVideoModeList( pColorFormat );
@@ -179,6 +184,64 @@ namespace ts3::system
     DisplayOutput * DisplayDriver::getOutput( dsm_output_id_t pOutputID ) const
     {
         return _getOutput( pOutputID );
+    }
+
+    std::string DisplayDriver::dumpDisplayConfiguration( const std::string & pLinePrefix ) const
+    {
+        const auto adaptersNum = mPrivate->adapterStorage.size();
+        const auto displayDevicesNum = adaptersNum * 2;
+        const auto averageDisplayModesNum = 16;
+        const auto averageLineLength = 40 + pLinePrefix.length();
+        const auto strReserveSize = displayDevicesNum * averageLineLength + ( displayDevicesNum * averageDisplayModesNum * averageLineLength );
+
+        std::string result;
+        result.reserve( strReserveSize );
+
+        if( mPrivate->adapterStorage.empty() )
+        {
+            result.append( pLinePrefix );
+            result.append( "<empty>" );
+        }
+        else
+        {
+            for( const auto * adapter : getAdapterList() )
+            {
+                if( adapter->mDesc->adapterIndex > 0 )
+                {
+                    result.append( 1, '\n' );
+                }
+                result.append( pLinePrefix );
+                result.append( adapter->mDesc->toString() );
+
+                if( adapter->mPrivate->outputStorage.empty() )
+                {
+                    result.append( 1, '\n' );
+                    result.append( pLinePrefix );
+                    result.append( 1, '\t' );
+                    result.append( "<no outputs>" );
+                }
+                else
+                {
+                    for( const auto * output : adapter->getOutputList() )
+                    {
+                        result.append( 1, '\n' );
+                        result.append( pLinePrefix );
+                        result.append( 1, '\t' );
+                        result.append( output->mDesc->toString() );
+
+                        for( const auto * displayMode : output->getVideoModeList() )
+                        {
+                            result.append( 1, '\n' );
+                            result.append( pLinePrefix );
+                            result.append( 2, '\t' );
+                            result.append( displayMode->mDesc->toString() );
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     DisplayAdapter * DisplayDriver::addAdapter()

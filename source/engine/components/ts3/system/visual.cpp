@@ -28,6 +28,21 @@ namespace ts3::system
 	static const ColorDesc sColorDescUnknown {
 	    math::RGBAColorU8{ 0, 0, 0, 0 }, 0, ColorSpace::Unknown };
 
+	const std::string & vsxQueryColorFormatStr( ColorFormat pFormat )
+	{
+	    static const std::unordered_map<ColorFormat, std::string> colorFormatStrMap =
+        {
+            { ColorFormat::B8G8R8       , "B8G8R8"       },
+            { ColorFormat::B8G8R8A8     , "B8G8R8A8"     },
+            { ColorFormat::B8G8R8A8SRGB , "B8G8R8A8SRGB" },
+            { ColorFormat::R8G8B8A8     , "R8G8B8A8"     },
+            { ColorFormat::R8G8B8A8SRGB , "R8G8B8A8SRGB" },
+            { ColorFormat::R10G10B10A2  , "R10G10B10A2"  },
+        };
+	    static const std::string defaultColorFormatStr = "UNKNOWN";
+	    return getMapValueOrDefault( colorFormatStrMap, pFormat, defaultColorFormatStr );
+	}
+
 	const ColorDesc & vsxGetDescForColorFormat( ColorFormat pFormat )
     {
     	static const std::unordered_map<ColorFormat, ColorDesc> colorDescMap =

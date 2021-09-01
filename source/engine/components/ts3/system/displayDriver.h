@@ -116,9 +116,7 @@ namespace ts3::system
         TS3_PCL_ATTR_NO_DISCARD DisplayOutput * getDefaultOutput( dsm_index_t pAdapterIndex = CX_DSM_INDEX_INVALID ) const;
         TS3_PCL_ATTR_NO_DISCARD DisplayOutput * getOutput( dsm_output_id_t pOutputID ) const;
 
-        TS3_PCL_ATTR_NO_DISCARD static dsm_output_id_t queryOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex );
-
-        TS3_PCL_ATTR_NO_DISCARD static ColorFormat resolveSystemColorFormat( ColorFormat pColorFormat );
+        TS3_PCL_ATTR_NO_DISCARD std::string dumpDisplayConfiguration( const std::string & pLinePrefix = {} ) const;
 
     protected:
         DisplayAdapter * addAdapter();

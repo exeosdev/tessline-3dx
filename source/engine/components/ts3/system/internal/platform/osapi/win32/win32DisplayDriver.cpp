@@ -65,6 +65,7 @@ namespace ts3::system
 
             // Extract adapter UUID from the registry key. Devices referring to the same adapter have the same adapter UUID.
             auto adapterUUID = getUUIDString( gdiDeviceInfo.DeviceKey );
+
             // Check if that adapter has been already added to the list of adapters (if there was already another device which referred to it).
             auto * adapterObject = _win32FindAdapterByUUID( *this, adapterUUID );
 
@@ -77,7 +78,12 @@ namespace ts3::system
                 adapterObject->mPrivate->nativeDataPriv.generic->gdiDeviceInfo = gdiDeviceInfo;
                 adapterObject->mPrivate->descPriv.name = strUtils::convertStringRepresentation<char>( gdiDeviceInfo.DeviceString );
 
-                if( ( gdiDeviceInfo.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE ) == DISPLAY_DEVICE_PRIMARY_DEVICE )
+                auto gdiAdapterFlags = makeBitmask( gdiDeviceInfo.StateFlags );
+                if( gdiAdapterFlags.isSet( DISPLAY_DEVICE_ATTACHED_TO_DESKTOP ) )
+                {
+                    adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
+                }
+                if( gdiAdapterFlags.isSet( DISPLAY_DEVICE_PRIMARY_DEVICE ) )
                 {
                     adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
                 }
@@ -85,10 +91,13 @@ namespace ts3::system
         }
     }
 
-    // Monitor enumeration function. Called for each monitor in the system (as a part of EnumDisplayMonitors).
-    // Actual initialization must be performed here - EnumDisplayOutput just wraps things up and returns.
+    // Monitor enumeration function. Called for each monitor in the system (as a part of _nativeEnumOutputs).
+    // This function is called after all output devices in the system have been enumerated and added to the
+    // internal list inside the adapter. IMPORTANT: again, this gets called *within* _nativeEnumOutputs()
+    // function *per each adapter* (that's why we pass DisplayAdapter* and check for monitors connected to it.
     static BOOL CALLBACK _win32MonitorEnumProc( HMONITOR hMonitor, HDC hDC, LPRECT monitorRect, LPARAM enumProcParam )
     {
+        // Adapter object for which we are enumerating outputs/monitors.
         auto * adapterObject = reinterpret_cast<DisplayAdapter *>( enumProcParam );
 
         MONITORINFOEXA gdiMonitorInfo;
@@ -96,8 +105,8 @@ namespace ts3::system
 
         if( ::GetMonitorInfoA( hMonitor, &gdiMonitorInfo ) != FALSE )
         {
-            // Output name matches the DISPLAY_DEVICEA::DeviceName property of its adapter.
-            // Find
+            // 'szDevice' of the MONITORINFOEXA matches the DISPLAY_DEVICEA::DeviceName property of the output.
+            // Thanks to that, we can obtain the output this monitor refers to.
             auto * outputObject = _win32FindOutputForDeviceID( *adapterObject, gdiMonitorInfo.szDevice );
 
             if( outputObject != nullptr )
@@ -108,6 +117,11 @@ namespace ts3::system
                 outputObject->mPrivate->descPriv.screenRect.offset.y = gdiMonitorInfo.rcMonitor.top;
                 outputObject->mPrivate->descPriv.screenRect.size.x = gdiMonitorInfo.rcMonitor.right - gdiMonitorInfo.rcMonitor.left;
                 outputObject->mPrivate->descPriv.screenRect.size.y = gdiMonitorInfo.rcMonitor.bottom - gdiMonitorInfo.rcMonitor.top;
+
+                if( makeBitmask( gdiMonitorInfo.dwFlags ).isSet( MONITORINFOF_PRIMARY ) )
+                {
+                    outputObject->mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
+                }
             }
         }
 
@@ -138,19 +152,18 @@ namespace ts3::system
                 break;
             }
 
-            if( ( gdiOutputInfo.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP ) == 0 )
-            {
-                continue;
-            }
-
             auto * outputObject = addOutput( pAdapter );
             outputObject->mPrivate->nativeDataPriv.generic->displayDeviceID = displayDeviceID;
             outputObject->mPrivate->nativeDataPriv.generic->outputID = gdiOutputInfo.DeviceName;
 
-            if( ( gdiOutputInfo.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE ) == DISPLAY_DEVICE_PRIMARY_DEVICE )
+            auto outputFlags = makeBitmask( gdiOutputInfo.StateFlags );
+            if( outputFlags.isSet( DISPLAY_DEVICE_ATTACHED_TO_DESKTOP ) )
             {
-                outputObject->mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
+                outputObject->mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
             }
+            // NOTE: 'DISPLAY_DEVICE_PRIMARY_DEVICE' flag is not set in case of output devices (unlike adapters).
+            // Primary output can be detected by analysing at monitor flags and looking for MONITORINFOF_PRIMARY.
+            // See _win32MonitorEnumProc function above where this gets done.
         }
 
         BOOL edmResult = ::EnumDisplayMonitors( nullptr, nullptr, _win32MonitorEnumProc, reinterpret_cast<LPARAM>( &pAdapter ) );
@@ -184,7 +197,7 @@ namespace ts3::system
             videoSettings.resolution.y = static_cast<uint32>( displayMode.dmPelsHeight );
             videoSettings.refreshRate = static_cast<uint16>( displayMode.dmDisplayFrequency );
 
-            if( ( displayMode.dmDisplayFlags & DM_INTERLACED ) == DM_INTERLACED )
+            if( makeBitmask( displayMode.dmDisplayFlags ).isSet( DM_INTERLACED ) )
             {
                 videoSettings.flags.set( E_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT );
             }
@@ -209,32 +222,40 @@ namespace ts3::system
     }
     
     void DisplayDriverGeneric::_nativeDestroyAdapter( DisplayAdapter & pAdapter )
-    {}
+    {
+        ( pAdapter );
+    }
 
     void DisplayDriverGeneric::_nativeDestroyOutput( DisplayOutput & pOutput )
-    {}
+    {
+        ( pOutput );
+    }
 
     void DisplayDriverGeneric::_nativeDestroyVideoMode( DisplayVideoMode & pVideoMode )
-    {}
+    {
+        ( pVideoMode );
+    }
 
     DisplayAdapter * _win32FindAdapterByUUID( DisplayDriverGeneric & pDriver, const std::string & pUUID )
     {
-        auto adapterIter = std::find_if( pDriver.mPrivate->adapterStorage.begin(),
-                                         pDriver.mPrivate->adapterStorage.end(),
-                                         [&pUUID]( const DisplayAdapter & pAdapter ) -> bool {
-                                             return pAdapter.mNativeData->generic->adapterUUID == pUUID;
-                                         });
+        auto adapterIter = std::find_if(
+            pDriver.mPrivate->adapterStorage.begin(),
+            pDriver.mPrivate->adapterStorage.end(),
+            [&pUUID]( const DisplayAdapter & pAdapter ) -> bool {
+                return pAdapter.mNativeData->generic->adapterUUID == pUUID;
+            });
 
         return ( adapterIter != pDriver.mPrivate->adapterStorage.end() ) ? &( *adapterIter ) : nullptr;
     }
 
     DisplayOutput * _win32FindOutputForDeviceID( DisplayAdapter & pAdapter, const char * pDeviceID )
     {
-        auto outputIter = std::find_if( pAdapter.mPrivate->outputStorage.begin(),
-                                        pAdapter.mPrivate->outputStorage.end(),
-                                        [pDeviceID]( const DisplayOutput & pOutput ) -> bool {
-                                            return pOutput.mNativeData->generic->displayDeviceID == pDeviceID;
-                                        });
+        auto outputIter = std::find_if(
+            pAdapter.mPrivate->outputStorage.begin(),
+            pAdapter.mPrivate->outputStorage.end(),
+            [pDeviceID]( const DisplayOutput & pOutput ) -> bool {
+                return pOutput.mNativeData->generic->displayDeviceID == pDeviceID;
+            });
 
         return ( outputIter != pAdapter.mPrivate->outputStorage.end() ) ? &( *outputIter ) : nullptr;
     }

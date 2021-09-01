@@ -198,6 +198,12 @@ namespace ts3
 		ValueType  _value;
 	};
 
+	template <typename TpIntegral>
+	inline constexpr Bitmask<TpIntegral> makeBitmask( TpIntegral pValue )
+	{
+	    return Bitmask<TpIntegral>( pValue );
+	}
+
 }
 
 #endif // __TS3_STDEXT_BITMASK_H__

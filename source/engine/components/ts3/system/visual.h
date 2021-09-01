@@ -109,6 +109,9 @@ namespace ts3::system
 	};
 
 	/// @brief Returns a ColorDesc structure representation of a specified ColorFormat.
+	TS3_SYSTEM_API const std::string & vsxQueryColorFormatStr( ColorFormat pFormat );
+
+	/// @brief Returns a ColorDesc structure representation of a specified ColorFormat.
 	TS3_SYSTEM_API const ColorDesc & vsxGetDescForColorFormat( ColorFormat pFormat );
 
     /// @brief Returns a DepthStencilDesc structure representation of a specified DepthStencilFormat.

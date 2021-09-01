@@ -63,7 +63,7 @@ namespace ts3::system
 	            adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
 	        }
 
-	        Bitmask<DXGI_ADAPTER_FLAG> dxgiAdapterFlags = dxgiAdapterDesc.Flags;
+	        auto dxgiAdapterFlags = makeBitmask( dxgiAdapterDesc.Flags );
 	        if( dxgiAdapterFlags.isSet( DXGI_ADAPTER_FLAG_SOFTWARE ) )
 	        {
 	            adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_SOFTWARE_BIT );
@@ -128,13 +128,35 @@ namespace ts3::system
 	        {
 	            outputObject->mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
 	        }
+
+	        if( dxgiOutputDesc.Monitor )
+	        {
+	            // It is almost crazy we need to rely on the old Win32 API within a DXGI realm... but it seems
+	            // DXGI API does not expose the concept of a "primary (or default) output". Some apps rely on
+	            // the existence of a default output, so we make sure DXGI has it too.
+	            MONITORINFOEXA gdiMonitorInfo;
+	            gdiMonitorInfo.cbSize = sizeof( MONITORINFOEXA );
+
+	            if( ::GetMonitorInfoA( dxgiOutputDesc.Monitor, &gdiMonitorInfo ) != FALSE )
+	            {
+	                if( makeBitmask( gdiMonitorInfo.dwFlags ).isSet( MONITORINFOF_PRIMARY ) )
+	                {
+	                    outputObject->mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
+	                }
+	            }
+	        }
 	    }
 	}
 
 	void DisplayDriverDXGI::_nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
 	{
 	    auto * dxgiOutput = pOutput.mPrivate->nativeDataPriv.dxgi->dxgiOutput.Get();
-	    printf("%u\n", (uint32)pColorFormat);
+
+	    // This should never fail, i.e. the specified format should always yield a value which
+	    // is known to the DXGI translation function. We had an issue with 'SystemNative' format,
+	    // but this has been resolved by proxy function inside DisplayOutput::PrivateData struct.
+	    // If there is a case the call below fails, make sure this function is ALWAYS called with
+	    // a "resolved" color format (look for 'dsmResolveSystemColorFormat').
 	    auto dxgiFormat = _dxgiTranslateColorFormatToDXGIFormat( pColorFormat );
 
 	    if ( dxgiFormat == DXGI_FORMAT_UNKNOWN )
@@ -202,13 +224,19 @@ namespace ts3::system
 	}
 
 	void DisplayDriverDXGI::_nativeDestroyAdapter( DisplayAdapter & pAdapter )
-	{}
+	{
+	    pAdapter.mPrivate->nativeDataPriv.dxgi->dxgiAdapter.Reset();
+	}
 
 	void DisplayDriverDXGI::_nativeDestroyOutput( DisplayOutput & pOutput )
-	{}
+	{
+	    pOutput.mPrivate->nativeDataPriv.dxgi->dxgiOutput.Reset();
+	}
 
 	void DisplayDriverDXGI::_nativeDestroyVideoMode( DisplayVideoMode & pVideoMode )
-	{}
+	{
+	    ( pVideoMode );
+	}
 
 
 	void _dxgiInitializeDriver( DisplayDriverDXGI & pDriverDXGI )
