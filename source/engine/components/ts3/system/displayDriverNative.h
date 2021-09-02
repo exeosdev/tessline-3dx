@@ -220,7 +220,7 @@ namespace ts3::system
         : outputID( 0u )
         {}
 
-        constexpr DisplayOutputID( dsm_output_id_t pOutputID )
+        constexpr explicit DisplayOutputID( dsm_output_id_t pOutputID )
         : outputID( pOutputID )
         {}
 

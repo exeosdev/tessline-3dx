@@ -220,7 +220,7 @@ namespace ts3
 			{
 				const math::Vec2i32 cursorPos { pXEvent.xmotion.x, pXEvent.xmotion.y };
 
-				if ( pInputState.mouseLastRegPos == cvMousePosInvalid )
+				if ( pInputState.mouseLastRegPos == CX_EVENT_MOUDE_POINT_INVALID )
 				{
 					pInputState.mouseLastRegPos = cursorPos;
 				}

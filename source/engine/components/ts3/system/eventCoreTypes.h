@@ -195,8 +195,6 @@ namespace ts3::system
 	    constexpr EvtInput()
         : EvtBase( tpEventCode )
 		{}
-
-		static_assert( ExfEnumGetEventCodeBaseType( tpEventCode ) == EEventBaseType::Input );
 	};
 
 	struct EvtInputGamepadAxis : public EvtInput<E_EVENT_CODE_INPUT_GAMEPAD_AXIS>
@@ -275,8 +273,6 @@ namespace ts3::system
 	    constexpr EvtWindow()
         : EvtBase( tpEventCode )
 		{}
-
-		static_assert( ExfEnumGetEventCodeBaseType( tpEventCode ) == EEventBaseType::Window );
 	};
 
 	struct EvtWindowUpdateClose : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_CLOSE>

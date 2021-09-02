@@ -1,148 +1,100 @@
 
-#include "eventCore.h"
+#include "eventSystemNative.h"
 
 namespace ts3::system
 {
 
-	EventController::EventController( ContextHandle pContext ) noexcept
-	: BaseObject( pContext )
-	, _activeDispatcher( nullptr )
+    void _internalEventPreProcess( EventObject & pEvent, EventController & pEventController );
+    void _internalEventOnInputMouseButton( EventObject & pEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState );
+    void _internalEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState );
+
+
+    EventController::EventController( SysContextHandle pSysContext )
+    : SysObject( pSysContext )
+    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
 	{}
 
-	EventController::~EventController() noexcept
-	{
-		_sysRelease();
-	}
+	EventController::~EventController() noexcept = default;
 
-	EventControllerHandle EventController::create( ContextHandle pContext )
-	{
-		auto eventController =  createSysObject<EventController>( pContext );
+    void EventController::dispatchEvent( EventObject pEvent )
+    {
+        if( !mPrivate->activeDispatcher )
+        {
+            throw 0;
+        }
+        mPrivate->activeDispatcher->postEvent( pEvent );
+    }
 
-		eventController->_defaultDispatcher =  createSysObject<EventDispatcher>( eventController );
-		eventController->_activeDispatcher = eventController->_defaultDispatcher.get();
+    uint32 EventController::dispatchSysEventAuto()
+    {
+        uint32 eventCounter = 0;
+        while( _nativeDispatchNext() )
+        {
+            ++eventCounter;
+        }
+        if( ( eventCounter == 0 ) && mPrivate->currentInternalConfig->configFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT ) )
+        {
+            _nativeDispatchNextWait();
+        }
+        return eventCounter;
+    }
 
-		eventController->_sysInitialize();
+    uint32 EventController::dispatchSysEventPeek( uint32 pLimit )
+    {
+        uint32 eventCounter = 0;
+        while( _nativeDispatchNext() && ( eventCounter <= pLimit ) )
+        {
+            ++eventCounter;
+        }
+        return eventCounter;
+    }
 
-		return eventController;
-	}
+    uint32 EventController::dispatchSysEventWait( uint32 pLimit )
+    {
+        uint32 eventCounter = 0;
+        while( _nativeDispatchNext() && ( eventCounter <= pLimit ) )
+        {
+            ++eventCounter;
+        }
+        if( eventCounter == 0 )
+        {
+            _nativeDispatchNextWait();
+        }
+        return eventCounter;
+    }
+    
+    void EventController::_onActiveDispatcherChange( EventDispatcher & pDispatcher )
+    {
+        mPrivate->currentInternalConfig = &( pDispatcher.mPrivate->internalConfig );
+        mPrivate->inputState.mouseClickSequenceLength = 0;
+        mPrivate->inputState.mouseLastPressTimestamp = 0;
+        mPrivate->inputState.mouseButtonStateMask = 0;
+        mPrivate->inputState.mouseLastPressButton = MouseButtonID::Unknown;
+        mPrivate->inputState.mouseLastRegPos = CX_EVENT_MOUDE_POINT_INVALID;
 
-	EventDispatcherHandle EventController::createEventDispatcher()
-	{
-		return EventDispatcher::create( getHandle<EventController>() );
-	}
-
-	void EventController::dispatchEvent( Event & pEvent )
-	{
-		_activeDispatcher->internalPutEvent( pEvent );
-	}
-
-	void EventController::processEvent()
-	{
-		ts3DebugAssert( _activeDispatcher );
-		if( _activeDispatcher->checkIdleProcessingMode() )
-		{
-			_sysDispatchNextEvent();
-		}
-		else
-		{
-			_sysDispatchNextEventWait();
-		}
-	}
-
-	void EventController::processQueue()
-	{
-		ts3DebugAssert( _activeDispatcher );
-		if( _activeDispatcher->checkIdleProcessingMode() )
-		{
-			_sysDispatchQueuedEvents();
-		}
-		else
-		{
-			_sysDispatchQueuedEventsWait();
-		}
-	}
-
-	void EventController::dispatchNextEvent()
-	{
-		ts3DebugAssert( _activeDispatcher );
-		_sysDispatchNextEvent();
-	}
-
-	void EventController::dispatchNextEventWait()
-	{
-		ts3DebugAssert( _activeDispatcher );
-		_sysDispatchNextEventWait();
-	}
-
-	void EventController::dispatchQueuedEvents()
-	{
-		ts3DebugAssert( _activeDispatcher );
-		_sysDispatchQueuedEvents();
-	}
-
-	void EventController::dispatchQueuedEventsWait()
-	{
-		ts3DebugAssert( _activeDispatcher );
-		_sysDispatchQueuedEventsWait();
-	}
-
-	void EventController::addEventSource( EventSource & pEventSource )
-	{
-		_sysAddEventSource( pEventSource );
-	}
-
-	void EventController::removeEventSource( EventSource & pEventSource )
-	{
-		_sysRemoveEventSource( pEventSource );
-	}
-
-	void EventController::setActiveDispatcher( EventDispatcher & pDispatcher )
-	{
-		_activeDispatcher = &pDispatcher;
-	}
-
-	void EventController::resetActiveDispatcher()
-	{
-		_activeDispatcher = _defaultDispatcher.get();
-	}
-
-	EventDispatcher & EventController::getActiveDispatcher() const
-	{
-		return *_activeDispatcher;
-	}
-
-	EventDispatcher & EventController::getDefaultDispatcher() const
-	{
-		return *_defaultDispatcher;
-	}
+        _nativeOnActiveDispatcherChange( pDispatcher );
+    }
 
 
-	EventDispatcher::EventDispatcher( EventControllerHandle pEventController ) noexcept
-	: BaseObject( pEventController->mContext )
-	, mEventController( pEventController )
-	{
-		_inputState.scNativeData = &( mEventController->mContext->mNativeData );
-	}
+    EventDispatcher::EventDispatcher( EventController * pEventController,
+                                      event_dispatcher_id_t pID )
+	: mEventController( pEventController )
+	, mPrivate( std::make_unique<ObjectPrivateData>( this ) )
+	, mID( pID )
+	{}
 
 	EventDispatcher::~EventDispatcher() noexcept = default;
-
-	EventDispatcherHandle EventDispatcher::create( EventControllerHandle pEventController )
-	{
-		auto eventDispatcher =  createSysObject<EventDispatcher>( pEventController );
-		return eventDispatcher;
-	}
 
 	void EventDispatcher::bindEventHandler( EEventBaseType pBaseType, EventHandler pHandler )
 	{
 		// EventBaseType enum is numbered from zero to have constant access time to its entry.
 		auto baseTypeValue = static_cast<size_t>( pBaseType );
 		// Check for possible violation attempt.
-		if ( baseTypeValue >= cvEnumEventBaseTypeCount )
+		if ( baseTypeValue >= CX_ENUM_EVENT_BASE_TYPE_COUNT )
 		{
 			throw 0;
 		}
-
-		_handlerMapByBaseType[baseTypeValue] = std::move( pHandler );
+		mPrivate->handlerMapByBaseType[baseTypeValue] = std::move( pHandler );
 	}
 
 	void EventDispatcher::bindEventHandler( EEventCategory pCategory, EventHandler pHandler )
@@ -150,12 +102,11 @@ namespace ts3::system
 		// EventCategory enum is numbered from zero to have constant access time to its entry.
 		auto categoryValue = static_cast<size_t>( pCategory );
 		// Check for possible violation attempt.
-		if ( categoryValue >= cvEnumEventCategoryCount )
+		if ( categoryValue >= CX_ENUM_EVENT_CATEGORY_COUNT )
 		{
 			throw 0;
 		}
-
-		_handlerMapByCategory[categoryValue] = std::move( pHandler );
+		mPrivate->handlerMapByCategory[categoryValue] = std::move( pHandler );
 	}
 
 	void EventDispatcher::bindEventHandler( EEventCodeIndex pCodeIndex, EventHandler pHandler )
@@ -163,159 +114,141 @@ namespace ts3::system
 		// EventCodeIndex enum is numbered from zero to have constant access time to its entry.
 		auto codeIndexValue = static_cast<size_t>( pCodeIndex );
 		// Check for possible violation attempt.
-		if ( codeIndexValue >= cvEnumEventCodeIndexCount )
+		if ( codeIndexValue >= CX_ENUM_EVENT_CODE_INDEX_COUNT )
 		{
 			throw 0;
 		}
-
-		_handlerMapByCodeIndex[codeIndexValue] = std::move( pHandler );
+		mPrivate->handlerMapByCodeIndex[codeIndexValue] = std::move( pHandler );
 	}
 
 	void EventDispatcher::bindDefaultEventHandler( EventHandler pHandler )
 	{
-		_defaultHandler = std::move( pHandler );
-	}
-
-	void EventDispatcher::postEvent( Event pEvent )
-	{
-		internalPutEvent( pEvent );
-	}
-
-	void EventDispatcher::postSimpleEvent( event_code_value_t pEventCode )
-	{
-		Event evtObject;
-		evtObject.code = static_cast<EEventCode>( pEventCode );
-		internalPutEvent( evtObject );
-	}
-
-	void EventDispatcher::postEventAppQuit()
-	{
-		return postSimpleEvent( E_EVENT_CODE_APP_ACTIVITY_QUIT );
-	}
-
-	void EventDispatcher::postEventAppTerminate()
-	{
-		return postSimpleEvent( E_EVENT_CODE_APP_ACTIVITY_TERMINATE );
+	    mPrivate->defaultHandler = std::move( pHandler );
 	}
 
 	void EventDispatcher::setIdleProcessingMode( bool pIdle )
 	{
-		_inputState.flags.setOrUnset( pIdle, E_EVENT_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT );
+	    mPrivate->internalConfig.configFlags.setOrUnset( pIdle, E_EVENT_SYSTEM_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT );
 	}
 
-	bool EventDispatcher::checkIdleProcessingMode() const
+	void EventDispatcher::postEvent( EventObject pEvent )
 	{
-		return _inputState.flags.isSet( E_EVENT_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT );
+	    _internalEventPreProcess( pEvent, *mEventController );
+
+	    pEvent.commonData.timeStamp = PerfCounter::queryCurrentStamp();
+
+	    {
+	        auto codeIndexValue = static_cast<size_t>( ecGetEventCodeCodeIndex( pEvent.code ) );
+	        auto & eventHandler = mPrivate->handlerMapByCodeIndex[codeIndexValue];
+	        if ( eventHandler && eventHandler( pEvent ) )
+	        {
+	            return;
+	        }
+	    }
+	    {
+	        auto categoryValue = static_cast<size_t>( ecGetEventCodeCategory( pEvent.code ) );
+	        auto & eventHandler = mPrivate->handlerMapByCategory[categoryValue];
+	        if ( eventHandler && eventHandler( pEvent ) )
+	        {
+	            return;
+	        }
+	    }
+	    {
+	        auto baseTypeValue = static_cast<size_t>( ecGetEventCodeBaseType( pEvent.code ) );
+	        auto & eventHandler = mPrivate->handlerMapByCategory[baseTypeValue];
+	        if ( eventHandler && eventHandler( pEvent ) )
+	        {
+	            return;
+	        }
+	    }
+	    {
+	        auto & defaultHandler = mPrivate->defaultHandler;
+	        if ( defaultHandler && defaultHandler( pEvent ) )
+	        {
+	            return;
+	        }
+	    }
+
+	    // warn?
+	    ts3DebugInterruptOnce();
 	}
 
-	EventInputState & EventDispatcher::getInputState()
+	void EventDispatcher::postEvent( event_code_value_t pEventCode )
 	{
-		return _inputState;
+	    EventObject eventObject;
+	    eventObject.code = static_cast<EEventCode>( pEventCode );
+	    postEvent( eventObject );
 	}
 
-	void EventDispatcher::internalPutEvent( Event & pEvent )
+	void EventDispatcher::postEventAppQuit()
 	{
-		_preProcessEvent( pEvent );
-		_putEvent( pEvent );
+	    postEvent( E_EVENT_CODE_APP_ACTIVITY_QUIT );
 	}
 
-	void _internalEventOnInputMouseButton( Event & pEvent, EventInputState & pInputState );
-	void _internalEventOnInputMouseButtonMulticlick( EvtInputMouseButton & pMouseButtonEvent, EventInputState & pInputState );
-
-	void EventDispatcher::_preProcessEvent( Event & pEvent )
+	void EventDispatcher::postEventAppTerminate()
 	{
-		// For INPUT_MOUSE_BUTTON events, we may want to modify event's data depending on the input configuration.
-		// _evtImplOnInputMouseButton() checks the input config and handles, for example, multi-click sequences.
-		if ( pEvent.code == E_EVENT_CODE_INPUT_MOUSE_BUTTON )
-		{
-			_internalEventOnInputMouseButton( pEvent, _inputState );
-
-		}
+	    postEvent( E_EVENT_CODE_APP_ACTIVITY_TERMINATE );
 	}
 
-	void EventDispatcher::_putEvent( Event & pEvent )
+
+	void _internalEventPreProcess( EventObject & pEvent, EventController & pEventController )
 	{
-		pEvent.commonData.timeStamp = PerfCounter::queryCurrentStamp();
-		{
-			auto codeIndexValue = static_cast<size_t>( ExfEnumGetEventCodeIndex( pEvent.code ) );
-			auto & eventHandler = _handlerMapByCodeIndex[codeIndexValue];
-			if ( eventHandler && eventHandler( pEvent ) )
-			{
-				return;
-			}
-		}
-		{
-			auto categoryValue = static_cast<size_t>( ExfEnumGetEventCodeCategory( pEvent.code ) );
-			auto & eventHandler = _handlerMapByCategory[categoryValue];
-			if ( eventHandler && eventHandler( pEvent ) )
-			{
-				return;
-			}
-		}
-		{
-			auto baseTypeValue = static_cast<size_t>( ExfEnumGetEventCodeBaseType( pEvent.code ) );
-			auto & eventHandler = _handlerMapByCategory[baseTypeValue];
-			if ( eventHandler && eventHandler( pEvent ) )
-			{
-				return;
-			}
-		}
-		{
-			auto & defaultHandler = _defaultHandler;
-			if ( defaultHandler && defaultHandler( pEvent ) )
-			{
-				return;
-			}
-		}
+	    // For INPUT_MOUSE_BUTTON events, we may want to modify event's data depending on the input configuration.
+	    // _evtImplOnInputMouseButton() checks the input config and handles, for example, multi-click sequences.
+	    if ( pEvent.code == E_EVENT_CODE_INPUT_MOUSE_BUTTON )
+	    {
+	        _internalEventOnInputMouseButton( pEvent, *( pEventController.mPrivate->currentInternalConfig ), pEventController.mPrivate->inputState );
+
+	    }
 	}
 
-	void _internalEventOnInputMouseButton( Event & pEvent, EventInputState & pInputState )
+	void _internalEventOnInputMouseButton( EventObject & pEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState )
 	{
-		if ( pInputState.flags.isSet( E_EVENT_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT ) )
-		{
-			auto & eInputMouseButton = pEvent.eInputMouseButton;
-			if ( eInputMouseButton.buttonAction == MouseButtonActionType::Click )
-			{
-				_internalEventOnInputMouseButtonMulticlick( eInputMouseButton, pInputState );
-			}
-		}
+	    if ( pConfig.configFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT ) )
+	    {
+	        auto & eInputMouseButton = pEvent.eInputMouseButton;
+	        if ( eInputMouseButton.buttonAction == MouseButtonActionType::Click )
+	        {
+	            _internalEventOnInputMouseButtonMultiClick( eInputMouseButton, pConfig, pInputState );
+	        }
+	    }
 	}
 
-	void _internalEventOnInputMouseButtonMulticlick( EvtInputMouseButton & pMouseButtonEvent, EventInputState & pInputState )
+	void _internalEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState )
 	{
-		bool multiClickEventSet = false;
+	    bool multiClickEventSet = false;
 
-		if ( pInputState.mouseLastPressButton == pMouseButtonEvent.buttonID )
-		{
-			auto lastClickDiff = pMouseButtonEvent.timeStamp - pInputState.mouseLastPressTimestamp;
-			auto lastClickDiffMs = PerfCounter::convertToDuration<DurationPeriod::Millisecond>( lastClickDiff );
-			if ( lastClickDiffMs <= pInputState.mouseClickSequenceTimeoutMs )
-			{
-				if( pInputState.mouseClickSequenceLength == 1 )
-				{
-					pMouseButtonEvent.buttonAction = MouseButtonActionType::DoubleClick;
-					pInputState.mouseClickSequenceLength = 2;
-					multiClickEventSet = true;
-				}
-				else if ( pInputState.flags.isSet( E_EVENT_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT ) )
-				{
-					pMouseButtonEvent.buttonAction = MouseButtonActionType::MultiClick;
-					pInputState.mouseClickSequenceLength += 1;
-					multiClickEventSet = true;
-				}
-			}
-		}
+	    if ( pInputState.mouseLastPressButton == pMouseButtonEvent.buttonID )
+	    {
+	        auto lastClickDiff = pMouseButtonEvent.timeStamp - pInputState.mouseLastPressTimestamp;
+	        auto lastClickDiffMs = PerfCounter::convertToDuration<DurationPeriod::Millisecond>( lastClickDiff );
+	        if ( lastClickDiffMs <= pConfig.mouseClickSequenceTimeoutMs )
+	        {
+	            if( pInputState.mouseClickSequenceLength == 1 )
+	            {
+	                pMouseButtonEvent.buttonAction = MouseButtonActionType::DoubleClick;
+	                pInputState.mouseClickSequenceLength = 2;
+	                multiClickEventSet = true;
+	            }
+	            else if ( pConfig.configFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT ) )
+	            {
+	                pMouseButtonEvent.buttonAction = MouseButtonActionType::MultiClick;
+	                pInputState.mouseClickSequenceLength += 1;
+	                multiClickEventSet = true;
+	            }
+	        }
+	    }
 
-		if( !multiClickEventSet )
-		{
-			// Multi-click has not been detected/updated. Possible reasons: different button ID,
-			// click timeout (mouse button clicked too slow), multi-click support is disabled.
-			pInputState.mouseLastPressButton = pMouseButtonEvent.buttonID;
-			pInputState.mouseClickSequenceLength = 1;
-		}
+	    if( !multiClickEventSet )
+	    {
+	        // Multi-click has not been detected/updated. Possible reasons: different button ID,
+	        // click timeout (mouse button clicked too slow), multi-click support is disabled.
+	        pInputState.mouseLastPressButton = pMouseButtonEvent.buttonID;
+	        pInputState.mouseClickSequenceLength = 1;
+	    }
 
-		pInputState.mouseLastPressTimestamp = pMouseButtonEvent.timeStamp;
-		pInputState.mouseLastRegPos = pMouseButtonEvent.cursorPos;
+	    pInputState.mouseLastPressTimestamp = pMouseButtonEvent.timeStamp;
+	    pInputState.mouseLastRegPos = pMouseButtonEvent.cursorPos;
 	}
 
 } // namespace ts3::system
