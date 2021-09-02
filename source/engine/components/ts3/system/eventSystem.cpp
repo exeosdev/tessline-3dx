@@ -19,15 +19,15 @@ namespace ts3::system
 
     void EventController::dispatchEvent( EventObject pEvent )
     {
-        if( !mPrivate->activeDispatcher )
-        {
-            throw 0;
-        }
+        _checkActiveDispatcherState();
+
         mPrivate->activeDispatcher->postEvent( pEvent );
     }
 
     uint32 EventController::dispatchSysEventAuto()
     {
+        _checkActiveDispatcherState();
+
         uint32 eventCounter = 0;
         while( _nativeDispatchNext() )
         {
@@ -42,6 +42,8 @@ namespace ts3::system
 
     uint32 EventController::dispatchSysEventPeek( uint32 pLimit )
     {
+        _checkActiveDispatcherState();
+
         uint32 eventCounter = 0;
         while( _nativeDispatchNext() && ( eventCounter <= pLimit ) )
         {
@@ -52,6 +54,8 @@ namespace ts3::system
 
     uint32 EventController::dispatchSysEventWait( uint32 pLimit )
     {
+        _checkActiveDispatcherState();
+
         uint32 eventCounter = 0;
         while( _nativeDispatchNext() && ( eventCounter <= pLimit ) )
         {
@@ -115,6 +119,22 @@ namespace ts3::system
             return &( mPrivate->defaultEventDispatcher );
         }
         return getMapValueOrDefault( mPrivate->dispatcherMap, pDispatcherID, nullptr );
+    }
+
+    bool EventController::hasActiveDispatcher() const
+    {
+        return mPrivate->activeDispatcher != nullptr;
+    }
+
+    void EventController::_checkActiveDispatcherState()
+    {
+        if( !hasActiveDispatcher() )
+        {
+            ts3DebugInterruptOnce();
+            throw 0;
+        }
+
+        ts3DebugAssert( mPrivate->currentInternalConfig != nullptr );
     }
     
     void EventController::_onActiveDispatcherChange( EventDispatcher * pDispatcher )
@@ -232,7 +252,6 @@ namespace ts3::system
 	    }
 
 	    // warn?
-	    ts3DebugInterruptOnce();
 	}
 
 	void EventDispatcher::postEvent( event_code_value_t pEventCode )

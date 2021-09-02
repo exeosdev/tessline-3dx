@@ -510,11 +510,7 @@ namespace ts3::system
         nativeEvent.wParam = pWparam;
         nativeEvent.lParam = pLparam;
 
-        EventObject eventObject;
-        if( nativeEventTranslate( *eventController, nativeEvent, eventObject ) )
-        {
-            eventController->dispatchEvent( eventObject );
-        }
+        nativeEventDispatch( *eventController, nativeEvent );
 
 	    return ::DefWindowProcA( pHWND, pMessage, pWparam, pLparam );
 	}

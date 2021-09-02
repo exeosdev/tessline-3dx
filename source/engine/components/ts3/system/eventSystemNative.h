@@ -93,6 +93,17 @@ namespace ts3::system
 
     TS3_SYSTEM_API bool nativeEventTranslate( EventController & pEventController, const NativeEvent & pNativeEvent, EventObject & pOutEvent );
 
+    inline bool nativeEventDispatch( EventController & pEventController, const NativeEvent & pNativeEvent )
+    {
+        EventObject eventObject;
+        if( nativeEventTranslate( pEventController, pNativeEvent, eventObject ) )
+        {
+            pEventController.dispatchEvent( eventObject );
+            return true;
+        }
+        return false;
+    }
+
 } // namespace ts3::system
 
 #endif // __TS3_SYSTEM_EVENT_SYSTEM_NATIVE_H__

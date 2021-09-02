@@ -51,11 +51,14 @@ namespace ts3::system
 		bool setActiveDispatcher( EventDispatcher & pDispatcher );
 		bool resetActiveDispatcher();
 
-		EventDispatcher * createEventDispatcher( event_dispatcher_id_t pDispatcherID );
+		TS3_PCL_ATTR_NO_DISCARD EventDispatcher * createEventDispatcher( event_dispatcher_id_t pDispatcherID );
 
-		EventDispatcher * getEventDispatcher( event_dispatcher_id_t pDispatcherID );
+		TS3_PCL_ATTR_NO_DISCARD EventDispatcher * getEventDispatcher( event_dispatcher_id_t pDispatcherID );
+
+		TS3_PCL_ATTR_NO_DISCARD bool hasActiveDispatcher() const;
 
 	private:
+	    void _checkActiveDispatcherState();
 	    void _onActiveDispatcherChange( EventDispatcher * pDispatcher );
 
 	    bool _nativeDispatchNext();
