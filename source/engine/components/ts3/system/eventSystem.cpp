@@ -1,5 +1,6 @@
 
 #include "eventSystemNative.h"
+#include <ts3/stdext/mapUtils.h>
 
 namespace ts3::system
 {
@@ -62,15 +63,76 @@ namespace ts3::system
         }
         return eventCounter;
     }
-    
-    void EventController::_onActiveDispatcherChange( EventDispatcher & pDispatcher )
+
+    bool EventController::setActiveDispatcher( EventDispatcher & pDispatcher )
     {
-        mPrivate->currentInternalConfig = &( pDispatcher.mPrivate->internalConfig );
+        if( &pDispatcher != mPrivate->activeDispatcher )
+        {
+            _onActiveDispatcherChange( &pDispatcher );
+            mPrivate->activeDispatcher = &pDispatcher;
+            return true;
+        }
+
+        return false;
+    }
+
+    bool EventController::resetActiveDispatcher()
+    {
+        if( mPrivate->activeDispatcher  )
+        {
+            _onActiveDispatcherChange( nullptr );
+            mPrivate->activeDispatcher = nullptr;
+            return true;
+        }
+
+        return false;
+    }
+
+    EventDispatcher * EventController::createEventDispatcher( event_dispatcher_id_t pDispatcherID )
+    {
+        if( pDispatcherID == CX_EVENT_DISPATCHER_ID_DEFAULT )
+        {
+            return nullptr;
+        }
+
+        auto existingDispatcherRef = mPrivate->dispatcherMap.find( pDispatcherID );
+        if( existingDispatcherRef != mPrivate->dispatcherMap.end() )
+        {
+            return existingDispatcherRef->second;
+        }
+
+        auto & dispatcher = mPrivate->dispatcherInternalStorage.emplace_back( this, pDispatcherID );
+        mPrivate->dispatcherMap[pDispatcherID] = &dispatcher;
+
+        return &dispatcher;
+
+    }
+
+    EventDispatcher * EventController::getEventDispatcher( event_dispatcher_id_t pDispatcherID )
+    {
+        if( pDispatcherID == CX_EVENT_DISPATCHER_ID_DEFAULT )
+        {
+            return &( mPrivate->defaultEventDispatcher );
+        }
+        return getMapValueOrDefault( mPrivate->dispatcherMap, pDispatcherID, nullptr );
+    }
+    
+    void EventController::_onActiveDispatcherChange( EventDispatcher * pDispatcher )
+    {
         mPrivate->inputState.mouseClickSequenceLength = 0;
         mPrivate->inputState.mouseLastPressTimestamp = 0;
         mPrivate->inputState.mouseButtonStateMask = 0;
         mPrivate->inputState.mouseLastPressButton = MouseButtonID::Unknown;
         mPrivate->inputState.mouseLastRegPos = CX_EVENT_MOUDE_POINT_INVALID;
+
+        if( pDispatcher )
+        {
+            mPrivate->currentInternalConfig = &( pDispatcher->mPrivate->internalConfig );
+        }
+        else
+        {
+            mPrivate->currentInternalConfig = nullptr;
+        }
 
         _nativeOnActiveDispatcherChange( pDispatcher );
     }
@@ -80,7 +142,7 @@ namespace ts3::system
                                       event_dispatcher_id_t pID )
 	: mEventController( pEventController )
 	, mPrivate( std::make_unique<ObjectPrivateData>( this ) )
-	, mID( pID )
+	, mID( ( pID != CX_EVENT_DISPATCHER_ID_AUTO ) ? pID : reinterpret_cast<event_dispatcher_id_t>( this ) )
 	{}
 
 	EventDispatcher::~EventDispatcher() noexcept = default;

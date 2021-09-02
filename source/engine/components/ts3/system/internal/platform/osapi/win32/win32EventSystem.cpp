@@ -35,7 +35,7 @@ namespace ts3::system
 	    return false;
 	}
 
-	void EventController::_nativeOnActiveDispatcherChange( EventDispatcher & pDispatcher )
+	void EventController::_nativeOnActiveDispatcherChange( EventDispatcher * pDispatcher )
 	{}
 
 
@@ -316,7 +316,7 @@ namespace ts3::system
 	    return pOutEvent.commonData.eventCode != E_EVENT_CODE_UNDEFINED;
 	}
 
-	bool _win32TranslateInputEventTouch( EventInputState & inputState, const MSG & pMSG, EventObject & pOutEvent )
+	bool _win32TranslateInputEventTouch( EventController & pOutEventController, const MSG & pMSG, EventObject & pOutEvent )
     {
 	    return false;
     }

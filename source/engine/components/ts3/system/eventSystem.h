@@ -11,6 +11,10 @@ namespace ts3::system
 
     using event_dispatcher_id_t = native_uint;
 
+    constexpr event_dispatcher_id_t CX_EVENT_DISPATCHER_ID_AUTO = 0u;
+
+    constexpr event_dispatcher_id_t CX_EVENT_DISPATCHER_ID_DEFAULT = Limits<event_dispatcher_id_t>::maxValue;
+
     /// @brief
     enum EventControllerConfigFlagBits : uint32
     {
@@ -38,23 +42,25 @@ namespace ts3::system
 	    explicit EventController( SysContextHandle pSysContext );
 		virtual ~EventController() noexcept;
 
-		EventDispatcher * createEventDispatcher( event_dispatcher_id_t pDispatcherID );
-
 		void dispatchEvent( EventObject pEvent );
 
 		uint32 dispatchSysEventAuto();
 		uint32 dispatchSysEventPeek( uint32 pLimit = CX_INT32_MAX );
 		uint32 dispatchSysEventWait( uint32 pLimit = CX_INT32_MAX );
 
-		void setActiveDispatcher( EventDispatcher & pDispatcher );
-		void resetActiveDispatcher();
+		bool setActiveDispatcher( EventDispatcher & pDispatcher );
+		bool resetActiveDispatcher();
+
+		EventDispatcher * createEventDispatcher( event_dispatcher_id_t pDispatcherID );
+
+		EventDispatcher * getEventDispatcher( event_dispatcher_id_t pDispatcherID );
 
 	private:
-	    void _onActiveDispatcherChange( EventDispatcher & pDispatcher );
+	    void _onActiveDispatcherChange( EventDispatcher * pDispatcher );
 
 	    bool _nativeDispatchNext();
 	    bool _nativeDispatchNextWait();
-	    void _nativeOnActiveDispatcherChange( EventDispatcher & pDispatcher );
+	    void _nativeOnActiveDispatcherChange( EventDispatcher * pDispatcher );
 	};
 
 	class EventDispatcher

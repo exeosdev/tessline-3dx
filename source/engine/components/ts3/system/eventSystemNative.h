@@ -55,6 +55,7 @@ namespace ts3::system
     struct EventController::ObjectPrivateData
     {
         EventController * objectPtr = nullptr;
+        EventDispatcher defaultEventDispatcher;
         std::deque<EventDispatcher> dispatcherInternalStorage;
         std::unordered_map<event_dispatcher_id_t, EventDispatcher *> dispatcherMap;
         EventDispatcher * activeDispatcher = nullptr;
@@ -63,6 +64,7 @@ namespace ts3::system
 
         explicit ObjectPrivateData( EventController * pObjectPtr )
         : objectPtr( pObjectPtr )
+        , defaultEventDispatcher( pObjectPtr, CX_EVENT_DISPATCHER_ID_DEFAULT )
         {}
     };
 
@@ -73,6 +75,7 @@ namespace ts3::system
         using EventCodeIndexHandlerMap = std::array<EventHandler, CX_ENUM_EVENT_CODE_INDEX_COUNT>;
 
         EventDispatcher * objectPtr = nullptr;
+        //
         EventSystemInternalConfig internalConfig;
         //
         EventHandler defaultHandler;
