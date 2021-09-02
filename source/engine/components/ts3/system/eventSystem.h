@@ -3,10 +3,17 @@
 #define __TS3_SYSTEM_EVENT_SYSTEM_H__
 
 #include "eventCommon.h"
+#include "sysObject.h"
 #include <ts3/math/vector.h>
 
 namespace ts3::system
 {
+
+    using event_dispatcher_id_t = native_uint;
+
+    constexpr event_dispatcher_id_t CX_EVENT_DISPATCHER_ID_AUTO = 0u;
+
+    constexpr event_dispatcher_id_t CX_EVENT_DISPATCHER_ID_DEFAULT = Limits<event_dispatcher_id_t>::maxValue;
 
     /// @brief
     enum EventControllerConfigFlagBits : uint32
@@ -35,89 +42,62 @@ namespace ts3::system
 	    explicit EventController( SysContextHandle pSysContext );
 		virtual ~EventController() noexcept;
 
-		EventDispatcher * createEventDispatcher();
+		void dispatchEvent( EventObject pEvent );
 
-		void dispatchEvent( Event & pEvent );
+		uint32 dispatchSysEventAuto();
+		uint32 dispatchSysEventPeek( uint32 pLimit = CX_INT32_MAX );
+		uint32 dispatchSysEventWait( uint32 pLimit = CX_INT32_MAX );
 
-		void processEvent();
-		void processQueue();
-		void dispatchNextEvent();
-		void dispatchNextEventWait();
-		void dispatchQueuedEvents();
-		void dispatchQueuedEventsWait();
+		bool setActiveDispatcher( EventDispatcher & pDispatcher );
+		bool resetActiveDispatcher();
 
-		void setActiveDispatcher( EventDispatcher & pDispatcher );
-		void resetActiveDispatcher();
+		TS3_PCL_ATTR_NO_DISCARD EventDispatcher * createEventDispatcher( event_dispatcher_id_t pDispatcherID );
 
-		TS3_PCL_ATTR_NO_DISCARD EventDispatcher & getActiveDispatcher() const;
-		TS3_PCL_ATTR_NO_DISCARD EventDispatcher & getDefaultDispatcher() const;
+		TS3_PCL_ATTR_NO_DISCARD EventDispatcher * getEventDispatcher( event_dispatcher_id_t pDispatcherID );
+
+		TS3_PCL_ATTR_NO_DISCARD bool hasActiveDispatcher() const;
 
 	private:
-		void _sysInitialize();
-		void _sysRelease();
-		void _sysAddEventSource( EventSource & pEventSource );
-		void _sysRemoveEventSource( EventSource & pEventSource );
-		void _sysDispatchNextEvent();
-		void _sysDispatchNextEventWait();
-		void _sysDispatchQueuedEvents();
-		void _sysDispatchQueuedEventsWait();
+	    void _checkActiveDispatcherState();
+	    void _onActiveDispatcherChange( EventDispatcher * pDispatcher );
 
-	private:
-		//
-		EventDispatcherHandle _defaultDispatcher;
-		//
-		EventDispatcher * _activeDispatcher;
+	    bool _nativeDispatchNext();
+	    bool _nativeDispatchNextWait();
+	    void _nativeOnActiveDispatcherChange( EventDispatcher * pDispatcher );
 	};
 
-	class EventDispatcher : public BaseObject
+	class EventDispatcher
 	{
 		friend class EventController;
 
 	public:
-		EventControllerHandle const mEventController;
+	    struct ObjectPrivateData;
+		EventController * const mEventController;
+		std::unique_ptr<ObjectPrivateData> const mPrivate;
+		event_dispatcher_id_t const mID;
 
-		EventDispatcher( EventControllerHandle pEventController ) noexcept;
+		EventDispatcher( EventController * pEventController,
+                         event_dispatcher_id_t pID );
+
 		~EventDispatcher() noexcept;
-
-		static EventDispatcherHandle create( EventControllerHandle pEventController );
 
 		void bindEventHandler( EEventBaseType pBaseType, EventHandler pHandler );
 		void bindEventHandler( EEventCategory pCategory, EventHandler pHandler );
 		void bindEventHandler( EEventCodeIndex pCodeIndex, EventHandler pHandler );
 		void bindDefaultEventHandler( EventHandler pHandler );
 
-		void postEvent( Event pEvent );
-		void postSimpleEvent( event_code_value_t pEventCode );
-		void postEventAppQuit();
-		void postEventAppTerminate();
+		void resetHandlers();
 
 		void setIdleProcessingMode( bool pIdle );
 
-		bool checkIdleProcessingMode() const;
-
-		EventInputState & getInputState();
-
-	private:
-		void internalPutEvent( Event & pEvent );
-
-		void _preProcessEvent( Event & pEvent );
-		void _putEvent( Event & pEvent );
+		void postEvent( EventObject pEvent );
+		void postEvent( event_code_value_t pEventCode );
+		void postEventAppQuit();
+		void postEventAppTerminate();
 
 	private:
-		using EventBaseTypeHandlerMap = std::array<EventHandler, cvEnumEventBaseTypeCount>;
-		using EventCategoryHandlerMap = std::array<EventHandler, cvEnumEventCategoryCount>;
-		using EventCodeIndexHandlerMap = std::array<EventHandler, cvEnumEventCodeIndexCount>;
-
-		//
-		EventInputState _inputState;
-		//
-		EventHandler _defaultHandler;
-		// Array of handlers registered for EventBaseType.
-		EventBaseTypeHandlerMap _handlerMapByBaseType;
-		// Array of handlers registered for EventCategory.
-		EventCategoryHandlerMap _handlerMapByCategory;
-		// Array of handlers registered for EventCodeIndex (i.e. event code itself).
-		EventCodeIndexHandlerMap _handlerMapByCodeIndex;
+		void _preProcessEvent( EventObject & pEvent );
+		void _putEvent( EventObject & pEvent );
 	};
 
 } // namespace ts3::system

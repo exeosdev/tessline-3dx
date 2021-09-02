@@ -20,7 +20,7 @@ namespace ts3::system
         WindowCreateInfo validatedCreateInfo;
         validatedCreateInfo.properties = pCreateInfo.properties;
 
-        validateWindowGeometryUpdate( validatedCreateInfo.properties.geometry );
+        validateWindowGeometry( validatedCreateInfo.properties.geometry );
 
         auto windowRef = mPrivate->windowList.emplace( mPrivate->windowList.end(), this );
         windowRef->mPrivate->windowManagerListRef = windowRef;
@@ -54,8 +54,22 @@ namespace ts3::system
         mPrivate->windowList.erase( pWindow.mPrivate->windowManagerListRef );
     }
 
+    void WindowManager::reset()
+    {
+        for( auto & window : mPrivate->windowList )
+        {
+            _nativeDestroyWindow( window );
+        }
+        mPrivate->windowList.clear();
+    }
+
     bool WindowManager::isWindowValid( Window & pWindow ) const
     {
+        if( mPrivate->windowList.empty() )
+        {
+            return false;
+        }
+
         auto windowIter = mPrivate->windowList.begin();
         auto windowEndIter = mPrivate->windowList.end();
 
@@ -74,14 +88,14 @@ namespace ts3::system
         return false;
     }
 
-    bool WindowManager::validateWindowGeometry( const WindowGeometry & pWindowGeometry ) const
+    bool WindowManager::checkWindowGeometry( const WindowGeometry & pWindowGeometry ) const
     {
-        return true;
+        return mDisplayManager->checkWindowGeometry( pWindowGeometry.position, pWindowGeometry.size );
     }
 
-    bool WindowManager::validateWindowGeometryUpdate( WindowGeometry & pWindowGeometry ) const
+    bool WindowManager::validateWindowGeometry( WindowGeometry & pWindowGeometry ) const
     {
-        return true;
+        return mDisplayManager->validateWindowGeometry( pWindowGeometry.position, pWindowGeometry.size );
     }
 
 
@@ -92,6 +106,11 @@ namespace ts3::system
     {}
 
     Window::~Window() = default;
+
+    void Window::destroy()
+    {
+        mWindowManager->destroyWindow( *this );
+    }
 
     void Window::resizeClientArea( const WindowSize & pNewWindowSize )
     {

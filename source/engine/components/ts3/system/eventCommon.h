@@ -8,8 +8,10 @@
 namespace ts3::system
 {
 
-	struct EventObject;
-	struct NativeEvent;
+    struct EventObject;
+
+	class EventController;
+	class EventDispatcher;
 
 	/// @brief
 	using EventHandler = std::function<bool( EventObject & )>;
@@ -100,9 +102,9 @@ namespace ts3::system
 	    struct
 	    {
 	        uint8 uControlKey;
-	        EEventBaseType uEventBaseType;
-	        EEventCategory uEventCategory;
-	        EEventCodeIndex uEventCodeIndex;
+	        uint8 uEventBaseType;
+	        uint8 uEventCategory;
+	        uint8 uEventCodeIndex;
 	    };
 
 	    event_code_value_t eventCodeValue;
@@ -117,15 +119,15 @@ namespace ts3::system
 
 	    constexpr EventCodeGen( EEventBaseType pEventBaseType, EEventCategory pEventCategory, EEventCodeIndex pEventCodeIndex )
 	    : uControlKey( CX_EVENT_CODE_CONTROL_KEY )
-	    , uEventBaseType( pEventBaseType )
-	    , uEventCategory( pEventCategory )
-	    , uEventCodeIndex( pEventCodeIndex )
+	    , uEventBaseType( static_cast<uint8>( pEventBaseType ) )
+	    , uEventCategory( static_cast<uint8>( pEventCategory ) )
+	    , uEventCodeIndex( static_cast<uint8>( pEventCodeIndex ) )
 	    {}
     };
 
 	inline constexpr event_code_value_t ecDeclareEventCode( EEventBaseType pEventBaseType, EEventCategory pEventCategory, EEventCodeIndex pEventCodeIndex )
 	{
-	    return EventCodeGen( pEventBaseType, pEventCategory, pEventCodeIndex ).eventCodeValue;
+	    return ( ( (uint32)CX_EVENT_CODE_CONTROL_KEY << 24 ) | ( (uint32)pEventBaseType << 16 ) | ( (uint32)pEventCategory << 8 ) | (uint32)pEventCodeIndex );
 	}
 
 	inline constexpr event_code_value_t ecDeclareEventCodeAppActivity( EEventCodeIndex pEventCodeIndex )
@@ -160,17 +162,17 @@ namespace ts3::system
 
 	inline constexpr EEventBaseType ecGetEventCodeBaseType( event_code_value_t pEventCode )
 	{
-	    return EventCodeGen( pEventCode ).uEventBaseType;
+	    return static_cast<EEventBaseType>( pEventCode >> 16 );
 	}
 
 	inline constexpr EEventCategory ecGetEventCodeCategory( event_code_value_t pEventCode )
 	{
-	    return EventCodeGen( pEventCode ).uEventCategory;
+	    return static_cast<EEventCategory>( pEventCode >> 8 );
 	}
 
 	inline constexpr EEventCodeIndex ecGetEventCodeCodeIndex( event_code_value_t pEventCode )
 	{
-	    return EventCodeGen( pEventCode ).uEventCodeIndex;
+	    return static_cast<EEventCodeIndex>( pEventCode & 0xFF );
 	}
 
 	inline constexpr bool ecValidateEventCode( event_code_value_t pEventCode )
@@ -193,16 +195,21 @@ namespace ts3::system
 		E_EVENT_CODE_APP_ACTIVITY_STOP          = ecDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityStop ),
 		E_EVENT_CODE_APP_ACTIVITY_QUIT          = ecDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityQuit ),
 		E_EVENT_CODE_APP_ACTIVITY_TERMINATE     = ecDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityTerminate ),
+
 		E_EVENT_CODE_INPUT_GAMEPAD_AXIS         = ecDeclareEventCodeInputGamepad( EEventCodeIndex::InputGamepadAxis ),
 		E_EVENT_CODE_INPUT_GAMEPAD_BUTTON       = ecDeclareEventCodeInputGamepad( EEventCodeIndex::InputGamepadButton ),
 		E_EVENT_CODE_INPUT_GAMEPAD_STATE        = ecDeclareEventCodeInputGamepad( EEventCodeIndex::InputGamepadState ),
+
 		E_EVENT_CODE_INPUT_KEYBOARD_KEY         = ecDeclareEventCodeInputKeyboard( EEventCodeIndex::InputKeyboardKey ),
+
 		E_EVENT_CODE_INPUT_MOUSE_BUTTON         = ecDeclareEventCodeInputMouse( EEventCodeIndex::InputMouseButton ),
 		E_EVENT_CODE_INPUT_MOUSE_MOVE           = ecDeclareEventCodeInputMouse( EEventCodeIndex::InputMouseMove ),
 		E_EVENT_CODE_INPUT_MOUSE_SCROLL         = ecDeclareEventCodeInputMouse( EEventCodeIndex::InputMouseScroll ),
+
 		E_EVENT_CODE_INPUT_TOUCH_DOWN           = ecDeclareEventCodeInputTouch( EEventCodeIndex::InputTouchDown ),
 		E_EVENT_CODE_INPUT_TOUCH_MOVE           = ecDeclareEventCodeInputTouch( EEventCodeIndex::InputTouchMove ),
 		E_EVENT_CODE_INPUT_TOUCH_UP             = ecDeclareEventCodeInputTouch( EEventCodeIndex::InputTouchUp ),
+
 		E_EVENT_CODE_WINDOW_UPDATE_CLOSE        = ecDeclareEventCodeWindowUpdate( EEventCodeIndex::WindowUpdateClose ),
 		E_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN   = ecDeclareEventCodeWindowUpdate( EEventCodeIndex::WindowUpdateFullscreen ),
 		E_EVENT_CODE_WINDOW_UPDATE_RESIZE       = ecDeclareEventCodeWindowUpdate( EEventCodeIndex::WindowUpdateResize ),

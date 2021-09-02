@@ -8,10 +8,12 @@
 namespace ts3::system
 {
 
-    struct NativeEvent : public MSG
-    {};
+    class EventController;
+    class EventDispatcher;
 
-	void nativeWin32EnableWindowEventSupport( HWND pHWND, void * pEventDispatcher );
+    using NativeEvent = MSG;
+
+    void nativeWin32EnableWindowEventSupport( HWND pHWND, EventController * pEventController );
 
 } // namespace ts3::system
 

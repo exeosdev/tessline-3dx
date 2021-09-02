@@ -37,11 +37,13 @@ namespace ts3::system
 
         void removeWindow( Window & pWindow );
 
+        void reset();
+
         TS3_SYSTEM_API_NODISCARD bool isWindowValid( Window & pWindow ) const;
 
-        TS3_SYSTEM_API_NODISCARD bool validateWindowGeometry( const WindowGeometry & pWindowGeometry ) const;
+        TS3_SYSTEM_API_NODISCARD bool checkWindowGeometry( const WindowGeometry & pWindowGeometry ) const;
 
-        bool validateWindowGeometryUpdate( WindowGeometry & pWindowGeometry ) const;
+        bool validateWindowGeometry( WindowGeometry & pWindowGeometry ) const;
 
     private:
         void _nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo );
@@ -60,6 +62,8 @@ namespace ts3::system
     public:
         explicit Window( WindowManager * pWindowManager );
         virtual ~Window();
+
+        void destroy();
 
         void resizeClientArea( const WindowSize & pNewWindowSize );
 
