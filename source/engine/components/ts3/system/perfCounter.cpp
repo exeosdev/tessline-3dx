@@ -25,7 +25,7 @@ namespace ts3::system
 
 		// Now:
 		// > NumberOfSeconds = pStampDiff / perfCounterResolution
-		// The result unit is specified as pUnitRation. ::first is the numerator and ::second - denominator
+		// The result unit is specified as pUnitRatio. ::first is the numerator and ::second - denominator
 		// of a ratio representing the result time unit with seconds as a relative base unit. So we have:
 		// > Duration = NumberOfSeconds / (pUnitRatio.first / pUnitRatio.second)
 		// > Duration = (pStampDiff / perfCounterResolution) / (pUnitRatio.first / pUnitRatio.second)

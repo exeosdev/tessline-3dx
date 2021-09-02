@@ -143,7 +143,7 @@ namespace ts3::system
         mPrivate->inputState.mouseLastPressTimestamp = 0;
         mPrivate->inputState.mouseButtonStateMask = 0;
         mPrivate->inputState.mouseLastPressButton = MouseButtonID::Unknown;
-        mPrivate->inputState.mouseLastRegPos = CX_EVENT_MOUDE_POINT_INVALID;
+        mPrivate->inputState.mouseLastRegPos = CX_EVENT_MOUSE_POS_INVALID;
 
         if( pDispatcher )
         {

@@ -19,7 +19,7 @@ namespace ts3::system
 {
 
     // Represents invalid mouse position. Used as a default value for last position registered.
-    constexpr math::Vec2i32 CX_EVENT_MOUDE_POINT_INVALID { CX_INT32_MAX, CX_INT32_MAX };
+    constexpr math::Vec2i32 CX_EVENT_MOUSE_POS_INVALID { CX_INT32_MAX, CX_INT32_MAX };
 
     enum EEventSystemConfigFlags : uint32
     {
@@ -41,7 +41,7 @@ namespace ts3::system
         // Current state of the keyboard.
         KeyboardState keyboardState;
         // Last cursor position registered by the event system.
-        math::Vec2i32 mouseLastRegPos = CX_EVENT_MOUDE_POINT_INVALID;
+        math::Vec2i32 mouseLastRegPos = CX_EVENT_MOUSE_POS_INVALID;
         // State of the mouse buttons. Used for motion events on systems which do not have reliable states (X11).
         Bitmask<MouseButtonFlagBits> mouseButtonStateMask = 0;
         // Last mouse button pressed. Used to detect multi-click sequences.

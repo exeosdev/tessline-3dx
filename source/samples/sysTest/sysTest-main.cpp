@@ -2,7 +2,8 @@
 #include <ts3/system/displayManager.h>
 #include <ts3/system/displayDriver.h>
 #include <ts3/system/sysContextNative.h>
-#include <ts3/system/window.h>
+#include <ts3/system/windowNative.h>
+#include <ts3/system/eventSystemNative.h>
 
 using namespace ts3::system;
 
@@ -28,6 +29,32 @@ int main( int pArgc, const char ** pArgv )
     auto wmgr = createSysObject<WindowManager>( dmgr );
     auto * wnd = wmgr->createWindow( wci );
 
-    system("pause");
+    bool runApp = true;
+
+    auto evts = createSysObject<EventController>( sysCtx );
+    auto * evtd = evts->getEventDispatcher( CX_EVENT_DISPATCHER_ID_DEFAULT );
+    evts->setActiveDispatcher( *evtd );
+
+    evtd->bindEventHandler( EEventCodeIndex::AppActivityQuit, [&runApp](const EventObject & pEvt) -> bool {
+        runApp = false;
+        return true;
+    });
+    evtd->bindEventHandler( EEventCodeIndex::InputKeyboardKey, [evtd](const EventObject & pEvt) -> bool {
+        if( pEvt.eInputKeyboardKey.keyCode == KeyCode::Escape )
+        {
+            evtd->postEventAppQuit();
+        }
+        return true;
+    });
+
+    nativeWin32EnableWindowEventSupport( wnd->mNativeData->hwnd, evts.get() );
+
+    while( runApp )
+    {
+        evts->dispatchSysEventAuto();
+    }
+
+    wmgr->reset();
+
     return 0;
 }

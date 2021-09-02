@@ -177,7 +177,7 @@ namespace ts3::system
 
 	    auto & inputState = pOutEventController.mPrivate->inputState;
 
-	    if ( inputState.mouseLastRegPos == CX_EVENT_MOUDE_POINT_INVALID )
+	    if ( inputState.mouseLastRegPos == CX_EVENT_MOUSE_POS_INVALID )
 	    {
 	        inputState.mouseLastRegPos = cursorPos;
 	    }
