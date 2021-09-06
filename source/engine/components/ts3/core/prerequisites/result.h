@@ -131,33 +131,33 @@ namespace ts3
 
 #endif
 
-	constexpr result_code_value_t cxResultCodeControlKey   = 0x18000000;
-	constexpr result_code_value_t cxResultCodeTypeMask     = 0x00FF0000;
-	constexpr result_code_value_t cxResultCodeCategoryMask = 0x0000FF00;
-	constexpr result_code_value_t cxResultCodeIIDMask      = 0x000000FF;
+	constexpr result_code_value_t CX_RESULT_CODE_CONTROL_KEY   = 0x18000000;
+	constexpr result_code_value_t CX_RESULT_CODE_TYPE_MASK     = 0x00FF0000;
+	constexpr result_code_value_t CX_RESULT_CODE_CATEGORY_MASK = 0x0000FF00;
+	constexpr result_code_value_t CX_RESULT_CODE_IID_MASK      = 0x000000FF;
 
 	///
-	inline constexpr result_code_value_t ecDeclareResultCode( ResultType pType, uint8 pCategory, uint8 pInternalID )
+	inline constexpr result_code_value_t ecDeclareResultCode( ResultType pType, uint8 pCategory, uint8 pIID )
 	{
-		return ( cxResultCodeControlKey | ( ( result_code_value_t )( pType ) << 16 ) | ( ( result_code_value_t )( pCategory ) << 8 ) | pInternalID );
+	    return ( CX_RESULT_CODE_CONTROL_KEY | ( ( result_code_value_t )( pType ) << 16 ) | ( ( result_code_value_t )( pCategory ) << 8 ) | pIID );
 	}
 
 	///
 	inline constexpr ResultType ecGetResultCodeType( result_code_value_t pResultCode )
 	{
-		return ( ResultType )( ( pResultCode & cxResultCodeTypeMask ) >> 16 );
+		return ( ResultType )( ( pResultCode & CX_RESULT_CODE_TYPE_MASK ) >> 16 );
 	}
 
 	///
 	inline constexpr uint8 ecGetResultCodeCategory( result_code_value_t pResultCode )
 	{
-		return ( uint8 )( ( pResultCode & cxResultCodeCategoryMask ) >> 8 );
+		return ( uint8 )( ( pResultCode & CX_RESULT_CODE_CATEGORY_MASK ) >> 8 );
 	}
 
 	///
 	inline constexpr bool ecValidateResultCode( result_code_value_t pResultCode )
 	{
-		return ( pResultCode & cxResultCodeControlKey ) == cxResultCodeControlKey;
+		return ( pResultCode & CX_RESULT_CODE_CONTROL_KEY ) == CX_RESULT_CODE_CONTROL_KEY;
 	}
 
 	/// @brief
