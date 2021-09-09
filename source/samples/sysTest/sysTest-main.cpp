@@ -15,7 +15,7 @@ int main( int pArgc, const char ** pArgv )
 
     auto sysCtx = creCreateSystemContext( sysCtxCreateInfo );
     auto dmgr = createSysObject<DisplayManager>( sysCtx );
-    auto ddrv = dmgr->createDisplayDriver( EDisplayDriverType::Generic );
+    auto ddrv = dmgr->createDisplayDriver( EDisplayDriverType::DXGI );
 
     ddrv->initializeDisplayConfiguration();
     auto dcdump = ddrv->generateConfigurationDump();

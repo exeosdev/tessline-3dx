@@ -1,6 +1,7 @@
 
 #include "displayDriverNative.h"
 #include "displayManager.h"
+#include <ts3/stdext/stringUtils.h>
 
 namespace ts3::system
 {
@@ -15,6 +16,8 @@ namespace ts3::system
         ColorFormat::R10G10B10A2,
     };
 
+    EDisplayAdapterVendorID _queryAdapterVendorID( const DisplayAdapter & pAdapter );
+
 
     DisplayAdapter::DisplayAdapter( DisplayDriver * pDriver )
     : mDisplayDriver( pDriver )
@@ -22,14 +25,9 @@ namespace ts3::system
     , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
     , mDesc( &( mPrivate->descPriv ) )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
-    {
-        dsmInitializeNativeData( &( mPrivate->nativeDataPriv ), mDisplayDriver->mDriverType );
-    }
+    {}
 
-    DisplayAdapter::~DisplayAdapter()
-    {
-        dsmReleaseNativeData( &( mPrivate->nativeDataPriv ), mDisplayDriver->mDriverType );
-    }
+    DisplayAdapter::~DisplayAdapter() = default;
 
     const DisplayOutputList & DisplayAdapter::getOutputList() const
     {
@@ -81,14 +79,9 @@ namespace ts3::system
     , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
     , mDesc( &( mPrivate->descPriv ) )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
-    {
-        dsmInitializeNativeData( &( mPrivate->nativeDataPriv ), mDisplayDriver->mDriverType );
-    }
+    {}
 
-    DisplayOutput::~DisplayOutput()
-    {
-        dsmReleaseNativeData( &( mPrivate->nativeDataPriv ), mDisplayDriver->mDriverType );
-    }
+    DisplayOutput::~DisplayOutput() = default;
 
     const DisplayVideoModeList & DisplayOutput::getVideoModeList() const
     {
@@ -118,14 +111,9 @@ namespace ts3::system
     , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
     , mDesc( &( mPrivate->descPriv ) )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
-    {
-        dsmInitializeNativeData( &( mPrivate->nativeDataPriv ), mDisplayDriver->mDriverType );
-    }
+    {}
 
-    DisplayVideoMode::~DisplayVideoMode()
-    {
-        dsmReleaseNativeData( &( mPrivate->nativeDataPriv ), mDisplayDriver->mDriverType );
-    }
+    DisplayVideoMode::~DisplayVideoMode() = default;
 
 
     DisplayDriver::DisplayDriver( DisplayManager * pDisplayManager,
@@ -135,14 +123,9 @@ namespace ts3::system
     , mDriverType( pDriverType )
     , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
-    {
-        dsmInitializeNativeData( &( mPrivate->nativeDataPriv ), mDriverType );
-    }
+    {}
 
-    DisplayDriver::~DisplayDriver()
-    {
-        dsmReleaseNativeData( &( mPrivate->nativeDataPriv ), mDriverType );
-    }
+    DisplayDriver::~DisplayDriver() = default;
 
     void DisplayDriver::initializeDisplayConfiguration()
     {
@@ -320,8 +303,9 @@ namespace ts3::system
         const auto adapterIndex = mPrivate->adapterInternalStorage.size();
 
         auto & adapter = mPrivate->adapterInternalStorage.emplace_back( this );
-        adapter.mPrivate->descPriv.driverType = mDriverType;
-        adapter.mPrivate->descPriv.adapterIndex = static_cast<dsm_index_t>( adapterIndex );
+        auto & adapterDesc = dsmGetObjectDesc( adapter );
+        adapterDesc.driverType = mDriverType;
+        adapterDesc.adapterIndex = static_cast<dsm_index_t>( adapterIndex );
 
         // Adapters are not added to the helper list at this point.
         // This is done as a post-process step later in DisplayDriver::_enumAdapters().
@@ -340,9 +324,10 @@ namespace ts3::system
         outputIDGen.uOutputIndex = static_cast<dsm_index_t>( outputIndex );
 
         auto & output = pAdapter.mPrivate->outputInternalStorage.emplace_back( &pAdapter );
-        output.mPrivate->descPriv.driverType = mDriverType;
-        output.mPrivate->descPriv.outputIndex = outputIDGen.uOutputIndex;
-        output.mPrivate->descPriv.outputID = outputIDGen.outputID;
+        auto & outputDesc = dsmGetObjectDesc( output );
+        outputDesc.driverType = mDriverType;
+        outputDesc.outputIndex = outputIDGen.uOutputIndex;
+        outputDesc.outputID = outputIDGen.outputID;
 
         // Outputs are not added to the helper list at this point.
         // This is done as a post-process step later in DisplayDriver::_enumOutputs().
@@ -364,10 +349,11 @@ namespace ts3::system
         videoModeIDGen.uModeIndex = static_cast<dsm_index_t>( videoModeIndex );
 
         auto & videoMode = colorFormatData.videoModeInternalStorage.emplace_back( &pOutput );
-        videoMode.mPrivate->descPriv.driverType = mDriverType;
-        videoMode.mPrivate->descPriv.videoModeIndex = videoModeIDGen.uModeIndex;
-        videoMode.mPrivate->descPriv.videoModeID = videoModeIDGen.modeID;
-        videoMode.mPrivate->descPriv.colorFormat = colorFormatData.colorFormat;
+        auto & videoModeDesc = dsmGetObjectDesc( videoMode );
+        videoModeDesc.driverType = mDriverType;
+        videoModeDesc.videoModeIndex = videoModeIDGen.uModeIndex;
+        videoModeDesc.videoModeID = videoModeIDGen.modeID;
+        videoModeDesc.colorFormat = colorFormatData.colorFormat;
 
         // Video modes are not added to the helper list at this point.
         // This is done as a post-process step later in DisplayDriver::_enumVideoModes().
@@ -379,10 +365,10 @@ namespace ts3::system
 
     void DisplayDriver::_initializeDisplayConfiguration()
     {
-        _enumAdapters();
+        _enumDisplayDevices();
+
         for( auto & adapter : mPrivate->adapterInternalStorage )
         {
-            _enumOutputs( adapter );
             for( auto & output : adapter.mPrivate->outputInternalStorage )
             {
                 auto colorFormatList = getSupportedColorFormatList();
@@ -420,15 +406,15 @@ namespace ts3::system
         mPrivate->adapterInternalStorage.clear();
     }
 
-    void DisplayDriver::_enumAdapters()
+    void DisplayDriver::_enumDisplayDevices()
     {
-        ts3DebugAssert( mPrivate->adapterInternalStorage.empty() );
-
-        _nativeEnumAdapters();
+        _nativeEnumDisplayDevices();
 
         if( !mPrivate->adapterInternalStorage.empty() )
         {
+            // Reserve space for the list of pointers/handles for adapters.
             mPrivate->adapterList.reserve( mPrivate->adapterInternalStorage.size() );
+
             for( auto & adapter : mPrivate->adapterInternalStorage )
             {
                 if( adapter.isActiveAdapter() )
@@ -437,50 +423,48 @@ namespace ts3::system
                 }
                 if( adapter.isPrimaryAdapter() )
                 {
+                    // Primary adapter is set here and should not be assigned by the driver itself.
+                    // We pick it 
+                    ts3DebugAssert( !mPrivate->primaryAdapter );
                     mPrivate->primaryAdapter = &adapter;
                 }
-                mPrivate->adapterList.push_back( &adapter );
-            }
 
-            if( !mPrivate->primaryAdapter )
+                adapter.mPrivate->descPriv.vendorID = _queryAdapterVendorID( adapter );
+
+                mPrivate->adapterList.push_back( &adapter );
+
+                if( !adapter.mPrivate->outputInternalStorage.empty() )
+                {
+                    adapter.mPrivate->outputList.reserve( adapter.mPrivate->outputInternalStorage.size() );
+                    for( auto & output : adapter.mPrivate->outputInternalStorage )
+                    {
+                        if( output.isActiveOutput() )
+                        {
+                            adapter.mPrivate->activeOutputsNum += 1;
+                        }
+                        if( output.isPrimaryOutput() )
+                        {
+                            ts3DebugAssert( !adapter.mPrivate->primaryOutput );
+                            adapter.mPrivate->primaryOutput = &output;
+                        }
+
+                        adapter.mPrivate->outputList.push_back( &output );
+                    }
+                    if( !adapter.mPrivate->primaryOutput && !adapter.mPrivate->outputInternalStorage.empty() )
+                    {
+                        auto & firstOutput = adapter.mPrivate->outputInternalStorage.front();
+                        firstOutput.mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
+                        adapter.mPrivate->primaryOutput = &firstOutput;
+                    }
+                }
+            }
+            if( !mPrivate->primaryAdapter && !mPrivate->adapterInternalStorage.empty() )
             {
-                auto & firstAdapter = mPrivate->adapterInternalStorage[0];
+                auto & firstAdapter = mPrivate->adapterInternalStorage.front();
                 firstAdapter.mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
                 mPrivate->primaryAdapter = &firstAdapter;
             }
         }
-    }
-
-    void DisplayDriver::_enumOutputs( DisplayAdapter & pAdapter )
-    {
-        ts3DebugAssert( pAdapter.mPrivate->outputInternalStorage.empty() );
-
-        _nativeEnumOutputs( pAdapter );
-
-        if( !pAdapter.mPrivate->outputInternalStorage.empty() )
-        {
-            pAdapter.mPrivate->outputList.reserve( pAdapter.mPrivate->outputInternalStorage.size() );
-            for( auto & output : pAdapter.mPrivate->outputInternalStorage )
-            {
-                if( output.isActiveOutput() )
-                {
-                    pAdapter.mPrivate->activeOutputsNum += 1;
-                }
-                if( output.isPrimaryOutput() )
-                {
-                    pAdapter.mPrivate->primaryOutput = &output;
-                }
-                pAdapter.mPrivate->outputList.push_back( &output );
-            }
-
-            if( !pAdapter.mPrivate->primaryOutput )
-            {
-                auto & firstOutput = pAdapter.mPrivate->outputInternalStorage[0];
-                firstOutput.mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
-                pAdapter.mPrivate->primaryOutput = &firstOutput;
-            }
-        }
-
     }
 
     void DisplayDriver::_enumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
@@ -527,5 +511,42 @@ namespace ts3::system
         }
     }
 
+
+    EDisplayAdapterVendorID _queryAdapterVendorID( const DisplayAdapter & pAdapter )
+    {
+        auto adapterVendorID = EDisplayAdapterVendorID::Unknown;
+        auto adapterString = strUtils::makeUpper( pAdapter.mPrivate->descPriv.name );
+
+        if( ( adapterString.find( "AMD" ) != std::string::npos ) || ( adapterString.find( "ATI" ) != std::string::npos ) )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::AMD;
+        }
+        else if( adapterString.find( "ARM" ) != std::string::npos )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::ARM;
+        }
+        else if( adapterString.find( "GOOGLE" ) != std::string::npos )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::Google;
+        }
+        else if( adapterString.find( "INTEL" ) != std::string::npos )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::Intel;
+        }
+        else if( adapterString.find( "MICROSOFT" ) != std::string::npos )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::Microsoft;
+        }
+        else if( adapterString.find( "NVIDIA" ) != std::string::npos )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::Nvidia;
+        }
+        else if( adapterString.find( "QUALCOMM" ) != std::string::npos )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::Qualcomm;
+        }
+
+        return adapterVendorID;
+    }
 
 }

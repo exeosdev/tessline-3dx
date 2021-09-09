@@ -7,6 +7,9 @@ namespace ts3::system
 {
 
     static void _dxgiInitializeDriver( DisplayDriverDXGI & pDriverDXGI );
+
+    static void _dxgiEnumAdapterOutputs( DisplayAdapter & pAdapter );
+
 	static DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( ColorFormat pColorFormat );
 
 
@@ -18,7 +21,7 @@ namespace ts3::system
 
 	DisplayDriverDXGI::~DisplayDriverDXGI() = default;
 
-	void DisplayDriverDXGI::_nativeEnumAdapters()
+	void DisplayDriverDXGI::_nativeEnumDisplayDevices()
 	{
 	    auto * dxgiFactory = mPrivate->nativeDataPriv.dxgi->dxgiFactory.Get();
 
@@ -53,31 +56,38 @@ namespace ts3::system
 	        }
 
 	        auto * adapterObject = addAdapter();
-	        adapterObject->mPrivate->nativeDataPriv.dxgi->dxgiAdapter = dxgiAdapter;
-	        adapterObject->mPrivate->nativeDataPriv.dxgi->dxgiAdapterDesc = dxgiAdapterDesc;
-	        adapterObject->mPrivate->descPriv.name = strUtils::convertStringRepresentation<char>( dxgiAdapterDesc.Description );
-	        adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
+	        auto & adapterNativeData = dsmGetObjectNativeDataDXGI( *adapterObject );
+	        auto & adapterDesc = dsmGetObjectDesc( *adapterObject );
+	        
+	        adapterNativeData.dxgiAdapter = dxgiAdapter;
+	        adapterNativeData.dxgiAdapterDesc = dxgiAdapterDesc;
+	        adapterDesc.name = strUtils::convertStringRepresentation<char>( dxgiAdapterDesc.Description );
+	        adapterDesc.flags.set( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
 
 	        if( adapterIndex == 0 )
 	        {
-	            adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
+	            adapterDesc.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
 	        }
 
 	        auto dxgiAdapterFlags = makeBitmask( dxgiAdapterDesc.Flags );
 	        if( dxgiAdapterFlags.isSet( DXGI_ADAPTER_FLAG_SOFTWARE ) )
 	        {
-	            adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_SOFTWARE_BIT );
+	            adapterDesc.flags.set( E_DISPLAY_ADAPTER_FLAG_SOFTWARE_BIT );
 	        }
 	        else if( !dxgiAdapterFlags.isSet( DXGI_ADAPTER_FLAG_REMOTE ) )
 	        {
-	            adapterObject->mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_HARDWARE_BIT );
+	            adapterDesc.flags.set( E_DISPLAY_ADAPTER_FLAG_HARDWARE_BIT );
 	        }
+
+	        _enumAdapterOutputs( *adapterObject );
 	    }
 	}
 
-	void DisplayDriverDXGI::_nativeEnumOutputs( DisplayAdapter & pAdapter )
+	void DisplayDriverDXGI::_enumAdapterOutputs( DisplayAdapter & pAdapter )
 	{
-	    auto * dxgiAdapter = pAdapter.mPrivate->nativeDataPriv.dxgi->dxgiAdapter.Get();
+	    auto & adapterNativeData = dsmGetObjectNativeDataDXGI( pAdapter );
+
+	    auto * dxgiAdapter = adapterNativeData.dxgiAdapter.Get();
 
 	    for( UINT outputIndex = 0u; ; ++outputIndex )
 	    {
@@ -116,17 +126,20 @@ namespace ts3::system
 	        }
 
 	        auto * outputObject = addOutput( pAdapter );
-	        outputObject->mPrivate->nativeDataPriv.dxgi->dxgiOutput = dxgiOutput1;
-	        outputObject->mPrivate->nativeDataPriv.dxgi->dxgiOutputDesc = dxgiOutputDesc;
-	        outputObject->mPrivate->descPriv.name = strUtils::convertStringRepresentation<char>( dxgiOutputDesc.DeviceName );
-	        outputObject->mPrivate->descPriv.screenRect.offset.x = dxgiOutputDesc.DesktopCoordinates.left;
-	        outputObject->mPrivate->descPriv.screenRect.offset.y = dxgiOutputDesc.DesktopCoordinates.top;
-	        outputObject->mPrivate->descPriv.screenRect.size.x = dxgiOutputDesc.DesktopCoordinates.right - dxgiOutputDesc.DesktopCoordinates.left;
-	        outputObject->mPrivate->descPriv.screenRect.size.y = dxgiOutputDesc.DesktopCoordinates.bottom - dxgiOutputDesc.DesktopCoordinates.top;
+	        auto & outputNativeData = dsmGetObjectNativeDataDXGI( *outputObject );
+	        auto & outputDesc = dsmGetObjectDesc( *outputObject );
+
+	        outputNativeData.dxgiOutput = dxgiOutput1;
+	        outputNativeData.dxgiOutputDesc = dxgiOutputDesc;
+	        outputDesc.name = strUtils::convertStringRepresentation<char>( dxgiOutputDesc.DeviceName );
+	        outputDesc.screenRect.offset.x = dxgiOutputDesc.DesktopCoordinates.left;
+	        outputDesc.screenRect.offset.y = dxgiOutputDesc.DesktopCoordinates.top;
+	        outputDesc.screenRect.size.x = dxgiOutputDesc.DesktopCoordinates.right - dxgiOutputDesc.DesktopCoordinates.left;
+	        outputDesc.screenRect.size.y = dxgiOutputDesc.DesktopCoordinates.bottom - dxgiOutputDesc.DesktopCoordinates.top;
 
 	        if( dxgiOutputDesc.AttachedToDesktop )
 	        {
-	            outputObject->mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
+	            outputDesc.flags.set( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
 	        }
 
 	        if( dxgiOutputDesc.Monitor )
@@ -141,7 +154,7 @@ namespace ts3::system
 	            {
 	                if( makeBitmask( gdiMonitorInfo.dwFlags ).isSet( MONITORINFOF_PRIMARY ) )
 	                {
-	                    outputObject->mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
+	                    outputDesc.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
 	                }
 	            }
 	        }
@@ -187,15 +200,14 @@ namespace ts3::system
 
 	    // We use hash-based comparison to filter out the same modes - at our level, we are only interested
 	    // in settings and color format (and couple flags), so duplications can be safely removed here).
-	    dsm_video_settings_hash_t prevSettingsHash = CX_DSM_VIDEO_SETTINGS_HASH_INVALID;
+	    dsm_video_settings_hash_t lastSettingsHash = CX_DSM_VIDEO_SETTINGS_HASH_INVALID;
 
 	    for ( auto & dxgiDisplayModeDesc : dxgiModeList )
 	    {
-
 	        DisplayVideoSettings videoSettings;
 	        videoSettings.resolution.x = static_cast<uint32>( dxgiDisplayModeDesc.Width );
 	        videoSettings.resolution.y = static_cast<uint32>( dxgiDisplayModeDesc.Height );
-	        videoSettings.refreshRate = static_cast<uint16>( dxgiDisplayModeDesc.RefreshRate.Numerator );
+	        videoSettings.refreshRate = static_cast<uint16>( ( float )dxgiDisplayModeDesc.RefreshRate.Numerator / dxgiDisplayModeDesc.RefreshRate.Denominator );
 
 	        if( dxgiDisplayModeDesc.ScanlineOrdering == DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE )
 	        {
@@ -211,15 +223,20 @@ namespace ts3::system
 	        }
 
 	        auto settingsHash = dsmComputeVideoSettingsHash( pColorFormat, videoSettings );
-	        if( settingsHash == prevSettingsHash )
+	        if( settingsHash == lastSettingsHash )
 	        {
 	            continue;
 	        }
 
 	        auto * videoMode = addVideoMode( pOutput, pColorFormat );
-	        videoMode->mPrivate->nativeDataPriv.dxgi->dxgiModeDesc = dxgiDisplayModeDesc;
-	        videoMode->mPrivate->descPriv.settings = videoSettings;
-	        videoMode->mPrivate->descPriv.settingsHash = settingsHash;
+	        auto & videoModeNativeData = dsmGetObjectNativeDataDXGI( *videoMode );
+	        auto & videoModeDesc = dsmGetObjectDesc( *videoMode );
+
+	        videoModeNativeData.dxgiModeDesc = dxgiDisplayModeDesc;
+	        videoModeDesc.settings = videoSettings;
+	        videoModeDesc.settingsHash = settingsHash;
+
+	        lastSettingsHash = settingsHash;
 	    }
 	}
 

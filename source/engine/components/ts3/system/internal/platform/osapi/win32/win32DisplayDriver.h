@@ -13,16 +13,17 @@ namespace ts3::system
 
 	struct DisplayAdapterNativeDataGeneric
     {
+	    std::string deviceUUID;
+	    std::string deviceName;
+
 	    DISPLAY_DEVICEA gdiDeviceInfo;
-	    std::string adapterUUID;
-	    std::string adapterName;
 	    std::string displayDeviceID;
     };
 
 	struct DisplayOutputNativeDataGeneric
     {
-	    HMONITOR gdiOutputMonitor;
-	    std::string displayDeviceID;
+	    HMONITOR gdiMonitorHandle;
+	    std::string displayDeviceName;
 	    std::string outputID;
     };
 

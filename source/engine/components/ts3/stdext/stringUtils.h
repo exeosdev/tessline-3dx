@@ -245,8 +245,6 @@ namespace ts3
 			return extractShortFilePath( std::basic_string<_Char>{pFilename}, pPathSeparator );
 		}
 
-
-
 	}
 
 }

@@ -321,8 +321,7 @@ namespace ts3::system
         virtual ~DisplayDriverGeneric();
 
     private:
-        virtual void _nativeEnumAdapters() override final;
-        virtual void _nativeEnumOutputs( DisplayAdapter & pAdapter ) override final;
+        virtual void _nativeEnumDisplayDevices() override final;
         virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
     
         virtual void _nativeDestroyAdapter( DisplayAdapter & pAdapter ) override final;
@@ -331,8 +330,6 @@ namespace ts3::system
 
         virtual ColorFormat _nativeGetSystemDefaultColorFormat() const override final;
         virtual ArrayView<const ColorFormat> _nativeGetSupportedColorFormatList() const override final;
-
-        static BOOL CALLBACK _win32MonitorEnumProc( HMONITOR hMonitor, HDC hDC, LPRECT monitorRect, LPARAM enumProcParam );
     };
 
 #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
@@ -343,8 +340,7 @@ namespace ts3::system
         virtual ~DisplayDriverDXGI();
 
     private:
-        virtual void _nativeEnumAdapters() override final;
-        virtual void _nativeEnumOutputs( DisplayAdapter & pAdapter ) override final;
+        virtual void _nativeEnumDisplayDevices() override final;
         virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
     
         virtual void _nativeDestroyAdapter( DisplayAdapter & pAdapter ) override final;
@@ -353,6 +349,8 @@ namespace ts3::system
 
         virtual ColorFormat _nativeGetSystemDefaultColorFormat() const override final;
         virtual ArrayView<const ColorFormat> _nativeGetSupportedColorFormatList() const override final;
+        
+        void _enumAdapterOutputs( DisplayAdapter & pAdapter );
     };
 #endif
 
@@ -364,8 +362,7 @@ namespace ts3::system
         virtual ~DisplayDriverSDL();
 
     private:
-        virtual void _nativeEnumAdapters() override final;
-        virtual void _nativeEnumOutputs( DisplayAdapter & pAdapter ) override final;
+        virtual void _nativeEnumDisplayDevices() override final {}
         virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
     
         virtual void _nativeDestroyAdapter( DisplayAdapter & pAdapter ) override final;

@@ -137,15 +137,13 @@ namespace ts3::system
         void _initializeDisplayConfiguration();
         void _resetDisplayConfiguration();
 
-        void _enumAdapters();
-        void _enumOutputs( DisplayAdapter & pAdapter );
+        void _enumDisplayDevices();
         void _enumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat );
 
         DisplayAdapter * _getAdapter( dsm_index_t pAdapterIndex ) const;
         DisplayOutput * _getOutput( dsm_output_id_t pOutputID ) const;
 
-        virtual void _nativeEnumAdapters() = 0;
-        virtual void _nativeEnumOutputs( DisplayAdapter & pAdapter ) = 0;
+        virtual void _nativeEnumDisplayDevices() = 0;
         virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) = 0;
 
         virtual void _nativeDestroyAdapter( DisplayAdapter & pAdapter ) = 0;

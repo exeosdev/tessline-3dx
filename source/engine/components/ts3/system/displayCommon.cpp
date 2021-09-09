@@ -88,7 +88,17 @@ namespace ts3::system
         auto & colorFormatDesc = vsxGetDescForColorFormat( pFormat );
 
         std::stringstream strStream;
-        strStream << pSettings.resolution.x << "x" << pSettings.resolution.y;
+        strStream << pSettings.resolution.x << 'x' << pSettings.resolution.y;
+
+        if( pSettings.flags.isSet( DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE ) )
+        {
+            strStream << 'p';
+        }
+        else if( pSettings.flags.isSet( E_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT ) )
+        {
+            strStream << 'i';
+        }
+
         strStream << ":" << colorFormatDesc.size << "bpp@" << pSettings.refreshRate << "Hz";
         return strStream.str();
 	}
