@@ -102,7 +102,6 @@ namespace ts3::system
         /// @brief
         TS3_PCL_ATTR_NO_DISCARD bool isRenderContextBound( GLRenderContext & pRenderContext ) const;
 
-
         TS3_SYSTEM_API_NODISCARD bool isDisplaySurfaceValid( GLDisplaySurface & pDisplaySurface ) const;
 
         TS3_SYSTEM_API_NODISCARD bool isRenderContextValid( GLRenderContext & pRenderContext ) const;
