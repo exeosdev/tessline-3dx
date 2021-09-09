@@ -101,7 +101,7 @@ namespace ts3::system
 	        }
 
 	        // According to the docs, the only possible error is DXGI_ERROR_NOT_FOUND which is returned
-	        // for an adapter which is a parent for D3D_DRIVER_TYPE_WARP D3D device. Not an option here. Still...
+	        // for an adapter created with D3D_DRIVER_TYPE_WARP D3D device. Not an option here. Still...
 	        // https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiadapter-enumoutputs
 	        if ( FAILED( hResult ) )
 	        {

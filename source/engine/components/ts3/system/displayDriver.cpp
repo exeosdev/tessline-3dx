@@ -1,7 +1,6 @@
 
 #include "displayDriverNative.h"
 #include "displayManager.h"
-#include <ts3/stdext/stringUtils.h>
 
 namespace ts3::system
 {
@@ -15,8 +14,6 @@ namespace ts3::system
         ColorFormat::R8G8B8A8SRGB,
         ColorFormat::R10G10B10A2,
     };
-
-    EDisplayAdapterVendorID _queryAdapterVendorID( const DisplayAdapter & pAdapter );
 
 
     DisplayAdapter::DisplayAdapter( DisplayDriver * pDriver )
@@ -365,15 +362,25 @@ namespace ts3::system
 
     void DisplayDriver::_initializeDisplayConfiguration()
     {
+        // Enum all display devices (adapters and outputs). This process is combined,
+        // because some drivers (like GDI, for example) may perform better if this is
+        // done atomically. After this is done, lists of adapters and their outputs
+        // are populated and all configuration/properties are valid and available.
         _enumDisplayDevices();
 
+        // Now, enumerate supported display modes for all outputs.
         for( auto & adapter : mPrivate->adapterInternalStorage )
         {
             for( auto & output : adapter.mPrivate->outputInternalStorage )
             {
+                // Each driver can provide a list of supported color formats.
+                // The default set (sColorFormatArray) may not be available
+                // on every platform (especially on mobile).
                 auto colorFormatList = getSupportedColorFormatList();
+
                 for( auto colorFormat : colorFormatList )
                 {
+                    // Enum all supported display modes for the current output and color format
                     _enumVideoModes( output, colorFormat );
                 }
             }
@@ -410,6 +417,10 @@ namespace ts3::system
     {
         _nativeEnumDisplayDevices();
 
+        // "Post-processing" part - in order to avoid duplicate
+        // common aspects of the enumeration process, some steps
+        // are done here, after the driver finishes enumeration.
+
         if( !mPrivate->adapterInternalStorage.empty() )
         {
             // Reserve space for the list of pointers/handles for adapters.
@@ -417,66 +428,134 @@ namespace ts3::system
 
             for( auto & adapter : mPrivate->adapterInternalStorage )
             {
+                // Update the non-driver-specific part of the adapter info
+                auto & adapterDesc = dsmGetObjectDesc( adapter );
+
+                if( adapterDesc.vendorID == EDisplayAdapterVendorID::Unknown )
+                {
+                    // Driver can set the vendor ID internally, but in case it is missing,
+                    // this function tries to resolve the ID by looking at the adapter desc.
+                    adapterDesc.vendorID = dsmResolveAdapterVendorID( adapterDesc.name );
+                }
+                if( adapter.isPrimaryAdapter() && !mPrivate->primaryAdapter )
+                {
+                    // Driver can also explicitly set the primary system adapter.
+                    // If it has not been set, we use the first adapter with proper flag set.
+                    mPrivate->primaryAdapter = &adapter;
+                }
                 if( adapter.isActiveAdapter() )
                 {
                     mPrivate->activeAdaptersNum += 1;
                 }
-                if( adapter.isPrimaryAdapter() )
-                {
-                    // Primary adapter is set here and should not be assigned by the driver itself.
-                    // We pick it 
-                    ts3DebugAssert( !mPrivate->primaryAdapter );
-                    mPrivate->primaryAdapter = &adapter;
-                }
-
-                adapter.mPrivate->descPriv.vendorID = _queryAdapterVendorID( adapter );
 
                 mPrivate->adapterList.push_back( &adapter );
 
+                // If the current adapter has any outputs listed, go through them as well
+                // and update the common part of their info just like with adapters above.
                 if( !adapter.mPrivate->outputInternalStorage.empty() )
                 {
+                    // Reserve space for the list of pointers/handles for outputs.
                     adapter.mPrivate->outputList.reserve( adapter.mPrivate->outputInternalStorage.size() );
+
                     for( auto & output : adapter.mPrivate->outputInternalStorage )
                     {
+                        // Update the non-driver-specific part of the output info
+                        auto & outputDesc = dsmGetObjectDesc( output );
+
+                        if( output.isPrimaryOutput() && adapter.mPrivate->primaryOutput )
+                        {
+                            // Similar to the default/primary system adapter, we select default
+                            // output of an adapter if the driver has not set it during enumeration.
+                            adapter.mPrivate->primaryOutput = &output;
+                        }
                         if( output.isActiveOutput() )
                         {
                             adapter.mPrivate->activeOutputsNum += 1;
                         }
-                        if( output.isPrimaryOutput() )
-                        {
-                            ts3DebugAssert( !adapter.mPrivate->primaryOutput );
-                            adapter.mPrivate->primaryOutput = &output;
-                        }
 
                         adapter.mPrivate->outputList.push_back( &output );
                     }
-                    if( !adapter.mPrivate->primaryOutput && !adapter.mPrivate->outputInternalStorage.empty() )
-                    {
-                        auto & firstOutput = adapter.mPrivate->outputInternalStorage.front();
-                        firstOutput.mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
-                        adapter.mPrivate->primaryOutput = &firstOutput;
-                    }
+
+                    // Validate if the default output for this adapter has been properly set.
+                    _enumDisplayDevicesCheckDefaultOutput( adapter );
                 }
             }
-            if( !mPrivate->primaryAdapter && !mPrivate->adapterInternalStorage.empty() )
+            // Validate if the default system adapter has been properly set.
+            _enumDisplayDevicesCheckDefaultAdapter();
+        }
+    }
+
+    void DisplayDriver::_enumDisplayDevicesCheckDefaultAdapter()
+    {
+        if( mPrivate->primaryAdapter )
+        {
+            // Default./primary adapter will usually have the proper bit set (all drivers should do that).
+            // In case the adapter has been set, but this bit is missing, emit a warning. It may be an
+            // intentional choice, but also an error or missing driver-specific init code.
+
+            auto & adapterDesc = dsmGetObjectDesc( *( mPrivate->primaryAdapter ) );
+            if( !adapterDesc.flags.isSet( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT ) )
             {
-                auto & firstAdapter = mPrivate->adapterInternalStorage.front();
-                firstAdapter.mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
-                mPrivate->primaryAdapter = &firstAdapter;
+                ts3DebugOutput(
+                    "Primary/Default adapter selected by the driver does not have "\
+                    "E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT set. Is that intentional?" );
             }
+        }
+        else
+        {
+            // If there is no default adapter set, it means it has not been done by the driver AND
+            // there has not been any adapter marked as PRIMARY. In this case, just select the first
+            // one, update its state and set as the default one.
+
+            auto & firstAdapter = mPrivate->adapterInternalStorage.front();
+            firstAdapter.mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
+            mPrivate->primaryAdapter = &firstAdapter;
+        }
+    }
+
+    void DisplayDriver::_enumDisplayDevicesCheckDefaultOutput( DisplayAdapter & pAdapter )
+    {
+        if( pAdapter.mPrivate->primaryOutput )
+        {
+            // Just like the above check for default adapter, we check the state of the default output.
+
+            auto & outputDesc = dsmGetObjectDesc( *( pAdapter.mPrivate->primaryOutput ) );
+            if( !outputDesc.flags.isSet( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT ) )
+            {
+                auto & adapterDesc = dsmGetObjectDesc( pAdapter );
+                ts3DebugOutputFmt(
+                        "Primary/Default output of [%s] selected by the driver does not have "\
+                        "E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT set. Is that intentional?",
+                        adapterDesc.name.c_str() );
+            }
+        }
+        else
+        {
+            // Same here. If nothing has been set, pick the first output and make it the default one.
+
+            auto & firstOutput = pAdapter.mPrivate->outputInternalStorage.front();
+            firstOutput.mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
+            pAdapter.mPrivate->primaryOutput = &firstOutput;
         }
     }
 
     void DisplayDriver::_enumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
     {
+        // There is no "update" option for the display topology. Each time the configuration changes,
+        // we do a full reset of the whole cached state and re-initialize/enumerate everything. Thus,
+        // the list of display modes should be always empty.
+
         auto & colorFormatData = pOutput.mPrivate->getColorFormatData( pColorFormat );
         ts3DebugAssert( colorFormatData.videoModeInternalStorage.empty() );
 
+        // Driver-specific enumeration.
         _nativeEnumVideoModes( pOutput, colorFormatData.colorFormat );
 
         if( !colorFormatData.videoModeInternalStorage.empty() )
         {
+            // Reserve the space for list of handles/pointers to available video modes.
             colorFormatData.videoModeList.reserve( colorFormatData.videoModeInternalStorage.size() );
+
             for( auto & videoMode : colorFormatData.videoModeInternalStorage )
             {
                 colorFormatData.videoModeList.push_back( &videoMode );
@@ -498,8 +577,10 @@ namespace ts3::system
 
     DisplayOutput * DisplayDriver::_getOutput( dsm_output_id_t pOutputID ) const
     {
-        auto * adapter = _getAdapter( dsmExtractOutputIDAdapterIndex( pOutputID ) );
+        auto adapterIndex = dsmExtractOutputIDAdapterIndex( pOutputID );
         auto outputIndex = dsmExtractOutputIDOutputIndex( pOutputID );
+
+        auto * adapter = _getAdapter( adapterIndex );
 
         if( outputIndex == CX_DSM_INDEX_DEFAULT )
         {
@@ -509,44 +590,6 @@ namespace ts3::system
         {
             return adapter->mPrivate->outputList.at( outputIndex );
         }
-    }
-
-
-    EDisplayAdapterVendorID _queryAdapterVendorID( const DisplayAdapter & pAdapter )
-    {
-        auto adapterVendorID = EDisplayAdapterVendorID::Unknown;
-        auto adapterString = strUtils::makeUpper( pAdapter.mPrivate->descPriv.name );
-
-        if( ( adapterString.find( "AMD" ) != std::string::npos ) || ( adapterString.find( "ATI" ) != std::string::npos ) )
-        {
-            adapterVendorID = EDisplayAdapterVendorID::AMD;
-        }
-        else if( adapterString.find( "ARM" ) != std::string::npos )
-        {
-            adapterVendorID = EDisplayAdapterVendorID::ARM;
-        }
-        else if( adapterString.find( "GOOGLE" ) != std::string::npos )
-        {
-            adapterVendorID = EDisplayAdapterVendorID::Google;
-        }
-        else if( adapterString.find( "INTEL" ) != std::string::npos )
-        {
-            adapterVendorID = EDisplayAdapterVendorID::Intel;
-        }
-        else if( adapterString.find( "MICROSOFT" ) != std::string::npos )
-        {
-            adapterVendorID = EDisplayAdapterVendorID::Microsoft;
-        }
-        else if( adapterString.find( "NVIDIA" ) != std::string::npos )
-        {
-            adapterVendorID = EDisplayAdapterVendorID::Nvidia;
-        }
-        else if( adapterString.find( "QUALCOMM" ) != std::string::npos )
-        {
-            adapterVendorID = EDisplayAdapterVendorID::Qualcomm;
-        }
-
-        return adapterVendorID;
     }
 
 }

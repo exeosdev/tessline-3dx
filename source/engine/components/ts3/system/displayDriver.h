@@ -138,6 +138,8 @@ namespace ts3::system
         void _resetDisplayConfiguration();
 
         void _enumDisplayDevices();
+        void _enumDisplayDevicesCheckDefaultAdapter();
+        void _enumDisplayDevicesCheckDefaultOutput( DisplayAdapter & pAdapter );
         void _enumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat );
 
         DisplayAdapter * _getAdapter( dsm_index_t pAdapterIndex ) const;

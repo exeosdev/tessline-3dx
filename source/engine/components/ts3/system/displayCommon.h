@@ -243,6 +243,8 @@ namespace ts3::system
 
 	TS3_PCL_ATTR_NO_DISCARD std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
+	TS3_PCL_ATTR_NO_DISCARD EDisplayAdapterVendorID dsmResolveAdapterVendorID( const std::string & pAdapterName );
+
 
 } // namespace ts3::system
 
