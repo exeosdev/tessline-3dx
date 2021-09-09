@@ -320,6 +320,9 @@ namespace ts3::system
         adapter.mPrivate->descPriv.driverType = mDriverType;
         adapter.mPrivate->descPriv.adapterIndex = static_cast<dsm_index_t>( adapterIndex );
 
+        // Adapters are not added to the helper list at this point.
+        // This is done as a post-process step later in DisplayDriver::_enumAdapters().
+        // Assertion added to prevent problems in case of refactoring.
         ts3DebugAssert( mPrivate->adapterList.empty() );
 
         return &adapter;
@@ -338,6 +341,9 @@ namespace ts3::system
         output.mPrivate->descPriv.outputIndex = outputIDGen.uOutputIndex;
         output.mPrivate->descPriv.outputID = outputIDGen.outputID;
 
+        // Outputs are not added to the helper list at this point.
+        // This is done as a post-process step later in DisplayDriver::_enumOutputs().
+        // Assertion added to prevent problems in case of refactoring.
         ts3DebugAssert( pAdapter.mPrivate->outputList.empty() );
 
         return &output;
@@ -360,6 +366,9 @@ namespace ts3::system
         videoMode.mPrivate->descPriv.videoModeID = videoModeIDGen.modeID;
         videoMode.mPrivate->descPriv.colorFormat = colorFormatData.colorFormat;
 
+        // Video modes are not added to the helper list at this point.
+        // This is done as a post-process step later in DisplayDriver::_enumVideoModes().
+        // Assertion added to prevent problems in case of refactoring.
         ts3DebugAssert( colorFormatData.videoModeList.empty() );
 
         return &videoMode;

@@ -124,6 +124,8 @@ namespace ts3::system
         TS3_PCL_ATTR_NO_DISCARD std::string generateConfigurationDump( const std::string & pLinePrefix = {} ) const;
 
     protected:
+        /// @brief
+        /// Used by actual driver implementations.
         DisplayAdapter * addAdapter();
         DisplayOutput * addOutput( DisplayAdapter & pAdapter );
         DisplayVideoMode * addVideoMode( DisplayOutput & pOutput, ColorFormat pColorFormat );

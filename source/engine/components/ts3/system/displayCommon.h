@@ -13,12 +13,12 @@
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
 #  pragma clang diagnostic ignored "-Wnested-anon-types"
-#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wpedantic"
 #elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
 #  pragma warning( push )
 #  pragma warning( disable: 4201 )  // 'Nonstandard extension used: nameless struct/union'
+#elif( TS3_PCL_COMPILER & ( TS3_PCL_COMPILER_GCC | TS3_PCL_COMPILER_MINGW64 ) )
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
 #define TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI 1
@@ -177,7 +177,7 @@ namespace ts3::system
 		// Reference settings used to filter video modes. By default, each property in a mode
 		// must be greater than or equal to the reference property (note for resolutions: both
 		// dimensions must be >=, i.e. 1024x768 satisfies 1024x600, but 1280x720 does not satisfy
-		// 1152x864). This does not apply to the flags, which must have exact same bits set.
+		// 1152x864). This does not apply to the flags, which must have exactly the same bits set.
 		// Each property can be ignored by using its respective IGNORE flag. Also, "greater than
 		// or equal" condition can be changed to "equal" for a given property by setting MATCH_EXACT
 		// flag for that property.
@@ -237,6 +237,8 @@ namespace ts3::system
 	using DisplayOutputList = std::vector<DisplayOutput *>;
 	using DisplayVideoModeList = std::vector<DisplayVideoMode *>;
 
+	TS3_PCL_ATTR_NO_DISCARD dsm_output_id_t dsmCreateDisplayOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex );
+
 	TS3_PCL_ATTR_NO_DISCARD dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
 	TS3_PCL_ATTR_NO_DISCARD std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
@@ -246,10 +248,10 @@ namespace ts3::system
 
 #if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
 #  pragma clang diagnostic pop
-#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
-#  pragma GCC diagnostic pop
 #elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
 #  pragma warning( pop )
+#elif( TS3_PCL_COMPILER & ( TS3_PCL_COMPILER_GCC | TS3_PCL_COMPILER_MINGW64 ) )
+#  pragma GCC diagnostic pop
 #endif
 
 #endif // __TS3_SYSTEM_DISPLAY_COMMON_H__

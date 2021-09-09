@@ -64,6 +64,14 @@ namespace ts3::system
         return strStream.str();
     }
 
+    dsm_output_id_t dsmCreateDisplayOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex )
+    {
+        DisplayOutputID outputIDGen;
+        outputIDGen.uAdapterIndex = pAdapterIndex;
+        outputIDGen.uOutputIndex = pOutputIndex;
+        return outputIDGen.outputID;
+    }
+
     dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings )
 	{
 		DisplayVideoSettingsHash hashValueGen;
