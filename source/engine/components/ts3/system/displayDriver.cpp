@@ -18,7 +18,8 @@ namespace ts3::system
 
     DisplayAdapter::DisplayAdapter( DisplayDriver * pDriver )
     : mDisplayDriver( pDriver )
-    , mPrivate( std::make_unique<ObjectPrivateData>() )
+    , mDriverType( pDriver->mDriverType )
+    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
     , mDesc( &( mPrivate->descPriv ) )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
     {
@@ -76,7 +77,8 @@ namespace ts3::system
     DisplayOutput::DisplayOutput( DisplayAdapter * pAdapter )
     : mDisplayDriver( pAdapter->mDisplayDriver )
     , mParentAdapter( pAdapter )
-    , mPrivate( std::make_unique<ObjectPrivateData>() )
+    , mDriverType( pAdapter->mDriverType )
+    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
     , mDesc( &( mPrivate->descPriv ) )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
     {
@@ -112,7 +114,8 @@ namespace ts3::system
     DisplayVideoMode::DisplayVideoMode( DisplayOutput * pOutput )
     : mDisplayDriver( pOutput->mDisplayDriver )
     , mParentOutput( pOutput )
-    , mPrivate( std::make_unique<ObjectPrivateData>() )
+    , mDriverType( pOutput->mDriverType )
+    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
     , mDesc( &( mPrivate->descPriv ) )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
     {
@@ -130,7 +133,7 @@ namespace ts3::system
     : SysObject( pDisplayManager->mSysContext )
     , mDisplayManager( pDisplayManager )
     , mDriverType( pDriverType )
-    , mPrivate( std::make_unique<ObjectPrivateData>() )
+    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
     {
         dsmInitializeNativeData( &( mPrivate->nativeDataPriv ), mDriverType );
@@ -332,7 +335,7 @@ namespace ts3::system
     {
         const auto outputIndex = pAdapter.mPrivate->outputInternalStorage.size();
 
-        DisplayOutputID outputIDGen;
+        DisplayOutputIDGen outputIDGen;
         outputIDGen.uAdapterIndex = pAdapter.mPrivate->descPriv.adapterIndex;
         outputIDGen.uOutputIndex = static_cast<dsm_index_t>( outputIndex );
 
@@ -355,7 +358,7 @@ namespace ts3::system
 
         const auto videoModeIndex = colorFormatData.videoModeInternalStorage.size();
 
-        DisplayVideoModeID videoModeIDGen;
+        DisplayVideoModeIDGen videoModeIDGen;
         videoModeIDGen.uOutputID = pOutput.mPrivate->descPriv.outputID;
         videoModeIDGen.uColorFormatIndex = static_cast<dsm_index_t>( pColorFormat );
         videoModeIDGen.uModeIndex = static_cast<dsm_index_t>( videoModeIndex );

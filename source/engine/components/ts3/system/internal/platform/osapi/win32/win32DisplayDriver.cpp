@@ -57,6 +57,11 @@ namespace ts3::system
                 break;
             }
 
+            const std::string oiDeviceID  = gdiDeviceInfo.DeviceID;
+            const std::string oiDeviceKey = gdiDeviceInfo.DeviceKey;
+            const std::string oiDeviceName = gdiDeviceInfo.DeviceName;
+            const std::string oiDeviceStr = gdiDeviceInfo.DeviceString;
+
             // Extract adapter UUID from the registry key. Devices referring to the same adapter have the same adapter UUID.
             auto adapterUUID = getUUIDString( gdiDeviceInfo.DeviceKey );
 
@@ -89,7 +94,7 @@ namespace ts3::system
     // This function is called after all output devices in the system have been enumerated and added to the
     // internal list inside the adapter. IMPORTANT: again, this gets called *within* _nativeEnumOutputs()
     // function *per each adapter* (that's why we pass DisplayAdapter* and check for monitors connected to it.
-    static BOOL CALLBACK _win32MonitorEnumProc( HMONITOR hMonitor, HDC hDC, LPRECT monitorRect, LPARAM enumProcParam )
+    BOOL CALLBACK DisplayDriverGeneric::_win32MonitorEnumProc( HMONITOR hMonitor, HDC hDC, LPRECT monitorRect, LPARAM enumProcParam )
     {
         // Adapter object for which we are enumerating outputs/monitors.
         auto * adapterObject = reinterpret_cast<DisplayAdapter *>( enumProcParam );
@@ -103,19 +108,28 @@ namespace ts3::system
             // Thanks to that, we can obtain the output this monitor refers to.
             auto * outputObject = _win32FindOutputForDeviceID( *adapterObject, gdiMonitorInfo.szDevice );
 
-            if( outputObject != nullptr )
+            if( !outputObject )
             {
-                outputObject->mPrivate->nativeDataPriv.generic->gdiOutputMonitor = hMonitor;
-                outputObject->mPrivate->descPriv.name = strUtils::convertStringRepresentation<char>( gdiMonitorInfo.szDevice );
-                outputObject->mPrivate->descPriv.screenRect.offset.x = gdiMonitorInfo.rcMonitor.left;
-                outputObject->mPrivate->descPriv.screenRect.offset.y = gdiMonitorInfo.rcMonitor.top;
-                outputObject->mPrivate->descPriv.screenRect.size.x = gdiMonitorInfo.rcMonitor.right - gdiMonitorInfo.rcMonitor.left;
-                outputObject->mPrivate->descPriv.screenRect.size.y = gdiMonitorInfo.rcMonitor.bottom - gdiMonitorInfo.rcMonitor.top;
+                auto * thisPtr = static_cast<DisplayDriverGeneric *>( adapterObject->mDisplayDriver );
+                outputObject = thisPtr->addOutput( *adapterObject );
 
-                if( makeBitmask( gdiMonitorInfo.dwFlags ).isSet( MONITORINFOF_PRIMARY ) )
-                {
-                    outputObject->mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
-                }
+                auto & outputNativeData = dsmGetObjectNativeDataGeneric( *outputObject );
+                outputNativeData.outputID = gdiMonitorInfo.szDevice;
+
+                auto & adapterNativeData = dsmGetObjectNativeDataGeneric( *adapterObject );
+                outputNativeData.displayDeviceID = adapterNativeData.displayDeviceID;
+            }
+
+            outputObject->mPrivate->nativeDataPriv.generic->gdiOutputMonitor = hMonitor;
+            outputObject->mPrivate->descPriv.name = strUtils::convertStringRepresentation<char>( gdiMonitorInfo.szDevice );
+            outputObject->mPrivate->descPriv.screenRect.offset.x = gdiMonitorInfo.rcMonitor.left;
+            outputObject->mPrivate->descPriv.screenRect.offset.y = gdiMonitorInfo.rcMonitor.top;
+            outputObject->mPrivate->descPriv.screenRect.size.x = gdiMonitorInfo.rcMonitor.right - gdiMonitorInfo.rcMonitor.left;
+            outputObject->mPrivate->descPriv.screenRect.size.y = gdiMonitorInfo.rcMonitor.bottom - gdiMonitorInfo.rcMonitor.top;
+
+            if( makeBitmask( gdiMonitorInfo.dwFlags ).isSet( MONITORINFOF_PRIMARY ) )
+            {
+                outputObject->mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
             }
         }
 
@@ -131,13 +145,15 @@ namespace ts3::system
     // and then use the associated device's name to properly add it.
     void DisplayDriverGeneric::_nativeEnumOutputs( DisplayAdapter & pAdapter )
     {
+        auto & adapterNativeData = dsmGetObjectNativeDataGeneric( pAdapter );
+        //
+        auto * displayDeviceID = adapterNativeData.displayDeviceID.c_str();
+
         DISPLAY_DEVICEA gdiOutputInfo;
         gdiOutputInfo.cb = sizeof( DISPLAY_DEVICEA );
 
         for( UINT displayOutputIndex = 0; ; ++displayOutputIndex )
         {
-            //
-            auto * displayDeviceID = pAdapter.mPrivate->nativeDataPriv.generic->displayDeviceID.c_str();
             //
             BOOL result = ::EnumDisplayDevicesA( displayDeviceID, displayOutputIndex, &gdiOutputInfo, 0 );
 
@@ -147,8 +163,14 @@ namespace ts3::system
             }
 
             auto * outputObject = addOutput( pAdapter );
-            outputObject->mPrivate->nativeDataPriv.generic->displayDeviceID = displayDeviceID;
-            outputObject->mPrivate->nativeDataPriv.generic->outputID = gdiOutputInfo.DeviceName;
+            auto & outputNativeData = dsmGetObjectNativeDataGeneric( *outputObject );
+            outputNativeData.displayDeviceID = displayDeviceID;
+            outputNativeData.outputID = gdiOutputInfo.DeviceName;
+
+            const std::string oiDeviceID  = gdiOutputInfo.DeviceID;
+            const std::string oiDeviceKey = gdiOutputInfo.DeviceKey;
+            const std::string oiDeviceName = gdiOutputInfo.DeviceName;
+            const std::string oiDeviceStr = gdiOutputInfo.DeviceString;
 
             auto outputFlags = makeBitmask( gdiOutputInfo.StateFlags );
             if( outputFlags.isSet( DISPLAY_DEVICE_ATTACHED_TO_DESKTOP ) )
@@ -170,6 +192,9 @@ namespace ts3::system
 
     void DisplayDriverGeneric::_nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
     {
+        auto & outputNativeData = dsmGetObjectNativeDataGeneric( pOutput );
+        auto * outputName = outputNativeData.displayDeviceID.c_str();
+
         const auto & colorFormatDesc = vsxGetDescForColorFormat( pColorFormat );
 
         DEVMODEA gdiDevMode;
@@ -180,7 +205,6 @@ namespace ts3::system
 
         for( UINT displayModeIndex = 0; ; ++displayModeIndex )
         {
-            auto * outputName = pOutput.mPrivate->nativeDataPriv.generic->displayDeviceID.c_str();
             BOOL edsResult = ::EnumDisplaySettingsExA( outputName, displayModeIndex, &gdiDevMode, 0 );
 
             if( edsResult == FALSE )
@@ -214,9 +238,13 @@ namespace ts3::system
             }
 
             auto * videoModeObject = addVideoMode( pOutput, pColorFormat );
-            videoModeObject->mPrivate->nativeDataPriv.generic->gdiModeInfo = gdiDevMode;
-            videoModeObject->mPrivate->descPriv.settings = videoSettings;
-            videoModeObject->mPrivate->descPriv.settingsHash = settingsHash;
+
+            auto & videoModeNativeData = dsmGetObjectNativeDataGeneric( *videoModeObject );
+            videoModeNativeData.gdiModeInfo = gdiDevMode;
+
+            auto & videoModeDesc = dsmGetObjectDesc( *videoModeObject );
+            videoModeDesc.settings = videoSettings;
+            videoModeDesc.settingsHash = settingsHash;
 
             prevSettingsHash = settingsHash;
         }

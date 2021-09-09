@@ -24,6 +24,7 @@ namespace ts3::system
     public:
         struct ObjectPrivateData;
         DisplayDriver * const mDisplayDriver;
+        EDisplayDriverType const mDriverType;
         std::unique_ptr<ObjectPrivateData> const mPrivate;
         const DisplayAdapterDesc * const mDesc = nullptr;
         const DisplayAdapterNativeData * const mNativeData = nullptr;
@@ -50,6 +51,7 @@ namespace ts3::system
         struct ObjectPrivateData;
         DisplayDriver * const mDisplayDriver;
         DisplayAdapter * const mParentAdapter;
+        EDisplayDriverType const mDriverType;
         std::unique_ptr<ObjectPrivateData> const mPrivate;
         const DisplayOutputDesc * const mDesc = nullptr;
         const DisplayOutputNativeData * const mNativeData = nullptr;
@@ -77,6 +79,7 @@ namespace ts3::system
         struct ObjectPrivateData;
         DisplayDriver * const mDisplayDriver;
         DisplayOutput * const mParentOutput;
+        EDisplayDriverType const mDriverType;
         std::unique_ptr<ObjectPrivateData> const mPrivate;
         const DisplayVideoModeDesc * const mDesc = nullptr;
         const DisplayVideoModeNativeData * const mNativeData = nullptr;

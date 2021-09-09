@@ -7,17 +7,20 @@ namespace ts3::system
     FileHandle FileManager::openFile( std::string pFilePath, EFileOpenMode pOpenMode )
     {
         auto fileHandle = _createFileInstance();
+        return fileHandle;
 
     }
 
     FileHandle FileManager::createFile( std::string pFilePath )
     {
         auto fileHandle = _createFileInstance();
+        return fileHandle;
     }
 
     FileHandle FileManager::createTemporaryFile()
     {
         auto fileHandle = _createFileInstance();
+        return fileHandle;
     }
 
     FileHandle FileManager::_createFileInstance()

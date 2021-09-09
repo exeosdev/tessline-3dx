@@ -39,66 +39,99 @@ namespace ts3::system
     // NativeData for DisplayDriver
     struct DisplayDriverNativeData
     {
+        EDisplayDriverType driverType = EDisplayDriverType::Unknown;
+
         using GenericType = DisplayDriverNativeDataGeneric;
         DisplayDriverNativeDataGeneric * generic = nullptr;
+
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
         using DXGIType = DisplayDriverNativeDataDXGI;
         DisplayDriverNativeDataDXGI * dxgi = nullptr;
     #endif
+
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
         using SDLType = DisplayDriverNativeDataSDL;
         DisplayDriverNativeDataSDL * sdl = nullptr;
     #endif
+
+        explicit DisplayDriverNativeData( EDisplayDriverType pDriverType );
+        ~DisplayDriverNativeData();
     };
 
     // NativeData for DisplayAdapter
     struct DisplayAdapterNativeData
     {
+        EDisplayDriverType driverType = EDisplayDriverType::Unknown;
+
         using GenericType = DisplayAdapterNativeDataGeneric;
         DisplayAdapterNativeDataGeneric * generic = nullptr;
+
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
         using DXGIType = DisplayAdapterNativeDataDXGI;
         DisplayAdapterNativeDataDXGI * dxgi = nullptr;
     #endif
+
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
         using SDLType = DisplayAdapterNativeDataSDL;
         DisplayAdapterNativeDataSDL * sdl = nullptr;
     #endif
+
+        explicit DisplayAdapterNativeData( EDisplayDriverType pDriverType );
+        ~DisplayAdapterNativeData();
     };
 
     // NativeData for DisplayOutput
     struct DisplayOutputNativeData
     {
+        EDisplayDriverType driverType = EDisplayDriverType::Unknown;
+
         using GenericType = DisplayOutputNativeDataGeneric;
         DisplayOutputNativeDataGeneric * generic = nullptr;
+
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
         using DXGIType = DisplayOutputNativeDataDXGI;
         DisplayOutputNativeDataDXGI * dxgi = nullptr;
     #endif
+
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
         using SDLType = DisplayOutputNativeDataSDL;
         DisplayOutputNativeDataSDL * sdl = nullptr;
     #endif
+
+        explicit DisplayOutputNativeData( EDisplayDriverType pDriverType );
+        ~DisplayOutputNativeData();
     };
 
     // NativeData for DisplayVideo
     struct DisplayVideoModeNativeData
     {
+        EDisplayDriverType driverType = EDisplayDriverType::Unknown;
+
         using GenericType = DisplayVideoModeNativeDataGeneric;
         DisplayVideoModeNativeDataGeneric * generic = nullptr;
+
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
         using DXGIType = DisplayVideoModeNativeDataDXGI;
         DisplayVideoModeNativeDataDXGI * dxgi = nullptr;
     #endif
+
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
         using SDLType = DisplayVideoModeNativeDataSDL;
         DisplayVideoModeNativeDataSDL * sdl = nullptr;
     #endif
+
+        explicit DisplayVideoModeNativeData( EDisplayDriverType pDriverType );
+        ~DisplayVideoModeNativeData();
     };
+
 
     /// @brief Private, implementation-specific data of the DisplayDriver class.
     struct DisplayDriver::ObjectPrivateData
     {
+        using NativeDataType = DisplayDriverNativeData;
+        //
+        DisplayDriver * parentDriver = nullptr;
+
         // Driver native data.
         // Referenced through a const pointer in the DisplayDriver class.
         DisplayDriverNativeData nativeDataPriv;
@@ -115,11 +148,22 @@ namespace ts3::system
 
         // Points to the default/primary adapter in the system. Usually this will be adapterList[0];
         DisplayAdapter * primaryAdapter = nullptr;
+
+        ObjectPrivateData( DisplayDriver * pDriver )
+        : parentDriver( pDriver )
+        , nativeDataPriv( pDriver->mDriverType )
+        {}
     };
+
 
     /// @brief Private, implementation-specific data of the DisplayAdapter class.
     struct DisplayAdapter::ObjectPrivateData
     {
+        using DescType = DisplayAdapterDesc;
+        using NativeDataType = DisplayAdapterNativeData;
+        //
+        DisplayAdapter * parentAdapter = nullptr;
+
         // Ddapter info struct, containing basic adapter properties.
         // Referenced through a const pointer in the DisplayAdapter class.
         DisplayAdapterDesc descPriv;
@@ -132,11 +176,18 @@ namespace ts3::system
         DisplayOutputList outputList;
         uint32 activeOutputsNum = 0;
         DisplayOutput * primaryOutput = nullptr;
+
+        ObjectPrivateData( DisplayAdapter * pAdapter )
+        : parentAdapter( pAdapter )
+        , nativeDataPriv( pAdapter->mDriverType )
+        {}
     };
 
     /// @brief Private, implementation-specific data of the DisplayOutput class.
     struct DisplayOutput::ObjectPrivateData
     {
+        using DescType = DisplayOutputDesc;
+        using NativeDataType = DisplayOutputNativeData;
         // Per-color-format data.
         // Video modes supported by the system may be different for each color format the display supports.
         // Hence, we associate the information about supported DMs with a separate struct which is created
@@ -150,6 +201,9 @@ namespace ts3::system
             // Helper list with handles/pointers.
             DisplayVideoModeList videoModeList;
         };
+
+        //
+        DisplayOutput * parentOutput = nullptr;
 
         // Output info struct, containing basic output properties.
         // Referenced through a const pointer in the DisplayOutput class.
@@ -189,11 +243,22 @@ namespace ts3::system
         {
             _colorFormatMap.clear();
         }
+
+        ObjectPrivateData( DisplayOutput * pOutput )
+        : parentOutput( pOutput )
+        , nativeDataPriv( pOutput->mDriverType )
+        {}
     };
 
     /// @brief Private, implementation-specific data of the DisplayVideoMode class.
     struct DisplayVideoMode::ObjectPrivateData
     {
+        using DescType = DisplayVideoModeDesc;
+        using NativeDataType = DisplayVideoModeNativeData;
+
+        //
+        DisplayVideoMode * parentVideoMode = nullptr;
+
         // Video mode info struct, containing basic mode properties.
         // Referenced through a const pointer in the DisplayVideoMode class.
         DisplayVideoModeDesc descPriv;
@@ -201,7 +266,53 @@ namespace ts3::system
         // Video mode native data.
         // Referenced through a const pointer in the DisplayVideoMode class.
         DisplayVideoModeNativeData nativeDataPriv;
+
+        ObjectPrivateData( DisplayVideoMode * pVideoMode )
+        : parentVideoMode( pVideoMode )
+        , nativeDataPriv( pVideoMode->mDriverType )
+        {}
     };
+
+    // Proxy functions to get the correct NativeData member, specific to a driver, without going through all internals.
+    // Used heavily in all drivers, allowing them to specify the following:
+    // >> auto * adapterDXGINativeData = dsmGetNativeDataDXGI( someAdapter );
+    // Instead of:
+    // >> auto * adapterDXGINativeData = pAdapter.mPrivate->nativeDataPriv.dxgi;
+    // This enables complete transparency and immunity to potential structure changes.
+    // TpDisplayObject can be either:
+    // - DisplayDriver
+    // - DisplayAdapter
+    // - DisplayOutput
+    // - DisplayVideoMode
+
+    template <typename TpDisplayObject>
+    inline typename TpDisplayObject::ObjectPrivateData::NativeDataType::GenericType & dsmGetObjectNativeDataGeneric( TpDisplayObject & pObject )
+    {
+        return *( pObject.mPrivate->nativeDataPriv.generic );
+    }
+
+    template <typename TpDisplayObject>
+    inline typename TpDisplayObject::ObjectPrivateData::NativeDataType::DXGIType & dsmGetObjectNativeDataDXGI( TpDisplayObject & pObject )
+    {
+        return *( pObject.mPrivate->nativeDataPriv.dxgi );
+    }
+
+    template <typename TpDisplayObject>
+    inline typename TpDisplayObject::ObjectPrivateData::NativeDataType::SDLType & dsmGetObjectNativeDataSDL( TpDisplayObject & pObject )
+    {
+        return *( pObject.mPrivate->nativeDataPriv.sdl );
+    }
+
+    // Additional proxy function for obtaining the private 'desc' structure of an object.
+    // TpDisplayObject can be either:
+    // - DisplayAdapter
+    // - DisplayOutput
+    // - DisplayVideoMode
+    template <typename TpDisplayObject>
+    inline typename TpDisplayObject::ObjectPrivateData::DescType & dsmGetObjectDesc( TpDisplayObject & pObject )
+    {
+        return pObject.mPrivate->descPriv;
+    }
 
     class DisplayDriverGeneric : public DisplayDriver
     {
@@ -220,6 +331,8 @@ namespace ts3::system
 
         virtual ColorFormat _nativeGetSystemDefaultColorFormat() const override final;
         virtual ArrayView<const ColorFormat> _nativeGetSupportedColorFormatList() const override final;
+
+        static BOOL CALLBACK _win32MonitorEnumProc( HMONITOR hMonitor, HDC hDC, LPRECT monitorRect, LPARAM enumProcParam );
     };
 
 #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
@@ -264,7 +377,7 @@ namespace ts3::system
     };
 #endif
 
-    union DisplayOutputID
+    union DisplayOutputIDGen
     {
         struct
         {
@@ -272,23 +385,10 @@ namespace ts3::system
             dsm_index_t uOutputIndex;
         };
 
-        dsm_output_id_t outputID;
-
-        constexpr DisplayOutputID()
-        : outputID( 0u )
-        {}
-
-        constexpr explicit DisplayOutputID( dsm_output_id_t pOutputID )
-        : outputID( pOutputID )
-        {}
-
-        constexpr DisplayOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex )
-        : uAdapterIndex( pAdapterIndex )
-        , uOutputIndex( pOutputIndex )
-        {}
+        dsm_output_id_t outputID = 0;
     };
 
-    union DisplayVideoModeID
+    union DisplayVideoModeIDGen
     {
         struct
         {
@@ -298,25 +398,9 @@ namespace ts3::system
         };
 
         dsm_video_mode_id_t modeID = 0u;
-
-        constexpr DisplayVideoModeID()
-        : modeID( 0u )
-        {}
-
-        constexpr explicit DisplayVideoModeID( dsm_video_mode_id_t pModeID )
-        : modeID( pModeID )
-        {}
-
-        constexpr DisplayVideoModeID( dsm_output_id_t pOutputID,
-                                      dsm_index_t pColorFormatIndex,
-                                      dsm_index_t pModeIndex )
-        : uOutputID( pOutputID )
-        , uColorFormatIndex( pColorFormatIndex )
-        , uModeIndex( pModeIndex )
-        {}
     };
 
-    union DisplayVideoSettingsHash
+    union DisplayVideoSettingsHashGen
     {
         struct
         {
@@ -328,71 +412,43 @@ namespace ts3::system
         };
 
         dsm_video_settings_hash_t hashValue = 0u;
-
-        constexpr DisplayVideoSettingsHash()
-        : hashValue( 0u )
-        {}
-
-        constexpr explicit DisplayVideoSettingsHash( dsm_video_settings_hash_t pHashValue )
-        : hashValue( pHashValue )
-        {}
-
-        constexpr DisplayVideoSettingsHash( uint16 pResWidth,
-                                            uint16 pResHeight,
-                                            uint16 pRefreshRate,
-                                            uint8 pFlags,
-                                            uint8 pColorFormatIndex )
-        : uResWidth( pResWidth )
-        , uResHeight( pResHeight )
-        , uRefreshRate( pRefreshRate )
-        , uFlags( pFlags )
-        , uColorFormatIndex( pColorFormatIndex )
-        {}
     };
 
-    inline constexpr dsm_index_t dsmExtractOutputIDAdapterIndex( dsm_output_id_t pOutputID )
+    inline dsm_index_t dsmExtractOutputIDAdapterIndex( dsm_output_id_t pOutputID )
     {
-        return DisplayOutputID{ pOutputID }.uAdapterIndex;
+        DisplayOutputIDGen outputIDGen;
+        outputIDGen.outputID = pOutputID;
+        return outputIDGen.uAdapterIndex;
     }
 
-    inline constexpr dsm_index_t dsmExtractOutputIDOutputIndex( dsm_output_id_t pOutputID )
+    inline dsm_index_t dsmExtractOutputIDOutputIndex( dsm_output_id_t pOutputID )
     {
-        return DisplayOutputID{ pOutputID }.uOutputIndex;
+        DisplayOutputIDGen outputIDGen;
+        outputIDGen.outputID = pOutputID;
+        return outputIDGen.uOutputIndex;
     }
+
 
     template <typename TpNativeData>
     inline void dsmInitializeNativeData( TpNativeData * pNativeData, EDisplayDriverType pDriverType )
     {
-        try
+        if( pDriverType == EDisplayDriverType::Generic )
         {
-            switch ( pDriverType )
-            {
-                case EDisplayDriverType::Generic:
-                {
-                    pNativeData->generic = new typename TpNativeData::GenericType();
-                    break;
-                }
-			#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
-			    case EDisplayDriverType::DXGI:
-                {
-                    pNativeData->dxgi = new typename TpNativeData::DXGIType();
-                    break;
-                }
-			#endif
-			#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
-			    case EDisplayDriverType::SDL:
-                {
-                    pNativeData->sdl = new typename TpNativeData::SDLType();
-                    break;
-                }
-			#endif
-                default:
-                {
-                    throw 0;
-                }
-            }
+            pNativeData->generic = new typename TpNativeData::GenericType();
         }
-        catch( ... )
+    #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
+        else if( pDriverType == EDisplayDriverType::DXGI )
+        {
+            pNativeData->dxgi = new typename TpNativeData::DXGIType();
+        }
+    #endif
+    #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
+        else if( pDriverType == EDisplayDriverType::SDL )
+        {
+            pNativeData->sdl = new typename TpNativeData::SDLType();
+        }
+    #endif
+        else
         {
             ts3DebugInterrupt();
         }
@@ -401,51 +457,77 @@ namespace ts3::system
     template <typename TpNativeData>
     inline void dsmReleaseNativeData( TpNativeData * pNativeData, EDisplayDriverType pDriverType )
     {
-        try
+        if( ( pDriverType == EDisplayDriverType::Generic ) && ( pNativeData->generic != nullptr ) )
         {
-            switch( pDriverType )
-            {
-                case EDisplayDriverType::Generic:
-                {
-                    if( pNativeData->generic != nullptr )
-                    {
-                        delete pNativeData->generic;
-                        pNativeData->generic = nullptr;
-                    }
-                    break;
-                }
-			#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
-			    case EDisplayDriverType::DXGI:
-                {
-                    if( pNativeData->dxgi != nullptr )
-                    {
-                        delete pNativeData->dxgi;
-                        pNativeData->dxgi = nullptr;
-                    }
-                    break;
-                }
-			#endif
-			#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
-                case EDisplayDriverType::SDL:
-                {
-                    if( pNativeData->sdl != nullptr )
-                    {
-                        delete pNativeData->sdl;
-                        pNativeData->sdl = nullptr;
-                    }
-                    break;
-                }
-			#endif
-                default:
-                {
-                    throw 0;
-                }
-            }
+            delete pNativeData->generic;
+            pNativeData->generic = nullptr;
         }
-        catch( ... )
+    #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
+        else if( ( pDriverType == EDisplayDriverType::DXGI ) && ( pNativeData->dxgi != nullptr ) )
+        {
+            delete pNativeData->dxgi;
+            pNativeData->dxgi = nullptr;
+        }
+    #endif
+    #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
+        else if( ( pDriverType == EDisplayDriverType::SDL ) && ( pNativeData->sdl != nullptr ) )
+        {
+            delete pNativeData->sdl;
+            pNativeData->sdl = nullptr;
+        }
+    #endif
+        else
         {
             ts3DebugInterrupt();
         }
+    }
+
+
+    inline DisplayDriverNativeData::DisplayDriverNativeData( EDisplayDriverType pDriverType )
+    : driverType( pDriverType )
+    {
+        dsmInitializeNativeData( this, pDriverType );
+    }
+
+    inline DisplayDriverNativeData::~DisplayDriverNativeData()
+    {
+        dsmReleaseNativeData( this, driverType );
+    }
+
+
+    inline DisplayAdapterNativeData::DisplayAdapterNativeData( EDisplayDriverType pDriverType )
+    : driverType( pDriverType )
+    {
+        dsmInitializeNativeData( this, pDriverType );
+    }
+
+    inline DisplayAdapterNativeData::~DisplayAdapterNativeData()
+    {
+        dsmReleaseNativeData( this, driverType );
+    }
+
+
+    inline DisplayOutputNativeData::DisplayOutputNativeData( EDisplayDriverType pDriverType )
+    : driverType( pDriverType )
+    {
+        dsmInitializeNativeData( this, pDriverType );
+    }
+
+    inline DisplayOutputNativeData::~DisplayOutputNativeData()
+    {
+        dsmReleaseNativeData( this, driverType );
+    }
+
+
+    inline DisplayVideoModeNativeData::DisplayVideoModeNativeData( EDisplayDriverType pDriverType )
+    : driverType( pDriverType )
+    {
+        dsmInitializeNativeData( this, pDriverType );
+    }
+
+    inline DisplayVideoModeNativeData::~DisplayVideoModeNativeData()
+    {
+        dsmReleaseNativeData( this, driverType );
     }
 
 } // namespace ts3::system

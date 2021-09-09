@@ -64,9 +64,9 @@ namespace ts3::system
         return strStream.str();
     }
 
-    dsm_output_id_t dsmCreateDisplayOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex )
+    dsm_output_id_t dsmCreateDisplayOutputIDGen( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex )
     {
-        DisplayOutputID outputIDGen;
+        DisplayOutputIDGen outputIDGen;
         outputIDGen.uAdapterIndex = pAdapterIndex;
         outputIDGen.uOutputIndex = pOutputIndex;
         return outputIDGen.outputID;
@@ -74,7 +74,7 @@ namespace ts3::system
 
     dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings )
 	{
-		DisplayVideoSettingsHash hashValueGen;
+		DisplayVideoSettingsHashGen hashValueGen;
 		hashValueGen.uResWidth = static_cast<uint16>( pSettings.resolution.x );
 		hashValueGen.uResHeight = static_cast<uint16>( pSettings.resolution.x );
 		hashValueGen.uRefreshRate = static_cast<uint16>( pSettings.refreshRate );

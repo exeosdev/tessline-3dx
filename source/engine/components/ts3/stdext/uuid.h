@@ -20,7 +20,7 @@ namespace ts3
 
 		if( rightDelim != 0 )
 		{
-		    auto lbPos = pInput.find_last_of( pLeftDelim, 0 );
+		    auto lbPos = pInput.find_first_of( pLeftDelim );
 		    auto rbPos = pInput.find_first_of( rightDelim, lbPos );
 
 		    if( ( lbPos != std::string::npos ) && ( rbPos != std::string::npos ) )
