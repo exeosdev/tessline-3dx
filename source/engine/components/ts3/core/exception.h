@@ -154,12 +154,68 @@ namespace ts3
     };
 
 
+
 	template <ExceptionBaseType tExceptionBaseType, bool tIsValidType>
 	struct ExceptionClassResolver
     {
 	    using Type = UnknownException;
     };
 
+	template <ExceptionBaseType tExceptionBaseType>
+	struct ExceptionClassResolver<tExceptionBaseType, true>
+    {
+	    using Type = ExceptionClass<tExceptionBaseType>;
+    };
+
+	template <>
+	struct ExceptionClassResolver<ExceptionBaseType::ResultWrapper, true>
+    {
+	    using Type = ResultWrapperException;
+    };
+
+	template <ExceptionBaseType tExceptionBaseType>
+	struct ExceptionBaseTypeClassProxy
+    {
+	    using Type = typename ExceptionClassResolver<tExceptionBaseType, ecIsExceptionBaseTypeValid( tExceptionBaseType )>::Type;
+    };
+
+	template <exception_category_value_t tExceptionCategory>
+	struct ExceptionCategoryClassProxy
+    {
+	    using Type = typename ExceptionBaseTypeClassProxy<ecGetExceptionCategoryBaseType( tExceptionCategory )>::Type;
+    };
+
+	template <exception_code_value_t tExceptionCode>
+	struct ExceptionCodeClassProxy
+    {
+	    using Type = typename ExceptionCategoryClassProxy<ecGetExceptionCodeCategory( tExceptionCode )>::Type;
+    };
+
+    #define ts3EnableExceptionSupport() \
+        template <exception_category_value_t tExceptionCategory> \
+        struct ExceptionCategoryClassProxy \
+        { \
+            using Type = typename ::ts3::ExceptionBaseTypeClassProxy<ecGetExceptionCategoryBaseType( tExceptionCategory )>::Type; \
+        }; \
+        template <exception_code_value_t tExceptionCode> \
+        struct ExceptionCodeClassProxy \
+        { \
+            using Type = typename ExceptionCategoryClassProxy<ecGetExceptionCodeCategory( tExceptionCode )>::Type; \
+        };
+
+    #define ts3SetExceptionCategoryType( pExceptionCategory, pType ) \
+        template <> \
+        struct ExceptionCategoryClassProxy<pExceptionCategory> \
+        { \
+            using Type = pType; \
+        };
+
+    #define ts3SetExceptionCodeType( pExceptionCode, pType ) \
+        template <> \
+        struct ExceptionCodeClassProxy<pExceptionCode> \
+        { \
+            using Type = pType; \
+        };
 
 	template <typename TpException, typename... TpArgs>
 	TS3_PCL_ATTR_NO_RETURN inline void throwException( ExceptionInfo pExceptionInfo, TpArgs &&... pArgs )
@@ -174,6 +230,35 @@ namespace ts3
 
 		throw TpException( std::move( pExceptionInfo ), std::forward<TpArgs>( pArgs )... );
 	}
+
+	template <typename TpException, typename... TpArgs>
+	TS3_PCL_ATTR_NO_RETURN inline void throwException( exception_code_value_t pExceptionCode,
+                                                       std::string pDescription,
+                                                       const FileLocationInfo & pFileLocationInfo,
+                                                       TpArgs &&... pArgs )
+	{
+	    ExceptionInfo exceptionInfo;
+	    exceptionInfo.code = pExceptionCode;
+	    exceptionInfo.description = std::move( pDescription );
+	    exceptionInfo.fileLocationInfo = pFileLocationInfo;
+
+	    throwException<TpException>( std::move( exceptionInfo ), std::forward<TpArgs>( pArgs )... );
+    }
+
+} // namespace ts3
+
+
+#define ts3ThrowAuto( pExceptionCode ) \
+    ::ts3::throwException<typename ExceptionCodeClassProxy<pExceptionCode>::Type>( pExceptionCode, "", ts3CurrentFileLocationInfo() )
+
+#define ts3ThrowAutoEx( pExceptionCode, pDescription, ... ) \
+    ::ts3::throwException<typename ExceptionCodeClassProxy<pExceptionCode>::Type>( pExceptionCode, pDescription, ts3CurrentFileLocationInfo(), __VA_ARGS__ )
+
+#define ts3ThrowResult( pResult ) \
+    ::ts3::throwException<typename ExceptionCodeClassProxy<E_EXCEPTION_CODE_RESULT_ERROR>::Type>( E_EXCEPTION_CODE_RESULT_ERROR, "", ts3CurrentFileLocationInfo(), pResult )
+
+#define ts3ThrowResultEx( pResult, pDescription ) \
+    ::ts3::throwException<typename ExceptionCodeClassProxy<E_EXCEPTION_CODE_RESULT_ERROR>::Type>( E_EXCEPTION_CODE_RESULT_ERROR, pDescription, ts3CurrentFileLocationInfo(), pResult )
 
 #define exfCatchIntoWrapper( pResultWrapper ) \
 	catch( const ::ts3::Result & eResult ) \
