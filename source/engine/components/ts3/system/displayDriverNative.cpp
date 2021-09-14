@@ -69,38 +69,6 @@ namespace ts3::system
     , nativeDataPriv( pOutput->mDriverType )
     {}
 
-//    DisplayOutput::ObjectPrivateData::ColorFormatData & DisplayOutput::ObjectPrivateData::getOrCreateColorFormatData( ColorFormat pColorFormat )
-//    {
-//        auto resolvedColorFormat = dsmResolveColorFormat( pColorFormat );
-//        auto colorFormatDataRef = _colorFormatMap.find( resolvedColorFormat );
-//        if( colorFormatDataRef == _colorFormatMap.end() )
-//        {
-//            auto insertRes = _colorFormatMap.insert( {resolvedColorFormat, ColorFormatData{}} );
-//            colorFormatDataRef = insertRes.first;
-//            colorFormatDataRef->second.colorFormat = resolvedColorFormat;
-//        }
-//        return colorFormatDataRef->second;
-//    }
-//
-//    DisplayOutput::ObjectPrivateData::ColorFormatData & DisplayOutput::ObjectPrivateData::getColorFormatData( ColorFormat pColorFormat )
-//    {
-//        auto resolvedColorFormat = dsmResolveColorFormat( pColorFormat );
-//        return _colorFormatMap.at( resolvedColorFormat );
-//    }
-//
-//    const DisplayOutput::ObjectPrivateData::ColorFormatData & DisplayOutput::ObjectPrivateData::getColorFormatData( ColorFormat pColorFormat ) const
-//    {
-//        auto resolvedColorFormat = dsmResolveColorFormat( pColorFormat );
-//        return _colorFormatMap.at( resolvedColorFormat );
-//    }
-//
-//    bool DisplayOutput::ObjectPrivateData::hasColorFormatData( ColorFormat pColorFormat ) const
-//    {
-//        auto resolvedColorFormat = dsmResolveColorFormat( pColorFormat );
-//        auto colorFormatDataRef = _colorFormatMap.find( resolvedColorFormat );
-//        return ( colorFormatDataRef != _colorFormatMap.end() ) && !colorFormatDataRef->second.videoModeInternalStorage.empty();
-//    }
-
 
     DisplayVideoMode::ObjectPrivateData::ObjectPrivateData( DisplayVideoMode * pVideoMode )
     : parentVideoMode( pVideoMode )
