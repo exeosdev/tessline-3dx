@@ -4,10 +4,10 @@
 
 #include "displayDriver.h"
 #include "sysContextNative.h"
+#include <ts3/stdext/utilities.h>
 
 #include <deque>
 #include <unordered_map>
-#include <unordered_set>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 #  include "internal/platform/osapi/android/androidDisplayDriver.h"
@@ -27,6 +27,71 @@
 
 namespace ts3::system
 {
+
+    // The default array with all ColorFormats supported by the library.
+    // Used by the common driver layer to iterate over support CFs.
+    inline constexpr ColorFormat cvColorFormatArray[6] =
+    {
+        ColorFormat::B8G8R8,
+        ColorFormat::B8G8R8A8,
+        ColorFormat::B8G8R8A8SRGB,
+        ColorFormat::R8G8B8A8,
+        ColorFormat::R8G8B8A8SRGB,
+        ColorFormat::R10G10B10A2,
+    };
+
+    static_assert( staticArraySize( cvColorFormatArray ) == CX_ENUM_COLOR_FORMAT_COUNT );
+
+    union DisplayOutputIDGen
+    {
+        struct
+        {
+            dsm_index_t uAdapterIndex;
+            dsm_index_t uOutputIndex;
+        };
+
+        dsm_output_id_t outputID = 0;
+    };
+
+    union DisplayVideoModeIDGen
+    {
+        struct
+        {
+            dsm_output_id_t uOutputID;
+            dsm_index_t uColorFormatIndex;
+            dsm_index_t uModeIndex;
+        };
+
+        dsm_video_mode_id_t modeID = 0u;
+    };
+
+    union DisplayVideoSettingsHashGen
+    {
+        struct
+        {
+            uint16 uResWidth;
+            uint16 uResHeight;
+            uint16 uRefreshRate;
+            uint8 uFlags;
+            uint8 uColorFormatIndex;
+        };
+
+        dsm_video_settings_hash_t hashValue = 0u;
+    };
+
+    inline dsm_index_t dsmExtractOutputIDAdapterIndex( dsm_output_id_t pOutputID )
+    {
+        DisplayOutputIDGen outputIDGen;
+        outputIDGen.outputID = pOutputID;
+        return outputIDGen.uAdapterIndex;
+    }
+
+    inline dsm_index_t dsmExtractOutputIDOutputIndex( dsm_output_id_t pOutputID )
+    {
+        DisplayOutputIDGen outputIDGen;
+        outputIDGen.outputID = pOutputID;
+        return outputIDGen.uOutputIndex;
+    }
 
     // Driver data structs for display driver-related classes.
     // Unlike in the case of other components, display driver has concrete sub-types instead of the usual 'native' layer.
@@ -129,6 +194,7 @@ namespace ts3::system
     struct DisplayDriver::ObjectPrivateData
     {
         using NativeDataType = DisplayDriverNativeData;
+
         //
         DisplayDriver * parentDriver = nullptr;
 
@@ -146,13 +212,13 @@ namespace ts3::system
         // Numer of active adapters in the system. Equals adapterList.size() (and, thus, adapterInternalStorage.size() too).
         uint32 activeAdaptersNum = 0;
 
+        // Numer of active adapters in the system. Equals adapterList.size() (and, thus, adapterInternalStorage.size() too).
+        uint32 combinedActiveOutputsNum = 0;
+
         // Points to the default/primary adapter in the system. Usually this will be adapterList[0];
         DisplayAdapter * primaryAdapter = nullptr;
 
-        ObjectPrivateData( DisplayDriver * pDriver )
-        : parentDriver( pDriver )
-        , nativeDataPriv( pDriver->mDriverType )
-        {}
+        explicit ObjectPrivateData( DisplayDriver * pDriver );
     };
 
 
@@ -161,6 +227,7 @@ namespace ts3::system
     {
         using DescType = DisplayAdapterDesc;
         using NativeDataType = DisplayAdapterNativeData;
+
         //
         DisplayAdapter * parentAdapter = nullptr;
 
@@ -177,10 +244,7 @@ namespace ts3::system
         uint32 activeOutputsNum = 0;
         DisplayOutput * primaryOutput = nullptr;
 
-        ObjectPrivateData( DisplayAdapter * pAdapter )
-        : parentAdapter( pAdapter )
-        , nativeDataPriv( pAdapter->mDriverType )
-        {}
+        explicit ObjectPrivateData( DisplayAdapter * pAdapter );
     };
 
     /// @brief Private, implementation-specific data of the DisplayOutput class.
@@ -188,6 +252,7 @@ namespace ts3::system
     {
         using DescType = DisplayOutputDesc;
         using NativeDataType = DisplayOutputNativeData;
+
         // Per-color-format data.
         // Video modes supported by the system may be different for each color format the display supports.
         // Hence, we associate the information about supported DMs with a separate struct which is created
@@ -215,39 +280,9 @@ namespace ts3::system
 
         // The main data. Stores a ColorFormatData strut for each ColorFormat supported/enumerated.
         // This map should  not be used directly - instead there are dedicated functions provided below.
-        std::unordered_map<ColorFormat, ColorFormatData> _colorFormatMap;
+        std::unordered_map<ColorFormat, ColorFormatData> colorFormatMap;
 
-        // Returns a ColorFormatData for a specified ColorFormat.
-        // If no ColorFormatData is found in the map, a new one is created.
-        ColorFormatData & getColorFormatData( ColorFormat pColorFormat )
-        {
-            auto colorFormatDataRef = _colorFormatMap.find( pColorFormat );
-            if( colorFormatDataRef == _colorFormatMap.end() )
-            {
-                auto insertRes = _colorFormatMap.insert( {pColorFormat, ColorFormatData{}} );
-                colorFormatDataRef = insertRes.first;
-                colorFormatDataRef->second.colorFormat = pColorFormat;
-            }
-            return colorFormatDataRef->second;
-        }
-
-        // Returns a DisplayVideoModeList for a specified ColorFormat.
-        DisplayVideoModeList & getVideoModeList( ColorFormat pColorFormat )
-        {
-            auto & colorFormatData = getColorFormatData( pColorFormat );
-            return colorFormatData.videoModeList;
-        }
-
-        // Resets the internal state and data.
-        void resetColorFormatMap()
-        {
-            _colorFormatMap.clear();
-        }
-
-        ObjectPrivateData( DisplayOutput * pOutput )
-        : parentOutput( pOutput )
-        , nativeDataPriv( pOutput->mDriverType )
-        {}
+        explicit ObjectPrivateData( DisplayOutput * pOutput );
     };
 
     /// @brief Private, implementation-specific data of the DisplayVideoMode class.
@@ -267,10 +302,7 @@ namespace ts3::system
         // Referenced through a const pointer in the DisplayVideoMode class.
         DisplayVideoModeNativeData nativeDataPriv;
 
-        ObjectPrivateData( DisplayVideoMode * pVideoMode )
-        : parentVideoMode( pVideoMode )
-        , nativeDataPriv( pVideoMode->mDriverType )
-        {}
+        explicit ObjectPrivateData( DisplayVideoMode * pVideoMode );
     };
 
     // Proxy functions to get the correct NativeData member, specific to a driver, without going through all internals.
@@ -291,17 +323,21 @@ namespace ts3::system
         return *( pObject.mPrivate->nativeDataPriv.generic );
     }
 
+#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
     template <typename TpDisplayObject>
     inline typename TpDisplayObject::ObjectPrivateData::NativeDataType::DXGIType & dsmGetObjectNativeDataDXGI( TpDisplayObject & pObject )
     {
         return *( pObject.mPrivate->nativeDataPriv.dxgi );
     }
+#endif
 
+#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
     template <typename TpDisplayObject>
     inline typename TpDisplayObject::ObjectPrivateData::NativeDataType::SDLType & dsmGetObjectNativeDataSDL( TpDisplayObject & pObject )
     {
         return *( pObject.mPrivate->nativeDataPriv.sdl );
     }
+#endif
 
     // Additional proxy function for obtaining the private 'desc' structure of an object.
     // TpDisplayObject can be either:
@@ -323,13 +359,7 @@ namespace ts3::system
     private:
         virtual void _nativeEnumDisplayDevices() override final;
         virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
-    
-        virtual void _nativeDestroyAdapter( DisplayAdapter & pAdapter ) override final;
-        virtual void _nativeDestroyOutput( DisplayOutput & pOutput ) override final;
-        virtual void _nativeDestroyVideoMode( DisplayVideoMode & pVideoMode ) override final;
-
-        virtual ColorFormat _nativeGetSystemDefaultColorFormat() const override final;
-        virtual ArrayView<const ColorFormat> _nativeGetSupportedColorFormatList() const override final;
+        virtual ColorFormat _nativeQueryDefaultSystemColorFormat() const override final;
     };
 
 #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
@@ -342,13 +372,7 @@ namespace ts3::system
     private:
         virtual void _nativeEnumDisplayDevices() override final;
         virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
-    
-        virtual void _nativeDestroyAdapter( DisplayAdapter & pAdapter ) override final;
-        virtual void _nativeDestroyOutput( DisplayOutput & pOutput ) override final;
-        virtual void _nativeDestroyVideoMode( DisplayVideoMode & pVideoMode ) override final;
-
-        virtual ColorFormat _nativeGetSystemDefaultColorFormat() const override final;
-        virtual ArrayView<const ColorFormat> _nativeGetSupportedColorFormatList() const override final;
+        virtual ColorFormat _nativeQueryDefaultSystemColorFormat() const override final;
         
         void _enumAdapterOutputs( DisplayAdapter & pAdapter );
     };
@@ -364,66 +388,9 @@ namespace ts3::system
     private:
         virtual void _nativeEnumDisplayDevices() override final {}
         virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
-    
-        virtual void _nativeDestroyAdapter( DisplayAdapter & pAdapter ) override final;
-        virtual void _nativeDestroyOutput( DisplayOutput & pOutput ) override final;
-        virtual void _nativeDestroyVideoMode( DisplayVideoMode & pVideoMode ) override final;
-
-        virtual ColorFormat _nativeGetSystemDefaultColorFormat() const override final;
-        virtual ArrayView<const ColorFormat> _nativeGetSupportedColorFormatList() const override final;
+        virtual ColorFormat _nativeQueryDefaultSystemColorFormat() const override final;
     };
 #endif
-
-    union DisplayOutputIDGen
-    {
-        struct
-        {
-            dsm_index_t uAdapterIndex;
-            dsm_index_t uOutputIndex;
-        };
-
-        dsm_output_id_t outputID = 0;
-    };
-
-    union DisplayVideoModeIDGen
-    {
-        struct
-        {
-            dsm_output_id_t uOutputID;
-            dsm_index_t uColorFormatIndex;
-            dsm_index_t uModeIndex;
-        };
-
-        dsm_video_mode_id_t modeID = 0u;
-    };
-
-    union DisplayVideoSettingsHashGen
-    {
-        struct
-        {
-            uint16 uResWidth;
-            uint16 uResHeight;
-            uint16 uRefreshRate;
-            uint8 uFlags;
-            uint8 uColorFormatIndex;
-        };
-
-        dsm_video_settings_hash_t hashValue = 0u;
-    };
-
-    inline dsm_index_t dsmExtractOutputIDAdapterIndex( dsm_output_id_t pOutputID )
-    {
-        DisplayOutputIDGen outputIDGen;
-        outputIDGen.outputID = pOutputID;
-        return outputIDGen.uAdapterIndex;
-    }
-
-    inline dsm_index_t dsmExtractOutputIDOutputIndex( dsm_output_id_t pOutputID )
-    {
-        DisplayOutputIDGen outputIDGen;
-        outputIDGen.outputID = pOutputID;
-        return outputIDGen.uOutputIndex;
-    }
 
 
     template <typename TpNativeData>
@@ -477,54 +444,6 @@ namespace ts3::system
         {
             ts3DebugInterrupt();
         }
-    }
-
-
-    inline DisplayDriverNativeData::DisplayDriverNativeData( EDisplayDriverType pDriverType )
-    : driverType( pDriverType )
-    {
-        dsmInitializeNativeData( this, pDriverType );
-    }
-
-    inline DisplayDriverNativeData::~DisplayDriverNativeData()
-    {
-        dsmReleaseNativeData( this, driverType );
-    }
-
-
-    inline DisplayAdapterNativeData::DisplayAdapterNativeData( EDisplayDriverType pDriverType )
-    : driverType( pDriverType )
-    {
-        dsmInitializeNativeData( this, pDriverType );
-    }
-
-    inline DisplayAdapterNativeData::~DisplayAdapterNativeData()
-    {
-        dsmReleaseNativeData( this, driverType );
-    }
-
-
-    inline DisplayOutputNativeData::DisplayOutputNativeData( EDisplayDriverType pDriverType )
-    : driverType( pDriverType )
-    {
-        dsmInitializeNativeData( this, pDriverType );
-    }
-
-    inline DisplayOutputNativeData::~DisplayOutputNativeData()
-    {
-        dsmReleaseNativeData( this, driverType );
-    }
-
-
-    inline DisplayVideoModeNativeData::DisplayVideoModeNativeData( EDisplayDriverType pDriverType )
-    : driverType( pDriverType )
-    {
-        dsmInitializeNativeData( this, pDriverType );
-    }
-
-    inline DisplayVideoModeNativeData::~DisplayVideoModeNativeData()
-    {
-        dsmReleaseNativeData( this, driverType );
     }
 
 } // namespace ts3::system

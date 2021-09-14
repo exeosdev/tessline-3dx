@@ -5,17 +5,6 @@
 namespace ts3::system
 {
 
-    static const ColorFormat sColorFormatArray[6] =
-    {
-        ColorFormat::B8G8R8,
-        ColorFormat::B8G8R8A8,
-        ColorFormat::B8G8R8A8SRGB,
-        ColorFormat::R8G8B8A8,
-        ColorFormat::R8G8B8A8SRGB,
-        ColorFormat::R10G10B10A2,
-    };
-
-
     DisplayAdapter::DisplayAdapter( DisplayDriver * pDriver )
     : mDisplayDriver( pDriver )
     , mDriverType( pDriver->mDriverType )
@@ -80,14 +69,40 @@ namespace ts3::system
 
     DisplayOutput::~DisplayOutput() = default;
 
+    ArrayView<const ColorFormat> DisplayOutput::getSupportedColorFormatList() const
+    {
+        return bindArrayView( cvColorFormatArray );
+    }
+
+    bool DisplayOutput::checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings ) const
+    {
+        auto colorFormat = mDisplayDriver->queryDefaultSystemColorFormat();
+        return checkVideoSettingsSupport( pVideoSettings, colorFormat );
+    }
+
+    bool DisplayOutput::checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings, ColorFormat pColorFormat ) const
+    {
+        const auto & colorFormatData = mPrivate->colorFormatMap.at( pColorFormat );
+        for( const auto & displayMode : colorFormatData.videoModeInternalStorage )
+        {
+            if( displayMode.mDesc->settings.matches( pVideoSettings ) )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     const DisplayVideoModeList & DisplayOutput::getVideoModeList() const
     {
-        return mPrivate->getVideoModeList( ColorFormat::SystemNative );
+        auto colorFormat = mDisplayDriver->queryDefaultSystemColorFormat();
+        return getVideoModeList( colorFormat );
     }
 
     const DisplayVideoModeList & DisplayOutput::getVideoModeList( ColorFormat pColorFormat ) const
     {
-        return mPrivate->getVideoModeList( pColorFormat );
+        const auto & colorFormatData = mPrivate->colorFormatMap.at( pColorFormat );
+        return colorFormatData.videoModeList;
     }
 
     bool DisplayOutput::isActiveOutput() const
@@ -98,6 +113,12 @@ namespace ts3::system
     bool DisplayOutput::isPrimaryOutput() const
     {
         return mPrivate->descPriv.flags.isSet( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
+    }
+
+    bool DisplayOutput::isColorFormatSupported( ColorFormat pColorFormat ) const
+    {
+        const auto & colorFormatData = mPrivate->colorFormatMap.at( pColorFormat );
+        return !colorFormatData.videoModeInternalStorage.empty();
     }
 
 
@@ -122,9 +143,12 @@ namespace ts3::system
     , mNativeData( &( mPrivate->nativeDataPriv ) )
     {}
 
-    DisplayDriver::~DisplayDriver() = default;
+    DisplayDriver::~DisplayDriver()
+    {
+        reset();
+    }
 
-    void DisplayDriver::initializeDisplayConfiguration()
+    void DisplayDriver::syncDisplayConfiguration()
     {
         if( !mPrivate->adapterInternalStorage.empty() )
         {
@@ -133,30 +157,19 @@ namespace ts3::system
         _initializeDisplayConfiguration();
     }
 
-    void DisplayDriver::resetDisplayConfiguration()
+    void DisplayDriver::reset()
     {
         _resetDisplayConfiguration();
+    }
+
+    ColorFormat DisplayDriver::queryDefaultSystemColorFormat() const
+    {
+        return _nativeQueryDefaultSystemColorFormat();
     }
 
     const DisplayAdapterList & DisplayDriver::getAdapterList() const
     {
         return mPrivate->adapterList;
-    }
-
-    ColorFormat DisplayDriver::resolveColorFormat( ColorFormat pColorFormat ) const
-    {
-        if( pColorFormat == ColorFormat::SystemNative )
-        {
-            return _nativeGetSystemDefaultColorFormat();
-        }
-        else if( pColorFormat == ColorFormat::Unknown )
-        {
-            return ColorFormat::Unknown;
-        }
-        else
-        {
-            return pColorFormat;
-        }
     }
 
     const DisplayOutputList & DisplayDriver::getOutputList( dsm_index_t pAdapterIndex ) const
@@ -193,16 +206,6 @@ namespace ts3::system
         return _getOutput( pOutputID );
     }
 
-    ColorFormat DisplayDriver::getSystemDefaultColorFormat() const
-    {
-        return _nativeGetSystemDefaultColorFormat();
-    }
-
-    ArrayView<const ColorFormat> DisplayDriver::getSupportedColorFormatList() const
-    {
-        return _nativeGetSupportedColorFormatList();
-    }
-
     bool DisplayDriver::hasActiveAdapters() const
     {
         return mPrivate->activeAdaptersNum > 0;
@@ -211,6 +214,11 @@ namespace ts3::system
     bool DisplayDriver::hasAnyAdapters() const
     {
         return !mPrivate->adapterInternalStorage.empty();
+    }
+
+    bool DisplayDriver::hasValidConfiguration() const
+    {
+        return !mPrivate->adapterInternalStorage.empty() && ( mPrivate->combinedActiveOutputsNum > 0 );
     }
 
     std::string DisplayDriver::generateConfigurationDump( const std::string & pLinePrefix ) const
@@ -258,8 +266,7 @@ namespace ts3::system
                         result.append( 1, '\t' );
                         result.append( output->mDesc->toString() );
 
-                        auto colorFormatList = getSupportedColorFormatList();
-                        for( auto colorFormat : colorFormatList )
+                        for( auto colorFormat : cvColorFormatArray )
                         {
                             auto colorFormatStr = vsxQueryColorFormatStr( colorFormat );
                             result.append( 1, '\n' );
@@ -267,8 +274,8 @@ namespace ts3::system
                             result.append( 2, '\t' );
                             result.append( colorFormatStr );
 
-                            const auto & displayModeList = output->getVideoModeList( colorFormat );
-                            if( displayModeList.empty() )
+                            const auto & videoModeList = output->getVideoModeList( colorFormat );
+                            if( videoModeList.empty() )
                             {
                                 result.append( 1, '\n' );
                                 result.append( pLinePrefix );
@@ -277,12 +284,12 @@ namespace ts3::system
                             }
                             else
                             {
-                                for( const auto * displayMode : displayModeList )
+                                for( const auto * videoMode : videoModeList )
                                 {
                                     result.append( 1, '\n' );
                                     result.append( pLinePrefix );
                                     result.append( 3, '\t' );
-                                    result.append( displayMode->mDesc->toString() );
+                                    result.append( videoMode->mDesc->toString() );
                                 }
                             }
                         }
@@ -336,13 +343,18 @@ namespace ts3::system
 
     DisplayVideoMode * DisplayDriver::addVideoMode( DisplayOutput & pOutput, ColorFormat pColorFormat )
     {
-        auto & colorFormatData = pOutput.mPrivate->getColorFormatData( pColorFormat );
+        auto & colorFormatData = pOutput.mPrivate->colorFormatMap[pColorFormat];
+
+        if( colorFormatData.colorFormat == ColorFormat::Unknown )
+        {
+            colorFormatData.colorFormat = pColorFormat;
+        }
 
         const auto videoModeIndex = colorFormatData.videoModeInternalStorage.size();
 
         DisplayVideoModeIDGen videoModeIDGen;
         videoModeIDGen.uOutputID = pOutput.mPrivate->descPriv.outputID;
-        videoModeIDGen.uColorFormatIndex = static_cast<dsm_index_t>( pColorFormat );
+        videoModeIDGen.uColorFormatIndex = static_cast<dsm_index_t>( colorFormatData.colorFormat );
         videoModeIDGen.uModeIndex = static_cast<dsm_index_t>( videoModeIndex );
 
         auto & videoMode = colorFormatData.videoModeInternalStorage.emplace_back( &pOutput );
@@ -350,7 +362,7 @@ namespace ts3::system
         videoModeDesc.driverType = mDriverType;
         videoModeDesc.videoModeIndex = videoModeIDGen.uModeIndex;
         videoModeDesc.videoModeID = videoModeIDGen.modeID;
-        videoModeDesc.colorFormat = colorFormatData.colorFormat;
+        videoModeDesc.colorFormat = pColorFormat;
 
         // Video modes are not added to the helper list at this point.
         // This is done as a post-process step later in DisplayDriver::_enumVideoModes().
@@ -368,49 +380,16 @@ namespace ts3::system
         // are populated and all configuration/properties are valid and available.
         _enumDisplayDevices();
 
-        // Now, enumerate supported display modes for all outputs.
-        for( auto & adapter : mPrivate->adapterInternalStorage )
-        {
-            for( auto & output : adapter.mPrivate->outputInternalStorage )
-            {
-                // Each driver can provide a list of supported color formats.
-                // The default set (sColorFormatArray) may not be available
-                // on every platform (especially on mobile).
-                auto colorFormatList = getSupportedColorFormatList();
-
-                for( auto colorFormat : colorFormatList )
-                {
-                    // Enum all supported display modes for the current output and color format
-                    _enumVideoModes( output, colorFormat );
-                }
-            }
-        }
+        _enumVideoModes();
     }
 
     void DisplayDriver::_resetDisplayConfiguration()
     {
-        for( auto & adapter : mPrivate->adapterInternalStorage )
-        {
-            for( auto & output : adapter.mPrivate->outputInternalStorage )
-            {
-                auto colorFormatList = getSupportedColorFormatList();
-                for( auto colorFormat : colorFormatList )
-                {
-                    auto & colorFormatData = output.mPrivate->getColorFormatData( colorFormat );
-                    for( auto & videoMode : colorFormatData.videoModeInternalStorage )
-                    {
-                        _nativeDestroyVideoMode( videoMode );
-                    }
-                    colorFormatData.videoModeInternalStorage.clear();
-                    colorFormatData.videoModeList.clear();
-                }
-                output.mPrivate->resetColorFormatMap();
-                _nativeDestroyOutput( output );
-            }
-            adapter.mPrivate->outputInternalStorage.clear();
-            _nativeDestroyAdapter( adapter );
-        }
         mPrivate->adapterInternalStorage.clear();
+        mPrivate->adapterList.clear();
+        mPrivate->primaryAdapter = nullptr;
+        mPrivate->activeAdaptersNum = 0u;
+        mPrivate->combinedActiveOutputsNum = 0u;
     }
 
     void DisplayDriver::_enumDisplayDevices()
@@ -471,6 +450,7 @@ namespace ts3::system
                         if( output.isActiveOutput() )
                         {
                             adapter.mPrivate->activeOutputsNum += 1;
+                            mPrivate->combinedActiveOutputsNum += 1;
                         }
 
                         adapter.mPrivate->outputList.push_back( &output );
@@ -539,26 +519,26 @@ namespace ts3::system
         }
     }
 
-    void DisplayDriver::_enumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
+    void DisplayDriver::_enumVideoModes()
     {
-        // There is no "update" option for the display topology. Each time the configuration changes,
-        // we do a full reset of the whole cached state and re-initialize/enumerate everything. Thus,
-        // the list of display modes should be always empty.
-
-        auto & colorFormatData = pOutput.mPrivate->getColorFormatData( pColorFormat );
-        ts3DebugAssert( colorFormatData.videoModeInternalStorage.empty() );
-
-        // Driver-specific enumeration.
-        _nativeEnumVideoModes( pOutput, colorFormatData.colorFormat );
-
-        if( !colorFormatData.videoModeInternalStorage.empty() )
+        for( auto & adapter : mPrivate->adapterInternalStorage )
         {
-            // Reserve the space for list of handles/pointers to available video modes.
-            colorFormatData.videoModeList.reserve( colorFormatData.videoModeInternalStorage.size() );
-
-            for( auto & videoMode : colorFormatData.videoModeInternalStorage )
+            for( auto & output : adapter.mPrivate->outputInternalStorage )
             {
-                colorFormatData.videoModeList.push_back( &videoMode );
+                for( auto colorFormat : cvColorFormatArray )
+                {
+                    _nativeEnumVideoModes( output, colorFormat );
+
+                    auto & colorFormatData = output.mPrivate->colorFormatMap[colorFormat];
+                    if( !colorFormatData.videoModeInternalStorage.empty() )
+                    {
+                        colorFormatData.videoModeList.reserve( colorFormatData.videoModeInternalStorage.size() );
+                        for( auto & videoMode : colorFormatData.videoModeInternalStorage )
+                        {
+                            colorFormatData.videoModeList.push_back( &videoMode );
+                        }
+                    }
+                }
             }
         }
     }

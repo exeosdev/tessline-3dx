@@ -207,7 +207,8 @@ namespace ts3::system
 	        DisplayVideoSettings videoSettings;
 	        videoSettings.resolution.x = static_cast<uint32>( dxgiDisplayModeDesc.Width );
 	        videoSettings.resolution.y = static_cast<uint32>( dxgiDisplayModeDesc.Height );
-	        videoSettings.refreshRate = static_cast<uint16>( ( float )dxgiDisplayModeDesc.RefreshRate.Numerator / dxgiDisplayModeDesc.RefreshRate.Denominator );
+	        auto & refreshRate = dxgiDisplayModeDesc.RefreshRate;
+	        videoSettings.refreshRate = static_cast<uint16>( static_cast<float>( refreshRate.Numerator ) / refreshRate.Denominator );
 
 	        if( dxgiDisplayModeDesc.ScanlineOrdering == DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE )
 	        {
@@ -240,38 +241,9 @@ namespace ts3::system
 	    }
 	}
 
-	void DisplayDriverDXGI::_nativeDestroyAdapter( DisplayAdapter & pAdapter )
-	{
-	    pAdapter.mPrivate->nativeDataPriv.dxgi->dxgiAdapter.Reset();
-	}
-
-	void DisplayDriverDXGI::_nativeDestroyOutput( DisplayOutput & pOutput )
-	{
-	    pOutput.mPrivate->nativeDataPriv.dxgi->dxgiOutput.Reset();
-	}
-
-	void DisplayDriverDXGI::_nativeDestroyVideoMode( DisplayVideoMode & pVideoMode )
-	{
-	    ( pVideoMode );
-	}
-
-	ColorFormat DisplayDriverDXGI::_nativeGetSystemDefaultColorFormat() const
+    ColorFormat DisplayDriverDXGI::_nativeQueryDefaultSystemColorFormat() const
     {
 	    return ColorFormat::B8G8R8A8;
-    }
-
-	ArrayView<const ColorFormat> DisplayDriverDXGI::_nativeGetSupportedColorFormatList() const
-    {
-	    static const ColorFormat sColorFormatArray[] =
-        {
-            ColorFormat::B8G8R8,
-            ColorFormat::B8G8R8A8,
-            ColorFormat::B8G8R8A8SRGB,
-            ColorFormat::R8G8B8A8,
-            ColorFormat::R8G8B8A8SRGB,
-            ColorFormat::R10G10B10A2,
-        };
-	    return bindArrayView( sColorFormatArray );
     }
 
 

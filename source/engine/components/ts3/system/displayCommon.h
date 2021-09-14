@@ -41,17 +41,21 @@ namespace ts3::system
 	using DisplayOffset = math::Pos2i;
 	using DisplaySize = math::Size2u;
 
+	using DisplayAdapterList = std::vector<DisplayAdapter *>;
+	using DisplayOutputList = std::vector<DisplayOutput *>;
+	using DisplayVideoModeList = std::vector<DisplayVideoMode *>;
+
 	/// @brief Represents invalid display system index (of an adapter or an output, for example).
-	constexpr dsm_index_t CX_DSM_INDEX_INVALID = Limits<dsm_index_t>::maxValue - 1;
+	inline constexpr dsm_index_t CX_DSM_INDEX_INVALID = Limits<dsm_index_t>::maxValue - 1;
 
 	/// @brief
-	constexpr dsm_index_t CX_DSM_INDEX_DEFAULT = Limits<dsm_index_t>::maxValue;
+	inline constexpr dsm_index_t CX_DSM_INDEX_DEFAULT = Limits<dsm_index_t>::maxValue;
 
 	/// @brief
-	constexpr dsm_output_id_t CX_DSM_OUTPUT_ID_DEFAULT = Limits<dsm_output_id_t>::maxValue;
+	inline constexpr dsm_output_id_t CX_DSM_OUTPUT_ID_DEFAULT = Limits<dsm_output_id_t>::maxValue;
 
 	/// @brief Represents invalid display settings hash. Used to identify/report invalid and/or empty configurations.
-	constexpr dsm_video_settings_hash_t CX_DSM_VIDEO_SETTINGS_HASH_INVALID = Limits<dsm_video_settings_hash_t>::maxValue;
+	inline constexpr dsm_video_settings_hash_t CX_DSM_VIDEO_SETTINGS_HASH_INVALID = Limits<dsm_video_settings_hash_t>::maxValue;
 
 	/// @brief Specifies supported types of drivers available through a DisplayManager.
 	/// Driver support is platform-specific and some of them may not be available on some systems.
@@ -157,19 +161,29 @@ namespace ts3::system
 	    DisplaySize resolution;
 		uint16 refreshRate = 0u;
 		Bitmask<EDisplayVideoSettingsFlags> flags = 0u;
+
+		bool equals( const DisplayVideoSettings & pOther ) const
+		{
+		    return ( resolution == pOther.resolution ) && ( refreshRate == pOther.refreshRate ) && ( flags == pOther.flags );
+		}
+
+		bool matches( const DisplayVideoSettings & pOther ) const
+		{
+		    return ( resolution == pOther.resolution ) && ( refreshRate == pOther.refreshRate ) && flags.isSet( pOther.flags );
+		}
 	};
 
 	inline bool operator==( const DisplayVideoSettings & pLhs, const DisplayVideoSettings & pRhs )
 	{
-	    return ( pLhs.resolution == pRhs.resolution ) && ( pLhs.refreshRate == pRhs.refreshRate ) && ( pLhs.flags == pRhs.flags );
+	    return pLhs.equals( pRhs );
 	}
 
 	inline bool operator!=( const DisplayVideoSettings & pLhs, const DisplayVideoSettings & pRhs )
 	{
-	    return ( pLhs.resolution != pRhs.resolution ) || ( pLhs.refreshRate != pRhs.refreshRate ) || ( pLhs.flags != pRhs.flags );
+	    return !pLhs.equals( pRhs );
 	}
 
-	constexpr DisplayVideoSettings cvDisplayVideoSettingsEmpty { { 0U, 0U }, 0U, 0U };
+	inline constexpr DisplayVideoSettings cvDisplayVideoSettingsEmpty { { 0U, 0U }, 0U, 0U };
 
 	/// @brief
 	struct DisplayVideoSettingsFilter
@@ -196,7 +210,7 @@ namespace ts3::system
 	    return ( pLhs.refSettings != pRhs.refSettings ) || ( pLhs.flags != pRhs.flags );
 	}
 
-	constexpr DisplayVideoSettingsFilter cvDisplayVideoSettingsFilterNone { cvDisplayVideoSettingsEmpty, 0U };
+	inline constexpr DisplayVideoSettingsFilter cvDisplayVideoSettingsFilterNone { cvDisplayVideoSettingsEmpty, 0U };
 
 	struct DisplayAdapterDesc
 	{
@@ -233,17 +247,15 @@ namespace ts3::system
 		std::string toString() const;
 	};
 
-	using DisplayAdapterList = std::vector<DisplayAdapter *>;
-	using DisplayOutputList = std::vector<DisplayOutput *>;
-	using DisplayVideoModeList = std::vector<DisplayVideoMode *>;
-
-	TS3_PCL_ATTR_NO_DISCARD dsm_output_id_t dsmCreateDisplayOutputIDGen( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex );
+	TS3_PCL_ATTR_NO_DISCARD dsm_output_id_t dsmCreateDisplayOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex );
 
 	TS3_PCL_ATTR_NO_DISCARD dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
 	TS3_PCL_ATTR_NO_DISCARD std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
 	TS3_PCL_ATTR_NO_DISCARD EDisplayAdapterVendorID dsmResolveAdapterVendorID( const std::string & pAdapterName );
+
+	TS3_PCL_ATTR_NO_DISCARD bool dsmCheckSettingsFilterMatch( const DisplayVideoSettingsFilter & pFilter, const DisplayVideoSettings & pSettings );
 
 
 } // namespace ts3::system

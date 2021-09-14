@@ -214,35 +214,10 @@ namespace ts3::system
             lastSettingsHash = settingsHash;
         }
     }
-    
-    void DisplayDriverGeneric::_nativeDestroyAdapter( DisplayAdapter & pAdapter )
-    {
-        ( pAdapter );
-    }
 
-    void DisplayDriverGeneric::_nativeDestroyOutput( DisplayOutput & pOutput )
-    {
-        ( pOutput );
-    }
-
-    void DisplayDriverGeneric::_nativeDestroyVideoMode( DisplayVideoMode & pVideoMode )
-    {
-        ( pVideoMode );
-    }
-
-    ColorFormat DisplayDriverGeneric::_nativeGetSystemDefaultColorFormat() const
+    ColorFormat DisplayDriverGeneric::_nativeQueryDefaultSystemColorFormat() const
     {
         return ColorFormat::B8G8R8A8;
-    }
-
-    ArrayView<const ColorFormat> DisplayDriverGeneric::_nativeGetSupportedColorFormatList() const
-    {
-        static const ColorFormat sColorFormatArray[] =
-        {
-            ColorFormat::B8G8R8,
-            ColorFormat::B8G8R8A8,
-        };
-        return bindArrayView( sColorFormatArray );
     }
 
 

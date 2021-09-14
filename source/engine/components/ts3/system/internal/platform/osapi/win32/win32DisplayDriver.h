@@ -3,6 +3,7 @@
 #define __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_DISPLAY_DRIVER_H__
 
 #include "win32Common.h"
+#include <ts3/system/visual.h>
 
 namespace ts3::system
 {

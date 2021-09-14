@@ -65,7 +65,7 @@ namespace ts3::system
         return strStream.str();
     }
 
-    dsm_output_id_t dsmCreateDisplayOutputIDGen( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex )
+    dsm_output_id_t dsmCreateDisplayOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex )
     {
         DisplayOutputIDGen outputIDGen;
         outputIDGen.uAdapterIndex = pAdapterIndex;
@@ -142,6 +142,11 @@ namespace ts3::system
         }
 
         return adapterVendorID;
+	}
+
+	bool dsmCheckSettingsFilterMatch( const DisplayVideoSettingsFilter & pFilter, const DisplayVideoSettings & pSettings )
+	{
+        return true;
 	}
 
 } // namespace ts3::system
