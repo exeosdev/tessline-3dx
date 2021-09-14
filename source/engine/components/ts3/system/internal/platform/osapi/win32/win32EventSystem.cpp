@@ -89,9 +89,14 @@ namespace ts3::system
         auto wndEventProcAddress = reinterpret_cast<LONG_PTR>( _win32EventSourceProxyEventProc );
         ::SetWindowLongPtrA( windowHwnd, GWLP_WNDPROC, wndEventProcAddress );
 
-        auto updateFlags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED;
-        // Trigger the update of control's internals.
-        ::SetWindowPos( windowHwnd, nullptr, 0, 0, 0, 0, updateFlags );
+        // Trigger the update of the window to ensure changes are visible.
+        ::SetWindowPos( windowHwnd,
+                        nullptr,
+                        0,
+                        0,
+                        0,
+                        0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
 	}
 
 
@@ -99,6 +104,27 @@ namespace ts3::system
 	{
 	    switch ( pMSG.message )
 	    {
+	        case WM_SHOWWINDOW:
+	        {
+	            auto & eWindowUpdateVisibility = pOutEvent.eWindowUpdateVisibility;
+	            eWindowUpdateVisibility.eventCode = E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY;
+	            eWindowUpdateVisibility.newVisibilityState = ( pMSG.wParam != FALSE );
+	            eWindowUpdateVisibility.sourceWindow = pEventController.mPrivate->windowManager->findWindow( [&pMSG]( Window & pWindow ) -> bool {
+	                return pWindow.mNativeData->hwnd == pMSG.hwnd;
+	            });
+	            break;
+	        }
+	        case WM_SIZE:
+	        {
+	            auto & eWindowUpdateResize = pOutEvent.eWindowUpdateResize;
+	            eWindowUpdateResize.eventCode = E_EVENT_CODE_WINDOW_UPDATE_RESIZE;
+	            eWindowUpdateResize.newSize.x = LOWORD( pMSG.lParam );
+	            eWindowUpdateResize.newSize.y = HIWORD( pMSG.lParam );
+	            eWindowUpdateResize.sourceWindow = pEventController.mPrivate->windowManager->findWindow( [&pMSG]( Window & pWindow ) -> bool {
+	                return pWindow.mNativeData->hwnd == pMSG.hwnd;
+	            });
+	            break;
+	        }
             case WM_CLOSE:
 	        {
 	            auto & eWindowUpdateClose = pOutEvent.eWindowUpdateClose;

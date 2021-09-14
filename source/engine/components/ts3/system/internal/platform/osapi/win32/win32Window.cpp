@@ -94,25 +94,25 @@ namespace ts3::system
 		auto frameWidth = windowRect.right - windowRect.left;
 		auto frameHeight = windowRect.bottom - windowRect.top;
 
-		HWND windowHandle = ::CreateWindowExA( WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW,
-		                                       pWindowNativeData.wndClsName,
-		                                       pCreateInfo.properties.title.c_str(),
-		                                       win32FrameStyle,
-		                                       framePosX,
-		                                       framePosY,
-		                                       frameWidth,
-		                                       frameHeight,
-		                                       nullptr,
-		                                       nullptr,
-		                                       pWindowNativeData.moduleHandle,
-		                                       &pWindowNativeData );
+		HWND windowHwnd = ::CreateWindowExA( WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW,
+                                             pWindowNativeData.wndClsName,
+                                             pCreateInfo.properties.title.c_str(),
+                                             win32FrameStyle,
+                                             framePosX,
+                                             framePosY,
+                                             frameWidth,
+                                             frameHeight,
+                                             nullptr,
+                                             nullptr,
+                                             pWindowNativeData.moduleHandle,
+                                             &pWindowNativeData );
 
-		if ( windowHandle == nullptr )
+		if ( windowHwnd == nullptr )
 		{
 			throw 0;
 		}
 
-		::SetWindowPos( windowHandle,
+		::SetWindowPos( windowHwnd,
                         nullptr,
                         0, // X coordinate
                         0, // Y coordinate
@@ -121,12 +121,12 @@ namespace ts3::system
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
 
 		// Retrieve the current number of windows created with our class (ClassRefCounter).
-		auto wndClassRefCounter = ::GetClassLongPtrA( windowHandle, 0 );
+		auto wndClassRefCounter = ::GetClassLongPtrA( windowHwnd, 0 );
 
 		// Increment the counter and store the new value.
-		::SetClassLongPtrA( windowHandle, 0, wndClassRefCounter + 1 );
+		::SetClassLongPtrA( windowHwnd, 0, wndClassRefCounter + 1 );
 
-		pWindowNativeData.hwnd = windowHandle;
+		pWindowNativeData.hwnd = windowHwnd;
 	}
 
 	void nativeWin32DestroyWindow( WindowNativeData & pWindowNativeData )
