@@ -63,6 +63,18 @@ namespace ts3::system
         mPrivate->windowList.clear();
     }
 
+    Window * WindowManager::findWindow( WindowPredicateCallback pPredicate )
+    {
+        for( auto & window : mPrivate->windowList )
+        {
+            if( pPredicate( window ) )
+            {
+                return &window;
+            }
+        }
+        return nullptr;
+    }
+
     bool WindowManager::isWindowValid( Window & pWindow ) const
     {
         if( mPrivate->windowList.empty() )

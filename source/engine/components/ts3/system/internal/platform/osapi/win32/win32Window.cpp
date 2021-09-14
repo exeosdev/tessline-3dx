@@ -6,7 +6,6 @@ namespace ts3::system
 {
 
 	void _win32RegisterWndClass( WindowNativeData & pWindowNativeData );
-	void _win32UnregisterWndClass( WindowNativeData & pWindowNativeData );
 	DWORD _win32TranslateFrameStyle( WindowFrameStyle pStyle );
 	LRESULT __stdcall _win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 
@@ -121,15 +120,36 @@ namespace ts3::system
                         0, // Height of the frame
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
 
+		// Retrieve the current number of windows created with our class (ClassRefCounter).
+		auto wndClassRefCounter = ::GetClassLongPtrA( windowHandle, 0 );
+
+		// Increment the counter and store the new value.
+		::SetClassLongPtrA( windowHandle, 0, wndClassRefCounter + 1 );
+
 		pWindowNativeData.hwnd = windowHandle;
 	}
 
 	void nativeWin32DestroyWindow( WindowNativeData & pWindowNativeData )
 	{
+	    // Retrieve the current number of windows created with our class (ClassRefCounter).
+	    auto wndClassRefCounter = ::GetClassLongPtrA( pWindowNativeData.hwnd, 0 );
+
+	    // We are destroying one of the windows, decrement the counter.
+	    --wndClassRefCounter;
+
+	    ::SetClassLongPtrA( pWindowNativeData.hwnd, 0, wndClassRefCounter );
+
 		::DestroyWindow( pWindowNativeData.hwnd );
+
+	    if( wndClassRefCounter == 0 )
+	    {
+	        ::UnregisterClassA( pWindowNativeData.wndClsName, pWindowNativeData.moduleHandle );
+	    }
 
 		pWindowNativeData.hwnd = nullptr;
 		pWindowNativeData.wndClsID = 0;
+		pWindowNativeData.wndClsName = nullptr;
+		pWindowNativeData.moduleHandle = nullptr;
 	}
 
 	void _win32RegisterWndClass( WindowNativeData & pWindowNativeData )
@@ -148,7 +168,8 @@ namespace ts3::system
 		if ( classFindResult == FALSE )
 		{
 			windowClass.cbSize = sizeof( WNDCLASSEXA );
-			windowClass.cbClsExtra = 0;
+			// Note this! We need one integer value for a simple ref counter.
+			windowClass.cbClsExtra = sizeof( LONG_PTR );
 			windowClass.cbWndExtra = 0;
 			windowClass.hbrBackground = static_cast<HBRUSH>( ::GetStockObject( GRAY_BRUSH ) );
 			windowClass.hCursor = ::LoadCursorA( nullptr, IDC_ARROW );
@@ -172,15 +193,6 @@ namespace ts3::system
 
 		pWindowNativeData.wndClsName = wndClassName;
 		pWindowNativeData.moduleHandle = wndProcModuleHandle;
-	}
-
-	void _win32UnregisterWndClass( WindowNativeData & pWindowNativeData )
-	{
-	    ::UnregisterClassA( pWindowNativeData.wndClsName, pWindowNativeData.moduleHandle );
-
-	    pWindowNativeData.wndClsID = 0;
-		pWindowNativeData.wndClsName = nullptr;
-		pWindowNativeData.moduleHandle = nullptr;
 	}
 
 	DWORD _win32TranslateFrameStyle( WindowFrameStyle pStyle )

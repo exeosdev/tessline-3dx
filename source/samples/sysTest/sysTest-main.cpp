@@ -15,9 +15,9 @@ int main( int pArgc, const char ** pArgv )
 
     auto sysCtx = creCreateSystemContext( sysCtxCreateInfo );
     auto dmgr = createSysObject<DisplayManager>( sysCtx );
-    auto ddrv = dmgr->createDisplayDriver( EDisplayDriverType::DXGI );
+    auto ddrv = dmgr->createDisplayDriver( EDisplayDriverType::Generic );
 
-    ddrv->initializeDisplayConfiguration();
+    ddrv->syncDisplayConfiguration();
     auto dcdump = ddrv->generateConfigurationDump();
     printf( "%s\n", dcdump.c_str() );
     
@@ -35,8 +35,20 @@ int main( int pArgc, const char ** pArgv )
     auto * evtd = evts->getEventDispatcher( CX_EVENT_DISPATCHER_ID_DEFAULT );
     evts->setActiveDispatcher( *evtd );
 
-    evtd->bindEventHandler( EEventCodeIndex::AppActivityQuit, [&runApp](const EventObject & pEvt) -> bool {
+    evtd->bindEventHandler( EEventCodeIndex::AppActivityQuit, [&runApp,&wnd](const EventObject & pEvt) -> bool {
+        if( wnd )
+        {
+            wnd->destroy();
+            wnd = nullptr;
+        }
         runApp = false;
+        return true;
+    });
+    evtd->bindEventHandler( EEventCodeIndex::WindowUpdateClose, [wnd,evtd](const EventObject & pEvt) -> bool {
+        if( pEvt.eWindowUpdateClose.sourceWindow == wnd )
+        {
+            evtd->postEventAppQuit();
+        }
         return true;
     });
     evtd->bindEventHandler( EEventCodeIndex::InputKeyboardKey, [evtd](const EventObject & pEvt) -> bool {
@@ -47,7 +59,7 @@ int main( int pArgc, const char ** pArgv )
         return true;
     });
 
-    nativeWin32EnableWindowEventSupport( wnd->mNativeData->hwnd, evts.get() );
+    nativeEnableWindowEventSupport( *wnd, *evts );
 
     while( runApp )
     {

@@ -14,6 +14,8 @@ namespace ts3::system
     ts3SysDeclareHandle( DisplayManager );
     ts3SysDeclareHandle( WindowManager );
 
+    using WindowPredicateCallback = std::function<bool( Window & )>;
+
 	struct WindowCreateInfo
 	{
 		WindowProperties properties;
@@ -38,6 +40,8 @@ namespace ts3::system
         void removeWindow( Window & pWindow );
 
         void reset();
+
+        Window * findWindow( WindowPredicateCallback pPredicate );
 
         TS3_SYSTEM_API_NODISCARD bool isWindowValid( Window & pWindow ) const;
 

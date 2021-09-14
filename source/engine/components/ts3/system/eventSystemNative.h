@@ -19,6 +19,9 @@
 namespace ts3::system
 {
 
+    class Window;
+    class WindowManager;
+
     // Represents invalid mouse position. Used as a default value for last position registered.
     constexpr math::Vec2i32 CX_EVENT_MOUSE_POS_INVALID { CX_INT32_MAX, CX_INT32_MAX };
 
@@ -62,6 +65,7 @@ namespace ts3::system
         EventDispatcher * activeDispatcher = nullptr;
         const EventSystemInternalConfig * currentInternalConfig = nullptr;
         EventInputState inputState;
+        WindowManager * windowManager = nullptr;
 
         explicit ObjectPrivateData( EventController * pObjectPtr )
         : objectPtr( pObjectPtr )
@@ -93,6 +97,8 @@ namespace ts3::system
     };
 
     TS3_SYSTEM_API bool nativeEventTranslate( EventController & pEventController, const NativeEvent & pNativeEvent, EventObject & pOutEvent );
+
+    TS3_SYSTEM_API void nativeEnableWindowEventSupport( Window & pWindow, EventController & pEventController );
 
     inline bool nativeEventDispatch( EventController & pEventController, const NativeEvent & pNativeEvent )
     {
