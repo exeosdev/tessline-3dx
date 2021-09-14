@@ -36,12 +36,6 @@ namespace ts3::system
 
         TS3_PCL_ATTR_NO_DISCARD DisplaySize queryMinWindowSize() const;
 
-        TS3_PCL_ATTR_NO_DISCARD bool checkWindowGeometry( const math::Pos2i & pWindowPosition,
-                                                          const math::Size2u & pWindowSize ) const;
-
-        bool validateWindowGeometry( math::Pos2i & pWindowPosition,
-                                     math::Size2u & pWindowSize ) const;
-
     private:
         void _nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const;
         void _nativeQueryMinWindowSize( DisplaySize & pOutSize ) const;

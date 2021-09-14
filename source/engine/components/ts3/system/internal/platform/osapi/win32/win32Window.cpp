@@ -28,34 +28,44 @@ namespace ts3::system
 	}
 
 
-	void Window::_nativeResize( const WindowSize & pNewWindowSize, WindowSizeMode pSizeMode )
+	void Window::_nativeSetTitleText( const std::string & pTitleText )
+	{}
+
+	void Window::_nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode )
 	{
 	    RECT windowRect;
 	    windowRect.left = 0;
 	    windowRect.top = 0;
-	    windowRect.right = pNewWindowSize.x;
-	    windowRect.bottom = pNewWindowSize.y;
+	    windowRect.right = static_cast<LONG>( pWindowGeometry.size.x );
+	    windowRect.bottom = static_cast<LONG>( pWindowGeometry.size.y );
+
+	    auto win32FrameStyle = _win32TranslateFrameStyle( pWindowGeometry.frameStyle );
+
+	    if( pWindowGeometry.frameStyle == WindowFrameStyle::Unspecified )
+	    {
+	        win32FrameStyle = ::GetWindowLongA( mNativeData->hwnd, GWL_STYLE );
+	    }
 
 	    if( pSizeMode == WindowSizeMode::ClientArea )
 	    {
-	        auto windowStyle = ::GetWindowLongA( mNativeData->hwnd, GWL_STYLE );
-	        ::AdjustWindowRect( &windowRect, windowStyle, FALSE );
+	        ::AdjustWindowRect( &windowRect, win32FrameStyle, FALSE );
 	    }
+
+	    const auto windowPosX = static_cast<int>( pWindowGeometry.position.x + windowRect.left );
+	    const auto windowPosY = static_cast<int>( pWindowGeometry.position.y + windowRect.top );
+	    const auto windowWidth = static_cast<int>( windowRect.right - windowRect.left );
+	    const auto windowHeight = static_cast<int>( windowRect.bottom - windowRect.top );
+
+	    ::SetWindowLongPtrA( mNativeData->hwnd, GWL_STYLE, win32FrameStyle );
 
 	    ::SetWindowPos( mNativeData->hwnd,
                         nullptr,
-                        0, // X coordinate
-                        0, // Y coordinate
-                        static_cast<int>( windowRect.right - windowRect.left ), // Width of the frame
-                        static_cast<int>( windowRect.bottom - windowRect.top ), // Height of the frame
-                        SWP_NOZORDER | SWP_FRAMECHANGED );
+                        windowPosX, // X coordinate
+                        windowPosY, // Y coordinate
+                        windowWidth, // Width of the frame
+                        windowHeight, // Height of the frame
+                        SWP_NOZORDER | SWP_FRAMECHANGED | SWP_SHOWWINDOW );
 	}
-
-	void Window::_nativeSetTitleText( const std::string & pTitleText )
-	{}
-
-	void Window::_nativeUpdateGeometry( const WindowGeometry & pWindowGeometry )
-	{}
 
 	void Window::_nativeGetSize( WindowSizeMode pSizeMode, WindowSize & pOutSize ) const
 	{
@@ -198,7 +208,7 @@ namespace ts3::system
 	DWORD _win32TranslateFrameStyle( WindowFrameStyle pStyle )
 	{
 		//
-		constexpr DWORD overlayFrameStyle = WS_POPUP;
+		constexpr DWORD overlayFrameStyle = WS_POPUP | WS_EX_TOPMOST;
 		//
 		constexpr DWORD captionFrameStyle = WS_CAPTION | WS_SYSMENU;
 		//
@@ -225,10 +235,6 @@ namespace ts3::system
 
 			case WindowFrameStyle::Resizeable:
 				resultStyle = resizeableFrameStyle;
-				break;
-
-			default:
-				resultStyle = fixedFrameStyle;
 				break;
 		}
 

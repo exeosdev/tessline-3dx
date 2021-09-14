@@ -19,6 +19,11 @@ namespace ts3::system
     using WindowList = std::list<Window>;
     using WindowRef = std::list<Window>::iterator;
 
+    enum EWindowStateFlags : uint32
+    {
+        E_WINDOW_STATE_FLAG_FULLSCREEN_BIT = 0x8000
+    };
+
     struct WindowManager::ObjectPrivateData
     {
         WindowManagerNativeData nativeDataPriv;
@@ -29,6 +34,8 @@ namespace ts3::system
     {
         WindowNativeData nativeDataPriv;
         WindowRef windowManagerListRef;
+        Bitmask<EWindowStateFlags> stateFlags = 0;
+        WindowSize preFullscreenSavedSize;
     };
 
 } // namespace ts3::system

@@ -51,10 +51,18 @@ int main( int pArgc, const char ** pArgv )
         }
         return true;
     });
-    evtd->bindEventHandler( EEventCodeIndex::InputKeyboardKey, [evtd](const EventObject & pEvt) -> bool {
+    evtd->bindEventHandler( EEventCodeIndex::InputKeyboardKey, [wnd,evtd](const EventObject & pEvt) -> bool {
         if( pEvt.eInputKeyboardKey.keyCode == KeyCode::Escape )
         {
             evtd->postEventAppQuit();
+        }
+        else if( pEvt.eInputKeyboardKey.keyCode == KeyCode::CharF )
+        {
+            wnd->setFullscreenMode( true );
+        }
+        else if( pEvt.eInputKeyboardKey.keyCode == KeyCode::CharG )
+        {
+            wnd->setFullscreenMode( false );
         }
         return true;
     });

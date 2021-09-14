@@ -31,6 +31,8 @@ namespace ts3::system
 	/// @brief Window styles supported by the system.
 	enum class WindowFrameStyle : enum_default_value_t
 	{
+	    //
+	    Unspecified,
 		// Title-bar only window, no system menu, non-resizeable, no close or minimize button.
 		Caption,
 		// Fixed window, with system menu, non-resizeable.
@@ -40,7 +42,7 @@ namespace ts3::system
 		// "Normal" window with title bar, minimize/maximize buttons (if applicable), resizeable.
 		Resizeable,
 		// Default style is the one which is most convenient for rendering - fixed frame.
-		Default = static_cast< enum_default_value_t >( Fixed )
+		Default = static_cast< enum_default_value_t >( Fixed ),
 	};
 
 	/// @brief
