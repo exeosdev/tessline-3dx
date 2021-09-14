@@ -32,6 +32,7 @@ namespace ts3::system
 			EvtInputTouchDown          eInputTouchDown;
 			EvtInputTouchMove          eInputTouchMove;
 			EvtInputTouchUp            eInputTouchUp;
+			EvtWindow<0>               eWindow;
 			EvtWindowUpdateClose       eWindowUpdateClose;
 			EvtWindowUpdateFullscreen  eWindowUpdateFullscreen;
 			EvtWindowUpdateResize      eWindowUpdateResize;

@@ -45,9 +45,9 @@ namespace ts3::system
 	bool _win32TranslateInputEventKeyboard( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
 	bool _win32TranslateInputEventMouse( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
 	bool _win32TranslateInputEventTouch( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
+	LRESULT __stdcall _win32EventSourceProxyEventProc( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 	KeyCode _win32GetSysKeyCode( WPARAM pWparam );
 	Bitmask<MouseButtonFlagBits> _win32GetMouseButtonStateMask( WPARAM pWparam );
-	LRESULT __stdcall _win32EventSourceProxyEventProc( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 
 
 	bool nativeEventTranslate( EventController & pEventController, const NativeEvent & pNativeEvent, EventObject & pOutEvent )
@@ -106,32 +106,35 @@ namespace ts3::system
 	    {
 	        case WM_SHOWWINDOW:
 	        {
+	            auto * windowObject = pEventController.mPrivate->windowManager->findWindow( [&pMSG]( Window & pWindow ) -> bool {
+	                return pWindow.mNativeData->hwnd == pMSG.hwnd;
+	            });
 	            auto & eWindowUpdateVisibility = pOutEvent.eWindowUpdateVisibility;
 	            eWindowUpdateVisibility.eventCode = E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY;
 	            eWindowUpdateVisibility.newVisibilityState = ( pMSG.wParam != FALSE );
-	            eWindowUpdateVisibility.sourceWindow = pEventController.mPrivate->windowManager->findWindow( [&pMSG]( Window & pWindow ) -> bool {
-	                return pWindow.mNativeData->hwnd == pMSG.hwnd;
-	            });
+	            eWindowUpdateVisibility.sourceWindow = windowObject;
 	            break;
 	        }
 	        case WM_SIZE:
 	        {
+	            auto * windowObject = pEventController.mPrivate->windowManager->findWindow( [&pMSG]( Window & pWindow ) -> bool {
+	                return pWindow.mNativeData->hwnd == pMSG.hwnd;
+	            });
 	            auto & eWindowUpdateResize = pOutEvent.eWindowUpdateResize;
 	            eWindowUpdateResize.eventCode = E_EVENT_CODE_WINDOW_UPDATE_RESIZE;
 	            eWindowUpdateResize.newSize.x = LOWORD( pMSG.lParam );
 	            eWindowUpdateResize.newSize.y = HIWORD( pMSG.lParam );
-	            eWindowUpdateResize.sourceWindow = pEventController.mPrivate->windowManager->findWindow( [&pMSG]( Window & pWindow ) -> bool {
-	                return pWindow.mNativeData->hwnd == pMSG.hwnd;
-	            });
+	            eWindowUpdateResize.sourceWindow = windowObject;
 	            break;
 	        }
             case WM_CLOSE:
 	        {
-	            auto & eWindowUpdateClose = pOutEvent.eWindowUpdateClose;
-	            eWindowUpdateClose.eventCode = E_EVENT_CODE_WINDOW_UPDATE_CLOSE;
-	            eWindowUpdateClose.sourceWindow = pEventController.mPrivate->windowManager->findWindow( [&pMSG]( Window & pWindow ) -> bool {
+	            auto * windowObject = pEventController.mPrivate->windowManager->findWindow( [&pMSG]( Window & pWindow ) -> bool {
 	                return pWindow.mNativeData->hwnd == pMSG.hwnd;
 	            });
+	            auto & eWindowUpdateClose = pOutEvent.eWindowUpdateClose;
+	            eWindowUpdateClose.eventCode = E_EVENT_CODE_WINDOW_UPDATE_CLOSE;
+	            eWindowUpdateClose.sourceWindow = windowObject;
 	            break;
 	        }
 	        case WM_QUIT:
@@ -357,6 +360,49 @@ namespace ts3::system
 	    return false;
     }
 
+    LRESULT __stdcall _win32EventSourceProxyEventProc( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam )
+    {
+	    // The UserData value is a pointer to the internal EventState of the current window.
+	    // It is created before this callback gets injected and released when NCDESTROY message arrives.
+	    LONG_PTR windowUserData = ::GetWindowLongPtrA( pHWND, GWLP_USERDATA );
+
+	    if( windowUserData != 0 )
+	    {
+	        // This our state.
+	        // TODO: Some validation might be useful to check if this callback is used correctly.
+	        auto * winEventState = reinterpret_cast<Win32WindowEventState *>( windowUserData );
+
+	        if( pMessage == WM_NCDESTROY )
+	        {
+	            // NCDESTROY is the last message received by a window's event callback.
+	            // This is the right moment to release any extra data allocated for this window.
+	            delete winEventState;
+
+	            // Update the UserData to 0 in case anything gets called afterwards.
+	            // This will prevent using an already deallocated memory/data.
+	            ::SetWindowLongPtrA( pHWND, GWLP_USERDATA, 0 );
+	        }
+	        else
+	        {
+	            // These are supported events which may alter window geometry, visibility or availability.
+	            if( winEventState->windowObject && ( ( pMessage == WM_SIZE ) || ( pMessage == WM_MOVE ) || ( pMessage == WM_SHOWWINDOW ) || ( pMessage == WM_DESTROY ) ) )
+	            {
+                    // Indicates that window should update any cached state.
+                    winEventState->windowObject->syncInternalState();
+	            }
+
+	            MSG nativeEvent;
+	            nativeEvent.hwnd = pHWND;
+	            nativeEvent.message = pMessage;
+	            nativeEvent.wParam = pWparam;
+	            nativeEvent.lParam = pLparam;
+
+	            nativeEventDispatch( *( winEventState->eventController ), nativeEvent );
+	        }
+	    }
+
+	    return ::DefWindowProcA( pHWND, pMessage, pWparam, pLparam );
+    }
 
 	static const KeyCode sASCIIKeyCodeMap_08_7B[] =
 	{
@@ -508,33 +554,6 @@ namespace ts3::system
 	Bitmask<MouseButtonFlagBits> _win32GetMouseButtonStateMask( WPARAM pWparam )
 	{
 		return static_cast<MouseButtonFlagBits>( static_cast<uint32>( pWparam ) & SYS_MOUSE_BUTTON_FLAG_ALL_BIT );
-	}
-
-	LRESULT __stdcall _win32EventSourceProxyEventProc( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam )
-	{
-	    LONG_PTR windowUserData = ::GetWindowLongPtrA( pHWND, GWLP_USERDATA );
-
-	    if( windowUserData != 0 )
-	    {
-	        auto * winEventState = reinterpret_cast<Win32WindowEventState *>( windowUserData );
-
-	        MSG nativeEvent;
-	        nativeEvent.hwnd = pHWND;
-	        nativeEvent.message = pMessage;
-	        nativeEvent.wParam = pWparam;
-	        nativeEvent.lParam = pLparam;
-
-	        nativeEventDispatch( *( winEventState->eventController ), nativeEvent );
-
-	        if( pMessage == WM_NCDESTROY )
-	        {
-	            delete winEventState;
-
-	            ::SetWindowLongPtrA( pHWND, GWLP_USERDATA, 0 );
-	        }
-	    }
-
-	    return ::DefWindowProcA( pHWND, pMessage, pWparam, pLparam );
 	}
 
 } // namespace ts3::system

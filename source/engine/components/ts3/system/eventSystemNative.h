@@ -111,6 +111,18 @@ namespace ts3::system
         return false;
     }
 
+    inline Window * nativeEventDispatchWindow( EventController & pEventController, const NativeEvent & pNativeEvent )
+    {
+        EventObject eventObject;
+        if( nativeEventTranslate( pEventController, pNativeEvent, eventObject ) )
+        {
+            auto * sourceWindowObject = eventObject.eWindow.sourceWindow;
+            pEventController.dispatchEvent( eventObject );
+            return sourceWindowObject;
+        }
+        return nullptr;
+    }
+
 } // namespace ts3::system
 
 #endif // __TS3_SYSTEM_EVENT_SYSTEM_NATIVE_H__
