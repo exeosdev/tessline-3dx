@@ -7,6 +7,7 @@ namespace ts3::system
 
 	void _win32RegisterWndClass( WindowNativeData & pWindowNativeData );
 	DWORD _win32TranslateFrameStyle( WindowFrameStyle pStyle );
+	Win32WindowGeometry _win32CheckWindowGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode, HWND pWindowHwnd );
 	LRESULT __stdcall _win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 
 
@@ -33,37 +34,16 @@ namespace ts3::system
 
 	void Window::_nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode )
 	{
-	    RECT windowRect;
-	    windowRect.left = 0;
-	    windowRect.top = 0;
-	    windowRect.right = static_cast<LONG>( pWindowGeometry.size.x );
-	    windowRect.bottom = static_cast<LONG>( pWindowGeometry.size.y );
+	    auto win32Geometry = _win32CheckWindowGeometry( pWindowGeometry, pSizeMode, mNativeData->hwnd );
 
-	    auto win32FrameStyle = _win32TranslateFrameStyle( pWindowGeometry.frameStyle );
-
-	    if( pWindowGeometry.frameStyle == WindowFrameStyle::Unspecified )
-	    {
-	        win32FrameStyle = ::GetWindowLongA( mNativeData->hwnd, GWL_STYLE );
-	    }
-
-	    if( pSizeMode == WindowSizeMode::ClientArea )
-	    {
-	        ::AdjustWindowRect( &windowRect, win32FrameStyle, FALSE );
-	    }
-
-	    const auto windowPosX = static_cast<int>( pWindowGeometry.position.x + windowRect.left );
-	    const auto windowPosY = static_cast<int>( pWindowGeometry.position.y + windowRect.top );
-	    const auto windowWidth = static_cast<int>( windowRect.right - windowRect.left );
-	    const auto windowHeight = static_cast<int>( windowRect.bottom - windowRect.top );
-
-	    ::SetWindowLongPtrA( mNativeData->hwnd, GWL_STYLE, win32FrameStyle );
+	    ::SetWindowLongPtrA( mNativeData->hwnd, GWL_STYLE, win32Geometry.style );
 
 	    ::SetWindowPos( mNativeData->hwnd,
                         nullptr,
-                        windowPosX, // X coordinate
-                        windowPosY, // Y coordinate
-                        windowWidth, // Width of the frame
-                        windowHeight, // Height of the frame
+                        win32Geometry.frameRect.left, // X coordinate
+                        win32Geometry.frameRect.top, // Y coordinate
+                        win32Geometry.frameRect.right, // Width of the frame
+                        win32Geometry.frameRect.bottom, // Height of the frame
                         SWP_NOZORDER | SWP_FRAMECHANGED | SWP_SHOWWINDOW );
 	}
 
@@ -90,28 +70,16 @@ namespace ts3::system
 		// Register window class. Will fetch it if already registered.
 		_win32RegisterWndClass( pWindowNativeData );
 
-		RECT windowRect;
-		windowRect.left = 0;
-		windowRect.top = 0;
-		windowRect.right = static_cast<LONG>( pCreateInfo.properties.geometry.size.x );
-		windowRect.bottom = static_cast<LONG>( pCreateInfo.properties.geometry.size.y );
-
-		auto win32FrameStyle = _win32TranslateFrameStyle( pCreateInfo.properties.geometry.frameStyle );
-		::AdjustWindowRect( &windowRect, win32FrameStyle, FALSE );
-
-		auto framePosX = pCreateInfo.properties.geometry.position.x;
-		auto framePosY = pCreateInfo.properties.geometry.position.y;
-		auto frameWidth = windowRect.right - windowRect.left;
-		auto frameHeight = windowRect.bottom - windowRect.top;
+		auto win32Geometry = _win32CheckWindowGeometry( pCreateInfo.properties.geometry, WindowSizeMode::ClientArea, nullptr );
 
 		HWND windowHwnd = ::CreateWindowExA( WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW,
                                              pWindowNativeData.wndClsName,
                                              pCreateInfo.properties.title.c_str(),
-                                             win32FrameStyle,
-                                             framePosX,
-                                             framePosY,
-                                             frameWidth,
-                                             frameHeight,
+                                             win32Geometry.style,
+                                             win32Geometry.frameRect.left,
+                                             win32Geometry.frameRect.top,
+                                             win32Geometry.frameRect.right,
+                                             win32Geometry.frameRect.bottom,
                                              nullptr,
                                              nullptr,
                                              pWindowNativeData.moduleHandle,
@@ -124,11 +92,11 @@ namespace ts3::system
 
 		::SetWindowPos( windowHwnd,
                         nullptr,
-                        0, // X coordinate
-                        0, // Y coordinate
+                        win32Geometry.frameRect.left,
+                        win32Geometry.frameRect.top,
                         0, // Width of the frame
                         0, // Height of the frame
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
+                        SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
 
 		// Retrieve the current number of windows created with our class (ClassRefCounter).
 		auto wndClassRefCounter = ::GetClassLongPtrA( windowHwnd, 0 );
@@ -165,7 +133,7 @@ namespace ts3::system
 	void _win32RegisterWndClass( WindowNativeData & pWindowNativeData )
 	{
 		//
-		const LPCSTR wndClassName = "TS3_SYSTEM_WNDCLS";
+		const LPCSTR wndClassName = "TS3_SYSTEM_WND_CLS";
 		//
 		const HMODULE wndProcModuleHandle = ::GetModuleHandleA( nullptr );
 
@@ -239,6 +207,36 @@ namespace ts3::system
 		}
 
 		return resultStyle;
+	}
+
+	Win32WindowGeometry _win32CheckWindowGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode, HWND pWindowHwnd )
+	{
+	    RECT windowRect;
+	    windowRect.left = 0;
+	    windowRect.top = 0;
+	    windowRect.right = static_cast<LONG>( pWindowGeometry.size.x );
+	    windowRect.bottom = static_cast<LONG>( pWindowGeometry.size.y );
+
+	    auto win32FrameStyle = _win32TranslateFrameStyle( pWindowGeometry.frameStyle );
+
+	    if( ( win32FrameStyle == 0u ) && pWindowHwnd )
+	    {
+	        win32FrameStyle = ::GetWindowLongPtrA( pWindowHwnd, GWL_STYLE );
+	    }
+
+	    if( pSizeMode == WindowSizeMode::ClientArea )
+	    {
+	        ::AdjustWindowRect( &windowRect, win32FrameStyle, FALSE );
+	    }
+
+	    Win32WindowGeometry resultGeometry;
+	    resultGeometry.style = win32FrameStyle;
+	    resultGeometry.frameRect.left = static_cast<int>( pWindowGeometry.position.x + windowRect.left );
+	    resultGeometry.frameRect.top = static_cast<int>( pWindowGeometry.position.y + windowRect.top );
+	    resultGeometry.frameRect.right = static_cast<int>( windowRect.right - windowRect.left );
+	    resultGeometry.frameRect.bottom = static_cast<int>( windowRect.bottom - windowRect.top );
+
+	    return resultGeometry;
 	}
 
 	LRESULT __stdcall _win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam )

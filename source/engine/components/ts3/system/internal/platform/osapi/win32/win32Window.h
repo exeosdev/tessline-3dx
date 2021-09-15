@@ -24,6 +24,12 @@ namespace ts3::system
     {
     };
 
+	struct Win32WindowGeometry
+    {
+	    RECT frameRect;
+	    DWORD style;
+    };
+
 	void nativeWin32CreateWindow( WindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo );
 	void nativeWin32DestroyWindow( WindowNativeData & pWindowNativeData );
 
