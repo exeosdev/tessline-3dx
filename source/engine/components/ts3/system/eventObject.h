@@ -13,6 +13,7 @@ namespace ts3::system
 		{
 			EEventCode                 code;
 			EvtBase                    commonData;
+			EvtApp<0>                  eApp;
 			EvtAppActivityDisplayReady eAppActivityDisplayReady;
 			EvtAppActivityFocusGained  eAppActivityFocusGained;
 			EvtAppActivityFocusLost    eAppActivityFocusLost;
@@ -22,6 +23,7 @@ namespace ts3::system
 			EvtAppActivityStop         eAppActivityStop;
 			EvtAppActivityQuit         eAppActivityQuit;
 			EvtAppActivityTerminate    eAppActivityTerminate;
+			EvtInput<0>                eInput;
 			EvtInputGamepadAxis        eInputGamepadAxis;
 			EvtInputGamepadButton      eInputGamepadButton;
 			EvtInputGamepadState       eInputGamepadState;
