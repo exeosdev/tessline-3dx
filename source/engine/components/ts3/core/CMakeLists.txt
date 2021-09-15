@@ -14,6 +14,8 @@ set( TS3_CORE_SRC_FILES
 		"coreEngineState.cpp"
 		"exception.h"
 		"exception.cpp"
+		"exceptionCommon.h"
+		"exceptionResult.h"
         "graphicsTypes.h"
         "mathImports.h"
 

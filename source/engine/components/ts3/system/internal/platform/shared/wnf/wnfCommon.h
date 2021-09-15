@@ -13,7 +13,15 @@ namespace ts3::system
 	template <typename Tp>
 	using ComPtr = Microsoft::WRL::ComPtr<Tp>;
 
-	std::string wnfQueryHresultErrorMessage( HRESULT pHResult );
+	namespace platform
+	{
+
+	    std::string wnfQueryCOMErrorMessage( HRESULT pHResult );
+
+	    std::string wnfQuerySystemErrorMessage( DWORD pErrorCode );
+
+
+	}
 
 } // namespace ts3::system
 

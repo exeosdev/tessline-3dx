@@ -1,4 +1,5 @@
 
+#include <ts3/system/perfCounter.h>
 #include "wnfPerfCounter.h"
 
 #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINFAMILY )

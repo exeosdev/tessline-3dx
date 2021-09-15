@@ -10,15 +10,21 @@ namespace ts3::system
 
 	enum class ColorFormat : uint32
 	{
-		Unknown,
+	    Unknown,
 		B8G8R8,
 		B8G8R8A8,
 		B8G8R8A8SRGB,
 		R8G8B8A8,
 		R8G8B8A8SRGB,
 		R10G10B10A2,
-		SystemNative,
+
+		// Sentinel value, used to determine the number of possible values.
+		// New color formats should be all added above this line so that the
+		// implementation can automatically adjust to the new definitions.
+		_Reserved,
 	};
+
+	inline constexpr auto CX_ENUM_COLOR_FORMAT_COUNT = static_cast<uint32>( ColorFormat::_Reserved ) - 1;
 
 	enum class ColorSpace : uint32
 	{

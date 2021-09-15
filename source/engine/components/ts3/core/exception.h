@@ -1,38 +1,32 @@
 
 #pragma once
 
-#include "prerequisites.h"
+#ifndef __TS3_CORE_EXCEPTION_H__
+#define __TS3_CORE_EXCEPTION_H__
+
+#include "exceptionCommon.h"
 #include <exception>
-#include <mutex>
 
 namespace ts3
 {
 
-	/// @brief Type used to represent exception codes.
-	using exception_code_value_t = enum_default_value_t;
+    enum : exception_category_value_t
+    {
+        E_EXCEPTION_CATEGORY_GENERIC_DEBUG              = ecDeclareExceptionCategory( ExceptionBaseType::Debug, 0 ),
+        E_EXCEPTION_CATEGORY_GENERIC_EXTERNAL           = ecDeclareExceptionCategory( ExceptionBaseType::External, 0 ),
+        E_EXCEPTION_CATEGORY_GENERIC_FRAMEWORK_CORE     = ecDeclareExceptionCategory( ExceptionBaseType::FrameworkCore, 0 ),
+        E_EXCEPTION_CATEGORY_GENERIC_FRAMEWORK_INTERNAL = ecDeclareExceptionCategory( ExceptionBaseType::FrameworkInternal, 0 ),
+        E_EXCEPTION_CATEGORY_GENERIC_INTERRUPT          = ecDeclareExceptionCategory( ExceptionBaseType::Interrupt, 0 ),
+        E_EXCEPTION_CATEGORY_GENERIC_MATH               = ecDeclareExceptionCategory( ExceptionBaseType::Math, 0 ),
+        E_EXCEPTION_CATEGORY_GENERIC_RESULT_WRAPPER     = ecDeclareExceptionCategory( ExceptionBaseType::ResultWrapper, 0 ),
+        E_EXCEPTION_CATEGORY_GENERIC_SYSTEM             = ecDeclareExceptionCategory( ExceptionBaseType::System, 0 ),
+    };
 
-	/// @brief
-	enum class ExceptionBaseType : uint8
-	{
-		//
-		Unknown,
-		// For debug-specific errors and messages.
-		Debug,
-		// All exceptions defined by the client libraries and frameworks.
-		External,
-		// For all normal, error-like exceptions. Defined primarily within the ::Core component.
-		FrameworkCore,
-		// Internal, implementation-details exception used by the framework.
-		FrameworkInternal,
-		// For exceptions used as an interrupts (for example in thread proc).
-		Interrupt,
-		// Defined primarily within the ::Math component.
-		Math,
-		//
-		ResultWrapper,
-		// System-specific exceptions, extended in platform-specific manner. Defined primarily within the ::System component.
-		System
-	};
+
+    enum : exception_code_value_t
+    {
+        E_EXCEPTION_CODE_RESULT_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_GENERIC_RESULT_WRAPPER, 0x01 )
+    };
 
 	/// @brief
 	struct ExceptionInfo
@@ -43,19 +37,27 @@ namespace ts3
 		std::string description;
 		//
 		FileLocationInfo fileLocationInfo;
-	};
 
+		std::string toString() const;
+	};
 
 	/// @brief
 	class Exception : public std::exception
 	{
 	public:
+	    // Exception info.
+	    ExceptionInfo mInfo;
+
+	    // Text representation of the exception info.
+	    std::string mString;
+
+	public:
 		/// @brief Constructor.
 		/// @param pType Type of the exception, represented as ExceptionBaseType enum.
 		/// @param pInfo Exception description, containing basic info about it.
 		Exception( ExceptionInfo pInfo )
-		: _info( std::move( pInfo ) )
-		, _string( convertExceptionInfoToString( _info ) )
+		: mInfo( std::move( pInfo ) )
+		, mString( mInfo.toString() )
 		{}
 
 		virtual ~Exception() = default;
@@ -72,44 +74,21 @@ namespace ts3
 		/// @return
 		virtual const char * what() const noexcept override
 		{
-			return _string.c_str();
+		    return mString.c_str();
 		}
-
-		/// @brief Returns the info object of the exception.
-		/// @return Info object of the exception.
-		const ExceptionInfo & getInfo() const
-		{
-			return _info;
-		}
-
-		/// @brief
-		/// @return
-		std::string toString() const
-		{
-			return _string;
-		}
-
-	private:
-		static std::string convertExceptionInfoToString( const ExceptionInfo & pInfo );
-
-	private:
-		// Exception info.
-		ExceptionInfo _info;
-		//
-		std::string _string;
 	};
 
 	/// @brief
-	/// @tparam tpExceptionBaseType
-	template <ExceptionBaseType tpExceptionBaseType>
-	class ExceptionSubtype : public Exception
+	/// @tparam tExceptionBaseType
+	template <ExceptionBaseType tExceptionBaseType>
+	class ExceptionClass : public Exception
 	{
 	public:
 		/// @brief
-		static constexpr auto baseType = tpExceptionBaseType;
+		static constexpr auto mBaseType = tExceptionBaseType;
 
 	public:
-		explicit ExceptionSubtype( ExceptionInfo pInfo )
+		explicit ExceptionClass( ExceptionInfo pInfo )
 		: Exception( std::move( pInfo ) )
 		{}
 
@@ -117,19 +96,19 @@ namespace ts3
 		/// @return
 		virtual ExceptionBaseType getBaseType() const override final
 		{
-			return tpExceptionBaseType;
+			return tExceptionBaseType;
 		}
 
 		/// @refitem
 		/// @return
 		virtual const std::string & getBaseTypeName() const override final
 		{
-			static std::once_flag initFlag;
+			// static std::once_flag initFlag;
 			static std::string baseTypeName;
 
 			// std::call_once( initFlag, []() {
 			// 	const auto & enumInfo = queryEnumTypeInfo<ExceptionBaseType>();
-			// 	const auto & baseTypeConstantInfo = enumInfo.getConstantMap().getByValue( tpExceptionBaseType );
+			// 	const auto & baseTypeConstantInfo = enumInfo.getConstantMap().getByValue( tExceptionBaseType );
 			// 	baseTypeName = baseTypeConstantInfo.name;
 			// } );
 
@@ -137,246 +116,162 @@ namespace ts3
 		}
 	};
 
-	/// @brief Specialized class for ResultWrapper exceptions. Adds result member and accessor.
-	class ResultWrapperException : public ExceptionSubtype<ExceptionBaseType::ResultWrapper>
-	{
-	public:
-		explicit ResultWrapperException( ExceptionInfo pInfo, Result pResult )
-		: ExceptionSubtype( std::move( pInfo ) )
-		{}
+	/// @brief Default base class for ExceptionBaseType::Debug.
+	using UnknownException = ExceptionClass<ExceptionBaseType::Unknown>;
 
-		/// @brief
-		/// @return
-		TS3_PCL_ATTR_NO_DISCARD const Result & getResult() const
-		{
-			return _result;
-		}
+	/// @brief Default base class for ExceptionBaseType::Debug.
+	using DebugException = ExceptionClass<ExceptionBaseType::Debug>;
 
-	private:
-		//
-		Result _result;
-	};
+	/// @brief Default base class for ExceptionBaseType::External.
+	using ExternalException = ExceptionClass<ExceptionBaseType::External>;
 
-	/// @brief Default class for ExceptionBaseType::Debug.
-	using DebugException = ExceptionSubtype<ExceptionBaseType::Debug>;
-	/// @brief Default class for ExceptionBaseType::External.
-	using ExternalException = ExceptionSubtype<ExceptionBaseType::External>;
-	/// @brief Default class for ExceptionBaseType::FrameworkInternal.
-	using FrameworkCoreException = ExceptionSubtype<ExceptionBaseType::FrameworkInternal>;
-	/// @brief Default class for ExceptionBaseType::FrameworkInternal.
-	using FrameworkInternalException = ExceptionSubtype<ExceptionBaseType::FrameworkInternal>;
-	/// @brief Default class for ExceptionBaseType::Interrupt.
-	using InterruptException = ExceptionSubtype<ExceptionBaseType::Interrupt>;
-	/// @brief Default class for ExceptionBaseType::Math.
-	using MathException = ExceptionSubtype<ExceptionBaseType::Math>;
-	/// @brief Default class for ExceptionBaseType::System.
-	using SystemException = ExceptionSubtype<ExceptionBaseType::System>;
+	/// @brief Default base class for ExceptionBaseType::FrameworkInternal.
+	using FrameworkCoreException = ExceptionClass<ExceptionBaseType::FrameworkInternal>;
+
+	/// @brief Default base class for ExceptionBaseType::FrameworkInternal.
+	using FrameworkInternalException = ExceptionClass<ExceptionBaseType::FrameworkInternal>;
+
+	/// @brief Default base class for ExceptionBaseType::Interrupt.
+	using InterruptException = ExceptionClass<ExceptionBaseType::Interrupt>;
+
+	/// @brief Default base class for ExceptionBaseType::Math.
+	using MathException = ExceptionClass<ExceptionBaseType::Math>;
+
+	/// @brief Default base class for ExceptionBaseType::System.
+	using SystemException = ExceptionClass<ExceptionBaseType::System>;
+
+	/// @brief Specialized class for ResultWrapper exceptions. Adds Result object.
+	class ResultWrapperException : public ExceptionClass<ExceptionBaseType::ResultWrapper>
+    {
+    public:
+        Result mResult;
+
+    public:
+        explicit ResultWrapperException( ExceptionInfo pInfo, Result pResult )
+        : ExceptionClass( std::move( pInfo ) )
+        , mResult( pResult )
+        {}
+    };
 
 
-	// Class type proxy. Used to get the actual exception type from an ExceptionBaseType value.
-	template < ExceptionBaseType tpExceptionBaseType >
-	struct ExceptionClassTypeProxy
-	{
-		using Type = ExceptionSubtype<tpExceptionBaseType>;
-	};
 
-	// Specialized definition for ResultWrapperException.
+	template <ExceptionBaseType tExceptionBaseType, bool tIsValidType>
+	struct ExceptionClassResolver
+    {
+	    using Type = UnknownException;
+    };
+
+	template <ExceptionBaseType tExceptionBaseType>
+	struct ExceptionClassResolver<tExceptionBaseType, true>
+    {
+	    using Type = ExceptionClass<tExceptionBaseType>;
+    };
+
 	template <>
-	struct ExceptionClassTypeProxy<ExceptionBaseType::ResultWrapper>
+	struct ExceptionClassResolver<ExceptionBaseType::ResultWrapper, true>
+    {
+	    using Type = ResultWrapperException;
+    };
+
+	template <ExceptionBaseType tExceptionBaseType>
+	struct ExceptionBaseTypeClassProxy
+    {
+	    using Type = typename ExceptionClassResolver<tExceptionBaseType, ecIsExceptionBaseTypeValid( tExceptionBaseType )>::Type;
+    };
+
+	template <exception_category_value_t tExceptionCategory>
+	struct ExceptionCategoryClassProxy
+    {
+	    using Type = typename ExceptionBaseTypeClassProxy<ecGetExceptionCategoryBaseType( tExceptionCategory )>::Type;
+    };
+
+	template <exception_code_value_t tExceptionCode>
+	struct ExceptionCodeClassProxy
+    {
+	    using Type = typename ExceptionCategoryClassProxy<ecGetExceptionCodeCategory( tExceptionCode )>::Type;
+    };
+
+    #define ts3EnableExceptionSupport() \
+        template <exception_category_value_t tExceptionCategory> \
+        struct ExceptionCategoryClassProxy \
+        { \
+            using Type = typename ::ts3::ExceptionBaseTypeClassProxy<ecGetExceptionCategoryBaseType( tExceptionCategory )>::Type; \
+        }; \
+        template <exception_code_value_t tExceptionCode> \
+        struct ExceptionCodeClassProxy \
+        { \
+            using Type = typename ExceptionCategoryClassProxy<ecGetExceptionCodeCategory( tExceptionCode )>::Type; \
+        };
+
+    #define ts3SetExceptionCategoryType( pExceptionCategory, pType ) \
+        template <> \
+        struct ExceptionCategoryClassProxy<pExceptionCategory> \
+        { \
+            using Type = pType; \
+        };
+
+    #define ts3SetExceptionCodeType( pExceptionCode, pType ) \
+        template <> \
+        struct ExceptionCodeClassProxy<pExceptionCode> \
+        { \
+            using Type = pType; \
+        };
+
+	template <typename TpException, typename... TpArgs>
+	TS3_PCL_ATTR_NO_RETURN inline void throwException( ExceptionInfo pExceptionInfo, TpArgs &&... pArgs )
 	{
-		using Type = ResultWrapperException;
-	};
-
-
-	namespace enumbits
-	{
-
-		// Exception code: control key for validation
-		constexpr exception_code_value_t exceptionCodeControlKey = 0xE7000000;
-		// Exception code: mask for type component (ExceptionBaseType, stored as 1 byte)
-		constexpr exception_code_value_t exceptionCodeTypeMask = 0x00FF0000;
-		// Exception code: mask for IID (internal ID) component (16-bit integer)
-		constexpr exception_code_value_t exceptionCodeIIDMask = 0x0000FFFF;
-
-		///
-		inline constexpr exception_code_value_t declareExceptionCode( ExceptionBaseType pBaseType, uint16 pInternalID )
-		{
-			return ( exceptionCodeControlKey | ( ( exception_code_value_t )( pBaseType ) << 16 ) | pInternalID );
-		}
-
-		///
-		inline constexpr ExceptionBaseType getExceptionCodeBaseType( exception_code_value_t pExceptionCode )
-		{
-			return ( ExceptionBaseType )( ( pExceptionCode & exceptionCodeTypeMask ) >> 16 );
-		}
-
-		///
-		inline constexpr bool validateExceptionCode( exception_code_value_t pExceptionCode )
-		{
-			return ( pExceptionCode & exceptionCodeControlKey ) == exceptionCodeControlKey;
-		}
-
-	}
-
-
-	enum : exception_code_value_t
-	{
-		EXC_ResultWrapper = enumbits::declareExceptionCode( ExceptionBaseType::ResultWrapper, 0x01 )
-	};
-
-
-	template < typename TpException, typename... TpArgs >
-	TS3_PCL_ATTR_NO_RETURN inline void throwException( const ExceptionInfo & pInfo, TpArgs &&... pArgs )
-	{
-		// TpException is a class derived from ExceptionSubtype<ExceptionBaseType>. It contains 'baseType'
+		// TpException is a class derived from ExceptionClass<ExceptionBaseType>. It contains 'baseType'
 		// member with type tag. It should match the type embedded within the code. In case of mismatch, there is
 		// either a typo (in case of manual call) or a problem with the throwException() function defined below.
-		if ( TpException::baseType != enumbits::getExceptionCodeBaseType( pInfo.code ) )
+		if ( TpException::mBaseType != ecGetExceptionCodeBaseType( pExceptionInfo.code ) )
 		{
 			ts3DebugInterruptOnce();
 		}
 
-		throw TpException( pInfo, std::forward<TpArgs>( pArgs )... );
+		throw TpException( std::move( pExceptionInfo ), std::forward<TpArgs>( pArgs )... );
 	}
 
-	template < exception_code_value_t tpExceptionCode, typename... TpArgs >
-	TS3_PCL_ATTR_NO_RETURN inline void throwException( const char * pDescription, const FileLocationInfo & pFileLocationInfo, TpArgs &&... pArgs )
+	template <typename TpException, typename... TpArgs>
+	TS3_PCL_ATTR_NO_RETURN inline void throwException( exception_code_value_t pExceptionCode,
+                                                       std::string pDescription,
+                                                       const FileLocationInfo & pFileLocationInfo,
+                                                       TpArgs &&... pArgs )
 	{
-		// Fetch the type tag embedded within the specified (presumably valid) exception code.
-		constexpr auto exceptionTypeTag = enumbits::getExceptionCodeBaseType( tpExceptionCode );
-		// The type is retrieved using pre-defined mappings. If the code isn't valid, this will immediately fail.
-		using ExceptionType = typename ExceptionClassTypeProxy<exceptionTypeTag>::Type;
+	    ExceptionInfo exceptionInfo;
+	    exceptionInfo.code = pExceptionCode;
+	    exceptionInfo.description = std::move( pDescription );
+	    exceptionInfo.fileLocationInfo = pFileLocationInfo;
 
-		ExceptionInfo exceptionInfo;
-		exceptionInfo.code = tpExceptionCode;
-		exceptionInfo.description = pDescription;
-		exceptionInfo.fileLocationInfo = pFileLocationInfo;
+	    throwException<TpException>( std::move( exceptionInfo ), std::forward<TpArgs>( pArgs )... );
+    }
 
-		throwException<ExceptionType>( exceptionInfo, std::forward<TpArgs>( pArgs )... );
-	}
-
-	TS3_PCL_ATTR_NO_RETURN inline void ThrowFromResult( const char * pDescription, const FileLocationInfo & pFileLocationInfo, Result pResult )
-	{
-		// Fetch the type tag embedded within the specified (presumably valid) exception code.
-		constexpr auto exceptionTypeTag = enumbits::getExceptionCodeBaseType( EXC_ResultWrapper );
-		// The type is retrieved using pre-defined mappings. If the code isn't valid, this will immediately fail.
-		using ExceptionType = typename ExceptionClassTypeProxy<exceptionTypeTag>::Type;
-
-		ExceptionInfo exceptionInfo;
-		exceptionInfo.code = EXC_ResultWrapper;
-		exceptionInfo.description = pDescription;
-		exceptionInfo.fileLocationInfo = pFileLocationInfo;
-
-		throwException<ExceptionType>( exceptionInfo, std::move( pResult ) );
-	}
-
-	/// @brief
-	struct ResultWrapper
-	{
-	public:
-		//
-		Result result;
-		//
-		std::exception_ptr exception;
-
-	public:
-		ResultWrapper() = default;
-
-		explicit operator bool() const
-		{
-			return !isError();
-		}
-
-		void setResult( Result pResult )
-		{
-			result = pResult;
-		}
-
-		void setException( std::exception_ptr pExceptionPtr )
-		{
-			exception = std::move( pExceptionPtr );
-		}
-
-		void saveCurrentException()
-		{
-			exception = std::current_exception();
-		}
-
-		void rethrowException()
-		{
-			auto localException = std::exception_ptr();
-			std::swap( exception, localException );
-			std::rethrow_exception( localException );
-		}
-
-		TS3_PCL_ATTR_NO_DISCARD bool hasException() const
-		{
-			return exception ? true : false;
-		}
-
-		TS3_PCL_ATTR_NO_DISCARD bool hasResult() const
-		{
-			return !result.empty();
-		}
-
-		TS3_PCL_ATTR_NO_DISCARD bool isError() const
-		{
-			return ts3ResultIsError( result ) || exception;
-		}
-	};
-
-	/// @brief
-	template <typename TpValue>
-	struct ReturnValueWrapper : public ResultWrapper
-	{
-	public:
-		//
-		mutable TpValue value;
-
-	public:
-		ReturnValueWrapper() = default;
-
-		explicit ReturnValueWrapper( ResultWrapper pResultWrapper )
-		: ResultWrapper( std::move( pResultWrapper ) )
-		{}
-
-		TpValue & operator*() const
-		{
-			return value;
-		}
-
-		TpValue * operator->() const
-		{
-			return &( value );
-		}
-	};
-
-	/// @brief
-	template <>
-	struct ReturnValueWrapper<void> : public ResultWrapper
-	{
-	public:
-		explicit ReturnValueWrapper() = default;
-	};
-
-}
+} // namespace ts3
 
 
-#define exfThrow( pExceptionCode ) \
-	::ts3::throwException<pExceptionCode>( "", ts3CurrentFileLocationInfo() )
+#define ts3ThrowAuto( pExceptionCode ) \
+    ::ts3::throwException<typename ExceptionCodeClassProxy<pExceptionCode>::Type>( pExceptionCode, "", ts3CurrentFileLocationInfo() )
 
-#define exfThrowEx( pExceptionCode, pDescription ) \
-	::ts3::throwException<pExceptionCode>( pDescription, ts3CurrentFileLocationInfo() )
+#define ts3ThrowAutoEx( pExceptionCode, pDescription, ... ) \
+    ::ts3::throwException<typename ExceptionCodeClassProxy<pExceptionCode>::Type>( pExceptionCode, pDescription, ts3CurrentFileLocationInfo(), __VA_ARGS__ )
 
-#define exfThrowResult( pResult ) \
-	::ts3::throwException<EXC_ResultWrapper>( "", ts3CurrentFileLocationInfo(), pResult )
+#define ts3ThrowResult( pResult ) \
+    ::ts3::throwException<typename ExceptionCodeClassProxy<E_EXCEPTION_CODE_RESULT_ERROR>::Type>( E_EXCEPTION_CODE_RESULT_ERROR, "", ts3CurrentFileLocationInfo(), pResult )
+
+#define ts3ThrowResultEx( pResult, pDescription ) \
+    ::ts3::throwException<typename ExceptionCodeClassProxy<E_EXCEPTION_CODE_RESULT_ERROR>::Type>( E_EXCEPTION_CODE_RESULT_ERROR, pDescription, ts3CurrentFileLocationInfo(), pResult )
 
 #define exfCatchIntoWrapper( pResultWrapper ) \
 	catch( const ::ts3::Result & eResult ) \
 	{ \
-		pResultWrapper.setResult( eResult ); \
-	} \
+        pResultWrapper.setResult( eResult ); \
+    } \
+    catch( const ::ts3::Result & eResult ) \
+    { \
+        pResultWrapper.setResult( eResult ); \
+    } \
 	catch( ... ) \
 	{ \
 		pResultWrapper.setException( std::current_exception() ); \
 	}
+
+#endif // __TS3_CORE_EXCEPTION_H__

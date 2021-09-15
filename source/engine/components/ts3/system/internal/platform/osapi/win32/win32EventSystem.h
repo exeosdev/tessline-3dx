@@ -10,10 +10,15 @@ namespace ts3::system
 
     class EventController;
     class EventDispatcher;
+    class Window;
 
     using NativeEvent = MSG;
 
-    void nativeWin32EnableWindowEventSupport( HWND pHWND, EventController * pEventController );
+    struct Win32WindowEventState
+    {
+        Window * windowObject;
+        EventController * eventController;
+    };
 
 } // namespace ts3::system
 

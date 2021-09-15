@@ -14,6 +14,8 @@ namespace ts3::system
     ts3SysDeclareHandle( DisplayManager );
     ts3SysDeclareHandle( WindowManager );
 
+    using WindowPredicateCallback = std::function<bool( Window & )>;
+
 	struct WindowCreateInfo
 	{
 		WindowProperties properties;
@@ -39,11 +41,13 @@ namespace ts3::system
 
         void reset();
 
+        TS3_SYSTEM_API_NODISCARD Window * findWindow( WindowPredicateCallback pPredicate );
+
         TS3_SYSTEM_API_NODISCARD bool isWindowValid( Window & pWindow ) const;
 
         TS3_SYSTEM_API_NODISCARD bool checkWindowGeometry( const WindowGeometry & pWindowGeometry ) const;
 
-        bool validateWindowGeometry( WindowGeometry & pWindowGeometry ) const;
+        TS3_SYSTEM_API_NODISCARD WindowGeometry validateWindowGeometry( const WindowGeometry & pWindowGeometry ) const;
 
     private:
         void _nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo );
@@ -65,22 +69,27 @@ namespace ts3::system
 
         void destroy();
 
+        void setFullscreenMode( bool pEnable = true, const WindowSize & pScreenSize = cvWindowSizeAuto );
+
         void resizeClientArea( const WindowSize & pNewWindowSize );
 
         void resizeFrame( const WindowSize & pNewWindowSize );
 
         void setTitleText( const std::string & pTitleText );
 
-        void updateGeometry( const WindowGeometry & pWindowGeometry );
+        void updateGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode );
+
+        void syncInternalState();
 
         TS3_SYSTEM_API_NODISCARD WindowSize getClientAreaSize() const;
 
         TS3_SYSTEM_API_NODISCARD WindowSize getFrameSize() const;
 
+        TS3_SYSTEM_API_NODISCARD bool isFullscreen() const;
+
     private:
-        void _nativeResize( const WindowSize & pNewWindowSize, WindowSizeMode pSizeMode );
         void _nativeSetTitleText( const std::string & pTitleText );
-        void _nativeUpdateGeometry( const WindowGeometry & pWindowGeometry );
+        void _nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode );
         void _nativeGetSize( WindowSizeMode pSizeMode, WindowSize & pOutSize ) const;
     };
 

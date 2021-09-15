@@ -3,6 +3,7 @@
 #define __TS3_SYSTEM_EVENT_CORE_TYPES_H__
 
 #include "eventCommon.h"
+#include "windowCommon.h"
 #include <ts3/math/vector.h>
 
 namespace ts3::system
@@ -266,9 +267,14 @@ namespace ts3::system
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	class Window;
+
 	template <event_code_value_t tpEventCode>
 	struct EvtWindow : public EvtBase
 	{
+	public:
+	    Window * sourceWindow = nullptr;
+
 	public:
 	    constexpr EvtWindow()
         : EvtBase( tpEventCode )
@@ -285,10 +291,12 @@ namespace ts3::system
 
 	struct EvtWindowUpdateResize : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_RESIZE>
 	{
+	    WindowSize newSize;
 	};
 
 	struct EvtWindowUpdateVisibility : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY>
 	{
+	    bool newVisibilityState;
 	};
 
 } // namespace ts3::system

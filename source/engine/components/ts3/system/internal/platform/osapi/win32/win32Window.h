@@ -7,6 +7,8 @@
 namespace ts3::system
 {
 
+    using native_window_event_id_t = UINT;
+
     struct WindowCreateInfo;
     struct WindowProperties;
 

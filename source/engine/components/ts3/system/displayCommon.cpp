@@ -1,5 +1,6 @@
 
 #include "displayDriverNative.h"
+#include <ts3/stdext/stringUtils.h>
 #include <sstream>
 
 namespace ts3::system
@@ -47,8 +48,8 @@ namespace ts3::system
             strStream << ", Primary";
         }
 
-        strStream << ", O:[" << screenRect.offset.x << "x" << screenRect.offset.y << "]";
-        strStream << ", S:[" << screenRect.size.x << "x" << screenRect.size.y << "]";
+        strStream << ", Origin:[" << screenRect.offset.x << "x" << screenRect.offset.y << "]";
+        strStream << ", Size:[" << screenRect.size.x << "x" << screenRect.size.y << "]";
 
         return strStream.str();
     }
@@ -64,9 +65,17 @@ namespace ts3::system
         return strStream.str();
     }
 
+    dsm_output_id_t dsmCreateDisplayOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex )
+    {
+        DisplayOutputIDGen outputIDGen;
+        outputIDGen.uAdapterIndex = pAdapterIndex;
+        outputIDGen.uOutputIndex = pOutputIndex;
+        return outputIDGen.outputID;
+    }
+
     dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings )
 	{
-		DisplayVideoSettingsHash hashValueGen;
+		DisplayVideoSettingsHashGen hashValueGen;
 		hashValueGen.uResWidth = static_cast<uint16>( pSettings.resolution.x );
 		hashValueGen.uResHeight = static_cast<uint16>( pSettings.resolution.x );
 		hashValueGen.uRefreshRate = static_cast<uint16>( pSettings.refreshRate );
@@ -78,11 +87,66 @@ namespace ts3::system
 	std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings )
 	{
         auto & colorFormatDesc = vsxGetDescForColorFormat( pFormat );
+        auto settingsHash = dsmComputeVideoSettingsHash( pFormat, pSettings );
 
         std::stringstream strStream;
-        strStream << pSettings.resolution.x << "x" << pSettings.resolution.y;
-        strStream << ":" << colorFormatDesc.size << "bpp@" << pSettings.refreshRate << "Hz";
+        strStream << pSettings.resolution.x << 'x' << pSettings.resolution.y;
+
+        if( pSettings.flags.isSet( E_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT ) )
+        {
+            strStream << "p";
+        }
+        else if( pSettings.flags.isSet( E_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT ) )
+        {
+            strStream << "i";
+        }
+
+        strStream << ", " << colorFormatDesc.size << "bit, " << pSettings.refreshRate << "Hz";
+        strStream << ", //0x" << std::hex << settingsHash << std::dec;
+
         return strStream.str();
+	}
+
+	EDisplayAdapterVendorID dsmResolveAdapterVendorID( const std::string & pAdapterName )
+	{
+        auto adapterVendorID = EDisplayAdapterVendorID::Unknown;
+        auto adapterString = strUtils::makeUpper( pAdapterName );
+
+        if( ( adapterString.find( "AMD" ) != std::string::npos ) || ( adapterString.find( "ATI" ) != std::string::npos ) )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::AMD;
+        }
+        else if( adapterString.find( "ARM" ) != std::string::npos )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::ARM;
+        }
+        else if( adapterString.find( "GOOGLE" ) != std::string::npos )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::Google;
+        }
+        else if( adapterString.find( "INTEL" ) != std::string::npos )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::Intel;
+        }
+        else if( adapterString.find( "MICROSOFT" ) != std::string::npos )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::Microsoft;
+        }
+        else if( adapterString.find( "NVIDIA" ) != std::string::npos )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::Nvidia;
+        }
+        else if( adapterString.find( "QUALCOMM" ) != std::string::npos )
+        {
+            adapterVendorID = EDisplayAdapterVendorID::Qualcomm;
+        }
+
+        return adapterVendorID;
+	}
+
+	bool dsmCheckSettingsFilterMatch( const DisplayVideoSettingsFilter & pFilter, const DisplayVideoSettings & pSettings )
+	{
+        return true;
 	}
 
 } // namespace ts3::system

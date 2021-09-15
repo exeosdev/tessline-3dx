@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_PREREQUISITES_H__
 #define __TS3_SYSTEM_PREREQUISITES_H__
 
-#include <ts3/core/prerequisites.h>
+#include <ts3/core/exception.h>
 #include <ts3/stdext/bitmask.h>
 #include <ts3/stdext/utilities.h>
 #include <ts3/stdext/version.h>
@@ -32,6 +32,8 @@
 namespace ts3::system
 {
 
+    ts3EnableExceptionSupport();
+
 	template <typename TpObject>
 	using Handle = SharedHandle<TpObject>;
 
@@ -44,6 +46,16 @@ namespace ts3::system
     // These two types need to be visible everywhere.
     ts3SysDeclareHandle( SysContext );
     ts3SysDeclareHandle( SysObject );
+
+    enum : exception_category_value_t
+    {
+        E_EXCEPTION_CATEGORY_SYSTEM_CORE    = ecDeclareExceptionCategory( ExceptionBaseType::System, 1 ),
+        E_EXCEPTION_CATEGORY_SYSTEM_DISPLAY = ecDeclareExceptionCategory( ExceptionBaseType::System, 2 ),
+        E_EXCEPTION_CATEGORY_SYSTEM_EVENT   = ecDeclareExceptionCategory( ExceptionBaseType::System, 3 ),
+        E_EXCEPTION_CATEGORY_SYSTEM_FILE    = ecDeclareExceptionCategory( ExceptionBaseType::System, 4 ),
+        E_EXCEPTION_CATEGORY_SYSTEM_OPENGL  = ecDeclareExceptionCategory( ExceptionBaseType::System, 5 ),
+        E_EXCEPTION_CATEGORY_SYSTEM_WINDOW  = ecDeclareExceptionCategory( ExceptionBaseType::System, 6 ),
+    };
 
 } // namespace ts3::system
 

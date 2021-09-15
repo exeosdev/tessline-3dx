@@ -13,12 +13,12 @@
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
 #  pragma clang diagnostic ignored "-Wnested-anon-types"
-#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wpedantic"
 #elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
 #  pragma warning( push )
 #  pragma warning( disable: 4201 )  // 'Nonstandard extension used: nameless struct/union'
+#elif( TS3_PCL_COMPILER & ( TS3_PCL_COMPILER_GCC | TS3_PCL_COMPILER_MINGW64 ) )
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
 #define TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI 1
@@ -41,17 +41,21 @@ namespace ts3::system
 	using DisplayOffset = math::Pos2i;
 	using DisplaySize = math::Size2u;
 
+	using DisplayAdapterList = std::vector<DisplayAdapter *>;
+	using DisplayOutputList = std::vector<DisplayOutput *>;
+	using DisplayVideoModeList = std::vector<DisplayVideoMode *>;
+
 	/// @brief Represents invalid display system index (of an adapter or an output, for example).
-	constexpr dsm_index_t CX_DSM_INDEX_INVALID = Limits<dsm_index_t>::maxValue - 1;
+	inline constexpr dsm_index_t CX_DSM_INDEX_INVALID = Limits<dsm_index_t>::maxValue - 1;
 
 	/// @brief
-	constexpr dsm_index_t CX_DSM_INDEX_DEFAULT = Limits<dsm_index_t>::maxValue;
+	inline constexpr dsm_index_t CX_DSM_INDEX_DEFAULT = Limits<dsm_index_t>::maxValue;
 
 	/// @brief
-	constexpr dsm_output_id_t CX_DSM_OUTPUT_ID_DEFAULT = Limits<dsm_output_id_t>::maxValue;
+	inline constexpr dsm_output_id_t CX_DSM_OUTPUT_ID_DEFAULT = Limits<dsm_output_id_t>::maxValue;
 
 	/// @brief Represents invalid display settings hash. Used to identify/report invalid and/or empty configurations.
-	constexpr dsm_video_settings_hash_t CX_DSM_VIDEO_SETTINGS_HASH_INVALID = Limits<dsm_video_settings_hash_t>::maxValue;
+	inline constexpr dsm_video_settings_hash_t CX_DSM_VIDEO_SETTINGS_HASH_INVALID = Limits<dsm_video_settings_hash_t>::maxValue;
 
 	/// @brief Specifies supported types of drivers available through a DisplayManager.
 	/// Driver support is platform-specific and some of them may not be available on some systems.
@@ -157,19 +161,29 @@ namespace ts3::system
 	    DisplaySize resolution;
 		uint16 refreshRate = 0u;
 		Bitmask<EDisplayVideoSettingsFlags> flags = 0u;
+
+		bool equals( const DisplayVideoSettings & pOther ) const
+		{
+		    return ( resolution == pOther.resolution ) && ( refreshRate == pOther.refreshRate ) && ( flags == pOther.flags );
+		}
+
+		bool matches( const DisplayVideoSettings & pOther ) const
+		{
+		    return ( resolution == pOther.resolution ) && ( refreshRate == pOther.refreshRate ) && flags.isSet( pOther.flags );
+		}
 	};
 
 	inline bool operator==( const DisplayVideoSettings & pLhs, const DisplayVideoSettings & pRhs )
 	{
-	    return ( pLhs.resolution == pRhs.resolution ) && ( pLhs.refreshRate == pRhs.refreshRate ) && ( pLhs.flags == pRhs.flags );
+	    return pLhs.equals( pRhs );
 	}
 
 	inline bool operator!=( const DisplayVideoSettings & pLhs, const DisplayVideoSettings & pRhs )
 	{
-	    return ( pLhs.resolution != pRhs.resolution ) || ( pLhs.refreshRate != pRhs.refreshRate ) || ( pLhs.flags != pRhs.flags );
+	    return !pLhs.equals( pRhs );
 	}
 
-	constexpr DisplayVideoSettings cvDisplayVideoSettingsEmpty { { 0U, 0U }, 0U, 0U };
+	inline constexpr DisplayVideoSettings cvDisplayVideoSettingsEmpty { { 0U, 0U }, 0U, 0U };
 
 	/// @brief
 	struct DisplayVideoSettingsFilter
@@ -177,7 +191,7 @@ namespace ts3::system
 		// Reference settings used to filter video modes. By default, each property in a mode
 		// must be greater than or equal to the reference property (note for resolutions: both
 		// dimensions must be >=, i.e. 1024x768 satisfies 1024x600, but 1280x720 does not satisfy
-		// 1152x864). This does not apply to the flags, which must have exact same bits set.
+		// 1152x864). This does not apply to the flags, which must have exactly the same bits set.
 		// Each property can be ignored by using its respective IGNORE flag. Also, "greater than
 		// or equal" condition can be changed to "equal" for a given property by setting MATCH_EXACT
 		// flag for that property.
@@ -196,7 +210,7 @@ namespace ts3::system
 	    return ( pLhs.refSettings != pRhs.refSettings ) || ( pLhs.flags != pRhs.flags );
 	}
 
-	constexpr DisplayVideoSettingsFilter cvDisplayVideoSettingsFilterNone { cvDisplayVideoSettingsEmpty, 0U };
+	inline constexpr DisplayVideoSettingsFilter cvDisplayVideoSettingsFilterNone { cvDisplayVideoSettingsEmpty, 0U };
 
 	struct DisplayAdapterDesc
 	{
@@ -233,23 +247,25 @@ namespace ts3::system
 		std::string toString() const;
 	};
 
-	using DisplayAdapterList = std::vector<DisplayAdapter *>;
-	using DisplayOutputList = std::vector<DisplayOutput *>;
-	using DisplayVideoModeList = std::vector<DisplayVideoMode *>;
+	TS3_PCL_ATTR_NO_DISCARD dsm_output_id_t dsmCreateDisplayOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex );
 
 	TS3_PCL_ATTR_NO_DISCARD dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
 	TS3_PCL_ATTR_NO_DISCARD std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
+
+	TS3_PCL_ATTR_NO_DISCARD EDisplayAdapterVendorID dsmResolveAdapterVendorID( const std::string & pAdapterName );
+
+	TS3_PCL_ATTR_NO_DISCARD bool dsmCheckSettingsFilterMatch( const DisplayVideoSettingsFilter & pFilter, const DisplayVideoSettings & pSettings );
 
 
 } // namespace ts3::system
 
 #if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
 #  pragma clang diagnostic pop
-#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
-#  pragma GCC diagnostic pop
 #elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
 #  pragma warning( pop )
+#elif( TS3_PCL_COMPILER & ( TS3_PCL_COMPILER_GCC | TS3_PCL_COMPILER_MINGW64 ) )
+#  pragma GCC diagnostic pop
 #endif
 
 #endif // __TS3_SYSTEM_DISPLAY_COMMON_H__

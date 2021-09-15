@@ -36,8 +36,8 @@ namespace ts3::system
             validatedCreateInfo.windowGeometry.frameStyle = pCreateInfo.windowGeometry.frameStyle;
         }
 
-        mDisplayManager->validateWindowGeometry( validatedCreateInfo.windowGeometry.position,
-                                                 validatedCreateInfo.windowGeometry.size );
+        //mDisplayManager->validateWindowGeometry( validatedCreateInfo.windowGeometry.position,
+        //                                         validatedCreateInfo.windowGeometry.size );
 
         auto surfaceRef = mPrivate->displaySurfaceList.emplace( mPrivate->displaySurfaceList.end(), this );
         surfaceRef->mPrivate->driverListRef = surfaceRef;
