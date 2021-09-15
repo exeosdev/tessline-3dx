@@ -8,7 +8,6 @@ set( TS3_SYSTEM_SRC_FILES
         "displayDriver.h"
         "displayDriver.cpp"
         "displayDriverNative.h"
-        "displayDriverNative.cpp"
         "displayManager.h"
         "displayManager.cpp"
         "displayManagerNative.h"
@@ -104,7 +103,7 @@ endif()
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
-            "internal/platform/osapi/x11/x11CommonDefs.h"
+            "internal/platform/osapi/x11/x11Common.h"
             "internal/platform/osapi/x11/x11SysContext.h"
             "internal/platform/osapi/x11/x11SysContext.cpp"
             "internal/platform/osapi/x11/x11Display.h"

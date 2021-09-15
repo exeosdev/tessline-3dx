@@ -1,6 +1,7 @@
 
 #include "displayDriverNative.h"
 #include "displayManager.h"
+#include "internal/private/displayInternal.h"
 
 namespace ts3::system
 {
