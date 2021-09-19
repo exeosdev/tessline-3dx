@@ -5,12 +5,9 @@ set( TS3_SYSTEM_SRC_FILES
         "sysContextNative.h"
         "displayCommon.h"
         "displayCommon.cpp"
-        "displayDriver.h"
-        "displayDriver.cpp"
-        "displayDriverNative.h"
-        "displayManager.h"
-        "displayManager.cpp"
-        "displayManagerNative.h"
+        "display.h"
+        "display.cpp"
+        "displayNative.h"
         "dynamicLib.h"
         "dynamicLib.cpp"
         "eventCommon.h"
@@ -40,8 +37,8 @@ set( TS3_SYSTEM_SRC_FILES
 if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_WINFAMILY} )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
-            "internal/platform/shared/dxgi/dxgiDisplayDriver.h"
-            "internal/platform/shared/dxgi/dxgiDisplayDriver.cpp"
+            "internal/platform/shared/dxgi/dxgiDisplay.h"
+            "internal/platform/shared/dxgi/dxgiDisplay.cpp"
             "internal/platform/shared/wnf/wnfCommon.h"
             "internal/platform/shared/wnf/wnfCommon.cpp"
             "internal/platform/shared/wnf/wnfPerfCounter.h"
@@ -54,6 +51,8 @@ if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_POSIX} )
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/shared/posix/posixPerfCounter.h"
             "internal/platform/shared/posix/posixPerfCounter.cpp"
+            "internal/platform/shared/posix/posixFileManager.h"
+            "internal/platform/shared/posix/posixFileManager.cpp"
             )
 endif()
 
@@ -83,18 +82,16 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/osapi/win32/win32Common.h"
             "internal/platform/osapi/win32/win32Common.cpp"
-            "internal/platform/osapi/win32/win32SysContext.h"
-            "internal/platform/osapi/win32/win32SysContext.cpp"
-            "internal/platform/osapi/win32/win32DisplayDriver.h"
-            "internal/platform/osapi/win32/win32DisplayDriver.cpp"
-            "internal/platform/osapi/win32/win32DisplayManager.h"
-            "internal/platform/osapi/win32/win32DisplayManager.cpp"
+            "internal/platform/osapi/win32/win32Display.h"
+            "internal/platform/osapi/win32/win32Display.cpp"
             "internal/platform/osapi/win32/win32EventSystem.h"
             "internal/platform/osapi/win32/win32EventSystem.cpp"
             "internal/platform/osapi/win32/win32FileManager.h"
             "internal/platform/osapi/win32/win32FileManager.cpp"
             "internal/platform/osapi/win32/win32OpenGL.h"
             "internal/platform/osapi/win32/win32OpenGL.cpp"
+            "internal/platform/osapi/win32/win32SysContext.h"
+            "internal/platform/osapi/win32/win32SysContext.cpp"
             "internal/platform/osapi/win32/win32Window.h"
             "internal/platform/osapi/win32/win32Window.cpp"
             )
@@ -104,16 +101,16 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/osapi/x11/x11Common.h"
-            "internal/platform/osapi/x11/x11SysContext.h"
-            "internal/platform/osapi/x11/x11SysContext.cpp"
+            "internal/platform/osapi/x11/x11Common.cpp"
             "internal/platform/osapi/x11/x11Display.h"
             "internal/platform/osapi/x11/x11Display.cpp"
-            "internal/platform/osapi/x11/x11DisplayXRR.h"
-            "internal/platform/osapi/x11/x11DisplayXRR.cpp"
             "internal/platform/osapi/x11/x11EventSystem.h"
             "internal/platform/osapi/x11/x11EventSystem.cpp"
+            "internal/platform/osapi/x11/x11FileManager.h"
             "internal/platform/osapi/x11/x11OpenGL.h"
             "internal/platform/osapi/x11/x11OpenGL.cpp"
+            "internal/platform/osapi/x11/x11SysContext.h"
+            "internal/platform/osapi/x11/x11SysContext.cpp"
             "internal/platform/osapi/x11/x11Window.h"
             "internal/platform/osapi/x11/x11Window.cpp"
             )
@@ -168,7 +165,7 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
             X11
             Xrandr
             GL
-            GLEW
+            #GLEW
             )
 endif()
 
