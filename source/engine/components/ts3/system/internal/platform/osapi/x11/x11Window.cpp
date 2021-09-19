@@ -1,68 +1,103 @@
 
-#include <ts3/system/windowtem.h>
+#include <ts3/system/windowNative.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
-namespace ts3
+namespace ts3::system
 {
 
-	void WindowManager::_sysInitialize()
+    void WindowManager::_nativeCtor()
+    {
+        mPrivate->nativeDataPriv.setSessionData( nativeX11GetXSessionData( *mSysContext ) );
+    }
+
+    void WindowManager::_nativeDtor() noexcept
+    {
+        mPrivate->nativeDataPriv.resetSessionData();
+    }
+
+    void WindowManager::_nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo )
+    {
+        auto & xSessionData = nativeX11GetXSessionDataInternal( *this );
+
+        X11WindowCreateInfo x11CreateInfo;
+        x11CreateInfo.setSessionData( xSessionData );
+        x11CreateInfo.commonProperties = pCreateInfo.properties;
+        x11CreateInfo.colorDepth = XDefaultDepth( xSessionData.display, xSessionData.screenIndex );
+        x11CreateInfo.windowVisual = XDefaultVisual( xSessionData.display, xSessionData.screenIndex );
+
+        nativeX11CreateWindow( pWindow.mPrivate->nativeDataPriv, x11CreateInfo );
+
+        nativeX11UpdateNewWindowState( pWindow.mPrivate->nativeDataPriv, x11CreateInfo );
+    }
+
+    void WindowManager::_nativeDestroyWindow( Window & pWindow )
+    {
+        nativeX11DestroyWindow( pWindow.mPrivate->nativeDataPriv );
+    }
+
+    void WindowManager::_nativeRemoveWindow( Window & pWindow )
+    {
+        // TODO
+    }
+
+
+    void Window::_nativeSetTitleText( const std::string & pTitleText )
+    {
+        auto & xSessionData = nativeX11GetXSessionDataInternal( *this );
+
+        XStoreName( xSessionData.display,
+                    mPrivate->nativeDataPriv.windowXID,
+                    pTitleText.c_str() );
+
+        XFlush( xSessionData.display );
+    }
+
+    void Window::_nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode )
+    {
+        auto & xSessionData = nativeX11GetXSessionDataInternal( *this );
+
+        XMoveWindow( xSessionData.display,
+                     mPrivate->nativeDataPriv.windowXID,
+                     pWindowGeometry.position.x,
+                     pWindowGeometry.position.y );
+
+        XResizeWindow( xSessionData.display,
+                       mPrivate->nativeDataPriv.windowXID,
+                       pWindowGeometry.size.x,
+                       pWindowGeometry.size.y );
+
+        XFlush( xSessionData.display );
+    }
+
+    void Window::_nativeGetSize( WindowSizeMode pSizeMode, WindowSize & pOutSize ) const
 	{
-		auto & scNativeData = mContext->mNativeData;
-		scNativeData.wmpDeleteWindow = XInternAtom( scNativeData.display, "WM_DELETE_WINDOW", False );
-	}
+        auto & xSessionData = nativeX11GetXSessionDataInternal( *this );
 
-	void WindowManager::_sysRelease() noexcept
-	{}
-
-
-	void Window::_sysInitialize( const WindowCreateInfo & pCreateInfo )
-	{
-		auto & scNativeData = mContext->mNativeData;
-
-		X11WindowCreateInfo x11WindowCreateInfo;
-		x11WindowCreateInfo.commonProperties = pCreateInfo.properties;
-		x11WindowCreateInfo.display = scNativeData.display;
-		x11WindowCreateInfo.screenIndex = scNativeData.screenIndex;
-		x11WindowCreateInfo.rootWindow = scNativeData.rootWindow;
-		x11WindowCreateInfo.wmpDeleteWindow = scNativeData.wmpDeleteWindow;
-		x11WindowCreateInfo.colorDepth = XDefaultDepth( scNativeData.display, scNativeData.screenIndex );
-		x11WindowCreateInfo.windowVisual = XDefaultVisual( scNativeData.display, scNativeData.screenIndex );
-
-		sysX11CreateWindow( mNativeData, x11WindowCreateInfo );
-		sysX11UpdateNewWindowState( mNativeData, x11WindowCreateInfo );
-	}
-
-	void Window::_sysRelease() noexcept
-	{}
-
-	void Window::_sysGetClientAreaSize( WindowSize & pClientAreaSize ) const
-	{
 		XWindowAttributes windowAttributes;
-		XGetWindowAttributes( mNativeData.display,
-		                      mNativeData.xwindow,
+		XGetWindowAttributes( xSessionData.display,
+                              mPrivate->nativeDataPriv.windowXID,
 		                      &windowAttributes );
 
-		pClientAreaSize.x = windowAttributes.width - windowAttributes.border_width;
-		pClientAreaSize.y = windowAttributes.height - windowAttributes.border_width;
-	}
-
-	void Window::_sysGetFrameSize( WindowSize & pFrameSize ) const
-	{
-		XWindowAttributes windowAttributes;
-		XGetWindowAttributes( mNativeData.display,
-		                      mNativeData.xwindow,
-		                      &windowAttributes );
-
-		pFrameSize.x = windowAttributes.width;
-		pFrameSize.y = windowAttributes.height;
+        if( pSizeMode == WindowSizeMode::ClientArea )
+        {
+            pOutSize.x = windowAttributes.width - windowAttributes.border_width;
+            pOutSize.y = windowAttributes.height - windowAttributes.border_width;
+        }
+        else
+        {
+            pOutSize.x = windowAttributes.width;
+            pOutSize.y = windowAttributes.height;
+        }
 	}
 
 
-	void sysX11CreateWindow( WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo )
+	void nativeX11CreateWindow( WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo )
 	{
+        auto & xSessionData = nativeX11GetXSessionData( pCreateInfo );
+
 		// Colormap for our window.
-		Colormap colormap = XCreateColormap( pCreateInfo.display,
-		                                     pCreateInfo.rootWindow,
+		Colormap colormap = XCreateColormap( xSessionData.display,
+		                                     xSessionData.rootWindowXID,
 		                                     pCreateInfo.windowVisual,
 		                                     AllocNone );
 
@@ -83,30 +118,30 @@ namespace ts3
 
 		// We pass initial position as (0,0) instead of the specified one, because window managers tend to do some
 		// weird stuff and this is ignored in most cases. XMoveWindow (after window gets mapped) does the right thing.
-		Window xwindow = XCreateWindow( pCreateInfo.display,
-		                                pCreateInfo.rootWindow,
-		                                0, 0,
-		                                pCreateInfo.commonProperties.geometry.size.x,
-		                                pCreateInfo.commonProperties.geometry.size.y,
-		                                0u,
-		                                pCreateInfo.colorDepth,
-		                                InputOutput,
-		                                pCreateInfo.windowVisual,
-		                                windowSetAttributesMask,
-		                                &windowSetAttributes );
+		auto windowXID = XCreateWindow( xSessionData.display,
+                                        xSessionData.rootWindowXID,
+                                        0, 0,
+                                        pCreateInfo.commonProperties.geometry.size.x,
+                                        pCreateInfo.commonProperties.geometry.size.y,
+                                        0u,
+                                        pCreateInfo.colorDepth,
+                                        InputOutput,
+                                        pCreateInfo.windowVisual,
+                                        windowSetAttributesMask,
+                                        &windowSetAttributes );
 
-		if( xwindow == cvXIDNone )
+		if( windowXID == E_X11_XID_NONE )
 		{
 			throw 0;
 		}
 
 		if( pCreateInfo.fullscreenMode )
 		{
-			Atom wmState = XInternAtom( pCreateInfo.display, "_NET_WM_STATE", true );
-			Atom wmFullscreen = XInternAtom( pCreateInfo.display, "_NET_WM_STATE_FULLSCREEN", true );
+			Atom wmState = XInternAtom( xSessionData.display, "_NET_WM_STATE", true );
+			Atom wmFullscreen = XInternAtom( xSessionData.display, "_NET_WM_STATE_FULLSCREEN", true );
 
-			XChangeProperty( pCreateInfo.display,
-			                 xwindow,
+			XChangeProperty( xSessionData.display,
+                             windowXID,
 			                 wmState,
 			                 XA_ATOM,
 			                 32,
@@ -115,33 +150,40 @@ namespace ts3
 			                 1 );
 		}
 
-		pWindowNativeData.display = pCreateInfo.display;
-		pWindowNativeData.xwindow = xwindow;
-		pWindowNativeData.colormap = colormap;
+        pWindowNativeData.windowXID = windowXID;
+		pWindowNativeData.xColormap = colormap;
+        pWindowNativeData.xSessionDataPtr = &xSessionData;
 	}
 
-	void sysX11UpdateNewWindowState( WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo )
+	void nativeX11UpdateNewWindowState( WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo )
 	{
-		XMapWindow( pWindowNativeData.display, pWindowNativeData.xwindow );
+        auto & xSessionData = nativeX11GetXSessionData( pWindowNativeData );
+        
+		XMapWindow( xSessionData.display, pWindowNativeData.windowXID );
 
-		XMoveWindow( pWindowNativeData.display,
-		             pWindowNativeData.xwindow,
+		XMoveWindow( xSessionData.display,
+		             pWindowNativeData.windowXID,
 		             pCreateInfo.commonProperties.geometry.position.x,
 		             pCreateInfo.commonProperties.geometry.position.y );
 
-		Atom wmpDeleteWindowProtocol = pCreateInfo.wmpDeleteWindow;
-		XSetWMProtocols( pWindowNativeData.display, pWindowNativeData.xwindow, &wmpDeleteWindowProtocol, 1 );
-		XStoreName( pWindowNativeData.display, pWindowNativeData.xwindow, pCreateInfo.commonProperties.title.c_str() );
-		XFlush( pWindowNativeData.display );
+		Atom wmpDeleteWindowProtocol = XInternAtom( xSessionData.display, "WM_DELETE_WINDOW", False );
+		XSetWMProtocols( xSessionData.display, pWindowNativeData.windowXID, &wmpDeleteWindowProtocol, 1 );
+		XStoreName( xSessionData.display, pWindowNativeData.windowXID, pCreateInfo.commonProperties.title.c_str() );
+		XFlush( xSessionData.display );
 	}
 
-	void sysX11DestroyWindow( WindowNativeData & pWindowNativeData )
+	void nativeX11DestroyWindow( WindowNativeData & pWindowNativeData )
 	{
-		XDestroyWindow( pWindowNativeData.display, pWindowNativeData.xwindow );
-		pWindowNativeData.xwindow = cvXIDNone;
-		XFreeColormap( pWindowNativeData.display, pWindowNativeData.colormap );
-		pWindowNativeData.colormap = cvXIDNone;
+        auto & xSessionData = nativeX11GetXSessionData( pWindowNativeData );
+
+		XDestroyWindow( xSessionData.display, pWindowNativeData.windowXID );
+		pWindowNativeData.windowXID = E_X11_XID_NONE;
+
+		XFreeColormap( xSessionData.display, pWindowNativeData.xColormap );
+		pWindowNativeData.xColormap = E_X11_XID_NONE;
+
+        pWindowNativeData.xSessionDataPtr = nullptr;
 	}
 
-}
+} // namespace ts3::system
 #endif

@@ -1,6 +1,6 @@
 
 #include "windowNative.h"
-#include "displayManager.h"
+#include "displayNative.h"
 #include <ts3/stdext/utilities.h>
 
 namespace ts3::system
@@ -11,9 +11,14 @@ namespace ts3::system
     , mDisplayManager( pDisplayManager )
     , mPrivate( std::make_unique<ObjectPrivateData>() )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
-    {}
+    {
+        _nativeCtor();
+    }
 
-    WindowManager::~WindowManager() = default;
+    WindowManager::~WindowManager()
+    {
+        _nativeDtor();
+    }
 
     Window * WindowManager::createWindow( const WindowCreateInfo & pCreateInfo )
     {
@@ -198,7 +203,8 @@ namespace ts3::system
 
 
     Window::Window( WindowManager * pWindowManager )
-    : mWindowManager( pWindowManager )
+    : SysObject( pWindowManager->mSysContext )
+    , mWindowManager( pWindowManager )
     , mPrivate( std::make_unique<ObjectPrivateData>() )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
     {}

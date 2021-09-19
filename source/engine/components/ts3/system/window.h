@@ -50,12 +50,14 @@ namespace ts3::system
         TS3_SYSTEM_API_NODISCARD WindowGeometry validateWindowGeometry( const WindowGeometry & pWindowGeometry ) const;
 
     private:
+        void _nativeCtor();
+        void _nativeDtor() noexcept;
         void _nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo );
         void _nativeDestroyWindow( Window & pWindow );
         void _nativeRemoveWindow( Window & pWindow );
     };
 
-	class Window
+	class Window : public SysObject
     {
     public:
         struct ObjectPrivateData;
