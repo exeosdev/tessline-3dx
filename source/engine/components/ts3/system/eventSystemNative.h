@@ -47,9 +47,9 @@ namespace ts3::system
         // Last cursor position registered by the event system.
         math::Vec2i32 mouseLastRegPos = CX_EVENT_MOUSE_POS_INVALID;
         // State of the mouse buttons. Used for motion events on systems which do not have reliable states (X11).
-        Bitmask<MouseButtonFlagBits> mouseButtonStateMask = 0;
+        Bitmask<EMouseButtonFlagBits> mouseButtonStateMask = 0;
         // Last mouse button pressed. Used to detect multi-click sequences.
-        MouseButtonID mouseLastPressButton = MouseButtonID::Unknown;
+        EMouseButtonID mouseLastPressButton = EMouseButtonID::Unknown;
         // Current sequence length, i.e. number of clicks of the same button in a row.
         uint32 mouseClickSequenceLength = 1;
         // Timestamp of last registered mouse button press.

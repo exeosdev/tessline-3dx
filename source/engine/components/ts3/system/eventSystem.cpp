@@ -142,7 +142,7 @@ namespace ts3::system
         mPrivate->inputState.mouseClickSequenceLength = 0;
         mPrivate->inputState.mouseLastPressTimestamp = 0;
         mPrivate->inputState.mouseButtonStateMask = 0;
-        mPrivate->inputState.mouseLastPressButton = MouseButtonID::Unknown;
+        mPrivate->inputState.mouseLastPressButton = EMouseButtonID::Unknown;
         mPrivate->inputState.mouseLastRegPos = CX_EVENT_MOUSE_POS_INVALID;
 
         if( pDispatcher )
@@ -288,7 +288,7 @@ namespace ts3::system
 	    if ( pConfig.configFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT ) )
 	    {
 	        auto & eInputMouseButton = pEvent.eInputMouseButton;
-	        if ( eInputMouseButton.buttonAction == MouseButtonActionType::Click )
+	        if ( eInputMouseButton.buttonAction == EMouseButtonActionType::Click )
 	        {
 	            _internalEventOnInputMouseButtonMultiClick( eInputMouseButton, pConfig, pInputState );
 	        }
@@ -307,13 +307,13 @@ namespace ts3::system
 	        {
 	            if( pInputState.mouseClickSequenceLength == 1 )
 	            {
-	                pMouseButtonEvent.buttonAction = MouseButtonActionType::DoubleClick;
+	                pMouseButtonEvent.buttonAction = EMouseButtonActionType::DoubleClick;
 	                pInputState.mouseClickSequenceLength = 2;
 	                multiClickEventSet = true;
 	            }
 	            else if ( pConfig.configFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT ) )
 	            {
-	                pMouseButtonEvent.buttonAction = MouseButtonActionType::MultiClick;
+	                pMouseButtonEvent.buttonAction = EMouseButtonActionType::MultiClick;
 	                pInputState.mouseClickSequenceLength += 1;
 	                multiClickEventSet = true;
 	            }
