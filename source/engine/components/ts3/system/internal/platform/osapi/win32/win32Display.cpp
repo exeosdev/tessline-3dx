@@ -22,11 +22,34 @@ namespace ts3::system
     static std::string _win32GetAdapterOutputName( const std::string & pAdapterRegistryKey );
 
 
-    DisplayDriverGeneric::DisplayDriverGeneric( DisplayManager * pDisplayManager )
-    : DisplayDriver( pDisplayManager, EDisplayDriverType::Generic )
+    void DisplayManager::_nativeCtor()
     {}
 
-    DisplayDriverGeneric::~DisplayDriverGeneric() = default;
+    void DisplayManager::_nativeDtor() noexcept
+    {}
+
+    void DisplayManager::_nativeQueryMinWindowSize( DisplaySize & pOutSize ) const
+    {
+        auto cxMin = ::GetSystemMetrics( SM_CXMIN );
+        auto cyMin = ::GetSystemMetrics( SM_CYMIN );
+        pOutSize.x = static_cast<uint32>( cxMin );
+        pOutSize.y = static_cast<uint32>( cyMin );
+    }
+
+    void DisplayManager::_nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const
+    {
+        auto cxScreen = ::GetSystemMetrics( SM_CXSCREEN );
+        auto cyScreen = ::GetSystemMetrics( SM_CYSCREEN );
+        pOutSize.x = static_cast<uint32>( cxScreen );
+        pOutSize.y = static_cast<uint32>( cyScreen );
+    }
+
+
+    void DisplayDriverGeneric::_nativeCtor()
+    {}
+
+    void DisplayDriverGeneric::_nativeDtor() noexcept
+    {}
 
     // -- Note on adapters enumeration:
     // Without the awesome DXGI, EnumDisplayDevices is the only reliable way of enumerating the display stuff.
@@ -38,7 +61,7 @@ namespace ts3::system
     // 2) \\Registry\\Machine\\System\\CurrentControlSet\\Control\\Video\\{79BD17DD-B591-11EA-B520-AC9E17ECDDE5}\\0001
     // So, to enumerate adapters properly, we must check the UUID of the adapter to not duplicate the entries.
     // See SysDisplayDriverGenericImplProxy::nativeEnumAdapterList below.
-    void DisplayDriverGeneric::_nativeEnumDisplayDevices()
+    void DisplayDriverGeneric::_drvEnumDisplayDevices()
     {
         // Represents information about a display device in the system. String properties have the following meaning:
         // ::DeviceID - PCI-specific ID, not really interesting
@@ -156,7 +179,7 @@ namespace ts3::system
         return TRUE;
     }
 
-    void DisplayDriverGeneric::_nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
+    void DisplayDriverGeneric::_drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
     {
         const auto & outputNativeData = dsmGetObjectNativeDataGeneric( pOutput );
         const auto & colorFormatDesc = vsxGetDescForColorFormat( pColorFormat );
@@ -215,7 +238,7 @@ namespace ts3::system
         }
     }
 
-    ColorFormat DisplayDriverGeneric::_nativeQueryDefaultSystemColorFormat() const
+    ColorFormat DisplayDriverGeneric::_drvQueryDefaultSystemColorFormat() const
     {
         return ColorFormat::B8G8R8A8;
     }

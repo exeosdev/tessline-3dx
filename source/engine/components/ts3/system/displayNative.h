@@ -2,31 +2,42 @@
 #ifndef __TS3_SYSTEM_DISPLAY_DRIVER_NATIVE_H__
 #define __TS3_SYSTEM_DISPLAY_DRIVER_NATIVE_H__
 
-#include "displayDriver.h"
+#include "display.h"
 #include "sysContextNative.h"
 #include <ts3/stdext/utilities.h>
 
 #include <deque>
+#include <functional>
+#include <map>
 #include <unordered_map>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
-#  include "internal/platform/osapi/android/androidDisplayDriver.h"
+#  include "internal/platform/osapi/android/androidDisplay.h"
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
-#  include "internal/platform/osapi/win32/win32DisplayDriver.h"
+#  include "internal/platform/osapi/win32/win32Display.h"
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
-#  include "internal/platform/osapi/x11/x11DisplayDriver.h"
+#  include "internal/platform/osapi/x11/x11Display.h"
 #endif
 
 #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
-#  include "internal/platform/shared/dxgi/dxgiDisplayDriver.h"
+#  include "internal/platform/shared/dxgi/dxgiDisplay.h"
 #endif
 
 #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
-#  include "internal/platform/shared/sdl/sdlDisplayDriver.h"
+#  include "internal/platform/shared/sdl/sdlDisplay.h"
 #endif
 
 namespace ts3::system
 {
+
+    using DisplayDriverFactoryCallback = std::function<DisplayDriverHandle()>;
+    using DisplayDriverFactoryMap = std::map<EDisplayDriverType, DisplayDriverFactoryCallback>;
+
+    struct DisplayManager::ObjectPrivateData
+    {
+        DisplayManagerNativeData nativeDataPriv;
+        DisplayDriverFactoryMap driverFactoryMap;
+    };
 
     template <typename TpNativeData>
     void dsmInitializeNativeData( TpNativeData * pNativeData, EDisplayDriverType pDriverType );
@@ -318,28 +329,50 @@ namespace ts3::system
     class DisplayDriverGeneric : public DisplayDriver
     {
     public:
-        explicit DisplayDriverGeneric( DisplayManager * pDisplayManager );
-        virtual ~DisplayDriverGeneric();
+        explicit DisplayDriverGeneric( DisplayManager * pDisplayManager )
+        : DisplayDriver( pDisplayManager, EDisplayDriverType::Generic )
+        {
+            _nativeCtor();
+        }
+
+        virtual ~DisplayDriverGeneric() noexcept
+        {
+            _nativeDtor();
+        }
 
     private:
-        virtual void _nativeEnumDisplayDevices() override final;
-        virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
-        virtual ColorFormat _nativeQueryDefaultSystemColorFormat() const override final;
+        void _nativeCtor();
+        void _nativeDtor() noexcept;
+
+        virtual void _drvEnumDisplayDevices() override final;
+        virtual void _drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
+        virtual ColorFormat _drvQueryDefaultSystemColorFormat() const override final;
     };
 
 #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
     class DisplayDriverDXGI : public DisplayDriver
     {
     public:
-        explicit DisplayDriverDXGI( DisplayManager * pDisplayManager );
-        virtual ~DisplayDriverDXGI();
+        explicit DisplayDriverDXGI( DisplayManager * pDisplayManager )
+        : DisplayDriver( pDisplayManager, EDisplayDriverType::DXGI )
+        {
+            _initialize();
+        }
+
+        virtual ~DisplayDriverDXGI()
+        {
+            _release();
+        }
 
     private:
-        virtual void _nativeEnumDisplayDevices() override final;
-        virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
-        virtual ColorFormat _nativeQueryDefaultSystemColorFormat() const override final;
-        
+        void _initialize();
+        void _release();
+
         void _enumAdapterOutputs( DisplayAdapter & pAdapter );
+
+        virtual void _drvEnumDisplayDevices() override final;
+        virtual void _drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
+        virtual ColorFormat _drvQueryDefaultSystemColorFormat() const override final;
     };
 #endif
 
@@ -347,13 +380,24 @@ namespace ts3::system
     class DisplayDriverSDL : public DisplayDriver
     {
     public:
-        explicit DisplayDriverSDL( DisplayManager * pDisplayManager );
-        virtual ~DisplayDriverSDL();
+        explicit DisplayDriverSDL( DisplayManager * pDisplayManager )
+        : DisplayDriver( pDisplayManager, EDisplayDriverType::SDL )
+        {
+            _initialize();
+        }
+
+        virtual ~DisplayDriverSDL()
+        {
+            _release();
+        }
 
     private:
-        virtual void _nativeEnumDisplayDevices() override final {}
-        virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
-        virtual ColorFormat _nativeQueryDefaultSystemColorFormat() const override final;
+        void _initialize();
+        void _release();
+
+        virtual void _drvEnumDisplayDevices() override final;
+        virtual void _drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
+        virtual ColorFormat _drvQueryDefaultSystemColorFormat() const override final;
     };
 #endif
 

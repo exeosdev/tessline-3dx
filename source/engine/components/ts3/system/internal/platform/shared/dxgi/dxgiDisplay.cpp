@@ -6,22 +6,127 @@
 namespace ts3::system
 {
 
-    static void _dxgiInitializeDriver( DisplayDriverDXGI & pDriverDXGI );
-
     static void _dxgiEnumAdapterOutputs( DisplayAdapter & pAdapter );
 
 	static DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( ColorFormat pColorFormat );
 
 
-	DisplayDriverDXGI::DisplayDriverDXGI( DisplayManager * pDisplayManager )
-	: DisplayDriver( pDisplayManager, EDisplayDriverType::DXGI )
-	{
-	    _dxgiInitializeDriver( *this );
-	}
+	void DisplayDriverDXGI::_initialize()
+    {
+        ts3DebugAssert( mPrivate->nativeDataPriv.dxgi );
+        auto & dxgiDriverData = *( mPrivate->nativeDataPriv.dxgi );
 
-	DisplayDriverDXGI::~DisplayDriverDXGI() = default;
+        if( dxgiDriverData.dxgiFactory == nullptr )
+        {
+            Bitmask<UINT> dxgiFactoryCreateFlags = 0;
+        #if ( TS3_DEBUG )
+            dxgiFactoryCreateFlags.set( DXGI_CREATE_FACTORY_DEBUG );
+        #endif
 
-	void DisplayDriverDXGI::_nativeEnumDisplayDevices()
+            ComPtr<IDXGIFactory2> dxgiFactory2;
+            auto hResult = ::CreateDXGIFactory2( dxgiFactoryCreateFlags, IID_PPV_ARGS( &dxgiFactory2 ) );
+
+            if( SUCCEEDED( hResult ) )
+            {
+                dxgiDriverData.dxgiFactory = dxgiFactory2;
+            }
+            else
+            {
+                ComPtr<IDXGIFactory1> dxgiFactory1;
+                hResult = ::CreateDXGIFactory1( IID_PPV_ARGS( &dxgiFactory1 ) );
+
+                if( FAILED( hResult ) )
+                {
+                    throw 0;
+                }
+
+                dxgiDriverData.dxgiFactory = dxgiFactory1;
+            }
+        }
+    }
+
+    void DisplayDriverDXGI::_release()
+    {}
+
+    void DisplayDriverDXGI::_enumAdapterOutputs( DisplayAdapter & pAdapter )
+    {
+        auto & adapterNativeData = dsmGetObjectNativeDataDXGI( pAdapter );
+
+        auto * dxgiAdapter = adapterNativeData.dxgiAdapter.Get();
+
+        for( UINT outputIndex = 0u; ; ++outputIndex )
+        {
+            ComPtr<IDXGIOutput> dxgiOutput;
+            auto hResult = dxgiAdapter->EnumOutputs( outputIndex, dxgiOutput.GetAddressOf() );
+
+            // Exactly the same situation: if DXGI_ERROR_NOT_FOUND is returned - no more adapters to enumerate.
+            if ( hResult == DXGI_ERROR_NOT_FOUND )
+            {
+                break;
+            }
+
+            // According to the docs, the only possible error is DXGI_ERROR_NOT_FOUND which is returned
+            // for an adapter created with D3D_DRIVER_TYPE_WARP D3D device. Not an option here. Still...
+            // https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiadapter-enumoutputs
+            if ( FAILED( hResult ) )
+            {
+                throw 0;
+            }
+
+            ComPtr<IDXGIOutput1> dxgiOutput1;
+            hResult = dxgiOutput->QueryInterface( __uuidof( IDXGIOutput1 ), reinterpret_cast< void** >( dxgiOutput1.GetAddressOf() ) );
+
+            // We require support for the DXGI version 1.1 (Windows 7 and newer). Required for DXGI_ADAPTER_FLAG member.
+            if ( FAILED( hResult ) )
+            {
+                throw 0;
+            }
+
+            DXGI_OUTPUT_DESC dxgiOutputDesc;
+            hResult = dxgiOutput1->GetDesc( &dxgiOutputDesc );
+
+            if ( FAILED( hResult ) )
+            {
+                throw 0;
+            }
+
+            auto * outputObject = addOutput( pAdapter );
+            auto & outputNativeData = dsmGetObjectNativeDataDXGI( *outputObject );
+            auto & outputDesc = dsmGetObjectDesc( *outputObject );
+
+            outputNativeData.dxgiOutput = dxgiOutput1;
+            outputNativeData.dxgiOutputDesc = dxgiOutputDesc;
+            outputDesc.name = strUtils::convertStringRepresentation<char>( dxgiOutputDesc.DeviceName );
+            outputDesc.screenRect.offset.x = dxgiOutputDesc.DesktopCoordinates.left;
+            outputDesc.screenRect.offset.y = dxgiOutputDesc.DesktopCoordinates.top;
+            outputDesc.screenRect.size.x = dxgiOutputDesc.DesktopCoordinates.right - dxgiOutputDesc.DesktopCoordinates.left;
+            outputDesc.screenRect.size.y = dxgiOutputDesc.DesktopCoordinates.bottom - dxgiOutputDesc.DesktopCoordinates.top;
+
+            if( dxgiOutputDesc.AttachedToDesktop )
+            {
+                outputDesc.flags.set( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
+            }
+
+            if( dxgiOutputDesc.Monitor )
+            {
+                // It is almost crazy we need to rely on the old Win32 API within a DXGI realm... but it seems
+                // DXGI API does not expose the concept of a "primary (or default) output". Some apps rely on
+                // the existence of a default output, so we make sure DXGI has it too.
+                MONITORINFOEXA gdiMonitorInfo;
+                gdiMonitorInfo.cbSize = sizeof( MONITORINFOEXA );
+
+                if( ::GetMonitorInfoA( dxgiOutputDesc.Monitor, &gdiMonitorInfo ) != FALSE )
+                {
+                    if( makeBitmask( gdiMonitorInfo.dwFlags ).isSet( MONITORINFOF_PRIMARY ) )
+                    {
+                        outputDesc.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
+                    }
+                }
+            }
+        }
+    }
+
+	void DisplayDriverDXGI::_drvEnumDisplayDevices()
 	{
 	    auto * dxgiFactory = mPrivate->nativeDataPriv.dxgi->dxgiFactory.Get();
 
@@ -83,85 +188,7 @@ namespace ts3::system
 	    }
 	}
 
-	void DisplayDriverDXGI::_enumAdapterOutputs( DisplayAdapter & pAdapter )
-	{
-	    auto & adapterNativeData = dsmGetObjectNativeDataDXGI( pAdapter );
-
-	    auto * dxgiAdapter = adapterNativeData.dxgiAdapter.Get();
-
-	    for( UINT outputIndex = 0u; ; ++outputIndex )
-	    {
-	        ComPtr<IDXGIOutput> dxgiOutput;
-	        auto hResult = dxgiAdapter->EnumOutputs( outputIndex, dxgiOutput.GetAddressOf() );
-
-	        // Exactly the same situation: if DXGI_ERROR_NOT_FOUND is returned - no more adapters to enumerate.
-	        if ( hResult == DXGI_ERROR_NOT_FOUND )
-	        {
-	            break;
-	        }
-
-	        // According to the docs, the only possible error is DXGI_ERROR_NOT_FOUND which is returned
-	        // for an adapter created with D3D_DRIVER_TYPE_WARP D3D device. Not an option here. Still...
-	        // https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiadapter-enumoutputs
-	        if ( FAILED( hResult ) )
-	        {
-	            throw 0;
-	        }
-
-	        ComPtr<IDXGIOutput1> dxgiOutput1;
-	        hResult = dxgiOutput->QueryInterface( __uuidof( IDXGIOutput1 ), reinterpret_cast< void** >( dxgiOutput1.GetAddressOf() ) );
-
-	        // We require support for the DXGI version 1.1 (Windows 7 and newer). Required for DXGI_ADAPTER_FLAG member.
-	        if ( FAILED( hResult ) )
-	        {
-	            throw 0;
-	        }
-
-	        DXGI_OUTPUT_DESC dxgiOutputDesc;
-	        hResult = dxgiOutput1->GetDesc( &dxgiOutputDesc );
-
-	        if ( FAILED( hResult ) )
-	        {
-	            throw 0;
-	        }
-
-	        auto * outputObject = addOutput( pAdapter );
-	        auto & outputNativeData = dsmGetObjectNativeDataDXGI( *outputObject );
-	        auto & outputDesc = dsmGetObjectDesc( *outputObject );
-
-	        outputNativeData.dxgiOutput = dxgiOutput1;
-	        outputNativeData.dxgiOutputDesc = dxgiOutputDesc;
-	        outputDesc.name = strUtils::convertStringRepresentation<char>( dxgiOutputDesc.DeviceName );
-	        outputDesc.screenRect.offset.x = dxgiOutputDesc.DesktopCoordinates.left;
-	        outputDesc.screenRect.offset.y = dxgiOutputDesc.DesktopCoordinates.top;
-	        outputDesc.screenRect.size.x = dxgiOutputDesc.DesktopCoordinates.right - dxgiOutputDesc.DesktopCoordinates.left;
-	        outputDesc.screenRect.size.y = dxgiOutputDesc.DesktopCoordinates.bottom - dxgiOutputDesc.DesktopCoordinates.top;
-
-	        if( dxgiOutputDesc.AttachedToDesktop )
-	        {
-	            outputDesc.flags.set( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
-	        }
-
-	        if( dxgiOutputDesc.Monitor )
-	        {
-	            // It is almost crazy we need to rely on the old Win32 API within a DXGI realm... but it seems
-	            // DXGI API does not expose the concept of a "primary (or default) output". Some apps rely on
-	            // the existence of a default output, so we make sure DXGI has it too.
-	            MONITORINFOEXA gdiMonitorInfo;
-	            gdiMonitorInfo.cbSize = sizeof( MONITORINFOEXA );
-
-	            if( ::GetMonitorInfoA( dxgiOutputDesc.Monitor, &gdiMonitorInfo ) != FALSE )
-	            {
-	                if( makeBitmask( gdiMonitorInfo.dwFlags ).isSet( MONITORINFOF_PRIMARY ) )
-	                {
-	                    outputDesc.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
-	                }
-	            }
-	        }
-	    }
-	}
-
-	void DisplayDriverDXGI::_nativeEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
+	void DisplayDriverDXGI::_drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
 	{
 	    auto * dxgiOutput = pOutput.mPrivate->nativeDataPriv.dxgi->dxgiOutput.Get();
 
@@ -241,7 +268,7 @@ namespace ts3::system
 	    }
 	}
 
-    ColorFormat DisplayDriverDXGI::_nativeQueryDefaultSystemColorFormat() const
+    ColorFormat DisplayDriverDXGI::_drvQueryDefaultSystemColorFormat() const
     {
 	    return ColorFormat::B8G8R8A8;
     }
@@ -249,36 +276,6 @@ namespace ts3::system
 
 	void _dxgiInitializeDriver( DisplayDriverDXGI & pDriverDXGI )
 	{
-	    ts3DebugAssert( pDriverDXGI.mPrivate->nativeDataPriv.dxgi );
-	    auto & dxgiDriverData = *( pDriverDXGI.mPrivate->nativeDataPriv.dxgi );
-
-	    if( dxgiDriverData.dxgiFactory == nullptr )
-	    {
-	        Bitmask<UINT> dxgiFactoryCreateFlags = 0;
-		#if ( TS3_DEBUG )
-	        dxgiFactoryCreateFlags.set( DXGI_CREATE_FACTORY_DEBUG );
-		#endif
-
-	        ComPtr<IDXGIFactory2> dxgiFactory2;
-	        auto hResult = ::CreateDXGIFactory2( dxgiFactoryCreateFlags, IID_PPV_ARGS( &dxgiFactory2 ) );
-
-	        if( SUCCEEDED( hResult ) )
-	        {
-	            dxgiDriverData.dxgiFactory = dxgiFactory2;
-	        }
-	        else
-	        {
-	            ComPtr<IDXGIFactory1> dxgiFactory1;
-	            hResult = ::CreateDXGIFactory1( IID_PPV_ARGS( &dxgiFactory1 ) );
-
-	            if( FAILED( hResult ) )
-	            {
-	                throw 0;
-	            }
-
-	            dxgiDriverData.dxgiFactory = dxgiFactory1;
-	        }
-	    }
 	}
 
 	DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( ColorFormat pColorFormat )

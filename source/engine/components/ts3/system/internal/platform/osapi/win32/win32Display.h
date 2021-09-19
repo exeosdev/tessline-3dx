@@ -1,12 +1,15 @@
 
-#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_DISPLAY_DRIVER_H__
-#define __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_DISPLAY_DRIVER_H__
+#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_DISPLAY_H__
+#define __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_DISPLAY_H__
 
 #include "win32Common.h"
-#include <ts3/system/visual.h>
 
 namespace ts3::system
 {
+
+    struct DisplayManagerNativeData
+    {
+    };
 
     struct DisplayDriverNativeDataGeneric
     {
@@ -35,4 +38,4 @@ namespace ts3::system
 
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_DISPLAY_DRIVER_H__
+#endif // __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_DISPLAY_H__

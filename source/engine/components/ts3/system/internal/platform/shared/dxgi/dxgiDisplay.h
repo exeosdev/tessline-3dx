@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_DXGI_DISPLAY_DRIVER_H__
-#define __TS3_SYSTEM_DXGI_DISPLAY_DRIVER_H__
+#ifndef __TS3_SYSTEM_DXGI_DISPLAY_H__
+#define __TS3_SYSTEM_DXGI_DISPLAY_H__
 
 #include "dxgiCommon.h"
 
@@ -31,4 +31,4 @@ namespace ts3::system
 
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_DXGI_DISPLAY_DRIVER_H__
+#endif // __TS3_SYSTEM_DXGI_DISPLAY_H__

@@ -1,138 +1,106 @@
 
-#include "displayDriverNative.h"
-#include "displayManager.h"
+#include "displayNative.h"
 #include "internal/private/displayInternal.h"
 
 namespace ts3::system
 {
 
-    DisplayAdapter::DisplayAdapter( DisplayDriver * pDriver )
-    : mDisplayDriver( pDriver )
-    , mDriverType( pDriver->mDriverType )
-    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
-    , mDesc( &( mPrivate->descPriv ) )
+    DisplayManager::DisplayManager( SysContextHandle pSysContext )
+    : SysObject( std::move( pSysContext ) )
+    , mPrivate( std::make_unique<ObjectPrivateData>() )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
-    {}
-
-    DisplayAdapter::~DisplayAdapter() = default;
-
-    const DisplayOutputList & DisplayAdapter::getOutputList() const
     {
-        return mPrivate->outputList;
+        _nativeCtor();
+
+        mPrivate->driverFactoryMap[EDisplayDriverType::Generic] = [this]() {
+            return createSysObject<DisplayDriverGeneric>( this );
+        };
+    #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
+        mPrivate->driverFactoryMap[EDisplayDriverType::DXGI] = [this]() {
+            return createSysObject<DisplayDriverDXGI>( this );
+        };
+    #endif
+    #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
+        mPrivate->driverFactoryMap[EDisplayDriverType::SDL] = [this]() {
+            return createSysObject<DisplayDriverSDL>( this );
+        };
+    #endif
     }
 
-    DisplayOutput * DisplayAdapter::getOutput( dsm_index_t pOutputIndex ) const
+    DisplayManager::~DisplayManager() noexcept
     {
-        if( pOutputIndex == CX_DSM_INDEX_DEFAULT )
+        _nativeDtor();
+    }
+
+    DisplayDriverHandle DisplayManager::createDisplayDriver( EDisplayDriverType pDriverID )
+    {
+        pDriverID = resolveDisplayDriverID( pDriverID );
+        if( pDriverID == EDisplayDriverType::Unknown )
         {
-            return mPrivate->primaryOutput;
+            return nullptr;
         }
-        else
+
+        auto & factoryCallback = mPrivate->driverFactoryMap.at( pDriverID );
+        auto displayDriver = factoryCallback();
+
+        return displayDriver;
+    }
+
+    bool DisplayManager::checkDriverSupport( EDisplayDriverType pDriverID ) const
+    {
+        // The default driver is always supported. If no driver is available on
+        // a given system, DisplayManager will fail to create in the first place,
+        if( pDriverID == EDisplayDriverType::Default )
         {
-            return mPrivate->outputList.at( pOutputIndex );
+            return true;
         }
+
+        // Resolve the driver ID. This will return EDisplayDriverType::Unknown
+        // if the specified driver is not supported on the current system.
+        auto resolvedDriverID = resolveDisplayDriverID( pDriverID );
+
+        return resolvedDriverID != EDisplayDriverType::Unknown;
     }
 
-    DisplayOutput * DisplayAdapter::getDefaultOutput() const
+    EDisplayDriverType DisplayManager::resolveDisplayDriverID( EDisplayDriverType pDriverID ) const
     {
-        return mPrivate->primaryOutput;
-    }
+        EDisplayDriverType resolvedDriverID = EDisplayDriverType::Unknown;
 
-    bool DisplayAdapter::isActiveAdapter() const
-    {
-        return mPrivate->descPriv.flags.isSet( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
-    }
-
-    bool DisplayAdapter::isPrimaryAdapter() const
-    {
-        return mPrivate->descPriv.flags.isSet( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
-    }
-
-    bool DisplayAdapter::hasActiveOutputs() const
-    {
-        return mPrivate->activeOutputsNum > 0;
-    }
-
-    bool DisplayAdapter::hasAnyOutputs() const
-    {
-        return !mPrivate->outputInternalStorage.empty();
-    }
-
-
-    DisplayOutput::DisplayOutput( DisplayAdapter * pAdapter )
-    : mDisplayDriver( pAdapter->mDisplayDriver )
-    , mParentAdapter( pAdapter )
-    , mDriverType( pAdapter->mDriverType )
-    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
-    , mDesc( &( mPrivate->descPriv ) )
-    , mNativeData( &( mPrivate->nativeDataPriv ) )
-    {}
-
-    DisplayOutput::~DisplayOutput() = default;
-
-    ArrayView<const ColorFormat> DisplayOutput::getSupportedColorFormatList() const
-    {
-        return bindArrayView( cvColorFormatArray );
-    }
-
-    bool DisplayOutput::checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings ) const
-    {
-        auto colorFormat = mDisplayDriver->queryDefaultSystemColorFormat();
-        return checkVideoSettingsSupport( pVideoSettings, colorFormat );
-    }
-
-    bool DisplayOutput::checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings, ColorFormat pColorFormat ) const
-    {
-        const auto & colorFormatData = mPrivate->colorFormatMap.at( pColorFormat );
-        for( const auto & displayMode : colorFormatData.videoModeInternalStorage )
+        if( pDriverID == EDisplayDriverType::Generic )
         {
-            if( displayMode.mDesc->settings.matches( pVideoSettings ) )
-            {
-                return true;
-            }
+            resolvedDriverID = EDisplayDriverType::Generic;
         }
-        return false;
+        else if( pDriverID == EDisplayDriverType::Default )
+        {
+        #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINFAMILY )
+            resolvedDriverID = EDisplayDriverType::DXGI;
+        #else
+            resolvedDriverID = EDisplayDriverType::Generic;
+        #endif
+        }
+    #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINFAMILY )
+        else if( pDriverID == EDisplayDriverType::DXGI )
+        {
+            resolvedDriverID = EDisplayDriverType::DXGI;
+        }
+    #endif
+
+        return resolvedDriverID;
     }
 
-    const DisplayVideoModeList & DisplayOutput::getVideoModeList() const
+    DisplaySize DisplayManager::queryDefaultDisplaySize() const
     {
-        auto colorFormat = mDisplayDriver->queryDefaultSystemColorFormat();
-        return getVideoModeList( colorFormat );
+        DisplaySize result;
+        _nativeQueryDefaultDisplaySize( result );
+        return result;
     }
 
-    const DisplayVideoModeList & DisplayOutput::getVideoModeList( ColorFormat pColorFormat ) const
+    DisplaySize DisplayManager::queryMinWindowSize() const
     {
-        const auto & colorFormatData = mPrivate->colorFormatMap.at( pColorFormat );
-        return colorFormatData.videoModeList;
+        DisplaySize result;
+        _nativeQueryMinWindowSize( result );
+        return result;
     }
-
-    bool DisplayOutput::isActiveOutput() const
-    {
-        return mPrivate->descPriv.flags.isSet( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
-    }
-
-    bool DisplayOutput::isPrimaryOutput() const
-    {
-        return mPrivate->descPriv.flags.isSet( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
-    }
-
-    bool DisplayOutput::isColorFormatSupported( ColorFormat pColorFormat ) const
-    {
-        const auto & colorFormatData = mPrivate->colorFormatMap.at( pColorFormat );
-        return !colorFormatData.videoModeInternalStorage.empty();
-    }
-
-
-    DisplayVideoMode::DisplayVideoMode( DisplayOutput * pOutput )
-    : mDisplayDriver( pOutput->mDisplayDriver )
-    , mParentOutput( pOutput )
-    , mDriverType( pOutput->mDriverType )
-    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
-    , mDesc( &( mPrivate->descPriv ) )
-    , mNativeData( &( mPrivate->nativeDataPriv ) )
-    {}
-
-    DisplayVideoMode::~DisplayVideoMode() = default;
 
 
     DisplayDriver::DisplayDriver( DisplayManager * pDisplayManager,
@@ -165,7 +133,7 @@ namespace ts3::system
 
     ColorFormat DisplayDriver::queryDefaultSystemColorFormat() const
     {
-        return _nativeQueryDefaultSystemColorFormat();
+        return _drvQueryDefaultSystemColorFormat();
     }
 
     const DisplayAdapterList & DisplayDriver::getAdapterList() const
@@ -395,7 +363,7 @@ namespace ts3::system
 
     void DisplayDriver::_enumDisplayDevices()
     {
-        _nativeEnumDisplayDevices();
+        _drvEnumDisplayDevices();
 
         // "Post-processing" part - in order to avoid duplicate
         // common aspects of the enumeration process, some steps
@@ -439,9 +407,6 @@ namespace ts3::system
 
                     for( auto & output : adapter.mPrivate->outputInternalStorage )
                     {
-                        // Update the non-driver-specific part of the output info
-                        auto & outputDesc = dsmGetObjectDesc( output );
-
                         if( output.isPrimaryOutput() && adapter.mPrivate->primaryOutput )
                         {
                             // Similar to the default/primary system adapter, we select default
@@ -478,7 +443,7 @@ namespace ts3::system
             if( !adapterDesc.flags.isSet( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT ) )
             {
                 ts3DebugOutput(
-                    "Primary/Default adapter selected by the driver does not have "\
+                        "Primary/Default adapter selected by the driver does not have "\
                     "E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT set. Is that intentional?" );
             }
         }
@@ -528,7 +493,7 @@ namespace ts3::system
             {
                 for( auto colorFormat : cvColorFormatArray )
                 {
-                    _nativeEnumVideoModes( output, colorFormat );
+                    _drvEnumVideoModes( output, colorFormat );
 
                     auto & colorFormatData = output.mPrivate->colorFormatMap[colorFormat];
                     if( !colorFormatData.videoModeInternalStorage.empty() )
@@ -572,5 +537,134 @@ namespace ts3::system
             return adapter->mPrivate->outputList.at( outputIndex );
         }
     }
+
+
+    DisplayAdapter::DisplayAdapter( DisplayDriver * pDriver )
+    : mDisplayDriver( pDriver )
+    , mDriverType( pDriver->mDriverType )
+    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
+    , mDesc( &( mPrivate->descPriv ) )
+    , mNativeData( &( mPrivate->nativeDataPriv ) )
+    {}
+
+    DisplayAdapter::~DisplayAdapter() = default;
+
+    const DisplayOutputList & DisplayAdapter::getOutputList() const
+    {
+        return mPrivate->outputList;
+    }
+
+    DisplayOutput * DisplayAdapter::getOutput( dsm_index_t pOutputIndex ) const
+    {
+        if( pOutputIndex == CX_DSM_INDEX_DEFAULT )
+        {
+            return mPrivate->primaryOutput;
+        }
+        else
+        {
+            return mPrivate->outputList.at( pOutputIndex );
+        }
+    }
+
+    DisplayOutput * DisplayAdapter::getDefaultOutput() const
+    {
+        return mPrivate->primaryOutput;
+    }
+
+    bool DisplayAdapter::isActiveAdapter() const
+    {
+        return mPrivate->descPriv.flags.isSet( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
+    }
+
+    bool DisplayAdapter::isPrimaryAdapter() const
+    {
+        return mPrivate->descPriv.flags.isSet( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
+    }
+
+    bool DisplayAdapter::hasActiveOutputs() const
+    {
+        return mPrivate->activeOutputsNum > 0;
+    }
+
+    bool DisplayAdapter::hasAnyOutputs() const
+    {
+        return !mPrivate->outputInternalStorage.empty();
+    }
+
+
+    DisplayOutput::DisplayOutput( DisplayAdapter * pAdapter )
+    : mDisplayDriver( pAdapter->mDisplayDriver )
+    , mParentAdapter( pAdapter )
+    , mDriverType( pAdapter->mDriverType )
+    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
+    , mDesc( &( mPrivate->descPriv ) )
+    , mNativeData( &( mPrivate->nativeDataPriv ) )
+    {}
+
+    DisplayOutput::~DisplayOutput() = default;
+
+    ArrayView<const ColorFormat> DisplayOutput::getSupportedColorFormatList() const
+    {
+        return bindArrayView( cvColorFormatArray );
+    }
+
+    bool DisplayOutput::checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings ) const
+    {
+        auto colorFormat = mDisplayDriver->queryDefaultSystemColorFormat();
+        return checkVideoSettingsSupport( pVideoSettings, colorFormat );
+    }
+
+    bool DisplayOutput::checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings, ColorFormat pColorFormat ) const
+    {
+        const auto & colorFormatData = mPrivate->colorFormatMap.at( pColorFormat );
+        for( const auto & displayMode : colorFormatData.videoModeInternalStorage )
+        {
+            if( displayMode.mDesc->settings.matches( pVideoSettings ) )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    const DisplayVideoModeList & DisplayOutput::getVideoModeList() const
+    {
+        auto colorFormat = mDisplayDriver->queryDefaultSystemColorFormat();
+        return getVideoModeList( colorFormat );
+    }
+
+    const DisplayVideoModeList & DisplayOutput::getVideoModeList( ColorFormat pColorFormat ) const
+    {
+        const auto & colorFormatData = mPrivate->colorFormatMap.at( pColorFormat );
+        return colorFormatData.videoModeList;
+    }
+
+    bool DisplayOutput::isActiveOutput() const
+    {
+        return mPrivate->descPriv.flags.isSet( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
+    }
+
+    bool DisplayOutput::isPrimaryOutput() const
+    {
+        return mPrivate->descPriv.flags.isSet( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
+    }
+
+    bool DisplayOutput::isColorFormatSupported( ColorFormat pColorFormat ) const
+    {
+        const auto & colorFormatData = mPrivate->colorFormatMap.at( pColorFormat );
+        return !colorFormatData.videoModeInternalStorage.empty();
+    }
+
+
+    DisplayVideoMode::DisplayVideoMode( DisplayOutput * pOutput )
+    : mDisplayDriver( pOutput->mDisplayDriver )
+    , mParentOutput( pOutput )
+    , mDriverType( pOutput->mDriverType )
+    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
+    , mDesc( &( mPrivate->descPriv ) )
+    , mNativeData( &( mPrivate->nativeDataPriv ) )
+    {}
+
+    DisplayVideoMode::~DisplayVideoMode() = default;
 
 }
