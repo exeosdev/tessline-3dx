@@ -9,13 +9,28 @@ namespace ts3::system
 
     LRESULT __stdcall _win32EventSourceProxyEventProc( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 
+    bool _win32TranslateAppOrWindowEvent( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
+    bool _win32TranslateInputEvent( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
+    bool _win32TranslateInputEventKeyboard( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
+    bool _win32TranslateInputEventMouse( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
+    bool _win32TranslateInputEventTouch( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
+    EKeyCode _win32GetSysKeyCode( WPARAM pWparam );
+    Bitmask<EMouseButtonFlagBits> _win32GetMouseButtonStateMask( WPARAM pWparam );
+
+
     void EventController::_nativeRegisterEventSource( EventSource & pEventSource )
     {
+        auto * eventSourceState = static_cast<Win32EventSourceState *>( _getEventSourcePrivateData( pEventSource ) );
+        if( !eventSourceState )
+        {
+            eventSourceState = new Win32EventSourceState();
+            eventSourceState->eventController = this;
+            eventSourceState->eventSource = &pEventSource;
+            _setEventSourcePrivateData( pEventSource, eventSourceState );
+        }
+
         auto * eventSourceNativeData = pEventSource.getEventSourceNativeData();
 
-        Win32EventSourceState * eventSourceState = new Win32EventSourceState();
-        eventSourceState->eventController = this;
-        eventSourceState->eventSource = &pEventSource;
         eventSourceState->savedEventCallback = ::GetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_WNDPROC );
 
         auto eventSourceStateAddress = reinterpret_cast<LONG_PTR>( eventSourceState );
@@ -36,10 +51,10 @@ namespace ts3::system
 
     void EventController::_nativeUnregisterEventSource( EventSource & pEventSource )
     {
-        auto * eventSourceNativeData = pEventSource.getEventSourceNativeData();
+        auto * eventSourceState = static_cast<Win32EventSourceState *>( _getEventSourcePrivateData( pEventSource ) );
+        ts3DebugAssert( eventSourceState != nullptr );
 
-        auto eventSourceStateAddress = ::GetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_USERDATA );
-        auto * eventSourceState = reinterpret_cast<Win32EventSourceState *>( eventSourceStateAddress );
+        auto * eventSourceNativeData = pEventSource.getEventSourceNativeData();
 
         ::SetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_WNDPROC, eventSourceState->savedEventCallback );
 
@@ -53,11 +68,17 @@ namespace ts3::system
                         0,
                         0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
-
-        delete eventSourceState;
     }
 
-	bool EventController::_nativeDispatchNext()
+    void EventController::_nativeDestroyEventSourcePrivateData( EventSource & pEventSource, void * pData )
+    {
+        if( auto * eventSourceState = static_cast<Win32EventSourceState *>( pData ) )
+        {
+            delete eventSourceState;
+        }
+    }
+
+	bool EventController::_nativeUpdateSysQueue()
 	{
 	    MSG pMSG;
 	    if( ::PeekMessageA( &pMSG, nullptr, 0, 0, PM_REMOVE ) != FALSE )
@@ -71,7 +92,7 @@ namespace ts3::system
 	    return false;
 	}
 
-	bool EventController::_nativeDispatchNextWait()
+	bool EventController::_nativeUpdateSysQueueWait()
 	{
 	    MSG pMSG;
 	    if( ::GetMessageA( &pMSG, nullptr, 0, 0 ) != FALSE )
@@ -87,15 +108,6 @@ namespace ts3::system
 
 	void EventController::_nativeOnActiveDispatcherChange( EventDispatcher * pDispatcher )
 	{}
-
-
-	bool _win32TranslateAppOrWindowEvent( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
-	bool _win32TranslateInputEvent( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
-	bool _win32TranslateInputEventKeyboard( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
-	bool _win32TranslateInputEventMouse( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
-	bool _win32TranslateInputEventTouch( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
-	EKeyCode _win32GetSysKeyCode( WPARAM pWparam );
-	Bitmask<EMouseButtonFlagBits> _win32GetMouseButtonStateMask( WPARAM pWparam );
 
 
 	bool nativeEventTranslate( EventController & pEventController, const NativeEvent & pNativeEvent, EventObject & pOutEvent )
@@ -118,8 +130,28 @@ namespace ts3::system
 	    return false;
 	}
 
-	void _win32RegisterEventSource( EventController & pEventController, HWND pSourceHwnd, Win32EventSourceState * pEventSourceState )
+	LRESULT __stdcall _win32EventSourceProxyEventProc( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam )
 	{
+        // The UserData value is a pointer to the internal EventState of the current window.
+        // It is created before this callback gets injected and released when NCDESTROY message arrives.
+        LONG_PTR windowUserData = ::GetWindowLongPtrA( pHWND, GWLP_USERDATA );
+
+        if( windowUserData != 0 )
+        {
+            // This our state.
+            // TODO: Some validation might be useful to check if this callback is used correctly.
+            auto * win32EventSourceState = reinterpret_cast<Win32EventSourceState *>( windowUserData );
+
+            MSG nativeEvent;
+            nativeEvent.hwnd = pHWND;
+            nativeEvent.message = pMessage;
+            nativeEvent.wParam = pWparam;
+            nativeEvent.lParam = pLparam;
+
+            nativeEventDispatch( *( win32EventSourceState->eventController ), nativeEvent );
+        }
+
+        return ::DefWindowProcA( pHWND, pMessage, pWparam, pLparam );
 	}
 
 	bool _win32TranslateAppOrWindowEvent( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
@@ -380,50 +412,6 @@ namespace ts3::system
 	bool _win32TranslateInputEventTouch( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
     {
 	    return false;
-    }
-
-    LRESULT __stdcall _win32EventSourceProxyEventProc( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam )
-    {
-	    // The UserData value is a pointer to the internal EventState of the current window.
-	    // It is created before this callback gets injected and released when NCDESTROY message arrives.
-	    LONG_PTR windowUserData = ::GetWindowLongPtrA( pHWND, GWLP_USERDATA );
-
-	    if( windowUserData != 0 )
-	    {
-	        // This our state.
-	        // TODO: Some validation might be useful to check if this callback is used correctly.
-	        auto * win32EventSourceState = reinterpret_cast<Win32EventSourceState *>( windowUserData );
-
-	        if( pMessage == WM_NCDESTROY )
-	        {
-	            if( win32EventSourceState->eventSource )
-	            {
-	                ts3DebugAssert( win32EventSourceState->eventController );
-	                auto & eventSource = *( win32EventSourceState->eventSource );
-	                win32EventSourceState->eventController->unregisterEventSource( eventSource );
-	            }
-
-	            // NCDESTROY is the last message received by a window's event callback.
-	            // This is the right moment to release any extra data allocated for this window.
-	            delete win32EventSourceState;
-
-	            // Update the UserData to 0 in case anything gets called afterwards.
-	            // This will prevent using an already deallocated memory/data.
-	            ::SetWindowLongPtrA( pHWND, GWLP_USERDATA, 0 );
-	        }
-	        else
-	        {
-	            MSG nativeEvent;
-	            nativeEvent.hwnd = pHWND;
-	            nativeEvent.message = pMessage;
-	            nativeEvent.wParam = pWparam;
-	            nativeEvent.lParam = pLparam;
-
-	            nativeEventDispatch( *( win32EventSourceState->eventController ), nativeEvent );
-	        }
-	    }
-
-	    return ::DefWindowProcA( pHWND, pMessage, pWparam, pLparam );
     }
 
 	static const EKeyCode sASCIIKeyCodeMap_08_7B[] =

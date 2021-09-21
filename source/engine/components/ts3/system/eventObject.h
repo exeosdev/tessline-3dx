@@ -41,13 +41,21 @@ namespace ts3::system
 			EvtWindowUpdateVisibility  eWindowUpdateVisibility;
 		};
 
-		EventObject()
+		constexpr EventObject()
 		: code{ E_EVENT_CODE_UNDEFINED }
 		{}
 
-		explicit operator bool() const
+		constexpr explicit EventObject( EEventCode pEventCode )
+		: code{ pEventCode }
+		{}
+
+		constexpr explicit EventObject( event_code_value_t pEventCode )
+		: code{ static_cast<EEventCode>( pEventCode ) }
+		{}
+
+		constexpr explicit operator bool() const
 		{
-			return code != E_EVENT_CODE_UNDEFINED;
+		    return ( code != E_EVENT_CODE_UNDEFINED ) && ecValidateEventCode( code );
 		}
 	};
 

@@ -44,7 +44,7 @@ namespace ts3::system
             throw 0;
         }
 
-        pWindow.onEventSourceDestroy();
+        pWindow.unregisterEventSourceAuto();
 
         _nativeDestroyWindow( pWindow );
 

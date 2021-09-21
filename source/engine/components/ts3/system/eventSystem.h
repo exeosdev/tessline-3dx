@@ -49,12 +49,13 @@ namespace ts3::system
 
         virtual const EventSourceNativeData * getEventSourceNativeData() const = 0;
 
-    protected:
-        void onEventSourceDestroy();
+        void unregisterEventSourceAuto();
     };
 
 	class EventController : public SysObject
 	{
+	    friend class EventSource;
+
 	public:
 	    struct ObjectPrivateData;
 	    std::unique_ptr<ObjectPrivateData> const mPrivate;
@@ -68,9 +69,9 @@ namespace ts3::system
 
 		bool dispatchEvent( EventObject pEvent );
 
-		uint32 dispatchSysEventAuto();
-		uint32 dispatchSysEventPeek( uint32 pLimit = CX_INT32_MAX );
-		uint32 dispatchSysEventWait( uint32 pLimit = CX_INT32_MAX );
+		uint32 updateSysQueueAuto();
+		uint32 updateSysQueuePeek( uint32 pLimit = CX_INT32_MAX );
+		uint32 updateSysQueueWait( uint32 pLimit = CX_INT32_MAX );
 
         bool setActiveDispatcher( EventDispatcher & pDispatcher );
         bool setDefaultActiveDispatcher();
@@ -88,21 +89,25 @@ namespace ts3::system
 
 		TS3_PCL_ATTR_NO_DISCARD bool hasActiveDispatcher() const;
 
+	friendapi: // EventSource
+	    void onEventSourceDestroy( EventSource & pEventSource );
+
 	private:
 	    void _checkActiveDispatcherState();
 	    void _onActiveDispatcherChange( EventDispatcher * pDispatcher );
+	    void _setEventSourcePrivateData( EventSource & pEventSource, void * pData );
+	    void * _getEventSourcePrivateData( EventSource & pEventSource ) const;
 
 	    void _nativeRegisterEventSource( EventSource & pEventSource );
 	    void _nativeUnregisterEventSource( EventSource & pEventSource );
-	    bool _nativeDispatchNext();
-	    bool _nativeDispatchNextWait();
+	    void _nativeDestroyEventSourcePrivateData( EventSource & pEventSource, void * pData );
+	    bool _nativeUpdateSysQueue();
+	    bool _nativeUpdateSysQueueWait();
 	    void _nativeOnActiveDispatcherChange( EventDispatcher * pDispatcher );
 	};
 
 	class EventDispatcher
 	{
-		friend class EventController;
-
 	public:
 	    struct ObjectPrivateData;
 		EventController * const mEventController;

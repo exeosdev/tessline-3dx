@@ -18,7 +18,7 @@ namespace ts3::system
 	Bitmask<EMouseButtonFlagBits> _x11GetMouseButtonStateMask( uint32 pState );
 
 
-    bool EventController::_nativeDispatchNext()
+    bool EventController::_nativeUpdateSysQueue()
     {
         auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 
@@ -33,7 +33,7 @@ namespace ts3::system
         return false;
     }
 
-    bool EventController::_nativeDispatchNextWait()
+    bool EventController::_nativeUpdateSysQueueWait()
     {
         auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 

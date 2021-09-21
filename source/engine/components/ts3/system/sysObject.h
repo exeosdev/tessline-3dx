@@ -18,11 +18,9 @@ namespace ts3::system
         // Public handle to the SysContext. This is always non-null and specified at construction time.
         SysContextHandle const mSysContext;
 
-        explicit SysObject( SysContextHandle pSysContext )
-        : mSysContext( std::move( pSysContext ) )
-        {}
-
-        virtual ~SysObject() = default;
+    public:
+        explicit SysObject( SysContextHandle pSysContext );
+        virtual ~SysObject();
     };
 
     template <typename TpObject, typename... TpArgs>

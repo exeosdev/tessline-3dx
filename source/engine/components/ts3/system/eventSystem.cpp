@@ -11,15 +11,17 @@ namespace ts3::system
 
     EventSource::~EventSource()
     {
-        ts3DebugAssert( !mEventController );
+        if( mEventController )
+        {
+            mEventController->onEventSourceDestroy( *this );
+        }
     }
 
-    void EventSource::onEventSourceDestroy()
+    void EventSource::unregisterEventSourceAuto()
     {
         if( mEventController )
         {
             mEventController->unregisterEventSource( *this );
-            mEventController = nullptr;
         }
     }
 
@@ -72,46 +74,46 @@ namespace ts3::system
         return mPrivate->activeDispatcher->postEvent( pEvent );
     }
 
-    uint32 EventController::dispatchSysEventAuto()
+    uint32 EventController::updateSysQueueAuto()
     {
         _checkActiveDispatcherState();
 
         uint32 eventCounter = 0;
-        while( _nativeDispatchNext() )
+        while( _nativeUpdateSysQueue() )
         {
             ++eventCounter;
         }
         if( ( eventCounter == 0 ) && mPrivate->currentInternalConfig->configFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT ) )
         {
-            _nativeDispatchNextWait();
+            _nativeUpdateSysQueueWait();
         }
         return eventCounter;
     }
 
-    uint32 EventController::dispatchSysEventPeek( uint32 pLimit )
+    uint32 EventController::updateSysQueuePeek( uint32 pLimit )
     {
         _checkActiveDispatcherState();
 
         uint32 eventCounter = 0;
-        while( _nativeDispatchNext() && ( eventCounter <= pLimit ) )
+        while( _nativeUpdateSysQueue() && ( eventCounter <= pLimit ) )
         {
             ++eventCounter;
         }
         return eventCounter;
     }
 
-    uint32 EventController::dispatchSysEventWait( uint32 pLimit )
+    uint32 EventController::updateSysQueueWait( uint32 pLimit )
     {
         _checkActiveDispatcherState();
 
         uint32 eventCounter = 0;
-        while( _nativeDispatchNext() && ( eventCounter <= pLimit ) )
+        while( _nativeUpdateSysQueue() && ( eventCounter <= pLimit ) )
         {
             ++eventCounter;
         }
         if( eventCounter == 0 )
         {
-            _nativeDispatchNextWait();
+            _nativeUpdateSysQueueWait();
         }
         return eventCounter;
     }
@@ -216,6 +218,41 @@ namespace ts3::system
         return mPrivate->activeDispatcher != nullptr;
     }
 
+    void EventController::onEventSourceDestroy( EventSource & pEventSource )
+    {
+        auto eventSourceIter = std::find( mPrivate->registeredEventSourceList.begin(),
+                                          mPrivate->registeredEventSourceList.end(),
+                                          &pEventSource );
+
+        if( eventSourceIter == mPrivate->registeredEventSourceList.end() )
+        {
+            return;
+        }
+
+        // !!! NOTE !!!
+        // Never do this here:
+        //
+        // _nativeUnregisterEventSource( pEventSource );
+        //
+        // onEventSourceDestroy is called when an EventSource is being destroyed (i.e. within its destructor), so the
+        // sub-class part ( e.g. Window/GLSurface) is already gone. That will cause any native code to (most likely)
+        // fail. For example, Win32 would not be able to reset the event procedure, since HWND has been already destroyed.
+        // The purpose of this method is only to remove those sources, that have been destroyed as a consequence of a
+        // system-generated action (e.g. close button of a window).
+
+        // Just remove the source from the internal list.
+        mPrivate->registeredEventSourceList.erase( eventSourceIter );
+
+        auto privateDataIter = mPrivate->registeredEventSourcePrivateDataMap.find( &pEventSource );
+        ts3DebugAssert( privateDataIter != mPrivate->registeredEventSourcePrivateDataMap.end() );
+
+        _nativeDestroyEventSourcePrivateData( pEventSource, privateDataIter->second );
+
+        mPrivate->registeredEventSourcePrivateDataMap.erase( privateDataIter );
+
+        pEventSource.mEventController = nullptr;
+    }
+
     void EventController::_checkActiveDispatcherState()
     {
         if( !hasActiveDispatcher() )
@@ -245,6 +282,21 @@ namespace ts3::system
         }
 
         _nativeOnActiveDispatcherChange( pDispatcher );
+    }
+
+    void EventController::_setEventSourcePrivateData( EventSource & pEventSource, void * pData )
+    {
+        mPrivate->registeredEventSourcePrivateDataMap[&pEventSource] = pData;
+    }
+
+    void * EventController::_getEventSourcePrivateData( EventSource & pEventSource ) const
+    {
+        auto dataIter = mPrivate->registeredEventSourcePrivateDataMap.find( &pEventSource );
+        if( dataIter != mPrivate->registeredEventSourcePrivateDataMap.end() )
+        {
+            return dataIter->second;
+        }
+        return nullptr;
     }
 
 
@@ -309,6 +361,11 @@ namespace ts3::system
 
     bool EventDispatcher::postEvent( EventObject pEvent )
 	{
+	    if( !ecValidateEventCode( pEvent.code ) )
+	    {
+	        return false;
+	    }
+
 	    _internalEventPreProcess( pEvent, *mEventController );
 
 	    pEvent.commonData.timeStamp = PerfCounter::queryCurrentStamp();
@@ -350,10 +407,7 @@ namespace ts3::system
 
     bool EventDispatcher::postEvent( event_code_value_t pEventCode )
 	{
-	    EventObject eventObject;
-	    eventObject.code = static_cast<EEventCode>( pEventCode );
-
-	    return postEvent( eventObject );
+	    return postEvent( EventObject( pEventCode ) );
 	}
 
     bool EventDispatcher::postEventAppQuit()

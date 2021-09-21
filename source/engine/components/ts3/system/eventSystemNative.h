@@ -81,6 +81,9 @@ namespace ts3::system
         //
         std::vector<EventSource *> registeredEventSourceList;
 
+        //
+        std::unordered_map<EventSource *, void *> registeredEventSourcePrivateDataMap;
+
         // Current active dispatcher used to forward all events. Initially NULL and can be reset to this state.
         EventDispatcher * activeDispatcher = nullptr;
 
@@ -129,8 +132,8 @@ namespace ts3::system
     };
 
     /// @brief Translates a native, OS-specific event into an internal representation.
-    /// This is an internal function, implemented at the OS API level. Technically, it could be OS-specific, but
-    /// having it here gives us the ability to write the dispatching helper function below and avoid duplicating.
+    /// This is an internal function, implemented at the OS API level. Technically, it could be purely OS-specific,
+    /// but having it here gives us the ability to write the dispatching helper function below and avoid duplicating.
     TS3_SYSTEM_API bool nativeEventTranslate( EventController & pEventController, const NativeEvent & pNativeEvent, EventObject & pOutEvent );
 
     /// @brief Helper function for translating and dispatching a native event.

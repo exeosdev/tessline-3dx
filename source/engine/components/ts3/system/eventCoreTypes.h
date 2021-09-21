@@ -278,10 +278,10 @@ namespace ts3::system
         : EvtBase( tpEventCode )
 		{}
 
-        template <typename TpObject>
-        bool checkEventSource( const TpObject & pSource ) const
+		template <typename TpObject>
+        bool checkEventSource( const TpObject * pSource ) const
         {
-	    	return static_cast<const void *>( &pSource ) == static_cast<const void *>( eventSource );
+	    	return static_cast<const void *>( pSource ) == eventSource;
         }
 	};
 
