@@ -10,15 +10,25 @@ namespace ts3::system
 
     class EventController;
     class EventDispatcher;
-    class Window;
+    class EventSource;
 
     using NativeEvent = MSG;
 
-    struct Win32WindowEventState
+    struct EventSourceNativeData
     {
-        Window * windowObject;
-        EventController * eventController;
+        HWND hwnd;
     };
+
+    struct Win32EventSourceState
+    {
+        EventController * eventController = nullptr;
+
+        EventSource * eventSource = nullptr;
+
+        LONG_PTR savedEventCallback = 0;
+    };
+
+    bool nativeWin32RegisterEventSource( EventController & pEventController, EventSource & pEventSource );
 
 } // namespace ts3::system
 

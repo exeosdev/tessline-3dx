@@ -3,6 +3,7 @@
 #define __TS3_SYSTEM_WINDOW_H__
 
 #include "windowCommon.h"
+#include "eventSystem.h"
 #include "sysObject.h"
 
 namespace ts3::system
@@ -37,8 +38,6 @@ namespace ts3::system
 
         void destroyWindow( Window & pWindow );
 
-        void removeWindow( Window & pWindow );
-
         void reset();
 
         TS3_SYSTEM_API_NODISCARD Window * findWindow( WindowPredicateCallback pPredicate );
@@ -54,11 +53,11 @@ namespace ts3::system
         void _nativeDtor() noexcept;
         void _nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo );
         void _nativeDestroyWindow( Window & pWindow );
-        void _nativeRemoveWindow( Window & pWindow );
     };
 
-	class Window : public SysObject
+	class Window : public EventSource
     {
+		friend class WindowManager;
     public:
         struct ObjectPrivateData;
         WindowManager * const mWindowManager;
@@ -68,6 +67,8 @@ namespace ts3::system
     public:
         explicit Window( WindowManager * pWindowManager );
         virtual ~Window();
+
+        virtual const EventSourceNativeData * getEventSourceNativeData() const override final;
 
         void destroy();
 

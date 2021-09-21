@@ -12,6 +12,7 @@ namespace ts3::system
 
 	class EventController;
 	class EventDispatcher;
+    class EventSource;
 
 	/// @brief
 	using EventHandler = std::function<bool( EventObject & )>;

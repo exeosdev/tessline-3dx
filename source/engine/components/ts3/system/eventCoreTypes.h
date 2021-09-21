@@ -267,18 +267,22 @@ namespace ts3::system
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	class Window;
-
 	template <event_code_value_t tpEventCode>
 	struct EvtWindow : public EvtBase
 	{
 	public:
-	    Window * sourceWindow = nullptr;
+        EventSource * eventSource = nullptr;
 
 	public:
 	    constexpr EvtWindow()
         : EvtBase( tpEventCode )
 		{}
+
+        template <typename TpObject>
+        bool checkEventSource( const TpObject & pSource ) const
+        {
+	    	return static_cast<const void *>( &pSource ) == static_cast<const void *>( eventSource );
+        }
 	};
 
 	struct EvtWindowUpdateClose : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_CLOSE>

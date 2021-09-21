@@ -5,9 +5,23 @@
 namespace ts3::system
 {
 
-    void _internalEventPreProcess( EventObject & pEvent, EventController & pEventController );
-    void _internalEventOnInputMouseButton( EventObject & pEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState );
-    void _internalEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState );
+    EventSource::EventSource( SysContextHandle pSysContext )
+    : SysObject( pSysContext )
+    {}
+
+    EventSource::~EventSource()
+    {
+        ts3DebugAssert( !mEventController );
+    }
+
+    void EventSource::onEventSourceDestroy()
+    {
+        if( mEventController )
+        {
+            mEventController->unregisterEventSource( *this );
+            mEventController = nullptr;
+        }
+    }
 
 
     EventController::EventController( SysContextHandle pSysContext )
@@ -17,11 +31,45 @@ namespace ts3::system
 
 	EventController::~EventController() noexcept = default;
 
-    void EventController::dispatchEvent( EventObject pEvent )
+    void EventController::registerEventSource( EventSource & pEventSource )
+    {
+        if( isEventSourceRegistered( pEventSource ) )
+        {
+            ts3DebugInterruptOnce();
+            return;
+        }
+
+        _nativeRegisterEventSource( pEventSource );
+
+        mPrivate->registeredEventSourceList.push_back( &pEventSource );
+
+        pEventSource.mEventController = this;
+    }
+
+    void EventController::unregisterEventSource( EventSource & pEventSource )
+    {
+        auto eventSourceIter = std::find( mPrivate->registeredEventSourceList.begin(),
+                                          mPrivate->registeredEventSourceList.end(),
+                                          &pEventSource );
+
+        if( eventSourceIter == mPrivate->registeredEventSourceList.end() )
+        {
+            ts3DebugInterruptOnce();
+            return;
+        }
+
+        _nativeUnregisterEventSource( pEventSource );
+
+        mPrivate->registeredEventSourceList.erase( eventSourceIter );
+
+        pEventSource.mEventController = nullptr;
+    }
+
+    bool EventController::dispatchEvent( EventObject pEvent )
     {
         _checkActiveDispatcherState();
 
-        mPrivate->activeDispatcher->postEvent( pEvent );
+        return mPrivate->activeDispatcher->postEvent( pEvent );
     }
 
     uint32 EventController::dispatchSysEventAuto()
@@ -80,6 +128,11 @@ namespace ts3::system
         return false;
     }
 
+    bool EventController::setDefaultActiveDispatcher()
+    {
+        return setActiveDispatcher( mPrivate->defaultEventDispatcher );
+    }
+
     bool EventController::resetActiveDispatcher()
     {
         if( mPrivate->activeDispatcher  )
@@ -121,6 +174,43 @@ namespace ts3::system
         return getMapValueOrDefault( mPrivate->dispatcherMap, pDispatcherID, nullptr );
     }
 
+    EventSource * EventController::findEventSource( EventSourceFindPredicate pPredicate ) const
+    {
+        for( auto * eventSource : mPrivate->registeredEventSourceList )
+        {
+            if( pPredicate( *eventSource ) )
+            {
+                return eventSource;
+            }
+        }
+        return nullptr;
+    }
+
+    EventSource * EventController::findEventSource( EventSourceNativeDataFindPredicate pPredicate ) const
+    {
+        for( auto * eventSource : mPrivate->registeredEventSourceList )
+        {
+            const auto * eventSourceNativeData = eventSource->getEventSourceNativeData();
+            if( pPredicate( *eventSourceNativeData ) )
+            {
+                return eventSource;
+            }
+        }
+        return nullptr;
+    }
+
+    bool EventController::isEventSourceRegistered( EventSource & pEventSource ) const
+    {
+        for( auto * eventSource : mPrivate->registeredEventSourceList )
+        {
+            if( &pEventSource == eventSource )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     bool EventController::hasActiveDispatcher() const
     {
         return mPrivate->activeDispatcher != nullptr;
@@ -157,6 +247,10 @@ namespace ts3::system
         _nativeOnActiveDispatcherChange( pDispatcher );
     }
 
+
+    void _internalEventPreProcess( EventObject & pEvent, EventController & pEventController );
+    void _internalEventOnInputMouseButton( EventObject & pEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState );
+    void _internalEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState );
 
     EventDispatcher::EventDispatcher( EventController * pEventController,
                                       event_dispatcher_id_t pID )
@@ -213,7 +307,7 @@ namespace ts3::system
 	    mPrivate->internalConfig.configFlags.setOrUnset( pIdle, E_EVENT_SYSTEM_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT );
 	}
 
-	void EventDispatcher::postEvent( EventObject pEvent )
+    bool EventDispatcher::postEvent( EventObject pEvent )
 	{
 	    _internalEventPreProcess( pEvent, *mEventController );
 
@@ -224,7 +318,7 @@ namespace ts3::system
 	        auto & eventHandler = mPrivate->handlerMapByCodeIndex[codeIndexValue];
 	        if ( eventHandler && eventHandler( pEvent ) )
 	        {
-	            return;
+	            return true;
 	        }
 	    }
 	    {
@@ -232,43 +326,44 @@ namespace ts3::system
 	        auto & eventHandler = mPrivate->handlerMapByCategory[categoryValue];
 	        if ( eventHandler && eventHandler( pEvent ) )
 	        {
-	            return;
+	            return true;
 	        }
 	    }
 	    {
 	        auto baseTypeValue = static_cast<size_t>( ecGetEventCodeBaseType( pEvent.code ) );
-	        auto & eventHandler = mPrivate->handlerMapByCategory[baseTypeValue];
+	        auto & eventHandler = mPrivate->handlerMapByBaseType[baseTypeValue];
 	        if ( eventHandler && eventHandler( pEvent ) )
 	        {
-	            return;
+	            return true;
 	        }
 	    }
 	    {
 	        auto & defaultHandler = mPrivate->defaultHandler;
 	        if ( defaultHandler && defaultHandler( pEvent ) )
 	        {
-	            return;
+	            return true;
 	        }
 	    }
 
-	    // warn?
+        return false;
 	}
 
-	void EventDispatcher::postEvent( event_code_value_t pEventCode )
+    bool EventDispatcher::postEvent( event_code_value_t pEventCode )
 	{
 	    EventObject eventObject;
 	    eventObject.code = static_cast<EEventCode>( pEventCode );
-	    postEvent( eventObject );
+
+	    return postEvent( eventObject );
 	}
 
-	void EventDispatcher::postEventAppQuit()
+    bool EventDispatcher::postEventAppQuit()
 	{
-	    postEvent( E_EVENT_CODE_APP_ACTIVITY_QUIT );
+        return postEvent( E_EVENT_CODE_APP_ACTIVITY_QUIT );
 	}
 
-	void EventDispatcher::postEventAppTerminate()
+    bool EventDispatcher::postEventAppTerminate()
 	{
-	    postEvent( E_EVENT_CODE_APP_ACTIVITY_TERMINATE );
+        return postEvent( E_EVENT_CODE_APP_ACTIVITY_TERMINATE );
 	}
 
 
@@ -278,8 +373,9 @@ namespace ts3::system
 	    // _evtImplOnInputMouseButton() checks the input config and handles, for example, multi-click sequences.
 	    if ( pEvent.code == E_EVENT_CODE_INPUT_MOUSE_BUTTON )
 	    {
-	        _internalEventOnInputMouseButton( pEvent, *( pEventController.mPrivate->currentInternalConfig ), pEventController.mPrivate->inputState );
-
+	        _internalEventOnInputMouseButton( pEvent,
+                                              *( pEventController.mPrivate->currentInternalConfig ),
+                                              pEventController.mPrivate->inputState );
 	    }
 	}
 

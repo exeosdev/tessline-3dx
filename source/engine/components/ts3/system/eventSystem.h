@@ -5,11 +5,17 @@
 #include "eventCommon.h"
 #include "sysObject.h"
 #include <ts3/math/vector.h>
+#include <functional>
 
 namespace ts3::system
 {
 
+    struct EventSourceNativeData;
+
     using event_dispatcher_id_t = native_uint;
+
+    using EventSourceFindPredicate = std::function<bool( const EventSource & )>;
+    using EventSourceNativeDataFindPredicate = std::function<bool( const EventSourceNativeData & )>;
 
     constexpr event_dispatcher_id_t CX_EVENT_DISPATCHER_ID_AUTO = 0u;
 
@@ -32,6 +38,21 @@ namespace ts3::system
         event_code_value_t mouseClickSequenceTimeoutMs = 100;
     };
 
+    class EventSource : public SysObject
+    {
+    public:
+        EventController * mEventController = nullptr;
+
+    public:
+        explicit EventSource( SysContextHandle pSysContext );
+        virtual ~EventSource();
+
+        virtual const EventSourceNativeData * getEventSourceNativeData() const = 0;
+
+    protected:
+        void onEventSourceDestroy();
+    };
+
 	class EventController : public SysObject
 	{
 	public:
@@ -42,18 +63,28 @@ namespace ts3::system
 	    explicit EventController( SysContextHandle pSysContext );
 		virtual ~EventController() noexcept;
 
-		void dispatchEvent( EventObject pEvent );
+		void registerEventSource( EventSource & pEventSource );
+		void unregisterEventSource( EventSource & pEventSource );
+
+		bool dispatchEvent( EventObject pEvent );
 
 		uint32 dispatchSysEventAuto();
 		uint32 dispatchSysEventPeek( uint32 pLimit = CX_INT32_MAX );
 		uint32 dispatchSysEventWait( uint32 pLimit = CX_INT32_MAX );
 
-		bool setActiveDispatcher( EventDispatcher & pDispatcher );
+        bool setActiveDispatcher( EventDispatcher & pDispatcher );
+        bool setDefaultActiveDispatcher();
 		bool resetActiveDispatcher();
 
 		TS3_PCL_ATTR_NO_DISCARD EventDispatcher * createEventDispatcher( event_dispatcher_id_t pDispatcherID );
 
 		TS3_PCL_ATTR_NO_DISCARD EventDispatcher * getEventDispatcher( event_dispatcher_id_t pDispatcherID );
+
+        TS3_PCL_ATTR_NO_DISCARD EventSource * findEventSource( EventSourceFindPredicate pPredicate ) const;
+
+        TS3_PCL_ATTR_NO_DISCARD EventSource * findEventSource( EventSourceNativeDataFindPredicate pPredicate ) const;
+
+        TS3_PCL_ATTR_NO_DISCARD bool isEventSourceRegistered( EventSource & pEventSource ) const;
 
 		TS3_PCL_ATTR_NO_DISCARD bool hasActiveDispatcher() const;
 
@@ -61,6 +92,8 @@ namespace ts3::system
 	    void _checkActiveDispatcherState();
 	    void _onActiveDispatcherChange( EventDispatcher * pDispatcher );
 
+	    void _nativeRegisterEventSource( EventSource & pEventSource );
+	    void _nativeUnregisterEventSource( EventSource & pEventSource );
 	    bool _nativeDispatchNext();
 	    bool _nativeDispatchNextWait();
 	    void _nativeOnActiveDispatcherChange( EventDispatcher * pDispatcher );
@@ -90,10 +123,10 @@ namespace ts3::system
 
 		void setIdleProcessingMode( bool pIdle );
 
-		void postEvent( EventObject pEvent );
-		void postEvent( event_code_value_t pEventCode );
-		void postEventAppQuit();
-		void postEventAppTerminate();
+		bool postEvent( EventObject pEvent );
+		bool postEvent( event_code_value_t pEventCode );
+        bool postEventAppQuit();
+        bool postEventAppTerminate();
 
 	private:
 		void _preProcessEvent( EventObject & pEvent );

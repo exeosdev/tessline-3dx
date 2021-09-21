@@ -16,6 +16,8 @@
 namespace ts3::system
 {
 
+    class EventController;
+
     using WindowList = std::list<Window>;
     using WindowRef = std::list<Window>::iterator;
 
@@ -37,6 +39,8 @@ namespace ts3::system
         Bitmask<EWindowStateFlags> stateFlags = 0;
         WindowSize preFullscreenSavedSize;
     };
+
+    TS3_SYSTEM_API void nativeBindEventSource( EventController & pEventController, Window & pWindow );
 
 } // namespace ts3::system
 

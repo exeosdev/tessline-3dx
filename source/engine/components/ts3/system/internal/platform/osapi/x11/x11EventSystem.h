@@ -23,6 +23,11 @@ namespace ts3::system
 		XBT2
 	};
 
+    struct EventSourceNativeData : public X11NativeDataCommon
+    {
+        XWindow windowXID = E_X11_XID_NONE;
+    };
+
 } // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_X11_EVENT_SYSTEM_H__

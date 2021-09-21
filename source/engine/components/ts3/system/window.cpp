@@ -1,7 +1,6 @@
 
 #include "windowNative.h"
 #include "displayNative.h"
-#include <ts3/stdext/utilities.h>
 
 namespace ts3::system
 {
@@ -17,6 +16,10 @@ namespace ts3::system
 
     WindowManager::~WindowManager()
     {
+        if( !mPrivate->windowList.empty() )
+        {
+            reset();
+        }
         _nativeDtor();
     }
 
@@ -41,19 +44,9 @@ namespace ts3::system
             throw 0;
         }
 
+        pWindow.onEventSourceDestroy();
+
         _nativeDestroyWindow( pWindow );
-
-        mPrivate->windowList.erase( pWindow.mPrivate->windowManagerListRef );
-    }
-
-    void WindowManager::removeWindow( Window & pWindow )
-    {
-        if( !isWindowValid( pWindow ) )
-        {
-            throw 0;
-        }
-
-        _nativeRemoveWindow( pWindow );
 
         mPrivate->windowList.erase( pWindow.mPrivate->windowManagerListRef );
     }
@@ -62,9 +55,9 @@ namespace ts3::system
     {
         for( auto & window : mPrivate->windowList )
         {
-            _nativeDestroyWindow( window );
+            destroyWindow( window );
         }
-        mPrivate->windowList.clear();
+        ts3DebugAssert( mPrivate->windowList.empty() );
     }
 
     Window * WindowManager::findWindow( WindowPredicateCallback pPredicate )
@@ -203,13 +196,18 @@ namespace ts3::system
 
 
     Window::Window( WindowManager * pWindowManager )
-    : SysObject( pWindowManager->mSysContext )
+    : EventSource( pWindowManager->mSysContext )
     , mWindowManager( pWindowManager )
     , mPrivate( std::make_unique<ObjectPrivateData>() )
     , mNativeData( &( mPrivate->nativeDataPriv ) )
     {}
 
     Window::~Window() = default;
+
+    const EventSourceNativeData * Window::getEventSourceNativeData() const
+    {
+        return &( mPrivate->nativeDataPriv );
+    }
 
     void Window::destroy()
     {
