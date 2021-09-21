@@ -14,7 +14,7 @@ namespace ts3::system
 	void WindowManager::_nativeCtor()
     {}
 
-    void WindowManager::_nativeDtor()
+    void WindowManager::_nativeDtor() noexcept
     {}
 
 	void WindowManager::_nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo )
@@ -27,11 +27,6 @@ namespace ts3::system
 	void WindowManager::_nativeDestroyWindow( Window & pWindow )
 	{
 	    nativeWin32DestroyWindow( pWindow.mPrivate->nativeDataPriv );
-	}
-
-	void WindowManager::_nativeRemoveWindow( Window & pWindow )
-	{
-	    // TODO
 	}
 
 

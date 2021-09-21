@@ -35,11 +35,6 @@ namespace ts3::system
         nativeX11DestroyWindow( pWindow.mPrivate->nativeDataPriv );
     }
 
-    void WindowManager::_nativeRemoveWindow( Window & pWindow )
-    {
-        // TODO
-    }
-
 
     void Window::_nativeSetTitleText( const std::string & pTitleText )
     {

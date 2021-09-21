@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_X11_WINDOW_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_X11_WINDOW_H__
 
-#include "x11Common.h"
+#include "x11EventSystem.h"
 #include <ts3/system/windowCommon.h>
 
 namespace ts3::system
@@ -12,10 +12,9 @@ namespace ts3::system
     {
     };
 
-    struct WindowNativeData : public X11NativeDataCommon
+    struct WindowNativeData : public EventSourceNativeData
     {
         Colormap xColormap = E_X11_XID_NONE;
-        XWindow windowXID = E_X11_XID_NONE;
     };
 
     struct X11WindowCreateInfo : public X11NativeDataCommon
