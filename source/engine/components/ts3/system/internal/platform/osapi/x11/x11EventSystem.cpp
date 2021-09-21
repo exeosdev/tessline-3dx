@@ -18,6 +18,15 @@ namespace ts3::system
 	Bitmask<EMouseButtonFlagBits> _x11GetMouseButtonStateMask( uint32 pState );
 
 
+    void EventController::_nativeRegisterEventSource( EventSource & /* pEventSource */ )
+    {}
+
+    void EventController::_nativeUnregisterEventSource( EventSource & /* pEventSource */ )
+    {}
+
+    void EventController::_nativeDestroyEventSourcePrivateData( EventSource & /* pEventSource */, void * /* pData */ )
+    {}
+
     bool EventController::_nativeUpdateSysQueue()
     {
         auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
@@ -79,17 +88,6 @@ namespace ts3::system
         return false;
     }
 
-    void nativeEnableWindowEventSupport( Window & pWindow, EventController & pEventController )
-    {
-        if( !pEventController.mPrivate->windowManager )
-        {
-            pEventController.mPrivate->windowManager = pWindow.mWindowManager;
-        }
-        else if( pEventController.mPrivate->windowManager != pWindow.mWindowManager )
-        {
-            // ts3ThrowAuto( XXX )
-        }
-    }
 
     bool _x11TranslateGenericEvent( EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent )
 	{
@@ -117,34 +115,34 @@ namespace ts3::system
 				break;
             case DestroyNotify:
             {
-                auto * windowObject = pEventController.mPrivate->windowManager->findWindow( [&pXEvent]( Window & pWindow ) -> bool {
-                    return pWindow.mNativeData->windowXID == pXEvent.xdestroywindow.window;
+                auto * eventSource = pEventController.findEventSource( [&pXEvent]( const EventSourceNativeData & pNativeData ) -> bool {
+                    return pNativeData.windowXID == pXEvent.xdestroywindow.window;
                 });
                 auto & eWindowUpdateClose = pOutEvent.eWindowUpdateClose;
                 eWindowUpdateClose.eventCode = E_EVENT_CODE_WINDOW_UPDATE_CLOSE;
-                eWindowUpdateClose.sourceWindow = windowObject;
+                eWindowUpdateClose.eventSource = eventSource;
                 break;
             }
 			case UnmapNotify:
             {
-                auto * windowObject = pEventController.mPrivate->windowManager->findWindow( [&pXEvent]( Window & pWindow ) -> bool {
-                    return pWindow.mNativeData->windowXID == pXEvent.xvisibility.window;
+                auto * eventSource = pEventController.findEventSource( [&pXEvent]( const EventSourceNativeData & pNativeData ) -> bool {
+                    return pNativeData.windowXID == pXEvent.xvisibility.window;
                 });
                 auto & eWindowUpdateVisibility = pOutEvent.eWindowUpdateVisibility;
                 eWindowUpdateVisibility.eventCode = E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY;
                 eWindowUpdateVisibility.newVisibilityState = false;
-                eWindowUpdateVisibility.sourceWindow = windowObject;
+                eWindowUpdateVisibility.eventSource = eventSource;
                 break;
             }
 			case MapNotify:
             {
-                auto * windowObject = pEventController.mPrivate->windowManager->findWindow( [&pXEvent]( Window & pWindow ) -> bool {
-                    return pWindow.mNativeData->windowXID == pXEvent.xvisibility.window;
+                auto * eventSource = pEventController.findEventSource( [&pXEvent]( const EventSourceNativeData & pNativeData ) -> bool {
+                    return pNativeData.windowXID == pXEvent.xvisibility.window;
                 });
                 auto & eWindowUpdateVisibility = pOutEvent.eWindowUpdateVisibility;
                 eWindowUpdateVisibility.eventCode = E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY;
                 eWindowUpdateVisibility.newVisibilityState = true;
-                eWindowUpdateVisibility.sourceWindow = windowObject;
+                eWindowUpdateVisibility.eventSource = eventSource;
                 break;
             }
 			case MapRequest:
@@ -402,12 +400,12 @@ namespace ts3::system
 				long wmpMessageType = pXEvent.xclient.data.l[0];
 				if ( wmpMessageType == xSessionData.wmpDeleteWindow )
 				{
-                    auto * windowObject = pEventController.mPrivate->windowManager->findWindow( [&pXEvent]( Window & pWindow ) -> bool {
-                        return pWindow.mNativeData->windowXID == pXEvent.xclient.window;
+                    auto * eventSource = pEventController.findEventSource( [&pXEvent]( const EventSourceNativeData & pNativeData ) -> bool {
+                        return pNativeData.windowXID == pXEvent.xclient.window;
                     });
 					auto & eventData = pOutEvent.eWindowUpdateClose;
 					eventData.eventCode = E_EVENT_CODE_WINDOW_UPDATE_CLOSE;
-                    eventData.sourceWindow = windowObject;
+                    eventData.eventSource = eventSource;
 				}
 				break;
 			}

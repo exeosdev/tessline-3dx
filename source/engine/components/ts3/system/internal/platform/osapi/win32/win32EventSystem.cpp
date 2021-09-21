@@ -130,6 +130,7 @@ namespace ts3::system
 	    return false;
 	}
 
+
 	LRESULT __stdcall _win32EventSourceProxyEventProc( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam )
 	{
         // The UserData value is a pointer to the internal EventState of the current window.

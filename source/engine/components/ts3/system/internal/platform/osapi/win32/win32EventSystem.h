@@ -28,8 +28,6 @@ namespace ts3::system
         LONG_PTR savedEventCallback = 0;
     };
 
-    bool nativeWin32RegisterEventSource( EventController & pEventController, EventSource & pEventSource );
-
 } // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_EVENT_SYSTEM_H__

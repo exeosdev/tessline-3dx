@@ -92,7 +92,6 @@ namespace ts3::system
 
         // Input state
         EventInputState inputState;
-        WindowManager * windowManager = nullptr;
 
         explicit ObjectPrivateData( EventController * pController )
         : parentController( pController )
