@@ -177,7 +177,7 @@ namespace ts3::system
         using DescType = DisplayAdapterDesc;
         using NativeDataType = DisplayAdapterNativeData;
 
-        //
+        // Pointer to the object which owns this private data.
         DisplayAdapter * parentAdapter = nullptr;
 
         // Ddapter info struct, containing basic adapter properties.
@@ -225,7 +225,7 @@ namespace ts3::system
             DisplayVideoModeList videoModeList;
         };
 
-        //
+        // Pointer to the object which owns this private data.
         DisplayOutput * parentOutput = nullptr;
 
         // Output info struct, containing basic output properties.
@@ -239,6 +239,9 @@ namespace ts3::system
         // The main data. Stores a ColorFormatData strut for each ColorFormat supported/enumerated.
         // This map should  not be used directly - instead there are dedicated functions provided below.
         std::unordered_map<ColorFormat, ColorFormatData> colorFormatMap;
+
+        //
+        std::vector<ColorFormat> supportedColorFormatList;
 
         explicit ObjectPrivateData( DisplayOutput * pOutput )
         : parentOutput( pOutput )
@@ -258,7 +261,7 @@ namespace ts3::system
         using DescType = DisplayVideoModeDesc;
         using NativeDataType = DisplayVideoModeNativeData;
 
-        //
+        // Pointer to the object which owns this private data.
         DisplayVideoMode * parentVideoMode = nullptr;
 
         // Video mode info struct, containing basic mode properties.

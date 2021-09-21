@@ -235,7 +235,8 @@ namespace ts3::system
                         result.append( 1, '\t' );
                         result.append( output->mDesc->toString() );
 
-                        for( auto colorFormat : cvColorFormatArray )
+                        auto colorFormats = output->getSupportedColorFormatList();
+                        for( auto colorFormat : colorFormats )
                         {
                             auto colorFormatStr = vsxQueryColorFormatStr( colorFormat );
                             result.append( 1, '\n' );
@@ -491,18 +492,26 @@ namespace ts3::system
         {
             for( auto & output : adapter.mPrivate->outputInternalStorage )
             {
+                output.mPrivate->supportedColorFormatList.reserve( staticArraySize( cvColorFormatArray ) );
+
                 for( auto colorFormat : cvColorFormatArray )
                 {
                     _drvEnumVideoModes( output, colorFormat );
 
-                    auto & colorFormatData = output.mPrivate->colorFormatMap[colorFormat];
-                    if( !colorFormatData.videoModeInternalStorage.empty() )
+                    try
                     {
+                        auto & colorFormatData = output.mPrivate->colorFormatMap.at( colorFormat );
+                        ts3DebugAssert( !colorFormatData.videoModeInternalStorage.empty() );
+                        output.mPrivate->supportedColorFormatList.push_back( colorFormat );
                         colorFormatData.videoModeList.reserve( colorFormatData.videoModeInternalStorage.size() );
                         for( auto & videoMode : colorFormatData.videoModeInternalStorage )
                         {
                             colorFormatData.videoModeList.push_back( &videoMode );
                         }
+                    }
+                    catch( ... )
+                    {
+                        continue;
                     }
                 }
             }
@@ -605,7 +614,7 @@ namespace ts3::system
 
     ArrayView<const ColorFormat> DisplayOutput::getSupportedColorFormatList() const
     {
-        return bindArrayView( cvColorFormatArray );
+        return bindArrayView( mPrivate->supportedColorFormatList.data(), mPrivate->supportedColorFormatList.size() );
     }
 
     bool DisplayOutput::checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings ) const

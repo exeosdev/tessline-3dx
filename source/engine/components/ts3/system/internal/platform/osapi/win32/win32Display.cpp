@@ -1,5 +1,5 @@
 
-#include <ts3/system/displayDriverNative.h>
+#include <ts3/system/displayNative.h>
 #include <ts3/stdext/stringUtils.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
@@ -183,6 +183,16 @@ namespace ts3::system
     {
         const auto & outputNativeData = dsmGetObjectNativeDataGeneric( pOutput );
         const auto & colorFormatDesc = vsxGetDescForColorFormat( pColorFormat );
+
+        if( colorFormatDesc.colorSpace != ColorSpace::Linear )
+        {
+            return;
+        }
+
+        if( ( colorFormatDesc.rgba.u8Red != 8 ) || ( colorFormatDesc.rgba.u8Green != 8 ) || ( colorFormatDesc.rgba.u8Blue != 8 ) )
+        {
+            return;
+        }
 
         DEVMODEA gdiDevMode;
         gdiDevMode.dmSize = sizeof( DEVMODEA );
