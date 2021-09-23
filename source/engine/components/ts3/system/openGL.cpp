@@ -1,6 +1,6 @@
 
 #include "openGLNative.h"
-#include "displayManager.h"
+#include "displayNative.h"
 
 namespace ts3::system
 {
@@ -8,19 +8,29 @@ namespace ts3::system
     GLSystemDriver::GLSystemDriver( DisplayManagerHandle pDisplayManager )
     : SysObject( pDisplayManager->mSysContext )
     , mDisplayManager( std::move( pDisplayManager ) )
-    , mPrivate( std::make_unique<ObjectPrivateData>() )
-    , mNativeData( &( mPrivate->nativeDataPriv ) )
-    {}
+    , mInternal( std::make_unique<ObjectInternalData>( this ) )
+    , mNativeData( &( mInternal->nativeDataPriv ) )
+    {
+        _nativeCtor();
+    }
 
-    GLSystemDriver::~GLSystemDriver() = default;
+    GLSystemDriver::~GLSystemDriver()
+    {
+        _nativeReleaseInitState();
+        _nativeDtor();
+    }
 
     void GLSystemDriver::initializePlatform()
-    {}
+    {
+        _nativeInitializePlatform();
+    }
 
-    void GLSystemDriver::releaseInitState( GLRenderContext & pGLRenderContext )
-    {}
+    void GLSystemDriver::releaseInitState( GLRenderContext & /* pGLRenderContext */ )
+    {
+        _nativeReleaseInitState();
+    }
 
-    GLDisplaySurface * GLSystemDriver::createDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo )
+    GLDisplaySurfaceHandle GLSystemDriver::createDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo )
     {
         GLDisplaySurfaceCreateInfo validatedCreateInfo = pCreateInfo;
 
@@ -36,49 +46,56 @@ namespace ts3::system
             validatedCreateInfo.windowGeometry.frameStyle = pCreateInfo.windowGeometry.frameStyle;
         }
 
-        //mDisplayManager->validateWindowGeometry( validatedCreateInfo.windowGeometry.position,
-        //                                         validatedCreateInfo.windowGeometry.size );
+        validatedCreateInfo.windowGeometry = mDisplayManager->validateWindowGeometry( validatedCreateInfo.windowGeometry );
 
-        auto surfaceRef = mPrivate->displaySurfaceList.emplace( mPrivate->displaySurfaceList.end(), this );
-        surfaceRef->mPrivate->driverListRef = surfaceRef;
-        surfaceRef->mPrivate->internalOwnershipFlag = true;
+        auto displaySurface = createSysObject<GLDisplaySurface>( getHandle<GLSystemDriver>() );
+        displaySurface->mInternal->internalOwnershipFlag = true;
 
-        _nativeCreateDisplaySurface( *surfaceRef, validatedCreateInfo );
+        _nativeCreateDisplaySurface( *displaySurface, validatedCreateInfo );
 
-        return &( *surfaceRef );
+        return displaySurface;
     }
 
-    GLDisplaySurface * GLSystemDriver::createDisplaySurfaceForCurrentThread( GLDisplaySurface * pTargetSurface )
+    GLDisplaySurfaceHandle GLSystemDriver::createDisplaySurfaceForCurrentThread( GLDisplaySurfaceHandle pTargetSurface )
     {
+        // 'pTargetSurface' is an optional, existing surface object that should be used as a target.
+        // It is only a hint - if it's not suitable and/or valid, a new one is created and used.
+
         if( pTargetSurface )
         {
             if( !isDisplaySurfaceValid( *pTargetSurface ) )
             {
+                // If the surface is not valid, just discard the object and clear the handle.
+                // TODO: should there be any extra check here? Anything to destroy? (OS-level)
+
                 pTargetSurface = nullptr;
             }
 
-            if( pTargetSurface->isValid() && pTargetSurface->mPrivate->internalOwnershipFlag )
+            if( pTargetSurface->isValid() && pTargetSurface->mInternal->internalOwnershipFlag )
             {
+                // If the surface is valid, we need to destroy it and ensure couple things are handled.
+                // destroyDisplaySurface() will also:
+                // - remove the surface from the driver's list (we will register it again after it's re-created)
+                // - unregister it from the event controller if it's an active event emitter
+
                 _nativeDestroyDisplaySurface( *pTargetSurface );
             }
         }
 
         if( !pTargetSurface )
         {
-            auto surfaceRef = mPrivate->displaySurfaceList.emplace( mPrivate->displaySurfaceList.end(), this );
-            surfaceRef->mPrivate->driverListRef = surfaceRef;
-            pTargetSurface = &( *surfaceRef );
+            pTargetSurface = createSysObject<GLDisplaySurface>( getHandle<GLSystemDriver>() );
         }
 
-        pTargetSurface->mPrivate->internalOwnershipFlag = false;
+        pTargetSurface->mInternal->internalOwnershipFlag = false;
 
         _nativeCreateDisplaySurfaceForCurrentThread( *pTargetSurface );
 
         return pTargetSurface;
     }
 
-    GLRenderContext * GLSystemDriver::createRenderContext( GLDisplaySurface & pSurface,
-                                                           const GLRenderContextCreateInfo & pCreateInfo )
+    GLRenderContextHandle GLSystemDriver::createRenderContext( GLDisplaySurface & pSurface,
+                                                               const GLRenderContextCreateInfo & pCreateInfo )
     {
         GLRenderContextCreateInfo validatedCreateInfo = pCreateInfo;
 
@@ -88,20 +105,16 @@ namespace ts3::system
             validatedCreateInfo.requiredAPIVersion.minor = 0;
         }
 
-        auto contextRef = mPrivate->renderContextList.emplace( mPrivate->renderContextList.end(), this );
-        contextRef->mPrivate->driverListRef = contextRef;
-        contextRef->mPrivate->internalOwnershipFlag = true;
+        auto renderContext = createSysObject<GLRenderContext>( getHandle<GLSystemDriver>() );
+        renderContext->mInternal->internalOwnershipFlag = true;
 
-        _nativeCreateRenderContext( *contextRef, pSurface, validatedCreateInfo );
+        _nativeCreateRenderContext( *renderContext, pSurface, validatedCreateInfo );
 
-        return &( *contextRef );
+        return renderContext;
     }
 
-    GLRenderContext * GLSystemDriver::createRenderContextForCurrentThread( GLRenderContext * pTargetContext )
+    GLRenderContextHandle GLSystemDriver::createRenderContextForCurrentThread( GLRenderContextHandle pTargetContext )
     {
-        // If the caller specifies target context, it means it should be used
-        // as a container for the context data instead of creating a new one.
-        // We perform a simple validation first to see if its state is correct.
         if( pTargetContext )
         {
             if( !isRenderContextValid( *pTargetContext ) )
@@ -109,7 +122,7 @@ namespace ts3::system
                 pTargetContext = nullptr;
             }
 
-            if( pTargetContext->isValid() && pTargetContext->mPrivate->internalOwnershipFlag )
+            if( pTargetContext->isValid() && pTargetContext->mInternal->internalOwnershipFlag )
             {
                 _nativeDestroyRenderContext( *pTargetContext );
             }
@@ -117,12 +130,10 @@ namespace ts3::system
 
         if( !pTargetContext )
         {
-            auto contextRef = mPrivate->renderContextList.emplace( mPrivate->renderContextList.end(), this );
-            contextRef->mPrivate->driverListRef = contextRef;
-            pTargetContext = &( *contextRef );
+            pTargetContext = createSysObject<GLRenderContext>( getHandle<GLSystemDriver>() );
         }
 
-        pTargetContext->mPrivate->internalOwnershipFlag = false;
+        pTargetContext->mInternal->internalOwnershipFlag = false;
 
         _nativeCreateRenderContextForCurrentThread( *pTargetContext );
 
@@ -142,83 +153,116 @@ namespace ts3::system
 
     bool GLSystemDriver::isRenderContextBound() const
     {
-        return false;
+        return _nativeIsRenderContextBound();
     }
 
     bool GLSystemDriver::isRenderContextBound( GLRenderContext & pRenderContext ) const
     {
-        return false;
+        return _nativeIsRenderContextBound( pRenderContext );
     }
 
     bool GLSystemDriver::isDisplaySurfaceValid( GLDisplaySurface & pDisplaySurface ) const
     {
-        auto displaySurfaceIter = mPrivate->displaySurfaceList.begin();
-        auto displaySurfaceEndIter = mPrivate->displaySurfaceList.end();
-
-        while( displaySurfaceIter != displaySurfaceEndIter )
-        {
-            if( pDisplaySurface.mPrivate->driverListRef == displaySurfaceIter )
-            {
-                if( &( *displaySurfaceIter ) == &pDisplaySurface )
-                {
-                    return true;
-                }
-            }
-            ++displaySurfaceIter;
-        }
-
-        return false;
+        return mInternal->parentDriver && _nativeIsDisplaySurfaceValid( pDisplaySurface );
     }
 
     bool GLSystemDriver::isRenderContextValid( GLRenderContext & pRenderContext ) const
     {
-        auto renderContextIter = mPrivate->renderContextList.begin();
-        auto renderContextEndIter = mPrivate->renderContextList.end();
+        return mInternal->parentDriver && _nativeIsRenderContextValid( pRenderContext );
+    }
 
-        while( renderContextIter != renderContextEndIter )
+    void GLSystemDriver::onDisplaySurfaceDtor( GLDisplaySurface & pDisplaySurface ) noexcept
+    {
+        try
         {
-            if( pRenderContext.mPrivate->driverListRef == renderContextIter )
+            if( !isDisplaySurfaceValid( pDisplaySurface ) )
             {
-                if( &( *renderContextIter ) == &pRenderContext )
-                {
-                    return true;
-                }
+                ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
             }
-            ++renderContextIter;
-        }
 
-        return false;
+            pDisplaySurface.unregisterEventSourceAuto();
+
+            if( pDisplaySurface.mInternal->internalOwnershipFlag )
+            {
+                _nativeDestroyDisplaySurface( pDisplaySurface );
+                pDisplaySurface.mInternal->internalOwnershipFlag = false;
+            }
+        }
+        catch( const Exception & pException )
+        {
+            ts3DebugInterrupt();
+        }
+        catch( ... )
+        {
+            ts3DebugInterrupt();
+        }
+    }
+
+    void GLSystemDriver::onRenderContextDtor( GLRenderContext & pRenderContext ) noexcept
+    {
+        try
+        {
+            if( !isRenderContextValid( pRenderContext ) )
+            {
+                ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            }
+
+            if( _nativeIsRenderContextBound( pRenderContext ) )
+            {
+                _nativeResetContextBinding();
+            }
+
+            if( pRenderContext.mInternal->internalOwnershipFlag )
+            {
+                _nativeDestroyRenderContext( pRenderContext );
+                pRenderContext.mInternal->internalOwnershipFlag = false;
+            }
+        }
+        catch( const Exception & pException )
+        {
+            ts3DebugInterrupt();
+        }
+        catch( ... )
+        {
+            ts3DebugInterrupt();
+        }
     }
 
 
-    GLDisplaySurface::GLDisplaySurface( GLSystemDriver * pDriver )
-    : mDriver( pDriver )
-    , mPrivate( std::make_unique<ObjectPrivateData>() )
-    , mNativeData( &( mPrivate->nativeDataPriv ) )
-    {}
+    GLDisplaySurface::GLDisplaySurface( GLSystemDriverHandle pDriver )
+    : EventSource( pDriver->mSysContext )
+    , mDriver( pDriver )
+    , mInternal( std::make_unique<ObjectInternalData>( this ) )
+    , mNativeData( &( mInternal->nativeDataPriv ) )
+    {
+        setEventSourceNativeData( &( mInternal->nativeDataPriv ) );
+    }
 
-    GLDisplaySurface::~GLDisplaySurface() = default;
+    GLDisplaySurface::~GLDisplaySurface() noexcept
+    {
+        mDriver->onDisplaySurfaceDtor( *this );
+    }
+
+    void GLDisplaySurface::clearColorBuffer()
+    {
+        glClearColor( 0.1f, 0.33f, 0.9f, 1.0f );
+    }
 
     void GLDisplaySurface::swapBuffers()
     {
         if( !isValid() )
         {
-            throw 0;
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         _nativeSwapBuffers();
-    }
-
-    bool GLDisplaySurface::checkDriver( const GLSystemDriver & pDriver ) const
-    {
-        return mDriver == &pDriver;
     }
 
     WindowSize GLDisplaySurface::queryRenderAreaSize() const
     {
         if( !isValid() )
         {
-            throw 0;
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         WindowSize result;
@@ -227,20 +271,29 @@ namespace ts3::system
         return result;
     }
 
+    bool GLDisplaySurface::isValid() const
+    {
+        return mInternal && _nativeIsValid();
+    }
 
-    GLRenderContext::GLRenderContext( GLSystemDriver * pDriver )
-    : mDriver( pDriver )
-    , mPrivate( std::make_unique<ObjectPrivateData>() )
-    , mNativeData( &( mPrivate->nativeDataPriv ) )
+
+    GLRenderContext::GLRenderContext( GLSystemDriverHandle pDriver )
+    : SysObject( pDriver->mSysContext )
+    , mDriver( pDriver )
+    , mInternal( std::make_unique<ObjectInternalData>( this ) )
+    , mNativeData( &( mInternal->nativeDataPriv ) )
     {}
 
-    GLRenderContext::~GLRenderContext() = default;
+    GLRenderContext::~GLRenderContext() noexcept
+    {
+        mDriver->onRenderContextDtor( *this );
+    }
 
     void GLRenderContext::bindForCurrentThread( const GLDisplaySurface & pSurface )
     {
         if( !isValid() )
         {
-            throw 0;
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
         _nativeBindForCurrentThread( pSurface );
     }
@@ -275,11 +328,6 @@ namespace ts3::system
         }
 
         return systemVersionInfo;
-    }
-
-    bool GLRenderContext::checkDriver( const GLSystemDriver & pDriver ) const
-    {
-        return mDriver == &pDriver;
     }
 
     bool GLRenderContext::isCurrent() const
