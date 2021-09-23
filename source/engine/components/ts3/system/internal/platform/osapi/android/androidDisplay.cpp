@@ -35,7 +35,7 @@ namespace ts3
         // pointer is still nullptr (ANativeWindow is not created with the activity itself!!)
         if( androidNativeWindow == nullptr )
         {
-            throw 0;
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         int32_t windowWidth = ANativeWindow_getWidth( androidNativeWindow );

@@ -27,13 +27,13 @@ namespace ts3
         // we can reconfigure the ANativeWindow buffers using the value of EGL_NATIVE_VISUAL_ID.
         if( ::eglGetConfigAttrib( driverNativeData->display, fbConfig, EGL_NATIVE_VISUAL_ID, &fbConfigNativeVisualID ) == EGL_FALSE )
         {
-            throw 0;
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         auto * aNativeWindow = static_cast<ANativeWindow *>( driverNativeData->androidNativeWindow );
         if( ANativeWindow_setBuffersGeometry( aNativeWindow, 0, 0, fbConfigNativeVisualID ) < 0 )
         {
-            throw 0;
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         eglCreateSurface( pSurface, driverNativeData->display, driverNativeData->androidNativeWindow, fbConfig );
