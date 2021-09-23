@@ -76,6 +76,37 @@ namespace ts3::system
         void * _eventSourceNativeData = nullptr;
     };
 
+    class EventDispatcher : public SysObject
+    {
+    public:
+        struct ObjectInternalData;
+        EventController * const mEventController = nullptr;
+        std::unique_ptr<ObjectInternalData> const mInternal;
+        event_dispatcher_id_t const mID;
+
+        EventDispatcher( EventController * pEventController, event_dispatcher_id_t pID );
+
+        ~EventDispatcher() noexcept;
+
+        void bindEventHandler( EEventBaseType pBaseType, EventHandler pHandler );
+        void bindEventHandler( EEventCategory pCategory, EventHandler pHandler );
+        void bindEventHandler( EEventCodeIndex pCodeIndex, EventHandler pHandler );
+        void bindDefaultEventHandler( EventHandler pHandler );
+
+        void resetHandlers();
+
+        void setIdleProcessingMode( bool pIdle );
+
+        bool postEvent( EventObject pEvent );
+        bool postEvent( event_code_value_t pEventCode );
+        bool postEventAppQuit();
+        bool postEventAppTerminate();
+
+    private:
+        void _preProcessEvent( EventObject & pEvent );
+        void _putEvent( EventObject & pEvent );
+    };
+
 	class EventController : public SysObject
 	{
 	    friend class EventDispatcher;
@@ -141,38 +172,6 @@ namespace ts3::system
 	    bool _nativeUpdateSysQueue();
 	    bool _nativeUpdateSysQueueWait();
 	    void _nativeOnActiveDispatcherChange( EventDispatcher * pDispatcher );
-	};
-
-	class EventDispatcher : public SysObject
-	{
-	public:
-	    struct ObjectInternalData;
-		EventController * const mEventController = nullptr;
-		std::unique_ptr<ObjectInternalData> const mInternal;
-		event_dispatcher_id_t const mID;
-
-		EventDispatcher( EventController * pEventController,
-                         event_dispatcher_id_t pID );
-
-		~EventDispatcher() noexcept;
-
-		void bindEventHandler( EEventBaseType pBaseType, EventHandler pHandler );
-		void bindEventHandler( EEventCategory pCategory, EventHandler pHandler );
-		void bindEventHandler( EEventCodeIndex pCodeIndex, EventHandler pHandler );
-		void bindDefaultEventHandler( EventHandler pHandler );
-
-		void resetHandlers();
-
-		void setIdleProcessingMode( bool pIdle );
-
-		bool postEvent( EventObject pEvent );
-		bool postEvent( event_code_value_t pEventCode );
-        bool postEventAppQuit();
-        bool postEventAppTerminate();
-
-	private:
-		void _preProcessEvent( EventObject & pEvent );
-		void _putEvent( EventObject & pEvent );
 	};
 
 } // namespace ts3::system
