@@ -45,12 +45,14 @@ namespace ts3::system
 
 	EventController::~EventController() noexcept
 	{
-        resetDispatcherList();
+        releaseDispatcherObjects();
 	}
 
     void EventController::registerEventSource( EventSource & pEventSource )
     {
         _nativeRegisterEventSource( pEventSource );
+
+        _addEventSource( pEventSource );
     }
 
     void EventController::unregisterEventSource( EventSource & pEventSource )
@@ -64,7 +66,7 @@ namespace ts3::system
     {
         _checkActiveDispatcherState();
 
-        return mInternal->activeDispatcher->postEvent( pEvent );
+        return mInternal->activeEventDispatcher->postEvent( pEvent );
     }
 
     uint32 EventController::updateSysQueueAuto()
@@ -113,7 +115,22 @@ namespace ts3::system
 
     EventDispatcher * EventController::createEventDispatcher( event_dispatcher_id_t pDispatcherID )
     {
-        return _addOrGetDispatcher( pDispatcherID );
+        if( pDispatcherID == CX_EVENT_DISPATCHER_ID_DEFAULT )
+        {
+            return _getDefaultDispatcher();
+        }
+
+        auto existingDispatcherRef = mInternal->dispatcherMap.find( pDispatcherID );
+        if( existingDispatcherRef != mInternal->dispatcherMap.end() )
+        {
+            return existingDispatcherRef->second;
+        }
+
+        auto dispatcher = createSysObject<EventDispatcher>( this, pDispatcherID );
+        mInternal->dispatcherList.push_back( dispatcher );
+        mInternal->dispatcherMap[pDispatcherID] = dispatcher.get();
+
+        return dispatcher.get();
     }
 
     EventDispatcher * EventController::getEventDispatcher( event_dispatcher_id_t pDispatcherID )
@@ -123,55 +140,60 @@ namespace ts3::system
             return _getDefaultDispatcher();
         }
         return getMapValueOrDefault( mInternal->dispatcherMap, pDispatcherID, nullptr );
+
     }
 
-    void EventController::resetDispatcherList()
+    bool EventController::setActiveEventDispatcher( event_dispatcher_id_t pDispatcherID )
     {
-        for( auto dispatcherHandle : mInternal->dispatcherList )
+        if( auto * dispatcher = getEventDispatcher( pDispatcherID ) )
         {
-            _removeDispatcher( *dispatcherHandle );
-            dispatcherHandle.reset();
+            return setActiveEventDispatcher( dispatcher );
         }
-        if( mInternal->defaultEventDispatcher )
-        {
-            mInternal->defaultEventDispatcher.reset();
-        }
-        ts3DebugAssert( mInternal->dispatcherList.empty() );
-    }
-
-    bool EventController::setActiveDispatcher( EventDispatcher * pDispatcher )
-    {
-        if( pDispatcher->mEventController != this )
-        {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
-        }
-
-        if( pDispatcher != mInternal->activeDispatcher )
-        {
-            _onActiveDispatcherChange( pDispatcher );
-            mInternal->activeDispatcher = pDispatcher;
-            return true;
-        }
-
         return false;
     }
 
-    bool EventController::setDefaultActiveDispatcher()
+    bool EventController::setActiveEventDispatcher( EventDispatcher * pDispatcher )
     {
-        auto * defaultDispatcher = _getDefaultDispatcher();
-        return setActiveDispatcher( defaultDispatcher );
+        if( pDispatcher != mInternal->activeEventDispatcher )
+        {
+            auto * validatedPtr = _validateDispatcher( pDispatcher );
+            if( validatedPtr == pDispatcher )
+            {
+                _onActiveDispatcherChange( pDispatcher );
+                mInternal->activeEventDispatcher = pDispatcher;
+                return true;
+            }
+        }
+        return false;
     }
 
-    bool EventController::resetActiveDispatcher()
+    bool EventController::setActiveEventDispatcherDefault()
     {
-        if( mInternal->activeDispatcher  )
+        auto defaultDispatcher = _getDefaultDispatcher();
+        return setActiveEventDispatcher( defaultDispatcher );
+    }
+
+    bool EventController::resetActiveEventDispatcher()
+    {
+        if( mInternal->activeEventDispatcher  )
         {
             _onActiveDispatcherChange( nullptr );
-            mInternal->activeDispatcher = nullptr;
+            mInternal->activeEventDispatcher = nullptr;
             return true;
         }
 
         return false;
+    }
+
+    void EventController::releaseDispatcherObjects()
+    {
+        resetActiveEventDispatcher();
+
+        mInternal->dispatcherMap.clear();
+        mInternal->dispatcherList.clear();
+
+        mInternal->activeEventDispatcher = nullptr;
+        mInternal->defaultEventDispatcher = nullptr;
     }
 
     EventSource * EventController::findEventSource( EventSourceFindPredicate pPredicate ) const
@@ -213,7 +235,7 @@ namespace ts3::system
 
     bool EventController::hasActiveDispatcher() const
     {
-        return mInternal->activeDispatcher != nullptr;
+        return mInternal->activeEventDispatcher != nullptr;
     }
 
     void EventController::onEventSourceDestroy( EventSource & pEventSource ) noexcept
@@ -246,47 +268,27 @@ namespace ts3::system
         }
     }
 
-    void EventController::onEventDispatcherDestroy( EventDispatcher & pDispatcher ) noexcept
-    {
-        try
-        {
-            _verifyDispatcherRemoval( pDispatcher );
-        }
-        catch( const Exception & pException )
-        {
-            ts3DebugInterrupt();
-        }
-        catch( ... )
-        {
-            ts3DebugInterrupt();
-        }
-    }
-
     void EventController::_checkActiveDispatcherState()
     {
         if( !hasActiveDispatcher() )
         {
-            ts3DebugInterruptOnce();
             ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
+        ts3DebugAssert( mInternal->currentInputState != nullptr );
         ts3DebugAssert( mInternal->currentInternalConfig != nullptr );
     }
     
     void EventController::_onActiveDispatcherChange( EventDispatcher * pDispatcher )
     {
-        mInternal->inputState.mouseClickSequenceLength = 0;
-        mInternal->inputState.mouseLastPressTimestamp = 0;
-        mInternal->inputState.mouseButtonStateMask = 0;
-        mInternal->inputState.mouseLastPressButton = EMouseButtonID::Unknown;
-        mInternal->inputState.mouseLastRegPos = CX_EVENT_MOUSE_POS_INVALID;
-
         if( pDispatcher )
         {
+            mInternal->currentInputState = &( pDispatcher->mInternal->inputState );
             mInternal->currentInternalConfig = &( pDispatcher->mInternal->internalConfig );
         }
         else
         {
+            mInternal->currentInputState = nullptr;
             mInternal->currentInternalConfig = nullptr;
         }
 
@@ -303,68 +305,25 @@ namespace ts3::system
         return mInternal->defaultEventDispatcher.get();
     }
 
-    EventDispatcher * EventController::_addOrGetDispatcher( event_dispatcher_id_t pDispatcherID )
+    EventDispatcher * EventController::_validateDispatcher( EventDispatcher * pDispatcher )
     {
-        if( pDispatcherID == CX_EVENT_DISPATCHER_ID_DEFAULT )
+        if( !pDispatcher )
         {
-            return _getDefaultDispatcher();
+            return nullptr;
         }
 
-        auto existingDispatcherRef = mInternal->dispatcherMap.find( pDispatcherID );
-        if( existingDispatcherRef != mInternal->dispatcherMap.end() )
+        if( pDispatcher->mEventController != this )
         {
-            return existingDispatcherRef->second;
+            return nullptr;
         }
 
-        auto dispatcher = createSysObject<EventDispatcher>( this, pDispatcherID );
-        mInternal->dispatcherList.push_back( dispatcher );
-        mInternal->dispatcherMap[pDispatcherID] = dispatcher.get();
-
-        return dispatcher.get();
-    }
-
-    void EventController::_removeDispatcher( EventDispatcher & pDispatcher )
-    {
-        auto eventDispatcherMapIter = mInternal->dispatcherMap.find( pDispatcher.mID );
-        if( eventDispatcherMapIter == mInternal->dispatcherMap.end() )
+        auto * internalDispatcherPtr = getEventDispatcher( pDispatcher->mID );
+        if( pDispatcher != internalDispatcherPtr )
         {
-            ts3DebugInterrupt();
-            return;
+            return nullptr;
         }
 
-        if( eventDispatcherMapIter->second != &pDispatcher )
-        {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
-        }
-
-        auto dispatcherHandle = eventDispatcherMapIter->second->getHandle<EventDispatcher>();
-
-        mInternal->dispatcherList.erase( dispatcherHandle->mInternal->parentListRef );
-        mInternal->dispatcherMap.erase( eventDispatcherMapIter );
-
-        ts3DebugAssert( dispatcherHandle.use_count() == 1 );
-
-        dispatcherHandle.reset();
-    }
-
-    void EventController::_verifyDispatcherRemoval( EventDispatcher & pDispatcher )
-    {
-        auto eventDispatcherMapIter = mInternal->dispatcherMap.find( pDispatcher.mID );
-        if( eventDispatcherMapIter != mInternal->dispatcherMap.end() )
-        {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
-        }
-
-        auto dispatcherListIter = std::find_if(
-            mInternal->dispatcherList.begin(),
-            mInternal->dispatcherList.end(),
-            [&pDispatcher]( const EventDispatcherHandle & pDispatcherHandle ) -> bool {
-                return pDispatcherHandle.get() == &pDispatcher;
-            });
-        if( dispatcherListIter != mInternal->dispatcherList.end() )
-        {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
-        }
+        return pDispatcher;
     }
 
     void EventController::_addEventSource( EventSource & pEventSource )
@@ -427,19 +386,13 @@ namespace ts3::system
 
     EventDispatcher::EventDispatcher( EventController * pEventController,
                                       event_dispatcher_id_t pID )
-	: SysObject( pEventController->mSysContext )
-	, mEventController( pEventController )
+    : SysObject( pEventController->mSysContext )
+    , mEventController( pEventController )
 	, mInternal( std::make_unique<ObjectInternalData>( this ) )
 	, mID( ( pID != CX_EVENT_DISPATCHER_ID_AUTO ) ? pID : reinterpret_cast<event_dispatcher_id_t>( this ) )
 	{}
 
-	EventDispatcher::~EventDispatcher() noexcept
-	{
-        if( mEventController )
-        {
-            mEventController->onEventDispatcherDestroy( *this );
-        }
-	}
+	EventDispatcher::~EventDispatcher() noexcept = default;
 
 	void EventDispatcher::bindEventHandler( EEventBaseType pBaseType, EventHandler pHandler )
 	{
@@ -556,8 +509,8 @@ namespace ts3::system
 	    if ( pEvent.code == E_EVENT_CODE_INPUT_MOUSE_BUTTON )
 	    {
 	        _internalEventOnInputMouseButton( pEvent,
-                                              *( pEventController.mInternal->currentInternalConfig ),
-                                              pEventController.mInternal->inputState );
+                                              pEventController.mInternal->getCurrentInternalConfig(),
+                                              pEventController.mInternal->getCurrentInputState() );
 	    }
 	}
 

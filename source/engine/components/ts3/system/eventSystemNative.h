@@ -73,6 +73,9 @@ namespace ts3::system
         // or by getting its pointer with getEventDispatcher( CX_EVENT_DISPATCHER_ID_DEFAULT ) and making it active.
         EventDispatcherHandle defaultEventDispatcher = nullptr;
 
+        // Current active dispatcher used to forward all events. Initially NULL and can be reset to this state.
+        EventDispatcher * activeEventDispatcher = nullptr;
+
         // Container for all dispatchers created in the system.
         std::list<EventDispatcherHandle> dispatcherList;
 
@@ -85,18 +88,27 @@ namespace ts3::system
         //
         std::unordered_map<EventSource *, void *> eventSourcePrivateDataMap;
 
-        // Current active dispatcher used to forward all events. Initially NULL and can be reset to this state.
-        EventDispatcher * activeDispatcher = nullptr;
-
         // Pointer to the configuration data from currently bound dispatcher.
         const EventSystemInternalConfig * currentInternalConfig = nullptr;
 
-        // Input state
-        EventInputState inputState;
+        // Pointer to the configuration data from currently bound dispatcher.
+        EventInputState * currentInputState = nullptr;
 
         explicit ObjectInternalData( EventController * pController )
         : parentController( pController )
         {}
+
+        const EventSystemInternalConfig & getCurrentInternalConfig() const
+        {
+            ts3DebugAssert( currentInternalConfig != nullptr );
+            return *currentInternalConfig;
+        }
+
+        EventInputState & getCurrentInputState() const
+        {
+            ts3DebugAssert( currentInputState != nullptr );
+            return *currentInputState;
+        }
     };
 
     /// @brief Private, implementation-specific data of the EventDispatcher class.
@@ -115,6 +127,9 @@ namespace ts3::system
         // Internal configuration of the event system. The configuration is stored per-dispatcher, so that in case
         // of multiple instances, configuration is properly restored each time a dispatcher is set as an active one.
         EventSystemInternalConfig internalConfig;
+
+        // Input state
+        EventInputState inputState;
 
         // A default handler. If set, it is called if there is no handler registered for a given code/category/base type.
         EventHandler defaultHandler;

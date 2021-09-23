@@ -231,7 +231,7 @@ namespace ts3::system
 
 	bool _win32TranslateInputEventKeyboard( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
 	{
-	    auto & inputState = pEventController.mInternal->inputState;
+	    auto & inputState = pEventController.mInternal->getCurrentInputState();
 
 	    switch( pMSG.message )
 	    {
@@ -269,7 +269,7 @@ namespace ts3::system
 	        GET_Y_LPARAM( pMSG.lParam )
 	    };
 
-	    auto & inputState = pEventController.mInternal->inputState;
+	    auto & inputState = pEventController.mInternal->getCurrentInputState();
 
 	    if ( inputState.mouseLastRegPos == CX_EVENT_MOUSE_POS_INVALID )
 	    {

@@ -102,11 +102,15 @@ namespace ts3::system
 
 		TS3_PCL_ATTR_NO_DISCARD EventDispatcher * getEventDispatcher( event_dispatcher_id_t pDispatcherID );
 
-		void resetDispatcherList();
+		bool setActiveEventDispatcher( event_dispatcher_id_t pDispatcherID );
 
-		bool setActiveDispatcher( EventDispatcher * pDispatcher );
-        bool setDefaultActiveDispatcher();
-		bool resetActiveDispatcher();
+		bool setActiveEventDispatcher( EventDispatcher * pDispatcher );
+
+		bool setActiveEventDispatcherDefault();
+
+		bool resetActiveEventDispatcher();
+
+		void releaseDispatcherObjects();
 
         TS3_PCL_ATTR_NO_DISCARD EventSource * findEventSource( EventSourceFindPredicate pPredicate ) const;
 
@@ -116,19 +120,15 @@ namespace ts3::system
 
 		TS3_PCL_ATTR_NO_DISCARD bool hasActiveDispatcher() const;
 
-	friendapi: // EventSource
+	friendapi:
+	    // Used by EventSource class. It is called inside its destructor.
 	    void onEventSourceDestroy( EventSource & pEventSource ) noexcept;
-
-    friendapi: // EventDispatcher
-	    void onEventDispatcherDestroy( EventDispatcher & pDispatcher ) noexcept;
 
 	private:
 	    void _checkActiveDispatcherState();
 	    void _onActiveDispatcherChange( EventDispatcher * pDispatcher );
 	    EventDispatcher * _getDefaultDispatcher();
-	    EventDispatcher * _addOrGetDispatcher( event_dispatcher_id_t pDispatcherID );
-	    void _removeDispatcher( EventDispatcher & pDispatcher  );
-	    void _verifyDispatcherRemoval( EventDispatcher & pDispatcher );
+	    EventDispatcher * _validateDispatcher( EventDispatcher * pDispatcher );
 	    void _addEventSource( EventSource & pEventSource );
 	    void _removeEventSource( EventSource & pEventSource );
 	    void * _removeEventSourcePrivateData( EventSource & pEventSource );
