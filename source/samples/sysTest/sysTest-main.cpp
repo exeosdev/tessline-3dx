@@ -1,80 +1,105 @@
 
-#include <ts3/system/displayManager.h>
-#include <ts3/system/displayDriver.h>
+#include <ts3/system/display.h>
 #include <ts3/system/sysContextNative.h>
 #include <ts3/system/windowNative.h>
 #include <ts3/system/eventSystemNative.h>
+#include <ts3/system/openGL.h>
 
 using namespace ts3::system;
 
 int main( int pArgc, const char ** pArgv )
 {
     SysContextCreateInfo sysCtxCreateInfo;
+#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_SYSAPI_WIN32 )
     sysCtxCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
+#elif( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_SYSAPI_X11 )
+#endif
     sysCtxCreateInfo.flags = 0;
 
     auto sysCtx = creCreateSystemContext( sysCtxCreateInfo );
-    auto dmgr = createSysObject<DisplayManager>( sysCtx );
-    auto ddrv = dmgr->createDisplayDriver( EDisplayDriverType::Generic );
+    auto dsmManager = createSysObject<DisplayManager>( sysCtx );
+    auto openglDiver = createSysObject<GLSystemDriver>( dsmManager );
 
-    ddrv->syncDisplayConfiguration();
-    auto dcdump = ddrv->generateConfigurationDump();
-    printf( "%s\n", dcdump.c_str() );
-    
-    WindowCreateInfo wci;
-    wci.properties.geometry.size = {1600,900};
-    wci.properties.geometry.frameStyle = WindowFrameStyle::Caption;
-    wci.properties.title = "SysTest";
+    // auto dsmDriver = dsmManager->createDisplayDriver( EDisplayDriverType::Generic );
+    // dsmDriver->syncDisplayConfiguration();
+    // auto dsmConfigDump = dsmDriver->generateConfigurationDump();
+    // printf( "%s\n", dsmConfigDump.c_str() );
 
-    auto wmgr = createSysObject<WindowManager>( dmgr );
-    auto * wnd = wmgr->createWindow( wci );
+    openglDiver->initializePlatform();
+
+    GLDisplaySurfaceCreateInfo surfaceCreateInfo;
+    surfaceCreateInfo.windowGeometry.size = {1600,900};
+    surfaceCreateInfo.windowGeometry.frameStyle = WindowFrameStyle::Caption;
+    surfaceCreateInfo.visualConfig = vsxGetDefaultVisualConfigForSysWindow();
+
+    auto displaySurface = openglDiver->createDisplaySurface( surfaceCreateInfo );
+
+    GLRenderContextCreateInfo renderContextCreateInfo;
+    renderContextCreateInfo.requiredAPIVersion = { 4, 2 };
+    renderContextCreateInfo.targetAPIProfile = EGLAPIProfile::Core;
+    renderContextCreateInfo.shareContext = nullptr;
+    renderContextCreateInfo.flags = E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT;
+
+    auto renderContext = openglDiver->createRenderContext( *displaySurface, renderContextCreateInfo );
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////
+
+    auto evtController = createSysObject<EventController>( sysCtx );
+    evtController->setActiveEventDispatcherDefault();
+    auto * evtDispatcher = evtController->getEventDispatcher( CX_EVENT_DISPATCHER_ID_DEFAULT );
 
     bool runApp = true;
 
-    auto evts = createSysObject<EventController>( sysCtx );
-    auto * evtd = evts->getEventDispatcher( CX_EVENT_DISPATCHER_ID_DEFAULT );
-    evts->setActiveDispatcher( *evtd );
-
-    evtd->bindEventHandler( EEventCodeIndex::AppActivityQuit, [&runApp,&wnd](const EventObject & pEvt) -> bool {
-        if( wnd )
-        {
-            wnd->destroy();
-            wnd = nullptr;
-        }
+    evtDispatcher->bindEventHandler( EEventCodeIndex::AppActivityQuit, [&runApp,&displaySurface](const EventObject & pEvt) -> bool {
+        // if( displaySurface )
+        // {
+        //     displaySurface->destroy();
+        //     displaySurface = nullptr;
+        // }
         runApp = false;
         return true;
     });
-    evtd->bindEventHandler( EEventCodeIndex::WindowUpdateClose, [wnd,evtd](const EventObject & pEvt) -> bool {
-        if( pEvt.eWindowUpdateClose.sourceWindow == wnd )
+    evtDispatcher->bindEventHandler( EEventCodeIndex::WindowUpdateClose, [displaySurface,evtDispatcher](const EventObject & pEvt) -> bool {
+        if( pEvt.eWindowUpdateClose.checkEventSource( displaySurface.get() ) )
         {
-            evtd->postEventAppQuit();
+            evtDispatcher->postEventAppQuit();
         }
         return true;
     });
-    evtd->bindEventHandler( EEventCodeIndex::InputKeyboardKey, [wnd,evtd](const EventObject & pEvt) -> bool {
-        if( pEvt.eInputKeyboardKey.keyCode == KeyCode::Escape )
+    evtDispatcher->bindEventHandler( EEventCodeIndex::InputKeyboardKey, [displaySurface,evtDispatcher](const EventObject & pEvt) -> bool {
+        if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::Escape )
         {
-            evtd->postEventAppQuit();
+            evtDispatcher->postEventAppQuit();
         }
-        else if( pEvt.eInputKeyboardKey.keyCode == KeyCode::CharF )
+        else if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::CharF )
         {
-            wnd->setFullscreenMode( true );
+            //appWindow->setFullscreenMode( true );
         }
-        else if( pEvt.eInputKeyboardKey.keyCode == KeyCode::CharG )
+        else if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::CharG )
         {
-            wnd->setFullscreenMode( false );
+            //appWindow->setFullscreenMode( false );
         }
         return true;
     });
 
-    nativeEnableWindowEventSupport( *wnd, *evts );
+    evtController->registerEventSource( *displaySurface );
+    openglDiver->releaseInitState( *renderContext );
+    renderContext->bindForCurrentThread( *displaySurface );
+
+    auto glSysInfo = renderContext->querySystemVersionInfo();
+    auto glSysInfoStr = glSysInfo.toString();
+    printf("%s\n", glSysInfoStr.c_str() );
 
     while( runApp )
     {
-        evts->dispatchSysEventAuto();
+        evtController->updateSysQueueAuto();
+        displaySurface->clearColorBuffer();
+        displaySurface->swapBuffers();
     }
 
-    wmgr->reset();
+    //wmgr->reset();
 
     return 0;
 }
