@@ -25,6 +25,7 @@ namespace ts3
 
     enum : exception_code_value_t
     {
+        E_EXCEPTION_CODE_DEBUG_PLACEHOLDER = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_DEBUG, 0x01 ),
         E_EXCEPTION_CODE_RESULT_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_RESULT, 0x01 )
     };
 
@@ -223,10 +224,7 @@ namespace ts3
 		// TpException is a class derived from ExceptionClass<ExceptionBaseType>. It contains 'baseType'
 		// member with type tag. It should match the type embedded within the code. In case of mismatch, there is
 		// either a typo (in case of manual call) or a problem with the throwException() function defined below.
-		if ( TpException::mBaseType != ecGetExceptionCodeBaseType( pExceptionInfo.code ) )
-		{
-			ts3DebugInterruptOnce();
-		}
+		ts3DebugAssert( TpException::mBaseType != ecGetExceptionCodeBaseType( pExceptionInfo.code ) );
 
 		throw TpException( std::move( pExceptionInfo ), std::forward<TpArgs>( pArgs )... );
 	}
@@ -260,7 +258,7 @@ namespace ts3
 #define ts3ThrowResultEx( pResult, pDescription ) \
     ::ts3::throwException<typename ExceptionCodeClassProxy<E_EXCEPTION_CODE_RESULT_ERROR>::Type>( E_EXCEPTION_CODE_RESULT_ERROR, pDescription, ts3CurrentFileLocationInfo(), pResult )
 
-#define exfCatchIntoWrapper( pResultWrapper ) \
+#define ts3CatchIntoWrapper( pResultWrapper ) \
 	catch( const ::ts3::Result & eResult ) \
 	{ \
         pResultWrapper.setResult( eResult ); \
