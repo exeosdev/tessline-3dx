@@ -100,6 +100,7 @@ namespace ts3::system
 		{
 			::glXDestroyContext( xSessionData.display, tmpContextNativeData.contextHandle );
 			tmpContextNativeData.contextHandle = nullptr;
+            tmpContextNativeData.resetSessionData();
 		}
 
 		if( tmpSurfaceNativeData.windowXID != E_X11_XID_NONE )
@@ -113,11 +114,6 @@ namespace ts3::system
 			XFree( tmpSurfaceNativeData.visualInfo );
 			tmpSurfaceNativeData.visualInfo = nullptr;
 		}
-
-        // Explicitly reset X11SessionData pointers. Not really important in terms of resource/memory
-        // management (it's just a pointer to the actual data in the SysContext), but useful for debugging.
-        tmpContextNativeData.resetSessionData();
-        tmpSurfaceNativeData.resetSessionData();
 
         delete mInternal->nativeDataPriv.initState;
         mInternal->nativeDataPriv.initState = nullptr;
@@ -154,7 +150,7 @@ namespace ts3::system
 
     void GLSystemDriver::_nativeDestroyDisplaySurface( GLDisplaySurface & pDisplaySurface )
     {
-        nativeX11DestroyWindow( pDisplaySurface.mInternal->nativeDataPriv );
+        _x11DestroyGLWindowAndSurface( pDisplaySurface.mInternal->nativeDataPriv );
     }
 
 	void GLSystemDriver::_nativeCreateRenderContext( GLRenderContext & pRenderContext,
@@ -251,10 +247,26 @@ namespace ts3::system
 
     void GLSystemDriver::_nativeDestroyRenderContext( GLRenderContext & pRenderContext )
     {
+        auto & xSessionData = mInternal->nativeDataPriv.getSessionData();
+
+        if( pRenderContext.mInternal->nativeDataPriv.contextHandle != nullptr )
+        {
+            if( _nativeIsRenderContextBound() )
+            {
+                ::glXMakeContextCurrent( xSessionData.display, E_X11_XID_NONE, E_X11_XID_NONE, nullptr );
+            }
+
+            ::glXDestroyContext( xSessionData.display, pRenderContext.mInternal->nativeDataPriv.contextHandle );
+
+            pRenderContext.mInternal->nativeDataPriv.resetSessionData();
+            pRenderContext.mInternal->nativeDataPriv.contextHandle = nullptr;
+        }
     }
 
     void GLSystemDriver::_nativeResetContextBinding()
     {
+        auto & xSessionData = mInternal->nativeDataPriv.getSessionData();
+        ::glXMakeContextCurrent( xSessionData.display, E_X11_XID_NONE, E_X11_XID_NONE, nullptr );
     }
 
     bool GLSystemDriver::_nativeIsRenderContextBound() const
@@ -269,7 +281,7 @@ namespace ts3::system
         return currentContext == pRenderContext.mInternal->nativeDataPriv.contextHandle;
     }
 
-    bool GLSystemDriver::_nativeIsDisplaySurfaceValid( GLDisplaySurface & pDisplaySurface ) const
+    bool GLSystemDriver::_nativeIsDisplaySurfaceValid( const GLDisplaySurface & pDisplaySurface ) const
     {
         return pDisplaySurface.mInternal->nativeDataPriv.fbConfig != nullptr;
     }
@@ -286,11 +298,6 @@ namespace ts3::system
         glXSwapBuffers( xSessionData.display, mInternal->nativeDataPriv.windowXID );
     }
 
-    void GLDisplaySurface::_nativeDestroy() noexcept
-    {
-        _x11DestroyGLWindowAndSurface( mInternal->nativeDataPriv );
-    }
-
     void GLDisplaySurface::_nativeQueryRenderAreaSize( WindowSize & pOutSize ) const
     {
         auto & xSessionData = nativeX11GetXSessionData( mInternal->nativeDataPriv );
@@ -304,11 +311,6 @@ namespace ts3::system
         pOutSize.y = windowAttributes.height;
     }
 
-    bool GLDisplaySurface::_nativeIsValid() const
-    {
-        return mInternal->nativeDataPriv.windowXID != E_X11_XID_NONE;
-    }
-
 
     void GLRenderContext::_nativeBindForCurrentThread( const GLDisplaySurface & pTargetSurface )
     {
@@ -318,38 +320,6 @@ namespace ts3::system
                                  pTargetSurface.mInternal->nativeDataPriv.windowXID,
                                  pTargetSurface.mInternal->nativeDataPriv.windowXID,
                                  mInternal->nativeDataPriv.contextHandle );
-    }
-
-    void GLRenderContext::_nativeDestroy() noexcept
-    {
-        auto & xSessionData = mInternal->nativeDataPriv.getSessionData();
-
-        if( mInternal->nativeDataPriv.contextHandle != nullptr )
-        {
-            if( _nativeIsCurrent() )
-            {
-                ::glXMakeContextCurrent( xSessionData.display,
-                                         E_X11_XID_NONE,
-                                         E_X11_XID_NONE,
-                                         nullptr );
-            }
-
-            ::glXDestroyContext( xSessionData.display, mInternal->nativeDataPriv.contextHandle );
-
-            mInternal->nativeDataPriv.resetSessionData();
-            mInternal->nativeDataPriv.contextHandle = nullptr;
-        }
-    }
-
-    bool GLRenderContext::_nativeIsCurrent() const
-    {
-        auto currentContext = ::glXGetCurrentContext();
-        return mInternal->nativeDataPriv.contextHandle == currentContext;
-    }
-
-    bool GLRenderContext::_nativeIsValid() const
-    {
-        return mInternal->nativeDataPriv.contextHandle != nullptr;
     }
 
 	

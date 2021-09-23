@@ -5,6 +5,122 @@
 namespace ts3::system
 {
 
+    GLDisplaySurface::GLDisplaySurface( GLSystemDriverHandle pDriver )
+    : EventSource( pDriver->mSysContext )
+    , mDriver( pDriver )
+    , mInternal( std::make_unique<ObjectInternalData>( this ) )
+    , mNativeData( &( mInternal->nativeDataPriv ) )
+    {
+        setEventSourceNativeData( &( mInternal->nativeDataPriv ) );
+    }
+
+    GLDisplaySurface::~GLDisplaySurface() noexcept
+    {
+        mDriver->onDisplaySurfaceDestroy( *this );
+    }
+
+    void GLDisplaySurface::clearColorBuffer()
+    {
+        glClearColor( 0.1f, 0.33f, 0.9f, 1.0f );
+        ts3GLHandleLastError();
+
+        glClear( GL_COLOR_BUFFER_BIT );
+        ts3GLHandleLastError();
+    }
+
+    void GLDisplaySurface::swapBuffers()
+    {
+        if( !isValid() )
+        {
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+        }
+
+        _nativeSwapBuffers();
+    }
+
+    WindowSize GLDisplaySurface::queryRenderAreaSize() const
+    {
+        if( !isValid() )
+        {
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+        }
+
+        WindowSize result;
+        _nativeQueryRenderAreaSize( result );
+
+        return result;
+    }
+
+    bool GLDisplaySurface::isValid() const
+    {
+        return mDriver->isDisplaySurfaceValid( *this );
+    }
+
+
+    GLRenderContext::GLRenderContext( GLSystemDriverHandle pDriver )
+    : SysObject( pDriver->mSysContext )
+    , mDriver( pDriver )
+    , mInternal( std::make_unique<ObjectInternalData>( this ) )
+    , mNativeData( &( mInternal->nativeDataPriv ) )
+    {}
+
+    GLRenderContext::~GLRenderContext() noexcept
+    {
+        mDriver->onRenderContextDestroy( *this );
+    }
+
+    void GLRenderContext::bindForCurrentThread( const GLDisplaySurface & pSurface )
+    {
+        if( !isValid() )
+        {
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+        }
+        _nativeBindForCurrentThread( pSurface );
+    }
+
+    GLSystemVersionInfo GLRenderContext::querySystemVersionInfo() const
+    {
+        GLSystemVersionInfo systemVersionInfo;
+
+        int majorVersion = 0;
+        glGetIntegerv( GL_MAJOR_VERSION, &majorVersion );
+        systemVersionInfo.apiVersion.major = static_cast< uint16 >( majorVersion );
+
+        int minorVersion = 0;
+        glGetIntegerv( GL_MINOR_VERSION, &minorVersion );
+        systemVersionInfo.apiVersion.minor = static_cast< uint16 >( minorVersion );
+
+        if ( const auto * versionStr = glGetString( GL_VERSION ) )
+        {
+            systemVersionInfo.apiVersionStr.assign( reinterpret_cast<const char *>( versionStr ) );
+        }
+        if ( const auto * glslVersionStr = glGetString( GL_SHADING_LANGUAGE_VERSION ) )
+        {
+            systemVersionInfo.glslVersionStr.assign( reinterpret_cast<const char *>( glslVersionStr ) );
+        }
+        if ( const auto * rendererNameStr = glGetString( GL_RENDERER ) )
+        {
+            systemVersionInfo.rendererName.assign( reinterpret_cast<const char *>( rendererNameStr ) );
+        }
+        if ( const auto * vendorNameStr = glGetString( GL_VENDOR ) )
+        {
+            systemVersionInfo.vendorName.assign( reinterpret_cast<const char *>( vendorNameStr ) );
+        }
+
+        return systemVersionInfo;
+    }
+
+    bool GLRenderContext::isCurrent() const
+    {
+        return mDriver->isRenderContextBound( *this );
+    }
+
+    bool GLRenderContext::isValid() const
+    {
+        return mDriver->isRenderContextValid( *this );
+    }
+
+
     GLSystemDriver::GLSystemDriver( DisplayManagerHandle pDisplayManager )
     : SysObject( pDisplayManager->mSysContext )
     , mDisplayManager( std::move( pDisplayManager ) )
@@ -156,22 +272,22 @@ namespace ts3::system
         return _nativeIsRenderContextBound();
     }
 
-    bool GLSystemDriver::isRenderContextBound( GLRenderContext & pRenderContext ) const
+    bool GLSystemDriver::isRenderContextBound( const GLRenderContext & pRenderContext ) const
     {
         return _nativeIsRenderContextBound( pRenderContext );
     }
 
-    bool GLSystemDriver::isDisplaySurfaceValid( GLDisplaySurface & pDisplaySurface ) const
+    bool GLSystemDriver::isDisplaySurfaceValid( const GLDisplaySurface & pDisplaySurface ) const
     {
         return mInternal->parentDriver && _nativeIsDisplaySurfaceValid( pDisplaySurface );
     }
 
-    bool GLSystemDriver::isRenderContextValid( GLRenderContext & pRenderContext ) const
+    bool GLSystemDriver::isRenderContextValid( const GLRenderContext & pRenderContext ) const
     {
         return mInternal->parentDriver && _nativeIsRenderContextValid( pRenderContext );
     }
 
-    void GLSystemDriver::onDisplaySurfaceDtor( GLDisplaySurface & pDisplaySurface ) noexcept
+    void GLSystemDriver::onDisplaySurfaceDestroy( GLDisplaySurface & pDisplaySurface ) noexcept
     {
         try
         {
@@ -190,6 +306,7 @@ namespace ts3::system
         }
         catch( const Exception & pException )
         {
+            ( pException );
             ts3DebugInterrupt();
         }
         catch( ... )
@@ -198,7 +315,7 @@ namespace ts3::system
         }
     }
 
-    void GLSystemDriver::onRenderContextDtor( GLRenderContext & pRenderContext ) noexcept
+    void GLSystemDriver::onRenderContextDestroy( GLRenderContext & pRenderContext ) noexcept
     {
         try
         {
@@ -220,128 +337,13 @@ namespace ts3::system
         }
         catch( const Exception & pException )
         {
+            ( pException );
             ts3DebugInterrupt();
         }
         catch( ... )
         {
             ts3DebugInterrupt();
         }
-    }
-
-
-    GLDisplaySurface::GLDisplaySurface( GLSystemDriverHandle pDriver )
-    : EventSource( pDriver->mSysContext )
-    , mDriver( pDriver )
-    , mInternal( std::make_unique<ObjectInternalData>( this ) )
-    , mNativeData( &( mInternal->nativeDataPriv ) )
-    {
-        setEventSourceNativeData( &( mInternal->nativeDataPriv ) );
-    }
-
-    GLDisplaySurface::~GLDisplaySurface() noexcept
-    {
-        mDriver->onDisplaySurfaceDtor( *this );
-    }
-
-    void GLDisplaySurface::clearColorBuffer()
-    {
-        glClearColor( 0.1f, 0.33f, 0.9f, 1.0f );
-    }
-
-    void GLDisplaySurface::swapBuffers()
-    {
-        if( !isValid() )
-        {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
-        }
-
-        _nativeSwapBuffers();
-    }
-
-    WindowSize GLDisplaySurface::queryRenderAreaSize() const
-    {
-        if( !isValid() )
-        {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
-        }
-
-        WindowSize result;
-        _nativeQueryRenderAreaSize( result );
-
-        return result;
-    }
-
-    bool GLDisplaySurface::isValid() const
-    {
-        return mInternal && _nativeIsValid();
-    }
-
-
-    GLRenderContext::GLRenderContext( GLSystemDriverHandle pDriver )
-    : SysObject( pDriver->mSysContext )
-    , mDriver( pDriver )
-    , mInternal( std::make_unique<ObjectInternalData>( this ) )
-    , mNativeData( &( mInternal->nativeDataPriv ) )
-    {}
-
-    GLRenderContext::~GLRenderContext() noexcept
-    {
-        mDriver->onRenderContextDtor( *this );
-    }
-
-    void GLRenderContext::bindForCurrentThread( const GLDisplaySurface & pSurface )
-    {
-        if( !isValid() )
-        {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
-        }
-        _nativeBindForCurrentThread( pSurface );
-    }
-
-    GLSystemVersionInfo GLRenderContext::querySystemVersionInfo() const
-    {
-        GLSystemVersionInfo systemVersionInfo;
-
-        int majorVersion = 0;
-        glGetIntegerv( GL_MAJOR_VERSION, &majorVersion );
-        systemVersionInfo.apiVersion.major = static_cast< uint16 >( majorVersion );
-
-        int minorVersion = 0;
-        glGetIntegerv( GL_MINOR_VERSION, &minorVersion );
-        systemVersionInfo.apiVersion.minor = static_cast< uint16 >( minorVersion );
-
-        if ( const auto * versionStr = glGetString( GL_VERSION ) )
-        {
-            systemVersionInfo.apiVersionStr.assign( reinterpret_cast<const char *>( versionStr ) );
-        }
-        if ( const auto * glslVersionStr = glGetString( GL_SHADING_LANGUAGE_VERSION ) )
-        {
-            systemVersionInfo.glslVersionStr.assign( reinterpret_cast<const char *>( glslVersionStr ) );
-        }
-        if ( const auto * rendererNameStr = glGetString( GL_RENDERER ) )
-        {
-            systemVersionInfo.rendererName.assign( reinterpret_cast<const char *>( rendererNameStr ) );
-        }
-        if ( const auto * vendorNameStr = glGetString( GL_VENDOR ) )
-        {
-            systemVersionInfo.vendorName.assign( reinterpret_cast<const char *>( vendorNameStr ) );
-        }
-
-        return systemVersionInfo;
-    }
-
-    bool GLRenderContext::isCurrent() const
-    {
-        if( !isValid() )
-        {
-            return false;
-        }
-        return _nativeIsCurrent();
-    }
-
-    bool GLRenderContext::isValid() const
-    {
-        return _nativeIsValid();
     }
 
 } // namespace ts3::system

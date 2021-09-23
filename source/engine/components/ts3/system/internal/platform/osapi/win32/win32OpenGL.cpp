@@ -153,7 +153,7 @@ namespace ts3::system
 	    }
 	    else
 	    {
-	        wglSwapIntervalEXT( 0 );
+	        // wglSwapIntervalEXT( 0 );
 	    }
 
 	    ::ShowWindow( pDisplaySurface.mInternal->nativeDataPriv.hwnd, SW_SHOWNORMAL );
@@ -188,6 +188,8 @@ namespace ts3::system
 
 	void GLSystemDriver::_nativeDestroyDisplaySurface( GLDisplaySurface & pDisplaySurface )
 	{
+	    _win32DestroyGLSurface( pDisplaySurface.mInternal->nativeDataPriv );
+
 	    nativeWin32DestroyWindow( pDisplaySurface.mInternal->nativeDataPriv );
 	}
 
@@ -263,10 +265,24 @@ namespace ts3::system
 
 	void GLSystemDriver::_nativeDestroyRenderContext( GLRenderContext & pRenderContext )
 	{
+	    if( pRenderContext.mInternal->nativeDataPriv.contextHandle != nullptr )
+	    {
+	        if( _nativeIsRenderContextBound( pRenderContext ) )
+	        {
+	            // Explicitly unbind the context if it's currently bound.
+	            // TODO: What about other threads? What if a context is destroyed in one thread while other uses it?
+	            ::wglMakeCurrent( nullptr, nullptr );
+	        }
+
+	        ::wglDeleteContext( pRenderContext.mInternal->nativeDataPriv.contextHandle );
+
+	        pRenderContext.mInternal->nativeDataPriv.contextHandle = nullptr;
+	    }
 	}
 
 	void GLSystemDriver::_nativeResetContextBinding()
     {
+        ::wglMakeCurrent( nullptr, nullptr );
     }
 
 	bool GLSystemDriver::_nativeIsRenderContextBound() const
@@ -281,7 +297,7 @@ namespace ts3::system
 	    return currentContext == pRenderContext.mInternal->nativeDataPriv.contextHandle;
 	}
 
-	bool GLSystemDriver::_nativeIsDisplaySurfaceValid( GLDisplaySurface & pDisplaySurface ) const
+	bool GLSystemDriver::_nativeIsDisplaySurfaceValid( const GLDisplaySurface & pDisplaySurface ) const
     {
 	    return pDisplaySurface.mInternal->nativeDataPriv.hwnd && pDisplaySurface.mInternal->nativeDataPriv.hdc;
     }
@@ -297,11 +313,6 @@ namespace ts3::system
 	    ::SwapBuffers( mInternal->nativeDataPriv.hdc );
 	}
 
-	void GLDisplaySurface::_nativeDestroy() noexcept
-	{
-	    _win32DestroyGLSurface( mInternal->nativeDataPriv );
-	}
-
 	void GLDisplaySurface::_nativeQueryRenderAreaSize( WindowSize & pOutSize ) const
 	{
 	    RECT clientRect;
@@ -311,45 +322,11 @@ namespace ts3::system
 	    pOutSize.y = clientRect.bottom - clientRect.top;
 	}
 
-	bool GLDisplaySurface::_nativeIsValid() const
-	{
-	    return mInternal->nativeDataPriv.hdc != nullptr;
-	}
-
 
 	void GLRenderContext::_nativeBindForCurrentThread( const GLDisplaySurface & pDisplaySurface )
 	{
 	    const auto & surfaceNativeData = pDisplaySurface.mInternal->nativeDataPriv;
-
 	    ::wglMakeCurrent( surfaceNativeData.hdc, mNativeData->contextHandle );
-	}
-
-	void GLRenderContext::_nativeDestroy() noexcept
-	{
-	    if( mInternal->nativeDataPriv.contextHandle != nullptr )
-	    {
-	        if( _nativeIsCurrent() )
-	        {
-	            // Explicitly unbind the context if it's currently bound.
-	            // TODO: What about other threads? What if a context is destroyed in one thread while other uses it?
-	            ::wglMakeCurrent( nullptr, nullptr );
-	        }
-
-	        ::wglDeleteContext( mInternal->nativeDataPriv.contextHandle );
-
-	        mInternal->nativeDataPriv.contextHandle = nullptr;
-	    }
-	}
-
-	bool GLRenderContext::_nativeIsCurrent() const
-	{
-	    auto currentContext = ::wglGetCurrentContext();
-	    return mInternal->nativeDataPriv.contextHandle == currentContext;
-	}
-
-	bool GLRenderContext::_nativeIsValid() const
-	{
-	    return mInternal->nativeDataPriv.contextHandle != nullptr;
 	}
 
 
