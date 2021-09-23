@@ -20,7 +20,7 @@ namespace ts3
 		if( initResult == EGL_FALSE )
 		{
 			// auto errorMessage = eglQueryLastErrorMessage();
-			throw 0;
+			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		pDriver.nativeData->display = eglDisplay;
@@ -63,7 +63,7 @@ namespace ts3
 
 		if( surfaceHandle == EGL_NO_SURFACE )
 		{
-			throw 0;
+			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		pSurface.nativeData->display = pEGLDisplay;
@@ -133,7 +133,7 @@ namespace ts3
 
 			if( contextHandle == EGL_NO_CONTEXT )
 			{
-				throw 0;
+				ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 			}
 		}
 
@@ -168,7 +168,7 @@ namespace ts3
 
 		if ( ( enumResult == EGL_FALSE ) || ( returnedEGLConfigsNum <= 0 ) )
 		{
-			throw 0;
+			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
         result.reserve( static_cast<size_t>( returnedEGLConfigsNum ) );

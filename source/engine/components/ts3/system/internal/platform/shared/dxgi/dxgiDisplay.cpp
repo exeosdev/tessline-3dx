@@ -13,8 +13,8 @@ namespace ts3::system
 
 	void DisplayDriverDXGI::_initialize()
     {
-        ts3DebugAssert( mPrivate->nativeDataPriv.dxgi );
-        auto & dxgiDriverData = *( mPrivate->nativeDataPriv.dxgi );
+        ts3DebugAssert( mInternal->nativeDataPriv.dxgi );
+        auto & dxgiDriverData = *( mInternal->nativeDataPriv.dxgi );
 
         if( dxgiDriverData.dxgiFactory == nullptr )
         {
@@ -37,7 +37,7 @@ namespace ts3::system
 
                 if( FAILED( hResult ) )
                 {
-                    throw 0;
+                    ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
                 }
 
                 dxgiDriverData.dxgiFactory = dxgiFactory1;
@@ -70,7 +70,7 @@ namespace ts3::system
             // https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiadapter-enumoutputs
             if ( FAILED( hResult ) )
             {
-                throw 0;
+                ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
             }
 
             ComPtr<IDXGIOutput1> dxgiOutput1;
@@ -79,7 +79,7 @@ namespace ts3::system
             // We require support for the DXGI version 1.1 (Windows 7 and newer). Required for DXGI_ADAPTER_FLAG member.
             if ( FAILED( hResult ) )
             {
-                throw 0;
+                ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
             }
 
             DXGI_OUTPUT_DESC dxgiOutputDesc;
@@ -87,7 +87,7 @@ namespace ts3::system
 
             if ( FAILED( hResult ) )
             {
-                throw 0;
+                ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
             }
 
             auto * outputObject = addOutput( pAdapter );
@@ -128,7 +128,7 @@ namespace ts3::system
 
 	void DisplayDriverDXGI::_drvEnumDisplayDevices()
 	{
-	    auto * dxgiFactory = mPrivate->nativeDataPriv.dxgi->dxgiFactory.Get();
+	    auto * dxgiFactory = mInternal->nativeDataPriv.dxgi->dxgiFactory.Get();
 
 	    for( UINT adapterIndex = 0u; ; ++adapterIndex )
 	    {
@@ -147,7 +147,7 @@ namespace ts3::system
 	        // https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgifactory1-enumadapters1
 	        if ( FAILED( hResult ) )
 	        {
-	            throw 0;
+	            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	        }
 
 	        DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
@@ -157,7 +157,7 @@ namespace ts3::system
 	        // https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiadapter1-getdesc1
 	        if ( FAILED( hResult ) )
 	        {
-	            throw 0;
+	            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	        }
 
 	        auto * adapterObject = addAdapter();
@@ -190,7 +190,7 @@ namespace ts3::system
 
 	void DisplayDriverDXGI::_drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
 	{
-	    auto * dxgiOutput = pOutput.mPrivate->nativeDataPriv.dxgi->dxgiOutput.Get();
+	    auto * dxgiOutput = pOutput.mInternal->nativeDataPriv.dxgi->dxgiOutput.Get();
 
 	    // This should never fail, i.e. the specified format should always yield a value which
 	    // is known to the DXGI translation function. We had an issue with 'SystemNative' format,
@@ -201,7 +201,7 @@ namespace ts3::system
 
 	    if ( dxgiFormat == DXGI_FORMAT_UNKNOWN )
 	    {
-	        throw 0;
+	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 
 	    UINT displayModesNum = 0;
@@ -210,7 +210,7 @@ namespace ts3::system
 
 	    if ( FAILED( hResult ) )
 	    {
-	        throw 0;
+	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 
 	    std::vector<DXGI_MODE_DESC> dxgiModeList;
@@ -222,7 +222,7 @@ namespace ts3::system
 
 	    if ( FAILED( hResult ) )
 	    {
-	        throw 0;
+	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 
 	    // We use hash-based comparison to filter out the same modes - at our level, we are only interested

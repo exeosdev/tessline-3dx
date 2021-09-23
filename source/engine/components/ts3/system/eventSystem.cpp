@@ -443,6 +443,7 @@ namespace ts3::system
         }
         catch( const Exception & pException )
         {
+            ( pException );
             ts3DebugInterrupt();
         }
         catch( ... )

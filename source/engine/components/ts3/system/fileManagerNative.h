@@ -25,7 +25,7 @@ namespace ts3::system
         }
     };
 
-    struct File::ObjectPrivateData
+    struct File::ObjectInternalData
     {
         FileNativeData nativeDataPriv;
         file_str_t name;
@@ -34,7 +34,7 @@ namespace ts3::system
 
     struct FileInstance
     {
-        File::ObjectPrivateData privateData;
+        File::ObjectInternalData privateData;
 
         File fileObject;
 
@@ -45,7 +45,7 @@ namespace ts3::system
         {}
     };
 
-    struct FileManager::ObjectPrivateData
+    struct FileManager::ObjectInternalData
     {
         using FileList = std::list<FileInstance>;
         using FileMap = std::map<File *, FileInstance *>;

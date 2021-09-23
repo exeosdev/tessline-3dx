@@ -66,24 +66,24 @@ namespace ts3::system
             ts3ThrowAutoEx( E_EXC_SYSTEM_FILE_OPEN_ERROR, std::move( errorMessage ), std::move( pFilePath ) );
         }
 
-        pFile.mPrivate->nativeDataPriv.fileHandle = fileHandle;
-        pFile.mPrivate->fullPath = std::move( pFilePath );
+        pFile.mInternal->nativeDataPriv.fileHandle = fileHandle;
+        pFile.mInternal->fullPath = std::move( pFilePath );
     }
 
     void _win32CloseFile( File & pFile )
     {
-        auto closeResult = ::CloseHandle( pFile.mPrivate->nativeDataPriv.fileHandle );
+        auto closeResult = ::CloseHandle( pFile.mInternal->nativeDataPriv.fileHandle );
         if( closeResult == FALSE )
         {
             auto lastErrorCode = ::GetLastError();
             auto errorMessage = platform::wnfQuerySystemErrorMessage( lastErrorCode );
 
-            ts3ThrowAutoEx( E_EXC_SYSTEM_FILE_OPEN_ERROR, std::move( errorMessage ), pFile.mPrivate->fullPath );
+            ts3ThrowAutoEx( E_EXC_SYSTEM_FILE_OPEN_ERROR, std::move( errorMessage ), pFile.mInternal->fullPath );
         }
 
-        pFile.mPrivate->nativeDataPriv.fileHandle = nullptr;
-        pFile.mPrivate->fullPath.clear();
-        pFile.mPrivate->name.clear();
+        pFile.mInternal->nativeDataPriv.fileHandle = nullptr;
+        pFile.mInternal->fullPath.clear();
+        pFile.mInternal->name.clear();
     }
 
     DWORD _win32TranslateFileOpenModeToWin32Access( EFileOpenMode pOpenMode )

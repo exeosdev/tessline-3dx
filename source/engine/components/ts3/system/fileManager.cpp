@@ -25,22 +25,22 @@ namespace ts3::system
 
     FileHandle FileManager::_createFileInstance()
     {
-        auto fileListIter = mPrivate->fileList.emplace( mPrivate->fileList.end(), this );
+        auto fileListIter = mInternal->fileList.emplace( mInternal->fileList.end(), this );
 
         auto & fileInstance = *fileListIter;
         auto & fileObject = fileListIter->fileObject;
 
-        mPrivate->fileMap[&fileObject] = &fileInstance;
+        mInternal->fileMap[&fileObject] = &fileInstance;
 
         return FileHandle{ &fileObject, FileDeleter() };
     }
 
 
-    File::File( FileManager * pFileManager, ObjectPrivateData * pPrivate )
+    File::File( FileManager * pFileManager, ObjectInternalData * pPrivate )
     : mFileManager( pFileManager )
-    , mPrivate( pPrivate )
-    , mName( mPrivate->name )
-    , mFullPath( mPrivate->fullPath )
+    , mInternal( pPrivate )
+    , mName( mInternal->name )
+    , mFullPath( mInternal->fullPath )
     {}
 
     File::~File() = default;

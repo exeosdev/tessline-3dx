@@ -33,14 +33,14 @@ namespace ts3::system
             }
         }
 
-        mPrivate->nativeDataPriv.setSessionData( xSessionData );
-        mPrivate->nativeDataPriv.screenDepth = static_cast<uint16>( screenDepth );
+        mInternal->nativeDataPriv.setSessionData( xSessionData );
+        mInternal->nativeDataPriv.screenDepth = static_cast<uint16>( screenDepth );
     }
 
     void DisplayManager::_nativeDtor() noexcept
     {
-        mPrivate->nativeDataPriv.screenDepth = 0u;
-        mPrivate->nativeDataPriv.resetSessionData();
+        mInternal->nativeDataPriv.screenDepth = 0u;
+        mInternal->nativeDataPriv.resetSessionData();
     }
 
     void DisplayManager::_nativeQueryMinWindowSize( DisplaySize & pOutSize ) const
@@ -49,7 +49,7 @@ namespace ts3::system
 
         // Ideally, we have XRR available here and can fetch the data from XRRMonitorInfo structure.
         // With that approach, we can tell precisely the size of the default monitor (not the entire virtual screen).
-        // auto * xrrDefaultMonitorInfo = mPrivate->nativeDataPriv.xrrDefaultMonitorInfo;
+        // auto * xrrDefaultMonitorInfo = mInternal->nativeDataPriv.xrrDefaultMonitorInfo;
 
         // if( xrrDefaultMonitorInfo != nullptr )
         // {
@@ -97,7 +97,7 @@ namespace ts3::system
 
             if ( XRRQueryVersion( xSessionData.display, &xrrVersionMajor, &xrrVersionMinor ) == False )
             {
-                throw 0; // ExsThrowException( EXC_Not_Supported );
+                ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Not_Supported );
             }
 
             driverNativeData.xrrVersion.major = static_cast<uint16>( xrrVersionMajor );
@@ -109,7 +109,7 @@ namespace ts3::system
                                                                      xSessionData.rootWindowXID );
         if ( driverNativeData.xrrScreenResources == nullptr )
         {
-            throw 0; // ExsThrowException( EXC_Internal_Error );
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Internal_Error );
         }
 
         //
@@ -120,7 +120,7 @@ namespace ts3::system
 
         if ( ( driverNativeData.xrrMonitorList == nullptr ) || ( driverNativeData.xrrMonitorsNum <= 0 ) )
         {
-            throw 0; // ExsThrowException( EXC_Internal_Error );
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Internal_Error );
         }
 
         for ( int monitorIndex = 0; monitorIndex < driverNativeData.xrrMonitorsNum; ++monitorIndex )
@@ -241,7 +241,7 @@ namespace ts3::system
                                               outputNativeData.xrrOutputID );
         if ( outputInfo == nullptr )
         {
-            throw 0;
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         if ( outputInfo->modes != nullptr )

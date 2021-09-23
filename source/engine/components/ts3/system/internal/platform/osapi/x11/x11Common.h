@@ -93,8 +93,8 @@ namespace ts3::system
     template <typename TpSysObject>
     TS3_PCL_ATTR_NO_DISCARD inline X11SessionData & nativeX11GetXSessionDataInternal( const TpSysObject & pSysObject )
     {
-        ts3DebugAssert( pSysObject.mPrivate->nativeDataPriv.xSessionDataPtr );
-        return *( pSysObject.mPrivate->nativeDataPriv.xSessionDataPtr );
+        ts3DebugAssert( pSysObject.mInternal->nativeDataPriv.xSessionDataPtr );
+        return *( pSysObject.mInternal->nativeDataPriv.xSessionDataPtr );
     }
 
 } // namespace ts3::system

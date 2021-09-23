@@ -7,21 +7,21 @@ namespace ts3::system
 
     DisplayManager::DisplayManager( SysContextHandle pSysContext )
     : SysObject( std::move( pSysContext ) )
-    , mPrivate( std::make_unique<ObjectPrivateData>() )
-    , mNativeData( &( mPrivate->nativeDataPriv ) )
+    , mInternal( std::make_unique<ObjectInternalData>() )
+    , mNativeData( &( mInternal->nativeDataPriv ) )
     {
         _nativeCtor();
 
-        mPrivate->driverFactoryMap[EDisplayDriverType::Generic] = [this]() {
+        mInternal->driverFactoryMap[EDisplayDriverType::Generic] = [this]() {
             return createSysObject<DisplayDriverGeneric>( this );
         };
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
-        mPrivate->driverFactoryMap[EDisplayDriverType::DXGI] = [this]() {
+        mInternal->driverFactoryMap[EDisplayDriverType::DXGI] = [this]() {
             return createSysObject<DisplayDriverDXGI>( this );
         };
     #endif
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
-        mPrivate->driverFactoryMap[EDisplayDriverType::SDL] = [this]() {
+        mInternal->driverFactoryMap[EDisplayDriverType::SDL] = [this]() {
             return createSysObject<DisplayDriverSDL>( this );
         };
     #endif
@@ -40,7 +40,7 @@ namespace ts3::system
             return nullptr;
         }
 
-        auto & factoryCallback = mPrivate->driverFactoryMap.at( pDriverID );
+        auto & factoryCallback = mInternal->driverFactoryMap.at( pDriverID );
         auto displayDriver = factoryCallback();
 
         return displayDriver;
@@ -102,14 +102,111 @@ namespace ts3::system
         return result;
     }
 
+    bool DisplayManager::checkWindowGeometry( const WindowGeometry & pWindowGeometry ) const
+    {
+        const auto & windowPos = pWindowGeometry.position;
+        const auto & windowSize = pWindowGeometry.size;
+
+        auto screenSize = queryDefaultDisplaySize();
+        auto minWindowSize = queryMinWindowSize();
+
+        if( windowSize != cvWindowSizeMax )
+        {
+            if( ( windowSize.x == 0 ) || ( windowSize.y == 0 ) )
+            {
+                return false;
+            }
+
+            if( ( windowSize.x > screenSize.x ) || ( windowSize.y > screenSize.y ) )
+            {
+                return false;
+            }
+
+            if( ( windowSize.x < minWindowSize.x ) || ( windowSize.y < minWindowSize.y ) )
+            {
+                return false;
+            }
+        }
+
+        if( windowPos != cvWindowPositionAuto )
+        {
+            if( ( windowPos.x < 0 ) || ( windowPos.y < 0 ) )
+            {
+                return false;
+            }
+
+            auto maxPosX = static_cast<int32>( screenSize.x - windowSize.x );
+            auto maxPosY = static_cast<int32>( screenSize.y - windowSize.y );
+            if ( ( windowPos.x > maxPosX ) || ( windowPos.y > maxPosY ) )
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    WindowGeometry DisplayManager::validateWindowGeometry( const WindowGeometry & pWindowGeometry ) const
+    {
+        const auto & windowPos = pWindowGeometry.position;
+        const auto & windowSize = pWindowGeometry.size;
+
+        auto resultGeometry = pWindowGeometry;
+
+        auto screenSize = queryDefaultDisplaySize();
+        auto minWindowSize = queryMinWindowSize();
+
+        if( windowSize == cvWindowSizeMax )
+        {
+            // Window size exceeds the screen size - clamp the size.
+            resultGeometry.size.x = screenSize.x;
+            resultGeometry.size.y = screenSize.y;
+        }
+        else
+        {
+            if ( ( windowSize.x == 0 ) || ( windowSize.y == 0 ) )
+            {
+                // Any dimension set to 0 means "use default size". By default,
+                // we just use the ratio of the screen and 70% of its dimensions.
+                resultGeometry.size.x = static_cast<uint32>( screenSize.x * 0.7 );
+                resultGeometry.size.y = static_cast<uint32>( screenSize.y * 0.7 );
+            }
+            else
+            {
+                // Size of the window must be less than the size of the screen...
+                resultGeometry.size.x = getMinOf( resultGeometry.size.x, screenSize.x );
+                resultGeometry.size.y = getMinOf( resultGeometry.size.y, screenSize.y );
+
+                // ... but at the same time bigger than the minimum allowed size (Win32-specific, really).
+                resultGeometry.size.x = getMaxOf( resultGeometry.size.x, minWindowSize.x );
+                resultGeometry.size.y = getMaxOf( resultGeometry.size.y, minWindowSize.y );
+            }
+        }
+
+        if ( ( windowPos.x < 0 ) || ( windowPos.y < 0 ) )
+        {
+            resultGeometry.position.x = static_cast<int32>( ( screenSize.x - windowSize.x ) / 2 );
+            resultGeometry.position.y = static_cast<int32>( ( screenSize.y - windowSize.y ) / 2 );
+        }
+        else
+        {
+            auto maxPosX = static_cast<int32>( screenSize.x - windowSize.x );
+            auto maxPosY = static_cast<int32>( screenSize.y - windowSize.y );
+            resultGeometry.position.x = getMinOf( resultGeometry.position.x, maxPosX );
+            resultGeometry.position.y = getMinOf( resultGeometry.position.y, maxPosY );
+        }
+
+        return resultGeometry;
+    }
+
 
     DisplayDriver::DisplayDriver( DisplayManager * pDisplayManager,
                                   EDisplayDriverType pDriverType )
     : SysObject( pDisplayManager->mSysContext )
     , mDisplayManager( pDisplayManager )
     , mDriverType( pDriverType )
-    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
-    , mNativeData( &( mPrivate->nativeDataPriv ) )
+    , mInternal( std::make_unique<ObjectInternalData>( this ) )
+    , mNativeData( &( mInternal->nativeDataPriv ) )
     {}
 
     DisplayDriver::~DisplayDriver()
@@ -119,7 +216,7 @@ namespace ts3::system
 
     void DisplayDriver::syncDisplayConfiguration()
     {
-        if( !mPrivate->adapterInternalStorage.empty() )
+        if( !mInternal->adapterInternalStorage.empty() )
         {
             _resetDisplayConfiguration();
         }
@@ -138,7 +235,7 @@ namespace ts3::system
 
     const DisplayAdapterList & DisplayDriver::getAdapterList() const
     {
-        return mPrivate->adapterList;
+        return mInternal->adapterList;
     }
 
     const DisplayOutputList & DisplayDriver::getOutputList( dsm_index_t pAdapterIndex ) const
@@ -151,17 +248,17 @@ namespace ts3::system
     {
         if( pAdapterIndex == CX_DSM_INDEX_DEFAULT )
         {
-            return mPrivate->primaryAdapter;
+            return mInternal->primaryAdapter;
         }
         else
         {
-            return mPrivate->adapterList.at( pAdapterIndex );
+            return mInternal->adapterList.at( pAdapterIndex );
         }
     }
 
     DisplayAdapter * DisplayDriver::getDefaultAdapter() const
     {
-        return mPrivate->primaryAdapter;
+        return mInternal->primaryAdapter;
     }
 
     DisplayOutput * DisplayDriver::getDefaultOutput( dsm_index_t pAdapterIndex ) const
@@ -177,22 +274,22 @@ namespace ts3::system
 
     bool DisplayDriver::hasActiveAdapters() const
     {
-        return mPrivate->activeAdaptersNum > 0;
+        return mInternal->activeAdaptersNum > 0;
     }
 
     bool DisplayDriver::hasAnyAdapters() const
     {
-        return !mPrivate->adapterInternalStorage.empty();
+        return !mInternal->adapterInternalStorage.empty();
     }
 
     bool DisplayDriver::hasValidConfiguration() const
     {
-        return !mPrivate->adapterInternalStorage.empty() && ( mPrivate->combinedActiveOutputsNum > 0 );
+        return !mInternal->adapterInternalStorage.empty() && ( mInternal->combinedActiveOutputsNum > 0 );
     }
 
     std::string DisplayDriver::generateConfigurationDump( const std::string & pLinePrefix ) const
     {
-        const auto adaptersNum = mPrivate->adapterInternalStorage.size();
+        const auto adaptersNum = mInternal->adapterInternalStorage.size();
         const auto displayDevicesNum = adaptersNum * 2;
         const auto averageDisplayModesNum = 16;
         const auto averageLineLength = 40 + pLinePrefix.length();
@@ -274,9 +371,9 @@ namespace ts3::system
 
     DisplayAdapter * DisplayDriver::addAdapter()
     {
-        const auto adapterIndex = mPrivate->adapterInternalStorage.size();
+        const auto adapterIndex = mInternal->adapterInternalStorage.size();
 
-        auto & adapter = mPrivate->adapterInternalStorage.emplace_back( this );
+        auto & adapter = mInternal->adapterInternalStorage.emplace_back( this );
         auto & adapterDesc = dsmGetObjectDesc( adapter );
         adapterDesc.driverType = mDriverType;
         adapterDesc.adapterIndex = static_cast<dsm_index_t>( adapterIndex );
@@ -284,20 +381,20 @@ namespace ts3::system
         // Adapters are not added to the helper list at this point.
         // This is done as a post-process step later in DisplayDriver::_enumAdapters().
         // Assertion added to prevent problems in case of refactoring.
-        ts3DebugAssert( mPrivate->adapterList.empty() );
+        ts3DebugAssert( mInternal->adapterList.empty() );
 
         return &adapter;
     }
 
     DisplayOutput * DisplayDriver::addOutput( DisplayAdapter & pAdapter )
     {
-        const auto outputIndex = pAdapter.mPrivate->outputInternalStorage.size();
+        const auto outputIndex = pAdapter.mInternal->outputInternalStorage.size();
 
         DisplayOutputIDGen outputIDGen;
-        outputIDGen.uAdapterIndex = pAdapter.mPrivate->descPriv.adapterIndex;
+        outputIDGen.uAdapterIndex = pAdapter.mInternal->descPriv.adapterIndex;
         outputIDGen.uOutputIndex = static_cast<dsm_index_t>( outputIndex );
 
-        auto & output = pAdapter.mPrivate->outputInternalStorage.emplace_back( &pAdapter );
+        auto & output = pAdapter.mInternal->outputInternalStorage.emplace_back( &pAdapter );
         auto & outputDesc = dsmGetObjectDesc( output );
         outputDesc.driverType = mDriverType;
         outputDesc.outputIndex = outputIDGen.uOutputIndex;
@@ -306,14 +403,14 @@ namespace ts3::system
         // Outputs are not added to the helper list at this point.
         // This is done as a post-process step later in DisplayDriver::_enumOutputs().
         // Assertion added to prevent problems in case of refactoring.
-        ts3DebugAssert( pAdapter.mPrivate->outputList.empty() );
+        ts3DebugAssert( pAdapter.mInternal->outputList.empty() );
 
         return &output;
     }
 
     DisplayVideoMode * DisplayDriver::addVideoMode( DisplayOutput & pOutput, ColorFormat pColorFormat )
     {
-        auto & colorFormatData = pOutput.mPrivate->colorFormatMap[pColorFormat];
+        auto & colorFormatData = pOutput.mInternal->colorFormatMap[pColorFormat];
 
         if( colorFormatData.colorFormat == ColorFormat::Unknown )
         {
@@ -323,7 +420,7 @@ namespace ts3::system
         const auto videoModeIndex = colorFormatData.videoModeInternalStorage.size();
 
         DisplayVideoModeIDGen videoModeIDGen;
-        videoModeIDGen.uOutputID = pOutput.mPrivate->descPriv.outputID;
+        videoModeIDGen.uOutputID = pOutput.mInternal->descPriv.outputID;
         videoModeIDGen.uColorFormatIndex = static_cast<dsm_index_t>( colorFormatData.colorFormat );
         videoModeIDGen.uModeIndex = static_cast<dsm_index_t>( videoModeIndex );
 
@@ -355,11 +452,11 @@ namespace ts3::system
 
     void DisplayDriver::_resetDisplayConfiguration()
     {
-        mPrivate->adapterInternalStorage.clear();
-        mPrivate->adapterList.clear();
-        mPrivate->primaryAdapter = nullptr;
-        mPrivate->activeAdaptersNum = 0u;
-        mPrivate->combinedActiveOutputsNum = 0u;
+        mInternal->adapterInternalStorage.clear();
+        mInternal->adapterList.clear();
+        mInternal->primaryAdapter = nullptr;
+        mInternal->activeAdaptersNum = 0u;
+        mInternal->combinedActiveOutputsNum = 0u;
     }
 
     void DisplayDriver::_enumDisplayDevices()
@@ -370,12 +467,12 @@ namespace ts3::system
         // common aspects of the enumeration process, some steps
         // are done here, after the driver finishes enumeration.
 
-        if( !mPrivate->adapterInternalStorage.empty() )
+        if( !mInternal->adapterInternalStorage.empty() )
         {
             // Reserve space for the list of pointers/handles for adapters.
-            mPrivate->adapterList.reserve( mPrivate->adapterInternalStorage.size() );
+            mInternal->adapterList.reserve( mInternal->adapterInternalStorage.size() );
 
-            for( auto & adapter : mPrivate->adapterInternalStorage )
+            for( auto & adapter : mInternal->adapterInternalStorage )
             {
                 // Update the non-driver-specific part of the adapter info
                 auto & adapterDesc = dsmGetObjectDesc( adapter );
@@ -386,41 +483,41 @@ namespace ts3::system
                     // this function tries to resolve the ID by looking at the adapter desc.
                     adapterDesc.vendorID = dsmResolveAdapterVendorID( adapterDesc.name );
                 }
-                if( adapter.isPrimaryAdapter() && !mPrivate->primaryAdapter )
+                if( adapter.isPrimaryAdapter() && !mInternal->primaryAdapter )
                 {
                     // Driver can also explicitly set the primary system adapter.
                     // If it has not been set, we use the first adapter with proper flag set.
-                    mPrivate->primaryAdapter = &adapter;
+                    mInternal->primaryAdapter = &adapter;
                 }
                 if( adapter.isActiveAdapter() )
                 {
-                    mPrivate->activeAdaptersNum += 1;
+                    mInternal->activeAdaptersNum += 1;
                 }
 
-                mPrivate->adapterList.push_back( &adapter );
+                mInternal->adapterList.push_back( &adapter );
 
                 // If the current adapter has any outputs listed, go through them as well
                 // and update the common part of their info just like with adapters above.
-                if( !adapter.mPrivate->outputInternalStorage.empty() )
+                if( !adapter.mInternal->outputInternalStorage.empty() )
                 {
                     // Reserve space for the list of pointers/handles for outputs.
-                    adapter.mPrivate->outputList.reserve( adapter.mPrivate->outputInternalStorage.size() );
+                    adapter.mInternal->outputList.reserve( adapter.mInternal->outputInternalStorage.size() );
 
-                    for( auto & output : adapter.mPrivate->outputInternalStorage )
+                    for( auto & output : adapter.mInternal->outputInternalStorage )
                     {
-                        if( output.isPrimaryOutput() && adapter.mPrivate->primaryOutput )
+                        if( output.isPrimaryOutput() && adapter.mInternal->primaryOutput )
                         {
                             // Similar to the default/primary system adapter, we select default
                             // output of an adapter if the driver has not set it during enumeration.
-                            adapter.mPrivate->primaryOutput = &output;
+                            adapter.mInternal->primaryOutput = &output;
                         }
                         if( output.isActiveOutput() )
                         {
-                            adapter.mPrivate->activeOutputsNum += 1;
-                            mPrivate->combinedActiveOutputsNum += 1;
+                            adapter.mInternal->activeOutputsNum += 1;
+                            mInternal->combinedActiveOutputsNum += 1;
                         }
 
-                        adapter.mPrivate->outputList.push_back( &output );
+                        adapter.mInternal->outputList.push_back( &output );
                     }
 
                     // Validate if the default output for this adapter has been properly set.
@@ -434,13 +531,13 @@ namespace ts3::system
 
     void DisplayDriver::_enumDisplayDevicesCheckDefaultAdapter()
     {
-        if( mPrivate->primaryAdapter )
+        if( mInternal->primaryAdapter )
         {
             // Default./primary adapter will usually have the proper bit set (all drivers should do that).
             // In case the adapter has been set, but this bit is missing, emit a warning. It may be an
             // intentional choice, but also an error or missing driver-specific init code.
 
-            auto & adapterDesc = dsmGetObjectDesc( *( mPrivate->primaryAdapter ) );
+            auto & adapterDesc = dsmGetObjectDesc( *( mInternal->primaryAdapter ) );
             if( !adapterDesc.flags.isSet( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT ) )
             {
                 ts3DebugOutput(
@@ -454,19 +551,19 @@ namespace ts3::system
             // there has not been any adapter marked as PRIMARY. In this case, just select the first
             // one, update its state and set as the default one.
 
-            auto & firstAdapter = mPrivate->adapterInternalStorage.front();
-            firstAdapter.mPrivate->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
-            mPrivate->primaryAdapter = &firstAdapter;
+            auto & firstAdapter = mInternal->adapterInternalStorage.front();
+            firstAdapter.mInternal->descPriv.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
+            mInternal->primaryAdapter = &firstAdapter;
         }
     }
 
     void DisplayDriver::_enumDisplayDevicesCheckDefaultOutput( DisplayAdapter & pAdapter )
     {
-        if( pAdapter.mPrivate->primaryOutput )
+        if( pAdapter.mInternal->primaryOutput )
         {
             // Just like the above check for default adapter, we check the state of the default output.
 
-            auto & outputDesc = dsmGetObjectDesc( *( pAdapter.mPrivate->primaryOutput ) );
+            auto & outputDesc = dsmGetObjectDesc( *( pAdapter.mInternal->primaryOutput ) );
             if( !outputDesc.flags.isSet( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT ) )
             {
                 auto & adapterDesc = dsmGetObjectDesc( pAdapter );
@@ -480,19 +577,19 @@ namespace ts3::system
         {
             // Same here. If nothing has been set, pick the first output and make it the default one.
 
-            auto & firstOutput = pAdapter.mPrivate->outputInternalStorage.front();
-            firstOutput.mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
-            pAdapter.mPrivate->primaryOutput = &firstOutput;
+            auto & firstOutput = pAdapter.mInternal->outputInternalStorage.front();
+            firstOutput.mInternal->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
+            pAdapter.mInternal->primaryOutput = &firstOutput;
         }
     }
 
     void DisplayDriver::_enumVideoModes()
     {
-        for( auto & adapter : mPrivate->adapterInternalStorage )
+        for( auto & adapter : mInternal->adapterInternalStorage )
         {
-            for( auto & output : adapter.mPrivate->outputInternalStorage )
+            for( auto & output : adapter.mInternal->outputInternalStorage )
             {
-                output.mPrivate->supportedColorFormatList.reserve( staticArraySize( cvColorFormatArray ) );
+                output.mInternal->supportedColorFormatList.reserve( staticArraySize( cvColorFormatArray ) );
 
                 for( auto colorFormat : cvColorFormatArray )
                 {
@@ -500,9 +597,9 @@ namespace ts3::system
 
                     try
                     {
-                        auto & colorFormatData = output.mPrivate->colorFormatMap.at( colorFormat );
+                        auto & colorFormatData = output.mInternal->colorFormatMap.at( colorFormat );
                         ts3DebugAssert( !colorFormatData.videoModeInternalStorage.empty() );
-                        output.mPrivate->supportedColorFormatList.push_back( colorFormat );
+                        output.mInternal->supportedColorFormatList.push_back( colorFormat );
                         colorFormatData.videoModeList.reserve( colorFormatData.videoModeInternalStorage.size() );
                         for( auto & videoMode : colorFormatData.videoModeInternalStorage )
                         {
@@ -522,11 +619,11 @@ namespace ts3::system
     {
         if( pAdapterIndex == CX_DSM_INDEX_DEFAULT )
         {
-            return mPrivate->primaryAdapter;
+            return mInternal->primaryAdapter;
         }
         else
         {
-            return mPrivate->adapterList.at( pAdapterIndex );
+            return mInternal->adapterList.at( pAdapterIndex );
         }
     }
 
@@ -539,11 +636,11 @@ namespace ts3::system
 
         if( outputIndex == CX_DSM_INDEX_DEFAULT )
         {
-            return adapter->mPrivate->primaryOutput;
+            return adapter->mInternal->primaryOutput;
         }
         else
         {
-            return adapter->mPrivate->outputList.at( outputIndex );
+            return adapter->mInternal->outputList.at( outputIndex );
         }
     }
 
@@ -551,53 +648,53 @@ namespace ts3::system
     DisplayAdapter::DisplayAdapter( DisplayDriver * pDriver )
     : mDisplayDriver( pDriver )
     , mDriverType( pDriver->mDriverType )
-    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
-    , mDesc( &( mPrivate->descPriv ) )
-    , mNativeData( &( mPrivate->nativeDataPriv ) )
+    , mInternal( std::make_unique<ObjectInternalData>( this ) )
+    , mDesc( &( mInternal->descPriv ) )
+    , mNativeData( &( mInternal->nativeDataPriv ) )
     {}
 
     DisplayAdapter::~DisplayAdapter() = default;
 
     const DisplayOutputList & DisplayAdapter::getOutputList() const
     {
-        return mPrivate->outputList;
+        return mInternal->outputList;
     }
 
     DisplayOutput * DisplayAdapter::getOutput( dsm_index_t pOutputIndex ) const
     {
         if( pOutputIndex == CX_DSM_INDEX_DEFAULT )
         {
-            return mPrivate->primaryOutput;
+            return mInternal->primaryOutput;
         }
         else
         {
-            return mPrivate->outputList.at( pOutputIndex );
+            return mInternal->outputList.at( pOutputIndex );
         }
     }
 
     DisplayOutput * DisplayAdapter::getDefaultOutput() const
     {
-        return mPrivate->primaryOutput;
+        return mInternal->primaryOutput;
     }
 
     bool DisplayAdapter::isActiveAdapter() const
     {
-        return mPrivate->descPriv.flags.isSet( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
+        return mInternal->descPriv.flags.isSet( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
     }
 
     bool DisplayAdapter::isPrimaryAdapter() const
     {
-        return mPrivate->descPriv.flags.isSet( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
+        return mInternal->descPriv.flags.isSet( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
     }
 
     bool DisplayAdapter::hasActiveOutputs() const
     {
-        return mPrivate->activeOutputsNum > 0;
+        return mInternal->activeOutputsNum > 0;
     }
 
     bool DisplayAdapter::hasAnyOutputs() const
     {
-        return !mPrivate->outputInternalStorage.empty();
+        return !mInternal->outputInternalStorage.empty();
     }
 
 
@@ -605,16 +702,16 @@ namespace ts3::system
     : mDisplayDriver( pAdapter->mDisplayDriver )
     , mParentAdapter( pAdapter )
     , mDriverType( pAdapter->mDriverType )
-    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
-    , mDesc( &( mPrivate->descPriv ) )
-    , mNativeData( &( mPrivate->nativeDataPriv ) )
+    , mInternal( std::make_unique<ObjectInternalData>( this ) )
+    , mDesc( &( mInternal->descPriv ) )
+    , mNativeData( &( mInternal->nativeDataPriv ) )
     {}
 
     DisplayOutput::~DisplayOutput() = default;
 
     ArrayView<const ColorFormat> DisplayOutput::getSupportedColorFormatList() const
     {
-        return bindArrayView( mPrivate->supportedColorFormatList.data(), mPrivate->supportedColorFormatList.size() );
+        return bindArrayView( mInternal->supportedColorFormatList.data(), mInternal->supportedColorFormatList.size() );
     }
 
     bool DisplayOutput::checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings ) const
@@ -625,7 +722,7 @@ namespace ts3::system
 
     bool DisplayOutput::checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings, ColorFormat pColorFormat ) const
     {
-        const auto & colorFormatData = mPrivate->colorFormatMap.at( pColorFormat );
+        const auto & colorFormatData = mInternal->colorFormatMap.at( pColorFormat );
         for( const auto & displayMode : colorFormatData.videoModeInternalStorage )
         {
             if( displayMode.mDesc->settings.matches( pVideoSettings ) )
@@ -644,23 +741,23 @@ namespace ts3::system
 
     const DisplayVideoModeList & DisplayOutput::getVideoModeList( ColorFormat pColorFormat ) const
     {
-        const auto & colorFormatData = mPrivate->colorFormatMap.at( pColorFormat );
+        const auto & colorFormatData = mInternal->colorFormatMap.at( pColorFormat );
         return colorFormatData.videoModeList;
     }
 
     bool DisplayOutput::isActiveOutput() const
     {
-        return mPrivate->descPriv.flags.isSet( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
+        return mInternal->descPriv.flags.isSet( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
     }
 
     bool DisplayOutput::isPrimaryOutput() const
     {
-        return mPrivate->descPriv.flags.isSet( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
+        return mInternal->descPriv.flags.isSet( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
     }
 
     bool DisplayOutput::isColorFormatSupported( ColorFormat pColorFormat ) const
     {
-        const auto & colorFormatData = mPrivate->colorFormatMap.at( pColorFormat );
+        const auto & colorFormatData = mInternal->colorFormatMap.at( pColorFormat );
         return !colorFormatData.videoModeInternalStorage.empty();
     }
 
@@ -669,9 +766,9 @@ namespace ts3::system
     : mDisplayDriver( pOutput->mDisplayDriver )
     , mParentOutput( pOutput )
     , mDriverType( pOutput->mDriverType )
-    , mPrivate( std::make_unique<ObjectPrivateData>( this ) )
-    , mDesc( &( mPrivate->descPriv ) )
-    , mNativeData( &( mPrivate->nativeDataPriv ) )
+    , mInternal( std::make_unique<ObjectInternalData>( this ) )
+    , mDesc( &( mInternal->descPriv ) )
+    , mNativeData( &( mInternal->nativeDataPriv ) )
     {}
 
     DisplayVideoMode::~DisplayVideoMode() = default;

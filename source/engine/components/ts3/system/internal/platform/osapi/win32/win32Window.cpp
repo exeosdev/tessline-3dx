@@ -19,14 +19,19 @@ namespace ts3::system
 
 	void WindowManager::_nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo )
 	{
-	    nativeWin32CreateWindow( pWindow.mPrivate->nativeDataPriv, pCreateInfo );
+	    nativeWin32CreateWindow( pWindow.mInternal->nativeDataPriv, pCreateInfo );
 
-	    ::ShowWindow( pWindow.mPrivate->nativeDataPriv.hwnd, SW_SHOWNORMAL );
+	    ::ShowWindow( pWindow.mInternal->nativeDataPriv.hwnd, SW_SHOWNORMAL );
 	}
 
 	void WindowManager::_nativeDestroyWindow( Window & pWindow )
 	{
-	    nativeWin32DestroyWindow( pWindow.mPrivate->nativeDataPriv );
+	    nativeWin32DestroyWindow( pWindow.mInternal->nativeDataPriv );
+	}
+
+	bool WindowManager::_nativeIsWindowValid( const Window & pWindow ) const noexcept
+	{
+	    return pWindow.mInternal->nativeDataPriv.hwnd != nullptr;
 	}
 
 
@@ -88,7 +93,7 @@ namespace ts3::system
 
 		if ( windowHwnd == nullptr )
 		{
-			throw 0;
+			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		::SetWindowPos( windowHwnd,
@@ -164,7 +169,7 @@ namespace ts3::system
 			auto wndClassID = ::RegisterClassExA( &windowClass );
 			if ( wndClassID == 0 )
 			{
-				throw 0;
+				ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 			}
 
 			pWindowNativeData.wndClsID = wndClassID;

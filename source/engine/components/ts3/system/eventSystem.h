@@ -152,7 +152,7 @@ namespace ts3::system
 		TS3_PCL_ATTR_NO_DISCARD bool hasActiveDispatcher() const;
 
 	friendapi:
-	    // Used by EventSource class. It is called inside its destructor.
+	    // Used by the EventSource class. It is called inside its destructor.
 	    void onEventSourceDestroy( EventSource & pEventSource ) noexcept;
 
 	private:

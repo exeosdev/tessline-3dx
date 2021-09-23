@@ -8,8 +8,8 @@
 namespace ts3::system
 {
 
-    class Window;
-    class WindowManager;
+    ts3SysDeclareHandle( Window );
+    ts3SysDeclareHandle( WindowManager );
 
 	using WindowPos = math::Pos2i;
 	using WindowSize = math::Size2u;

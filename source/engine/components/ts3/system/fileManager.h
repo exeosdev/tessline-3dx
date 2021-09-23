@@ -11,14 +11,14 @@ namespace ts3::system
     class File
     {
     public:
-        struct ObjectPrivateData;
+        struct ObjectInternalData;
         FileManager * const mFileManager = nullptr;
-        ObjectPrivateData * const mPrivate = nullptr;
+        ObjectInternalData * const mInternal = nullptr;
         const file_str_t & mName;
         const file_str_t & mFullPath;
 
     public:
-        File( FileManager * pFileManager, ObjectPrivateData * pPrivate );
+        File( FileManager * pFileManager, ObjectInternalData * pPrivate );
         ~File();
 
     private:
@@ -30,8 +30,8 @@ namespace ts3::system
         friend struct FileDeleter;
 
     public:
-        struct ObjectPrivateData;
-        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        struct ObjectInternalData;
+        std::unique_ptr<ObjectInternalData> const mInternal;
 
     public:
         explicit FileManager( SysContext pSysContext );

@@ -6,7 +6,7 @@ namespace ts3::system
 
     X11SessionData & nativeX11GetXSessionData( SysContext & pSysContext )
     {
-        return pSysContext.mPrivate->nativeDataPriv.xSessionData;
+        return pSysContext.mInternal->nativeDataPriv.xSessionData;
     }
 
 } // namespace ts3::system

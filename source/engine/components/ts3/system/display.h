@@ -5,6 +5,7 @@
 #include "sysContext.h"
 #include "sysObject.h"
 #include "displayCommon.h"
+#include "windowCommon.h"
 
 namespace ts3::system
 {
@@ -25,8 +26,8 @@ namespace ts3::system
     class DisplayManager : public SysObject
     {
     public:
-        struct ObjectPrivateData;
-        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        struct ObjectInternalData;
+        std::unique_ptr<ObjectInternalData> const mInternal;
         const DisplayManagerNativeData * const mNativeData = nullptr;
 
     public:
@@ -43,6 +44,10 @@ namespace ts3::system
 
         TS3_PCL_ATTR_NO_DISCARD DisplaySize queryMinWindowSize() const;
 
+        TS3_SYSTEM_API_NODISCARD bool checkWindowGeometry( const WindowGeometry & pWindowGeometry ) const;
+
+        TS3_SYSTEM_API_NODISCARD WindowGeometry validateWindowGeometry( const WindowGeometry & pWindowGeometry ) const;
+
     private:
         void _nativeCtor();
         void _nativeDtor() noexcept;
@@ -54,10 +59,10 @@ namespace ts3::system
     class DisplayDriver : public SysObject
     {
     public:
-        struct ObjectPrivateData;
+        struct ObjectInternalData;
         DisplayManager * const mDisplayManager;
         EDisplayDriverType const mDriverType;
-        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        std::unique_ptr<ObjectInternalData> const mInternal;
         const DisplayDriverNativeData * const mNativeData = nullptr;
 
     protected:
@@ -123,10 +128,10 @@ namespace ts3::system
     class DisplayAdapter
     {
     public:
-        struct ObjectPrivateData;
+        struct ObjectInternalData;
         DisplayDriver * const mDisplayDriver;
         EDisplayDriverType const mDriverType;
-        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        std::unique_ptr<ObjectInternalData> const mInternal;
         const DisplayAdapterDesc * const mDesc = nullptr;
         const DisplayAdapterNativeData * const mNativeData = nullptr;
 
@@ -149,11 +154,11 @@ namespace ts3::system
     class DisplayOutput
     {
     public:
-        struct ObjectPrivateData;
+        struct ObjectInternalData;
         DisplayDriver * const mDisplayDriver;
         DisplayAdapter * const mParentAdapter;
         EDisplayDriverType const mDriverType;
-        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        std::unique_ptr<ObjectInternalData> const mInternal;
         const DisplayOutputDesc * const mDesc = nullptr;
         const DisplayOutputNativeData * const mNativeData = nullptr;
 
@@ -179,11 +184,11 @@ namespace ts3::system
     class DisplayVideoMode
     {
     public:
-        struct ObjectPrivateData;
+        struct ObjectInternalData;
         DisplayDriver * const mDisplayDriver;
         DisplayOutput * const mParentOutput;
         EDisplayDriverType const mDriverType;
-        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        std::unique_ptr<ObjectInternalData> const mInternal;
         const DisplayVideoModeDesc * const mDesc = nullptr;
         const DisplayVideoModeNativeData * const mNativeData = nullptr;
 

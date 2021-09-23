@@ -7,12 +7,12 @@ namespace ts3::system
 
     void WindowManager::_nativeCtor()
     {
-        mPrivate->nativeDataPriv.setSessionData( nativeX11GetXSessionData( *mSysContext ) );
+        mInternal->nativeDataPriv.setSessionData( nativeX11GetXSessionData( *mSysContext ) );
     }
 
     void WindowManager::_nativeDtor() noexcept
     {
-        mPrivate->nativeDataPriv.resetSessionData();
+        mInternal->nativeDataPriv.resetSessionData();
     }
 
     void WindowManager::_nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo )
@@ -25,15 +25,20 @@ namespace ts3::system
         x11CreateInfo.colorDepth = XDefaultDepth( xSessionData.display, xSessionData.screenIndex );
         x11CreateInfo.windowVisual = XDefaultVisual( xSessionData.display, xSessionData.screenIndex );
 
-        nativeX11CreateWindow( pWindow.mPrivate->nativeDataPriv, x11CreateInfo );
+        nativeX11CreateWindow( pWindow.mInternal->nativeDataPriv, x11CreateInfo );
 
-        nativeX11UpdateNewWindowState( pWindow.mPrivate->nativeDataPriv, x11CreateInfo );
+        nativeX11UpdateNewWindowState( pWindow.mInternal->nativeDataPriv, x11CreateInfo );
     }
 
     void WindowManager::_nativeDestroyWindow( Window & pWindow )
     {
-        nativeX11DestroyWindow( pWindow.mPrivate->nativeDataPriv );
+        nativeX11DestroyWindow( pWindow.mInternal->nativeDataPriv );
     }
+
+    bool WindowManager::_nativeIsWindowValid( const Window & pWindow ) const noexcept
+	{
+        return pWindow.mInternal->nativeDataPriv.windowXID != E_XID_NONE;
+	}
 
 
     void Window::_nativeSetTitleText( const std::string & pTitleText )
@@ -41,7 +46,7 @@ namespace ts3::system
         auto & xSessionData = nativeX11GetXSessionDataInternal( *this );
 
         XStoreName( xSessionData.display,
-                    mPrivate->nativeDataPriv.windowXID,
+                    mInternal->nativeDataPriv.windowXID,
                     pTitleText.c_str() );
 
         XFlush( xSessionData.display );
@@ -52,12 +57,12 @@ namespace ts3::system
         auto & xSessionData = nativeX11GetXSessionDataInternal( *this );
 
         XMoveWindow( xSessionData.display,
-                     mPrivate->nativeDataPriv.windowXID,
+                     mInternal->nativeDataPriv.windowXID,
                      pWindowGeometry.position.x,
                      pWindowGeometry.position.y );
 
         XResizeWindow( xSessionData.display,
-                       mPrivate->nativeDataPriv.windowXID,
+                       mInternal->nativeDataPriv.windowXID,
                        pWindowGeometry.size.x,
                        pWindowGeometry.size.y );
 
@@ -70,7 +75,7 @@ namespace ts3::system
 
 		XWindowAttributes windowAttributes;
 		XGetWindowAttributes( xSessionData.display,
-                              mPrivate->nativeDataPriv.windowXID,
+                              mInternal->nativeDataPriv.windowXID,
 		                      &windowAttributes );
 
         if( pSizeMode == WindowSizeMode::ClientArea )
@@ -127,7 +132,7 @@ namespace ts3::system
 
 		if( windowXID == E_X11_XID_NONE )
 		{
-			throw 0;
+			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		if( pCreateInfo.fullscreenMode )
@@ -145,9 +150,9 @@ namespace ts3::system
 			                 1 );
 		}
 
+        pWindowNativeData.setSessionData( xSessionData );
         pWindowNativeData.windowXID = windowXID;
 		pWindowNativeData.xColormap = colormap;
-        pWindowNativeData.xSessionDataPtr = &xSessionData;
 	}
 
 	void nativeX11UpdateNewWindowState( WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo )
@@ -177,7 +182,7 @@ namespace ts3::system
 		XFreeColormap( xSessionData.display, pWindowNativeData.xColormap );
 		pWindowNativeData.xColormap = E_X11_XID_NONE;
 
-        pWindowNativeData.xSessionDataPtr = nullptr;
+        pWindowNativeData.resetSessionData();
 	}
 
 } // namespace ts3::system

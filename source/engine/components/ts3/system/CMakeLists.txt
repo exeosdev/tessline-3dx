@@ -1,8 +1,5 @@
 
 set( TS3_SYSTEM_SRC_FILES
-        "sysContext.h"
-        "sysContext.cpp"
-        "sysContextNative.h"
         "displayCommon.h"
         "displayCommon.cpp"
         "display.h"
@@ -22,12 +19,18 @@ set( TS3_SYSTEM_SRC_FILES
         "openGL.h"
         "openGL.cpp"
         "openGLCommon.h"
+        "openGLCommon.cpp"
         "openGLNative.h"
         "visual.h"
         "visual.cpp"
         "perfCounter.h"
         "perfCounter.cpp"
         "prerequisites.h"
+        "sysContext.h"
+        "sysContext.cpp"
+        "sysContextNative.h"
+        "sysObject.h"
+        "sysObject.cpp"
         "window.h"
         "window.cpp"
         "windowCommon.h"
@@ -165,7 +168,7 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
             X11
             Xrandr
             GL
-            #GLEW
+            GLEW
             )
 endif()
 

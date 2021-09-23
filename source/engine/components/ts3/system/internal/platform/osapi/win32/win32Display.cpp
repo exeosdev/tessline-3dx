@@ -135,7 +135,7 @@ namespace ts3::system
                 // See _win32MonitorEnumProc function above where this gets done.
                 if( makeBitmask( outputInfoGDI.StateFlags ).isSet( DISPLAY_DEVICE_ATTACHED_TO_DESKTOP ) )
                 {
-                    outputObject->mPrivate->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
+                    outputObject->mInternal->descPriv.flags.set( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
                 }
             }
         }
@@ -257,18 +257,18 @@ namespace ts3::system
     DisplayAdapter * _win32FindAdapterByUUID( DisplayDriverGeneric & pDriver, const std::string & pUUID )
     {
         auto adapterIter = std::find_if(
-            pDriver.mPrivate->adapterInternalStorage.begin(),
-            pDriver.mPrivate->adapterInternalStorage.end(),
+            pDriver.mInternal->adapterInternalStorage.begin(),
+            pDriver.mInternal->adapterInternalStorage.end(),
             [&pUUID]( const DisplayAdapter & pAdapter ) -> bool {
                 return pAdapter.mNativeData->generic->deviceUUID == pUUID;
             });
 
-        return ( adapterIter != pDriver.mPrivate->adapterInternalStorage.end() ) ? &( *adapterIter ) : nullptr;
+        return ( adapterIter != pDriver.mInternal->adapterInternalStorage.end() ) ? &( *adapterIter ) : nullptr;
     }
 
     DisplayOutput * _win32FindOutputForDisplayDeviceName( DisplayDriverGeneric & pDriver, const char * pDeviceName )
     {
-        for( auto & adapter : pDriver.mPrivate->adapterInternalStorage )
+        for( auto & adapter : pDriver.mInternal->adapterInternalStorage )
         {
             if( auto * adapterOutput = _win32FindOutputForDisplayDeviceName( adapter, pDeviceName ) )
             {
@@ -282,13 +282,13 @@ namespace ts3::system
     DisplayOutput * _win32FindOutputForDisplayDeviceName( DisplayAdapter & pAdapter, const char * pDeviceName )
     {
         auto outputIter = std::find_if(
-            pAdapter.mPrivate->outputInternalStorage.begin(),
-            pAdapter.mPrivate->outputInternalStorage.end(),
+            pAdapter.mInternal->outputInternalStorage.begin(),
+            pAdapter.mInternal->outputInternalStorage.end(),
             [pDeviceName]( const DisplayOutput & pOutput ) -> bool {
                 return pOutput.mNativeData->generic->displayDeviceName == pDeviceName;
             });
 
-        return ( outputIter != pAdapter.mPrivate->outputInternalStorage.end() ) ? &( *outputIter ) : nullptr;
+        return ( outputIter != pAdapter.mInternal->outputInternalStorage.end() ) ? &( *outputIter ) : nullptr;
     }
 
     std::string _win32GetAdapterOutputName( const std::string & pAdapterRegistryKey )

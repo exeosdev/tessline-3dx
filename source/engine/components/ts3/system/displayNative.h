@@ -33,7 +33,7 @@ namespace ts3::system
     using DisplayDriverFactoryCallback = std::function<DisplayDriverHandle()>;
     using DisplayDriverFactoryMap = std::map<EDisplayDriverType, DisplayDriverFactoryCallback>;
 
-    struct DisplayManager::ObjectPrivateData
+    struct DisplayManager::ObjectInternalData
     {
         DisplayManagerNativeData nativeDataPriv;
         DisplayDriverFactoryMap driverFactoryMap;
@@ -131,7 +131,7 @@ namespace ts3::system
 
 
     /// @brief Private, implementation-specific data of the DisplayDriver class.
-    struct DisplayDriver::ObjectPrivateData
+    struct DisplayDriver::ObjectInternalData
     {
         using NativeDataType = DisplayDriverNativeData;
 
@@ -158,13 +158,13 @@ namespace ts3::system
         // Points to the default/primary adapter in the system. Usually this will be adapterList[0];
         DisplayAdapter * primaryAdapter = nullptr;
 
-        explicit ObjectPrivateData( DisplayDriver * pDriver )
+        explicit ObjectInternalData( DisplayDriver * pDriver )
         : parentDriver( pDriver )
         {
             dsmInitializeNativeData( &nativeDataPriv, pDriver->mDriverType );
         }
 
-        ~ObjectPrivateData()
+        ~ObjectInternalData()
         {
             dsmReleaseNativeData( &nativeDataPriv );
         }
@@ -172,7 +172,7 @@ namespace ts3::system
 
 
     /// @brief Private, implementation-specific data of the DisplayAdapter class.
-    struct DisplayAdapter::ObjectPrivateData
+    struct DisplayAdapter::ObjectInternalData
     {
         using DescType = DisplayAdapterDesc;
         using NativeDataType = DisplayAdapterNativeData;
@@ -193,20 +193,20 @@ namespace ts3::system
         uint32 activeOutputsNum = 0;
         DisplayOutput * primaryOutput = nullptr;
 
-        explicit ObjectPrivateData( DisplayAdapter * pAdapter )
+        explicit ObjectInternalData( DisplayAdapter * pAdapter )
         : parentAdapter( pAdapter )
         {
             dsmInitializeNativeData( &nativeDataPriv, pAdapter->mDriverType );
         }
 
-        ~ObjectPrivateData()
+        ~ObjectInternalData()
         {
             dsmReleaseNativeData( &nativeDataPriv );
         }
     };
 
     /// @brief Private, implementation-specific data of the DisplayOutput class.
-    struct DisplayOutput::ObjectPrivateData
+    struct DisplayOutput::ObjectInternalData
     {
         using DescType = DisplayOutputDesc;
         using NativeDataType = DisplayOutputNativeData;
@@ -243,20 +243,20 @@ namespace ts3::system
         //
         std::vector<ColorFormat> supportedColorFormatList;
 
-        explicit ObjectPrivateData( DisplayOutput * pOutput )
+        explicit ObjectInternalData( DisplayOutput * pOutput )
         : parentOutput( pOutput )
         {
             dsmInitializeNativeData( &nativeDataPriv, pOutput->mDriverType );
         }
 
-        ~ObjectPrivateData()
+        ~ObjectInternalData()
         {
             dsmReleaseNativeData( &nativeDataPriv );
         }
     };
 
     /// @brief Private, implementation-specific data of the DisplayVideoMode class.
-    struct DisplayVideoMode::ObjectPrivateData
+    struct DisplayVideoMode::ObjectInternalData
     {
         using DescType = DisplayVideoModeDesc;
         using NativeDataType = DisplayVideoModeNativeData;
@@ -272,13 +272,13 @@ namespace ts3::system
         // Referenced through a const pointer in the DisplayVideoMode class.
         DisplayVideoModeNativeData nativeDataPriv;
 
-        explicit ObjectPrivateData( DisplayVideoMode * pVideoMode )
+        explicit ObjectInternalData( DisplayVideoMode * pVideoMode )
         : parentVideoMode( pVideoMode )
         {
             dsmInitializeNativeData( &nativeDataPriv, pVideoMode->mDriverType );
         }
 
-        ~ObjectPrivateData()
+        ~ObjectInternalData()
         {
             dsmReleaseNativeData( &nativeDataPriv );
         }
@@ -288,7 +288,7 @@ namespace ts3::system
     // Used heavily in all drivers, allowing them to specify the following:
     // >> auto * adapterDXGINativeData = dsmGetNativeDataDXGI( someAdapter );
     // Instead of:
-    // >> auto * adapterDXGINativeData = pAdapter.mPrivate->nativeDataPriv.dxgi;
+    // >> auto * adapterDXGINativeData = pAdapter.mInternal->nativeDataPriv.dxgi;
     // This enables complete transparency and immunity to potential structure changes.
     // TpDisplayObject can be either:
     // - DisplayDriver
@@ -297,24 +297,24 @@ namespace ts3::system
     // - DisplayVideoMode
 
     template <typename TpDisplayObject>
-    inline typename TpDisplayObject::ObjectPrivateData::NativeDataType::GenericType & dsmGetObjectNativeDataGeneric( TpDisplayObject & pObject )
+    inline typename TpDisplayObject::ObjectInternalData::NativeDataType::GenericType & dsmGetObjectNativeDataGeneric( TpDisplayObject & pObject )
     {
-        return *( pObject.mPrivate->nativeDataPriv.generic );
+        return *( pObject.mInternal->nativeDataPriv.generic );
     }
 
 #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
     template <typename TpDisplayObject>
-    inline typename TpDisplayObject::ObjectPrivateData::NativeDataType::DXGIType & dsmGetObjectNativeDataDXGI( TpDisplayObject & pObject )
+    inline typename TpDisplayObject::ObjectInternalData::NativeDataType::DXGIType & dsmGetObjectNativeDataDXGI( TpDisplayObject & pObject )
     {
-        return *( pObject.mPrivate->nativeDataPriv.dxgi );
+        return *( pObject.mInternal->nativeDataPriv.dxgi );
     }
 #endif
 
 #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
     template <typename TpDisplayObject>
-    inline typename TpDisplayObject::ObjectPrivateData::NativeDataType::SDLType & dsmGetObjectNativeDataSDL( TpDisplayObject & pObject )
+    inline typename TpDisplayObject::ObjectInternalData::NativeDataType::SDLType & dsmGetObjectNativeDataSDL( TpDisplayObject & pObject )
     {
-        return *( pObject.mPrivate->nativeDataPriv.sdl );
+        return *( pObject.mInternal->nativeDataPriv.sdl );
     }
 #endif
 
@@ -324,9 +324,9 @@ namespace ts3::system
     // - DisplayOutput
     // - DisplayVideoMode
     template <typename TpDisplayObject>
-    inline typename TpDisplayObject::ObjectPrivateData::DescType & dsmGetObjectDesc( TpDisplayObject & pObject )
+    inline typename TpDisplayObject::ObjectInternalData::DescType & dsmGetObjectDesc( TpDisplayObject & pObject )
     {
-        return pObject.mPrivate->descPriv;
+        return pObject.mInternal->descPriv;
     }
 
     class DisplayDriverGeneric : public DisplayDriver

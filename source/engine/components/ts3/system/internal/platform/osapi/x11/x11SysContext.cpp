@@ -6,18 +6,18 @@ namespace ts3::system
 
     void SysContext::_nativeInitialize()
     {
-        auto & nativeData = mPrivate->nativeDataPriv;
+        auto & nativeData = mInternal->nativeDataPriv;
 
         int thrInitStatus = ::XInitThreads();
         if( thrInitStatus == False )
         {
-            throw 0;
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         auto * xDisplay = ::XOpenDisplay( nullptr );
         if( xDisplay == nullptr )
         {
-            throw 0;
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         nativeData.xSessionData.display = xDisplay;
@@ -31,7 +31,7 @@ namespace ts3::system
 
     void SysContext::_nativeRelease() noexcept
     {
-        auto & nativeData = mPrivate->nativeDataPriv;
+        auto & nativeData = mInternal->nativeDataPriv;
 
         nativeData.xSessionData.display = nullptr;
         nativeData.xSessionData.screenIndex = -1;
