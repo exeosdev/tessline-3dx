@@ -29,7 +29,7 @@ namespace ts3::system
             _setEventSourcePrivateData( pEventSource, eventSourceState );
         }
 
-        auto * eventSourceNativeData = pEventSource.getEventSourceNativeData();
+        auto * eventSourceNativeData = pEventSource.getEventSourceNativeData<EventSourceNativeData>();
 
         eventSourceState->savedEventCallback = ::GetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_WNDPROC );
 
@@ -54,7 +54,7 @@ namespace ts3::system
         auto * eventSourceState = static_cast<Win32EventSourceState *>( _getEventSourcePrivateData( pEventSource ) );
         ts3DebugAssert( eventSourceState != nullptr );
 
-        auto * eventSourceNativeData = pEventSource.getEventSourceNativeData();
+        auto * eventSourceNativeData = pEventSource.getEventSourceNativeData<EventSourceNativeData>();
 
         ::SetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_WNDPROC, eventSourceState->savedEventCallback );
 
@@ -231,7 +231,7 @@ namespace ts3::system
 
 	bool _win32TranslateInputEventKeyboard( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
 	{
-	    auto & inputState = pEventController.mPrivate->inputState;
+	    auto & inputState = pEventController.mInternal->inputState;
 
 	    switch( pMSG.message )
 	    {
@@ -269,7 +269,7 @@ namespace ts3::system
 	        GET_Y_LPARAM( pMSG.lParam )
 	    };
 
-	    auto & inputState = pEventController.mPrivate->inputState;
+	    auto & inputState = pEventController.mInternal->inputState;
 
 	    if ( inputState.mouseLastRegPos == CX_EVENT_MOUSE_POS_INVALID )
 	    {

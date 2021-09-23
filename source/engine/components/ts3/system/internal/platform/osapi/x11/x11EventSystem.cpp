@@ -156,7 +156,7 @@ namespace ts3::system
 
     bool _x11TranslateInputEvent( EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent )
 	{
-        auto & inputState = pEventController.mPrivate->inputState;
+        auto & inputState = pEventController.mInternal->inputState;
 
         switch( pXEvent.type )
 		{
@@ -242,7 +242,7 @@ namespace ts3::system
 
     bool _x11TranslateInputEventMouseButton( EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent, EMouseButtonActionType pButtonAction )
 	{
-        auto & inputState = pEventController.mPrivate->inputState;
+        auto & inputState = pEventController.mInternal->inputState;
 
 		const math::Vec2i32 cursorPos { pXEvent.xbutton.x, pXEvent.xbutton.y };
 		const auto EX11MouseButtonID = _x11GetMouseButtonID( pXEvent.xbutton.button );

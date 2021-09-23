@@ -6,6 +6,7 @@
 #include "eventObject.h"
 
 #include <deque>
+#include <list>
 #include <unordered_map>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
@@ -63,26 +64,26 @@ namespace ts3::system
     };
 
     /// @brief Private, implementation-specific data of the EventController class.
-    struct EventController::ObjectPrivateData
+    struct EventController::ObjectInternalData
     {
         // Pointer to the object which owns this private data.
         EventController * parentController = nullptr;
 
         // Default event dispatcher. It can be bound by either calling setDefaultActiveDispatcher() on the controller
         // or by getting its pointer with getEventDispatcher( CX_EVENT_DISPATCHER_ID_DEFAULT ) and making it active.
-        EventDispatcher defaultEventDispatcher;
+        EventDispatcherHandle defaultEventDispatcher = nullptr;
 
         // Container for all dispatchers created in the system.
-        std::deque<EventDispatcher> dispatcherInternalStorage;
+        std::list<EventDispatcherHandle> dispatcherList;
 
         // ID -> Dispatcher map.
         std::unordered_map<event_dispatcher_id_t, EventDispatcher *> dispatcherMap;
 
         //
-        std::vector<EventSource *> registeredEventSourceList;
+        std::vector<EventSource *> eventSourceList;
 
         //
-        std::unordered_map<EventSource *, void *> registeredEventSourcePrivateDataMap;
+        std::unordered_map<EventSource *, void *> eventSourcePrivateDataMap;
 
         // Current active dispatcher used to forward all events. Initially NULL and can be reset to this state.
         EventDispatcher * activeDispatcher = nullptr;
@@ -93,14 +94,13 @@ namespace ts3::system
         // Input state
         EventInputState inputState;
 
-        explicit ObjectPrivateData( EventController * pController )
+        explicit ObjectInternalData( EventController * pController )
         : parentController( pController )
-        , defaultEventDispatcher( pController, CX_EVENT_DISPATCHER_ID_DEFAULT )
         {}
     };
 
     /// @brief Private, implementation-specific data of the EventDispatcher class.
-    struct EventDispatcher::ObjectPrivateData
+    struct EventDispatcher::ObjectInternalData
     {
         using EventBaseTypeHandlerMap = std::array<EventHandler, CX_ENUM_EVENT_BASE_TYPE_COUNT>;
         using EventCategoryHandlerMap = std::array<EventHandler, CX_ENUM_EVENT_CATEGORY_COUNT>;
@@ -108,6 +108,9 @@ namespace ts3::system
 
         // Pointer to the object which owns this private data.
         EventDispatcher * parentDispatcher = nullptr;
+
+        //
+        std::list<EventDispatcherHandle>::iterator parentListRef;
 
         // Internal configuration of the event system. The configuration is stored per-dispatcher, so that in case
         // of multiple instances, configuration is properly restored each time a dispatcher is set as an active one.
@@ -125,7 +128,7 @@ namespace ts3::system
         // Array of handlers registered for EventCodeIndex (i.e. event code itself).
         EventCodeIndexHandlerMap handlerMapByCodeIndex;
 
-        explicit ObjectPrivateData( EventDispatcher * pDispatcher )
+        explicit ObjectInternalData( EventDispatcher * pDispatcher )
         : parentDispatcher( pDispatcher )
         {}
     };
