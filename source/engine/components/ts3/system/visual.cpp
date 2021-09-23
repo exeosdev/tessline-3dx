@@ -104,8 +104,8 @@ namespace ts3::system
 		// Default VisualConfig for creating a system-level window.
 		static const VisualConfig sVisualConfigWindowDefault
 		{
-			sColorDescB8G8R8,
-			ColorFormat::B8G8R8,
+			sColorDescB8G8R8A8,
+			ColorFormat::B8G8R8A8,
 			sDepthStencilDescD24S8,
 			DepthStencilFormat::D24S8,
 			sMSAADescNone,
