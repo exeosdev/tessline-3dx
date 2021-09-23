@@ -22,8 +22,8 @@
 #define TS3_PCL_ATTR_THREAD_LOCAL             __thread
 #define TS3_PCL_ATTR_ALWAYS_INLINE            __attribute__(( always_inline )) inline
 
-#define TS3_PCL_DEBUG_BREAK()         raise( SIGINT )
-#define TS3_PCL_RUNTIME_BREAK()       raise( SIGINT )
+#define TS3_PCL_DEBUG_BREAK()         __builtin_trap() // raise( SIGINT )
+#define TS3_PCL_RUNTIME_BREAK()       __builtin_trap() // raise( SIGABRT )
 #define TS3_PCL_DEBUG_OUTPUT( text )  printf( "%s\n", text )
 #define TS3_PCL_SLEEP( miliseconds )  usleep( miliseconds * 1000 )
 
