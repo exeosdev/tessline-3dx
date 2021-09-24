@@ -2,46 +2,33 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_X11_WINDOW_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_X11_WINDOW_H__
 
-#include "x11CommonDefs.h"
+#include "x11EventSystem.h"
+#include <ts3/system/windowCommon.h>
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
-    struct WindowNativeData
+    struct WindowManagerNativeData : public X11NativeDataCommon
     {
-        Display * display = nullptr;
-        Window xWindow = XID_None;
-        Colormap xColormap = XID_None;
     };
 
-    struct WindowManagerNativeData
+    struct WindowNativeData : public EventSourceNativeData
     {
-        Display * display = nullptr;
-        Window xWindow = XID_None;
-        Colormap xColormap = XID_None;
+        Colormap xColormap = E_X11_XID_NONE;
     };
 
-    struct X11WindowCreateInfo
+    struct X11WindowCreateInfo : public X11NativeDataCommon
     {
-        Display * display = nullptr;
-        int screenIndex = -1;
-        Window rootWindow = XID_None;
-        int colorDepth = 0;
+        WindowProperties commonProperties;
         Visual * windowVisual = nullptr;
-        Atom wmpDeleteWindow = -1;
+        int colorDepth = 0;
         bool fullscreenMode = false;
     };
 
-    using X11WindowNativeData = WindowNativeData;
-    using X11WindowManagerNativeData = WindowManagerNativeData;
+    void nativeX11CreateWindow( WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo );
+    void nativeX11UpdateNewWindowState( WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo );
+    void nativeX11DestroyWindow( WindowNativeData & pWindowNativeData );
 
-    void x11CreateWindow( X11WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo );
-    void x11UpdateNewWindowState( X11WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo );
-    void x11DestroyWindow( X11WindowNativeData & pWindowNativeData );
-
-} // namespace system
-} // namespace ts3
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_X11_WINDOW_H__

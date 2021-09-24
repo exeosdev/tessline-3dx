@@ -16,29 +16,36 @@
 namespace ts3::system
 {
 
-    struct GLSystemDriver::ObjectPrivateData
+    struct GLSystemDriver::ObjectInternalData
     {
-        using GLDisplaySurfaceList = std::list<GLDisplaySurface>;
-        using GLRenderContextList = std::list<GLRenderContext>;
+        GLSystemDriver * parentDriver = nullptr;
         GLSystemDriverNativeData nativeDataPriv;
-        GLDisplaySurfaceList displaySurfaceList;
-        GLRenderContextList renderContextList;
+
+        explicit ObjectInternalData( GLSystemDriver * pSystemDriver )
+        : parentDriver( pSystemDriver )
+        {}
     };
 
-    struct GLDisplaySurface::ObjectPrivateData
+    struct GLDisplaySurface::ObjectInternalData
     {
-        using GLDisplaySurfaceRef = GLSystemDriver::ObjectPrivateData::GLDisplaySurfaceList::iterator;
+        GLDisplaySurface * parentSurface = nullptr;
         GLDisplaySurfaceNativeData nativeDataPriv;
-        GLDisplaySurfaceRef driverListRef;
         bool internalOwnershipFlag = true;
+
+        explicit ObjectInternalData( GLDisplaySurface * pDisplaySurface )
+        : parentSurface( pDisplaySurface )
+        {}
     };
 
-    struct GLRenderContext::ObjectPrivateData
+    struct GLRenderContext::ObjectInternalData
     {
-        using GLRenderContextRef = GLSystemDriver::ObjectPrivateData::GLRenderContextList::iterator;
+        GLRenderContext * parentContext = nullptr;
         GLRenderContextNativeData nativeDataPriv;
-        GLRenderContextRef driverListRef;
         bool internalOwnershipFlag = true;
+
+        explicit ObjectInternalData( GLRenderContext * pRenderContext )
+        : parentContext( pRenderContext )
+        {}
     };
 
 } // namespace ts3::system

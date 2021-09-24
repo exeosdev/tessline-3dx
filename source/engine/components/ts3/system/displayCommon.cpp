@@ -1,5 +1,6 @@
 
-#include "displayDriverNative.h"
+#include "displayNative.h"
+#include "internal/private/displayInternal.h"
 #include <ts3/stdext/stringUtils.h>
 #include <sstream>
 

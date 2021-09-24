@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_GFX_OPENGL_H__
-#define __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_GFX_OPENGL_H__
+#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_OPENGL_H__
+#define __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_OPENGL_H__
 
 #include "win32Window.h"
 #include <GL/wglew.h>
@@ -31,9 +31,9 @@ namespace ts3::system
 			GLRenderContextNativeData contextData;
 		};
 
-		InitState initState;
+        InitState * initState = nullptr;
 	};
 
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_GFX_OPENGL_H__
+#endif // __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_OPENGL_H__

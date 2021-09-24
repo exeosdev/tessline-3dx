@@ -58,13 +58,13 @@ namespace ts3::system
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	enum class KeyActionType : enum_default_value_t
+	enum class EKeyActionType : enum_default_value_t
 	{
 		Press,
 		Release
 	};
 
-	enum class KeyCode : uint32
+	enum class EKeyCode : uint32
 	{
 		Unknown = CX_UINT32_MAX,
 		Num0 = 0,
@@ -155,33 +155,33 @@ namespace ts3::system
 		_Reserved
 	};
 
-	inline constexpr auto cvEnumKeyCodeCount = static_cast< size_t >( KeyCode::_Reserved );
+	inline constexpr auto cvEnumKeyCodeCount = static_cast< size_t >( EKeyCode::_Reserved );
 
 	struct KeyboardState
 	{
 	};
 
-	enum MouseButtonFlagBits : uint32
+	enum EMouseButtonFlagBits : uint32
 	{
-		SYS_MOUSE_BUTTON_FLAG_LEFT_BIT = 0x0001,
-		SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT = 0x0002,
-		SYS_MOUSE_BUTTON_FLAG_MIDDLE_BIT = 0x0010,
-		SYS_MOUSE_BUTTON_FLAG_XB1_BIT = 0x0020,
-		SYS_MOUSE_BUTTON_FLAG_XB2_BIT = 0x0040,
-		SYS_MOUSE_BUTTON_FLAG_ALL_BIT = 0x00FF
+		E_SYS_MOUSE_BUTTON_FLAG_LEFT_BIT = 0x0001,
+		E_SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT = 0x0002,
+		E_SYS_MOUSE_BUTTON_FLAG_MIDDLE_BIT = 0x0010,
+		E_SYS_MOUSE_BUTTON_FLAG_XB1_BIT = 0x0020,
+		E_SYS_MOUSE_BUTTON_FLAG_XB2_BIT = 0x0040,
+		E_SYS_MOUSE_BUTTON_FLAG_ALL_BIT = 0x00FF
 	};
 
-	enum class MouseButtonID : enum_default_value_t
+	enum class EMouseButtonID : enum_default_value_t
 	{
 		Unknown,
-		Left = static_cast<enum_default_value_t>( SYS_MOUSE_BUTTON_FLAG_LEFT_BIT ),
-		Right = static_cast<enum_default_value_t>( SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT ),
-		Middle = static_cast<enum_default_value_t>( SYS_MOUSE_BUTTON_FLAG_MIDDLE_BIT ),
-		XB1 = static_cast<enum_default_value_t>( SYS_MOUSE_BUTTON_FLAG_XB1_BIT ),
-		XB2 = static_cast<enum_default_value_t>( SYS_MOUSE_BUTTON_FLAG_XB2_BIT ),
+		Left = static_cast<enum_default_value_t>( E_SYS_MOUSE_BUTTON_FLAG_LEFT_BIT ),
+		Right = static_cast<enum_default_value_t>( E_SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT ),
+		Middle = static_cast<enum_default_value_t>( E_SYS_MOUSE_BUTTON_FLAG_MIDDLE_BIT ),
+		XB1 = static_cast<enum_default_value_t>( E_SYS_MOUSE_BUTTON_FLAG_XB1_BIT ),
+		XB2 = static_cast<enum_default_value_t>( E_SYS_MOUSE_BUTTON_FLAG_XB2_BIT ),
 	};
 
-	enum class MouseButtonActionType : enum_default_value_t
+	enum class EMouseButtonActionType : enum_default_value_t
 	{
 		Click,
 		DoubleClick,
@@ -214,9 +214,9 @@ namespace ts3::system
 	struct EvtInputKeyboardKey : public EvtInput<E_EVENT_CODE_INPUT_KEYBOARD_KEY>
 	{
 		//
-		KeyActionType keyAction;
+		EKeyActionType keyAction;
 		//
-		KeyCode keyCode;
+		EKeyCode keyCode;
 		//
 		const KeyboardState * keyboardState;
 	};
@@ -224,11 +224,11 @@ namespace ts3::system
 	struct EvtInputMouseButton : public EvtInput<E_EVENT_CODE_INPUT_MOUSE_BUTTON>
 	{
 		//
-		MouseButtonActionType buttonAction;
+		EMouseButtonActionType buttonAction;
 		//
-		MouseButtonID buttonID;
+		EMouseButtonID buttonID;
 		//
-		Bitmask<MouseButtonFlagBits> buttonStateMask;
+		Bitmask<EMouseButtonFlagBits> buttonStateMask;
 		//
 		uint32 multiClickSequenceLength;
 		//
@@ -238,7 +238,7 @@ namespace ts3::system
 	struct EvtInputMouseMove : public EvtInput<E_EVENT_CODE_INPUT_MOUSE_MOVE>
 	{
 		//
-		Bitmask<MouseButtonFlagBits> buttonStateMask;
+		Bitmask<EMouseButtonFlagBits> buttonStateMask;
 		//
 		math::Vec2i32 cursorPos;
 		//
@@ -267,18 +267,22 @@ namespace ts3::system
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	class Window;
-
 	template <event_code_value_t tpEventCode>
 	struct EvtWindow : public EvtBase
 	{
 	public:
-	    Window * sourceWindow = nullptr;
+        EventSource * eventSource = nullptr;
 
 	public:
 	    constexpr EvtWindow()
         : EvtBase( tpEventCode )
 		{}
+
+		template <typename TpObject>
+        bool checkEventSource( const TpObject * pSource ) const
+        {
+	    	return static_cast<const void *>( pSource ) == eventSource;
+        }
 	};
 
 	struct EvtWindowUpdateClose : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_CLOSE>

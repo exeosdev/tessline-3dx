@@ -8,10 +8,10 @@ namespace ts3::system
 
 
 	// Creates Win32 OpenGL surface using provided visual config.
-	void _win32CreateGLSurface( GLDisplaySurfaceNativeData & pDisplaySurfaceNativeData, const VisualConfig & pVisualConfig );
+	void _win32CreateGLSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData, const VisualConfig & pVisualConfig );
 
 	// Destroys existing surface.
-	void _win32DestroyGLSurface( GLDisplaySurfaceNativeData & pDisplaySurfaceNativeData );
+	void _win32DestroyGLSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData );
 
 	// Selects matching pixel format for surface described with a PFD. Uses legacy API.
 	int _win32ChooseLegacyGLPixelFormat( HDC pDisplaySurfaceDC, PIXELFORMATDESCRIPTOR & pPfmtDescriptor );
@@ -40,9 +40,19 @@ namespace ts3::system
 	}
 
 
+	void GLSystemDriver::_nativeCtor()
+    {}
+
+    void GLSystemDriver::_nativeDtor() noexcept
+    {}
+
 	void GLSystemDriver::_nativeInitializePlatform()
 	{
-	    auto & openglInitState = mPrivate->nativeDataPriv.initState;
+	    ts3DebugAssert( !mInternal->nativeDataPriv.initState );
+	    // Init state should be first created here and destroyed as soon as proper GL
+	    // contexts are created (this is not enforce, though, and controlled explicitly
+	    // by the user and done by calling releaseInitState() method od the driver).
+	    mInternal->nativeDataPriv.initState = new GLSystemDriverNativeData::InitState();
 
 	    WindowCreateInfo tempWindowCreateInfo;
 	    tempWindowCreateInfo.properties.geometry.position = cvWindowPositionOrigin;
@@ -53,63 +63,73 @@ namespace ts3::system
 	    legacyVisualConfig = vsxGetDefaultVisualConfigForSysWindow();
 	    legacyVisualConfig.flags.set( VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
+	    auto & tmpSurfaceNativeData = mInternal->nativeDataPriv.initState->surfaceData;
+
 	    // Create a surface window. In case of Win32, GLDisplaySurfaceNativeData inherits from WindowNativeData
 	    // for this very reason: to allow treating surfaces as windows (as that's exactly the case on desktop).
-	    nativeWin32CreateWindow( openglInitState.surfaceData, tempWindowCreateInfo );
+	    nativeWin32CreateWindow( tmpSurfaceNativeData, tempWindowCreateInfo );
 
 	    // Create a surface. This sets up the PFD and configures HDC properly.
-	    _win32CreateGLSurface( openglInitState.surfaceData, legacyVisualConfig );
+	    _win32CreateGLSurface( tmpSurfaceNativeData, legacyVisualConfig );
 
+	    auto & tmpContextNativeData = mInternal->nativeDataPriv.initState->contextData;
+	    
 	    // Create legacy OpenGL context for initialization phase.
-	    openglInitState.contextData.contextHandle = ::wglCreateContext( openglInitState.surfaceData.hdc );
-	    if ( openglInitState.contextData.contextHandle == nullptr )
+	    tmpContextNativeData.contextHandle = ::wglCreateContext( tmpSurfaceNativeData.hdc );
+	    if ( tmpContextNativeData.contextHandle == nullptr )
 	    {
-	        throw 0;
+	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 
 	    // Bind context as current, so GL calls may be used normally.
-	    BOOL makeCurrentResult = ::wglMakeCurrent( openglInitState.surfaceData.hdc,
-                                                   openglInitState.contextData.contextHandle );
+	    BOOL makeCurrentResult = ::wglMakeCurrent( tmpSurfaceNativeData.hdc,
+                                                   tmpContextNativeData.contextHandle );
 
 	    if ( makeCurrentResult == FALSE )
 	    {
-	        throw 0;
+	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 
 	    auto glewResult = glewInit();
 	    if ( glewResult != GLEW_OK )
 	    {
-	        throw 0;
+	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 
 	    glewResult = wglewInit();
 	    if ( glewResult != GLEW_OK )
 	    {
-	        throw 0;
+	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 	}
 
-	void GLSystemDriver::_nativeReleaseInitState( GLRenderContext & pRenderContext )
+	void GLSystemDriver::_nativeReleaseInitState()
 	{
-	    auto & openglInitState = mPrivate->nativeDataPriv.initState;
-
-	    if( openglInitState.contextData.contextHandle != nullptr )
+	    if( !mInternal->nativeDataPriv.initState )
 	    {
-	        ::wglDeleteContext( openglInitState.contextData.contextHandle );
-	        openglInitState.contextData.contextHandle = nullptr;
+	        return;
 	    }
 
-	    if( openglInitState.surfaceData.hdc != nullptr )
+	    auto & tmpSurfaceNativeData = mInternal->nativeDataPriv.initState->surfaceData;
+	    auto & tmpContextNativeData = mInternal->nativeDataPriv.initState->contextData;
+
+	    if( tmpContextNativeData.contextHandle != nullptr )
 	    {
-	        _win32DestroyGLSurface( openglInitState.surfaceData );
-	        openglInitState.surfaceData.hdc = nullptr;
-	        openglInitState.surfaceData.pixelFormatIndex = cvWin32InvalidPixelFormatIndex;
+	        ::wglDeleteContext( tmpContextNativeData.contextHandle );
+	        tmpContextNativeData.contextHandle = nullptr;
 	    }
 
-	    if( openglInitState.surfaceData.hwnd != nullptr )
+	    if( tmpSurfaceNativeData.hdc != nullptr )
 	    {
-	        nativeWin32DestroyWindow( openglInitState.surfaceData );
-	        openglInitState.surfaceData.hwnd = nullptr;
+	        _win32DestroyGLSurface( tmpSurfaceNativeData );
+	        tmpSurfaceNativeData.hdc = nullptr;
+	        tmpSurfaceNativeData.pixelFormatIndex = cvWin32InvalidPixelFormatIndex;
+	    }
+
+	    if( tmpSurfaceNativeData.hwnd != nullptr )
+	    {
+	        nativeWin32DestroyWindow( tmpSurfaceNativeData );
+	        tmpSurfaceNativeData.hwnd = nullptr;
 	    }
 	}
 
@@ -119,8 +139,9 @@ namespace ts3::system
 	    surfaceWindowCreateInfo.properties.geometry = pCreateInfo.windowGeometry;
 	    surfaceWindowCreateInfo.properties.title = "TS3 OpenGL Window";
 
-	    nativeWin32CreateWindow( pDisplaySurface.mPrivate->nativeDataPriv, surfaceWindowCreateInfo );
-	    _win32CreateGLSurface( pDisplaySurface.mPrivate->nativeDataPriv, pCreateInfo.visualConfig );
+	    nativeWin32CreateWindow( pDisplaySurface.mInternal->nativeDataPriv, surfaceWindowCreateInfo );
+
+	    _win32CreateGLSurface( pDisplaySurface.mInternal->nativeDataPriv, pCreateInfo.visualConfig );
 
 	    if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT ) )
 	    {
@@ -132,15 +153,15 @@ namespace ts3::system
 	    }
 	    else
 	    {
-	        wglSwapIntervalEXT( 0 );
+	        // wglSwapIntervalEXT( 0 );
 	    }
 
-	    ::ShowWindow( pDisplaySurface.mPrivate->nativeDataPriv.hwnd, SW_SHOWNORMAL );
+	    ::ShowWindow( pDisplaySurface.mInternal->nativeDataPriv.hwnd, SW_SHOWNORMAL );
 
 	    // TODO: Workaround to properly work with current engine's implementation. That should be turned into an explicit flag.
 	    if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
 	    {
-	        ::SetCapture( pDisplaySurface.mPrivate->nativeDataPriv.hwnd );
+	        ::SetCapture( pDisplaySurface.mInternal->nativeDataPriv.hwnd );
 	        ::ShowCursor( FALSE );
 	    }
 	}
@@ -150,22 +171,31 @@ namespace ts3::system
 	    auto hdc = ::wglGetCurrentDC();
 	    if ( hdc == nullptr )
 	    {
-	        throw 0;
+	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 
-	    pDisplaySurface.mPrivate->nativeDataPriv.hdc = hdc;
-	    pDisplaySurface.mPrivate->nativeDataPriv.hwnd = ::WindowFromDC( hdc );
-	    pDisplaySurface.mPrivate->nativeDataPriv.pixelFormatIndex = ::GetPixelFormat( hdc );
+	    pDisplaySurface.mInternal->nativeDataPriv.hdc = hdc;
+	    pDisplaySurface.mInternal->nativeDataPriv.hwnd = ::WindowFromDC( hdc );
+	    pDisplaySurface.mInternal->nativeDataPriv.pixelFormatIndex = ::GetPixelFormat( hdc );
 
 	    CHAR surfaceWindowClassName[256];
-	    ::GetClassNameA( pDisplaySurface.mPrivate->nativeDataPriv.hwnd, surfaceWindowClassName, 255 );
-	    auto wndProcModuleHandle = ::GetWindowLongPtrA( pDisplaySurface.mPrivate->nativeDataPriv.hwnd, GWLP_HINSTANCE );
+	    ::GetClassNameA( pDisplaySurface.mInternal->nativeDataPriv.hwnd, surfaceWindowClassName, 255 );
+	    auto wndProcModuleHandle = ::GetWindowLongPtrA( pDisplaySurface.mInternal->nativeDataPriv.hwnd, GWLP_HINSTANCE );
 
-	    pDisplaySurface.mPrivate->nativeDataPriv.wndClsName = surfaceWindowClassName;
-	    pDisplaySurface.mPrivate->nativeDataPriv.moduleHandle = reinterpret_cast<HMODULE>( wndProcModuleHandle );
+	    pDisplaySurface.mInternal->nativeDataPriv.wndClsName = surfaceWindowClassName;
+	    pDisplaySurface.mInternal->nativeDataPriv.moduleHandle = reinterpret_cast<HMODULE>( wndProcModuleHandle );
 	}
 
-	void GLSystemDriver::_nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLDisplaySurface & pDisplaySurface, const GLRenderContextCreateInfo & pCreateInfo )
+	void GLSystemDriver::_nativeDestroyDisplaySurface( GLDisplaySurface & pDisplaySurface )
+	{
+	    _win32DestroyGLSurface( pDisplaySurface.mInternal->nativeDataPriv );
+
+	    nativeWin32DestroyWindow( pDisplaySurface.mInternal->nativeDataPriv );
+	}
+
+	void GLSystemDriver::_nativeCreateRenderContext( GLRenderContext & pRenderContext,
+                                                     const GLDisplaySurface & pDisplaySurface,
+                                                     const GLRenderContextCreateInfo & pCreateInfo )
 	{
 	    int contextProfile = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
 	    Bitmask<int> contextCreateFlags = 0;
@@ -191,7 +221,7 @@ namespace ts3::system
 	    {
 	        if( pCreateInfo.shareContext )
 	        {
-	            shareContextHandle = pCreateInfo.shareContext->mPrivate->nativeDataPriv.contextHandle;
+	            shareContextHandle = pCreateInfo.shareContext->mInternal->nativeDataPriv.contextHandle;
 	        }
 	    }
 
@@ -209,16 +239,18 @@ namespace ts3::system
             FALSE
         };
 
-	    HGLRC contextHandle = wglCreateContextAttribsARB( pDisplaySurface.mPrivate->nativeDataPriv.hdc,
+	    const auto & surfaceNativeData = pDisplaySurface.mInternal->nativeDataPriv;
+	    HGLRC contextHandle = wglCreateContextAttribsARB( surfaceNativeData.hdc,
                                                           shareContextHandle,
                                                           &( contextAttribs[0] ) );
 
 	    if ( contextHandle == nullptr )
 	    {
-	        throw 0;
+	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 
-	    pRenderContext.mPrivate->nativeDataPriv.contextHandle = contextHandle;
+	    auto & contextNativeData = pRenderContext.mInternal->nativeDataPriv;
+	    contextNativeData.contextHandle = contextHandle;
 	}
 
 	void GLSystemDriver::_nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext )
@@ -226,10 +258,32 @@ namespace ts3::system
 	    auto contextHandle = ::wglGetCurrentContext();
 	    if ( contextHandle == nullptr )
 	    {
-	        throw 0;
+	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
-	    pRenderContext.mPrivate->nativeDataPriv.contextHandle = contextHandle;
+	    pRenderContext.mInternal->nativeDataPriv.contextHandle = contextHandle;
 	}
+
+	void GLSystemDriver::_nativeDestroyRenderContext( GLRenderContext & pRenderContext )
+	{
+	    if( pRenderContext.mInternal->nativeDataPriv.contextHandle != nullptr )
+	    {
+	        if( _nativeIsRenderContextBound( pRenderContext ) )
+	        {
+	            // Explicitly unbind the context if it's currently bound.
+	            // TODO: What about other threads? What if a context is destroyed in one thread while other uses it?
+	            ::wglMakeCurrent( nullptr, nullptr );
+	        }
+
+	        ::wglDeleteContext( pRenderContext.mInternal->nativeDataPriv.contextHandle );
+
+	        pRenderContext.mInternal->nativeDataPriv.contextHandle = nullptr;
+	    }
+	}
+
+	void GLSystemDriver::_nativeResetContextBinding()
+    {
+        ::wglMakeCurrent( nullptr, nullptr );
+    }
 
 	bool GLSystemDriver::_nativeIsRenderContextBound() const
 	{
@@ -240,74 +294,47 @@ namespace ts3::system
 	bool GLSystemDriver::_nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const
 	{
 	    auto currentContext = ::wglGetCurrentContext();
-	    return currentContext == pRenderContext.mPrivate->nativeDataPriv.contextHandle;
+	    return currentContext == pRenderContext.mInternal->nativeDataPriv.contextHandle;
 	}
+
+	bool GLSystemDriver::_nativeIsDisplaySurfaceValid( const GLDisplaySurface & pDisplaySurface ) const
+    {
+	    return pDisplaySurface.mInternal->nativeDataPriv.hwnd && pDisplaySurface.mInternal->nativeDataPriv.hdc;
+    }
+
+    bool GLSystemDriver::_nativeIsRenderContextValid( const GLRenderContext & pRenderContext ) const
+    {
+        return pRenderContext.mInternal->nativeDataPriv.contextHandle != nullptr;
+    }
 
 
 	void GLDisplaySurface::_nativeSwapBuffers()
 	{
-	    ::SwapBuffers( mPrivate->nativeDataPriv.hdc );
-	}
-
-	void GLDisplaySurface::_nativeDestroy()
-	{
-	    _win32DestroyGLSurface( mPrivate->nativeDataPriv );
+	    ::SwapBuffers( mInternal->nativeDataPriv.hdc );
 	}
 
 	void GLDisplaySurface::_nativeQueryRenderAreaSize( WindowSize & pOutSize ) const
 	{
 	    RECT clientRect;
-	    ::GetClientRect( mPrivate->nativeDataPriv.hwnd, &clientRect );
+	    ::GetClientRect( mInternal->nativeDataPriv.hwnd, &clientRect );
 
 	    pOutSize.x = clientRect.right - clientRect.left;
 	    pOutSize.y = clientRect.bottom - clientRect.top;
 	}
 
-	bool GLDisplaySurface::_nativeIsValid() const
-	{
-	    return mPrivate->nativeDataPriv.hdc != nullptr;
-	}
-
 
 	void GLRenderContext::_nativeBindForCurrentThread( const GLDisplaySurface & pDisplaySurface )
 	{
-	    ::wglMakeCurrent( pDisplaySurface.mPrivate->nativeDataPriv.hdc,
-                          mPrivate->nativeDataPriv.contextHandle );
-	}
-
-	void GLRenderContext::_nativeDestroy()
-	{
-	    if( mPrivate->nativeDataPriv.contextHandle != nullptr )
-	    {
-	        if( _nativeIsCurrent() )
-	        {
-	            // Explicitly unbind the context if it's currently bound.
-	            // TODO: What about other threads? What if a context is destroyed in one thread while other uses it?
-	            ::wglMakeCurrent( nullptr, nullptr );
-	        }
-
-	        ::wglDeleteContext( mPrivate->nativeDataPriv.contextHandle );
-
-	        mPrivate->nativeDataPriv.contextHandle = nullptr;
-	    }
-	}
-
-	bool GLRenderContext::_nativeIsCurrent() const
-	{
-	    auto currentContext = ::wglGetCurrentContext();
-	    return mPrivate->nativeDataPriv.contextHandle == currentContext;
-	}
-
-	bool GLRenderContext::_nativeIsValid() const
-	{
-	    return mPrivate->nativeDataPriv.contextHandle != nullptr;
+	    const auto & surfaceNativeData = pDisplaySurface.mInternal->nativeDataPriv;
+	    ::wglMakeCurrent( surfaceNativeData.hdc, mNativeData->contextHandle );
 	}
 
 
-	void _win32CreateGLSurface( GLDisplaySurfaceNativeData & pDisplaySurfaceNativeData, const VisualConfig & pVisualConfig )
+	void _win32CreateGLSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData,
+                                const VisualConfig & pVisualConfig )
 	{
-		auto hdc = ::GetWindowDC( pDisplaySurfaceNativeData.hwnd );
-		pDisplaySurfaceNativeData.hdc = hdc;
+		auto hdc = ::GetWindowDC( pGLSurfaceNativeData.hwnd );
+		pGLSurfaceNativeData.hdc = hdc;
 
 		PIXELFORMATDESCRIPTOR pixelFormatDescriptor;
 		memset( &pixelFormatDescriptor, 0, sizeof( PIXELFORMATDESCRIPTOR ) );
@@ -316,28 +343,28 @@ namespace ts3::system
 
 		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
 		{
-			pDisplaySurfaceNativeData.pixelFormatIndex = _win32ChooseLegacyGLPixelFormat( hdc, pixelFormatDescriptor );
+			pGLSurfaceNativeData.pixelFormatIndex = _win32ChooseLegacyGLPixelFormat( hdc, pixelFormatDescriptor );
 		}
 		else
 		{
-			pDisplaySurfaceNativeData.pixelFormatIndex = _win32ChooseCoreGLPixelFormat( hdc, pVisualConfig, pixelFormatDescriptor );
+			pGLSurfaceNativeData.pixelFormatIndex = _win32ChooseCoreGLPixelFormat( hdc, pVisualConfig, pixelFormatDescriptor );
 		}
 
-		BOOL spfResult = ::SetPixelFormat( hdc, pDisplaySurfaceNativeData.pixelFormatIndex, &pixelFormatDescriptor );
+		BOOL spfResult = ::SetPixelFormat( hdc, pGLSurfaceNativeData.pixelFormatIndex, &pixelFormatDescriptor );
 		if ( spfResult == FALSE )
 		{
-			throw 0;
+			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 	}
 
-	void _win32DestroyGLSurface( GLDisplaySurfaceNativeData & pDisplaySurfaceNativeData )
+	void _win32DestroyGLSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData )
 	{
-		if ( pDisplaySurfaceNativeData.hdc != nullptr )
+		if ( pGLSurfaceNativeData.hdc != nullptr )
 		{
-			::ReleaseDC( pDisplaySurfaceNativeData.hwnd, pDisplaySurfaceNativeData.hdc );
+			::ReleaseDC( pGLSurfaceNativeData.hwnd, pGLSurfaceNativeData.hdc );
 
-			pDisplaySurfaceNativeData.hdc = nullptr;
-			pDisplaySurfaceNativeData.pixelFormatIndex = 0;
+			pGLSurfaceNativeData.hdc = nullptr;
+			pGLSurfaceNativeData.pixelFormatIndex = 0;
 		}
 	}
 
@@ -407,7 +434,7 @@ namespace ts3::system
 
 		if ( ( enumResult == FALSE ) || ( returnedPixelFormatsNum == 0 ) )
 		{
-			throw 0;
+			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		std::vector<int> result;

@@ -7,13 +7,13 @@ namespace ts3::system
 
     void SysContext::_nativeInitialize()
     {
-        auto & nativeData = mPrivate->nativeDataPriv;
+        auto & nativeData = mInternal->nativeDataPriv;
         nativeData.appExecModuleHandle = ::GetModuleHandleA( nullptr );
     }
 
     void SysContext::_nativeRelease() noexcept
     {
-        auto & nativeData = mPrivate->nativeDataPriv;
+        auto & nativeData = mInternal->nativeDataPriv;
         nativeData.appExecModuleHandle = nullptr;
     }
 

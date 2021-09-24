@@ -17,28 +17,28 @@ namespace ts3
     template <>
     struct CharConv<char>
     {
-        static inline int toLower( char pChar )
+        static inline char toLower( char pChar )
         {
-            return std::tolower( pChar );
+            return static_cast<char>( std::tolower( pChar ) );
         }
 
-        static inline int toUpper( char pChar )
+        static inline char toUpper( char pChar )
         {
-            return std::toupper( pChar );
+            return static_cast<char>( std::toupper( pChar ) );
         }
     };
 
     template <>
     struct CharConv<wchar_t>
     {
-        static inline wint_t toLower( wchar_t pChar )
+        static inline wchar_t toLower( wchar_t pChar )
         {
-            return std::towlower( pChar );
+            return static_cast<char>( std::towlower( pChar ) );
         }
 
-        static inline wint_t toUpper( wchar_t pChar )
+        static inline wchar_t toUpper( wchar_t pChar )
         {
-            return std::towupper( pChar );
+            return static_cast<char>( std::towupper( pChar ) );
         }
     };
 

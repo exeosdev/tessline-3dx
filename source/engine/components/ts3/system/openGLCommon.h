@@ -6,6 +6,14 @@
 #include "windowCommon.h"
 #include <GL/glew.h>
 
+#if !defined( TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS )
+#  if( TS3_DEBUG || TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS_NON_DEBUG )
+#    define TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS 1
+#  else
+#    define TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS 1
+#  endif
+#endif
+
 namespace ts3::system
 {
 
@@ -61,6 +69,32 @@ namespace ts3::system
         std::string toString() const;
     };
 
+    class GLErrorHandler
+    {
+    public:
+        static bool checkLastResult();
+
+        static bool checkLastError( GLenum pErrorCode );
+
+        static void handleLastError();
+
+        static void resetErrorQueue();
+
+        static const char * translateErrorCode( GLenum pError );
+    };
+
 } // namespace ts3::system
+
+#if( TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS )
+#  define ts3GLCheckLastResult()             GLErrorHandler::checkLastResult()
+#  define ts3GLCheckLastError( pErrorCode )  GLErrorHandler::checkLastError( pErrorCode )
+#  define ts3GLHandleLastError()             GLErrorHandler::handleLastError()
+#  define ts3GLResetErrorQueue()             GLErrorHandler::resetErrorQueue()
+#else
+#  define ts3GLCheckLastResult()
+#  define ts3GLCheckLastError( pErrorCode )
+#  define ts3GLHandleLastError()
+#  define ts3GLResetErrorQueue()
+#endif
 
 #endif // __TS3_SYSTEM_GFX_OPENGL_COMMON_H__

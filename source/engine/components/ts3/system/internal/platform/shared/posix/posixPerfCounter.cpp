@@ -2,7 +2,7 @@
 #include "posixPerfCounter.h"
 
 #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_POSIX )
-namespace ts3
+namespace ts3::system
 {
 
 	perf_counter_value_t nativePerfCounterQueryValue()
@@ -17,5 +17,5 @@ namespace ts3
 		return 1000000000u;
 	}
 
-} // namespace ts3
+} // namespace ts3::system
 #endif

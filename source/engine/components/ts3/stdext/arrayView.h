@@ -25,6 +25,13 @@ namespace ts3
 		, size( pSize )
 		{}
 
+		template <typename TpOther>
+		ArrayView( const ArrayView<TpOther> & pOther )
+		: beginPtr( pOther.beginPtr )
+		, endPtr( pOther.endPtr )
+		, size( pOther.size )
+		{}
+
 		template <size_t tSize>
 		explicit ArrayView( Tp( &pArray )[tSize] )
 		: ArrayView( &( pArray[0] ), tSize )

@@ -12,20 +12,21 @@ namespace ts3
 
     enum : exception_category_value_t
     {
-        E_EXCEPTION_CATEGORY_GENERIC_DEBUG              = ecDeclareExceptionCategory( ExceptionBaseType::Debug, 0 ),
-        E_EXCEPTION_CATEGORY_GENERIC_EXTERNAL           = ecDeclareExceptionCategory( ExceptionBaseType::External, 0 ),
-        E_EXCEPTION_CATEGORY_GENERIC_FRAMEWORK_CORE     = ecDeclareExceptionCategory( ExceptionBaseType::FrameworkCore, 0 ),
-        E_EXCEPTION_CATEGORY_GENERIC_FRAMEWORK_INTERNAL = ecDeclareExceptionCategory( ExceptionBaseType::FrameworkInternal, 0 ),
-        E_EXCEPTION_CATEGORY_GENERIC_INTERRUPT          = ecDeclareExceptionCategory( ExceptionBaseType::Interrupt, 0 ),
-        E_EXCEPTION_CATEGORY_GENERIC_MATH               = ecDeclareExceptionCategory( ExceptionBaseType::Math, 0 ),
-        E_EXCEPTION_CATEGORY_GENERIC_RESULT_WRAPPER     = ecDeclareExceptionCategory( ExceptionBaseType::ResultWrapper, 0 ),
-        E_EXCEPTION_CATEGORY_GENERIC_SYSTEM             = ecDeclareExceptionCategory( ExceptionBaseType::System, 0 ),
+        E_EXCEPTION_CATEGORY_DEBUG              = ecDeclareExceptionCategory( ExceptionBaseType::Debug, 0 ),
+        E_EXCEPTION_CATEGORY_EXTERNAL           = ecDeclareExceptionCategory( ExceptionBaseType::External, 0 ),
+        E_EXCEPTION_CATEGORY_FRAMEWORK_CORE     = ecDeclareExceptionCategory( ExceptionBaseType::FrameworkCore, 0 ),
+        E_EXCEPTION_CATEGORY_FRAMEWORK_INTERNAL = ecDeclareExceptionCategory( ExceptionBaseType::FrameworkInternal, 0 ),
+        E_EXCEPTION_CATEGORY_INTERRUPT          = ecDeclareExceptionCategory( ExceptionBaseType::Interrupt, 0 ),
+        E_EXCEPTION_CATEGORY_MATH               = ecDeclareExceptionCategory( ExceptionBaseType::Math, 0 ),
+        E_EXCEPTION_CATEGORY_RESULT             = ecDeclareExceptionCategory( ExceptionBaseType::Result, 0 ),
+        E_EXCEPTION_CATEGORY_SYSTEM             = ecDeclareExceptionCategory( ExceptionBaseType::System, 0 ),
     };
 
 
     enum : exception_code_value_t
     {
-        E_EXCEPTION_CODE_RESULT_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_GENERIC_RESULT_WRAPPER, 0x01 )
+        E_EXCEPTION_CODE_DEBUG_PLACEHOLDER = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_DEBUG, 0x01 ),
+        E_EXCEPTION_CODE_RESULT_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_RESULT, 0x01 )
     };
 
 	/// @brief
@@ -141,13 +142,13 @@ namespace ts3
 	using SystemException = ExceptionClass<ExceptionBaseType::System>;
 
 	/// @brief Specialized class for ResultWrapper exceptions. Adds Result object.
-	class ResultWrapperException : public ExceptionClass<ExceptionBaseType::ResultWrapper>
+	class ResultException : public ExceptionClass<ExceptionBaseType::Result>
     {
     public:
         Result mResult;
 
     public:
-        explicit ResultWrapperException( ExceptionInfo pInfo, Result pResult )
+        explicit ResultException( ExceptionInfo pInfo, Result pResult )
         : ExceptionClass( std::move( pInfo ) )
         , mResult( pResult )
         {}
@@ -168,9 +169,9 @@ namespace ts3
     };
 
 	template <>
-	struct ExceptionClassResolver<ExceptionBaseType::ResultWrapper, true>
+	struct ExceptionClassResolver<ExceptionBaseType::Result, true>
     {
-	    using Type = ResultWrapperException;
+	    using Type = ResultException;
     };
 
 	template <ExceptionBaseType tExceptionBaseType>
@@ -201,21 +202,21 @@ namespace ts3
         struct ExceptionCodeClassProxy \
         { \
             using Type = typename ExceptionCategoryClassProxy<ecGetExceptionCodeCategory( tExceptionCode )>::Type; \
-        };
+        }
 
     #define ts3SetExceptionCategoryType( pExceptionCategory, pType ) \
         template <> \
         struct ExceptionCategoryClassProxy<pExceptionCategory> \
         { \
             using Type = pType; \
-        };
+        }
 
     #define ts3SetExceptionCodeType( pExceptionCode, pType ) \
         template <> \
         struct ExceptionCodeClassProxy<pExceptionCode> \
         { \
             using Type = pType; \
-        };
+        }
 
 	template <typename TpException, typename... TpArgs>
 	TS3_PCL_ATTR_NO_RETURN inline void throwException( ExceptionInfo pExceptionInfo, TpArgs &&... pArgs )
@@ -223,10 +224,7 @@ namespace ts3
 		// TpException is a class derived from ExceptionClass<ExceptionBaseType>. It contains 'baseType'
 		// member with type tag. It should match the type embedded within the code. In case of mismatch, there is
 		// either a typo (in case of manual call) or a problem with the throwException() function defined below.
-		if ( TpException::mBaseType != ecGetExceptionCodeBaseType( pExceptionInfo.code ) )
-		{
-			ts3DebugInterruptOnce();
-		}
+		ts3DebugAssert( TpException::mBaseType != ecGetExceptionCodeBaseType( pExceptionInfo.code ) );
 
 		throw TpException( std::move( pExceptionInfo ), std::forward<TpArgs>( pArgs )... );
 	}
@@ -260,7 +258,7 @@ namespace ts3
 #define ts3ThrowResultEx( pResult, pDescription ) \
     ::ts3::throwException<typename ExceptionCodeClassProxy<E_EXCEPTION_CODE_RESULT_ERROR>::Type>( E_EXCEPTION_CODE_RESULT_ERROR, pDescription, ts3CurrentFileLocationInfo(), pResult )
 
-#define exfCatchIntoWrapper( pResultWrapper ) \
+#define ts3CatchIntoWrapper( pResultWrapper ) \
 	catch( const ::ts3::Result & eResult ) \
 	{ \
         pResultWrapper.setResult( eResult ); \

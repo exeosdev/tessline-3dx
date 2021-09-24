@@ -12,6 +12,7 @@ namespace ts3::system
 
 	class EventController;
 	class EventDispatcher;
+    class EventSource;
 
 	/// @brief
 	using EventHandler = std::function<bool( EventObject & )>;
@@ -26,7 +27,7 @@ namespace ts3::system
 		App,
 		Input,
 		Window,
-		_Reserved
+		_ReservedMax
 	};
 
 	/// @brief
@@ -39,7 +40,7 @@ namespace ts3::system
 		InputMouse,
 		InputTouch,
 		WindowUpdate,
-		_Reserved
+		_ReservedMax
 	};
 
 	/// @brief
@@ -69,16 +70,16 @@ namespace ts3::system
 		WindowUpdateFullscreen,
 		WindowUpdateResize,
 		WindowUpdateVisibility,
-		_Reserved
+		_ReservedMax
 	};
 
 	constexpr uint8 CX_EVENT_CODE_CONTROL_KEY = 0xEC;
 
-	constexpr auto CX_ENUM_EVENT_BASE_TYPE_COUNT = static_cast< size_t >( EEventBaseType::_Reserved );
+	constexpr auto CX_ENUM_EVENT_BASE_TYPE_COUNT = static_cast< size_t >( EEventBaseType::_ReservedMax );
 
-	constexpr auto CX_ENUM_EVENT_CATEGORY_COUNT = static_cast< size_t >( EEventCategory::_Reserved );
+	constexpr auto CX_ENUM_EVENT_CATEGORY_COUNT = static_cast< size_t >( EEventCategory::_ReservedMax );
 
-	constexpr auto CX_ENUM_EVENT_CODE_INDEX_COUNT = static_cast< size_t >( EEventCodeIndex::_Reserved );
+	constexpr auto CX_ENUM_EVENT_CODE_INDEX_COUNT = static_cast< size_t >( EEventCodeIndex::_ReservedMax );
 
 	/// @brief
 	struct EvtBase
@@ -96,34 +97,6 @@ namespace ts3::system
         {}
     };
 
-	/// @brief
-	union EventCodeGen
-    {
-	    struct
-	    {
-	        uint8 uControlKey;
-	        uint8 uEventBaseType;
-	        uint8 uEventCategory;
-	        uint8 uEventCodeIndex;
-	    };
-
-	    event_code_value_t eventCodeValue;
-
-	    constexpr EventCodeGen()
-	    : eventCodeValue( 0u )
-	    {}
-
-	    constexpr explicit EventCodeGen( event_code_value_t pCodeValue )
-	    : eventCodeValue( pCodeValue )
-	    {}
-
-	    constexpr EventCodeGen( EEventBaseType pEventBaseType, EEventCategory pEventCategory, EEventCodeIndex pEventCodeIndex )
-	    : uControlKey( CX_EVENT_CODE_CONTROL_KEY )
-	    , uEventBaseType( static_cast<uint8>( pEventBaseType ) )
-	    , uEventCategory( static_cast<uint8>( pEventCategory ) )
-	    , uEventCodeIndex( static_cast<uint8>( pEventCodeIndex ) )
-	    {}
-    };
 
 	inline constexpr event_code_value_t ecDeclareEventCode( EEventBaseType pEventBaseType, EEventCategory pEventCategory, EEventCodeIndex pEventCodeIndex )
 	{
@@ -160,14 +133,19 @@ namespace ts3::system
 	    return ecDeclareEventCode( EEventBaseType::Window, EEventCategory::WindowUpdate, pEventCodeIndex );
 	}
 
+	inline constexpr uint8 ecGetEventCodeControlKey( event_code_value_t pEventCode )
+	{
+	    return static_cast<uint8>( ( pEventCode >> 24 ) & 0xFF );
+	}
+
 	inline constexpr EEventBaseType ecGetEventCodeBaseType( event_code_value_t pEventCode )
 	{
-	    return static_cast<EEventBaseType>( pEventCode >> 16 );
+	    return static_cast<EEventBaseType>( ( pEventCode >> 16 ) & 0xFF );
 	}
 
 	inline constexpr EEventCategory ecGetEventCodeCategory( event_code_value_t pEventCode )
 	{
-	    return static_cast<EEventCategory>( pEventCode >> 8 );
+	    return static_cast<EEventCategory>( ( pEventCode >> 8 ) & 0xFF );
 	}
 
 	inline constexpr EEventCodeIndex ecGetEventCodeCodeIndex( event_code_value_t pEventCode )
@@ -177,10 +155,10 @@ namespace ts3::system
 
 	inline constexpr bool ecValidateEventCode( event_code_value_t pEventCode )
 	{
-	    return  ( EventCodeGen( pEventCode ).uControlKey == CX_EVENT_CODE_CONTROL_KEY ) &&
-	            ( EventCodeGen( pEventCode ).uEventBaseType < CX_ENUM_EVENT_BASE_TYPE_COUNT ) &&
-	            ( EventCodeGen( pEventCode ).uEventCategory < CX_ENUM_EVENT_CATEGORY_COUNT ) &&
-	            ( EventCodeGen( pEventCode ).uEventCodeIndex < CX_ENUM_EVENT_CODE_INDEX_COUNT );
+	    return ( ecGetEventCodeControlKey( pEventCode ) == CX_EVENT_CODE_CONTROL_KEY ) &&
+	           ( ecGetEventCodeBaseType( pEventCode ) < EEventBaseType::_ReservedMax ) &&
+	           ( ecGetEventCodeCategory( pEventCode ) < EEventCategory::_ReservedMax ) &&
+	           ( ecGetEventCodeCodeIndex( pEventCode ) < EEventCodeIndex::_ReservedMax );
 	}
 
 	enum EEventCode : event_code_value_t

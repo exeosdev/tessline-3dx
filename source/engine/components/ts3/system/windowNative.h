@@ -16,27 +16,26 @@
 namespace ts3::system
 {
 
-    using WindowList = std::list<Window>;
-    using WindowRef = std::list<Window>::iterator;
+    class EventController;
 
     enum EWindowStateFlags : uint32
     {
         E_WINDOW_STATE_FLAG_FULLSCREEN_BIT = 0x8000
     };
 
-    struct WindowManager::ObjectPrivateData
+    struct WindowManager::ObjectInternalData
     {
         WindowManagerNativeData nativeDataPriv;
-        WindowList windowList;
     };
 
-    struct Window::ObjectPrivateData
+    struct Window::ObjectInternalData
     {
         WindowNativeData nativeDataPriv;
-        WindowRef windowManagerListRef;
         Bitmask<EWindowStateFlags> stateFlags = 0;
         WindowSize preFullscreenSavedSize;
     };
+
+    TS3_SYSTEM_API void nativeBindEventSource( EventController & pEventController, Window & pWindow );
 
 } // namespace ts3::system
 

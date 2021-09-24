@@ -41,7 +41,7 @@ namespace ts3
         // Defined primarily within the ::Math component.
         Math,
         // Dedicated type for exceptions carrying Results as an error indicator.
-        ResultWrapper,
+        Result,
         // System-specific exceptions, extended in platform-specific manner. Defined primarily within the ::System component.
         System,
         //

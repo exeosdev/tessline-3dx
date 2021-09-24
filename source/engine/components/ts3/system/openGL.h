@@ -1,9 +1,9 @@
 
-#ifndef __TS3_SYSTEM_GFX_OPENGL_H__
-#define __TS3_SYSTEM_GFX_OPENGL_H__
+#ifndef __TS3_SYSTEM_OPENGL_H__
+#define __TS3_SYSTEM_OPENGL_H__
 
 #include "openGLCommon.h"
-#include "sysObject.h"
+#include "eventSystem.h"
 
 namespace ts3::system
 {
@@ -38,12 +38,71 @@ namespace ts3::system
         Bitmask<EGLRenderContextCreateFlags> flags = 0;
     };
 
-    class GLSystemDriver : public SysObject
+    class GLDisplaySurface : public EventSource
     {
     public:
-        struct ObjectPrivateData;
+        struct ObjectInternalData;
+        GLSystemDriverHandle const mDriver;
+        std::unique_ptr<ObjectInternalData> const mInternal;
+        const GLDisplaySurfaceNativeData * const mNativeData;
+
+    public:
+        explicit GLDisplaySurface( GLSystemDriverHandle pDriver );
+        virtual ~GLDisplaySurface() noexcept;
+
+        void clearColorBuffer();
+
+        /// @brief
+        void swapBuffers();
+
+        /// @brief
+        TS3_PCL_ATTR_NO_DISCARD WindowSize queryRenderAreaSize() const;
+
+        /// @brief
+        TS3_PCL_ATTR_NO_DISCARD bool isValid() const;
+
+    private:
+        void _nativeSwapBuffers();
+        void _nativeQueryRenderAreaSize( WindowSize & pOutSize ) const;
+    };
+
+    class GLRenderContext : public SysObject
+    {
+    public:
+        struct ObjectInternalData;
+        GLSystemDriverHandle const mDriver;
+        std::unique_ptr<ObjectInternalData> const mInternal;
+        const GLRenderContextNativeData * const mNativeData;
+
+    public:
+        explicit GLRenderContext( GLSystemDriverHandle pDriver );
+        virtual ~GLRenderContext();
+
+        /// @brief
+        void bindForCurrentThread( const GLDisplaySurface & pSurface );
+
+        /// @brief
+        TS3_PCL_ATTR_NO_DISCARD GLSystemVersionInfo querySystemVersionInfo() const;
+
+        /// @brief
+        TS3_PCL_ATTR_NO_DISCARD bool isCurrent() const;
+
+        /// @brief
+        TS3_PCL_ATTR_NO_DISCARD bool isValid() const;
+
+    private:
+        virtual void _nativeBindForCurrentThread( const GLDisplaySurface & pSurface );
+    };
+
+    class GLSystemDriver : public SysObject
+    {
+        friend class GLDisplaySurface;
+        friend class GLRenderContext;
+
+    public:
+        struct ObjectInternalData;
         DisplayManagerHandle const mDisplayManager;
-        std::unique_ptr<ObjectPrivateData> const mPrivate;
+        std::unique_ptr<ObjectInternalData> const mInternal;
         const GLSystemDriverNativeData * const mNativeData;
 
     public:
@@ -62,7 +121,7 @@ namespace ts3::system
 
         /// @brief Creates a system OpenGL surface (usually - a window) with a configuration matching specified requirements.
         /// @param pCreateInfo CreateInfo struct with a surface specification (VisualConfig, window geometry, etc.)
-        TS3_PCL_ATTR_NO_DISCARD GLDisplaySurface * createDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo );
+        TS3_PCL_ATTR_NO_DISCARD GLDisplaySurfaceHandle createDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo );
 
         /// @brief Creates a GLDisplaySurface object, that wraps currently bound surface for the current thread.
         /// @param pTargetSurface Existing surface object to be used. If null, a new GLDisplaySurface will be created.
@@ -73,13 +132,13 @@ namespace ts3::system
         /// method will throw an exception with EXC_NOT_SUPPORTED code.
         /// @note The surface specified as pTargetSurface is just a hint and may be discarded. Always use returned handle!
         /// @note If no surface is currently bound, null handle is returned, regardless of the value of pTargetSurface.
-        TS3_PCL_ATTR_NO_DISCARD GLDisplaySurface * createDisplaySurfaceForCurrentThread( GLDisplaySurface * pTargetSurface = nullptr );
+        TS3_PCL_ATTR_NO_DISCARD GLDisplaySurfaceHandle createDisplaySurfaceForCurrentThread( GLDisplaySurfaceHandle pTargetSurface = nullptr );
 
         /// @brief Creates a system OpenGL render context with a configuration matching specified requirements.
         /// @param pSurface Surface to be used for context creation. Context can be bound to any surface compatible with this one.
         /// @param pCreateInfo CreateInfo struct with a context specification (OpenGL API version, profile, etc.)
-        TS3_PCL_ATTR_NO_DISCARD GLRenderContext * createRenderContext( GLDisplaySurface & pSurface,
-                                                                       const GLRenderContextCreateInfo & pCreateInfo );
+        TS3_PCL_ATTR_NO_DISCARD GLRenderContextHandle createRenderContext( GLDisplaySurface & pSurface,
+                                                                           const GLRenderContextCreateInfo & pCreateInfo );
 
         /// @brief Creates a GLRenderContext object, that wraps currently bound context for the current thread.
         /// @param pTargetContext Existing context object to be used. If null, a new GLRenderContext will be created.
@@ -87,7 +146,7 @@ namespace ts3::system
         /// bound OpenGL render context. See description of createDisplaySurfaceForCurrentThread() for details.
         /// @note The context specified as pTargetContext is just a hint and may be discarded. Always use returned handle!
         /// @note If no context is currently bound, null handle is returned, regardless of the value of pTargetContext.
-        TS3_PCL_ATTR_NO_DISCARD GLRenderContext * createRenderContextForCurrentThread( GLRenderContext * pTargetContext = nullptr );
+        TS3_PCL_ATTR_NO_DISCARD GLRenderContextHandle createRenderContextForCurrentThread( GLRenderContextHandle pTargetContext = nullptr );
 
         /// @brief
         TS3_PCL_ATTR_NO_DISCARD std::vector<DepthStencilFormat> querySupportedDepthStencilFormats( ColorFormat pColorFormat ) const;
@@ -100,96 +159,37 @@ namespace ts3::system
         TS3_PCL_ATTR_NO_DISCARD bool isRenderContextBound() const;
 
         /// @brief
-        TS3_PCL_ATTR_NO_DISCARD bool isRenderContextBound( GLRenderContext & pRenderContext ) const;
+        TS3_PCL_ATTR_NO_DISCARD bool isRenderContextBound( const GLRenderContext & pRenderContext ) const;
 
-        TS3_SYSTEM_API_NODISCARD bool isDisplaySurfaceValid( GLDisplaySurface & pDisplaySurface ) const;
+        TS3_SYSTEM_API_NODISCARD bool isDisplaySurfaceValid( const GLDisplaySurface & pDisplaySurface ) const;
 
-        TS3_SYSTEM_API_NODISCARD bool isRenderContextValid( GLRenderContext & pRenderContext ) const;
+        TS3_SYSTEM_API_NODISCARD bool isRenderContextValid( const GLRenderContext & pRenderContext ) const;
+
+    friendapi:
+        // Used by the GLDisplaySurface class. It is called inside its destructor.
+        void onDisplaySurfaceDestroy( GLDisplaySurface & pDisplaySurface ) noexcept;
+
+        // Used by the GLRenderContext class. It is called inside its destructor.
+        void onRenderContextDestroy( GLRenderContext & pRenderContext ) noexcept;
 
     private: // For implementation
+        void _nativeCtor();
+        void _nativeDtor() noexcept;
         void _nativeInitializePlatform();
-        void _nativeReleaseInitState( GLRenderContext & pRenderContext );
+        void _nativeReleaseInitState();
         void _nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo );
         void _nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface );
         void _nativeDestroyDisplaySurface( GLDisplaySurface & pDisplaySurface );
         void _nativeCreateRenderContext( GLRenderContext & pRenderContext, const GLDisplaySurface & pSurface, const GLRenderContextCreateInfo & pCreateInfo );
         void _nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext );
         void _nativeDestroyRenderContext( GLRenderContext & pRenderContext );
+        void _nativeResetContextBinding();
         bool _nativeIsRenderContextBound() const;
         bool _nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const;
-    };
-
-    class GLDisplaySurface
-    {
-    public:
-        struct ObjectPrivateData;
-        GLSystemDriver * const mDriver;
-        std::unique_ptr<ObjectPrivateData> const mPrivate;
-        const GLDisplaySurfaceNativeData * const mNativeData;
-
-    public:
-        explicit GLDisplaySurface( GLSystemDriver * pDriver );
-        virtual ~GLDisplaySurface();
-
-        /// @brief
-        void swapBuffers();
-
-        /// @brief
-        void destroy();
-
-        /// @brief
-        TS3_PCL_ATTR_NO_DISCARD WindowSize queryRenderAreaSize() const;
-
-        /// @brief
-        TS3_PCL_ATTR_NO_DISCARD bool checkDriver( const GLSystemDriver & pDriver ) const;
-
-        /// @brief
-        TS3_PCL_ATTR_NO_DISCARD bool isValid() const;
-
-    private:
-        void _nativeSwapBuffers();
-        void _nativeDestroy();
-        void _nativeQueryRenderAreaSize( WindowSize & pOutSize ) const;
-        bool _nativeIsValid() const;
-    };
-
-    class GLRenderContext
-    {
-    public:
-        struct ObjectPrivateData;
-        GLSystemDriver * const mDriver;
-        std::unique_ptr<ObjectPrivateData> const mPrivate;
-        const GLRenderContextNativeData * const mNativeData;
-
-    public:
-        explicit GLRenderContext( GLSystemDriver * pDriver );
-        virtual ~GLRenderContext();
-
-        /// @brief
-        void bindForCurrentThread( const GLDisplaySurface & pSurface );
-
-        /// @brief
-        void destroy();
-
-        /// @brief
-        TS3_PCL_ATTR_NO_DISCARD GLSystemVersionInfo querySystemVersionInfo() const;
-
-        /// @brief
-        TS3_PCL_ATTR_NO_DISCARD bool checkDriver( const GLSystemDriver & pDriver ) const;
-
-        /// @brief
-        TS3_PCL_ATTR_NO_DISCARD bool isCurrent() const;
-
-        /// @brief
-        TS3_PCL_ATTR_NO_DISCARD bool isValid() const;
-
-    private:
-        virtual void _nativeBindForCurrentThread( const GLDisplaySurface & pSurface );
-        virtual void _nativeDestroy();
-        virtual bool _nativeIsCurrent() const;
-        virtual bool _nativeIsValid() const;
+        bool _nativeIsDisplaySurfaceValid( const GLDisplaySurface & pDisplaySurface ) const;
+        bool _nativeIsRenderContextValid( const GLRenderContext & pRenderContext ) const;
     };
 
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_GFX_OPENGL_H__
+#endif // __TS3_SYSTEM_OPENGL_H__

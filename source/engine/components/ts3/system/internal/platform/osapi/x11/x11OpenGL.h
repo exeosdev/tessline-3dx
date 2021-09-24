@@ -1,14 +1,12 @@
 
-#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_X11_GFX_OPENGL_H__
-#define __TS3_SYSTEM_PLATFORM_OSAPI_X11_GFX_OPENGL_H__
+#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_X11_OPENGL_H__
+#define __TS3_SYSTEM_PLATFORM_OSAPI_X11_OPENGL_H__
 
 #include "x11Window.h"
 #include <GL/glx.h>
 #include <GL/glxext.h>
 
-namespace ts3
-{
-namespace system
+namespace ts3::system
 {
 
 	struct GLDisplaySurfaceNativeData : public WindowNativeData
@@ -17,29 +15,22 @@ namespace system
 		XVisualInfo * visualInfo = nullptr;
 	};
 
-	struct GLRenderContextNativeData
+	struct GLRenderContextNativeData : public X11NativeDataCommon
 	{
-		Display * display = nullptr;
-		GLXDrawable targetSurface = XID_None;
 		GLXContext contextHandle = nullptr;
 	};
 
-	struct GLDriverNativeData
+	struct GLSystemDriverNativeData : public X11NativeDataCommon
 	{
 		struct InitState
 		{
-            X11GLSurfaceNativeData surfaceData;
-            X11GLRenderContextNativeData contextData;
+            GLDisplaySurfaceNativeData surfaceData;
+            GLRenderContextNativeData contextData;
 		};
 
 		InitState * initState = nullptr;
 	};
 
-    using X11GLDriverNativeData = GLDriverNativeData;
-    using X11GLSurfaceNativeData = GLDisplaySurfaceNativeData;
-    using X11GLRenderContextNativeData = GLRenderContextNativeData;
+} // namespace ts3::system
 
-} // namespace system
-} // namespace ts3
-
-#endif // __TS3_SYSTEM_PLATFORM_OSAPI_X11_GFX_OPENGL_H__
+#endif // __TS3_SYSTEM_PLATFORM_OSAPI_X11_OPENGL_H__

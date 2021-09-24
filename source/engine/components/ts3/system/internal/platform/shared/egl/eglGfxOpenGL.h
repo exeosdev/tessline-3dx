@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_EGL_GFX_OPENGL_H__
-#define __TS3_SYSTEM_PLATFORM_OSAPI_EGL_GFX_OPENGL_H__
+#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_EGL_OPENGL_H__
+#define __TS3_SYSTEM_PLATFORM_OSAPI_EGL_OPENGL_H__
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -41,4 +41,4 @@ namespace ts3::system
 
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_PLATFORM_OSAPI_EGL_GFX_OPENGL_H__
+#endif // __TS3_SYSTEM_PLATFORM_OSAPI_EGL_OPENGL_H__

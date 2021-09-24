@@ -1,139 +1,95 @@
 
-#include <ts3/system/eventCore.h>
+#include <ts3/system/eventSystemNative.h>
+#include <ts3/system/sysContextNative.h>
+#include <ts3/system/windowNative.h>
 #include <ts3/math/vectorOps.h>
 #include <X11/keysym.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
-namespace ts3
+namespace ts3::system
 {
 
-	bool _x11EventPeek( ContextNativeData & pSCNativeData, XEvent & pEvent );
-	bool _x11EventWait( ContextNativeData & pSCNativeData, XEvent & pEvent );
-	bool _x11TranslateAndDispatch( EventController & pEventController, XEvent & pXEvent );
-	bool _x11TranslateGenericEvent( EventDispatcher & pDispatcher, XEvent & pXEvent, Event & pEvent );
-	bool _x11TranslateInputEvent( EventInputState & pInputState, XEvent & pXEvent, Event & pEvent );
-	bool _x11TranslateInputEventMouseButton( EventInputState & pInputState, XEvent & pXEvent, Event & pEvent, MouseButtonActionType pButtonAction );
-	bool _x11TranslatetemEvent( EventDispatcher & pDispatcher, XEvent & pXEvent, Event & pEvent );
-	KeyCode _x11GettemKeyCode( KeySym pXkeySym );
-	X11MouseButtonID _x11GetMouseButtonID( uint32 pButton );
-	Bitmask<MouseButtonFlagBits> _x11GetMouseButtonStateMask( uint32 pState );
+	bool _x11TranslateGenericEvent( EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent );
+	bool _x11TranslateInputEvent( EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent );
+	bool _x11TranslateInputEventMouseButton( EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent, EMouseButtonActionType pButtonAction );
+	bool _x11TranslateSystemEvent( EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent );
+	EKeyCode _x11GetSysKeyCode( KeySym pXkeySym );
+	EX11MouseButtonID _x11GetMouseButtonID( uint32 pButton );
+	Bitmask<EMouseButtonFlagBits> _x11GetMouseButtonStateMask( uint32 pState );
 
 
-	void EventController::_sysInitialize()
-	{}
+    void EventController::_nativeRegisterEventSource( EventSource & /* pEventSource */ )
+    {}
 
-	void EventController::_sysRelease()
-	{}
+    void EventController::_nativeUnregisterEventSource( EventSource & /* pEventSource */ )
+    {}
 
-	void EventController::_sysAddEventSource( EventSource & pEventSource )
-	{}
+    void EventController::_nativeDestroyEventSourcePrivateData( EventSource & /* pEventSource */, void * /* pData */ )
+    {}
 
-	void EventController::_sysRemoveEventSource( EventSource & pEventSource )
-	{}
+    bool EventController::_nativeUpdateSysQueue()
+    {
+        auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 
-	void EventController::_sysDispatchNextEvent()
-	{
-		XEvent xevent;
-		if( _x11EventPeek( mContext->mNativeData, xevent ) )
-		{
-			_x11TranslateAndDispatch( *this, xevent );
-		}
-	}
+        XEvent xNativeEvent;
+        if( XEventsQueued( xSessionData.display, QueuedAfterReading ) > 0 )
+        {
+            XNextEvent( xSessionData.display, &xNativeEvent );
+            nativeEventDispatch( *this, xNativeEvent );
+            return true;
+        }
 
-	void EventController::_sysDispatchNextEventWait()
-	{
-		XEvent xevent;
-		if( _x11EventWait( mContext->mNativeData, xevent ) )
-		{
-			_x11TranslateAndDispatch( *this, xevent );
-		}
-	}
+        return false;
+    }
 
-	void EventController::_sysDispatchQueuedEvents()
-	{
-		XEvent xevent;
-		while( _x11EventPeek( mContext->mNativeData, xevent ) )
-		{
-			_x11TranslateAndDispatch( *this, xevent );
-		}
-	}
+    bool EventController::_nativeUpdateSysQueueWait()
+    {
+        auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 
-	void EventController::_sysDispatchQueuedEventsWait()
-	{
-		uint32 fetchedEventsNum = 0;
+        XEvent xNativeEvent;
+        if( XEventsQueued( xSessionData.display, QueuedAfterFlush ) > 0 )
+        {
+            XNextEvent( xSessionData.display, &xNativeEvent );
+            nativeEventDispatch( *this, xNativeEvent );
+            return true;
+        }
 
-		XEvent xevent;
-		while( _x11EventPeek( mContext->mNativeData, xevent ) )
-		{
-			_x11TranslateAndDispatch( *this, xevent );
-			++fetchedEventsNum;
-		}
+        return false;
+    }
 
-		if( ( fetchedEventsNum == 0 ) && _x11EventWait( mContext->mNativeData, xevent ) )
-		{
-			_x11TranslateAndDispatch( *this, xevent );
-		}
-	}
+    void EventController::_nativeOnActiveDispatcherChange( EventDispatcher * /* pDispatcher */ )
+    {}
 
 
+    bool nativeEventTranslate( EventController & pEventController, const NativeEvent & pNativeEvent, EventObject & pOutEvent )
+    {
+        if( ( pNativeEvent.type >= KeyPress ) && ( pNativeEvent.type <= MotionNotify ) )
+        {
+            if( _x11TranslateInputEvent( pEventController, pNativeEvent, pOutEvent ) )
+            {
+                return true;
+            }
+        }
+        else if( ( pNativeEvent.type >= EnterNotify ) && ( pNativeEvent.type <= MapRequest ) )
+        {
+            if( _x11TranslateGenericEvent( pEventController, pNativeEvent, pOutEvent  ) )
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if( _x11TranslateSystemEvent( pEventController, pNativeEvent, pOutEvent  ) )
+            {
+                return true;
+            }
+        }
 
-	bool _x11EventPeek( ContextNativeData & pSCNativeData, XEvent & pEvent )
-	{
-		if( XEventsQueued( pSCNativeData.display, QueuedAfterReading ) > 0 )
-		{
-			XNextEvent( pSCNativeData.display, &pEvent );
-			return true;
-		}
+        return false;
+    }
 
-		return false;
-	}
 
-	bool _x11EventWait( ContextNativeData & pSCNativeData, XEvent & pEvent )
-	{
-		if( XEventsQueued( pSCNativeData.display, QueuedAfterFlush ) > 0 )
-		{
-			XNextEvent( pSCNativeData.display, &pEvent );
-			return true;
-		}
-
-		return false;
-	}
-
-	bool _x11TranslateAndDispatch( EventController & pEventController, XEvent & pXEvent )
-	{
-		auto & dispatcher = pEventController.getActiveDispatcher();
-
-		Event sysEvent;
-
-		if( ( pXEvent.type >= KeyPress ) && ( pXEvent.type <= MotionNotify ) )
-		{
-			auto & inputState = dispatcher.getInputState();
-			if( !_x11TranslateInputEvent( inputState, pXEvent, sysEvent ) )
-			{
-				return false;
-			}
-		}
-		else if( ( pXEvent.type >= EnterNotify ) && ( pXEvent.type <= MapRequest ) )
-		{
-			if( !_x11TranslateGenericEvent( dispatcher, pXEvent, sysEvent ) )
-			{
-				return false;
-			}
-		}
-		else
-		{
-			if( !_x11TranslatetemEvent( dispatcher, pXEvent, sysEvent ) )
-			{
-				return false;
-			}
-		}
-
-		pEventController.dispatchEvent( sysEvent );
-
-		return true;
-	}
-
-	bool _x11TranslateGenericEvent( EventDispatcher & pDispatcher, XEvent & pXEvent, Event & pEvent )
+    bool _x11TranslateGenericEvent( EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent )
 	{
 		switch( pXEvent.type )
 		{
@@ -154,15 +110,41 @@ namespace ts3
 			case NoExpose:
 				break;
 			case VisibilityNotify:
-				break;
+                break;
 			case CreateNotify:
 				break;
-			case DestroyNotify:
-				break;
+            case DestroyNotify:
+            {
+                auto * eventSource = pEventController.findEventSource( [&pXEvent]( const EventSourceNativeData & pNativeData ) -> bool {
+                    return pNativeData.windowXID == pXEvent.xdestroywindow.window;
+                });
+                auto & eWindowUpdateClose = pOutEvent.eWindowUpdateClose;
+                eWindowUpdateClose.eventCode = E_EVENT_CODE_WINDOW_UPDATE_CLOSE;
+                eWindowUpdateClose.eventSource = eventSource;
+                break;
+            }
 			case UnmapNotify:
-				break;
+            {
+                auto * eventSource = pEventController.findEventSource( [&pXEvent]( const EventSourceNativeData & pNativeData ) -> bool {
+                    return pNativeData.windowXID == pXEvent.xvisibility.window;
+                });
+                auto & eWindowUpdateVisibility = pOutEvent.eWindowUpdateVisibility;
+                eWindowUpdateVisibility.eventCode = E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY;
+                eWindowUpdateVisibility.newVisibilityState = false;
+                eWindowUpdateVisibility.eventSource = eventSource;
+                break;
+            }
 			case MapNotify:
-				break;
+            {
+                auto * eventSource = pEventController.findEventSource( [&pXEvent]( const EventSourceNativeData & pNativeData ) -> bool {
+                    return pNativeData.windowXID == pXEvent.xvisibility.window;
+                });
+                auto & eWindowUpdateVisibility = pOutEvent.eWindowUpdateVisibility;
+                eWindowUpdateVisibility.eventCode = E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY;
+                eWindowUpdateVisibility.newVisibilityState = true;
+                eWindowUpdateVisibility.eventSource = eventSource;
+                break;
+            }
 			case MapRequest:
 				break;
 			default:
@@ -172,9 +154,11 @@ namespace ts3
 		return true;
 	}
 
-	bool _x11TranslateInputEvent( EventInputState & pInputState, XEvent & pXEvent, Event & pEvent )
+    bool _x11TranslateInputEvent( EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent )
 	{
-		switch( pXEvent.type )
+        auto & inputState = pEventController.mInternal->getCurrentInputState();
+
+        switch( pXEvent.type )
 		{
 			// Note on the keysym index:
 			// The standard rules for obtaining a KeySym from a KeyPress event make use of only the Group 1
@@ -183,36 +167,42 @@ namespace ts3
 			// [Source: https://tronche.com/gui/x/xlib/input/keyboard-encoding.html#KeySym]
 			case KeyPress:
 			{
-				auto keysym = XLookupKeysym( &( pXEvent.xkey ), 0 );
-				auto keycode = _x11GettemKeyCode( keysym );
-				auto & eventData = pEvent.eInputKeyboardKey;
+                // XLookupKeysym requires non-const XKeyEvent parameter.
+                // Use locally copied one to keep the API right (we don't want to drop 'const for input event param).
+                auto xKey = pXEvent.xkey;
+				auto keysym = XLookupKeysym( &xKey, 0 );
+				auto keycode = _x11GetSysKeyCode( keysym );
+				auto & eventData = pOutEvent.eInputKeyboardKey;
 				eventData.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
-				eventData.keyboardState = &( pInputState.keyboardState );
+				eventData.keyboardState = &( inputState.keyboardState );
 				eventData.keyCode = keycode;
-				eventData.keyAction = KeyActionType::Press;
+				eventData.keyAction = EKeyActionType::Press;
 				break;
 			}
 			case KeyRelease:
 			{
-				auto keysym = XLookupKeysym( &( pXEvent.xkey ), 0 );
-				auto keycode = _x11GettemKeyCode( keysym );
-				auto & eventData = pEvent.eInputKeyboardKey;
+                // XLookupKeysym requires non-const XKeyEvent parameter.
+                // Use locally copied one to keep the API right (we don't want to drop 'const for input event param).
+                auto xKey = pXEvent.xkey;
+				auto keysym = XLookupKeysym( &xKey, 0 );
+				auto keycode = _x11GetSysKeyCode( keysym );
+				auto & eventData = pOutEvent.eInputKeyboardKey;
 				eventData.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
-				eventData.keyboardState = &( pInputState.keyboardState );
+				eventData.keyboardState = &( inputState.keyboardState );
 				eventData.keyCode = keycode;
-				eventData.keyAction = KeyActionType::Release;
+				eventData.keyAction = EKeyActionType::Release;
 
 				break;
 			}
 			case ButtonPress:
 			{
-				_x11TranslateInputEventMouseButton( pInputState, pXEvent, pEvent, MouseButtonActionType::Click );
+				_x11TranslateInputEventMouseButton( pEventController, pXEvent, pOutEvent, EMouseButtonActionType::Click );
 
 				break;
 			}
 			case ButtonRelease:
 			{
-				_x11TranslateInputEventMouseButton( pInputState, pXEvent, pEvent, MouseButtonActionType::Release );
+				_x11TranslateInputEventMouseButton( pEventController, pXEvent, pOutEvent, EMouseButtonActionType::Release );
 
 				break;
 			}
@@ -220,12 +210,12 @@ namespace ts3
 			{
 				const math::Vec2i32 cursorPos { pXEvent.xmotion.x, pXEvent.xmotion.y };
 
-				if ( pInputState.mouseLastRegPos == CX_EVENT_MOUSE_POS_INVALID )
+				if ( inputState.mouseLastRegPos == CX_EVENT_MOUSE_POS_INVALID )
 				{
-					pInputState.mouseLastRegPos = cursorPos;
+					inputState.mouseLastRegPos = cursorPos;
 				}
 
-				auto & eInputMouseMove = pEvent.eInputMouseMove;
+				auto & eInputMouseMove = pOutEvent.eInputMouseMove;
 				eInputMouseMove.eventCode = E_EVENT_CODE_INPUT_MOUSE_MOVE;
 				eInputMouseMove.cursorPos = cursorPos;
 
@@ -235,9 +225,9 @@ namespace ts3
 				// for the future reference or if additional modifiers need to be supported.
 				// eInputMouseMove.buttonStateMask = _x11GetMouseButtonStateMask( pXEvent.xmotion.state );
 
-				eInputMouseMove.buttonStateMask = pInputState.mouseButtonStateMask;
-				eInputMouseMove.movementDelta = cursorPos - pInputState.mouseLastRegPos;
-				pInputState.mouseLastRegPos = cursorPos;
+				eInputMouseMove.buttonStateMask = inputState.mouseButtonStateMask;
+				eInputMouseMove.movementDelta = cursorPos - inputState.mouseLastRegPos;
+				inputState.mouseLastRegPos = cursorPos;
 
 				break;
 			}
@@ -247,143 +237,144 @@ namespace ts3
 			}
 		}
 
-		return pEvent.commonData.eventCode != E_EVENT_CODE_UNDEFINED;
+		return pOutEvent.commonData.eventCode != E_EVENT_CODE_UNDEFINED;
 	}
 
-	bool _x11TranslateInputEventMouseButton( EventInputState & pInputState, XEvent & pXEvent, Event & pEvent, MouseButtonActionType pButtonAction )
+    bool _x11TranslateInputEventMouseButton( EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent, EMouseButtonActionType pButtonAction )
 	{
+        auto & inputState = pEventController.mInternal->getCurrentInputState();
+
 		const math::Vec2i32 cursorPos { pXEvent.xbutton.x, pXEvent.xbutton.y };
+		const auto EX11MouseButtonID = _x11GetMouseButtonID( pXEvent.xbutton.button );
 
-		auto X11MouseButtonID = _x11GetMouseButtonID( pXEvent.xbutton.button );
-
-		switch( X11MouseButtonID )
+		switch( EX11MouseButtonID )
 		{
-			case X11MouseButtonID::Left:
+			case EX11MouseButtonID::Left:
 			{
-				auto & eInputMouseButton = pEvent.eInputMouseButton;
+				auto & eInputMouseButton = pOutEvent.eInputMouseButton;
 				eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 				eInputMouseButton.cursorPos = cursorPos;
 				eInputMouseButton.buttonAction = pButtonAction;
-				eInputMouseButton.buttonID = MouseButtonID::Left;
+				eInputMouseButton.buttonID = EMouseButtonID::Left;
 
-				if( pButtonAction == MouseButtonActionType::Click )
+				if( pButtonAction == EMouseButtonActionType::Click )
 				{
-					pInputState.mouseButtonStateMask.set( SYS_MOUSE_BUTTON_FLAG_LEFT_BIT );
+					inputState.mouseButtonStateMask.set( E_SYS_MOUSE_BUTTON_FLAG_LEFT_BIT );
 				}
-				else if( pButtonAction == MouseButtonActionType::Release )
+				else if( pButtonAction == EMouseButtonActionType::Release )
 				{
-					pInputState.mouseButtonStateMask.unset( SYS_MOUSE_BUTTON_FLAG_LEFT_BIT );
+					inputState.mouseButtonStateMask.unset( E_SYS_MOUSE_BUTTON_FLAG_LEFT_BIT );
 				}
 
 				break;
 			}
-			case X11MouseButtonID::Middle:
+			case EX11MouseButtonID::Middle:
 			{
-				auto & eInputMouseButton = pEvent.eInputMouseButton;
+				auto & eInputMouseButton = pOutEvent.eInputMouseButton;
 				eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 				eInputMouseButton.cursorPos = cursorPos;
 				eInputMouseButton.buttonAction = pButtonAction;
-				eInputMouseButton.buttonID = MouseButtonID::Middle;
+				eInputMouseButton.buttonID = EMouseButtonID::Middle;
 
-				if( pButtonAction == MouseButtonActionType::Click )
+				if( pButtonAction == EMouseButtonActionType::Click )
 				{
-					pInputState.mouseButtonStateMask.set( SYS_MOUSE_BUTTON_FLAG_MIDDLE_BIT );
+					inputState.mouseButtonStateMask.set( E_SYS_MOUSE_BUTTON_FLAG_MIDDLE_BIT );
 				}
-				else if( pButtonAction == MouseButtonActionType::Release )
+				else if( pButtonAction == EMouseButtonActionType::Release )
 				{
-					pInputState.mouseButtonStateMask.unset( SYS_MOUSE_BUTTON_FLAG_MIDDLE_BIT );
+					inputState.mouseButtonStateMask.unset( E_SYS_MOUSE_BUTTON_FLAG_MIDDLE_BIT );
 				}
 
 				break;
 			}
-			case X11MouseButtonID::Right:
+			case EX11MouseButtonID::Right:
 			{
-				auto & eInputMouseButton = pEvent.eInputMouseButton;
+				auto & eInputMouseButton = pOutEvent.eInputMouseButton;
 				eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 				eInputMouseButton.cursorPos = cursorPos;
 				eInputMouseButton.buttonAction = pButtonAction;
-				eInputMouseButton.buttonID = MouseButtonID::Right;
+				eInputMouseButton.buttonID = EMouseButtonID::Right;
 
-				if( pButtonAction == MouseButtonActionType::Click )
+				if( pButtonAction == EMouseButtonActionType::Click )
 				{
-					pInputState.mouseButtonStateMask.set( SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT );
+					inputState.mouseButtonStateMask.set( E_SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT );
 				}
-				else if( pButtonAction == MouseButtonActionType::Release )
+				else if( pButtonAction == EMouseButtonActionType::Release )
 				{
-					pInputState.mouseButtonStateMask.unset( SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT );
+					inputState.mouseButtonStateMask.unset( E_SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT );
 				}
 
 				break;
 			}
-			case X11MouseButtonID::VWheelUp:
+			case EX11MouseButtonID::VWheelUp:
 			{
-				auto & eInputMouseScroll = pEvent.eInputMouseScroll;
+				auto & eInputMouseScroll = pOutEvent.eInputMouseScroll;
 				eInputMouseScroll.eventCode = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
 				eInputMouseScroll.scrollDelta.x = 0;
 				eInputMouseScroll.scrollDelta.y = 100;
 				break;
 			}
-			case X11MouseButtonID::VWheelDown:
+			case EX11MouseButtonID::VWheelDown:
 			{
-				auto & eInputMouseScroll = pEvent.eInputMouseScroll;
+				auto & eInputMouseScroll = pOutEvent.eInputMouseScroll;
 				eInputMouseScroll.eventCode = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
 				eInputMouseScroll.scrollDelta.x = 0;
 				eInputMouseScroll.scrollDelta.y = -100;
 
 				break;
 			}
-			case X11MouseButtonID::HWheelLeft:
+			case EX11MouseButtonID::HWheelLeft:
 			{
-				auto & eInputMouseScroll = pEvent.eInputMouseScroll;
+				auto & eInputMouseScroll = pOutEvent.eInputMouseScroll;
 				eInputMouseScroll.eventCode = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
 				eInputMouseScroll.scrollDelta.x = -100;
 				eInputMouseScroll.scrollDelta.y = 0;
 
 				break;
 			}
-			case X11MouseButtonID::HWheelRight:
+			case EX11MouseButtonID::HWheelRight:
 			{
-				auto & eInputMouseScroll = pEvent.eInputMouseScroll;
+				auto & eInputMouseScroll = pOutEvent.eInputMouseScroll;
 				eInputMouseScroll.eventCode = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
 				eInputMouseScroll.scrollDelta.x = 100;
 				eInputMouseScroll.scrollDelta.y = 0;
 
 				break;
 			}
-			case X11MouseButtonID::Xbtn1:
+			case EX11MouseButtonID::XBT1:
 			{
-				auto & eInputMouseButton = pEvent.eInputMouseButton;
+				auto & eInputMouseButton = pOutEvent.eInputMouseButton;
 				eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 				eInputMouseButton.cursorPos = cursorPos;
 				eInputMouseButton.buttonAction = pButtonAction;
-				eInputMouseButton.buttonID = MouseButtonID::XB1;
+				eInputMouseButton.buttonID = EMouseButtonID::XB1;
 
-				if( pButtonAction == MouseButtonActionType::Click )
+				if( pButtonAction == EMouseButtonActionType::Click )
 				{
-					pInputState.mouseButtonStateMask.set( SYS_MOUSE_BUTTON_FLAG_XB1_BIT );
+					inputState.mouseButtonStateMask.set( E_SYS_MOUSE_BUTTON_FLAG_XB1_BIT );
 				}
-				else if( pButtonAction == MouseButtonActionType::Release )
+				else if( pButtonAction == EMouseButtonActionType::Release )
 				{
-					pInputState.mouseButtonStateMask.unset( SYS_MOUSE_BUTTON_FLAG_XB1_BIT );
+					inputState.mouseButtonStateMask.unset( E_SYS_MOUSE_BUTTON_FLAG_XB1_BIT );
 				}
 
 				break;
 			}
-			case X11MouseButtonID::Xbtn2:
+			case EX11MouseButtonID::XBT2:
 			{
-				auto & eInputMouseButton = pEvent.eInputMouseButton;
+				auto & eInputMouseButton = pOutEvent.eInputMouseButton;
 				eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 				eInputMouseButton.cursorPos = cursorPos;
 				eInputMouseButton.buttonAction = pButtonAction;
-				eInputMouseButton.buttonID = MouseButtonID::XB2;
+				eInputMouseButton.buttonID = EMouseButtonID::XB2;
 
-				if( pButtonAction == MouseButtonActionType::Click )
+				if( pButtonAction == EMouseButtonActionType::Click )
 				{
-					pInputState.mouseButtonStateMask.set( SYS_MOUSE_BUTTON_FLAG_XB2_BIT );
+					inputState.mouseButtonStateMask.set( E_SYS_MOUSE_BUTTON_FLAG_XB2_BIT );
 				}
-				else if( pButtonAction == MouseButtonActionType::Release )
+				else if( pButtonAction == EMouseButtonActionType::Release )
 				{
-					pInputState.mouseButtonStateMask.unset( SYS_MOUSE_BUTTON_FLAG_XB2_BIT );
+					inputState.mouseButtonStateMask.unset( E_SYS_MOUSE_BUTTON_FLAG_XB2_BIT );
 				}
 
 				break;
@@ -397,19 +388,24 @@ namespace ts3
 		return true;
 	}
 
-	bool _x11TranslatetemEvent( EventDispatcher & pDispatcher, XEvent & pXEvent, Event & pEvent )
+    bool _x11TranslateSystemEvent( EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent )
 	{
 		switch( pXEvent.type )
 		{
 			case ClientMessage:
 			{
-				auto & scNativeData = pDispatcher.mContext->mNativeData;
+				auto & xSessionData = nativeX11GetXSessionData( *( pEventController.mSysContext ) );
+
 				// Type of wm protocol message is stored in data.l[0].
 				long wmpMessageType = pXEvent.xclient.data.l[0];
-				if ( wmpMessageType == scNativeData.wmpDeleteWindow )
+				if ( wmpMessageType == xSessionData.wmpDeleteWindow )
 				{
-					auto & eventData = pEvent.eWindowUpdateClose;
+                    auto * eventSource = pEventController.findEventSource( [&pXEvent]( const EventSourceNativeData & pNativeData ) -> bool {
+                        return pNativeData.windowXID == pXEvent.xclient.window;
+                    });
+					auto & eventData = pOutEvent.eWindowUpdateClose;
 					eventData.eventCode = E_EVENT_CODE_WINDOW_UPDATE_CLOSE;
+                    eventData.eventSource = eventSource;
 				}
 				break;
 			}
@@ -423,165 +419,165 @@ namespace ts3
 	}
 
 
-	static const KeyCode x11KeycodeMap_20_7A[] =
+	static const EKeyCode x11KeycodeMap_20_7A[] =
 	{
-		/* 0x0020 */ KeyCode::Space,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x0030 */ KeyCode::Num0,
-		/* 0x0031 */ KeyCode::Num1,
-		/* 0x0032 */ KeyCode::Num2,
-		/* 0x0033 */ KeyCode::Num3,
-		/* 0x0034 */ KeyCode::Num4,
-		/* 0x0035 */ KeyCode::Num5,
-		/* 0x0036 */ KeyCode::Num6,
-		/* 0x0037 */ KeyCode::Num7,
-		/* 0x0038 */ KeyCode::Num8,
-		/* 0x0039 */ KeyCode::Num9,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x0041 */ KeyCode::CharA,
-		/* 0x0042 */ KeyCode::CharB,
-		/* 0x0043 */ KeyCode::CharC,
-		/* 0x0044 */ KeyCode::CharD,
-		/* 0x0045 */ KeyCode::CharE,
-		/* 0x0046 */ KeyCode::CharF,
-		/* 0x0047 */ KeyCode::CharG,
-		/* 0x0048 */ KeyCode::CharH,
-		/* 0x0049 */ KeyCode::CharI,
-		/* 0x004a */ KeyCode::CharJ,
-		/* 0x004b */ KeyCode::CharK,
-		/* 0x004c */ KeyCode::CharL,
-		/* 0x004d */ KeyCode::CharM,
-		/* 0x004e */ KeyCode::CharN,
-		/* 0x004f */ KeyCode::CharO,
-		/* 0x0050 */ KeyCode::CharP,
-		/* 0x0051 */ KeyCode::CharQ,
-		/* 0x0052 */ KeyCode::CharR,
-		/* 0x0053 */ KeyCode::CharS,
-		/* 0x0054 */ KeyCode::CharT,
-		/* 0x0055 */ KeyCode::CharU,
-		/* 0x0056 */ KeyCode::CharV,
-		/* 0x0057 */ KeyCode::CharW,
-		/* 0x0058 */ KeyCode::CharX,
-		/* 0x0059 */ KeyCode::CharY,
-		/* 0x005a */ KeyCode::CharZ,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x00xx */ KeyCode::Unknown,
-		/* 0x0061 */ KeyCode::CharA,
-		/* 0x0062 */ KeyCode::CharB,
-		/* 0x0063 */ KeyCode::CharC,
-		/* 0x0064 */ KeyCode::CharD,
-		/* 0x0065 */ KeyCode::CharE,
-		/* 0x0066 */ KeyCode::CharF,
-		/* 0x0067 */ KeyCode::CharG,
-		/* 0x0068 */ KeyCode::CharH,
-		/* 0x0069 */ KeyCode::CharI,
-		/* 0x006a */ KeyCode::CharJ,
-		/* 0x006b */ KeyCode::CharK,
-		/* 0x006c */ KeyCode::CharL,
-		/* 0x006d */ KeyCode::CharM,
-		/* 0x006e */ KeyCode::CharN,
-		/* 0x006f */ KeyCode::CharO,
-		/* 0x0070 */ KeyCode::CharP,
-		/* 0x0071 */ KeyCode::CharQ,
-		/* 0x0072 */ KeyCode::CharR,
-		/* 0x0073 */ KeyCode::CharS,
-		/* 0x0074 */ KeyCode::CharT,
-		/* 0x0075 */ KeyCode::CharU,
-		/* 0x0076 */ KeyCode::CharV,
-		/* 0x0077 */ KeyCode::CharW,
-		/* 0x0078 */ KeyCode::CharX,
-		/* 0x0079 */ KeyCode::CharY,
-		/* 0x007a */ KeyCode::CharZ,
+		/* 0x0020 */ EKeyCode::Space,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x0030 */ EKeyCode::Num0,
+		/* 0x0031 */ EKeyCode::Num1,
+		/* 0x0032 */ EKeyCode::Num2,
+		/* 0x0033 */ EKeyCode::Num3,
+		/* 0x0034 */ EKeyCode::Num4,
+		/* 0x0035 */ EKeyCode::Num5,
+		/* 0x0036 */ EKeyCode::Num6,
+		/* 0x0037 */ EKeyCode::Num7,
+		/* 0x0038 */ EKeyCode::Num8,
+		/* 0x0039 */ EKeyCode::Num9,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x0041 */ EKeyCode::CharA,
+		/* 0x0042 */ EKeyCode::CharB,
+		/* 0x0043 */ EKeyCode::CharC,
+		/* 0x0044 */ EKeyCode::CharD,
+		/* 0x0045 */ EKeyCode::CharE,
+		/* 0x0046 */ EKeyCode::CharF,
+		/* 0x0047 */ EKeyCode::CharG,
+		/* 0x0048 */ EKeyCode::CharH,
+		/* 0x0049 */ EKeyCode::CharI,
+		/* 0x004a */ EKeyCode::CharJ,
+		/* 0x004b */ EKeyCode::CharK,
+		/* 0x004c */ EKeyCode::CharL,
+		/* 0x004d */ EKeyCode::CharM,
+		/* 0x004e */ EKeyCode::CharN,
+		/* 0x004f */ EKeyCode::CharO,
+		/* 0x0050 */ EKeyCode::CharP,
+		/* 0x0051 */ EKeyCode::CharQ,
+		/* 0x0052 */ EKeyCode::CharR,
+		/* 0x0053 */ EKeyCode::CharS,
+		/* 0x0054 */ EKeyCode::CharT,
+		/* 0x0055 */ EKeyCode::CharU,
+		/* 0x0056 */ EKeyCode::CharV,
+		/* 0x0057 */ EKeyCode::CharW,
+		/* 0x0058 */ EKeyCode::CharX,
+		/* 0x0059 */ EKeyCode::CharY,
+		/* 0x005a */ EKeyCode::CharZ,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x00xx */ EKeyCode::Unknown,
+		/* 0x0061 */ EKeyCode::CharA,
+		/* 0x0062 */ EKeyCode::CharB,
+		/* 0x0063 */ EKeyCode::CharC,
+		/* 0x0064 */ EKeyCode::CharD,
+		/* 0x0065 */ EKeyCode::CharE,
+		/* 0x0066 */ EKeyCode::CharF,
+		/* 0x0067 */ EKeyCode::CharG,
+		/* 0x0068 */ EKeyCode::CharH,
+		/* 0x0069 */ EKeyCode::CharI,
+		/* 0x006a */ EKeyCode::CharJ,
+		/* 0x006b */ EKeyCode::CharK,
+		/* 0x006c */ EKeyCode::CharL,
+		/* 0x006d */ EKeyCode::CharM,
+		/* 0x006e */ EKeyCode::CharN,
+		/* 0x006f */ EKeyCode::CharO,
+		/* 0x0070 */ EKeyCode::CharP,
+		/* 0x0071 */ EKeyCode::CharQ,
+		/* 0x0072 */ EKeyCode::CharR,
+		/* 0x0073 */ EKeyCode::CharS,
+		/* 0x0074 */ EKeyCode::CharT,
+		/* 0x0075 */ EKeyCode::CharU,
+		/* 0x0076 */ EKeyCode::CharV,
+		/* 0x0077 */ EKeyCode::CharW,
+		/* 0x0078 */ EKeyCode::CharX,
+		/* 0x0079 */ EKeyCode::CharY,
+		/* 0x007a */ EKeyCode::CharZ,
 	};
 
-	static const KeyCode x11KeycodeMap_50_57[] =
+	static const EKeyCode x11KeycodeMap_50_57[] =
 	{
-		/* 0xff50 */ KeyCode::Home,
-		/* 0xff51 */ KeyCode::ArrowLeft,
-		/* 0xff52 */ KeyCode::ArrowUp,
-		/* 0xff53 */ KeyCode::ArrowRight,
-		/* 0xff54 */ KeyCode::ArrowDown,
-		/* 0xff55 */ KeyCode::PageUp,
-		/* 0xff56 */ KeyCode::PageDown,
-		/* 0xff57 */ KeyCode::End
+		/* 0xff50 */ EKeyCode::Home,
+		/* 0xff51 */ EKeyCode::ArrowLeft,
+		/* 0xff52 */ EKeyCode::ArrowUp,
+		/* 0xff53 */ EKeyCode::ArrowRight,
+		/* 0xff54 */ EKeyCode::ArrowDown,
+		/* 0xff55 */ EKeyCode::PageUp,
+		/* 0xff56 */ EKeyCode::PageDown,
+		/* 0xff57 */ EKeyCode::End
 	};
 
-	static const KeyCode x11KeycodeMap_AA_B9[] =
+	static const EKeyCode x11KeycodeMap_AA_B9[] =
 	{
-		/* 0xffaa */ KeyCode::NumpadMul,
-		/* 0xffab */ KeyCode::NumpadAdd,
-		/* 0xffac */ KeyCode::Unknown,
-		/* 0xffad */ KeyCode::NumpadSub,
-		/* 0xffae */ KeyCode::NumpadDot,
-		/* 0xffaf */ KeyCode::NumpadDiv,
-		/* 0xffb0 */ KeyCode::Numpad0,
-		/* 0xffb1 */ KeyCode::Numpad1,
-		/* 0xffb2 */ KeyCode::Numpad2,
-		/* 0xffb3 */ KeyCode::Numpad3,
-		/* 0xffb4 */ KeyCode::Numpad4,
-		/* 0xffb5 */ KeyCode::Numpad5,
-		/* 0xffb6 */ KeyCode::Numpad6,
-		/* 0xffb7 */ KeyCode::Numpad7,
-		/* 0xffb8 */ KeyCode::Numpad8,
-		/* 0xffb9 */ KeyCode::Numpad9,
+		/* 0xffaa */ EKeyCode::NumpadMul,
+		/* 0xffab */ EKeyCode::NumpadAdd,
+		/* 0xffac */ EKeyCode::Unknown,
+		/* 0xffad */ EKeyCode::NumpadSub,
+		/* 0xffae */ EKeyCode::NumpadDot,
+		/* 0xffaf */ EKeyCode::NumpadDiv,
+		/* 0xffb0 */ EKeyCode::Numpad0,
+		/* 0xffb1 */ EKeyCode::Numpad1,
+		/* 0xffb2 */ EKeyCode::Numpad2,
+		/* 0xffb3 */ EKeyCode::Numpad3,
+		/* 0xffb4 */ EKeyCode::Numpad4,
+		/* 0xffb5 */ EKeyCode::Numpad5,
+		/* 0xffb6 */ EKeyCode::Numpad6,
+		/* 0xffb7 */ EKeyCode::Numpad7,
+		/* 0xffb8 */ EKeyCode::Numpad8,
+		/* 0xffb9 */ EKeyCode::Numpad9,
 	};
 
-	static const KeyCode x11KeycodeMap_BE_C9[] =
+	static const EKeyCode x11KeycodeMap_BE_C9[] =
 	{
-		/* 0xffbe */ KeyCode::F1,
-		/* 0xffbf */ KeyCode::F2,
-		/* 0xffc0 */ KeyCode::F3,
-		/* 0xffc1 */ KeyCode::F4,
-		/* 0xffc2 */ KeyCode::F5,
-		/* 0xffc3 */ KeyCode::F6,
-		/* 0xffc4 */ KeyCode::F7,
-		/* 0xffc5 */ KeyCode::F8,
-		/* 0xffc6 */ KeyCode::F9,
-		/* 0xffc7 */ KeyCode::F10,
-		/* 0xffc8 */ KeyCode::F11,
-		/* 0xffc9 */ KeyCode::F12
+		/* 0xffbe */ EKeyCode::F1,
+		/* 0xffbf */ EKeyCode::F2,
+		/* 0xffc0 */ EKeyCode::F3,
+		/* 0xffc1 */ EKeyCode::F4,
+		/* 0xffc2 */ EKeyCode::F5,
+		/* 0xffc3 */ EKeyCode::F6,
+		/* 0xffc4 */ EKeyCode::F7,
+		/* 0xffc5 */ EKeyCode::F8,
+		/* 0xffc6 */ EKeyCode::F9,
+		/* 0xffc7 */ EKeyCode::F10,
+		/* 0xffc8 */ EKeyCode::F11,
+		/* 0xffc9 */ EKeyCode::F12
 	};
 
-	static const KeyCode x11KeycodeMap_E1_EA[] =
+	static const EKeyCode x11KeycodeMap_E1_EA[] =
 	{
-		/* 0xffe1 */ KeyCode::ShiftLeft,
-		/* 0xffe2 */ KeyCode::ShiftRight,
-		/* 0xffe3 */ KeyCode::CtrlLeft,
-		/* 0xffe4 */ KeyCode::CtrlRight,
-		/* 0xffe5 */ KeyCode::CapsLock,
-		/* 0xffe6 */ KeyCode::Unknown,
-		/* 0xffe7 */ KeyCode::Unknown,
-		/* 0xffe8 */ KeyCode::Unknown,
-		/* 0xffe9 */ KeyCode::AltLeft,
-		/* 0xffea */ KeyCode::AltRight
+		/* 0xffe1 */ EKeyCode::ShiftLeft,
+		/* 0xffe2 */ EKeyCode::ShiftRight,
+		/* 0xffe3 */ EKeyCode::CtrlLeft,
+		/* 0xffe4 */ EKeyCode::CtrlRight,
+		/* 0xffe5 */ EKeyCode::CapsLock,
+		/* 0xffe6 */ EKeyCode::Unknown,
+		/* 0xffe7 */ EKeyCode::Unknown,
+		/* 0xffe8 */ EKeyCode::Unknown,
+		/* 0xffe9 */ EKeyCode::AltLeft,
+		/* 0xffea */ EKeyCode::AltRight
 	};
 
 
-	KeyCode _x11GettemKeyCode( KeySym pXkeySym )
+	EKeyCode _x11GetSysKeyCode( KeySym pXkeySym )
 	{
 		if ( ( pXkeySym >= 0x0020 ) && ( pXkeySym <= 0x007a ) )
 		{
@@ -618,78 +614,78 @@ namespace ts3
 
 		if ( pXkeySym == XK_Tab )
 		{
-			return KeyCode::Tab;
+			return EKeyCode::Tab;
 		}
 		else if ( pXkeySym == XK_Return )
 		{
-			return KeyCode::Enter;
+			return EKeyCode::Enter;
 		}
 		else if ( pXkeySym == XK_Escape )
 		{
-			return KeyCode::Escape;
+			return EKeyCode::Escape;
 		}
 		else if ( pXkeySym == XK_BackSpace )
 		{
-			return KeyCode::Backspace;
+			return EKeyCode::Backspace;
 		}
 		else if ( pXkeySym == XK_Insert )
 		{
-			return KeyCode::Insert;
+			return EKeyCode::Insert;
 		}
 		else if ( pXkeySym == XK_Delete )
 		{
-			return KeyCode::Delete;
+			return EKeyCode::Delete;
 		}
 
-		return KeyCode::Unknown;
+		return EKeyCode::Unknown;
 	}
 
-	static constexpr X11MouseButtonID x11MouseButtonIDMap[] =
+	static constexpr EX11MouseButtonID x11MouseButtonIDMap[] =
 	{
-		X11MouseButtonID::Left,
-		X11MouseButtonID::Middle,
-		X11MouseButtonID::Right,
-		X11MouseButtonID::VWheelUp,
-		X11MouseButtonID::VWheelDown,
-		X11MouseButtonID::HWheelLeft,
-		X11MouseButtonID::HWheelRight,
-		X11MouseButtonID::Xbtn1,
-		X11MouseButtonID::Xbtn2,
-		X11MouseButtonID::Unknown
+		EX11MouseButtonID::Left,
+		EX11MouseButtonID::Middle,
+		EX11MouseButtonID::Right,
+		EX11MouseButtonID::VWheelUp,
+		EX11MouseButtonID::VWheelDown,
+		EX11MouseButtonID::HWheelLeft,
+		EX11MouseButtonID::HWheelRight,
+		EX11MouseButtonID::XBT1,
+		EX11MouseButtonID::XBT2,
+		EX11MouseButtonID::Unknown
 	};
 	static constexpr auto x11MouseButtonMaxIndex = staticArraySize( x11MouseButtonIDMap ) - 1;
 
-	X11MouseButtonID _x11GetMouseButtonID( uint32 pButton )
+	EX11MouseButtonID _x11GetMouseButtonID( uint32 pButton )
 	{
 		auto mouseButtonIndex = static_cast<size_t>( pButton - 1 );
 		mouseButtonIndex = getMinOf( mouseButtonIndex, x11MouseButtonMaxIndex );
 		return x11MouseButtonIDMap[mouseButtonIndex];
 	}
 
-	Bitmask<MouseButtonFlagBits> _x11GetMouseButtonStateMask( uint32 pState )
+	Bitmask<EMouseButtonFlagBits> _x11GetMouseButtonStateMask( uint32 pState )
 	{
 		Bitmask<uint32> inputStateMask = pState;
-		Bitmask<MouseButtonFlagBits> buttonStateMask;
+		Bitmask<EMouseButtonFlagBits> buttonStateMask;
 		if( pState != 0 )
 		{
 			if( inputStateMask.isSetAnyOf( Button1Mask | Button1MotionMask ) )
 			{
 				inputStateMask.unset( Button1Mask | Button1MotionMask );
-				buttonStateMask.set( SYS_MOUSE_BUTTON_FLAG_LEFT_BIT );
+				buttonStateMask.set( E_SYS_MOUSE_BUTTON_FLAG_LEFT_BIT );
 			}
 			if( inputStateMask.isSetAnyOf( Button2Mask | Button2MotionMask ) )
 			{
 				inputStateMask.unset( Button2Mask | Button2MotionMask );
-				buttonStateMask.set( SYS_MOUSE_BUTTON_FLAG_MIDDLE_BIT );
+				buttonStateMask.set( E_SYS_MOUSE_BUTTON_FLAG_MIDDLE_BIT );
 			}
 			if( inputStateMask.isSetAnyOf( Button3Mask | Button3MotionMask ) )
 			{
 				inputStateMask.unset( Button3Mask | Button3MotionMask );
-				buttonStateMask.set( SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT);
+				buttonStateMask.set( E_SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT);
 			}
 		}
 		return buttonStateMask;
 	}
 
-}
+} // namespace ts3::system
 #endif

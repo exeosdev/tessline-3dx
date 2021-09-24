@@ -1,9 +1,11 @@
 
-#include <ts3/system/openGL.h>
+#include <ts3/system/openGLNative.h>
+#include <ts3/system/sysContextNative.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
-namespace ts3
+namespace ts3::system
 {
+
 	// Creates X11 OpenGL surface using provided window create attributes and visual config.
 	void _x11CreateGLWindowAndSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData,
 	                                   X11WindowCreateInfo & pWindowCreateInfo,
@@ -12,183 +14,151 @@ namespace ts3
 	// Destroys existing surface and corresponding window.
 	void _x11DestroyGLWindowAndSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData );
 
+    // Destroys existing surface and corresponding window.
+    void _x11CreateAndBindLegacyRenderContext( GLRenderContextNativeData & pGLContextNativeData,
+                                               const GLDisplaySurfaceNativeData & pGLSurfaceNativeData );
+
 	// Selects matching FBConfig for a GL surface. Format is selected using current system's configuration. Uses legacy API.
-	GLXFBConfig _x11ChooseLegacyGLFBConfig( Display * pDisplay, int pScreenIndex );
+	GLXFBConfig _x11ChooseLegacyGLFBConfig( XDisplay pDisplay, int pScreenIndex );
 
 	// Selects matching pixel format for surface described with a VisualConfig. Uses new EXT API and supports stuff like MSAA.
-	GLXFBConfig _x11ChooseCoreGLFBConfig( Display * pDisplay, int pScreenIndex, const VisualConfig & pVisualConfig );
+	GLXFBConfig _x11ChooseCoreGLFBConfig( XDisplay pDisplay, int pScreenIndex, const VisualConfig & pVisualConfig );
 
 	// Returns an array of FBConfigs matching specified VisualConfig structure.
-	std::vector<GLXFBConfig> _x11QueryCompatibleFBConfigList( Display * pDisplay, int pScreenIndex, const VisualConfig & pVisualConfig );
+	std::vector<GLXFBConfig> _x11QueryCompatibleFBConfigList( XDisplay pDisplay, int pScreenIndex, const VisualConfig & pVisualConfig );
 
 	// Computes a "compatibility rate", i.e. how much the specified FBConfig matches the visual.
-	int _x11GetFBConfigMatchRate( Display * pDisplay, int pScreenIndex, GLXFBConfig pFBConfig, const VisualConfig & pVisualConfig );
+	int _x11GetFBConfigMatchRate( XDisplay pDisplay, GLXFBConfig pFBConfig, const VisualConfig & pVisualConfig );
 
 	// Translation: VisualConfig --> array of GLX_* attributes required by the system API. Used for surface/context creation.
 	void _x11GetAttribArrayForVisualConfig( const VisualConfig & pVisualConfig, int * pAttribArray );
 
 
-	void GLDisplaySurface::_sysDestroy() noexcept
+    void GLSystemDriver::_nativeCtor()
+    {
+        mInternal->nativeDataPriv.setSessionData( nativeX11GetXSessionData( *mSysContext ) );
+    }
+
+    void GLSystemDriver::_nativeDtor() noexcept
+    {
+        mInternal->nativeDataPriv.resetSessionData();
+    }
+
+	void GLSystemDriver::_nativeInitializePlatform()
 	{
-		_x11DestroyGLWindowAndSurface( mNativeData );
-	}
+        ts3DebugAssert( !mInternal->nativeDataPriv.initState );
+        // Init state should be first created here and destroyed as soon as proper GL
+        // contexts are created (this is not enforce, though, and controlled explicitly
+        // by the user and done by calling releaseInitState() method od the driver).
+        mInternal->nativeDataPriv.initState = new GLSystemDriverNativeData::InitState();
 
-	void GLDisplaySurface::_sysSwapBuffers()
-	{
-		glXSwapBuffers( mNativeData.display, mNativeData.xwindow );
-	}
-
-	void GLDisplaySurface::_sysQueryCurrentSize( WindowSize & pSize ) const
-	{
-		XWindowAttributes windowAttributes;
-		XGetWindowAttributes( mNativeData.display,
-		                      mNativeData.xwindow,
-		                      &windowAttributes );
-
-		pSize.x = windowAttributes.width;
-		pSize.y = windowAttributes.height;
-	}
-
-
-	void GLRenderContext::_sysDestroy() noexcept
-	{
-		if( mNativeData.contextHandle != nullptr )
-		{
-			if( _sysValidateCurrentBinding() )
-			{
-				::glXMakeContextCurrent( mNativeData.display, cvXIDNone, cvXIDNone, nullptr );
-			}
-
-			::glXDestroyContext( mNativeData.display, mNativeData.contextHandle );
-
-			mNativeData.contextHandle = nullptr;
-		}
-	}
-
-	void GLRenderContext::_sysBindForCurrentThread( GLDisplaySurface & pTargetSurface )
-	{
-		::glXMakeContextCurrent( mNativeData.display,
-		                         pTargetSurface.mNativeData.xwindow,
-		                         pTargetSurface.mNativeData.xwindow,
-		                         mNativeData.contextHandle );
-	}
-
-	bool GLRenderContext::_sysValidateCurrentBinding() const
-	{
-		auto currentContext = ::glXGetCurrentContext();
-		return mNativeData.contextHandle == currentContext;
-	}
-
-
-	void GLDriver::_sysInitializePlatform()
-	{
-		auto & scNativeData = mContext->mNativeData;
-		auto & openglInitState = mNativeData.initState;
+        auto & xSessionData = nativeX11GetXSessionData( mInternal->nativeDataPriv );
 
 		int glxVersionMajor = 0;
 		int glxVersionMinor = 0;
-		::glXQueryVersion( scNativeData.display, &glxVersionMajor, &glxVersionMinor );
-		if( ( glxVersionMajor == 0 ) || ( ( glxVersionMajor == 1 ) && ( glxVersionMinor < 3 ) ) )
+
+		::glXQueryVersion( xSessionData.display, &glxVersionMajor, &glxVersionMinor );
+        // We need at least version 1.3 of the GLX runtime (that's rather a pretty old one...).
+		if( ( glxVersionMajor <= 0 ) || ( ( glxVersionMajor == 1 ) && ( glxVersionMinor < 3 ) ) )
 		{
-			throw 0;
+			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		VisualConfig legacyVisualConfig;
-		legacyVisualConfig = gfxGetDefaultVisualConfigForSysWindow();
+		legacyVisualConfig = vsxGetDefaultVisualConfigForSysWindow();
 		legacyVisualConfig.flags.set( VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
-		X11WindowCreateInfo x11WindowCreateInfo;
-		x11WindowCreateInfo.display = scNativeData.display;
-		x11WindowCreateInfo.screenIndex = scNativeData.screenIndex;
-		x11WindowCreateInfo.rootWindow = scNativeData.rootWindow;
-		x11WindowCreateInfo.wmpDeleteWindow = scNativeData.wmpDeleteWindow;
+		X11WindowCreateInfo windowCreateInfo;
+        windowCreateInfo.setSessionData( xSessionData );
 
-		_x11CreateGLWindowAndSurface( openglInitState.surfaceData, x11WindowCreateInfo, legacyVisualConfig );
+        auto & tmpSurfaceNativeData = mInternal->nativeDataPriv.initState->surfaceData;
+		_x11CreateGLWindowAndSurface( tmpSurfaceNativeData, windowCreateInfo, legacyVisualConfig );
 
-		auto tempContextHandle = ::glXCreateContext( scNativeData.display,
-		                                             openglInitState.surfaceData.visualInfo,
-		                                             nullptr,
-		                                             True );
-		if ( tempContextHandle == nullptr )
-		{
-			throw 0;
-		}
-
-		openglInitState.contextData.contextHandle = tempContextHandle;
-		openglInitState.contextData.display = scNativeData.display;
-		openglInitState.contextData.targetSurface = openglInitState.surfaceData.xwindow;
-
-		auto makeCurrentResult = ::glXMakeCurrent( openglInitState.contextData.display,
-		                                           openglInitState.contextData.targetSurface,
-		                                           openglInitState.contextData.contextHandle );
-		if ( makeCurrentResult == False )
-		{
-			throw 0;
-		}
+        auto & tmpContextNativeData = mInternal->nativeDataPriv.initState->contextData;
+        _x11CreateAndBindLegacyRenderContext( tmpContextNativeData, tmpSurfaceNativeData );
 
         auto glewResult = glewInit();
         if ( glewResult != GLEW_OK )
         {
-            throw 0;
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 	}
 
-	void GLDriver::_sysReleaseInitState()
+	void GLSystemDriver::_nativeReleaseInitState()
 	{
-		auto & openglInitState = mNativeData.initState;
+        if( !mInternal->nativeDataPriv.initState )
+        {
+            return;
+        }
 
-		if( openglInitState.contextData.contextHandle != nullptr )
+        auto & xSessionData = nativeX11GetXSessionData( mInternal->nativeDataPriv );
+
+        auto & tmpSurfaceNativeData = mInternal->nativeDataPriv.initState->surfaceData;
+        auto & tmpContextNativeData = mInternal->nativeDataPriv.initState->contextData;
+
+		if( tmpContextNativeData.contextHandle != nullptr )
 		{
-			::glXDestroyContext( openglInitState.contextData.display, openglInitState.contextData.contextHandle );
-			openglInitState.contextData.contextHandle = nullptr;
-			openglInitState.contextData.targetSurface = cvXIDNone;
+			::glXDestroyContext( xSessionData.display, tmpContextNativeData.contextHandle );
+			tmpContextNativeData.contextHandle = nullptr;
+            tmpContextNativeData.resetSessionData();
 		}
 
-		if( openglInitState.surfaceData.xwindow != cvXIDNone )
+		if( tmpSurfaceNativeData.windowXID != E_X11_XID_NONE )
 		{
-			_x11DestroyGLWindowAndSurface( openglInitState.surfaceData );
-			openglInitState.surfaceData.fbConfig = nullptr;
+			_x11DestroyGLWindowAndSurface( tmpSurfaceNativeData );
+			tmpSurfaceNativeData.fbConfig = nullptr;
 		}
 
-		if( openglInitState.surfaceData.visualInfo != nullptr )
+		if( tmpSurfaceNativeData.visualInfo != nullptr )
 		{
-			XFree( openglInitState.surfaceData.visualInfo );
-			openglInitState.surfaceData.visualInfo = nullptr;
+			XFree( tmpSurfaceNativeData.visualInfo );
+			tmpSurfaceNativeData.visualInfo = nullptr;
 		}
+
+        delete mInternal->nativeDataPriv.initState;
+        mInternal->nativeDataPriv.initState = nullptr;
 	}
 
-	void GLDriver::_sysCreateDisplaySurface( GLDisplaySurface & pGLSurface, const GLDisplaySurfaceCreateInfo & pCreateInfo )
+	void GLSystemDriver::_nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo )
 	{
-		auto & scNativeData = mContext->mNativeData;
+        auto & xSessionData = nativeX11GetXSessionData( mInternal->nativeDataPriv );
 
 		X11WindowCreateInfo x11WindowCreateInfo;
+        x11WindowCreateInfo.setSessionData( xSessionData );
 		x11WindowCreateInfo.commonProperties.geometry = pCreateInfo.windowGeometry;
-		x11WindowCreateInfo.commonProperties.title = "Exeos Framework OpenGL Window";
-		x11WindowCreateInfo.display = scNativeData.display;
-		x11WindowCreateInfo.screenIndex = scNativeData.screenIndex;
-		x11WindowCreateInfo.rootWindow = scNativeData.rootWindow;
-		x11WindowCreateInfo.wmpDeleteWindow = scNativeData.wmpDeleteWindow;
+		x11WindowCreateInfo.commonProperties.title = "TS3 OpenGL Window";
 		x11WindowCreateInfo.fullscreenMode = pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 
-		_x11CreateGLWindowAndSurface( pGLSurface.mNativeData, x11WindowCreateInfo, pCreateInfo.visualConfig );
-		sysX11UpdateNewWindowState( pGLSurface.mNativeData, x11WindowCreateInfo );
+		_x11CreateGLWindowAndSurface( pDisplaySurface.mInternal->nativeDataPriv, x11WindowCreateInfo, pCreateInfo.visualConfig );
+
+		nativeX11UpdateNewWindowState( pDisplaySurface.mInternal->nativeDataPriv, x11WindowCreateInfo );
 	}
 
-	void GLDriver::_sysCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pGLSurface )
+	void GLSystemDriver::_nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface )
 	{
-		pGLSurface.mNativeData.display = glXGetCurrentDisplay();
-		pGLSurface.mNativeData.xwindow = glXGetCurrentDrawable();
+        auto & xSessionData = nativeX11GetXSessionData( mInternal->nativeDataPriv );
+
+        auto & surfaceNativeData = pDisplaySurface.mInternal->nativeDataPriv;
+        surfaceNativeData.setSessionData( xSessionData );
+        surfaceNativeData.windowXID = glXGetCurrentDrawable();
 
 		XWindowAttributes windowAttributes;
-		XGetWindowAttributes( pGLSurface.mNativeData.display,
-		                      pGLSurface.mNativeData.xwindow,
-		                      &windowAttributes );
+		XGetWindowAttributes( xSessionData.display, surfaceNativeData.windowXID, &windowAttributes );
 
-		pGLSurface.mNativeData.colormap = windowAttributes.colormap;
+        surfaceNativeData.xColormap = windowAttributes.colormap;
 	}
 
-	void GLDriver::_sysCreateRenderContext( GLRenderContext & pGLRenderContext, GLDisplaySurface & pGLSurface, const GLRenderContextCreateInfo & pCreateInfo )
+    void GLSystemDriver::_nativeDestroyDisplaySurface( GLDisplaySurface & pDisplaySurface )
+    {
+        _x11DestroyGLWindowAndSurface( pDisplaySurface.mInternal->nativeDataPriv );
+    }
+
+	void GLSystemDriver::_nativeCreateRenderContext( GLRenderContext & pRenderContext,
+                                                     const GLDisplaySurface & pDisplaySurface,
+                                                     const GLRenderContextCreateInfo & pCreateInfo )
 	{
+        auto & xSessionData = nativeX11GetXSessionData( mInternal->nativeDataPriv );
+
 		static PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsProc = nullptr;
 		static PFNGLXSWAPINTERVALEXTPROC glXSwapIntervalEXTProc = nullptr;
 
@@ -202,9 +172,9 @@ namespace ts3
 			glXSwapIntervalEXTProc = (PFNGLXSWAPINTERVALEXTPROC)glXGetProcAddressARB( (const GLubyte *) "glXSwapIntervalEXT" );
 		}
 
-		int contextProfile = GLX_CONTEXT_CORE_PROFILE_BIT_ARB;
 		Bitmask<int> contextCreateFlags = 0;
 		GLXContext shareContextHandle = nullptr;
+        int contextProfile = GLX_CONTEXT_CORE_PROFILE_BIT_ARB;
 
 		if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::GLES )
 		{
@@ -226,7 +196,7 @@ namespace ts3
 		{
 			if( pCreateInfo.shareContext != nullptr )
 			{
-				shareContextHandle = pCreateInfo.shareContext->mNativeData.contextHandle;
+				shareContextHandle = pCreateInfo.shareContext->mNativeData->contextHandle;
 			}
 		}
 
@@ -244,57 +214,143 @@ namespace ts3
 			FALSE
 		};
 
-		GLXContext contextHandle = glXCreateContextAttribsProc( pGLSurface.mNativeData.display,
-		                                                        pGLSurface.mNativeData.fbConfig,
-		                                                        shareContextHandle,
-		                                                        True,
-		                                                        &( contextAttribs[0] ) );
-
+        const auto & surfaceNativeData = pDisplaySurface.mInternal->nativeDataPriv;
+		GLXContext contextHandle = glXCreateContextAttribsProc( xSessionData.display,
+                                                                surfaceNativeData.fbConfig,
+                                                                shareContextHandle,
+                                                                True,
+                                                                &( contextAttribs[0] ) );
 		if ( contextHandle == nullptr )
 		{
-			throw 0;
+			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
-		pGLRenderContext.mNativeData.display = pGLSurface.mNativeData.display;
-		pGLRenderContext.mNativeData.targetSurface = pGLSurface.mNativeData.xwindow;
-		pGLRenderContext.mNativeData.contextHandle = contextHandle;
+        auto & contextNativeData = pRenderContext.mInternal->nativeDataPriv;
+		contextNativeData.setSessionData( xSessionData );
+		contextNativeData.contextHandle = contextHandle;
 	}
 
-	void GLDriver::_sysCreateRenderContextForCurrentThread( GLRenderContext & pGLRenderContext )
+	void GLSystemDriver::_nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext )
 	{
+        auto & xSessionData = nativeX11GetXSessionData( mInternal->nativeDataPriv );
+
 		auto contextHandle = ::glXGetCurrentContext();
 		if ( contextHandle == nullptr )
 		{
-			throw 0;
+			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
-		pGLRenderContext.mNativeData.contextHandle = contextHandle;
+
+        auto & contextNativeData = pRenderContext.mInternal->nativeDataPriv;
+        contextNativeData.setSessionData( xSessionData );
+        contextNativeData.contextHandle = contextHandle;
 	}
+
+    void GLSystemDriver::_nativeDestroyRenderContext( GLRenderContext & pRenderContext )
+    {
+        auto & xSessionData = mInternal->nativeDataPriv.getSessionData();
+
+        if( pRenderContext.mInternal->nativeDataPriv.contextHandle != nullptr )
+        {
+            if( _nativeIsRenderContextBound() )
+            {
+                ::glXMakeContextCurrent( xSessionData.display, E_X11_XID_NONE, E_X11_XID_NONE, nullptr );
+            }
+
+            ::glXDestroyContext( xSessionData.display, pRenderContext.mInternal->nativeDataPriv.contextHandle );
+
+            pRenderContext.mInternal->nativeDataPriv.resetSessionData();
+            pRenderContext.mInternal->nativeDataPriv.contextHandle = nullptr;
+        }
+    }
+
+    void GLSystemDriver::_nativeResetContextBinding()
+    {
+        auto & xSessionData = mInternal->nativeDataPriv.getSessionData();
+        ::glXMakeContextCurrent( xSessionData.display, E_X11_XID_NONE, E_X11_XID_NONE, nullptr );
+    }
+
+    bool GLSystemDriver::_nativeIsRenderContextBound() const
+    {
+        auto currentContext = ::glXGetCurrentContext();
+        return currentContext != nullptr;
+    }
+
+    bool GLSystemDriver::_nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const
+    {
+        auto currentContext = ::glXGetCurrentContext();
+        return currentContext == pRenderContext.mInternal->nativeDataPriv.contextHandle;
+    }
+
+    bool GLSystemDriver::_nativeIsDisplaySurfaceValid( const GLDisplaySurface & pDisplaySurface ) const
+    {
+        return pDisplaySurface.mInternal->nativeDataPriv.fbConfig != nullptr;
+    }
+
+    bool GLSystemDriver::_nativeIsRenderContextValid( const GLRenderContext & pRenderContext ) const
+    {
+        return pRenderContext.mInternal->nativeDataPriv.contextHandle != nullptr;
+    }
+
+
+    void GLDisplaySurface::_nativeSwapBuffers()
+    {
+        auto & xSessionData = nativeX11GetXSessionData( mInternal->nativeDataPriv );
+        glXSwapBuffers( xSessionData.display, mInternal->nativeDataPriv.windowXID );
+    }
+
+    void GLDisplaySurface::_nativeQueryRenderAreaSize( WindowSize & pOutSize ) const
+    {
+        auto & xSessionData = nativeX11GetXSessionData( mInternal->nativeDataPriv );
+
+        XWindowAttributes windowAttributes;
+        XGetWindowAttributes( xSessionData.display,
+                              mInternal->nativeDataPriv.windowXID,
+                              &windowAttributes );
+
+        pOutSize.x = windowAttributes.width;
+        pOutSize.y = windowAttributes.height;
+    }
+
+
+    void GLRenderContext::_nativeBindForCurrentThread( const GLDisplaySurface & pTargetSurface )
+    {
+        auto & xSessionData = nativeX11GetXSessionData( mInternal->nativeDataPriv );
+
+        ::glXMakeContextCurrent( xSessionData.display,
+                                 pTargetSurface.mInternal->nativeDataPriv.windowXID,
+                                 pTargetSurface.mInternal->nativeDataPriv.windowXID,
+                                 mInternal->nativeDataPriv.contextHandle );
+    }
 
 	
 	void _x11CreateGLWindowAndSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData,
 	                                   X11WindowCreateInfo & pWindowCreateInfo,
 	                                   const VisualConfig & pVisualConfig )
 	{
-		GLXFBConfig windowFBConfig = nullptr;
+        auto & xSessionData = nativeX11GetXSessionData( pWindowCreateInfo );
 
+		GLXFBConfig windowFBConfig = nullptr;
 		if( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
 		{
-			windowFBConfig = _x11ChooseLegacyGLFBConfig( pWindowCreateInfo.display, pWindowCreateInfo.screenIndex );
+			windowFBConfig = _x11ChooseLegacyGLFBConfig( xSessionData.display,
+                                                         xSessionData.screenIndex );
 		}
 		else
 		{
-			windowFBConfig = _x11ChooseCoreGLFBConfig( pWindowCreateInfo.display, pWindowCreateInfo.screenIndex, pVisualConfig );
+			windowFBConfig = _x11ChooseCoreGLFBConfig( xSessionData.display,
+                                                       xSessionData.screenIndex,
+                                                       pVisualConfig );
 		}
 
 		if( windowFBConfig == nullptr )
 		{
-			throw 0;
+			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
-		auto * fbConfigVisualInfo = glXGetVisualFromFBConfig( pWindowCreateInfo.display, windowFBConfig );
+		auto * fbConfigVisualInfo = glXGetVisualFromFBConfig( xSessionData.display, windowFBConfig );
 		if( fbConfigVisualInfo == nullptr )
 		{
-			throw 0;
+			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		pGLSurfaceNativeData.fbConfig = windowFBConfig;
@@ -303,16 +359,44 @@ namespace ts3
 		pWindowCreateInfo.colorDepth = fbConfigVisualInfo->depth;
 		pWindowCreateInfo.windowVisual = fbConfigVisualInfo->visual;
 
-		sysX11CreateWindow( pGLSurfaceNativeData, pWindowCreateInfo );
+        nativeX11CreateWindow( pGLSurfaceNativeData, pWindowCreateInfo );
 	}
 
 	void _x11DestroyGLWindowAndSurface( GLDisplaySurfaceNativeData & pGLSurfaceNativeData )
 	{
-		XUnmapWindow( pGLSurfaceNativeData.display, pGLSurfaceNativeData.xwindow );
-		sysX11DestroyWindow( pGLSurfaceNativeData );
+        auto & xSessionData = nativeX11GetXSessionData( pGLSurfaceNativeData );
+
+		XUnmapWindow( xSessionData.display, pGLSurfaceNativeData.windowXID );
+        nativeX11DestroyWindow( pGLSurfaceNativeData );
 	}
 
-	GLXFBConfig _x11ChooseLegacyGLFBConfig( Display * pDisplay, int pScreenIndex )
+    void _x11CreateAndBindLegacyRenderContext( GLRenderContextNativeData & pGLContextNativeData,
+                                               const GLDisplaySurfaceNativeData & pGLSurfaceNativeData )
+    {
+        auto & xSessionData = nativeX11GetXSessionData( pGLSurfaceNativeData );
+
+        auto tempContextHandle = ::glXCreateContext( xSessionData.display,
+                                                     pGLSurfaceNativeData.visualInfo,
+                                                     nullptr,
+                                                     True );
+        if ( tempContextHandle == nullptr )
+        {
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+        }
+
+        pGLContextNativeData.setSessionData( xSessionData );
+        pGLContextNativeData.contextHandle = tempContextHandle;
+
+        auto makeCurrentResult = ::glXMakeCurrent( xSessionData.display,
+                                                   pGLSurfaceNativeData.windowXID,
+                                                   pGLContextNativeData.contextHandle );
+        if ( makeCurrentResult == False )
+        {
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+        }
+    }
+
+	GLXFBConfig _x11ChooseLegacyGLFBConfig( XDisplay pDisplay, int pScreenIndex )
 	{
 		const int defaultVisualAttribs[] =
 		{
@@ -327,7 +411,7 @@ namespace ts3
 			GLX_DEPTH_SIZE,    24,
 			GLX_STENCIL_SIZE,  8,
 			GLX_DOUBLEBUFFER,  True,
-			cvXIDNone,
+            E_X11_XID_NONE,
 		};
 
 		const int defaultVisualAttribsNoDepthStencil[] =
@@ -341,7 +425,7 @@ namespace ts3
 			GLX_BLUE_SIZE,     8,
 			GLX_ALPHA_SIZE,    8,
 			GLX_DOUBLEBUFFER,  True,
-			cvXIDNone,
+			E_X11_XID_NONE,
 		};
 
 		int fbConfigListSize = 0;
@@ -352,7 +436,7 @@ namespace ts3
 			fbConfigList = glXChooseFBConfig( pDisplay, pScreenIndex, defaultVisualAttribsNoDepthStencil, &fbConfigListSize );
 			if( ( fbConfigList == nullptr ) || ( fbConfigListSize == 0 ) )
 			{
-				throw 0;
+				ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 			}
 		}
 
@@ -389,7 +473,7 @@ namespace ts3
 		return bestFBConfig;
 	}
 
-	GLXFBConfig _x11ChooseCoreGLFBConfig( Display * pDisplay, int pScreenIndex, const VisualConfig & pVisualConfig )
+	GLXFBConfig _x11ChooseCoreGLFBConfig( XDisplay pDisplay, int pScreenIndex, const VisualConfig & pVisualConfig )
 	{
 		auto fbConfigList = _x11QueryCompatibleFBConfigList( pDisplay, pScreenIndex, pVisualConfig );
 
@@ -398,7 +482,7 @@ namespace ts3
 
 		for ( auto fbConfig : fbConfigList )
 		{
-			int matchRate = _x11GetFBConfigMatchRate( pDisplay, pScreenIndex, fbConfig, pVisualConfig );
+			int matchRate = _x11GetFBConfigMatchRate( pDisplay, fbConfig, pVisualConfig );
 			if ( matchRate > bestMatchRate )
 			{
 				bestMatchRate = matchRate;
@@ -411,7 +495,7 @@ namespace ts3
 
     static constexpr size_t cxX11MaxGLXFBConfigAttributesNum = 64u;
 
-	std::vector<GLXFBConfig> _x11QueryCompatibleFBConfigList( Display * pDisplay, int pScreenIndex, const VisualConfig & pVisualConfig )
+	std::vector<GLXFBConfig> _x11QueryCompatibleFBConfigList( XDisplay pDisplay, int pScreenIndex, const VisualConfig & pVisualConfig )
 	{
 		std::vector<GLXFBConfig> result;
 
@@ -423,7 +507,7 @@ namespace ts3
 
 		if ( ( pFBConfigList == nullptr ) || ( pFBConfigListSize == 0 ) )
 		{
-			throw 0;
+			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		for ( int pFBConfigIndex = 0; pFBConfigIndex < pFBConfigListSize; ++pFBConfigIndex )
@@ -450,7 +534,7 @@ namespace ts3
 		return result;
 	}
 
-	int _x11GetFBConfigMatchRate( Display * pDisplay, int pScreenIndex, GLXFBConfig pFBConfig, const VisualConfig & pVisualConfig )
+	int _x11GetFBConfigMatchRate( XDisplay pDisplay, GLXFBConfig pFBConfig, const VisualConfig & pVisualConfig )
 	{
 		int doubleBufferRequestedState = True;
 		int stereoModeRequestedState = False;
@@ -569,8 +653,8 @@ namespace ts3
 			pAttribArray[attribIndex++] = pVisualConfig.depthStencilDesc.stencilBufferSize;
 		}
 
-		pAttribArray[attribIndex++] = cvXIDNone;
+		pAttribArray[attribIndex++] = E_X11_XID_NONE;
 	}
 
-}
+} // namespace ts3::system
 #endif

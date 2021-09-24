@@ -16,7 +16,7 @@ namespace ts3::system
     {
     public:
         struct ContextPrivateData;
-        std::unique_ptr<ContextPrivateData> const mPrivate;
+        std::unique_ptr<ContextPrivateData> const mInternal;
         const SysContextNativeData * const mNativeData = nullptr;
 
     public:

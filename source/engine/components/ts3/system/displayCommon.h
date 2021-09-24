@@ -21,8 +21,17 @@
 #  pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
-#define TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI 1
-#define TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL 0
+#if !defined( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
+#  if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINFAMILY )
+#    define TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI 1
+#  else
+#    define TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI 0
+#  endif
+#endif
+
+#if !defined( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
+#  define TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL 0
+#endif
 
 namespace ts3::system
 {
