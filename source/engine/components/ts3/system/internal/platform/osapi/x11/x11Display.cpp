@@ -45,6 +45,12 @@ namespace ts3::system
 
     void DisplayManager::_nativeQueryMinWindowSize( DisplaySize & pOutSize ) const
     {
+        pOutSize.x = 0u;
+        pOutSize.y = 0u;
+    }
+
+    void DisplayManager::_nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const
+    {
         auto & xSessionData = nativeX11GetXSessionDataInternal( *this );
 
         // Ideally, we have XRR available here and can fetch the data from XRRMonitorInfo structure.
@@ -73,12 +79,6 @@ namespace ts3::system
             pOutSize.x = static_cast<uint32>( displayWidth );
             pOutSize.y = static_cast<uint32>( displayHeight );
         }
-    }
-
-    void DisplayManager::_nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const
-    {
-        pOutSize.x = 0u;
-        pOutSize.y = 0u;
     }
 
 

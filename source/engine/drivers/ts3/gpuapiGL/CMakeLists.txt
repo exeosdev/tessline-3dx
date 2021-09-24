@@ -3,8 +3,6 @@ setInternal( TS3_DRIVER_GPUAPI_GLCOMMON_SRC_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/prerequisites/GL_commonDefs.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/prerequisites/GL_debugOutput.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/prerequisites/GL_debugOutput.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/prerequisites/GL_errorUtils.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/prerequisites/GL_errorUtils.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/prerequisites/GL_object.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/prerequisites/GL_object.cpp"
 

@@ -82,6 +82,12 @@ namespace ts3::system
         {
             ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
+
+        glewResult = glxewInit();
+        if ( glewResult != GLEW_OK )
+        {
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+        }
 	}
 
 	void GLSystemDriver::_nativeReleaseInitState()
@@ -172,18 +178,23 @@ namespace ts3::system
 			glXSwapIntervalEXTProc = (PFNGLXSWAPINTERVALEXTPROC)glXGetProcAddressARB( (const GLubyte *) "glXSwapIntervalEXT" );
 		}
 
+		int contextProfile = 0;
 		Bitmask<int> contextCreateFlags = 0;
 		GLXContext shareContextHandle = nullptr;
-        int contextProfile = GLX_CONTEXT_CORE_PROFILE_BIT_ARB;
 
-		if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::GLES )
+		if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::Core )
 		{
-			contextProfile = GLX_CONTEXT_ES_PROFILE_BIT_EXT;
+		    contextProfile = GLX_CONTEXT_CORE_PROFILE_BIT_ARB;
 		}
-		if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::Legacy )
+		else if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::Legacy )
 		{
-			contextProfile = GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
+		    contextProfile = GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
 		}
+		else if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::GLES )
+		{
+		    contextProfile = GLX_CONTEXT_ES_PROFILE_BIT_EXT;
+		}
+
 		if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
 		{
 			contextCreateFlags |= GLX_CONTEXT_DEBUG_BIT_ARB;
@@ -194,7 +205,7 @@ namespace ts3::system
 		}
 		if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
 		{
-			if( pCreateInfo.shareContext != nullptr )
+			if( pCreateInfo.shareContext )
 			{
 				shareContextHandle = pCreateInfo.shareContext->mNativeData->contextHandle;
 			}

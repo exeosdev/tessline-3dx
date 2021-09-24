@@ -69,9 +69,11 @@ namespace ts3::system
         std::string toString() const;
     };
 
-    class GLErrorHandler
+    class GLCoreAPI
     {
     public:
+        static Version queryRuntimeVersion();
+
         static bool checkLastResult();
 
         static bool checkLastError( GLenum pErrorCode );
@@ -86,10 +88,10 @@ namespace ts3::system
 } // namespace ts3::system
 
 #if( TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS )
-#  define ts3GLCheckLastResult()             GLErrorHandler::checkLastResult()
-#  define ts3GLCheckLastError( pErrorCode )  GLErrorHandler::checkLastError( pErrorCode )
-#  define ts3GLHandleLastError()             GLErrorHandler::handleLastError()
-#  define ts3GLResetErrorQueue()             GLErrorHandler::resetErrorQueue()
+#  define ts3GLCheckLastResult()             GLCoreAPI::checkLastResult()
+#  define ts3GLCheckLastError( pErrorCode )  GLCoreAPI::checkLastError( pErrorCode )
+#  define ts3GLHandleLastError()             GLCoreAPI::handleLastError()
+#  define ts3GLResetErrorQueue()             GLCoreAPI::resetErrorQueue()
 #else
 #  define ts3GLCheckLastResult()
 #  define ts3GLCheckLastError( pErrorCode )

@@ -37,7 +37,7 @@ namespace ts3::system
 
     bool WindowManager::_nativeIsWindowValid( const Window & pWindow ) const noexcept
 	{
-        return pWindow.mInternal->nativeDataPriv.windowXID != E_XID_NONE;
+        return pWindow.mInternal->nativeDataPriv.windowXID != E_X11_XID_NONE;
 	}
 
 

@@ -51,7 +51,6 @@
 #endif
 
 #include "prerequisites/GL_commonDefs.h"
-#include "prerequisites/GL_errorUtils.h"
 #include "prerequisites/GL_debugOutput.h"
 #include "prerequisites/GL_object.h"
 
