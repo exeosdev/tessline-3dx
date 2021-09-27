@@ -127,12 +127,12 @@ namespace ts3::system
     , mInternal( std::make_unique<ObjectInternalData>() )
     , mNativeData( &( mInternal->nativeDataPriv ) )
     {
-        _nativeCtor();
+        _nativeConstructor();
     }
 
-    WindowManager::~WindowManager()
+    WindowManager::~WindowManager() noexcept
     {
-        _nativeDtor();
+        _nativeDestructor();
     }
 
     WindowHandle WindowManager::createWindow( const WindowCreateInfo & pCreateInfo )

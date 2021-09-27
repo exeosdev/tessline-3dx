@@ -4,7 +4,18 @@
 
 #include "visual.h"
 #include "windowCommon.h"
-#include <GL/glew.h>
+
+#define TS3_SYSTEM_GL_PLATFORM_TYPE_CORE 0x7001
+#define TS3_SYSTEM_GL_PLATFORM_TYPE_ES   0x7002
+
+#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_DESKTOP )
+#  define TS3_SYSTEM_GL_PLATFORM_TYPE TS3_SYSTEM_GL_PLATFORM_TYPE_CORE
+#  include <GL/glew.h>
+#else
+#  define TS3_SYSTEM_GL_PLATFORM_TYPE TS3_SYSTEM_GL_PLATFORM_TYPE_ES
+#  include <GLES3/gl3platform.h>
+#  include <GLES3/gl3.h>
+#endif
 
 #if !defined( TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS )
 #  if( TS3_DEBUG || TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS_NON_DEBUG )
@@ -37,7 +48,8 @@ namespace ts3::system
         E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT = 0x1000,
         E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT = 0x2000,
         E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT = 0x0010,
-        E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT = 0x0020
+        E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARING_OPTIONAL_BIT = 0x0020,
+        E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT = 0x0040
     };
 
     /// @brief
@@ -69,9 +81,11 @@ namespace ts3::system
         std::string toString() const;
     };
 
-    class GLErrorHandler
+    class GLCoreAPI
     {
     public:
+        static Version queryRuntimeVersion();
+
         static bool checkLastResult();
 
         static bool checkLastError( GLenum pErrorCode );
@@ -86,10 +100,10 @@ namespace ts3::system
 } // namespace ts3::system
 
 #if( TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS )
-#  define ts3GLCheckLastResult()             GLErrorHandler::checkLastResult()
-#  define ts3GLCheckLastError( pErrorCode )  GLErrorHandler::checkLastError( pErrorCode )
-#  define ts3GLHandleLastError()             GLErrorHandler::handleLastError()
-#  define ts3GLResetErrorQueue()             GLErrorHandler::resetErrorQueue()
+#  define ts3GLCheckLastResult()             GLCoreAPI::checkLastResult()
+#  define ts3GLCheckLastError( pErrorCode )  GLCoreAPI::checkLastError( pErrorCode )
+#  define ts3GLHandleLastError()             GLCoreAPI::handleLastError()
+#  define ts3GLResetErrorQueue()             GLCoreAPI::resetErrorQueue()
 #else
 #  define ts3GLCheckLastResult()
 #  define ts3GLCheckLastError( pErrorCode )

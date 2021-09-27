@@ -5,19 +5,19 @@
 namespace ts3::system
 {
 
-    void WindowManager::_nativeCtor()
+    void WindowManager::_nativeConstructor()
     {
         mInternal->nativeDataPriv.setSessionData( nativeX11GetXSessionData( *mSysContext ) );
     }
 
-    void WindowManager::_nativeDtor() noexcept
+    void WindowManager::_nativeDestructor() noexcept
     {
         mInternal->nativeDataPriv.resetSessionData();
     }
 
     void WindowManager::_nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo )
     {
-        auto & xSessionData = nativeX11GetXSessionDataInternal( *this );
+        auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 
         X11WindowCreateInfo x11CreateInfo;
         x11CreateInfo.setSessionData( xSessionData );
@@ -37,13 +37,13 @@ namespace ts3::system
 
     bool WindowManager::_nativeIsWindowValid( const Window & pWindow ) const noexcept
 	{
-        return pWindow.mInternal->nativeDataPriv.windowXID != E_XID_NONE;
+        return pWindow.mInternal->nativeDataPriv.windowXID != E_X11_XID_NONE;
 	}
 
 
     void Window::_nativeSetTitleText( const std::string & pTitleText )
     {
-        auto & xSessionData = nativeX11GetXSessionDataInternal( *this );
+        auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 
         XStoreName( xSessionData.display,
                     mInternal->nativeDataPriv.windowXID,
@@ -54,7 +54,7 @@ namespace ts3::system
 
     void Window::_nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode )
     {
-        auto & xSessionData = nativeX11GetXSessionDataInternal( *this );
+        auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 
         XMoveWindow( xSessionData.display,
                      mInternal->nativeDataPriv.windowXID,
@@ -71,7 +71,7 @@ namespace ts3::system
 
     void Window::_nativeGetSize( WindowSizeMode pSizeMode, WindowSize & pOutSize ) const
 	{
-        auto & xSessionData = nativeX11GetXSessionDataInternal( *this );
+        auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 
 		XWindowAttributes windowAttributes;
 		XGetWindowAttributes( xSessionData.display,

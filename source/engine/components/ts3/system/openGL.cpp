@@ -22,10 +22,10 @@ namespace ts3::system
     void GLDisplaySurface::clearColorBuffer()
     {
         glClearColor( 0.1f, 0.33f, 0.9f, 1.0f );
-        ts3GLHandleLastError();
+        //ts3GLHandleLastError();
 
         glClear( GL_COLOR_BUFFER_BIT );
-        ts3GLHandleLastError();
+        //ts3GLHandleLastError();
     }
 
     void GLDisplaySurface::swapBuffers()
@@ -82,13 +82,7 @@ namespace ts3::system
     {
         GLSystemVersionInfo systemVersionInfo;
 
-        int majorVersion = 0;
-        glGetIntegerv( GL_MAJOR_VERSION, &majorVersion );
-        systemVersionInfo.apiVersion.major = static_cast< uint16 >( majorVersion );
-
-        int minorVersion = 0;
-        glGetIntegerv( GL_MINOR_VERSION, &minorVersion );
-        systemVersionInfo.apiVersion.minor = static_cast< uint16 >( minorVersion );
+        systemVersionInfo.apiVersion = GLCoreAPI::queryRuntimeVersion();
 
         if ( const auto * versionStr = glGetString( GL_VERSION ) )
         {
@@ -127,18 +121,26 @@ namespace ts3::system
     , mInternal( std::make_unique<ObjectInternalData>( this ) )
     , mNativeData( &( mInternal->nativeDataPriv ) )
     {
-        _nativeCtor();
+        _nativeConstructor();
     }
 
     GLSystemDriver::~GLSystemDriver()
     {
         _nativeReleaseInitState();
-        _nativeDtor();
+        _nativeDestructor();
     }
 
     void GLSystemDriver::initializePlatform()
     {
         _nativeInitializePlatform();
+
+        mInternal->supportedRuntimeVersion = GLCoreAPI::queryRuntimeVersion();
+
+        if( mInternal->supportedRuntimeVersion.major == 0 )
+        {
+            mInternal->supportedRuntimeVersion.major = 1;
+            mInternal->supportedRuntimeVersion.minor = 0;
+        }
     }
 
     void GLSystemDriver::releaseInitState( GLRenderContext & /* pGLRenderContext */ )
@@ -148,26 +150,26 @@ namespace ts3::system
 
     GLDisplaySurfaceHandle GLSystemDriver::createDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo )
     {
-        GLDisplaySurfaceCreateInfo validatedCreateInfo = pCreateInfo;
+        GLDisplaySurfaceCreateInfo ctxCreateInfo = pCreateInfo;
 
         if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
         {
-            validatedCreateInfo.windowGeometry.size = cvWindowSizeMax;
-            validatedCreateInfo.windowGeometry.frameStyle = WindowFrameStyle::Overlay;
+            ctxCreateInfo.windowGeometry.size = cvWindowSizeMax;
+            ctxCreateInfo.windowGeometry.frameStyle = WindowFrameStyle::Overlay;
         }
         else
         {
-            validatedCreateInfo.windowGeometry.position = pCreateInfo.windowGeometry.position;
-            validatedCreateInfo.windowGeometry.size = pCreateInfo.windowGeometry.size;
-            validatedCreateInfo.windowGeometry.frameStyle = pCreateInfo.windowGeometry.frameStyle;
+            ctxCreateInfo.windowGeometry.position = pCreateInfo.windowGeometry.position;
+            ctxCreateInfo.windowGeometry.size = pCreateInfo.windowGeometry.size;
+            ctxCreateInfo.windowGeometry.frameStyle = pCreateInfo.windowGeometry.frameStyle;
         }
 
-        validatedCreateInfo.windowGeometry = mDisplayManager->validateWindowGeometry( validatedCreateInfo.windowGeometry );
+        ctxCreateInfo.windowGeometry = mDisplayManager->validateWindowGeometry( ctxCreateInfo.windowGeometry );
 
         auto displaySurface = createSysObject<GLDisplaySurface>( getHandle<GLSystemDriver>() );
         displaySurface->mInternal->internalOwnershipFlag = true;
 
-        _nativeCreateDisplaySurface( *displaySurface, validatedCreateInfo );
+        _nativeCreateDisplaySurface( *displaySurface, ctxCreateInfo );
 
         return displaySurface;
     }
@@ -213,18 +215,56 @@ namespace ts3::system
     GLRenderContextHandle GLSystemDriver::createRenderContext( GLDisplaySurface & pSurface,
                                                                const GLRenderContextCreateInfo & pCreateInfo )
     {
-        GLRenderContextCreateInfo validatedCreateInfo = pCreateInfo;
+        GLRenderContextCreateInfo ctxCreateInfo = pCreateInfo;
 
-        if( ( pCreateInfo.requiredAPIVersion == cvVersionInvalid  ) || ( pCreateInfo.requiredAPIVersion == cvVersionUnknown  ) )
+        if( ctxCreateInfo.requiredAPIVersion == cvVersionUnknown  )
         {
-            validatedCreateInfo.requiredAPIVersion.major = 1;
-            validatedCreateInfo.requiredAPIVersion.minor = 0;
+            ctxCreateInfo.requiredAPIVersion = Version{ 1, 0 };
+        }
+        else if( ctxCreateInfo.requiredAPIVersion == cvGLVersionBestSupported )
+        {
+            ctxCreateInfo.requiredAPIVersion = mInternal->supportedRuntimeVersion;
+        }
+
+        if( ctxCreateInfo.targetAPIProfile == EGLAPIProfile::GLES )
+        {
+            if( ctxCreateInfo.requiredAPIVersion > cvGLVersionMaxES )
+            {
+                return nullptr;
+            }
+        }
+        else
+        {
+            if( ctxCreateInfo.requiredAPIVersion > cvGLVersionMaxDesktop )
+            {
+                return nullptr;
+            }
+        }
+        
+        if( ctxCreateInfo.requiredAPIVersion == Version{ 3, 1 } )
+        {
+            if( ( ctxCreateInfo.targetAPIProfile == EGLAPIProfile::Auto ) || ( ctxCreateInfo.targetAPIProfile == EGLAPIProfile::Core ) )
+            {
+                ctxCreateInfo.flags.set( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
+            }
+            else
+            {
+                ctxCreateInfo.flags.unset( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
+            }
+        }
+
+        if( ctxCreateInfo.requiredAPIVersion >= Version{ 3, 2 } )
+        {
+            if( ctxCreateInfo.targetAPIProfile == EGLAPIProfile::Auto )
+            {
+                ctxCreateInfo.targetAPIProfile = EGLAPIProfile::Core;
+            }
         }
 
         auto renderContext = createSysObject<GLRenderContext>( getHandle<GLSystemDriver>() );
         renderContext->mInternal->internalOwnershipFlag = true;
 
-        _nativeCreateRenderContext( *renderContext, pSurface, validatedCreateInfo );
+        _nativeCreateRenderContext( *renderContext, pSurface, ctxCreateInfo );
 
         return renderContext;
     }

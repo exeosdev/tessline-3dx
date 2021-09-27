@@ -22,10 +22,10 @@ namespace ts3::system
     static std::string _win32GetAdapterOutputName( const std::string & pAdapterRegistryKey );
 
 
-    void DisplayManager::_nativeCtor()
+    void DisplayManager::_nativeConstructor()
     {}
 
-    void DisplayManager::_nativeDtor() noexcept
+    void DisplayManager::_nativeDestructor() noexcept
     {}
 
     void DisplayManager::_nativeQueryMinWindowSize( DisplaySize & pOutSize ) const
@@ -45,10 +45,10 @@ namespace ts3::system
     }
 
 
-    void DisplayDriverGeneric::_nativeCtor()
+    void DisplayDriverGeneric::_nativeConstructor()
     {}
 
-    void DisplayDriverGeneric::_nativeDtor() noexcept
+    void DisplayDriverGeneric::_nativeDestructor() noexcept
     {}
 
     // -- Note on adapters enumeration:

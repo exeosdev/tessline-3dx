@@ -20,9 +20,11 @@ namespace ts3::system
     {
         GLSystemDriver * parentDriver = nullptr;
         GLSystemDriverNativeData nativeDataPriv;
+        Version supportedRuntimeVersion;
 
         explicit ObjectInternalData( GLSystemDriver * pSystemDriver )
         : parentDriver( pSystemDriver )
+        , supportedRuntimeVersion{ 0, 0 }
         {}
     };
 

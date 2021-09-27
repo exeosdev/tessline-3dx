@@ -287,6 +287,7 @@ namespace ts3::system
 			{ ColorFormat::B8G8R8A8SRGB , DXGI_FORMAT_B8G8R8X8_UNORM_SRGB },
 			{ ColorFormat::R8G8B8A8     , DXGI_FORMAT_R8G8B8A8_UNORM      },
 			{ ColorFormat::R8G8B8A8SRGB , DXGI_FORMAT_R8G8B8A8_UNORM_SRGB },
+			{ ColorFormat::R8G8B8X8     , DXGI_FORMAT_R8G8B8X8_UNORM      },
 			{ ColorFormat::R10G10B10A2  , DXGI_FORMAT_R10G10B10A2_UNORM   },
 		};
 		return getMapValueOrDefault( colorDescMap, pColorFormat, DXGI_FORMAT_UNKNOWN );

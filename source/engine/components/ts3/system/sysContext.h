@@ -21,11 +21,7 @@ namespace ts3::system
 
     public:
         SysContext();
-        ~SysContext();
-
-    private:
-        void _nativeInitialize();
-        void _nativeRelease() noexcept;
+        ~SysContext() noexcept;
     };
 
 } // namespace ts3::system

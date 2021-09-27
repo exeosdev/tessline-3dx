@@ -335,17 +335,17 @@ namespace ts3::system
         explicit DisplayDriverGeneric( DisplayManager * pDisplayManager )
         : DisplayDriver( pDisplayManager, EDisplayDriverType::Generic )
         {
-            _nativeCtor();
+            _nativeConstructor();
         }
 
         virtual ~DisplayDriverGeneric() noexcept
         {
-            _nativeDtor();
+            _nativeDestructor();
         }
 
     private:
-        void _nativeCtor();
-        void _nativeDtor() noexcept;
+        void _nativeConstructor();
+        void _nativeDestructor() noexcept;
 
         virtual void _drvEnumDisplayDevices() override final;
         virtual void _drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;

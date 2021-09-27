@@ -224,11 +224,15 @@ namespace ts3::system
     EventController::EventController( SysContextHandle pSysContext )
     : SysObject( pSysContext )
     , mInternal( std::make_unique<ObjectInternalData>( this ) )
-	{}
+	{
+        _nativeConstructor();
+	}
 
 	EventController::~EventController() noexcept
 	{
         releaseDispatcherObjects();
+
+        _nativeDestructor();
 	}
 
     void EventController::registerEventSource( EventSource & pEventSource )

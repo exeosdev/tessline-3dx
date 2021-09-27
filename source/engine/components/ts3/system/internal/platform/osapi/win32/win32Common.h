@@ -9,9 +9,6 @@
 
 namespace ts3::system
 {
-
-
-
 } // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_COMMON_DEFS_H__

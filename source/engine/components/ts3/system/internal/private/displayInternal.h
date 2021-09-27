@@ -9,13 +9,14 @@ namespace ts3::system
 
     // The default array with all ColorFormats supported by the library.
     // Used by the common driver layer to iterate over support CFs.
-    inline constexpr ColorFormat cvColorFormatArray[6] =
+    inline constexpr ColorFormat cvColorFormatArray[7] =
     {
         ColorFormat::B8G8R8,
         ColorFormat::B8G8R8A8,
         ColorFormat::B8G8R8A8SRGB,
         ColorFormat::R8G8B8A8,
         ColorFormat::R8G8B8A8SRGB,
+        ColorFormat::R8G8B8X8,
         ColorFormat::R10G10B10A2,
     };
 

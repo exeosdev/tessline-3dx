@@ -38,6 +38,14 @@ namespace ts3::system
         Bitmask<EGLRenderContextCreateFlags> flags = 0;
     };
 
+    inline constexpr Version cvGLVersionBestSupported{ CX_UINT16_MAX, CX_UINT16_MAX };
+
+    inline constexpr Version cvGLVersionUnknown{ 0, 0 };
+
+    inline constexpr Version cvGLVersionMaxDesktop{ 4, 6 };
+
+    inline constexpr Version cvGLVersionMaxES{ 3, 2 };
+
     class GLDisplaySurface : public EventSource
     {
     public:
@@ -173,8 +181,8 @@ namespace ts3::system
         void onRenderContextDestroy( GLRenderContext & pRenderContext ) noexcept;
 
     private: // For implementation
-        void _nativeCtor();
-        void _nativeDtor() noexcept;
+        void _nativeConstructor();
+        void _nativeDestructor() noexcept;
         void _nativeInitializePlatform();
         void _nativeReleaseInitState();
         void _nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo );

@@ -197,18 +197,23 @@ namespace ts3::system
                                                      const GLDisplaySurface & pDisplaySurface,
                                                      const GLRenderContextCreateInfo & pCreateInfo )
 	{
-	    int contextProfile = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
+	    int contextProfile = 0;
 	    Bitmask<int> contextCreateFlags = 0;
 	    HGLRC shareContextHandle = nullptr;
 
-	    if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::GLES )
+	    if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::Core )
 	    {
-	        contextProfile = WGL_CONTEXT_ES_PROFILE_BIT_EXT;
+	        contextProfile = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
 	    }
-	    if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::Legacy )
+	    else if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::Legacy )
 	    {
 	        contextProfile = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
 	    }
+	    else if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::GLES )
+	    {
+	        contextProfile = WGL_CONTEXT_ES_PROFILE_BIT_EXT;
+	    }
+
 	    if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
 	    {
 	        contextCreateFlags |= WGL_CONTEXT_DEBUG_BIT_ARB;

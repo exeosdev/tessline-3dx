@@ -2,13 +2,14 @@
 #ifndef __TS3_PLATFORM_ANDROID_NATIVE_APP_PROXY_H__
 #define __TS3_PLATFORM_ANDROID_NATIVE_APP_PROXY_H__
 
-#include "androidCommon.h"
+#include "../platform.h"
 
 #include <poll.h>
 #include <pthread.h>
 #include <sched.h>
 
 #include <android/configuration.h>
+#include <android/log.h>
 #include <android/looper.h>
 #include <android/native_activity.h>
 
@@ -65,7 +66,7 @@
 
 struct AndroidAppState;
 
-using android_native_entry_point = void(*)(AndroidAppState * );
+using android_native_entry_point = int(*)( int argc, char ** argv, AndroidAppState * );
 
 /**
  * Data associated with an ALooper fd that will be returned as the "outData"
@@ -84,7 +85,7 @@ struct AndroidPollSource {
     void (*process)(struct AndroidAppState* app, struct AndroidPollSource* source);
 };
 
-constexpr size_t cxAndroidAppUserDataMaxSize = 64u;
+constexpr size_t CX_PLATFORM_ANDROID_APP_USER_DATA_SIZE = 64u;
 
 /**
  * This is the interface for the standard glue code of a threaded
@@ -95,18 +96,15 @@ constexpr size_t cxAndroidAppUserDataMaxSize = 64u;
  * Java objects.
  */
 struct AndroidAppState {
-
-    /***********************/
-    /********* EXF *********/
-    /***********************/
     //
     android_native_entry_point entry_point;
-    //
-    void* exfUserData[cvAndroidAppUserDataMaxSize];
 
     // The application can place a pointer to its own state object
     // here if it likes.
     void* userData;
+
+    //
+    void* ts3UserData[CX_PLATFORM_ANDROID_APP_USER_DATA_SIZE];
 
     // Fill this in with the function to process main app commands (APP_CMD_*)
     void (*onAppCmd)(struct AndroidAppState* app, int32_t cmd);
@@ -179,22 +177,22 @@ struct AndroidAppState {
     ARect pendingContentRect;
 
     template <typename TpData>
-    inline void setUserData( uint32 pIndex, TpData * pData )
+    inline void ts3SetUserData( uint32 pIndex, TpData * pData )
     {
-        assert( pIndex < cvAndroidAppUserDataMaxSize );
-        this->exfUserData[pIndex] = pData;
+        assert( pIndex < CX_PLATFORM_ANDROID_APP_USER_DATA_SIZE );
+        ts3UserData[pIndex] = pData;
     }
 
-    inline void * getUserData( uint32 pIndex )
+    inline void * ts3GetUserData( uint32 pIndex )
     {
-        assert( pIndex < cvAndroidAppUserDataMaxSize );
-        return this->exfUserData[pIndex];
+        assert( pIndex < CX_PLATFORM_ANDROID_APP_USER_DATA_SIZE );
+        return ts3UserData[pIndex];
     }
 
     template <typename TpData>
-    inline TpData * getUserDataAs( uint32 pIndex )
+    inline TpData * ts3GetUserDataAs( uint32 pIndex )
     {
-        void * dataPtr = getUserData( pIndex );
+        void * dataPtr = ts3GetUserData( pIndex );
         return static_cast<TpData *>( dataPtr );
     }
 };

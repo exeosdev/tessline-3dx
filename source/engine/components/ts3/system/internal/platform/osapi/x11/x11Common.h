@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_X11_COMMON_DEFS_H__
-#define __TS3_SYSTEM_PLATFORM_OSAPI_X11_COMMON_DEFS_H__
+#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_X11_COMMON_H__
+#define __TS3_SYSTEM_PLATFORM_OSAPI_X11_COMMON_H__
 
 #include <X11/X.h>
 #include <X11/Xatom.h>
@@ -84,19 +84,8 @@ namespace ts3::system
 
     TS3_SYSTEM_API_NODISCARD X11SessionData & nativeX11GetXSessionData( SysContext & pSysContext );
 
-    TS3_PCL_ATTR_NO_DISCARD inline X11SessionData & nativeX11GetXSessionData( const X11NativeDataCommon & pNativeData )
-    {
-        ts3DebugAssert( pNativeData.xSessionDataPtr );
-        return *( pNativeData.xSessionDataPtr );
-    }
-
-    template <typename TpSysObject>
-    TS3_PCL_ATTR_NO_DISCARD inline X11SessionData & nativeX11GetXSessionDataInternal( const TpSysObject & pSysObject )
-    {
-        ts3DebugAssert( pSysObject.mInternal->nativeDataPriv.xSessionDataPtr );
-        return *( pSysObject.mInternal->nativeDataPriv.xSessionDataPtr );
-    }
+    TS3_PCL_ATTR_NO_DISCARD X11SessionData & nativeX11GetXSessionData( const X11NativeDataCommon & pNativeData );
 
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_PLATFORM_OSAPI_X11_COMMON_DEFS_H__
+#endif // __TS3_SYSTEM_PLATFORM_OSAPI_X11_COMMON_H__

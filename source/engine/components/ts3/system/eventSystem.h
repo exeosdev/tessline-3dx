@@ -166,6 +166,8 @@ namespace ts3::system
 	    void _setEventSourcePrivateData( EventSource & pEventSource, void * pData );
 	    void * _getEventSourcePrivateData( EventSource & pEventSource ) const;
 
+	    void _nativeConstructor();
+	    void _nativeDestructor() noexcept;
 	    void _nativeRegisterEventSource( EventSource & pEventSource );
 	    void _nativeUnregisterEventSource( EventSource & pEventSource );
 	    void _nativeDestroyEventSourcePrivateData( EventSource & pEventSource, void * pData );
