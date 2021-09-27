@@ -121,13 +121,13 @@ namespace ts3::system
     , mInternal( std::make_unique<ObjectInternalData>( this ) )
     , mNativeData( &( mInternal->nativeDataPriv ) )
     {
-        _nativeCtor();
+        _nativeConstructor();
     }
 
     GLSystemDriver::~GLSystemDriver()
     {
         _nativeReleaseInitState();
-        _nativeDtor();
+        _nativeDestructor();
     }
 
     void GLSystemDriver::initializePlatform()

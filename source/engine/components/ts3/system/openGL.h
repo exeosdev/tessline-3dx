@@ -181,8 +181,8 @@ namespace ts3::system
         void onRenderContextDestroy( GLRenderContext & pRenderContext ) noexcept;
 
     private: // For implementation
-        void _nativeCtor();
-        void _nativeDtor() noexcept;
+        void _nativeConstructor();
+        void _nativeDestructor() noexcept;
         void _nativeInitializePlatform();
         void _nativeReleaseInitState();
         void _nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo );
