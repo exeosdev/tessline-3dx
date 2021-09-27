@@ -1,5 +1,5 @@
 
-add_executable( ts3sample-sysTest
+add_library( ts3sample-sysTest STATIC
         "sysTest-main.cpp" )
 
 set_target_properties( ts3sample-sysTest PROPERTIES

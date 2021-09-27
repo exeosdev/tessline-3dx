@@ -31,13 +31,15 @@ set( TS3_PLATFORM_SRC_FILES
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Android" )
 	set( TS3_PLATFORM_SRC_FILES
 			${TS3_PLATFORM_SRC_FILES}
-			"android/androidCommon.h"
 			"android/androidNativeAppProxy.h"
 			"android/androidNativeAppProxy.cpp"
 			)
 endif()
 
-add_library( ts3-platform STATIC ${TS3_PLATFORM_SRC_FILES}
+add_library( ts3-platform STATIC ${TS3_PLATFORM_SRC_FILES} )
+
+target_compile_definitions( ts3-platform PRIVATE
+		TS3_PCL_PROJECT_ROOT_PATH="${TS3_PCL_PROJECT_ROOT_PATH}"
 		)
 
 set_target_properties( ts3-platform PROPERTIES

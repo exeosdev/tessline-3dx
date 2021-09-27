@@ -1,8 +1,4 @@
 
-set( CMAKE_PROJECT_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}" )
-string( REPLACE "\\" "/" CMAKE_PROJECT_ROOT_PATH "${CMAKE_PROJECT_ROOT_PATH}" )
-add_compile_definitions( TS3_PCL_PROJECT_ROOT_PATH="${CMAKE_PROJECT_ROOT_PATH}" )
-
 include( "cmake/CMakeApi.Core.cmake" )
 include( "cmake/CMakeApi.Sysconf.cmake" )
 include( "cmake/CMakeApi.Workspace.cmake" )
