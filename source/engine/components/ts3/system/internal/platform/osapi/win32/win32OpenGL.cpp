@@ -40,10 +40,10 @@ namespace ts3::system
 	}
 
 
-	void GLSystemDriver::_nativeCtor()
+	void GLSystemDriver::_nativeConstructor()
     {}
 
-    void GLSystemDriver::_nativeDtor() noexcept
+    void GLSystemDriver::_nativeDestructor() noexcept
     {}
 
 	void GLSystemDriver::_nativeInitializePlatform()
@@ -230,7 +230,7 @@ namespace ts3::system
 	        }
 	    }
 
-	    const int contextAttribs[] =
+	    const int contextAttributes[] =
         {
             // Requested OpenGL API version: major part
             WGL_CONTEXT_MAJOR_VERSION_ARB, pCreateInfo.requiredAPIVersion.major,
@@ -247,7 +247,7 @@ namespace ts3::system
 	    const auto & surfaceNativeData = pDisplaySurface.mInternal->nativeDataPriv;
 	    HGLRC contextHandle = wglCreateContextAttribsARB( surfaceNativeData.hdc,
                                                           shareContextHandle,
-                                                          &( contextAttribs[0] ) );
+                                                          &( contextAttributes[0] ) );
 
 	    if ( contextHandle == nullptr )
 	    {
