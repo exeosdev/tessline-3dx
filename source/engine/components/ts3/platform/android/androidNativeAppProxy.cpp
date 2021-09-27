@@ -28,6 +28,8 @@
 #include <android/log.h>
 #include <android/sensor.h>
 
+#include <ts3/system/sysContextNative.h>
+
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "threaded_app", __VA_ARGS__))
 #define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "threaded_app", __VA_ARGS__))
 
@@ -232,7 +234,7 @@ void* android_app_entry(void* param) {
     pthread_cond_broadcast(&android_app->cond);
     pthread_mutex_unlock(&android_app->mutex);
 
-    android_app->entry_point( android_app );
+    android_app->entry_point( 0, nullptr, android_app );
 
     android_app_destroy(android_app);
     return nullptr;
@@ -243,8 +245,8 @@ void* android_app_entry(void* param) {
 // --------------------------------------------------------------------
 
 static AndroidAppState* android_app_create(ANativeActivity* activity, void* savedState, size_t savedStateSize, android_native_entry_point entryPoint) {
-    AndroidAppState* android_app = (AndroidAppState*)malloc(sizeof(android_app));
-    memset(android_app, 0, sizeof(android_app));
+    AndroidAppState* android_app = (AndroidAppState*)malloc(sizeof(struct AndroidAppState));
+    memset(android_app, 0, sizeof(struct AndroidAppState));
     android_app->activity = activity;
 
     pthread_mutex_init(&android_app->mutex, nullptr);
