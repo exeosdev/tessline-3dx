@@ -34,12 +34,12 @@ namespace ts3::system
 	void _x11GetAttribArrayForVisualConfig( const VisualConfig & pVisualConfig, int * pAttribArray );
 
 
-    void GLSystemDriver::_nativeCtor()
+    void GLSystemDriver::_nativeConstructor()
     {
         mInternal->nativeDataPriv.setSessionData( nativeX11GetXSessionData( *mSysContext ) );
     }
 
-    void GLSystemDriver::_nativeDtor() noexcept
+    void GLSystemDriver::_nativeDestructor() noexcept
     {
         mInternal->nativeDataPriv.resetSessionData();
     }
@@ -52,7 +52,7 @@ namespace ts3::system
         // by the user and done by calling releaseInitState() method od the driver).
         mInternal->nativeDataPriv.initState = new GLSystemDriverNativeData::InitState();
 
-        auto & xSessionData = nativeX11GetXSessionData( mInternal->nativeDataPriv );
+        auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 
 		int glxVersionMajor = 0;
 		int glxVersionMinor = 0;
@@ -144,13 +144,14 @@ namespace ts3::system
 	{
         auto & xSessionData = nativeX11GetXSessionData( mInternal->nativeDataPriv );
 
-        auto & surfaceNativeData = pDisplaySurface.mInternal->nativeDataPriv;
-        surfaceNativeData.setSessionData( xSessionData );
-        surfaceNativeData.windowXID = glXGetCurrentDrawable();
+        auto currentWindowXID = glXGetCurrentDrawable();
 
 		XWindowAttributes windowAttributes;
-		XGetWindowAttributes( xSessionData.display, surfaceNativeData.windowXID, &windowAttributes );
+		XGetWindowAttributes( xSessionData.display, currentWindowXID, &windowAttributes );
 
+		auto & surfaceNativeData = pDisplaySurface.mInternal->nativeDataPriv;
+		surfaceNativeData.setSessionData( xSessionData );
+		surfaceNativeData.windowXID = currentWindowXID;
         surfaceNativeData.xColormap = windowAttributes.colormap;
 	}
 
@@ -211,7 +212,7 @@ namespace ts3::system
 			}
 		}
 
-		const int contextAttribs[] =
+		const int contextAttributes[] =
 		{
 			// Requested OpenGL API version: major part
 			GLX_CONTEXT_MAJOR_VERSION_ARB, pCreateInfo.requiredAPIVersion.major,
@@ -230,10 +231,22 @@ namespace ts3::system
                                                                 surfaceNativeData.fbConfig,
                                                                 shareContextHandle,
                                                                 True,
-                                                                &( contextAttribs[0] ) );
-		if ( contextHandle == nullptr )
+                                                                &( contextAttributes[0] ) );
+
+		if ( !contextHandle )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			if( shareContextHandle && pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARING_OPTIONAL_BIT ) )
+			{
+				contextHandle = glXCreateContextAttribsProc( xSessionData.display,
+															 surfaceNativeData.fbConfig,
+															 nullptr,
+															 True,
+															 &( contextAttributes[0] ) );
+			}
+			if ( !contextHandle )
+			{
+				ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			}
 		}
 
         auto & contextNativeData = pRenderContext.mInternal->nativeDataPriv;

@@ -4,9 +4,10 @@
 namespace ts3::system
 {
 
-    void SysContext::_nativeInitialize()
+    SysContextHandle nativeCreateSysContext( const SysContextCreateInfo & pCreateInfo )
     {
-        auto & nativeData = mInternal->nativeDataPriv;
+        auto sysContext = std::make_shared<SysContext>();
+        auto & nativeData = sysContext->mInternal->nativeDataPriv;
 
         int thrInitStatus = ::XInitThreads();
         if( thrInitStatus == False )
@@ -27,11 +28,13 @@ namespace ts3::system
         nativeData.xSessionData.sessionInfo.connectionNumber = XConnectionNumber( xDisplay );
         nativeData.xSessionData.sessionInfo.vendorName = XServerVendor( xDisplay );
         nativeData.xSessionData.sessionInfo.displayString = XDisplayString( xDisplay );
+
+        return sysContext;
     }
 
-    void SysContext::_nativeRelease() noexcept
+    void nativeDestroySysContext( SysContextHandle pContext )
     {
-        auto & nativeData = mInternal->nativeDataPriv;
+        auto & nativeData = pContext->mInternal->nativeDataPriv;
 
         nativeData.xSessionData.display = nullptr;
         nativeData.xSessionData.screenIndex = -1;
