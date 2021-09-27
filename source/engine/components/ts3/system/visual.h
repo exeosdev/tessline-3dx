@@ -16,6 +16,7 @@ namespace ts3::system
 		B8G8R8A8SRGB,
 		R8G8B8A8,
 		R8G8B8A8SRGB,
+		R8G8B8X8,
 		R10G10B10A2,
 
 		// Sentinel value, used to determine the number of possible values.
