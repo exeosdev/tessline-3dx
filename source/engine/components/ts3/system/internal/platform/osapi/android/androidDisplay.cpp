@@ -1,62 +1,117 @@
 
-#include <ts3/system/internal/internalDisplay.h>
-#include <ts3/system/internal/internaltemContext.h>
+#include <ts3/system/displayNative.h>
+#include <ts3/system/windowNative.h>
+#include <ts3/stdext/mapUtils.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
-namespace ts3
+namespace ts3::system
 {
 
-	void DisplayManager::_sysInitialize()
+    static ColorFormat _androidTranslateAHWBufferFormatToColorFormat( AHardwareBuffer_Format pAHWBufferFormat );
+
+
+    void DisplayManager::_nativeConstructor()
 	{
 	}
 
-	void DisplayManager::_sysRelease() noexcept
+    void DisplayManager::_nativeDestructor() noexcept
 	{
 	}
 
-	void DisplayManager::_sysQueryDisplaySize( DisplaySize & pDisplaySize ) const
+    void DisplayManager::_nativeQueryMinWindowSize( DisplaySize & pOutSize ) const
 	{
+        auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
+        pOutSize = nativeAndroidQueryNativeWindowSize( aSessionData.aNativeWindow );
 	}
 
-	void DisplayManager::_sysQueryMinWindowSize( DisplaySize & pMinWindowSize ) const
+    void DisplayManager::_nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const
 	{
+        auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
+        pOutSize = nativeAndroidQueryNativeWindowSize( aSessionData.aNativeWindow );
 	}
 
-	void nativeDisplayManagerInitialize( DisplayManager & )
-	{
-	}
 
-	void DisplayManagerImplProxy::nativeQueryDisplaySize( const DisplayManager & pDisplayManager, DisplaySize & pDisplaySize )
-	{
-        // Native window for the app is stored within the display manager.
-        auto * androidNativeWindow = pDisplayManager.systemContext->nativeData->androidNativeWindow;
 
-        // This function requires the window to already be available and throws if the window
-        // pointer is still nullptr (ANativeWindow is not created with the activity itself!!)
-        if( androidNativeWindow == nullptr )
+    void DisplayDriverGeneric::_nativeConstructor()
+    {
+    }
+
+    void DisplayDriverGeneric::_nativeDestructor() noexcept
+    {
+    }
+
+    void DisplayDriverGeneric::_drvEnumDisplayDevices()
+    {
+        auto & driverNativeData = dsmGetObjectNativeDataGeneric( *this );
+        auto & aSessionData = driverNativeData.getSessionData();
+
+        auto * adapterObject = addAdapter();
+        auto & adapterNativeData = dsmGetObjectNativeDataGeneric( *adapterObject );
+        adapterNativeData.setSessionData( aSessionData );
+        auto & adapterDesc = dsmGetObjectDesc( *adapterObject );
+        adapterDesc.name = "ANDROID_DEFAULT_ADAPTER";
+        adapterDesc.vendorID = EDisplayAdapterVendorID::Google;
+        adapterDesc.flags.set( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
+        adapterDesc.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
+
+        auto * outputObject = addOutput( *adapterObject );
+        auto & outputNativeData = dsmGetObjectNativeDataGeneric( *outputObject );
+        outputNativeData.setSessionData( aSessionData );
+        auto & outputDesc = dsmGetObjectDesc( *outputObject );
+        outputDesc.name = "ANDROID_DEFAULT_DISPLAY";
+        outputDesc.screenRect.offset.x = 0;
+        outputDesc.screenRect.offset.y = 0;
+        outputDesc.screenRect.size = nativeAndroidQueryNativeWindowSize( aSessionData.aNativeWindow );
+    }
+
+    void DisplayDriverGeneric::_drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
+    {
+        auto & driverNativeData = dsmGetObjectNativeDataGeneric( *this );
+        auto & aSessionData = driverNativeData.getSessionData();
+
+        auto aWindowFormat = ANativeWindow_getFormat( aSessionData.aNativeWindow );
+        auto aHWBufferFormat = static_cast<AHardwareBuffer_Format>( aWindowFormat );
+        auto colorFormat = _androidTranslateAHWBufferFormatToColorFormat( aHWBufferFormat );
+
+        if( pColorFormat != colorFormat )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            return;
         }
 
-        int32_t windowWidth = ANativeWindow_getWidth( androidNativeWindow );
-        int32_t windowHeight = ANativeWindow_getHeight( androidNativeWindow );
+        const auto & outputDesc = dsmGetObjectDesc( pOutput );
 
-        if( ( windowWidth > 0 ) && ( windowHeight > 0 ) )
+        auto * videoModeObject = addVideoMode( pOutput, pColorFormat );
+        auto & videoModeNativeData = dsmGetObjectNativeDataGeneric( *videoModeObject );
+        videoModeNativeData.setSessionData( aSessionData );
+        auto & videoModeDesc = dsmGetObjectDesc( *videoModeObject );
+        videoModeDesc.settings.resolution = outputDesc.screenRect.size;
+        videoModeDesc.settings.refreshRate = 60;
+        videoModeDesc.settings.flags.set( E_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_PROGRESSIVE_BIT );
+        videoModeDesc.settingsHash = dsmComputeVideoSettingsHash( pColorFormat, videoModeDesc.settings );
+    }
+
+    ColorFormat DisplayDriverGeneric::_drvQueryDefaultSystemColorFormat() const
+    {
+        auto & driverNativeData = dsmGetObjectNativeDataGeneric( *this );
+        auto & aSessionData = driverNativeData.getSessionData();
+
+        auto aWindowFormat = ANativeWindow_getFormat( aSessionData.aNativeWindow );
+        auto aHWBufferFormat = static_cast<AHardwareBuffer_Format>( aWindowFormat );
+        auto colorFormat = _androidTranslateAHWBufferFormatToColorFormat( aHWBufferFormat );
+
+        return colorFormat;
+    }
+
+    ColorFormat _androidTranslateAHWBufferFormatToColorFormat( AHardwareBuffer_Format pAHWBufferFormat )
+    {
+        static const std::unordered_map<AHardwareBuffer_Format, ColorFormat> colorDescMap =
         {
-            pDisplaySize.x = static_cast<uint32>( windowWidth );
-            pDisplaySize.y = static_cast<uint32>( windowHeight );
-        }
-        else
-        {
-            pDisplaySize.x = 0u;
-            pDisplaySize.y = 0u;
-        }
-	}
+            { AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,    ColorFormat::R8G8B8A8 },
+            { AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM,    ColorFormat::R8G8B8X8 },
+            { AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM, ColorFormat::R10G10B10A2 }
+        };
+        return getMapValueOrDefault( colorDescMap, pAHWBufferFormat, ColorFormat::Unknown );
+    }
 
-	void DisplayManagerImplProxy::nativeQueryMinWindowSize( const DisplayManager & pDisplayManager, DisplaySize & pMinWindowSize )
-	{
-        nativeQueryDisplaySize( pDisplayManager, pMinWindowSize );
-	}
-
-}
+} // namespace ts3::system
 #endif
