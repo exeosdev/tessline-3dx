@@ -1,6 +1,5 @@
 
 #include "syncCommon.h"
-#include <emmintrin.h>
 #include <thread>
 
 namespace ts3
@@ -8,7 +7,9 @@ namespace ts3
 
 	void syncHardwarePause()
 	{
+	#if( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_LEVEL_SSE )
 		_mm_pause();
+	#endif
 	}
 
 	void syncThreadYield()
@@ -26,7 +27,7 @@ namespace ts3
 		}
 		else if( pCounter < sSpinCountBeforeYield )
 		{
-			_mm_pause();
+			syncHardwarePause();
 		}
 		else
 		{
