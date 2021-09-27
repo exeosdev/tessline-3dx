@@ -7,12 +7,14 @@
 #define _MM_SHUFFLE_R( fp0, fp1, fp2, fp3 ) \
 	_MM_SHUFFLE( fp3, fp2, fp1, fp0 )
 
-#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#if( ( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG ) && ( TS3_PCL_COMPILER <= TS3_PCL_COMPILER_CLANG_7 ) )
+#  define __TS3_PRAGMA_DIAGNOSTIC_POP_CLANG 1
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wpsabi"
 #endif
 
 #if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#  define __TS3_PRAGMA_DIAGNOSTIC_POP_GCC 1
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wpsabi"
 #endif
@@ -142,11 +144,11 @@ inline __m256d _mm256d_dp_pd4( const __m256d & m1, const __m256d & m2 )
 }
 #endif
 
-#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#if( __TS3_PRAGMA_DIAGNOSTIC_POP_GCC )
 #  pragma GCC diagnostic pop
 #endif
 
-#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#if( __TS3_PRAGMA_DIAGNOSTIC_POP_CLANG )
 #  pragma clang diagnostic pop
 #endif
 

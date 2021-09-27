@@ -17,7 +17,9 @@
 #include <utility>
 #include <vector>
 
-#if ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_AVX )
+#if ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_NEON )
+#  include <arm_neon.h>
+#elif ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_AVX )
 #  include <immintrin.h>
 #elif ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_SSE42 )
 #  include <smmintrin.h>
@@ -31,8 +33,6 @@
 #  include <emmintrin.h>
 #elif ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_SSE )
 #  include <xmmintrin.h>
-#elif ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_NEON )
-#  include <arm_neon.h>
 #endif
 
 #endif /* __TS3_PLATFORM_CONFIG_INCLUDE_H__ */
