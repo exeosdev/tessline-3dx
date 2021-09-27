@@ -4,19 +4,19 @@
 
 #include "androidCommon.h"
 
-namespace ts3
+namespace ts3::system
 {
 
-    struct ContextNativeData
+    struct SysContextNativeData
     {
-        AndroidAppState * androidAppState = nullptr;
-        ANativeWindow * androidNativeWindow = nullptr;
+		ASessionData aSessionData;
     };
 
-	struct ContextNativeCreateInfo
+	struct SysContextCreateInfoNativeParams
 	{
+		AndroidAppState * aCommonAppState = nullptr;
 	};
 
-}
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_CORE_SESSION_CONTEXT_H__

@@ -1,13 +1,23 @@
 
-#include <ts3/system/systemContext.h>
+#include <ts3/system/sysContextNative.h>
 
-namespace ts3
+#if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
+namespace ts3::system
 {
 
-	void Context::_sysInitialize( const SysContextCreateInfo & pCreateInfo )
+	SysContextHandle nativeCreateSysContext( const SysContextCreateInfo & pCreateInfo )
+	{
+		auto sysContext = std::make_shared<SysContext>();
+		auto & nativeData = sysContext->mInternal->nativeDataPriv;
+
+		nativeData.aSessionData.aCommonAppState = pCreateInfo.nativeParams.aCommonAppState;
+		nativeData.aSessionData.aCommonAppState->ts3SetUserData( E_ANDROID_APP_STATE_USER_DATA_INDEX_SYS_CONTEXT, sysContext.get() );
+
+		return sysContext;
+	}
+
+	void nativeDestroySysContext( SysContextHandle pContext )
 	{}
 
-	void Context::_sysRelease() noexcept
-	{}
-
-}
+} // namespace ts3::system
+#endif
