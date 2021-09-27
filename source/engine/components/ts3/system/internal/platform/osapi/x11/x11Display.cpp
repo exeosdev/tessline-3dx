@@ -17,7 +17,7 @@ namespace ts3::system
         return false;
     }
 
-    void DisplayManager::_nativeCtor()
+    void DisplayManager::_nativeConstructor()
     {
         auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 
@@ -37,7 +37,7 @@ namespace ts3::system
         mInternal->nativeDataPriv.screenDepth = static_cast<uint16>( screenDepth );
     }
 
-    void DisplayManager::_nativeDtor() noexcept
+    void DisplayManager::_nativeDestructor() noexcept
     {
         mInternal->nativeDataPriv.screenDepth = 0u;
         mInternal->nativeDataPriv.resetSessionData();
@@ -51,7 +51,7 @@ namespace ts3::system
 
     void DisplayManager::_nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const
     {
-        auto & xSessionData = nativeX11GetXSessionDataInternal( *this );
+        auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 
         // Ideally, we have XRR available here and can fetch the data from XRRMonitorInfo structure.
         // With that approach, we can tell precisely the size of the default monitor (not the entire virtual screen).
@@ -82,7 +82,7 @@ namespace ts3::system
     }
 
 
-    void DisplayDriverGeneric::_nativeCtor()
+    void DisplayDriverGeneric::_nativeConstructor()
     {
         auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 
@@ -139,7 +139,7 @@ namespace ts3::system
         }
     }
 
-    void DisplayDriverGeneric::_nativeDtor() noexcept
+    void DisplayDriverGeneric::_nativeDestructor() noexcept
     {
         auto & driverNativeData = dsmGetObjectNativeDataGeneric( *this );
 

@@ -32,7 +32,7 @@ namespace ts3::system
 
     public:
         explicit Window( WindowManager * pWindowManager );
-        virtual ~Window();
+        virtual ~Window() noexcept;
 
         void setFullscreenMode( bool pEnable = true, const WindowSize & pScreenSize = cvWindowSizeAuto );
 
@@ -85,8 +85,8 @@ namespace ts3::system
         void onWindowDestroy( Window & pWindow ) noexcept;
 
     private:
-        void _nativeCtor();
-        void _nativeDtor() noexcept;
+        void _nativeConstructor();
+        void _nativeDestructor() noexcept;
         void _nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo );
         void _nativeDestroyWindow( Window & pWindow );
         bool _nativeIsWindowValid( const Window & pWindow ) const noexcept;

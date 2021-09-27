@@ -10,7 +10,7 @@ namespace ts3::system
     , mInternal( std::make_unique<ObjectInternalData>() )
     , mNativeData( &( mInternal->nativeDataPriv ) )
     {
-        _nativeCtor();
+        _nativeConstructor();
 
         mInternal->driverFactoryMap[EDisplayDriverType::Generic] = [this]() {
             return createSysObject<DisplayDriverGeneric>( this );
@@ -29,7 +29,7 @@ namespace ts3::system
 
     DisplayManager::~DisplayManager() noexcept
     {
-        _nativeDtor();
+        _nativeDestructor();
     }
 
     DisplayDriverHandle DisplayManager::createDisplayDriver( EDisplayDriverType pDriverID )
@@ -190,8 +190,8 @@ namespace ts3::system
         }
         else
         {
-            auto maxPosX = static_cast<int32>( screenSize.x - windowSize.x );
-            auto maxPosY = static_cast<int32>( screenSize.y - windowSize.y );
+            auto maxPosX = static_cast<int32>( screenSize.x - resultGeometry.size.x );
+            auto maxPosY = static_cast<int32>( screenSize.y - resultGeometry.size.y );
             resultGeometry.position.x = getMinOf( resultGeometry.position.x, maxPosX );
             resultGeometry.position.y = getMinOf( resultGeometry.position.y, maxPosY );
         }

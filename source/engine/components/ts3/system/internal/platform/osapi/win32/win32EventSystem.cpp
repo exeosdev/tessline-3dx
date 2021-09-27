@@ -18,7 +18,13 @@ namespace ts3::system
     Bitmask<EMouseButtonFlagBits> _win32GetMouseButtonStateMask( WPARAM pWparam );
 
 
-    void EventController::_nativeRegisterEventSource( EventSource & pEventSource )
+	void EventController::_nativeConstructor()
+	{}
+
+	void EventController::_nativeDestructor() noexcept
+	{}
+
+	void EventController::_nativeRegisterEventSource( EventSource & pEventSource )
     {
         auto * eventSourceState = static_cast<Win32EventSourceState *>( _getEventSourcePrivateData( pEventSource ) );
         if( !eventSourceState )

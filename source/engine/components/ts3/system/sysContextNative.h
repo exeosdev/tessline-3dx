@@ -34,10 +34,10 @@ namespace ts3::system
     };
 
     /// @brief
-    TS3_SYSTEM_API_NODISCARD SysContextHandle creCreateSystemContext( const SysContextCreateInfo & pCreateInfo );
+    TS3_SYSTEM_API_NODISCARD SysContextHandle nativeCreateSysContext( const SysContextCreateInfo & pCreateInfo );
 
     /// @brief
-    TS3_SYSTEM_API void creDestroySysContext( SysContextHandle pContext );
+    TS3_SYSTEM_API void nativeDestroySysContext( SysContextHandle pContext );
 
 } // namespace ts3::system
 

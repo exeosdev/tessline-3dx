@@ -49,8 +49,8 @@ namespace ts3::system
         TS3_SYSTEM_API_NODISCARD WindowGeometry validateWindowGeometry( const WindowGeometry & pWindowGeometry ) const;
 
     private:
-        void _nativeCtor();
-        void _nativeDtor() noexcept;
+        void _nativeConstructor();
+        void _nativeDestructor() noexcept;
         void _nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const;
         void _nativeQueryMinWindowSize( DisplaySize & pOutSize ) const;
     };

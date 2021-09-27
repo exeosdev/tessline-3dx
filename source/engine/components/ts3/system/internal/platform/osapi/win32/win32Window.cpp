@@ -11,10 +11,10 @@ namespace ts3::system
 	LRESULT __stdcall _win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 
 
-	void WindowManager::_nativeCtor()
+	void WindowManager::_nativeConstructor()
     {}
 
-    void WindowManager::_nativeDtor() noexcept
+    void WindowManager::_nativeDestructor() noexcept
     {}
 
 	void WindowManager::_nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo )

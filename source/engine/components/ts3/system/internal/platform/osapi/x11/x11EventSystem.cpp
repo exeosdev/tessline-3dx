@@ -18,7 +18,13 @@ namespace ts3::system
 	Bitmask<EMouseButtonFlagBits> _x11GetMouseButtonStateMask( uint32 pState );
 
 
-    void EventController::_nativeRegisterEventSource( EventSource & /* pEventSource */ )
+	void EventController::_nativeConstructor()
+	{}
+
+	void EventController::_nativeDestructor() noexcept
+	{}
+
+	void EventController::_nativeRegisterEventSource( EventSource & /* pEventSource */ )
     {}
 
     void EventController::_nativeUnregisterEventSource( EventSource & /* pEventSource */ )

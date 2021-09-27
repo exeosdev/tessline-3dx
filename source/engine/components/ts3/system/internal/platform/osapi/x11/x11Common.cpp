@@ -9,4 +9,10 @@ namespace ts3::system
         return pSysContext.mInternal->nativeDataPriv.xSessionData;
     }
 
+    X11SessionData & nativeX11GetXSessionData( const X11NativeDataCommon & pNativeData )
+    {
+        ts3DebugAssert( pNativeData.xSessionDataPtr );
+        return *( pNativeData.xSessionDataPtr );
+    }
+
 } // namespace ts3::system
