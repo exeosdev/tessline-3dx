@@ -47,7 +47,8 @@ namespace ts3::system
 	enum class EEventCodeIndex : uint8
 	{
 		Undefined,
-		AppActivityDisplayReady,
+		AppActivityDisplayInit,
+		AppActivityDisplayTerm,
 		AppActivityFocusGained,
 		AppActivityFocusLost,
 		AppActivityPause,
@@ -164,7 +165,8 @@ namespace ts3::system
 	enum EEventCode : event_code_value_t
 	{
 		E_EVENT_CODE_UNDEFINED = 0,
-		E_EVENT_CODE_APP_ACTIVITY_DISPLAY_READY = ecDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityDisplayReady ),
+		E_EVENT_CODE_APP_ACTIVITY_DISPLAY_INIT  = ecDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityDisplayInit ),
+		E_EVENT_CODE_APP_ACTIVITY_DISPLAY_TERM  = ecDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityDisplayTerm ),
 		E_EVENT_CODE_APP_ACTIVITY_FOCUS_GAINED  = ecDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityFocusGained ),
 		E_EVENT_CODE_APP_ACTIVITY_FOCUS_LOST    = ecDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityFocusLost ),
 		E_EVENT_CODE_APP_ACTIVITY_PAUSE         = ecDeclareEventCodeAppActivity( EEventCodeIndex::AppActivityPause ),

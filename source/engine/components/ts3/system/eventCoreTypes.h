@@ -18,7 +18,11 @@ namespace ts3::system
 		{}
 	};
 
-	struct EvtAppActivityDisplayReady : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_DISPLAY_READY>
+	struct EvtAppActivityDisplayInit : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_DISPLAY_INIT>
+	{
+	};
+
+	struct EvtAppActivityDisplayTerm : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_DISPLAY_TERM>
 	{
 	};
 

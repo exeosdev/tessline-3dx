@@ -122,6 +122,7 @@ namespace ts3::system
 
 		void registerEventSource( EventSource & pEventSource );
 		void unregisterEventSource( EventSource & pEventSource );
+		void resetEventSourceList();
 
 		bool dispatchEvent( EventObject pEvent );
 
