@@ -1,6 +1,10 @@
 
 cmake_minimum_required( VERSION 3.10 )
 
+set( CMAKE_PROJECT_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}" )
+string( REPLACE "\\" "/" CMAKE_PROJECT_ROOT_PATH "${CMAKE_PROJECT_ROOT_PATH}" )
+set( TS3_PCL_PROJECT_ROOT_PATH "${CMAKE_PROJECT_ROOT_PATH}" )
+
 set( CMAKE_C_STANDARD 11 )
 set( CMAKE_C_STANDARD_REQUIRED ON )
 set( CMAKE_C_EXTENSIONS OFF )
@@ -49,3 +53,7 @@ add_subdirectory( "source/engine/components" )
 add_subdirectory( "source/engine/drivers" )
 add_subdirectory( "source/engine/extensions" )
 add_subdirectory( "source/samples" )
+
+if( "${CM_EBS_SYSCONF_TARGET_PLATFORM}" STREQUAL "Android" )
+	add_subdirectory( source/appx/boot/android/launcher/src )
+endif()

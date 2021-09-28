@@ -120,11 +120,11 @@ int main( int argc, char ** argv )
 			ts3::ESysEventCodeIndex::InputMouseMove,
 			[&cameraController]( ts3::SysEvent & e ) -> bool {
 				const auto & emove = e.eInputMouseMove;
-				if( emove.buttonStateMask.isSet( ts3::SYS_MOUSE_BUTTON_FLAG_LEFT_BIT ) )
+				if( emove.buttonStateMask.isSet( ts3::E_SYS_MOUSE_BUTTON_FLAG_LEFT_BIT ) )
 				{
 					cameraController.rotateAroundOrigin( emove.movementDelta.x, emove.movementDelta.y );
 				}
-				else if( emove.buttonStateMask.isSet( ts3::SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT ) )
+				else if( emove.buttonStateMask.isSet( ts3::E_SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT ) )
 				{
 					cameraController.rotateAroundTarget( emove.movementDelta.x, emove.movementDelta.y );
 				}

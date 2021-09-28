@@ -2,27 +2,25 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_OPENGL_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_OPENGL_H__
 
-#include "androidEventCore.h"
+#include "androidEventSystem.h"
 #include "../../shared/egl/eglOpenGL.h"
-#include <GLES3/gl3platform.h>
-#include <GLES3/gl3.h>
 #include <GLES3/gl31.h>
 
-namespace ts3
+namespace ts3::system
 {
 
-	struct GLDisplaySurfaceNativeData : public EGLSurfaceNativeData, public EventSourceNativeData
+	struct GLDisplaySurfaceNativeData : public EGLDisplaySurfaceNativeData, public EventSourceNativeData
 	{
 	};
 
-	struct GLRenderContextNativeData : public EGLRenderContextNativeData
+	struct GLRenderContextNativeData : public EGLRenderContextNativeData, public AndroidNativeDataCommon
 	{
 	};
 
-	struct GLDriverNativeData : public EGLDriverNativeData
+	struct GLSystemDriverNativeData : public EGLDriverNativeData, public AndroidNativeDataCommon
 	{
 	};
 
-}
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_OPENGL_H__

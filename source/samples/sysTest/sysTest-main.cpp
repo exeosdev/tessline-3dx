@@ -7,96 +7,143 @@
 
 using namespace ts3::system;
 
-int main( int pArgc, const char ** pArgv )
+struct GfxState
 {
-    SysContextCreateInfo sysCtxCreateInfo;
-#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_SYSAPI_WIN32 )
-    sysCtxCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
-#elif( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_SYSAPI_X11 )
-#endif
-    sysCtxCreateInfo.flags = 0;
+    DisplayManagerHandle displayManager;
+    GLSystemDriverHandle glSystemDriver;
+    GLDisplaySurfaceHandle glSurface;
+    GLRenderContextHandle glContext;
+};
 
-    auto sysCtx = creCreateSystemContext( sysCtxCreateInfo );
-    auto dsmManager = createSysObject<DisplayManager>( sysCtx );
-    auto openglDiver = createSysObject<GLSystemDriver>( dsmManager );
+void initializeGraphics( SysContextHandle pSysContext, GfxState & pGfxState )
+{
+    pGfxState.displayManager = createSysObject<DisplayManager>( pSysContext );
+    pGfxState.glSystemDriver = createSysObject<GLSystemDriver>( pGfxState.displayManager );
 
-    // auto dsmDriver = dsmManager->createDisplayDriver( EDisplayDriverType::Generic );
-    // dsmDriver->syncDisplayConfiguration();
-    // auto dsmConfigDump = dsmDriver->generateConfigurationDump();
-    // printf( "%s\n", dsmConfigDump.c_str() );
-
-    openglDiver->initializePlatform();
+    pGfxState.glSystemDriver->initializePlatform();
 
     GLDisplaySurfaceCreateInfo surfaceCreateInfo;
-    surfaceCreateInfo.windowGeometry.size = {1600,900};
+    surfaceCreateInfo.windowGeometry.size = {0, 0 };
     surfaceCreateInfo.windowGeometry.frameStyle = WindowFrameStyle::Caption;
     surfaceCreateInfo.visualConfig = vsxGetDefaultVisualConfigForSysWindow();
+    surfaceCreateInfo.flags.set( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 
-    auto displaySurface = openglDiver->createDisplaySurface( surfaceCreateInfo );
+    pGfxState.glSurface = pGfxState.glSystemDriver->createDisplaySurface( surfaceCreateInfo );
 
     GLRenderContextCreateInfo renderContextCreateInfo;
-    renderContextCreateInfo.requiredAPIVersion = { 4, 2 };
+    renderContextCreateInfo.requiredAPIVersion = cvGLVersionBestSupported;
     renderContextCreateInfo.targetAPIProfile = EGLAPIProfile::Core;
     renderContextCreateInfo.shareContext = nullptr;
     renderContextCreateInfo.flags = E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT;
 
-    auto renderContext = openglDiver->createRenderContext( *displaySurface, renderContextCreateInfo );
+    pGfxState.glContext = pGfxState.glSystemDriver->createRenderContext( *(pGfxState.glSurface), renderContextCreateInfo );
+}
+
+#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_OS_ANDROID )
+int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
+{
+    ts3::system::SysContextCreateInfo sysContextCreateInfo {};
+    sysContextCreateInfo.nativeParams.aCommonAppState = pAppState;
+    sysContextCreateInfo.flags = 0;
+    auto sysContext = nativeCreateSysContext( sysContextCreateInfo );
+#elif( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_SYSAPI_WIN32 )
+int main( int pArgc, const char ** pArgv )
+{
+    SysContextCreateInfo sysContextCreateInfo;
+    sysContextCreateInfo.flags = 0;
+    sysContextCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
+    auto sysContext = nativeCreateSysContext( sysContextCreateInfo );
+#elif( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_SYSAPI_X11 )
+int main( int pArgc, const char ** pArgv )
+{
+    SysContextCreateInfo sysContextCreateInfo;
+    sysContextCreateInfo.flags = 0;
+    auto sysContext = nativeCreateSysContext( sysContextCreateInfo );
+#endif
+
+    GfxState gfxState;
 
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    auto evtController = createSysObject<EventController>( sysCtx );
+    auto evtController = createSysObject<EventController>( sysContext );
     evtController->setActiveEventDispatcherDefault();
     auto * evtDispatcher = evtController->getEventDispatcher( CX_EVENT_DISPATCHER_ID_DEFAULT );
 
+#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_OS_ANDROID )
+    bool waitForDisplay = true;
+
+    evtDispatcher->bindEventHandler(
+        EEventCodeIndex::AppActivityDisplayReady,
+        [&waitForDisplay,&sysContext](const EventObject & pEvt) -> bool {
+            waitForDisplay = false;
+            return true;
+        });
+
+    while( waitForDisplay )
+    {
+        evtController->updateSysQueueAuto();
+    }
+
+    evtDispatcher->bindEventHandler( EEventCodeIndex::AppActivityDisplayReady, nullptr );
+#endif
+
     bool runApp = true;
 
-    evtDispatcher->bindEventHandler( EEventCodeIndex::AppActivityQuit, [&runApp,&displaySurface](const EventObject & pEvt) -> bool {
-        // if( displaySurface )
-        // {
-        //     displaySurface->destroy();
-        //     displaySurface = nullptr;
-        // }
-        runApp = false;
-        return true;
-    });
-    evtDispatcher->bindEventHandler( EEventCodeIndex::WindowUpdateClose, [displaySurface,evtDispatcher](const EventObject & pEvt) -> bool {
-        if( pEvt.eWindowUpdateClose.checkEventSource( displaySurface.get() ) )
-        {
-            evtDispatcher->postEventAppQuit();
-        }
-        return true;
-    });
-    evtDispatcher->bindEventHandler( EEventCodeIndex::InputKeyboardKey, [displaySurface,evtDispatcher](const EventObject & pEvt) -> bool {
-        if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::Escape )
-        {
-            evtDispatcher->postEventAppQuit();
-        }
-        else if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::CharF )
-        {
-            //appWindow->setFullscreenMode( true );
-        }
-        else if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::CharG )
-        {
-            //appWindow->setFullscreenMode( false );
-        }
-        return true;
-    });
+    evtDispatcher->bindEventHandler(
+            EEventCodeIndex::AppActivityQuit,
+            [&runApp,&gfxState](const EventObject & pEvt) -> bool {
+                // if( displaySurface )
+                // {
+                //     displaySurface->destroy();
+                //     displaySurface = nullptr;
+                // }
+                runApp = false;
+                return true;
+            });
+    evtDispatcher->bindEventHandler(
+            EEventCodeIndex::WindowUpdateClose,
+            [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
+                if( pEvt.eWindowUpdateClose.checkEventSource( gfxState.glSurface.get() ) )
+                {
+                    evtDispatcher->postEventAppQuit();
+                }
+                return true;
+            });
+    evtDispatcher->bindEventHandler(
+            EEventCodeIndex::InputKeyboardKey,
+            [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
+                if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::Escape )
+                {
+                    evtDispatcher->postEventAppQuit();
+                }
+                else if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::CharF )
+                {
+                    //appWindow->setFullscreenMode( true );
+                }
+                else if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::CharG )
+                {
+                    //appWindow->setFullscreenMode( false );
+                }
+                return true;
+            });
 
-    evtController->registerEventSource( *displaySurface );
-    openglDiver->releaseInitState( *renderContext );
-    renderContext->bindForCurrentThread( *displaySurface );
+    initializeGraphics( sysContext, gfxState );
 
-    auto glSysInfo = renderContext->querySystemVersionInfo();
+    evtController->registerEventSource( *(gfxState.glSurface) );
+    gfxState.glSystemDriver->releaseInitState( *(gfxState.glContext) );
+    gfxState.glContext->bindForCurrentThread( *(gfxState.glSurface) );
+
+    auto glSysInfo = gfxState.glContext->querySystemVersionInfo();
     auto glSysInfoStr = glSysInfo.toString();
     printf("%s\n", glSysInfoStr.c_str() );
 
     while( runApp )
     {
         evtController->updateSysQueueAuto();
-        displaySurface->clearColorBuffer();
-        displaySurface->swapBuffers();
+        gfxState.glSurface->clearColorBuffer();
+        gfxState.glSurface->swapBuffers();
     }
 
     //wmgr->reset();

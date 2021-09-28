@@ -71,10 +71,16 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Android" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/osapi/android/androidCommon.h"
+            "internal/platform/osapi/android/androidCommon.cpp"
+            "internal/platform/osapi/android/androidDisplay.h"
+            "internal/platform/osapi/android/androidDisplay.cpp"
             "internal/platform/osapi/android/androidEventSystem.h"
             "internal/platform/osapi/android/androidEventSystem.cpp"
+            "internal/platform/osapi/android/androidFileManager.h"
             "internal/platform/osapi/android/androidOpenGL.h"
             "internal/platform/osapi/android/androidOpenGL.cpp"
+            "internal/platform/osapi/android/androidSysContext.h"
+            "internal/platform/osapi/android/androidSysContext.cpp"
             "internal/platform/osapi/android/androidWindow.h"
             "internal/platform/osapi/android/androidWindow.cpp"
             )
@@ -128,7 +134,7 @@ else()
 endif()
 
 set_target_properties( ts3-system PROPERTIES
-        OUTPUT_NAME "exf-system"
+        OUTPUT_NAME "ts3-system"
         )
 
 target_include_directories( ts3-system PUBLIC

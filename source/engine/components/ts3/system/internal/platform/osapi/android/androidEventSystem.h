@@ -2,13 +2,12 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_EVENT_SYSTEM_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_EVENT_SYSTEM_H__
 
-namespace ts3
+#include "androidCommon.h"
+
+namespace ts3::system
 {
 
     using NativeEvent = struct ANativeEvent;
-
-    constexpr int cvAndroidLooperWaitTimeoutImmediate = 0;
-    constexpr int cvAndroidLooperWaitTimeoutInfinity = -1;
 
     enum class ANativeEventType : enum_default_value_t
     {
@@ -19,8 +18,11 @@ namespace ts3
 
     enum : int32_t
     {
-        APP_CMD_USER_DESTROY_REQUESTED = 0xFF00
+        E_ANDROID_EVT_CMD_USER_DESTROY_REQUESTED = 0xFF00,
     };
+
+    inline constexpr int32_t CX_ANDROID_EVENT_LOOPER_WAIT_TIMEOUT_IMMEDIATE = 0;
+    inline constexpr int32_t CX_ANDROID_EVENT_LOOPER_WAIT_TIMEOUT_INFINITY = -1;
 
     struct ANativeEvent
     {
@@ -32,10 +34,10 @@ namespace ts3
         };
     };
 
-	struct EventSourceNativeData
+	struct EventSourceNativeData : public AndroidNativeDataCommon
 	{
 	};
 
-}
+} // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_EVENT_SYSTEM_H__
