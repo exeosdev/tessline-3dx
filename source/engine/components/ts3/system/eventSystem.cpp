@@ -6,34 +6,46 @@ namespace ts3::system
 {
 
     EventSource::EventSource( SysContextHandle pSysContext )
-    : SysObject( pSysContext )
+    : SysObject( std::move( pSysContext ) )
     {}
 
     EventSource::~EventSource() noexcept
     {
-        if( _eventController )
+        if( _eventControllerActiveRef )
         {
-            _eventController->onEventSourceDestroy( *this );
-            _eventController = nullptr;
-        }
-    }
-
-    void EventSource::unregisterEventSourceAuto()
-    {
-        if( _eventController )
-        {
-            _eventController->unregisterEventSource( *this );
+            _eventControllerActiveRef->onEventSourceDestroy( *this );
+            _eventControllerActiveRef = nullptr;
         }
     }
 
     void EventSource::setEventController( EventControllerHandle pEventController )
     {
-        _eventController = pEventController;
+        _eventControllerActiveRef = pEventController;
     }
 
-    void EventSource::setEventSourceNativeData( void * pData )
+    void EventSource::setPrivateData( void * pPrivateData )
     {
-        _eventSourceNativeData = pData;
+        _privateData = pPrivateData;
+    }
+
+    EventSourceNativeData * EventSource::getEventSourceNativeData() const
+    {
+        return _eventSourceNativeData;
+    }
+
+    void * EventSource::getPrivateData() const
+    {
+        return _privateData;
+    }
+
+    void EventSource::setEventSourceNativeData( EventSourceNativeData & pNativeData )
+    {
+        _eventSourceNativeData = &pNativeData;
+    }
+
+    void EventSource::resetEventSourceNativeData()
+    {
+        _eventSourceNativeData = nullptr;
     }
 
 
@@ -41,14 +53,21 @@ namespace ts3::system
     void _internalEventOnInputMouseButton( EventObject & pEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState );
     void _internalEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState );
 
-    EventDispatcher::EventDispatcher( EventController * pEventController, event_dispatcher_id_t pID )
+    EventDispatcher::EventDispatcher( EventControllerHandle pEventController )
     : SysObject( pEventController->mSysContext )
-    , mEventController( pEventController )
+    , mEventController( pEventController.get() )
     , mInternal( std::make_unique<ObjectInternalData>( this ) )
-    , mID( ( pID != CX_EVENT_DISPATCHER_ID_AUTO ) ? pID : reinterpret_cast<event_dispatcher_id_t>( this ) )
+    , _eventControllerActiveRef( std::move( pEventController ) )
     {}
 
-    EventDispatcher::~EventDispatcher() noexcept = default;
+    EventDispatcher::~EventDispatcher() noexcept
+    {
+        if( _eventControllerActiveRef )
+        {
+            _eventControllerActiveRef->onEventDispatcherDestroy( *this );
+            _eventControllerActiveRef = nullptr;
+        }
+    }
 
     void EventDispatcher::bindEventHandler( EEventBaseType pBaseType, EventHandler pHandler )
     {
@@ -229,11 +248,92 @@ namespace ts3::system
 
 	EventController::~EventController() noexcept
 	{
-        resetEventSourceList();
+        _resetEventSourceList();
 
-        releaseDispatcherObjects();
+        _resetEventDispatcherList();
 
         _nativeDestructor();
+	}
+
+	bool EventController::dispatchEvent( EventObject pEvent )
+	{
+        _checkActiveDispatcherState();
+
+        return mInternal->activeEventDispatcher->postEvent( pEvent );
+	}
+
+	uint32 EventController::updateSysQueueAuto()
+	{
+        _checkActiveDispatcherState();
+
+        uint32 eventCounter = 0;
+        while( _nativeUpdateSysQueue() )
+        {
+            ++eventCounter;
+        }
+        if( ( eventCounter == 0 ) && mInternal->currentInternalConfig->configFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT ) )
+        {
+            _nativeUpdateSysQueueWait();
+        }
+        return eventCounter;
+	}
+
+	uint32 EventController::updateSysQueuePeek( uint32 pLimit )
+	{
+        _checkActiveDispatcherState();
+
+        uint32 eventCounter = 0;
+        while( _nativeUpdateSysQueue() && ( eventCounter <= pLimit ) )
+        {
+            ++eventCounter;
+        }
+        return eventCounter;
+	}
+
+	uint32 EventController::updateSysQueueWait( uint32 pLimit )
+	{
+        _checkActiveDispatcherState();
+
+        uint32 eventCounter = 0;
+        while( _nativeUpdateSysQueue() && ( eventCounter <= pLimit ) )
+        {
+            ++eventCounter;
+        }
+        if( eventCounter == 0 )
+        {
+            _nativeUpdateSysQueueWait();
+        }
+        return eventCounter;
+	}
+
+	EventDispatcherHandle EventController::createEventDispatcher()
+	{
+        auto eventDispatcher = createSysObject<EventDispatcher>( getHandle<EventController>() );
+
+        _addEventDispatcher( *eventDispatcher );
+
+        return eventDispatcher;
+	}
+
+	bool EventController::setActiveEventDispatcher( EventDispatcher & pEventDispatcher )
+	{
+        if( &pEventDispatcher != mInternal->activeEventDispatcher )
+        {
+            _validateDispatcher( pEventDispatcher );
+            _onActiveDispatcherChange( &pEventDispatcher );
+            return true;
+        }
+        return false;
+	}
+
+	bool EventController::resetActiveEventDispatcher()
+	{
+        if( mInternal->activeEventDispatcher  )
+        {
+            _onActiveDispatcherChange( nullptr );
+            return true;
+        }
+        return false;
 	}
 
     void EventController::registerEventSource( EventSource & pEventSource )
@@ -250,151 +350,7 @@ namespace ts3::system
         _nativeUnregisterEventSource( pEventSource );
     }
 
-    void EventController::resetEventSourceList()
-    {
-        while( !mInternal->eventSourceList.empty() )
-        {
-            auto * eventSource = mInternal->eventSourceList.back();
-
-            unregisterEventSource( *eventSource );
-        }
-    }
-
-    bool EventController::dispatchEvent( EventObject pEvent )
-    {
-        _checkActiveDispatcherState();
-
-        return mInternal->activeEventDispatcher->postEvent( pEvent );
-    }
-
-    uint32 EventController::updateSysQueueAuto()
-    {
-        _checkActiveDispatcherState();
-
-        uint32 eventCounter = 0;
-        while( _nativeUpdateSysQueue() )
-        {
-            ++eventCounter;
-        }
-        if( ( eventCounter == 0 ) && mInternal->currentInternalConfig->configFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT ) )
-        {
-            _nativeUpdateSysQueueWait();
-        }
-        return eventCounter;
-    }
-
-    uint32 EventController::updateSysQueuePeek( uint32 pLimit )
-    {
-        _checkActiveDispatcherState();
-
-        uint32 eventCounter = 0;
-        while( _nativeUpdateSysQueue() && ( eventCounter <= pLimit ) )
-        {
-            ++eventCounter;
-        }
-        return eventCounter;
-    }
-
-    uint32 EventController::updateSysQueueWait( uint32 pLimit )
-    {
-        _checkActiveDispatcherState();
-
-        uint32 eventCounter = 0;
-        while( _nativeUpdateSysQueue() && ( eventCounter <= pLimit ) )
-        {
-            ++eventCounter;
-        }
-        if( eventCounter == 0 )
-        {
-            _nativeUpdateSysQueueWait();
-        }
-        return eventCounter;
-    }
-
-    EventDispatcher * EventController::createEventDispatcher( event_dispatcher_id_t pDispatcherID )
-    {
-        if( pDispatcherID == CX_EVENT_DISPATCHER_ID_DEFAULT )
-        {
-            return _getDefaultDispatcher();
-        }
-
-        auto existingDispatcherRef = mInternal->dispatcherMap.find( pDispatcherID );
-        if( existingDispatcherRef != mInternal->dispatcherMap.end() )
-        {
-            return existingDispatcherRef->second;
-        }
-
-        auto dispatcher = createSysObject<EventDispatcher>( this, pDispatcherID );
-        mInternal->dispatcherList.push_back( dispatcher );
-        mInternal->dispatcherMap[pDispatcherID] = dispatcher.get();
-
-        return dispatcher.get();
-    }
-
-    EventDispatcher * EventController::getEventDispatcher( event_dispatcher_id_t pDispatcherID )
-    {
-        if( pDispatcherID == CX_EVENT_DISPATCHER_ID_DEFAULT )
-        {
-            return _getDefaultDispatcher();
-        }
-        return getMapValueOrDefault( mInternal->dispatcherMap, pDispatcherID, nullptr );
-
-    }
-
-    bool EventController::setActiveEventDispatcher( event_dispatcher_id_t pDispatcherID )
-    {
-        if( auto * dispatcher = getEventDispatcher( pDispatcherID ) )
-        {
-            return setActiveEventDispatcher( dispatcher );
-        }
-        return false;
-    }
-
-    bool EventController::setActiveEventDispatcher( EventDispatcher * pDispatcher )
-    {
-        if( pDispatcher != mInternal->activeEventDispatcher )
-        {
-            auto * validatedPtr = _validateDispatcher( pDispatcher );
-            if( validatedPtr == pDispatcher )
-            {
-                _onActiveDispatcherChange( pDispatcher );
-                mInternal->activeEventDispatcher = pDispatcher;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    bool EventController::setActiveEventDispatcherDefault()
-    {
-        auto defaultDispatcher = _getDefaultDispatcher();
-        return setActiveEventDispatcher( defaultDispatcher );
-    }
-
-    bool EventController::resetActiveEventDispatcher()
-    {
-        if( mInternal->activeEventDispatcher  )
-        {
-            _onActiveDispatcherChange( nullptr );
-            mInternal->activeEventDispatcher = nullptr;
-            return true;
-        }
-
-        return false;
-    }
-
-    void EventController::releaseDispatcherObjects()
-    {
-        resetActiveEventDispatcher();
-
-        mInternal->dispatcherMap.clear();
-        mInternal->dispatcherList.clear();
-
-        mInternal->activeEventDispatcher = nullptr;
-        mInternal->defaultEventDispatcher = nullptr;
-    }
-
-    EventSource * EventController::findEventSource( EventSourceFindPredicate pPredicate ) const
+    EventSource * EventController::findEventSource( const EventSourceFindPredicate & pPredicate ) const
     {
         for( auto * eventSource : mInternal->eventSourceList )
         {
@@ -406,14 +362,16 @@ namespace ts3::system
         return nullptr;
     }
 
-    EventSource * EventController::findEventSource( EventSourceNativeDataFindPredicate pPredicate ) const
+    EventSource * EventController::findEventSource( const EventSourceNativeDataFindPredicate & pPredicate ) const
     {
         for( auto * eventSource : mInternal->eventSourceList )
         {
-            const auto * eventSourceNativeData = eventSource->getEventSourceNativeData<EventSourceNativeData>();
-            if( pPredicate( *eventSourceNativeData ) )
+            if( const auto * eventSourceNativeData = eventSource->getEventSourceNativeData() )
             {
-                return eventSource;
+                if( pPredicate( *eventSourceNativeData ) )
+                {
+                    return eventSource;
+                }
             }
         }
         return nullptr;
@@ -438,23 +396,28 @@ namespace ts3::system
 
     void EventController::onEventSourceDestroy( EventSource & pEventSource ) noexcept
     {
-        // Important note on destroying event sources: native-side unregistration should not be used here
-        // (which means, to never call the native method _nativeUnregisterEventSource( pEventSource );
-        //
-        // onEventSourceDestroy is called when an EventSource is being destroyed (i.e. within its destructor), so the
-        // sub-class part ( e.g. Window/GLSurface) is already gone. That will cause any native code to (most likely)
-        // fail. For example, Win32 would not be able to reset the event procedure, since HWND has been already destroyed.
-        // The purpose of this method is only to remove those sources, that have been destroyed as a consequence of a
-        // system-generated action (e.g. close button of a window).
-
         try
         {
             _removeEventSource( pEventSource );
 
-            if( auto * privateData = _removeEventSourcePrivateData( pEventSource ) )
-            {
-                _nativeDestroyEventSourcePrivateData( pEventSource, privateData );
-            }
+            _nativeUnregisterEventSource( pEventSource );
+        }
+        catch( const Exception & pException )
+        {
+            ( pException );
+            ts3DebugInterrupt();
+        }
+        catch( ... )
+        {
+            ts3DebugInterrupt();
+        }
+    }
+
+    void EventController::onEventDispatcherDestroy( EventDispatcher & pEventDispatcher ) noexcept
+    {
+        try
+        {
+            _removeEventDispatcher( pEventDispatcher );
         }
         catch( const Exception & pException )
         {
@@ -478,12 +441,14 @@ namespace ts3::system
         ts3DebugAssert( mInternal->currentInternalConfig != nullptr );
     }
     
-    void EventController::_onActiveDispatcherChange( EventDispatcher * pDispatcher )
+    void EventController::_onActiveDispatcherChange( EventDispatcher * pEventDispatcher )
     {
-        if( pDispatcher )
+        _nativeOnActiveDispatcherChange( pEventDispatcher );
+
+        if( pEventDispatcher )
         {
-            mInternal->currentInputState = &( pDispatcher->mInternal->inputState );
-            mInternal->currentInternalConfig = &( pDispatcher->mInternal->internalConfig );
+            mInternal->currentInputState = &( pEventDispatcher->mInternal->inputState );
+            mInternal->currentInternalConfig = &( pEventDispatcher->mInternal->internalConfig );
         }
         else
         {
@@ -491,44 +456,49 @@ namespace ts3::system
             mInternal->currentInternalConfig = nullptr;
         }
 
-        _nativeOnActiveDispatcherChange( pDispatcher );
+        mInternal->activeEventDispatcher = pEventDispatcher;
     }
 
-    EventDispatcher * EventController::_getDefaultDispatcher()
+    void EventController::_validateDispatcher( EventDispatcher & pEventDispatcher )
     {
-        if( !mInternal->defaultEventDispatcher )
+        if( pEventDispatcher.mEventController != this )
         {
-            auto defaultDispatcher = createSysObject<EventDispatcher>( this, CX_EVENT_DISPATCHER_ID_DEFAULT );
-            mInternal->defaultEventDispatcher = defaultDispatcher;
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
-        return mInternal->defaultEventDispatcher.get();
+
+        auto eventDispatcherRef = mInternal->findEventDispatcherInternal( &pEventDispatcher );
+        if( !eventDispatcherRef.first || ( *( eventDispatcherRef.second ) != &pEventDispatcher ) )
+        {
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+        }
     }
 
-    EventDispatcher * EventController::_validateDispatcher( EventDispatcher * pDispatcher )
+    void EventController::_addEventDispatcher( EventDispatcher & pEventDispatcher )
     {
-        if( !pDispatcher )
+        auto eventDispatcherRef = mInternal->findEventDispatcherInternal( &pEventDispatcher );
+        if( eventDispatcherRef.first )
         {
-            return nullptr;
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
-        if( pDispatcher->mEventController != this )
+        mInternal->eventDispatcherList.push_back( &pEventDispatcher );
+    }
+
+    void EventController::_removeEventDispatcher( EventDispatcher & pEventDispatcher )
+    {
+        auto eventDispatcherRef = mInternal->findEventDispatcherInternal( &pEventDispatcher );
+        if( !eventDispatcherRef.first )
         {
-            return nullptr;
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
-        auto * internalDispatcherPtr = getEventDispatcher( pDispatcher->mID );
-        if( pDispatcher != internalDispatcherPtr )
-        {
-            return nullptr;
-        }
-
-        return pDispatcher;
+        mInternal->eventDispatcherList.erase( eventDispatcherRef.second );
     }
 
     void EventController::_addEventSource( EventSource & pEventSource )
     {
-        auto eventSourceIter = std::find( mInternal->eventSourceList.begin(), mInternal->eventSourceList.end(), &pEventSource );
-        if( eventSourceIter != mInternal->eventSourceList.end() )
+        auto eventSourceRef = mInternal->findEventSourceInternal( &pEventSource );
+        if( eventSourceRef.first )
         {
             ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
@@ -540,40 +510,35 @@ namespace ts3::system
 
     void EventController::_removeEventSource( EventSource & pEventSource )
     {
-        auto eventSourceIter = std::find( mInternal->eventSourceList.begin(), mInternal->eventSourceList.end(), &pEventSource );
-        if( eventSourceIter == mInternal->eventSourceList.end() )
+        auto eventSourceRef = mInternal->findEventSourceInternal( &pEventSource );
+        if( !eventSourceRef.first )
         {
             ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
-        mInternal->eventSourceList.erase( eventSourceIter );
+        mInternal->eventSourceList.erase( eventSourceRef.second );
     }
 
-    void * EventController::_removeEventSourcePrivateData( EventSource & pEventSource )
+    void EventController::_resetEventDispatcherList()
     {
-        auto dataIter = mInternal->eventSourcePrivateDataMap.find( &pEventSource );
-        if( dataIter != mInternal->eventSourcePrivateDataMap.end() )
+        while( !mInternal->eventDispatcherList.empty() )
         {
-            auto * privateData = dataIter->second;
-            mInternal->eventSourcePrivateDataMap.erase( dataIter );
-            return privateData;
+            auto * eventDispatcher = mInternal->eventDispatcherList.back();
+
+            _removeEventDispatcher( *eventDispatcher );
         }
-        return nullptr;
     }
 
-    void EventController::_setEventSourcePrivateData( EventSource & pEventSource, void * pData )
+    void EventController::_resetEventSourceList()
     {
-        mInternal->eventSourcePrivateDataMap[&pEventSource] = pData;
-    }
-
-    void * EventController::_getEventSourcePrivateData( EventSource & pEventSource ) const
-    {
-        auto dataIter = mInternal->eventSourcePrivateDataMap.find( &pEventSource );
-        if( dataIter != mInternal->eventSourcePrivateDataMap.end() )
+        while( !mInternal->eventSourceList.empty() )
         {
-            return dataIter->second;
+            auto * eventSource = mInternal->eventSourceList.back();
+
+            _removeEventSource( *eventSource );
+
+            _nativeUnregisterEventSource( *eventSource );
         }
-        return nullptr;
     }
 
 } // namespace ts3::system

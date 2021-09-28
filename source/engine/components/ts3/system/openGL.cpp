@@ -11,11 +11,12 @@ namespace ts3::system
     , mInternal( std::make_unique<ObjectInternalData>( this ) )
     , mNativeData( &( mInternal->nativeDataPriv ) )
     {
-        setEventSourceNativeData( &( mInternal->nativeDataPriv ) );
+        setEventSourceNativeData( mInternal->nativeDataPriv );
     }
 
     GLDisplaySurface::~GLDisplaySurface() noexcept
     {
+        resetEventSourceNativeData();
         mDriver->onDisplaySurfaceDestroy( *this );
     }
 

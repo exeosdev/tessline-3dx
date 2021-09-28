@@ -16,16 +16,14 @@ namespace ts3::system
 
     struct EventSourceNativeData
     {
-        HWND hwnd;
+        HWND hwnd = nullptr;
     };
 
     struct Win32EventSourceState
     {
-        EventController * eventController = nullptr;
-
-        EventSource * eventSource = nullptr;
-
         LONG_PTR savedEventCallback = 0;
+        LONG_PTR savedEventCallbackUserData = 0;
+        EventController * eventController = nullptr;
     };
 
 } // namespace ts3::system

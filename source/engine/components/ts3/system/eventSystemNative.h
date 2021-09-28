@@ -69,18 +69,11 @@ namespace ts3::system
         // Pointer to the object which owns this private data.
         EventController * parentController = nullptr;
 
-        // Default event dispatcher. It can be bound by either calling setDefaultActiveDispatcher() on the controller
-        // or by getting its pointer with getEventDispatcher( CX_EVENT_DISPATCHER_ID_DEFAULT ) and making it active.
-        EventDispatcherHandle defaultEventDispatcher = nullptr;
-
         // Current active dispatcher used to forward all events. Initially NULL and can be reset to this state.
         EventDispatcher * activeEventDispatcher = nullptr;
 
         // Container for all dispatchers created in the system.
-        std::list<EventDispatcherHandle> dispatcherList;
-
-        // ID -> Dispatcher map.
-        std::unordered_map<event_dispatcher_id_t, EventDispatcher *> dispatcherMap;
+        std::vector<EventDispatcher *> eventDispatcherList;
 
         //
         std::vector<EventSource *> eventSourceList;
@@ -97,6 +90,22 @@ namespace ts3::system
         explicit ObjectInternalData( EventController * pController )
         : parentController( pController )
         {}
+
+        std::pair<bool, std::vector<EventDispatcher *>::iterator> findEventDispatcherInternal( EventDispatcher * pEventDispatcher )
+        {
+            std::pair<bool, std::vector<EventDispatcher *>::iterator> result;
+            result.second = std::find( eventDispatcherList.begin(), eventDispatcherList.end(), pEventDispatcher );
+            result.first = ( result.second != eventDispatcherList.end() );
+            return result;
+        }
+
+        std::pair<bool, std::vector<EventSource *>::iterator> findEventSourceInternal( EventSource * pEventSource )
+        {
+            std::pair<bool, std::vector<EventSource *>::iterator> result;
+            result.second = std::find( eventSourceList.begin(), eventSourceList.end(), pEventSource );
+            result.first = ( result.second != eventSourceList.end() );
+            return result;
+        }
 
         const EventSystemInternalConfig & getCurrentInternalConfig() const
         {
@@ -143,8 +152,8 @@ namespace ts3::system
         // Array of handlers registered for EventCodeIndex (i.e. event code itself).
         EventCodeIndexHandlerMap handlerMapByCodeIndex;
 
-        explicit ObjectInternalData( EventDispatcher * pDispatcher )
-        : parentDispatcher( pDispatcher )
+        explicit ObjectInternalData( EventDispatcher * pEventDispatcher )
+        : parentDispatcher( pEventDispatcher )
         {}
     };
 

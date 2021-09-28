@@ -26,21 +26,22 @@ namespace ts3::system
 
 	void EventController::_nativeRegisterEventSource( EventSource & pEventSource )
     {
-        auto * eventSourceState = static_cast<Win32EventSourceState *>( _getEventSourcePrivateData( pEventSource ) );
-        if( !eventSourceState )
-        {
-            eventSourceState = new Win32EventSourceState();
-            eventSourceState->eventController = this;
-            eventSourceState->eventSource = &pEventSource;
-            _setEventSourcePrivateData( pEventSource, eventSourceState );
-        }
+	    auto * eventSourceNativeData = pEventSource.getEventSourceNativeData();
+	    ts3DebugAssert( eventSourceNativeData != nullptr );
 
-        auto * eventSourceNativeData = pEventSource.getEventSourceNativeData<EventSourceNativeData>();
+	    auto * win32EventSourceState = pEventSource.getPrivateDataAs<Win32EventSourceState>();
+	    if( !win32EventSourceState )
+	    {
+	        win32EventSourceState = new Win32EventSourceState();
+	        pEventSource.setPrivateData( win32EventSourceState );
+	    }
 
-        eventSourceState->savedEventCallback = ::GetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_WNDPROC );
+        win32EventSourceState->eventController = this;
+	    win32EventSourceState->savedEventCallback = ::GetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_WNDPROC );
+	    win32EventSourceState->savedEventCallbackUserData = ::GetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_USERDATA );
 
-        auto eventSourceStateAddress = reinterpret_cast<LONG_PTR>( eventSourceState );
-        ::SetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_USERDATA, eventSourceStateAddress );
+        auto win32EventSourceStateAddress = reinterpret_cast<LONG_PTR>( win32EventSourceState );
+        ::SetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_USERDATA, win32EventSourceStateAddress );
 
         auto eventSourceProcAddress = reinterpret_cast<LONG_PTR>( _win32EventSourceProxyEventProc );
         ::SetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_WNDPROC, eventSourceProcAddress );
@@ -57,31 +58,27 @@ namespace ts3::system
 
     void EventController::_nativeUnregisterEventSource( EventSource & pEventSource )
     {
-        auto * eventSourceState = static_cast<Win32EventSourceState *>( _getEventSourcePrivateData( pEventSource ) );
-        ts3DebugAssert( eventSourceState != nullptr );
+	    if( auto * win32EventSourceState = pEventSource.getPrivateDataAs<Win32EventSourceState>() )
+	    {
+	        if( auto * eventSourceNativeData = pEventSource.getEventSourceNativeData() )
+	        {
+	            ::SetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_WNDPROC, win32EventSourceState->savedEventCallback );
 
-        auto * eventSourceNativeData = pEventSource.getEventSourceNativeData<EventSourceNativeData>();
+	            ::SetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_USERDATA, win32EventSourceState->savedEventCallbackUserData );
 
-        ::SetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_WNDPROC, eventSourceState->savedEventCallback );
+	            // Trigger the update of the window to ensure changes are visible.
+	            ::SetWindowPos( eventSourceNativeData->hwnd,
+                                nullptr,
+                                0,
+                                0,
+                                0,
+                                0,
+                                SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
+	        }
 
-        ::SetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_USERDATA, 0u );
-
-        // Trigger the update of the window to ensure changes are visible.
-        ::SetWindowPos( eventSourceNativeData->hwnd,
-                        nullptr,
-                        0,
-                        0,
-                        0,
-                        0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
-    }
-
-    void EventController::_nativeDestroyEventSourcePrivateData( EventSource & pEventSource, void * pData )
-    {
-        if( auto * eventSourceState = static_cast<Win32EventSourceState *>( pData ) )
-        {
-            delete eventSourceState;
-        }
+	        delete win32EventSourceState;
+	        pEventSource.setPrivateData( nullptr );
+	    }
     }
 
 	bool EventController::_nativeUpdateSysQueue()
@@ -112,7 +109,7 @@ namespace ts3::system
 	    return false;
 	}
 
-	void EventController::_nativeOnActiveDispatcherChange( EventDispatcher * pDispatcher )
+	void EventController::_nativeOnActiveDispatcherChange( EventDispatcher * pEventDispatcher )
 	{}
 
 
