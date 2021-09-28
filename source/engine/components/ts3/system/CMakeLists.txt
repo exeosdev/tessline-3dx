@@ -1,5 +1,9 @@
 
 set( TS3_SYSTEM_SRC_FILES
+        "assetCommon.h"
+        "assetSystem.h"
+        "assetSystem.cpp"
+        "assetSystemNative.h"
         "displayCommon.h"
         "displayCommon.cpp"
         "display.h"
@@ -35,6 +39,9 @@ set( TS3_SYSTEM_SRC_FILES
         "window.cpp"
         "windowCommon.h"
         "windowNative.h"
+
+        "internal/platform/default/defaultAssetSystem.h"
+        "internal/platform/default/defaultAssetSystem.cpp"
         )
 
 if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_WINFAMILY} )
@@ -62,6 +69,8 @@ endif()
 if( "${CM_EBS_SYSCONF_TARGET_FLAG_OSF_GLAPI}" STREQUAL "EGL" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
+            "internal/platform/shared/egl/eglCoreUtils.h"
+            "internal/platform/shared/egl/eglCoreUtils.cpp"
             "internal/platform/shared/egl/eglOpenGL.h"
             "internal/platform/shared/egl/eglOpenGL.cpp"
             )
@@ -72,6 +81,8 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Android" )
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/osapi/android/androidCommon.h"
             "internal/platform/osapi/android/androidCommon.cpp"
+            "internal/platform/osapi/android/androidAssetSystem.h"
+            "internal/platform/osapi/android/androidAssetSystem.cpp"
             "internal/platform/osapi/android/androidDisplay.h"
             "internal/platform/osapi/android/androidDisplay.cpp"
             "internal/platform/osapi/android/androidEventSystem.h"

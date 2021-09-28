@@ -42,7 +42,7 @@ namespace ts3::system
         XRRModeInfo  * xrrModeInfo = nullptr;
     };
 
-    bool nativeX11CheckColorFormatSupport( XDisplay pXDisplay, int pScreenIndex, ColorFormat pColorFormat );
+    bool nativeX11CheckColorFormatSupport( XDisplay pXDisplay, int pScreenIndex, EColorFormat pColorFormat );
 
 } // namespace ts3::system
 

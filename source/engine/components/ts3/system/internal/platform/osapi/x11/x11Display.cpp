@@ -5,7 +5,7 @@
 namespace ts3::system
 {
 
-    bool nativeX11CheckColorFormatSupport( XDisplay pXDisplay, int pScreenIndex, ColorFormat pColorFormat )
+    bool nativeX11CheckColorFormatSupport( XDisplay pXDisplay, int pScreenIndex, EColorFormat pColorFormat )
     {
         const auto & colorFormatDesc = vsxGetDescForColorFormat( pColorFormat );
 
@@ -220,9 +220,9 @@ namespace ts3::system
         }
     }
 
-    void DisplayDriverGeneric::_drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
+    void DisplayDriverGeneric::_drvEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat )
     {
-        if( ( pColorFormat != ColorFormat::B8G8R8 ) && ( pColorFormat != ColorFormat::B8G8R8A8 ) )
+        if( ( pColorFormat != EColorFormat::B8G8R8 ) && ( pColorFormat != EColorFormat::B8G8R8A8 ) )
         {
             return;
         }
@@ -308,10 +308,10 @@ namespace ts3::system
         XRRFreeOutputInfo( outputInfo );
     }
 
-    ColorFormat DisplayDriverGeneric::_drvQueryDefaultSystemColorFormat() const
+    EColorFormat DisplayDriverGeneric::_drvQueryDefaultSystemColorFormat() const
     {
-        return ColorFormat::B8G8R8A8;
+        return EColorFormat::B8G8R8A8;
     }
 
 } // namespace ts3::system
-#endif
+#endif // TS3_PCL_TARGET_SYSAPI_X11

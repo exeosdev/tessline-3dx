@@ -4,6 +4,7 @@
 
 #include "dxgiCommon.h"
 
+#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
 namespace ts3::system
 {
 
@@ -30,5 +31,6 @@ namespace ts3::system
 	};
 
 } // namespace ts3::system
+#endif // TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI
 
 #endif // __TS3_SYSTEM_DXGI_DISPLAY_H__
