@@ -5,17 +5,17 @@
 namespace ts3::system
 {
 
-    void SysContext::_nativeInitialize()
+    void nativeSysContextInternalInitialize( SysContext & pSysContext, const SysContextCreateInfo & pCreateInfo )
     {
-        auto & nativeData = mInternal->nativeDataPriv;
+        auto & nativeData = pSysContext.mInternal->nativeDataPriv;
         nativeData.appExecModuleHandle = ::GetModuleHandleA( nullptr );
     }
 
-    void SysContext::_nativeRelease() noexcept
+    void nativeSysContextInternalRelease( SysContext & pSysContext )
     {
-        auto & nativeData = mInternal->nativeDataPriv;
+        auto & nativeData = pSysContext.mInternal->nativeDataPriv;
         nativeData.appExecModuleHandle = nullptr;
     }
 
 } // namespace ts3::system
-#endif
+#endif // TS3_PCL_TARGET_SYSAPI_WIN32

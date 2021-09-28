@@ -3,12 +3,13 @@
 #include <ts3/stdext/mapUtils.h>
 #include <ts3/stdext/stringUtils.h>
 
+#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
 namespace ts3::system
 {
 
     static void _dxgiEnumAdapterOutputs( DisplayAdapter & pAdapter );
 
-	static DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( ColorFormat pColorFormat );
+	static DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( EColorFormat pColorFormat );
 
 
 	void DisplayDriverDXGI::_initialize()
@@ -188,7 +189,7 @@ namespace ts3::system
 	    }
 	}
 
-	void DisplayDriverDXGI::_drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
+	void DisplayDriverDXGI::_drvEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat )
 	{
 	    auto * dxgiOutput = pOutput.mInternal->nativeDataPriv.dxgi->dxgiOutput.Get();
 
@@ -268,9 +269,9 @@ namespace ts3::system
 	    }
 	}
 
-    ColorFormat DisplayDriverDXGI::_drvQueryDefaultSystemColorFormat() const
+    EColorFormat DisplayDriverDXGI::_drvQueryDefaultSystemColorFormat() const
     {
-	    return ColorFormat::B8G8R8A8;
+	    return EColorFormat::B8G8R8A8;
     }
 
 
@@ -278,19 +279,20 @@ namespace ts3::system
 	{
 	}
 
-	DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( ColorFormat pColorFormat )
+	DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( EColorFormat pColorFormat )
 	{
-		static const std::unordered_map<ColorFormat, DXGI_FORMAT> colorDescMap =
+		static const std::unordered_map<EColorFormat, DXGI_FORMAT> colorDescMap =
 		{
-			{ ColorFormat::B8G8R8       , DXGI_FORMAT_B8G8R8X8_UNORM      },
-			{ ColorFormat::B8G8R8A8     , DXGI_FORMAT_B8G8R8A8_UNORM      },
-			{ ColorFormat::B8G8R8A8SRGB , DXGI_FORMAT_B8G8R8X8_UNORM_SRGB },
-			{ ColorFormat::R8G8B8A8     , DXGI_FORMAT_R8G8B8A8_UNORM      },
-			{ ColorFormat::R8G8B8A8SRGB , DXGI_FORMAT_R8G8B8A8_UNORM_SRGB },
-			{ ColorFormat::R8G8B8X8     , DXGI_FORMAT_R8G8B8X8_UNORM      },
-			{ ColorFormat::R10G10B10A2  , DXGI_FORMAT_R10G10B10A2_UNORM   },
+			{ EColorFormat::B8G8R8       , DXGI_FORMAT_B8G8R8X8_UNORM      },
+			{ EColorFormat::B8G8R8A8     , DXGI_FORMAT_B8G8R8A8_UNORM      },
+			{ EColorFormat::B8G8R8A8SRGB , DXGI_FORMAT_B8G8R8X8_UNORM_SRGB },
+			{ EColorFormat::R8G8B8A8     , DXGI_FORMAT_R8G8B8A8_UNORM      },
+			{ EColorFormat::R8G8B8A8SRGB , DXGI_FORMAT_R8G8B8A8_UNORM_SRGB },
+			{ EColorFormat::R8G8B8X8     , DXGI_FORMAT_UNKNOWN             },
+			{ EColorFormat::R10G10B10A2  , DXGI_FORMAT_R10G10B10A2_UNORM   },
 		};
 		return getMapValueOrDefault( colorDescMap, pColorFormat, DXGI_FORMAT_UNKNOWN );
 	}
 
-}
+} // namespace ts3::system
+#endif // TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI

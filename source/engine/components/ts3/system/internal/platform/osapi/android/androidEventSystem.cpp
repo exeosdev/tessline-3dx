@@ -189,14 +189,14 @@ namespace ts3::system
                 if( pAppState->window != nullptr )
                 {
                     auto * sysContext = pAppState->ts3GetUserDataAs<SysContext>( E_ANDROID_APP_STATE_USER_DATA_INDEX_SYS_CONTEXT );
-                    sysContext->mInternal->nativeDataPriv.aSessionData.aNativeWindow = pAppState->window;
-                    pOutEvent.code = E_EVENT_CODE_APP_ACTIVITY_DISPLAY_READY;
+                    nativeAndroidUpdateNativeWindowRef( *sysContext, pAppState->window );
+                    pOutEvent.code = E_EVENT_CODE_APP_ACTIVITY_DISPLAY_INIT;
                 }
                 break;
             }
             case APP_CMD_TERM_WINDOW:
             {
-                pOutEvent.code = E_EVENT_CODE_WINDOW_UPDATE_CLOSE;
+                pOutEvent.code = E_EVENT_CODE_APP_ACTIVITY_DISPLAY_TERM;
                 break;
             }
             case APP_CMD_WINDOW_RESIZED:
@@ -294,4 +294,4 @@ namespace ts3::system
     }
     
 }
-#endif
+#endif // TS3_PCL_TARGET_SYSAPI_ANDROID

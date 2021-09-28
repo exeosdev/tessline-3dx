@@ -6,22 +6,32 @@
 namespace ts3::system
 {
 
+    void _androidInitializeDriver( SysContext & pSysContext, GLSystemDriverNativeData & pGLDriverNativeData );
+    void _androidReleaseDriver( GLSystemDriverNativeData & pGLDriverNativeData );
+
+
     void GLSystemDriver::_nativeConstructor()
     {
-        mInternal->nativeDataPriv.setSessionData( nativeAndroidGetASessionData( *mSysContext ) );
-        mInternal->nativeDataPriv.eNativeWindow = mInternal->nativeDataPriv.aSessionDataPtr->aNativeWindow;
+        _nativeInitialize();
     }
 
     void GLSystemDriver::_nativeDestructor() noexcept
     {
-        mInternal->nativeDataPriv.eNativeWindow = nullptr;
-        mInternal->nativeDataPriv.resetSessionData();
+        _nativeRelease();
+    }
+
+    void GLSystemDriver::_nativeInitialize()
+    {
+        _androidInitializeDriver( *mSysContext, mInternal->nativeDataPriv );
+    }
+
+    void GLSystemDriver::_nativeRelease()
+    {
+        _androidReleaseDriver( mInternal->nativeDataPriv );
     }
 
     void GLSystemDriver::_nativeInitializePlatform()
-    {
-        nativeEGLInitializeGLDriver( mInternal->nativeDataPriv );
-    }
+    {}
 
     void GLSystemDriver::_nativeReleaseInitState()
     {}
@@ -152,5 +162,24 @@ namespace ts3::system
         nativeEGLBindContextForCurrentThread( mInternal->nativeDataPriv, pTargetSurface.mInternal->nativeDataPriv );
     }
 
+
+    void _androidInitializeDriver( SysContext & pSysContext, GLSystemDriverNativeData & pGLDriverNativeData )
+    {
+        auto & aSessionData = nativeAndroidGetASessionData( pSysContext );
+
+        pGLDriverNativeData.setSessionData( aSessionData );
+        pGLDriverNativeData.eNativeWindow = aSessionData.aNativeWindow;
+
+        nativeEGLInitializeGLDriver( pGLDriverNativeData );
+    }
+
+    void _androidReleaseDriver( GLSystemDriverNativeData & pGLDriverNativeData )
+    {
+        nativeEGLReleaseGLDriver( pGLDriverNativeData );
+
+        pGLDriverNativeData.eNativeWindow = nullptr;
+        pGLDriverNativeData.resetSessionData();
+    }
+
 } // namespace ts3::system
-#endif
+#endif // TS3_PCL_TARGET_SYSAPI_ANDROID

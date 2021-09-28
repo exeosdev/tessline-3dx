@@ -74,7 +74,7 @@ namespace ts3::system
         return outputIDGen.outputID;
     }
 
-    dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings )
+    dsm_video_settings_hash_t dsmComputeVideoSettingsHash( EColorFormat pFormat, const DisplayVideoSettings & pSettings )
 	{
 		DisplayVideoSettingsHashGen hashValueGen;
 		hashValueGen.uResWidth = static_cast<uint16>( pSettings.resolution.x );
@@ -85,7 +85,7 @@ namespace ts3::system
 		return hashValueGen.hashValue;
 	}
 
-	std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings )
+	std::string dsmGetVideoSettingsString( EColorFormat pFormat, const DisplayVideoSettings & pSettings )
 	{
         auto & colorFormatDesc = vsxGetDescForColorFormat( pFormat );
         auto settingsHash = dsmComputeVideoSettingsHash( pFormat, pSettings );

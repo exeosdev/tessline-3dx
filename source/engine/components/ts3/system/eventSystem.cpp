@@ -23,7 +23,6 @@ namespace ts3::system
         if( _eventController )
         {
             _eventController->unregisterEventSource( *this );
-            _eventController = nullptr;
         }
     }
 
@@ -230,6 +229,8 @@ namespace ts3::system
 
 	EventController::~EventController() noexcept
 	{
+        resetEventSourceList();
+
         releaseDispatcherObjects();
 
         _nativeDestructor();
@@ -247,6 +248,16 @@ namespace ts3::system
         _removeEventSource( pEventSource );
 
         _nativeUnregisterEventSource( pEventSource );
+    }
+
+    void EventController::resetEventSourceList()
+    {
+        while( !mInternal->eventSourceList.empty() )
+        {
+            auto * eventSource = mInternal->eventSourceList.back();
+
+            unregisterEventSource( *eventSource );
+        }
     }
 
     bool EventController::dispatchEvent( EventObject pEvent )
@@ -536,8 +547,6 @@ namespace ts3::system
         }
 
         mInternal->eventSourceList.erase( eventSourceIter );
-
-        pEventSource.setEventController( nullptr );
     }
 
     void * EventController::_removeEventSourcePrivateData( EventSource & pEventSource )

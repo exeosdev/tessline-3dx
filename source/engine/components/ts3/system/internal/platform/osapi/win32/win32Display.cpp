@@ -179,12 +179,12 @@ namespace ts3::system
         return TRUE;
     }
 
-    void DisplayDriverGeneric::_drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
+    void DisplayDriverGeneric::_drvEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat )
     {
         const auto & outputNativeData = dsmGetObjectNativeDataGeneric( pOutput );
         const auto & colorFormatDesc = vsxGetDescForColorFormat( pColorFormat );
 
-        if( colorFormatDesc.colorSpace != ColorSpace::Linear )
+        if( colorFormatDesc.colorSpace != EColorSpace::Linear )
         {
             return;
         }
@@ -248,9 +248,9 @@ namespace ts3::system
         }
     }
 
-    ColorFormat DisplayDriverGeneric::_drvQueryDefaultSystemColorFormat() const
+    EColorFormat DisplayDriverGeneric::_drvQueryDefaultSystemColorFormat() const
     {
-        return ColorFormat::B8G8R8A8;
+        return EColorFormat::B8G8R8A8;
     }
 
 
@@ -298,4 +298,4 @@ namespace ts3::system
     }
     
 } // namespace ts3::system
-#endif
+#endif // TS3_PCL_TARGET_SYSAPI_WIN32

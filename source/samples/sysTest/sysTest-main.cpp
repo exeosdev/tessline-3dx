@@ -13,15 +13,17 @@ struct GfxState
     GLSystemDriverHandle glSystemDriver;
     GLDisplaySurfaceHandle glSurface;
     GLRenderContextHandle glContext;
+    bool pauseAnimation = false;
 };
 
-void initializeGraphics( SysContextHandle pSysContext, GfxState & pGfxState )
+void initializeGraphicsCreateDriver( GfxState & pGfxState )
 {
-    pGfxState.displayManager = createSysObject<DisplayManager>( pSysContext );
     pGfxState.glSystemDriver = createSysObject<GLSystemDriver>( pGfxState.displayManager );
-
     pGfxState.glSystemDriver->initializePlatform();
+}
 
+void initializeGraphicsCreateSurface( GfxState & pGfxState )
+{
     GLDisplaySurfaceCreateInfo surfaceCreateInfo;
     surfaceCreateInfo.windowGeometry.size = {0, 0 };
     surfaceCreateInfo.windowGeometry.frameStyle = WindowFrameStyle::Caption;
@@ -29,7 +31,10 @@ void initializeGraphics( SysContextHandle pSysContext, GfxState & pGfxState )
     surfaceCreateInfo.flags.set( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 
     pGfxState.glSurface = pGfxState.glSystemDriver->createDisplaySurface( surfaceCreateInfo );
+}
 
+void initializeGraphicsCreateContext( GfxState & pGfxState )
+{
     GLRenderContextCreateInfo renderContextCreateInfo;
     renderContextCreateInfo.requiredAPIVersion = cvGLVersionBestSupported;
     renderContextCreateInfo.targetAPIProfile = EGLAPIProfile::Core;
@@ -39,26 +44,39 @@ void initializeGraphics( SysContextHandle pSysContext, GfxState & pGfxState )
     pGfxState.glContext = pGfxState.glSystemDriver->createRenderContext( *(pGfxState.glSurface), renderContextCreateInfo );
 }
 
-#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_OS_ANDROID )
+void initializeGraphicsGL( GfxState & pGfxState )
+{
+    initializeGraphicsCreateDriver( pGfxState );
+    initializeGraphicsCreateSurface( pGfxState );
+    initializeGraphicsCreateContext( pGfxState );
+}
+
+void initializeGraphics( SysContextHandle pSysContext, GfxState & pGfxState )
+{
+    pGfxState.displayManager = createSysObject<DisplayManager>( pSysContext );
+    initializeGraphicsGL( pGfxState );
+}
+
+#if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 {
     ts3::system::SysContextCreateInfo sysContextCreateInfo {};
     sysContextCreateInfo.nativeParams.aCommonAppState = pAppState;
     sysContextCreateInfo.flags = 0;
-    auto sysContext = nativeCreateSysContext( sysContextCreateInfo );
-#elif( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_SYSAPI_WIN32 )
+    auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+#elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
 int main( int pArgc, const char ** pArgv )
 {
     SysContextCreateInfo sysContextCreateInfo;
     sysContextCreateInfo.flags = 0;
     sysContextCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
-    auto sysContext = nativeCreateSysContext( sysContextCreateInfo );
-#elif( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_SYSAPI_X11 )
+    auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+#elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
 int main( int pArgc, const char ** pArgv )
 {
     SysContextCreateInfo sysContextCreateInfo;
     sysContextCreateInfo.flags = 0;
-    auto sysContext = nativeCreateSysContext( sysContextCreateInfo );
+    auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
 #endif
 
     GfxState gfxState;
@@ -75,7 +93,7 @@ int main( int pArgc, const char ** pArgv )
     bool waitForDisplay = true;
 
     evtDispatcher->bindEventHandler(
-        EEventCodeIndex::AppActivityDisplayReady,
+        EEventCodeIndex::AppActivityDisplayInit,
         [&waitForDisplay,&sysContext](const EventObject & pEvt) -> bool {
             waitForDisplay = false;
             return true;
@@ -86,7 +104,25 @@ int main( int pArgc, const char ** pArgv )
         evtController->updateSysQueueAuto();
     }
 
-    evtDispatcher->bindEventHandler( EEventCodeIndex::AppActivityDisplayReady, nullptr );
+    evtDispatcher->bindEventHandler(
+        EEventCodeIndex::AppActivityDisplayInit,
+        [&gfxState](const EventObject & pEvt) -> bool {
+            initializeGraphicsGL( gfxState );
+            gfxState.glContext->bindForCurrentThread( *(gfxState.glSurface) );
+            gfxState.pauseAnimation = false;
+            return true;
+        });
+
+    evtDispatcher->bindEventHandler(
+        EEventCodeIndex::AppActivityDisplayTerm,
+        [&gfxState](const EventObject & pEvt) -> bool {
+            //gfxState.glSystemDriver->invalidate();
+            gfxState.glContext = nullptr;
+            gfxState.glSurface = nullptr;
+            gfxState.glSystemDriver = nullptr;
+            gfxState.pauseAnimation = true;
+            return true;
+        });
 #endif
 
     bool runApp = true;
@@ -142,6 +178,10 @@ int main( int pArgc, const char ** pArgv )
     while( runApp )
     {
         evtController->updateSysQueueAuto();
+        if( gfxState.pauseAnimation )
+        {
+            continue;
+        }
         gfxState.glSurface->clearColorBuffer();
         gfxState.glSurface->swapBuffers();
     }

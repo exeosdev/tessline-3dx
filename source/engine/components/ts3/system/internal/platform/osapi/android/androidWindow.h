@@ -13,7 +13,6 @@ namespace ts3::system
 
 	struct WindowNativeData : public EventSourceNativeData
 	{
-		ANativeWindow * aNativeWindow = nullptr;
 	};
 
 	TS3_SYSTEM_API_NODISCARD math::Size2u nativeAndroidQueryNativeWindowSize( ANativeWindow * pANativeWindow );

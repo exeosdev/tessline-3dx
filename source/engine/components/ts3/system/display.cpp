@@ -185,8 +185,8 @@ namespace ts3::system
 
         if ( ( windowPos.x < 0 ) || ( windowPos.y < 0 ) )
         {
-            resultGeometry.position.x = static_cast<int32>( ( screenSize.x - windowSize.x ) / 2 );
-            resultGeometry.position.y = static_cast<int32>( ( screenSize.y - windowSize.y ) / 2 );
+            resultGeometry.position.x = static_cast<int32>( ( screenSize.x - resultGeometry.size.x ) / 2 );
+            resultGeometry.position.y = static_cast<int32>( ( screenSize.y - resultGeometry.size.y ) / 2 );
         }
         else
         {
@@ -228,7 +228,7 @@ namespace ts3::system
         _resetDisplayConfiguration();
     }
 
-    ColorFormat DisplayDriver::queryDefaultSystemColorFormat() const
+    EColorFormat DisplayDriver::queryDefaultSystemColorFormat() const
     {
         return _drvQueryDefaultSystemColorFormat();
     }
@@ -408,11 +408,11 @@ namespace ts3::system
         return &output;
     }
 
-    DisplayVideoMode * DisplayDriver::addVideoMode( DisplayOutput & pOutput, ColorFormat pColorFormat )
+    DisplayVideoMode * DisplayDriver::addVideoMode( DisplayOutput & pOutput, EColorFormat pColorFormat )
     {
         auto & colorFormatData = pOutput.mInternal->colorFormatMap[pColorFormat];
 
-        if( colorFormatData.colorFormat == ColorFormat::Unknown )
+        if( colorFormatData.colorFormat == EColorFormat::Unknown )
         {
             colorFormatData.colorFormat = pColorFormat;
         }
@@ -709,7 +709,7 @@ namespace ts3::system
 
     DisplayOutput::~DisplayOutput() = default;
 
-    ArrayView<const ColorFormat> DisplayOutput::getSupportedColorFormatList() const
+    ArrayView<const EColorFormat> DisplayOutput::getSupportedColorFormatList() const
     {
         return bindArrayView( mInternal->supportedColorFormatList.data(), mInternal->supportedColorFormatList.size() );
     }
@@ -720,7 +720,7 @@ namespace ts3::system
         return checkVideoSettingsSupport( pVideoSettings, colorFormat );
     }
 
-    bool DisplayOutput::checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings, ColorFormat pColorFormat ) const
+    bool DisplayOutput::checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings, EColorFormat pColorFormat ) const
     {
         const auto & colorFormatData = mInternal->colorFormatMap.at( pColorFormat );
         for( const auto & displayMode : colorFormatData.videoModeInternalStorage )
@@ -739,7 +739,7 @@ namespace ts3::system
         return getVideoModeList( colorFormat );
     }
 
-    const DisplayVideoModeList & DisplayOutput::getVideoModeList( ColorFormat pColorFormat ) const
+    const DisplayVideoModeList & DisplayOutput::getVideoModeList( EColorFormat pColorFormat ) const
     {
         const auto & colorFormatData = mInternal->colorFormatMap.at( pColorFormat );
         return colorFormatData.videoModeList;
@@ -755,7 +755,7 @@ namespace ts3::system
         return mInternal->descPriv.flags.isSet( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
     }
 
-    bool DisplayOutput::isColorFormatSupported( ColorFormat pColorFormat ) const
+    bool DisplayOutput::isColorFormatSupported( EColorFormat pColorFormat ) const
     {
         const auto & colorFormatData = mInternal->colorFormatMap.at( pColorFormat );
         return !colorFormatData.videoModeInternalStorage.empty();

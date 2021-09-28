@@ -32,29 +32,22 @@ namespace ts3::system
 	{
 		auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
 
-		ANativeWindow_acquire( aSessionData.aNativeWindow );
-
 		auto & windowNativeData = pWindow.mInternal->nativeDataPriv;
 		windowNativeData.setSessionData( aSessionData );
-		windowNativeData.aNativeWindow = aSessionData.aNativeWindow;
 	}
 
 	void WindowManager::_nativeDestroyWindow( Window & pWindow )
 	{
+		auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
 		auto & windowNativeData = pWindow.mInternal->nativeDataPriv;
 
-		ANativeWindow_release( windowNativeData.aNativeWindow );
-
-		windowNativeData.aNativeWindow = nullptr;
 		windowNativeData.resetSessionData();
 	}
 
 	bool WindowManager::_nativeIsWindowValid( const Window & pWindow ) const noexcept
 	{
 		auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
-		auto & windowNativeData = pWindow.mInternal->nativeDataPriv;
-
-		return windowNativeData.aNativeWindow && ( windowNativeData.aNativeWindow == aSessionData.aNativeWindow );
+		return aSessionData.aNativeWindow != nullptr;
 	}
 
 
@@ -68,8 +61,9 @@ namespace ts3::system
 
 	void Window::_nativeGetSize( WindowSizeMode /* pSizeMode */, WindowSize & pOutSize ) const
 	{
-		pOutSize = nativeAndroidQueryNativeWindowSize( mInternal->nativeDataPriv.aNativeWindow );
+		auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
+		pOutSize = nativeAndroidQueryNativeWindowSize( aSessionData.aNativeWindow );
 	}
 
 } // namespace ts3::system
-#endif
+#endif // TS3_PCL_TARGET_SYSAPI_ANDROID

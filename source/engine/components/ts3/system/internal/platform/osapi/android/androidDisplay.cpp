@@ -7,7 +7,7 @@
 namespace ts3::system
 {
 
-    static ColorFormat _androidTranslateAHWBufferFormatToColorFormat( AHardwareBuffer_Format pAHWBufferFormat );
+    static EColorFormat _androidTranslateAHWBufferFormatToColorFormat( AHardwareBuffer_Format pAHWBufferFormat );
 
 
     void DisplayManager::_nativeConstructor()
@@ -64,7 +64,7 @@ namespace ts3::system
         outputDesc.screenRect.size = nativeAndroidQueryNativeWindowSize( aSessionData.aNativeWindow );
     }
 
-    void DisplayDriverGeneric::_drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat )
+    void DisplayDriverGeneric::_drvEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat )
     {
         auto & driverNativeData = dsmGetObjectNativeDataGeneric( *this );
         auto & aSessionData = driverNativeData.getSessionData();
@@ -90,7 +90,7 @@ namespace ts3::system
         videoModeDesc.settingsHash = dsmComputeVideoSettingsHash( pColorFormat, videoModeDesc.settings );
     }
 
-    ColorFormat DisplayDriverGeneric::_drvQueryDefaultSystemColorFormat() const
+    EColorFormat DisplayDriverGeneric::_drvQueryDefaultSystemColorFormat() const
     {
         auto & driverNativeData = dsmGetObjectNativeDataGeneric( *this );
         auto & aSessionData = driverNativeData.getSessionData();
@@ -102,16 +102,16 @@ namespace ts3::system
         return colorFormat;
     }
 
-    ColorFormat _androidTranslateAHWBufferFormatToColorFormat( AHardwareBuffer_Format pAHWBufferFormat )
+    EColorFormat _androidTranslateAHWBufferFormatToColorFormat( AHardwareBuffer_Format pAHWBufferFormat )
     {
-        static const std::unordered_map<AHardwareBuffer_Format, ColorFormat> colorDescMap =
+        static const std::unordered_map<AHardwareBuffer_Format, EColorFormat> colorDescMap =
         {
-            { AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,    ColorFormat::R8G8B8A8 },
-            { AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM,    ColorFormat::R8G8B8X8 },
-            { AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM, ColorFormat::R10G10B10A2 }
+            { AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,    EColorFormat::R8G8B8A8 },
+            { AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM,    EColorFormat::R8G8B8X8 },
+            { AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM, EColorFormat::R10G10B10A2 }
         };
-        return getMapValueOrDefault( colorDescMap, pAHWBufferFormat, ColorFormat::Unknown );
+        return getMapValueOrDefault( colorDescMap, pAHWBufferFormat, EColorFormat::Unknown );
     }
 
 } // namespace ts3::system
-#endif
+#endif // TS3_PCL_TARGET_SYSAPI_ANDROID

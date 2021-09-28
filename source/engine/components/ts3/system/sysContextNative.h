@@ -33,11 +33,24 @@ namespace ts3::system
         SysContextNativeData nativeDataPriv;
     };
 
-    /// @brief
-    TS3_SYSTEM_API_NODISCARD SysContextHandle nativeCreateSysContext( const SysContextCreateInfo & pCreateInfo );
+    void nativeSysContextInternalInitialize( SysContext & pSysContext, const SysContextCreateInfo & pCreateInfo );
 
-    /// @brief
-    TS3_SYSTEM_API void nativeDestroySysContext( SysContextHandle pContext );
+    void nativeSysContextInternalRelease( SysContext & pSysContext );
+
+    TS3_PCL_ATTR_NO_DISCARD inline SysContextHandle nativeSysContextCreate( const SysContextCreateInfo & pCreateInfo )
+    {
+        auto sysContext = std::make_shared<SysContext>();
+        nativeSysContextInternalInitialize( *sysContext, pCreateInfo );
+        return sysContext;
+    }
+
+    inline void nativeSysContextDestroy( SysContext & pSysContext )
+    {
+        ts3DebugAssert( pSysContext.mInternal );
+        ts3DebugAssert( pSysContext.mNativeData );
+
+        nativeSysContextInternalRelease( pSysContext );
+    }
 
 } // namespace ts3::system
 

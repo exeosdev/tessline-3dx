@@ -1,6 +1,11 @@
 
-add_library( ts3sample-sysTest STATIC
-        "sysTest-main.cpp" )
+if( "${CM_EBS_SYSCONF_TARGET_PLATFORM}" STREQUAL "Android" )
+    add_library( ts3sample-sysTest STATIC
+            "sysTest-main.cpp" )
+else()
+    add_executable( ts3sample-sysTest
+            "sysTest-main.cpp" )
+endif()
 
 set_target_properties( ts3sample-sysTest PROPERTIES
         OUTPUT_NAME "ts3sample-sysTest" )

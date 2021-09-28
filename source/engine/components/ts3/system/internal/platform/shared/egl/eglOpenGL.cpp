@@ -36,7 +36,7 @@ namespace ts3::system
 
 	void nativeEGLReleaseGLDriver( EGLDriverNativeData & pEGLDriverNativeData )
 	{
-		::eglTerminate( pEGLDriverNativeData.eDisplay );
+		auto eglResult = ::eglTerminate( pEGLDriverNativeData.eDisplay );
 		pEGLDriverNativeData.eDisplay = EGL_NO_DISPLAY;
 		pEGLDriverNativeData.eglVersion.major = 0;
 		pEGLDriverNativeData.eglVersion.minor = 0;
@@ -85,12 +85,13 @@ namespace ts3::system
 		const EGLint sRGBSurfaceAttributeList[] = { EGL_GL_COLORSPACE, EGL_GL_COLORSPACE_SRGB, EGL_NONE };
 
 		const EGLint * surfaceAttributeList = &( defaultSurfaceAttributeList[0] );
-		if( pVisualConfig.colorDesc.colorSpace == ColorSpace::SRGB )
+		if( pVisualConfig.colorDesc.colorSpace == EColorSpace::SRGB )
 		{
 			surfaceAttributeList = &( sRGBSurfaceAttributeList[0] );
 		}
 
 		auto surfaceHandle = ::eglCreateWindowSurface( pEGLDisplay, pEGLConfig, pWindow, surfaceAttributeList );
+		ts3EGLHandleLastError();
 		if( surfaceHandle == EGL_NO_SURFACE )
 		{
 			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
@@ -131,7 +132,7 @@ namespace ts3::system
 
 	void nativeEGLDestroySurface( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData )
 	{
-		::eglDestroySurface( pEGLSurfaceNativeData.eDisplay, pEGLSurfaceNativeData.eSurfaceHandle );
+		auto eglResult = ::eglDestroySurface( pEGLSurfaceNativeData.eDisplay, pEGLSurfaceNativeData.eSurfaceHandle );
 
 		pEGLSurfaceNativeData.eDisplay = nullptr;
 		pEGLSurfaceNativeData.eFBConfig = nullptr;
@@ -234,7 +235,7 @@ namespace ts3::system
 				::eglMakeCurrent( pEGLContextNativeData.eDisplay, nullptr, nullptr, nullptr );
 			}
 
-			::eglDestroyContext( pEGLContextNativeData.eDisplay, pEGLContextNativeData.eContextHandle );
+			auto eglResult = ::eglDestroyContext( pEGLContextNativeData.eDisplay, pEGLContextNativeData.eContextHandle );
 
 			pEGLContextNativeData.eDisplay = nullptr;
 			pEGLContextNativeData.eContextHandle = nullptr;

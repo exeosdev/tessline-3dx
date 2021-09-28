@@ -14,7 +14,8 @@ namespace ts3::system
 			EEventCode                 code;
 			EvtBase                    commonData;
 			EvtApp<0>                  eApp;
-			EvtAppActivityDisplayReady eAppActivityDisplayReady;
+			EvtAppActivityDisplayInit  eAppActivityDisplayInit;
+			EvtAppActivityDisplayTerm  eAppActivityDisplayTerm;
 			EvtAppActivityFocusGained  eAppActivityFocusGained;
 			EvtAppActivityFocusLost    eAppActivityFocusLost;
 			EvtAppActivityPause        eAppActivityPause;

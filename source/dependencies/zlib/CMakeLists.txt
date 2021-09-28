@@ -40,3 +40,9 @@ target_compile_definitions( dplib-zlib PRIVATE
         _CRT_SECURE_NO_WARNINGS=1
         _CRT_SECURE_NO_DEPRECATED=1
 )
+
+if( "${CM_EBS_SYSCONF_HOST_COMPILER}" MATCHES "Clang|GCC" )
+    target_compile_options( dplib-zlib PRIVATE
+            -Wno-implicit-function-declaration
+    )
+endif()

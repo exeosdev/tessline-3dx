@@ -1,23 +1,42 @@
 
 #include <ts3/system/sysContextNative.h>
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 namespace ts3::system
 {
 
-	SysContextHandle nativeCreateSysContext( const SysContextCreateInfo & pCreateInfo )
+    void nativeSysContextInternalInitialize( SysContext & pSysContext, const SysContextCreateInfo & pCreateInfo )
 	{
-		auto sysContext = std::make_shared<SysContext>();
-		auto & nativeData = sysContext->mInternal->nativeDataPriv;
+		auto & nativeData = pSysContext.mInternal->nativeDataPriv;
 
 		nativeData.aSessionData.aCommonAppState = pCreateInfo.nativeParams.aCommonAppState;
-		nativeData.aSessionData.aCommonAppState->ts3SetUserData( E_ANDROID_APP_STATE_USER_DATA_INDEX_SYS_CONTEXT, sysContext.get() );
-
-		return sysContext;
+		nativeData.aSessionData.aCommonAppState->ts3SetUserData( E_ANDROID_APP_STATE_USER_DATA_INDEX_SYS_CONTEXT, &pSysContext );
 	}
 
-	void nativeDestroySysContext( SysContextHandle pContext )
-	{}
+	void nativeSysContextInternalRelease( SysContext & pSysContext )
+	{
+        auto & nativeData = pSysContext.mInternal->nativeDataPriv;
+
+        nativeData.aSessionData.aCommonAppState->ts3SetUserData( E_ANDROID_APP_STATE_USER_DATA_INDEX_SYS_CONTEXT, nullptr );
+        nativeData.aSessionData.aCommonAppState = nullptr;
+	}
+
+	void nativeAndroidUpdateNativeWindowRef( SysContext & pSysContext, ANativeWindow * pANativeWindow )
+	{
+		auto & aSessionData = nativeAndroidGetASessionData( pSysContext );
+		if( pANativeWindow != aSessionData.aNativeWindow )
+		{
+			ANativeWindow_acquire( pANativeWindow );
+			if( aSessionData.aNativeWindow )
+			{
+				ANativeWindow_release( aSessionData.aNativeWindow );
+			}
+			aSessionData.aNativeWindow = pANativeWindow;
+		}
+
+	}
 
 } // namespace ts3::system
-#endif
+#endif // TS3_PCL_TARGET_SYSAPI_ANDROID

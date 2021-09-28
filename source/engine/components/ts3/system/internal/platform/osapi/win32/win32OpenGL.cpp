@@ -46,6 +46,12 @@ namespace ts3::system
     void GLSystemDriver::_nativeDestructor() noexcept
     {}
 
+	void GLSystemDriver::_nativeInitialize()
+	{}
+
+	void GLSystemDriver::_nativeRelease()
+	{}
+
 	void GLSystemDriver::_nativeInitializePlatform()
 	{
 	    ts3DebugAssert( !mInternal->nativeDataPriv.initState );
@@ -61,7 +67,7 @@ namespace ts3::system
 
 	    VisualConfig legacyVisualConfig;
 	    legacyVisualConfig = vsxGetDefaultVisualConfigForSysWindow();
-	    legacyVisualConfig.flags.set( VISUAL_ATTRIB_FLAG_LEGACY_BIT );
+	    legacyVisualConfig.flags.set( E_VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
 	    auto & tmpSurfaceNativeData = mInternal->nativeDataPriv.initState->surfaceData;
 
@@ -313,7 +319,7 @@ namespace ts3::system
     }
 
 
-	void GLDisplaySurface::_nativeSwapBuffers()
+    void GLDisplaySurface::_nativeSwapBuffers()
 	{
 	    ::SwapBuffers( mInternal->nativeDataPriv.hdc );
 	}
@@ -346,7 +352,7 @@ namespace ts3::system
 		pixelFormatDescriptor.nSize = sizeof( PIXELFORMATDESCRIPTOR );
 		pixelFormatDescriptor.nVersion = 1;
 
-		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
+		if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
 		{
 			pGLSurfaceNativeData.pixelFormatIndex = _win32ChooseLegacyGLPixelFormat( hdc, pixelFormatDescriptor );
 		}
@@ -464,14 +470,14 @@ namespace ts3::system
 		int doubleBufferRequestedState = TRUE;
 		int stereoModeRequestedState = FALSE;
 
-		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
-			!pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
+		if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
+			!pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 		{
 			doubleBufferRequestedState = FALSE;
 		}
 
-		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
-			!pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
+		if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
+			!pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 		{
 			stereoModeRequestedState = TRUE;
 		}
@@ -534,29 +540,29 @@ namespace ts3::system
 		pAttribArray[attribIndex++] = WGL_PIXEL_TYPE_ARB;
 		pAttribArray[attribIndex++] = WGL_TYPE_RGBA_ARB;
 
-		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
+		if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 		{
 			pAttribArray[attribIndex++] = WGL_DOUBLE_BUFFER_ARB;
 			pAttribArray[attribIndex++] = GL_TRUE;
 		}
-		else if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
+		else if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
 		{
 			pAttribArray[attribIndex++] = WGL_DOUBLE_BUFFER_ARB;
 			pAttribArray[attribIndex++] = GL_FALSE;
 		}
 
-		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
+		if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 		{
 			pAttribArray[attribIndex++] = WGL_STEREO_ARB;
 			pAttribArray[attribIndex++] = GL_FALSE;
 		}
-		else if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
+		else if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
 		{
 			pAttribArray[attribIndex++] = WGL_STEREO_ARB;
 			pAttribArray[attribIndex++] = GL_TRUE;
 		}
 
-		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_SRGB_CAPABLE_BIT ) )
+		if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SRGB_CAPABLE_BIT ) )
 		{
 			pAttribArray[attribIndex++] = WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB;
 			pAttribArray[attribIndex++] = GL_TRUE;
@@ -603,4 +609,4 @@ namespace ts3::system
 	}
 
 } // namespace ts3::system
-#endif
+#endif // TS3_PCL_TARGET_SYSAPI_WIN32

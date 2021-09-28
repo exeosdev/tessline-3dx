@@ -214,12 +214,12 @@ namespace ts3::system
         // Per-color-format data.
         // Video modes supported by the system may be different for each color format the display supports.
         // Hence, we associate the information about supported DMs with a separate struct which is created
-        // for each ColorFormat supported. This provides correct way to have the right data in the cache.
+        // for each EColorFormat supported. This provides correct way to have the right data in the cache.
         struct ColorFormatData
         {
             // The color format this data refers to.
-            ColorFormat colorFormat;
-            // List of video modes supported for this ColorFormat. Stored as queue - as usual.
+            EColorFormat colorFormat;
+            // List of video modes supported for this EColorFormat. Stored as queue - as usual.
             std::deque<DisplayVideoMode> videoModeInternalStorage;
             // Helper list with handles/pointers.
             DisplayVideoModeList videoModeList;
@@ -236,12 +236,12 @@ namespace ts3::system
         // Referenced through a const pointer in the DisplayOutput class.
         DisplayOutputNativeData nativeDataPriv;
 
-        // The main data. Stores a ColorFormatData strut for each ColorFormat supported/enumerated.
+        // The main data. Stores a ColorFormatData strut for each EColorFormat supported/enumerated.
         // This map should  not be used directly - instead there are dedicated functions provided below.
-        std::unordered_map<ColorFormat, ColorFormatData> colorFormatMap;
+        std::unordered_map<EColorFormat, ColorFormatData> colorFormatMap;
 
         //
-        std::vector<ColorFormat> supportedColorFormatList;
+        std::vector<EColorFormat> supportedColorFormatList;
 
         explicit ObjectInternalData( DisplayOutput * pOutput )
         : parentOutput( pOutput )
@@ -348,8 +348,8 @@ namespace ts3::system
         void _nativeDestructor() noexcept;
 
         virtual void _drvEnumDisplayDevices() override final;
-        virtual void _drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
-        virtual ColorFormat _drvQueryDefaultSystemColorFormat() const override final;
+        virtual void _drvEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat ) override final;
+        virtual EColorFormat _drvQueryDefaultSystemColorFormat() const override final;
     };
 
 #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
@@ -374,8 +374,8 @@ namespace ts3::system
         void _enumAdapterOutputs( DisplayAdapter & pAdapter );
 
         virtual void _drvEnumDisplayDevices() override final;
-        virtual void _drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
-        virtual ColorFormat _drvQueryDefaultSystemColorFormat() const override final;
+        virtual void _drvEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat ) override final;
+        virtual EColorFormat _drvQueryDefaultSystemColorFormat() const override final;
     };
 #endif
 
@@ -399,8 +399,8 @@ namespace ts3::system
         void _release();
 
         virtual void _drvEnumDisplayDevices() override final;
-        virtual void _drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) override final;
-        virtual ColorFormat _drvQueryDefaultSystemColorFormat() const override final;
+        virtual void _drvEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat ) override final;
+        virtual EColorFormat _drvQueryDefaultSystemColorFormat() const override final;
     };
 #endif
 
