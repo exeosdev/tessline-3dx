@@ -176,6 +176,12 @@ struct AndroidAppState {
     ANativeWindow* pendingWindow;
     ARect pendingContentRect;
 
+    inline void ts3SetUserData( uint32 pIndex, std::nullptr_t )
+    {
+        assert( pIndex < CX_PLATFORM_ANDROID_APP_USER_DATA_SIZE );
+        ts3UserData[pIndex] = nullptr;
+    }
+
     template <typename TpData>
     inline void ts3SetUserData( uint32 pIndex, TpData * pData )
     {
