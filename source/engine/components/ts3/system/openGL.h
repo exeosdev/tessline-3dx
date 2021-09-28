@@ -46,8 +46,11 @@ namespace ts3::system
 
     inline constexpr Version cvGLVersionMaxES{ 3, 2 };
 
+    /// @brief
     class GLDisplaySurface : public EventSource
     {
+        friend class GLSystemDriver;
+
     public:
         struct ObjectInternalData;
         GLSystemDriverHandle const mDriver;
@@ -69,13 +72,19 @@ namespace ts3::system
         /// @brief
         TS3_PCL_ATTR_NO_DISCARD bool isValid() const;
 
+    friendapi:
+        void setInvalidState();
+
     private:
         void _nativeSwapBuffers();
         void _nativeQueryRenderAreaSize( WindowSize & pOutSize ) const;
     };
 
+    /// @brief
     class GLRenderContext : public SysObject
     {
+        friend class GLSystemDriver;
+
     public:
         struct ObjectInternalData;
         GLSystemDriverHandle const mDriver;
@@ -84,7 +93,7 @@ namespace ts3::system
 
     public:
         explicit GLRenderContext( GLSystemDriverHandle pDriver );
-        virtual ~GLRenderContext();
+        virtual ~GLRenderContext() noexcept;
 
         /// @brief
         void bindForCurrentThread( const GLDisplaySurface & pSurface );
@@ -98,10 +107,14 @@ namespace ts3::system
         /// @brief
         TS3_PCL_ATTR_NO_DISCARD bool isValid() const;
 
+    friendapi:
+        void setInvalidState();
+
     private:
-        virtual void _nativeBindForCurrentThread( const GLDisplaySurface & pSurface );
+        void _nativeBindForCurrentThread( const GLDisplaySurface & pSurface );
     };
 
+    /// @brief
     class GLSystemDriver : public SysObject
     {
         friend class GLDisplaySurface;
@@ -115,7 +128,22 @@ namespace ts3::system
 
     public:
         GLSystemDriver( DisplayManagerHandle pDisplayManager );
-        virtual ~GLSystemDriver();
+        virtual ~GLSystemDriver() noexcept;
+
+        /// @brief Initializes the driver.
+        /// The GL driver is always automatically initialized when it is created for the first time,
+        /// so there is no need to explicitly call this function (calling it multiple times has no
+        /// effect). However, if the driver was released by calling release() on it (but not destroyed),
+        /// it can be re-initialized using this function. This enables the app to avoid re-creating
+        /// the driver object on some platforms (like Android - Suspend/Resume events).
+        void initialize();
+
+        /// @brief Releases the driver. Invalidates all surfaces and contexts.
+        /// This function destroys all driver resources and renders all existing surfaces and contexts
+        /// created with this driver invalid (like if their release() method was called). Unlike the
+        /// driver itself, surfaces and contexts cannot be re-initialized, so after the driver is
+        /// released, they must be explicitly re-created.
+        void release();
 
         /// @brief Initializes core OpenGL state and system-level interfaces.
         /// This method also creates any additionally required
@@ -157,11 +185,14 @@ namespace ts3::system
         TS3_PCL_ATTR_NO_DISCARD GLRenderContextHandle createRenderContextForCurrentThread( GLRenderContextHandle pTargetContext = nullptr );
 
         /// @brief
-        TS3_PCL_ATTR_NO_DISCARD std::vector<DepthStencilFormat> querySupportedDepthStencilFormats( ColorFormat pColorFormat ) const;
+        TS3_PCL_ATTR_NO_DISCARD std::vector<EDepthStencilFormat> querySupportedDepthStencilFormats( EColorFormat pColorFormat ) const;
 
         /// @brief
-        TS3_PCL_ATTR_NO_DISCARD std::vector<MSAAMode> querySupportedMSAAModes( ColorFormat pColorFormat,
-                                                                               DepthStencilFormat pDepthStencilFormat ) const;
+        TS3_PCL_ATTR_NO_DISCARD std::vector<EMSAAMode> querySupportedMSAAModes( EColorFormat pColorFormat,
+                                                                               EDepthStencilFormat pDepthStencilFormat ) const;
+
+        /// @brief
+        TS3_PCL_ATTR_NO_DISCARD void resetContextBinding();
 
         /// @brief
         TS3_PCL_ATTR_NO_DISCARD bool isRenderContextBound() const;
@@ -183,6 +214,8 @@ namespace ts3::system
     private: // For implementation
         void _nativeConstructor();
         void _nativeDestructor() noexcept;
+        void _nativeInitialize();
+        void _nativeRelease();
         void _nativeInitializePlatform();
         void _nativeReleaseInitState();
         void _nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo );

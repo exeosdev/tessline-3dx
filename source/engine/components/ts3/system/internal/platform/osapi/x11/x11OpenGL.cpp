@@ -44,6 +44,16 @@ namespace ts3::system
         mInternal->nativeDataPriv.resetSessionData();
     }
 
+	void GLSystemDriver::_nativeInitialize()
+	{
+		mInternal->nativeDataPriv.setSessionData( nativeX11GetXSessionData( *mSysContext ) );
+	}
+
+	void GLSystemDriver::_nativeRelease()
+	{
+		mInternal->nativeDataPriv.resetSessionData();
+	}
+
 	void GLSystemDriver::_nativeInitializePlatform()
 	{
         ts3DebugAssert( !mInternal->nativeDataPriv.initState );
@@ -66,7 +76,7 @@ namespace ts3::system
 
 		VisualConfig legacyVisualConfig;
 		legacyVisualConfig = vsxGetDefaultVisualConfigForSysWindow();
-		legacyVisualConfig.flags.set( VISUAL_ATTRIB_FLAG_LEGACY_BIT );
+		legacyVisualConfig.flags.set( E_VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
 		X11WindowCreateInfo windowCreateInfo;
         windowCreateInfo.setSessionData( xSessionData );
@@ -354,7 +364,7 @@ namespace ts3::system
         auto & xSessionData = nativeX11GetXSessionData( pWindowCreateInfo );
 
 		GLXFBConfig windowFBConfig = nullptr;
-		if( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
+		if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
 		{
 			windowFBConfig = _x11ChooseLegacyGLFBConfig( xSessionData.display,
                                                          xSessionData.screenIndex );
@@ -563,14 +573,14 @@ namespace ts3::system
 		int doubleBufferRequestedState = True;
 		int stereoModeRequestedState = False;
 
-		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
-		     !pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
+		if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
+		     !pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 		{
 			doubleBufferRequestedState = False;
 		}
 
-		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
-		     !pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
+		if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
+		     !pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 		{
 			stereoModeRequestedState = True;
 		}
@@ -619,23 +629,23 @@ namespace ts3::system
 		pAttribArray[attribIndex++] = GLX_X_VISUAL_TYPE;
 		pAttribArray[attribIndex++] = GLX_TRUE_COLOR;
 
-		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
+		if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 		{
 			pAttribArray[attribIndex++] = GLX_DOUBLEBUFFER;
 			pAttribArray[attribIndex++] = True;
 		}
-		else if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
+		else if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
 		{
 			pAttribArray[attribIndex++] = GLX_DOUBLEBUFFER;
 			pAttribArray[attribIndex++] = False;
 		}
 
-		if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
+		if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 		{
 			pAttribArray[attribIndex++] = GLX_STEREO;
 			pAttribArray[attribIndex++] = False;
 		}
-		else if ( pVisualConfig.flags.isSet( VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
+		else if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
 		{
 			pAttribArray[attribIndex++] = GLX_STEREO;
 			pAttribArray[attribIndex++] = True;
@@ -681,4 +691,4 @@ namespace ts3::system
 	}
 
 } // namespace ts3::system
-#endif
+#endif // TS3_PCL_TARGET_SYSAPI_X11

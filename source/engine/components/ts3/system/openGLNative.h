@@ -21,6 +21,8 @@ namespace ts3::system
         GLSystemDriver * parentDriver = nullptr;
         GLSystemDriverNativeData nativeDataPriv;
         Version supportedRuntimeVersion;
+        std::vector<GLDisplaySurface *> internalDisplaySurfaceList;
+        std::vector<GLRenderContext *> internalRenderContextList;
 
         explicit ObjectInternalData( GLSystemDriver * pSystemDriver )
         : parentDriver( pSystemDriver )
@@ -33,6 +35,7 @@ namespace ts3::system
         GLDisplaySurface * parentSurface = nullptr;
         GLDisplaySurfaceNativeData nativeDataPriv;
         bool internalOwnershipFlag = true;
+        bool internalInvalidateFlag = false;
 
         explicit ObjectInternalData( GLDisplaySurface * pDisplaySurface )
         : parentSurface( pDisplaySurface )
@@ -44,6 +47,7 @@ namespace ts3::system
         GLRenderContext * parentContext = nullptr;
         GLRenderContextNativeData nativeDataPriv;
         bool internalOwnershipFlag = true;
+        bool internalInvalidateFlag = false;
 
         explicit ObjectInternalData( GLRenderContext * pRenderContext )
         : parentContext( pRenderContext )

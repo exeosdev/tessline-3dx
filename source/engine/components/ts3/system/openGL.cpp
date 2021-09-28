@@ -21,11 +21,16 @@ namespace ts3::system
 
     void GLDisplaySurface::clearColorBuffer()
     {
+        if( !isValid() )
+        {
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+        }
+
         glClearColor( 0.1f, 0.33f, 0.9f, 1.0f );
-        //ts3GLHandleLastError();
+        ts3GLHandleLastError();
 
         glClear( GL_COLOR_BUFFER_BIT );
-        //ts3GLHandleLastError();
+        ts3GLHandleLastError();
     }
 
     void GLDisplaySurface::swapBuffers()
@@ -53,7 +58,12 @@ namespace ts3::system
 
     bool GLDisplaySurface::isValid() const
     {
-        return mDriver->isDisplaySurfaceValid( *this );
+        return !mInternal->internalInvalidateFlag && mDriver->isDisplaySurfaceValid( *this );
+    }
+
+    void GLDisplaySurface::setInvalidState()
+    {
+        mInternal->internalInvalidateFlag = true;
     }
 
 
@@ -80,8 +90,12 @@ namespace ts3::system
 
     GLSystemVersionInfo GLRenderContext::querySystemVersionInfo() const
     {
-        GLSystemVersionInfo systemVersionInfo;
+        if( !isValid() )
+        {
+            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+        }
 
+        GLSystemVersionInfo systemVersionInfo;
         systemVersionInfo.apiVersion = GLCoreAPI::queryRuntimeVersion();
 
         if ( const auto * versionStr = glGetString( GL_VERSION ) )
@@ -101,17 +115,28 @@ namespace ts3::system
             systemVersionInfo.vendorName.assign( reinterpret_cast<const char *>( vendorNameStr ) );
         }
 
+        ts3GLResetErrorQueue();
+
         return systemVersionInfo;
     }
 
     bool GLRenderContext::isCurrent() const
     {
-        return mDriver->isRenderContextBound( *this );
+        return !mInternal->internalInvalidateFlag && mDriver->isRenderContextBound( *this );
     }
 
     bool GLRenderContext::isValid() const
     {
-        return mDriver->isRenderContextValid( *this );
+        return !mInternal->internalInvalidateFlag && mDriver->isRenderContextValid( *this );
+    }
+
+    void GLRenderContext::setInvalidState()
+    {
+        if( mDriver->isRenderContextBound( *this ) )
+        {
+            mDriver->resetContextBinding();
+        }
+        mInternal->internalInvalidateFlag = true;
     }
 
 
@@ -124,10 +149,29 @@ namespace ts3::system
         _nativeConstructor();
     }
 
-    GLSystemDriver::~GLSystemDriver()
+    GLSystemDriver::~GLSystemDriver() noexcept
     {
         _nativeReleaseInitState();
         _nativeDestructor();
+    }
+
+    void GLSystemDriver::initialize()
+    {
+        _nativeInitialize();
+    }
+
+    void GLSystemDriver::release()
+    {
+        for( auto * renderContext : mInternal->internalRenderContextList )
+        {
+            renderContext->setInvalidState();
+        }
+        for( auto * displaySurface : mInternal->internalDisplaySurfaceList )
+        {
+            displaySurface->setInvalidState();
+        }
+        _nativeReleaseInitState();
+        _nativeRelease();
     }
 
     void GLSystemDriver::initializePlatform()
@@ -167,9 +211,11 @@ namespace ts3::system
         ctxCreateInfo.windowGeometry = mDisplayManager->validateWindowGeometry( ctxCreateInfo.windowGeometry );
 
         auto displaySurface = createSysObject<GLDisplaySurface>( getHandle<GLSystemDriver>() );
-        displaySurface->mInternal->internalOwnershipFlag = true;
 
         _nativeCreateDisplaySurface( *displaySurface, ctxCreateInfo );
+        displaySurface->mInternal->internalOwnershipFlag = true;
+
+        mInternal->internalDisplaySurfaceList.push_back( displaySurface.get() );
 
         return displaySurface;
     }
@@ -181,15 +227,7 @@ namespace ts3::system
 
         if( pTargetSurface )
         {
-            if( !isDisplaySurfaceValid( *pTargetSurface ) )
-            {
-                // If the surface is not valid, just discard the object and clear the handle.
-                // TODO: should there be any extra check here? Anything to destroy? (OS-level)
-
-                pTargetSurface = nullptr;
-            }
-
-            if( pTargetSurface->isValid() && pTargetSurface->mInternal->internalOwnershipFlag )
+            if( pTargetSurface->mInternal->internalOwnershipFlag && _nativeIsDisplaySurfaceValid( *pTargetSurface ) )
             {
                 // If the surface is valid, we need to destroy it and ensure couple things are handled.
                 // destroyDisplaySurface() will also:
@@ -197,6 +235,8 @@ namespace ts3::system
                 // - unregister it from the event controller if it's an active event emitter
 
                 _nativeDestroyDisplaySurface( *pTargetSurface );
+
+                pTargetSurface->mInternal->internalOwnershipFlag = false;
             }
         }
 
@@ -205,9 +245,11 @@ namespace ts3::system
             pTargetSurface = createSysObject<GLDisplaySurface>( getHandle<GLSystemDriver>() );
         }
 
-        pTargetSurface->mInternal->internalOwnershipFlag = false;
-
         _nativeCreateDisplaySurfaceForCurrentThread( *pTargetSurface );
+        pTargetSurface->mInternal->internalOwnershipFlag = false;
+        pTargetSurface->mInternal->internalInvalidateFlag = false;
+
+        mInternal->internalDisplaySurfaceList.push_back( pTargetSurface.get() );
 
         return pTargetSurface;
     }
@@ -262,9 +304,11 @@ namespace ts3::system
         }
 
         auto renderContext = createSysObject<GLRenderContext>( getHandle<GLSystemDriver>() );
-        renderContext->mInternal->internalOwnershipFlag = true;
 
         _nativeCreateRenderContext( *renderContext, pSurface, ctxCreateInfo );
+        renderContext->mInternal->internalOwnershipFlag = true;
+
+        mInternal->internalRenderContextList.push_back( renderContext.get() );
 
         return renderContext;
     }
@@ -273,14 +317,11 @@ namespace ts3::system
     {
         if( pTargetContext )
         {
-            if( !isRenderContextValid( *pTargetContext ) )
-            {
-                pTargetContext = nullptr;
-            }
-
-            if( pTargetContext->isValid() && pTargetContext->mInternal->internalOwnershipFlag )
+            if( pTargetContext->mInternal->internalOwnershipFlag && _nativeIsRenderContextValid( *pTargetContext ) )
             {
                 _nativeDestroyRenderContext( *pTargetContext );
+
+                pTargetContext->mInternal->internalOwnershipFlag = false;
             }
         }
 
@@ -289,22 +330,29 @@ namespace ts3::system
             pTargetContext = createSysObject<GLRenderContext>( getHandle<GLSystemDriver>() );
         }
 
-        pTargetContext->mInternal->internalOwnershipFlag = false;
-
         _nativeCreateRenderContextForCurrentThread( *pTargetContext );
+        pTargetContext->mInternal->internalOwnershipFlag = false;
+        pTargetContext->mInternal->internalInvalidateFlag = false;
+
+        mInternal->internalRenderContextList.push_back( pTargetContext.get() );
 
         return pTargetContext;
     }
 
-    std::vector<DepthStencilFormat> GLSystemDriver::querySupportedDepthStencilFormats( ColorFormat pColorFormat ) const
+    std::vector<EDepthStencilFormat> GLSystemDriver::querySupportedDepthStencilFormats( EColorFormat pColorFormat ) const
     {
         return {};
     }
 
-    std::vector<MSAAMode> GLSystemDriver::querySupportedMSAAModes( ColorFormat pColorFormat,
-                                                                   DepthStencilFormat pDepthStencilFormat ) const
+    std::vector<EMSAAMode> GLSystemDriver::querySupportedMSAAModes( EColorFormat pColorFormat,
+                                                                   EDepthStencilFormat pDepthStencilFormat ) const
     {
         return {};
+    }
+
+    void GLSystemDriver::resetContextBinding()
+    {
+        _nativeResetContextBinding();
     }
 
     bool GLSystemDriver::isRenderContextBound() const
@@ -319,29 +367,33 @@ namespace ts3::system
 
     bool GLSystemDriver::isDisplaySurfaceValid( const GLDisplaySurface & pDisplaySurface ) const
     {
-        return mInternal->parentDriver && _nativeIsDisplaySurfaceValid( pDisplaySurface );
+        return _nativeIsDisplaySurfaceValid( pDisplaySurface );
     }
 
     bool GLSystemDriver::isRenderContextValid( const GLRenderContext & pRenderContext ) const
     {
-        return mInternal->parentDriver && _nativeIsRenderContextValid( pRenderContext );
+        return _nativeIsRenderContextValid( pRenderContext );
     }
 
     void GLSystemDriver::onDisplaySurfaceDestroy( GLDisplaySurface & pDisplaySurface ) noexcept
     {
         try
         {
-            if( !isDisplaySurfaceValid( pDisplaySurface ) )
-            {
-                ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
-            }
-
-            pDisplaySurface.unregisterEventSourceAuto();
-
-            if( pDisplaySurface.mInternal->internalOwnershipFlag )
+            if( pDisplaySurface.mInternal->internalOwnershipFlag && _nativeIsDisplaySurfaceValid( pDisplaySurface ) )
             {
                 _nativeDestroyDisplaySurface( pDisplaySurface );
                 pDisplaySurface.mInternal->internalOwnershipFlag = false;
+            }
+
+            auto surfaceIter = mInternal->internalDisplaySurfaceList.begin();
+            while( surfaceIter != mInternal->internalDisplaySurfaceList.end() )
+            {
+                if( *surfaceIter == &pDisplaySurface )
+                {
+                    mInternal->internalDisplaySurfaceList.erase( surfaceIter );
+                    break;
+                }
+                ++surfaceIter;
             }
         }
         catch( const Exception & pException )
@@ -359,20 +411,21 @@ namespace ts3::system
     {
         try
         {
-            if( !isRenderContextValid( pRenderContext ) )
-            {
-                ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
-            }
-
-            if( _nativeIsRenderContextBound( pRenderContext ) )
-            {
-                _nativeResetContextBinding();
-            }
-
-            if( pRenderContext.mInternal->internalOwnershipFlag )
+            if( pRenderContext.mInternal->internalOwnershipFlag && _nativeIsRenderContextValid( pRenderContext ) )
             {
                 _nativeDestroyRenderContext( pRenderContext );
                 pRenderContext.mInternal->internalOwnershipFlag = false;
+            }
+
+            auto contextIter = mInternal->internalRenderContextList.begin();
+            while( contextIter != mInternal->internalRenderContextList.end() )
+            {
+                if( *contextIter == &pRenderContext )
+                {
+                    mInternal->internalRenderContextList.erase( contextIter );
+                    break;
+                }
+                ++contextIter;
             }
         }
         catch( const Exception & pException )

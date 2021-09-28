@@ -3,7 +3,7 @@
 #define __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_OPENGL_H__
 
 #include "androidEventSystem.h"
-#include "../../shared/egl/eglOpenGL.h"
+#include <ts3/system/internal/platform/shared/egl/eglOpenGL.h>
 #include <GLES3/gl31.h>
 
 namespace ts3::system
