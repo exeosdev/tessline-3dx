@@ -250,7 +250,7 @@ namespace ts3::system
 		dsm_index_t videoModeIndex = CX_DSM_INDEX_INVALID;
 		dsm_video_mode_id_t videoModeID = 0u;
 		dsm_video_settings_hash_t settingsHash = 0u;
-		ColorFormat colorFormat = ColorFormat::Unknown;
+		EColorFormat colorFormat = EColorFormat::Unknown;
 		DisplayVideoSettings settings;
 
 		std::string toString() const;
@@ -258,9 +258,9 @@ namespace ts3::system
 
 	TS3_PCL_ATTR_NO_DISCARD dsm_output_id_t dsmCreateDisplayOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex );
 
-	TS3_PCL_ATTR_NO_DISCARD dsm_video_settings_hash_t dsmComputeVideoSettingsHash( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
+	TS3_PCL_ATTR_NO_DISCARD dsm_video_settings_hash_t dsmComputeVideoSettingsHash( EColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
-	TS3_PCL_ATTR_NO_DISCARD std::string dsmGetVideoSettingsString( ColorFormat pFormat, const DisplayVideoSettings & pSettings );
+	TS3_PCL_ATTR_NO_DISCARD std::string dsmGetVideoSettingsString( EColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
 	TS3_PCL_ATTR_NO_DISCARD EDisplayAdapterVendorID dsmResolveAdapterVendorID( const std::string & pAdapterName );
 

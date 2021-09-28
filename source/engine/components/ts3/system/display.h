@@ -76,7 +76,7 @@ namespace ts3::system
 
         void reset();
 
-        ColorFormat queryDefaultSystemColorFormat() const;
+        EColorFormat queryDefaultSystemColorFormat() const;
 
         TS3_PCL_ATTR_NO_DISCARD const DisplayAdapterList & getAdapterList() const;
         TS3_PCL_ATTR_NO_DISCARD const DisplayOutputList & getOutputList( dsm_index_t pAdapterIndex ) const;
@@ -105,7 +105,7 @@ namespace ts3::system
 
         /// @brief Adds a new video mode and initializes its common properties. Returns the pointer to the created object.
         /// Used by actual driver implementations. Returned pointer is persistent throughout the app lifetime.
-        DisplayVideoMode * addVideoMode( DisplayOutput & pOutput, ColorFormat pColorFormat );
+        DisplayVideoMode * addVideoMode( DisplayOutput & pOutput, EColorFormat pColorFormat );
 
     private:
         void _initializeDisplayConfiguration();
@@ -120,8 +120,8 @@ namespace ts3::system
         DisplayOutput * _getOutput( dsm_output_id_t pOutputID ) const;
 
         virtual void _drvEnumDisplayDevices() = 0;
-        virtual void _drvEnumVideoModes( DisplayOutput & pOutput, ColorFormat pColorFormat ) = 0;
-        virtual ColorFormat _drvQueryDefaultSystemColorFormat() const = 0;
+        virtual void _drvEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat ) = 0;
+        virtual EColorFormat _drvQueryDefaultSystemColorFormat() const = 0;
     };
 
     /// @brief
@@ -166,18 +166,18 @@ namespace ts3::system
         explicit DisplayOutput( DisplayAdapter * pDisplayAdapter );
         virtual ~DisplayOutput();
 
-        TS3_PCL_ATTR_NO_DISCARD ArrayView<const ColorFormat> getSupportedColorFormatList() const;
+        TS3_PCL_ATTR_NO_DISCARD ArrayView<const EColorFormat> getSupportedColorFormatList() const;
 
         TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings ) const;
-        TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings, ColorFormat pColorFormat ) const;
+        TS3_PCL_ATTR_NO_DISCARD bool checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings, EColorFormat pColorFormat ) const;
 
         TS3_PCL_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList() const;
-        TS3_PCL_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList( ColorFormat pColorFormat ) const;
+        TS3_PCL_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList( EColorFormat pColorFormat ) const;
 
         TS3_PCL_ATTR_NO_DISCARD bool isActiveOutput() const;
         TS3_PCL_ATTR_NO_DISCARD bool isPrimaryOutput() const;
 
-        TS3_PCL_ATTR_NO_DISCARD bool isColorFormatSupported( ColorFormat pColorFormat ) const;
+        TS3_PCL_ATTR_NO_DISCARD bool isColorFormatSupported( EColorFormat pColorFormat ) const;
     };
 
     /// @brief
