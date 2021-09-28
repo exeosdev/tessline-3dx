@@ -4,10 +4,9 @@
 namespace ts3::system
 {
 
-    SysContextHandle nativeCreateSysContext( const SysContextCreateInfo & pCreateInfo )
+    void nativeSysContextInternalInitialize( SysContext & pSysContext, const SysContextCreateInfo & pCreateInfo )
     {
-        auto sysContext = std::make_shared<SysContext>();
-        auto & nativeData = sysContext->mInternal->nativeDataPriv;
+        auto & nativeData = pSysContext.mInternal->nativeDataPriv;
 
         int thrInitStatus = ::XInitThreads();
         if( thrInitStatus == False )
@@ -28,13 +27,11 @@ namespace ts3::system
         nativeData.xSessionData.sessionInfo.connectionNumber = XConnectionNumber( xDisplay );
         nativeData.xSessionData.sessionInfo.vendorName = XServerVendor( xDisplay );
         nativeData.xSessionData.sessionInfo.displayString = XDisplayString( xDisplay );
-
-        return sysContext;
     }
 
-    void nativeDestroySysContext( SysContextHandle pContext )
+    void nativeSysContextInternalRelease( SysContext & pSysContext )
     {
-        auto & nativeData = pContext->mInternal->nativeDataPriv;
+        auto & nativeData = pSysContext.mInternal->nativeDataPriv;
 
         nativeData.xSessionData.display = nullptr;
         nativeData.xSessionData.screenIndex = -1;
@@ -46,3 +43,4 @@ namespace ts3::system
     }
 
 } // namespace ts3::system
+#endif // TS3_PCL_TARGET_SYSAPI_X11
