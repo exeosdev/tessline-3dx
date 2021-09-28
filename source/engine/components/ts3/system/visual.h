@@ -8,12 +8,13 @@
 namespace ts3::system
 {
 
-	enum class ColorFormat : uint32
+	enum class EColorFormat : uint32
 	{
 	    Unknown,
 		B8G8R8,
 		B8G8R8A8,
 		B8G8R8A8SRGB,
+		B8G8R8X8,
 		R8G8B8A8,
 		R8G8B8A8SRGB,
 		R8G8B8X8,
@@ -25,16 +26,23 @@ namespace ts3::system
 		_Reserved,
 	};
 
-	inline constexpr auto CX_ENUM_COLOR_FORMAT_COUNT = static_cast<uint32>( ColorFormat::_Reserved ) - 1;
+	inline constexpr auto CX_ENUM_COLOR_FORMAT_COUNT = static_cast<uint32>( EColorFormat::_Reserved ) - 1;
 
-	enum class ColorSpace : uint32
+	enum class EColorSpace : uint32
 	{
 		Unknown,
 		Linear,
 		SRGB
 	};
 
-	enum class DepthStencilFormat : uint16
+	enum class EPixelOrder : uint32
+    {
+	    Unknown,
+	    BGR,
+	    RGB
+    };
+
+	enum class EDepthStencilFormat : uint16
 	{
 		Unknown,
 		D16,
@@ -44,7 +52,7 @@ namespace ts3::system
 		D32FS8
 	};
 
-	enum class MSAAMode : uint16
+	enum class EMSAAMode : uint16
 	{
 		Unknown,
 		x1,
@@ -56,7 +64,7 @@ namespace ts3::system
 	};
 
 	/// @brief Flags representing attributes (properties) of visuals.
-	enum VisualAttribFlags : uint32
+	enum EVisualAttribFlags : uint32
 	{
 		// Note: some flags are mutually exclusive. If both are set (e.g. inside visual
 		// configuration for a surface), they are chosen by the following priority rules:
@@ -64,24 +72,25 @@ namespace ts3::system
 		// - If StereoDisplay and MonoDisplay are both set, MonoDisplay is used. If none is set, MonoDisplay is used.
 
 		//
-		VISUAL_ATTRIB_FLAG_LEGACY_BIT = 0x0001,
+		E_VISUAL_ATTRIB_FLAG_LEGACY_BIT = 0x0001,
 		// Visual supports double buffering.
-		VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT = 0x0100,
+		E_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT = 0x0100,
 		// Visual does not support double buffering.
-		VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT = 0x0200,
+		E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT = 0x0200,
 		// Visual is sRGB-capable.
-		VISUAL_ATTRIB_FLAG_SRGB_CAPABLE_BIT = 0x1000,
+		E_VISUAL_ATTRIB_FLAG_SRGB_CAPABLE_BIT = 0x1000,
 		// Visual has the stereoscopic display mode.
-		VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT = 0x0400,
+		E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT = 0x0400,
 		// Visual has the classic, monoscopic display mode.
-		VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT = 0x0800,
+		E_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT = 0x0800,
 	};
 
 	struct ColorDesc
 	{
 		math::RGBAColorU8 rgba;
 		uint32 size = 0;
-		ColorSpace colorSpace = ColorSpace::Linear;
+		EPixelOrder pixelOrder = EPixelOrder::Unknown;
+		EColorSpace colorSpace = EColorSpace::Unknown;
 	};
 
 	struct DepthStencilDesc
@@ -102,36 +111,36 @@ namespace ts3::system
 		// Struct representation of the color format.
 		ColorDesc colorDesc;
 		// Enum ID of the color format.
-		ColorFormat colorFormat;
+		EColorFormat colorFormat;
 		// Struct representation of a depth/stencil buffer description.
 		DepthStencilDesc depthStencilDesc;
 		// Enum ID of the depth/stencil buffer format.
-		DepthStencilFormat depthStencilFormat;
+		EDepthStencilFormat depthStencilFormat;
 		// Struct representation of the MSAA mode.
 		MSAADesc msaaDesc;
 		// Enum ID of the MSAA mode.
-		MSAAMode msaaMode;
+		EMSAAMode msaaMode;
 		// Additional visual config flags.
-		Bitmask<VisualAttribFlags> flags;
+		Bitmask<EVisualAttribFlags> flags;
 	};
 
-	/// @brief Returns a ColorDesc structure representation of a specified ColorFormat.
-	TS3_SYSTEM_API const std::string & vsxQueryColorFormatStr( ColorFormat pFormat );
+	/// @brief Returns a ColorDesc structure representation of a specified EColorFormat.
+	TS3_SYSTEM_API const std::string & vsxQueryColorFormatStr( EColorFormat pFormat );
 
-	/// @brief Returns a ColorDesc structure representation of a specified ColorFormat.
-	TS3_SYSTEM_API const ColorDesc & vsxGetDescForColorFormat( ColorFormat pFormat );
+	/// @brief Returns a ColorDesc structure representation of a specified EColorFormat.
+	TS3_SYSTEM_API const ColorDesc & vsxGetDescForColorFormat( EColorFormat pFormat );
 
-    /// @brief Returns a DepthStencilDesc structure representation of a specified DepthStencilFormat.
-    TS3_SYSTEM_API const DepthStencilDesc & vsxGetDescForDepthStencilFormat( DepthStencilFormat pFormat );
+    /// @brief Returns a DepthStencilDesc structure representation of a specified EDepthStencilFormat.
+    TS3_SYSTEM_API const DepthStencilDesc & vsxGetDescForDepthStencilFormat( EDepthStencilFormat pFormat );
 
-    /// @brief Returns an MSAADesc structure representation of a specified MSAAMode.
-    TS3_SYSTEM_API const MSAADesc & vsxGetDescForMSAAMode( MSAAMode pMode );
+    /// @brief Returns an MSAADesc structure representation of a specified EMSAAMode.
+    TS3_SYSTEM_API const MSAADesc & vsxGetDescForMSAAMode( EMSAAMode pMode );
 
-    /// @brief Returns a ColorDesc structure representation of a specified ColorFormat.
+    /// @brief Returns a ColorDesc structure representation of a specified EColorFormat.
     TS3_SYSTEM_API const VisualConfig & vsxGetDefaultVisualConfigForSysWindow();
 
     ///
-    TS3_SYSTEM_API bool vsxCheckColorFormatCompatibility( ColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha );
+    TS3_SYSTEM_API bool vsxCheckColorFormatCompatibility( EColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha );
 
 } // namespace ts3::system
 
