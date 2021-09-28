@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ts3ResourceDef>
+	<FontLibrary>
+		<FontGroup type="Bitmap">
+			<Font id="FONT_ID_BMF_SAMPLE1">
+				<File>assets/fonts/bmf-sample1.bmf</File>
+			</Font>
+		</FontGroup>
+		<FontGroup type="FreeType">
+			<Preload>abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789()!@#$%^&*()_+~`[]{}\|;:'",./<>?</Preload>
+			<Font id="FONT_ID_FTF_ANONPRO">
+				<File>assets/fonts/ftf-anonpro.ttf</File>
+			</Font>
+			<Font id="FONT_ID_FTF_CALIBRI">
+				<File>assets/fonts/ftf-calibri.ttf</File>
+			</Font>
+			<Font id="FONT_ID_FTF_GOTHIC3">
+				<File>assets/fonts/ftf-gothic3.ttf</File>
+			</Font>
+			<Font id="FONT_ID_FTF_MONACO" >
+				<File>assets/fonts/ftf-monaco.ttf</File>
+			</Font>
+			<Font id="FONT_ID_FTF_NWNMAIN">
+				<File>assets/fonts/ftf-nwnmain.ttf</File>
+			</Font>
+			<Font id="FONT_ID_FTF_TIMESNR">
+				<File>assets/fonts/ftf-timesnr.ttf</File>
+			</Font>
+		</FontGroup>
+		<FontGroup type="SDF">
+			<Font id="FONT_ID_SDF_SAMPLE1" file="assets/fonts/sdf-sample1.sdf" />
+		</FontGroup>
+	</FontLibrary>
+</Ts3ResourceDef>
