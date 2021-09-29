@@ -28,10 +28,10 @@ namespace ts3::system
 } // namespace ts3::system
 
 #if( TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS )
-#  define ts3EGLCheckLastResult()             EGLCoreAPI::checkLastResult()
-#  define ts3EGLCheckLastError( pErrorCode )  EGLCoreAPI::checkLastError( pErrorCode )
-#  define ts3EGLHandleLastError()             EGLCoreAPI::handleLastError()
-#  define ts3EGLResetErrorQueue()             EGLCoreAPI::resetErrorQueue()
+#  define ts3EGLCheckLastResult()             ::ts3::system::EGLCoreAPI::checkLastResult()
+#  define ts3EGLCheckLastError( pErrorCode )  ::ts3::system::EGLCoreAPI::checkLastError( pErrorCode )
+#  define ts3EGLHandleLastError()             ::ts3::system::EGLCoreAPI::handleLastError()
+#  define ts3EGLResetErrorQueue()             ::ts3::system::EGLCoreAPI::resetErrorQueue()
 #else
 #  define ts3EGLCheckLastResult()
 #  define ts3EGLCheckLastError( pErrorCode )

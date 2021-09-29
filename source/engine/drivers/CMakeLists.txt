@@ -9,9 +9,9 @@ set( TS3_DRIVERS_INCLUDE_DIR_INTERNAL
 
 add_subdirectory( "ts3/gpuapiGL" )
 add_subdirectory( "ts3/gpuapiGL4" )
-#add_subdirectory( "ts3/gpuapiGLES3" )
-add_subdirectory( "ts3/gpuapiDX" )
-add_subdirectory( "ts3/gpuapiDX11" )
+add_subdirectory( "ts3/gpuapiGLES3" )
+#add_subdirectory( "ts3/gpuapiDX" )
+#add_subdirectory( "ts3/gpuapiDX11" )
 #add_subdirectory( "ts3/gpuapiDX12" )
 #add_subdirectory( "ts3/gpuapiVK" )
 #add_subdirectory( "ts3/gpuapiVK10" )

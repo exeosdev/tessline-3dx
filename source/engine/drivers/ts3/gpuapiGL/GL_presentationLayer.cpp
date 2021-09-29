@@ -6,29 +6,30 @@
 namespace ts3::gpuapi
 {
 
-	static SysGLSurfaceHandle createSysGLSurface( SysGLDriverHandle pSysGLDriver, const GLPresentationLayerCreateInfo & pSCCreateInfo )
+	static system::GLDisplaySurfaceHandle createSysGLSurface( system::GLSystemDriverHandle pSysGLDriver,
+                                                              const GLPresentationLayerCreateInfo & pPLCreateInfo )
 	{
 		try
 		{
-			SysGLSurfaceCreateInfo surfaceCreateInfo;
-			surfaceCreateInfo.windowGeometry.position = pSCCreateInfo.screenRect.offset;
-			surfaceCreateInfo.windowGeometry.size = pSCCreateInfo.screenRect.size;
-			surfaceCreateInfo.windowGeometry.frameStyle = ts3::SysWindowFrameStyle::Default;
-			surfaceCreateInfo.visualConfig = pSCCreateInfo.visualConfig;
+		    system::GLDisplaySurfaceCreateInfo surfaceCreateInfo;
+			surfaceCreateInfo.windowGeometry.position = pPLCreateInfo.screenRect.offset;
+			surfaceCreateInfo.windowGeometry.size = pPLCreateInfo.screenRect.size;
+			surfaceCreateInfo.windowGeometry.frameStyle = system::EWindowFrameStyle::Default;
+			surfaceCreateInfo.visualConfig = pPLCreateInfo.visualConfig;
 			surfaceCreateInfo.flags = 0u;
 
-			if( pSCCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT ) )
+			if( pPLCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT ) )
 			{
-				surfaceCreateInfo.flags.set( E_SYS_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
+				surfaceCreateInfo.flags.set( system::E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 			}
 
-			if( pSCCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_SYNC_MODE_ADAPTIVE_BIT ) )
+			if( pPLCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_SYNC_MODE_ADAPTIVE_BIT ) )
 			{
-				surfaceCreateInfo.flags.set( E_SYS_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT );
+				surfaceCreateInfo.flags.set( system::E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT );
 			}
-			else if( pSCCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_SYNC_MODE_VERTICAL_BIT ) )
+			else if( pPLCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_SYNC_MODE_VERTICAL_BIT ) )
 			{
-				surfaceCreateInfo.flags.set( E_SYS_GFX_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT );
+				surfaceCreateInfo.flags.set( system::E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT );
 			}
 
 			auto sysGLSurface = pSysGLDriver->createDisplaySurface( surfaceCreateInfo );
@@ -43,21 +44,21 @@ namespace ts3::gpuapi
 		return nullptr;
 	}
 
-	GLPresentationLayer::GLPresentationLayer( GLGPUDevice & pDevice, SysGLSurfaceHandle pSysGLSurface )
+	GLPresentationLayer::GLPresentationLayer( GLGPUDevice & pDevice, system::GLDisplaySurfaceHandle pSysGLDisplaySurface )
 	: PresentationLayer( pDevice )
-	, mSysGLSurface( pSysGLSurface )
+	, mSysGLDisplaySurface( pSysGLDisplaySurface )
 	{ }
 
 	GLPresentationLayer::~GLPresentationLayer() = default;
 
-	SysEventSource * GLPresentationLayer::querySysEventSourceObject() const noexcept
+	system::EventSource * GLPresentationLayer::getInternalSystemEventSource() const noexcept
 	{
-		return mSysGLSurface.get();
+		return mSysGLDisplaySurface.get();
 	}
 
 
-	GLScreenPresentationLayer::GLScreenPresentationLayer( GLGPUDevice & pDevice, SysGLSurfaceHandle pSysGLSurface )
-	: GLPresentationLayer( pDevice, pSysGLSurface )
+	GLScreenPresentationLayer::GLScreenPresentationLayer( GLGPUDevice & pDevice, system::GLDisplaySurfaceHandle pSysGLDisplaySurface )
+	: GLPresentationLayer( pDevice, pSysGLDisplaySurface )
 	{ }
 
 	GLScreenPresentationLayer::~GLScreenPresentationLayer() = default;
@@ -86,7 +87,7 @@ namespace ts3::gpuapi
 
 	void GLScreenPresentationLayer::present()
 	{
-		mSysGLSurface->swapBuffers();
+		mSysGLDisplaySurface->swapBuffers();
 	}
 
 	void GLScreenPresentationLayer::resize( uint32 pWidth, uint32 pHeight )
@@ -99,7 +100,7 @@ namespace ts3::gpuapi
 
 	ts3::math::Vec2u32 GLScreenPresentationLayer::queryRenderTargetSize() const
 	{
-		return mSysGLSurface->queryCurrentSize();
+		return mSysGLDisplaySurface->queryRenderAreaSize();
 	}
 
 }

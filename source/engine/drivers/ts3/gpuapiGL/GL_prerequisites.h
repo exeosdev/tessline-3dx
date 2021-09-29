@@ -66,7 +66,7 @@ namespace ts3::gpuapi
 	struct GLRenderContextSpecification
 	{
 		Version apiVersion;
-		ESysGLAPIProfile targetProfile;
+		system::EGLAPIProfile targetProfile;
 	};
 
 }

@@ -5,7 +5,7 @@
 namespace ts3::gpuapi
 {
 
-	VKGPUDriver::VKGPUDriver( ts3::SystemContext * pExfSystemContext )
+	VKGPUDriver::VKGPUDriver( system::temContext * pExfSystemContext )
 	: GPUDriver( pExfSystemContext )
 	{ }
 

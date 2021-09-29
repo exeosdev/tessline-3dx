@@ -6,7 +6,7 @@
 namespace ts3::gpuapi
 {
 
-	GLES3GPUDriver::GLES3GPUDriver( ts3::SysGfxGLDriver * pExfGLDriver )
+	GLES3GPUDriver::GLES3GPUDriver( system::GfxGLDriver * pExfGLDriver )
 	: GLGPUDriver( pExfGLDriver )
 	{ }
 

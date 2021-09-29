@@ -10,24 +10,27 @@ set( TS3_DRIVER_GPUAPI_GLES3_SRC_FILES
         "GLES3_gpuDriver.cpp"
 )
 
-if( "${TS3_VAR_ENGINE_BUILD_MODE_DRIVERS}" STREQUAL "STATIC" )
-    add_library( ts3_dgxgl4 STATIC ${TS3_DRIVER_GPUAPI_GLES3_SRC_FILES} )
-    target_compile_definitions( ts3_dgxgl4 PRIVATE
-        "TS3_BUILD_STATIC=1")
+if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
+    add_library( ts3drv-gpuapi-gles3 STATIC ${TS3_DRIVER_GPUAPI_GLES3_SRC_FILES} )
+    target_compile_definitions( ts3drv-gpuapi-gles3 PRIVATE
+            "TS3_BUILD_STATIC=1")
 else()
-    add_library( ts3_dgxgl4 SHARED ${TS3_DRIVER_GPUAPI_GLES3_SRC_FILES} )
+    add_library( ts3drv-gpuapi-gles3 SHARED ${TS3_DRIVER_GPUAPI_GLES3_SRC_FILES} )
 endif()
 
-set_target_properties( ts3_dgxgl4 PROPERTIES
-    OUTPUT_NAME "ts3dx-driver-gpuapi-gl4" )
+set_target_properties( ts3drv-gpuapi-gles3 PROPERTIES
+        OUTPUT_NAME "ts3dx-driver-gx-gles3" )
 
-target_compile_definitions( ts3_dgxgl4 PRIVATE
+target_compile_definitions( ts3drv-gpuapi-gles3 PRIVATE
+        #"GLEW_STATIC=1"
         "TS3_DRIVER_GPUAPI_GL_BUILD=1"
         "TS3_DRIVER_GPUAPI_GLES3_BUILD=1"
+        "GL_PLATFORM_TYPE_CORE=0"
         "GL_PLATFORM_TYPE_ES=1" )
 
-target_include_directories( ts3_dgxgl4 PUBLIC
-    ${TS3_DRIVERS_INCLUDE_DIR_INTERNAL} )
+target_include_directories( ts3drv-gpuapi-gles3 PUBLIC
+        ${TS3_DRIVERS_INCLUDE_DIR_INTERNAL} )
 
-target_link_libraries( ts3_dgxgl4 PUBLIC
-    ts3_ecgraphics )
+target_link_libraries( ts3drv-gpuapi-gles3 PUBLIC
+        ts3-gpuapi
+        ts3-system )

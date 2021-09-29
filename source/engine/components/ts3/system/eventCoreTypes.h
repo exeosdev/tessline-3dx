@@ -167,22 +167,22 @@ namespace ts3::system
 
 	enum EMouseButtonFlagBits : uint32
 	{
-		E_SYS_MOUSE_BUTTON_FLAG_LEFT_BIT = 0x0001,
-		E_SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT = 0x0002,
-		E_SYS_MOUSE_BUTTON_FLAG_MIDDLE_BIT = 0x0010,
-		E_SYS_MOUSE_BUTTON_FLAG_XB1_BIT = 0x0020,
-		E_SYS_MOUSE_BUTTON_FLAG_XB2_BIT = 0x0040,
-		E_SYS_MOUSE_BUTTON_FLAG_ALL_BIT = 0x00FF
+		E_MOUSE_BUTTON_FLAG_LEFT_BIT = 0x0001,
+		E_MOUSE_BUTTON_FLAG_RIGHT_BIT = 0x0002,
+		E_MOUSE_BUTTON_FLAG_MIDDLE_BIT = 0x0010,
+		E_MOUSE_BUTTON_FLAG_XB1_BIT = 0x0020,
+		E_MOUSE_BUTTON_FLAG_XB2_BIT = 0x0040,
+		E_MOUSE_BUTTON_FLAG_ALL_BIT = 0x00FF
 	};
 
 	enum class EMouseButtonID : enum_default_value_t
 	{
 		Unknown,
-		Left = static_cast<enum_default_value_t>( E_SYS_MOUSE_BUTTON_FLAG_LEFT_BIT ),
-		Right = static_cast<enum_default_value_t>( E_SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT ),
-		Middle = static_cast<enum_default_value_t>( E_SYS_MOUSE_BUTTON_FLAG_MIDDLE_BIT ),
-		XB1 = static_cast<enum_default_value_t>( E_SYS_MOUSE_BUTTON_FLAG_XB1_BIT ),
-		XB2 = static_cast<enum_default_value_t>( E_SYS_MOUSE_BUTTON_FLAG_XB2_BIT ),
+		Left = static_cast<enum_default_value_t>( E_MOUSE_BUTTON_FLAG_LEFT_BIT ),
+		Right = static_cast<enum_default_value_t>( E_MOUSE_BUTTON_FLAG_RIGHT_BIT ),
+		Middle = static_cast<enum_default_value_t>( E_MOUSE_BUTTON_FLAG_MIDDLE_BIT ),
+		XB1 = static_cast<enum_default_value_t>( E_MOUSE_BUTTON_FLAG_XB1_BIT ),
+		XB2 = static_cast<enum_default_value_t>( E_MOUSE_BUTTON_FLAG_XB2_BIT ),
 	};
 
 	enum class EMouseButtonActionType : enum_default_value_t

@@ -6,7 +6,7 @@
 namespace ts3::gpuapi
 {
 
-	GL4GPUDriver::GL4GPUDriver( SysGLDriverHandle pSysGLDriver )
+	GL4GPUDriver::GL4GPUDriver( system::GLSystemDriverHandle pSysGLDriver )
 	: GLGPUDriver( pSysGLDriver )
 	{}
 
@@ -21,7 +21,7 @@ namespace ts3::gpuapi
 		auto sysContext = pCreateInfo.sysContext;
 		if( !sysContext )
 		{
-			sysContext = sysCreateContext( pCreateInfo.sysContextCreateInfo );
+			sysContext = system::nativeSysContextCreate( pCreateInfo.sysContextCreateInfo );
 			if( !sysContext )
 			{
 				return nullptr;

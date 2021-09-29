@@ -13,7 +13,7 @@ namespace ts3::gpuapi
 	class TS3GX_DXCOMMON_CLASS DXGPUDriver : public GPUDriver
 	{
 	public:
-		explicit DXGPUDriver( SysContextHandle pSysContext ) noexcept;
+		explicit DXGPUDriver( system::SysContextHandle pSysContext ) noexcept;
 		virtual ~DXGPUDriver() noexcept;
 	};
 

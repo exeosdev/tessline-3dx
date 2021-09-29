@@ -13,7 +13,7 @@ namespace ts3::gpuapi
 
 	struct SystemDisplayManagerCreateInfo
 	{
-		ts3::SystemContext * exfSystemContext = nullptr;
+		system::temContext * exfSystemContext = nullptr;
 		ts3::ESysDsmDisplayDriverType exfDisplayDriverType = ts3::ESysDsmDisplayDriverType::Default;
 	};
 
@@ -23,9 +23,9 @@ namespace ts3::gpuapi
 		friend class GPUDriver;
 
 	public:
-		ts3::SysDisplayDriver * const mExfDisplayDriver = nullptr;
+		system::DisplayDriver * const mExfDisplayDriver = nullptr;
 
-		explicit SystemDisplayManager( ts3::SysDisplayDriver * pExfDisplayDriver );
+		explicit SystemDisplayManager( system::DisplayDriver * pExfDisplayDriver );
 		virtual ~SystemDisplayManager();
 
 		/// @brief
@@ -44,7 +44,7 @@ namespace ts3::gpuapi
 		virtual OutputDesc getDefaultOutput( display_system_id_t pAdapterID ) const override;
 
 		/// @brief
-		virtual VideoModeList enumVideoModeList( display_system_id_t pOutputID, ts3::SysColorFormat pFormat ) const override;
+		virtual VideoModeList enumVideoModeList( display_system_id_t pOutputID, system::EColorFormat pFormat ) const override;
 	};
 
 }

@@ -5,7 +5,7 @@
 namespace ts3::system
 {
 
-    DisplayManager::DisplayManager( SysContextHandle pSysContext )
+    DisplayManager::DisplayManager( system::SysContextHandle pSysContext )
     : SysObject( std::move( pSysContext ) )
     , mInternal( std::make_unique<ObjectInternalData>() )
     , mNativeData( &( mInternal->nativeDataPriv ) )

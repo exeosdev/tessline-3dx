@@ -43,7 +43,7 @@ namespace ts3::gpuapi
 		                                                    D3D12_COMMAND_LIST_TYPE pD3D12CommandListType );
 
 		ComPtr<IDXGISwapChain3> createD3D12SwapChainForExfWindow( const ComPtr<ID3D12CommandQueue> & pD3D12PresentCommandQueue,
-		                                                          void * pExfSysWindow, /* It must be an ts3::SysWindow */
+		                                                          void * pExfSysWindow, /* It must be an system::Window */
 		                                                          Bitmask<UINT> pDXGIFlags );
 
 		D3D12CommandListData createD3D12CommandList( const ComPtr<ID3D12Device> & pD3D12Device,

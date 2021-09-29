@@ -12,7 +12,7 @@ namespace ts3::gpuapi
 
 	PresentationLayer::~PresentationLayer() = default;
 
-	SysEventSource * PresentationLayer::querySysEventSourceObject() const noexcept
+	system::EventSource * PresentationLayer::getInternalSystemEventSource() const noexcept
 	{
 		return nullptr;
 	}

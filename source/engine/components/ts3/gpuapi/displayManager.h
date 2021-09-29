@@ -38,7 +38,7 @@ namespace ts3::gpuapi
 		virtual OutputDesc getDefaultOutput( display_system_id_t pAdapterID ) const = 0;
 
 		/// @brief
-		virtual VideoModeList enumVideoModeList( display_system_id_t pOutputID, ts3::SysColorFormat pFormat ) const = 0;
+		virtual VideoModeList enumVideoModeList( display_system_id_t pOutputID, system::EColorFormat pFormat ) const = 0;
 	};
 
 }

@@ -55,11 +55,11 @@ namespace ts3::system
 	{
 	}
 
-	void Window::_nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode /* pSizeMode */ )
+	void Window::_nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, EWindowSizeMode /* pSizeMode */ )
 	{
 	}
 
-	void Window::_nativeGetSize( WindowSizeMode /* pSizeMode */, WindowSize & pOutSize ) const
+	void Window::_nativeGetSize( EWindowSizeMode /* pSizeMode */, WindowSize & pOutSize ) const
 	{
 		auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
 		pOutSize = nativeAndroidQueryNativeWindowSize( aSessionData.aNativeWindow );

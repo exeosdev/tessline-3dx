@@ -17,7 +17,7 @@ namespace ts3::gpuapi
 	class TS3GX_GLES3_CLASS GLES3GPUDriver final : public GLGPUDriver
 	{
 	public:
-		explicit GLES3GPUDriver( ts3::SysGfxGLDriver * pExfGLDriver );
+		explicit GLES3GPUDriver( system::GfxGLDriver * pExfGLDriver );
 		virtual ~GLES3GPUDriver();
 
 		virtual GPUDeviceHandle createDevice( const GPUDeviceCreateInfo & pCreateInfo ) override;

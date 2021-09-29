@@ -81,7 +81,7 @@ namespace ts3::gpuapi
 		return openglBuffer;
 	}
 
-	bool GLGPUBuffer::mapRegion( void * pCommandObject, const MemoryRegion & pRegion, EGPUMemoryMapMode pMapMode )
+	bool GLGPUBuffer::mapRegion( void * pCommandObject, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode )
 	{
 		void * mappedMemoryPtr = nullptr;
 		if( mPersistentMapPtr )
@@ -131,12 +131,12 @@ namespace ts3::gpuapi
 		resetMappedMemory();
 	}
 
-	void GLGPUBuffer::flushMappedRegion( void * pCommandObject, const MemoryRegion & pRegion )
+	void GLGPUBuffer::flushMappedRegion( void * pCommandObject, const GPUMemoryRegion & pRegion )
 	{
 		mGLBufferObject->flushMappedRegion( pRegion.offset, pRegion.size );
 	}
 
-	void GLGPUBuffer::invalidateRegion( void * pCommandObject, const MemoryRegion & pRegion )
+	void GLGPUBuffer::invalidateRegion( void * pCommandObject, const GPUMemoryRegion & pRegion )
 	{
 		mGLBufferObject->invalidateRegion( pRegion.offset, pRegion.size );
 	}
@@ -152,7 +152,7 @@ namespace ts3::gpuapi
 		mGLBufferObject->updateUpload( pUploadDesc );
 	}
 
-	bool GLGPUBuffer::validateMapRequest( const MemoryRegion & pRegion, const EGPUMemoryMapMode & pMapMode )
+	bool GLGPUBuffer::validateMapRequest( const GPUMemoryRegion & pRegion, const EGPUMemoryMapMode & pMapMode )
 	{
 		return GPUBuffer::validateMapRequest( pRegion, pMapMode );
 	}

@@ -96,13 +96,13 @@ namespace ts3::gpuapi
 	bool GLGPUDevice::onSetPresentationLayer( PresentationLayerHandle pPresentationLayer )
 	{
 		auto * openglPresentationLayer = pPresentationLayer->queryInterface<GLPresentationLayer>();
-		if ( !openglPresentationLayer->mSysGLSurface )
+		if ( !openglPresentationLayer->mSysGLDisplaySurface )
 		{
 			return false;
 		}
 
 		auto * openglCommandSystem = _commandSystem->queryInterface<GLCommandSystem>();
-		openglCommandSystem->setTargetGLSurface( openglPresentationLayer->mSysGLSurface );
+		openglCommandSystem->setTargetGLSurface( openglPresentationLayer->mSysGLDisplaySurface );
 
 		return true;
 	}

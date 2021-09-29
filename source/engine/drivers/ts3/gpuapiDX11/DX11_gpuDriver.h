@@ -17,7 +17,7 @@ namespace ts3::gpuapi
 	class TS3GX_DX11_CLASS DX11GPUDriver final : public DXGPUDriver
 	{
 	public:
-		explicit DX11GPUDriver( SysContextHandle pSysContext ) noexcept;
+		explicit DX11GPUDriver( system::SysContextHandle pSysContext ) noexcept;
 		virtual ~DX11GPUDriver() noexcept;
 
 		virtual DisplayManagerHandle createDefaultDisplayManager() override;

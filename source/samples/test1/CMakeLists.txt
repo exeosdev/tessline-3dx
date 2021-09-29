@@ -1,7 +1,13 @@
 
-add_executable( ts3sample-test1
-        "test1-meshDefs.h"
-        "test1-main.cpp" )
+if( "${CM_EBS_SYSCONF_TARGET_PLATFORM}" STREQUAL "Android" )
+    add_library( ts3sample-test1 STATIC
+            "test1-meshDefs.h"
+            "test1-main.cpp" )
+else()
+    add_executable( ts3sample-test1
+            "test1-meshDefs.h"
+            "test1-main.cpp" )
+endif()
 
 set_target_properties( ts3sample-test1 PROPERTIES
         OUTPUT_NAME "ts3sample-test1" )

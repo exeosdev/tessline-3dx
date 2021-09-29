@@ -4,7 +4,7 @@
 namespace ts3::system
 {
 
-    SysObject::SysObject( SysContextHandle pSysContext )
+    SysObject::SysObject( system::SysContextHandle pSysContext )
     : mSysContext( std::move( pSysContext ) )
     {}
 

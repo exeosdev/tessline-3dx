@@ -40,7 +40,7 @@ namespace ts3::system
         friend class EventController;
 
     public:
-        explicit EventSource( SysContextHandle pSysContext );
+        explicit EventSource( system::SysContextHandle pSysContext );
         virtual ~EventSource() noexcept;
 
     friendapi:
@@ -118,7 +118,7 @@ namespace ts3::system
 	    std::unique_ptr<ObjectInternalData> const mInternal;
 
 	public:
-	    explicit EventController( SysContextHandle pSysContext );
+	    explicit EventController( system::SysContextHandle pSysContext );
 		virtual ~EventController() noexcept;
 
 		bool dispatchEvent( EventObject pEvent );

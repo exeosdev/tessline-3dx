@@ -6,7 +6,7 @@
 namespace ts3::gpuapi
 {
 
-	SystemDisplayManager::SystemDisplayManager( ts3::SysDisplayDriver * pExfDisplayDriver )
+	SystemDisplayManager::SystemDisplayManager( system::DisplayDriver * pExfDisplayDriver )
 	: DisplayManager()
 	, mExfDisplayDriver( pExfDisplayDriver )
 	{}
@@ -111,7 +111,7 @@ namespace ts3::gpuapi
 		return outputDesc;
 	}
 
-	VideoModeList SystemDisplayManager::enumVideoModeList( display_system_id_t pOutputID, ts3::SysColorFormat pFormat ) const
+	VideoModeList SystemDisplayManager::enumVideoModeList( display_system_id_t pOutputID, system::EColorFormat pFormat ) const
 	{
 		VideoModeList videoModeList;
 

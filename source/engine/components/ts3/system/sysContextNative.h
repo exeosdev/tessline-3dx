@@ -37,7 +37,7 @@ namespace ts3::system
 
     void nativeSysContextInternalRelease( SysContext & pSysContext );
 
-    TS3_PCL_ATTR_NO_DISCARD inline SysContextHandle nativeSysContextCreate( const SysContextCreateInfo & pCreateInfo )
+    TS3_PCL_ATTR_NO_DISCARD inline system::SysContextHandle nativeSysContextCreate( const SysContextCreateInfo & pCreateInfo )
     {
         auto sysContext = std::make_shared<SysContext>();
         nativeSysContextInternalInitialize( *sysContext, pCreateInfo );

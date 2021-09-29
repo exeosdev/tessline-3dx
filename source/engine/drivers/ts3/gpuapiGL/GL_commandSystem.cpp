@@ -60,13 +60,13 @@ namespace ts3::gpuapi
 		return cmdSyncObject;
 	}
 
-	void GLCommandSystem::setTargetGLSurface( SysGLSurfaceHandle pSysGLSurface )
+	void GLCommandSystem::setTargetGLSurface( system::GLDisplaySurfaceHandle pSysGLDisplaySurface )
 	{
 		// Surface is required to create a GL context. Since CommandSystem is bound to a device
 		// and PresentationLayer is created when device is already available, there is no way
 		// we can know the surface in advance. Hence, we set it manually (eh...) and use to
 		// create a GL context when a new CommandList is instantiated.
-		_targetSysGLSurface = pSysGLSurface;
+		_targetSysGLSurface = pSysGLDisplaySurface;
 	}
 
 	GLCommandList * GLCommandSystem::acquireCommandList( ECommandExecutionMode pCommandExecutionMode )
@@ -103,34 +103,34 @@ namespace ts3::gpuapi
 		return true;
 	}
 
-	SysGLRenderContextHandle GLCommandSystem::createSysGLRenderContext( GLGPUDevice & pGLGPUDevice, SysGLSurfaceHandle pSysGLSurface )
+	system::GLRenderContextHandle GLCommandSystem::createSysGLRenderContext( GLGPUDevice & pGLGPUDevice, system::GLDisplaySurfaceHandle pSysGLDisplaySurface )
 	{
-		SysGLRenderContextHandle sysGLRenderContext = nullptr;
+		system::GLRenderContextHandle sysGLRenderContext = nullptr;
 
 		try
 		{
-			SysGLRenderContextCreateInfo contextCreateInfo;
+			system::GLRenderContextCreateInfo contextCreateInfo;
 			contextCreateInfo.shareContext = nullptr;
-			contextCreateInfo.flags.set( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
+			contextCreateInfo.flags.set( system::E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
 
 		#if( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL43 )
 			contextCreateInfo.requiredAPIVersion.major = 4;
 			contextCreateInfo.requiredAPIVersion.minor = 3;
-			contextCreateInfo.targetAPIProfile = ESysGLAPIProfile::Core;
-			contextCreateInfo.flags.set( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT );
+			contextCreateInfo.targetAPIProfile = system::EGLAPIProfile::Core;
+			contextCreateInfo.flags.set( system::E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT );
 		#elif( TS3GX_GL_TARGET == TS3GX_GL_TARGET_ES31 )
 			contextCreateInfo.requiredAPIVersion.major = 3;
 			contextCreateInfo.requiredAPIVersion.minor = 1;
 			contextCreateInfo.targetAPIProfile = ESysGLAPIProfile::GLES;
-			contextCreateInfo.flags.set( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
+			contextCreateInfo.flags.set( system::E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
 		#endif
 
 			if( pGLGPUDevice.isDebugDevice() )
 			{
-				contextCreateInfo.flags.set( E_SYS_GFX_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT );
+				contextCreateInfo.flags.set( system::E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT );
 			}
 
-			auto sysGLRenderContext = pSysGLSurface->mGLDriver->createRenderContext( *pSysGLSurface, contextCreateInfo );
+			auto sysGLRenderContext = pSysGLDisplaySurface->mDriver->createRenderContext( *pSysGLDisplaySurface, contextCreateInfo );
 
 			return sysGLRenderContext;
 		}

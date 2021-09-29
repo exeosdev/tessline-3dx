@@ -6,8 +6,8 @@ namespace ts3::system
 {
 
 	void _win32RegisterWndClass( WindowNativeData & pWindowNativeData );
-	DWORD _win32TranslateFrameStyle( WindowFrameStyle pStyle );
-	Win32WindowGeometry _win32CheckWindowGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode, HWND pWindowHwnd );
+	DWORD _win32TranslateFrameStyle( EWindowFrameStyle pStyle );
+	Win32WindowGeometry _win32CheckWindowGeometry( const WindowGeometry & pWindowGeometry, EWindowSizeMode pSizeMode, HWND pWindowHwnd );
 	LRESULT __stdcall _win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 
 
@@ -38,7 +38,7 @@ namespace ts3::system
 	void Window::_nativeSetTitleText( const std::string & pTitleText )
 	{}
 
-	void Window::_nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode )
+	void Window::_nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, EWindowSizeMode pSizeMode )
 	{
 	    auto win32Geometry = _win32CheckWindowGeometry( pWindowGeometry, pSizeMode, mNativeData->hwnd );
 
@@ -53,11 +53,11 @@ namespace ts3::system
                         SWP_NOZORDER | SWP_FRAMECHANGED | SWP_SHOWWINDOW );
 	}
 
-	void Window::_nativeGetSize( WindowSizeMode pSizeMode, WindowSize & pOutSize ) const
+	void Window::_nativeGetSize( EWindowSizeMode pSizeMode, WindowSize & pOutSize ) const
 	{
 	    RECT resultRect;
 
-	    if( pSizeMode == WindowSizeMode::ClientArea )
+	    if( pSizeMode == EWindowSizeMode::ClientArea )
 	    {
 	        ::GetClientRect( mNativeData->hwnd, &resultRect );
 	    }
@@ -76,7 +76,7 @@ namespace ts3::system
 		// Register window class. Will fetch it if already registered.
 		_win32RegisterWndClass( pWindowNativeData );
 
-		auto win32Geometry = _win32CheckWindowGeometry( pCreateInfo.properties.geometry, WindowSizeMode::ClientArea, nullptr );
+		auto win32Geometry = _win32CheckWindowGeometry( pCreateInfo.properties.geometry, EWindowSizeMode::ClientArea, nullptr );
 
 		HWND windowHwnd = ::CreateWindowExA( WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW,
                                              pWindowNativeData.wndClsName,
@@ -179,7 +179,7 @@ namespace ts3::system
 		pWindowNativeData.moduleHandle = wndProcModuleHandle;
 	}
 
-	DWORD _win32TranslateFrameStyle( WindowFrameStyle pStyle )
+	DWORD _win32TranslateFrameStyle( EWindowFrameStyle pStyle )
 	{
 		//
 		constexpr DWORD overlayFrameStyle = WS_POPUP | WS_EX_TOPMOST;
@@ -195,19 +195,19 @@ namespace ts3::system
 
 		switch ( pStyle )
 		{
-			case WindowFrameStyle::Caption:
+			case EWindowFrameStyle::Caption:
 				resultStyle = captionFrameStyle;
 				break;
 
-			case WindowFrameStyle::Fixed:
+			case EWindowFrameStyle::Fixed:
 				resultStyle = fixedFrameStyle;
 				break;
 
-			case WindowFrameStyle::Overlay:
+			case EWindowFrameStyle::Overlay:
 				resultStyle = overlayFrameStyle;
 				break;
 
-			case WindowFrameStyle::Resizeable:
+			case EWindowFrameStyle::Resizeable:
 				resultStyle = resizeableFrameStyle;
 				break;
 		}
@@ -215,7 +215,7 @@ namespace ts3::system
 		return resultStyle;
 	}
 
-	Win32WindowGeometry _win32CheckWindowGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode, HWND pWindowHwnd )
+	Win32WindowGeometry _win32CheckWindowGeometry( const WindowGeometry & pWindowGeometry, EWindowSizeMode pSizeMode, HWND pWindowHwnd )
 	{
 	    RECT windowRect;
 	    windowRect.left = 0;
@@ -230,7 +230,7 @@ namespace ts3::system
 	        win32FrameStyle = ::GetWindowLongPtrA( pWindowHwnd, GWL_STYLE );
 	    }
 
-	    if( pSizeMode == WindowSizeMode::ClientArea )
+	    if( pSizeMode == EWindowSizeMode::ClientArea )
 	    {
 	        ::AdjustWindowRect( &windowRect, win32FrameStyle, FALSE );
 	    }

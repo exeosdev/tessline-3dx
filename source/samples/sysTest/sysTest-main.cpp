@@ -26,7 +26,7 @@ void initializeGraphicsCreateSurface( GfxState & pGfxState )
 {
     GLDisplaySurfaceCreateInfo surfaceCreateInfo;
     surfaceCreateInfo.windowGeometry.size = {0, 0 };
-    surfaceCreateInfo.windowGeometry.frameStyle = WindowFrameStyle::Caption;
+    surfaceCreateInfo.windowGeometry.frameStyle = EWindowFrameStyle::Caption;
     surfaceCreateInfo.visualConfig = vsxGetDefaultVisualConfigForSysWindow();
     surfaceCreateInfo.flags.set( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 
@@ -60,7 +60,7 @@ void initializeGraphics( SysContextHandle pSysContext, GfxState & pGfxState )
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 {
-    ts3::system::SysContextCreateInfo sysContextCreateInfo {};
+    SysContextCreateInfo sysContextCreateInfo {};
     sysContextCreateInfo.nativeParams.aCommonAppState = pAppState;
     sysContextCreateInfo.flags = 0;
     auto sysContext = nativeSysContextCreate( sysContextCreateInfo );

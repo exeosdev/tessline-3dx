@@ -42,7 +42,7 @@ namespace ts3::system
 
         void setTitleText( const std::string & pTitleText );
 
-        void updateGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode );
+        void updateGeometry( const WindowGeometry & pWindowGeometry, EWindowSizeMode pSizeMode );
 
         void syncInternalState();
 
@@ -54,8 +54,8 @@ namespace ts3::system
 
     private:
         void _nativeSetTitleText( const std::string & pTitleText );
-        void _nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode );
-        void _nativeGetSize( WindowSizeMode pSizeMode, WindowSize & pOutSize ) const;
+        void _nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, EWindowSizeMode pSizeMode );
+        void _nativeGetSize( EWindowSizeMode pSizeMode, WindowSize & pOutSize ) const;
     };
 
 	class WindowManager : public SysObject
