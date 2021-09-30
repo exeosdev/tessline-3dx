@@ -15,8 +15,9 @@ namespace ts3::system
     using file_str_t = std::basic_string<file_char_t>;
     using file_offset_t = native_int;
     using file_size_t = native_uint;
-
     using FileHandle = std::shared_ptr<File>;
+
+    inline constexpr auto CX_FILE_SIZE_MAX = Limits<file_size_t>::maxValue;
 
     enum : exception_code_value_t
     {
@@ -25,9 +26,9 @@ namespace ts3::system
 
     enum class EFilePointerRefPos : enum_default_value_t
     {
-        CurrentPos,
-        FileBeg,
+        FileBeginning,
         FileEnd,
+        PtrCurrent,
     };
 
     enum class EFileOpenMode : enum_default_value_t
@@ -66,6 +67,12 @@ namespace ts3::system
     };
 
     ts3SetExceptionCategoryType( E_EXCEPTION_CATEGORY_SYSTEM_FILE, FileException );
+
+    class FileAPI
+    {
+    public:
+        static std::string normalizePath( const std::string & pPath );
+    };
 
 }
 
