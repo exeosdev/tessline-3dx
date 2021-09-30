@@ -29,7 +29,7 @@ namespace ts3::system
         mInternal->nativeDataPriv.resetSessionData();
     }
 
-    AssetHandle AssetLoader::_nativOopenSubAsset( FileAPI::FilePathInfo pAssetPathInfo )
+    AssetHandle AssetLoader::_nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo )
     {
         AssetHandle asset = nullptr;
 
@@ -149,7 +149,7 @@ namespace ts3::system
         }
     }
 
-    file_offset_t Asset::_nativeSetReadPointer( EFilePointerRefPos pRefPos, file_offset_t pOffset )
+    file_offset_t Asset::_nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
     {
         return 0;
     }
