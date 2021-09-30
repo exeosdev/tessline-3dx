@@ -26,12 +26,9 @@
 #include <ts3ext/rcsupport/images/bitmapCommon.h>
 
 #include <ts3/math/matrixUtils.h>
-#include <ts3/system/perfCounter.h>
 
 #include "test1-meshDefs.h"
 
-#include <ts3/engine/gpuapi/vertexFormatDefs.h>
-#include <ts3/engine/gpuapi/hwBuffer.h>
 #include <ts3/system/eventCoreTypes.h>
 #include <ts3/system/eventObject.h>
 
@@ -68,14 +65,6 @@ struct GraphicsDriverState
 GraphicsDriverState initializeGraphicsDriver( ts3::system::SysContextHandle pSysContext, const std::string & pDriverID );
 
 using namespace ts3::math;
-
-struct CB0Data
-{
-	Vec4f scolor;
-	Mat4x4f modelMatrix;
-	Mat4x4f viewMatrix;
-	Mat4x4f projectionMatrix;
-};
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )

@@ -18,7 +18,7 @@ namespace ts3::system
         auto assetDirectory = SysContext::queryCurrentProcessExecutableDirectory();
         assetDirectory.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
         assetDirectory.append( pCreateInfo.nativeParams.relativeAssetRootDir );
-        assetDirectory = FileAPI::normalizePath( assetDirectory );
+        assetDirectory = FileUtilityAPI::normalizePath( assetDirectory );
 
         assetLoader->mInternal->nativeDataPriv.rootDir = std::move( assetDirectory );
 
@@ -32,7 +32,7 @@ namespace ts3::system
     void AssetLoader::_nativeDestructor() noexcept
     {}
 
-    AssetHandle AssetLoader::_nativOopenSubAsset( FileAPI::FilePathInfo pAssetPathInfo )
+    AssetHandle AssetLoader::_nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo )
     {
         AssetHandle asset = nullptr;
 

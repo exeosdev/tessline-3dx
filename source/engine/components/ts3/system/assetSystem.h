@@ -40,7 +40,7 @@ namespace ts3::system
     private:
         void _nativeConstructor();
         void _nativeDestructor() noexcept;
-        AssetHandle _nativOopenSubAsset( FileAPI::FilePathInfo pAssetPathInfo );
+        AssetHandle _nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo );
         AssetDirectoryHandle _nativeOpenDirectory( std::string pDirectoryName );
         bool _nativeCheckDirectoryExists( const std::string & pDirectoryName ) const;
     };
@@ -103,14 +103,14 @@ namespace ts3::system
             return readData( pVector.data(), pVector.size() * sizeof( TpValue ), pReadSize );
         }
 
-        file_offset_t setReadPointer( EFilePointerRefPos pRefPos, file_offset_t pOffset );
+        file_offset_t setReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos = EFilePointerRefPos::FileBeginning );
 
         void resetReadPointer();
 
     private:
         void _nativeConstructor();
         void _nativeDestructor() noexcept;
-        file_offset_t _nativeSetReadPointer( EFilePointerRefPos pRefPos, file_offset_t pOffset );
+        file_offset_t _nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos );
     };
 
 } // namespace ts3::system

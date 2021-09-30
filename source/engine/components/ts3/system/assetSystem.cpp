@@ -24,10 +24,10 @@ namespace ts3::system
             return nullptr;
         }
 
-        auto assetRefName = FileAPI::normalizePath( pAssetRefName );
-        auto assetPathInfo = FileAPI::splitFilePath( std::move( assetRefName ), E_FILE_API_FLAG_SPLIT_PATH_ASSUME_FILE_BIT );
+        auto assetRefName = FileUtilityAPI::normalizePath( pAssetRefName );
+        auto assetPathInfo = FileUtilityAPI::splitFilePath( std::move( assetRefName ), E_FILE_API_FLAG_SPLIT_PATH_ASSUME_FILE_BIT );
 
-        return _nativOopenSubAsset( std::move( assetPathInfo ) );
+        return _nativeOpenSubAsset( std::move( assetPathInfo ) );
     }
 
     AssetDirectoryHandle AssetLoader::openDirectory( std::string pDirectoryName )
@@ -135,14 +135,14 @@ namespace ts3::system
         return 0u;
     }
 
-    file_offset_t Asset::setReadPointer( EFilePointerRefPos pRefPos, file_offset_t pOffset )
+    file_offset_t Asset::setReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
     {
-        return _nativeSetReadPointer( pRefPos, pOffset );
+        return _nativeSetReadPointer( pOffset, pRefPos );
     }
 
     void Asset::resetReadPointer()
     {
-        _nativeSetReadPointer( EFilePointerRefPos::FileBeginning, 0 );
+        _nativeSetReadPointer( 0, EFilePointerRefPos::FileBeginning );
     }
 
 } // namespace ts3::system
