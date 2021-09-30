@@ -72,13 +72,13 @@ namespace ts3::system
         }
         else if( pDriverID == EDisplayDriverType::Default )
         {
-        #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINFAMILY )
+        #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_MSE )
             resolvedDriverID = EDisplayDriverType::DXGI;
         #else
             resolvedDriverID = EDisplayDriverType::Generic;
         #endif
         }
-    #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINFAMILY )
+    #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_MSE )
         else if( pDriverID == EDisplayDriverType::DXGI )
         {
             resolvedDriverID = EDisplayDriverType::DXGI;

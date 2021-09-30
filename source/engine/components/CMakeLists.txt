@@ -1,9 +1,19 @@
 
-add_subdirectory( "ts3/platform" )
-add_subdirectory( "ts3/core" )
-add_subdirectory( "ts3/engine" )
-add_subdirectory( "ts3/gpuapi" )
-add_subdirectory( "ts3/math" )
-add_subdirectory( "ts3/script" )
-add_subdirectory( "ts3/stdext" )
-add_subdirectory( "ts3/system" )
+set( _EBS_ENGINE_COMPONENTS_TARGET_LIST
+        "platform"
+        "core"
+        "engine"
+        "gpuapi"
+        "math"
+        "script"
+        "stdext"
+        "system"
+        )
+
+foreach( target ${_EBS_ENGINE_COMPONENTS_TARGET_LIST} )
+    add_subdirectory( "ts3/${target}" )
+    if( TARGET "ts3-${target}" )
+        set_property( TARGET "ts3-${target}" PROPERTY CXX_STANDARD 17 )
+        target_compile_features( "ts3-${target}" PRIVATE cxx_std_17 )
+    endif()
+endforeach()

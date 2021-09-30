@@ -17,9 +17,11 @@ android {
         targetSdkVersion 29
         externalNativeBuild {
             cmake {
-                abiFilters 'arm64-v8a', 'x86_64'// , 'armeabi-v7a', 'x86'
-                arguments '-DANDROID_STL=c++_static'
-                cppFlags "-std=c++17"
+                abiFilters "arm64-v8a", "x86_64" //, "armeabi-v7a", "x86"
+                arguments  "-DANDROID_ARM_NEON=TRUE", "-DANDROID_TOOLCHAIN=clang"
+                arguments  "-DANDROID_STL=c++_static"
+                cFlags     "-std=gnu11"
+                cppFlags   "-std=c++17"
             }
         }
     }
@@ -36,7 +38,7 @@ android {
     sourceSets {
         main {
             assets {
-                srcDirs 'src\\main\\assets', 'src\\main\\assets\\shaders', '..\\..\\..\\..\\..\\assets\\definitions'
+                srcDirs 'src\\main\\assets', 'src\\main\\assets\\shaders', 'src\\main\\assets\\shaders\\GL4'
             }
         }
     }

@@ -42,19 +42,19 @@ set( TS3_SYSTEM_SRC_FILES
         "windowNative.h"
         )
 
-if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_WINFAMILY} )
+if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_MSE} )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/shared/dxgi/dxgiDisplay.h"
             "internal/platform/shared/dxgi/dxgiDisplay.cpp"
-            "internal/platform/shared/wnf/wnfCommon.h"
-            "internal/platform/shared/wnf/wnfCommon.cpp"
-            "internal/platform/shared/wnf/wnfPerfCounter.h"
-            "internal/platform/shared/wnf/wnfPerfCounter.cpp"
+            "internal/platform/shared/mse/mseCommon.h"
+            "internal/platform/shared/mse/mseCommon.cpp"
+            "internal/platform/shared/mse/msePerfCounter.h"
+            "internal/platform/shared/mse/msePerfCounter.cpp"
             )
 endif()
 
-if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_POSIX} )
+if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_POSIX} )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/shared/posix/posixPerfCounter.h"
@@ -64,7 +64,7 @@ if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_POSIX} )
             )
 endif()
 
-if( "${CM_EBS_SYSCONF_TARGET_FLAG_OSF_GLAPI}" STREQUAL "EGL" )
+if( "${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_GLAPI}" STREQUAL "EGL" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/shared/egl/eglCoreUtils.h"
@@ -201,7 +201,7 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
             )
 endif()
 
-if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_VULKAN} )
+if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_VULKAN} )
     target_link_libraries( ts3-system PUBLIC
             #shaderc
             #shaderc_util

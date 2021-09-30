@@ -1,16 +1,16 @@
 
 #include <ts3/system/prerequisites.h>
-#include "wnfCommon.h"
+#include "mseCommon.h"
 #include <comdef.h>
 
-#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINFAMILY )
+#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_MSE )
 namespace ts3::system
 {
 
 	namespace platform
 	{
 
-        std::string wnfQueryCOMErrorMessage( HRESULT pHResult )
+        std::string mseQueryCOMErrorMessage( HRESULT pHResult )
         {
             _com_error comError{ pHResult };
             _bstr_t comErrorString{ comError.ErrorMessage() };
@@ -25,7 +25,7 @@ namespace ts3::system
             return errorMessage;
         }
 
-        std::string wnfQuerySystemErrorMessage( DWORD pErrorCode )
+        std::string mseQuerySystemErrorMessage( DWORD pErrorCode )
         {
             char * messagePtr = nullptr;
 
