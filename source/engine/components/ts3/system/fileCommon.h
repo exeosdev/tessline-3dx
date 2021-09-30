@@ -68,10 +68,29 @@ namespace ts3::system
 
     ts3SetExceptionCategoryType( E_EXCEPTION_CATEGORY_SYSTEM_FILE, FileException );
 
+    enum EFileAPIFlags : uint32
+    {
+        E_FILE_API_FLAG_SPLIT_PATH_ASSUME_DIRECTORY_BIT     = 0x0001,
+
+        E_FILE_API_FLAG_SPLIT_PATH_ASSUME_FILE_BIT          = 0x0002,
+
+        E_FILE_API_FLAGS_SPLIT_PATH_DEFAULT = E_FILE_API_FLAG_SPLIT_PATH_ASSUME_DIRECTORY_BIT
+    };
+
     class FileAPI
     {
     public:
+        struct FilePathInfo
+        {
+            std::string directory;
+            std::string fileName;
+        };
+    public:
         static std::string normalizePath( const std::string & pPath );
+
+        static FilePathInfo splitFilePath( std::string pFilePath, Bitmask<EFileAPIFlags> pFlags = E_FILE_API_FLAGS_SPLIT_PATH_DEFAULT );
+
+        static bool isFilenameWithExtension( const std::string & pFilename );
     };
 
 }

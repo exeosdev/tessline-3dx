@@ -71,4 +71,61 @@ namespace ts3::system
         return result;
     }
 
+    FileAPI::FilePathInfo FileAPI::splitFilePath( std::string pFilePath, Bitmask<EFileAPIFlags> pFlags )
+    {
+        FilePathInfo pathInfo;
+
+        if( !pFilePath.empty() )
+        {
+            if( !pFlags.isSetAnyOf( E_FILE_API_FLAG_SPLIT_PATH_ASSUME_DIRECTORY_BIT | E_FILE_API_FLAG_SPLIT_PATH_ASSUME_FILE_BIT ) )
+            {
+                pFlags.set( E_FILE_API_FLAG_SPLIT_PATH_ASSUME_DIRECTORY_BIT );
+            }
+            else if( pFlags.isSet( E_FILE_API_FLAG_SPLIT_PATH_ASSUME_DIRECTORY_BIT | E_FILE_API_FLAG_SPLIT_PATH_ASSUME_FILE_BIT ) )
+            {
+                pFlags.unset( E_FILE_API_FLAG_SPLIT_PATH_ASSUME_FILE_BIT );
+            }
+
+            auto lastSeparatorPos = pFilePath.find_last_of( TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
+            if( lastSeparatorPos == std::string::npos )
+            {
+                if( isFilenameWithExtension( pFilePath ) || pFlags.isSet( E_FILE_API_FLAG_SPLIT_PATH_ASSUME_FILE_BIT ) )
+                {
+                    pathInfo.fileName = pFilePath;
+                }
+            }
+            else
+            {
+                auto directoryPart = pFilePath.substr( 0, lastSeparatorPos );
+                auto filenamePath = pFilePath.substr( lastSeparatorPos + 1 );
+
+                if( isFilenameWithExtension( filenamePath ) || pFlags.isSet( E_FILE_API_FLAG_SPLIT_PATH_ASSUME_FILE_BIT ) )
+                {
+                    pathInfo.directory = std::move( directoryPart );
+                    pathInfo.fileName = std::move( filenamePath );
+                }
+            }
+
+            if( pathInfo.directory.empty() && pathInfo.fileName.empty() )
+            {
+                pathInfo.directory = std::move( pFilePath );
+            }
+        }
+
+        return pathInfo;
+    }
+
+    bool FileAPI::isFilenameWithExtension( const std::string & pFilename )
+    {
+        if( !pFilename.empty() )
+        {
+            auto dotPos = pFilename.find_last_of( '.' );
+            if( ( dotPos != std::string::npos ) && ( dotPos != 0 ) && ( dotPos != ( pFilename.length() - 1 ) ) )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
