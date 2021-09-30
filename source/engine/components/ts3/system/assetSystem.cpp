@@ -17,6 +17,19 @@ namespace ts3::system
         _nativeDestructor();
     }
 
+    AssetHandle AssetLoader::openSubAsset( const std::string & pAssetRefName )
+    {
+        if( pAssetRefName.empty() )
+        {
+            return nullptr;
+        }
+
+        auto assetRefName = FileAPI::normalizePath( pAssetRefName );
+        auto assetPathInfo = FileAPI::splitFilePath( std::move( assetRefName ), E_FILE_API_FLAG_SPLIT_PATH_ASSUME_FILE_BIT );
+
+        return _nativOopenSubAsset( std::move( assetPathInfo ) );
+    }
+
     AssetDirectoryHandle AssetLoader::openDirectory( std::string pDirectoryName )
     {
         if( pDirectoryName.empty() )
@@ -86,6 +99,16 @@ namespace ts3::system
         return _nativeCheckAssetExists( pAssetName );
     }
 
+
+    Asset::Asset( AssetLoaderHandle pAssetLoader )
+    : SysObject( pAssetLoader->mSysContext )
+    , mAssetDirectory( nullptr )
+    , mInternal( std::make_unique<ObjectInternalData>() )
+    , mNativeData( &( mInternal->nativeDataPriv ) )
+    , mName( mInternal->name )
+    {
+        _nativeConstructor();
+    }
 
     Asset::Asset( AssetDirectoryHandle pAssetDirectory )
     : SysObject( pAssetDirectory->mSysContext )

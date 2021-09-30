@@ -32,6 +32,45 @@ namespace ts3::system
     void AssetLoader::_nativeDestructor() noexcept
     {}
 
+    AssetHandle AssetLoader::_nativOopenSubAsset( FileAPI::FilePathInfo pAssetPathInfo )
+    {
+        AssetHandle asset = nullptr;
+
+        auto combinedFilePath = mInternal->nativeDataPriv.rootDir;
+        combinedFilePath.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
+        combinedFilePath.append( pAssetPathInfo.directory );
+
+        if( platform::win32FACheckDirectoryExists( combinedFilePath ) )
+        {
+            combinedFilePath.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
+            combinedFilePath.append( pAssetPathInfo.fileName );
+
+            if( platform::win32FACheckFileExists( combinedFilePath ) )
+            {
+                auto fileHandle = ::CreateFileA( combinedFilePath.c_str(),
+                                                 GENERIC_READ,
+                                                 0u,
+                                                 nullptr,
+                                                 OPEN_EXISTING,
+                                                 FILE_ATTRIBUTE_NORMAL,
+                                                 nullptr );
+
+                if( !fileHandle )
+                {
+                    auto errorMessage = platform::mseQuerySystemErrorMessage( ::GetLastError() );
+                    ts3ThrowAutoEx( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
+                }
+
+                asset = createSysObject<Asset>( getHandle<AssetLoader>() );
+                asset->mInternal->name = std::move( pAssetPathInfo.fileName );
+                asset->mInternal->nativeDataPriv.fileHandle = fileHandle;
+                asset->mInternal->nativeDataPriv.filePath = std::move( combinedFilePath );
+            }
+        }
+
+        return asset;
+    }
+
     AssetDirectoryHandle AssetLoader::_nativeOpenDirectory( std::string pDirectoryName )
     {
         auto combinedDirPath = mInternal->nativeDataPriv.rootDir;
@@ -80,7 +119,7 @@ namespace ts3::system
         if( win32FindFileHandle == INVALID_HANDLE_VALUE )
         {
             auto lastError = ::GetLastError();
-            auto lastErrorMessage = platform::wnfQuerySystemErrorMessage( lastError );
+            auto lastErrorMessage = platform::mseQuerySystemErrorMessage( lastError );
             ts3ThrowAutoEx( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( lastErrorMessage ) );
         }
 
@@ -104,18 +143,18 @@ namespace ts3::system
                 }
                 else
                 {
-                    auto lastErrorMessage = platform::wnfQuerySystemErrorMessage( lastError );
+                    auto lastErrorMessage = platform::mseQuerySystemErrorMessage( lastError );
                     ts3ThrowAutoEx( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( lastErrorMessage ) );
                 }
             }
         }
     }
 
-    AssetHandle AssetDirectory::_nativeOpenAsset( std::string mAssetName )
+    AssetHandle AssetDirectory::_nativeOpenAsset( std::string pAssetName )
     {
         auto combinedFilePath = mInternal->nativeDataPriv.combinedDirPath;
         combinedFilePath.append( 1, '\\' );
-        combinedFilePath.append( mAssetName );
+        combinedFilePath.append( pAssetName );
 
         if( !platform::win32FACheckFileExists( combinedFilePath ) )
         {
@@ -134,7 +173,7 @@ namespace ts3::system
 
         if( !fileHandle )
         {
-            auto errorMessage = platform::wnfQuerySystemErrorMessage( ::GetLastError() );
+            auto errorMessage = platform::mseQuerySystemErrorMessage( ::GetLastError() );
             ts3ThrowAutoEx( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
         }
 
@@ -180,7 +219,7 @@ namespace ts3::system
             auto lastError = ::GetLastError();
             if( lastError != NO_ERROR )
             {
-                auto errorMessage = platform::wnfQuerySystemErrorMessage( lastError );
+                auto errorMessage = platform::mseQuerySystemErrorMessage( lastError );
                 ts3ThrowAutoEx( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
             }
         }

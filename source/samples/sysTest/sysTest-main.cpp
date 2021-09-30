@@ -71,6 +71,8 @@ int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
     aslCreateInfo.sysContext = sysContext;
     auto assetLoader = createAssetLoader( aslCreateInfo );
 
+    aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
 
 int main( int pArgc, const char ** pArgv )
@@ -100,8 +102,9 @@ int main( int pArgc, const char ** pArgv )
 
 #endif
 
-    auto fontsDir = assetLoader->openDirectory( "fonts" );
+    auto fontsDir = assetLoader->openDirectory( "shaders/GL4" );
     auto fontsList = fontsDir->getAssetList();
+    auto vsAsset = assetLoader->openSubAsset( "shaders/GL4/fx_passthrough_vs.glsl" );
 
     GfxState gfxState;
 
@@ -154,11 +157,6 @@ int main( int pArgc, const char ** pArgv )
     evtDispatcher->bindEventHandler(
             EEventCodeIndex::AppActivityQuit,
             [&runApp,&gfxState](const EventObject & pEvt) -> bool {
-                // if( displaySurface )
-                // {
-                //     displaySurface->destroy();
-                //     displaySurface = nullptr;
-                // }
                 runApp = false;
                 return true;
             });
@@ -177,14 +175,6 @@ int main( int pArgc, const char ** pArgv )
                 if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::Escape )
                 {
                     evtDispatcher->postEventAppQuit();
-                }
-                else if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::CharF )
-                {
-                    //appWindow->setFullscreenMode( true );
-                }
-                else if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::CharG )
-                {
-                    //appWindow->setFullscreenMode( false );
                 }
                 return true;
             });

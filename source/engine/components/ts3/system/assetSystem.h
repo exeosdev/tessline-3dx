@@ -31,6 +31,8 @@ namespace ts3::system
         explicit AssetLoader( SysContextHandle pSysContext );
         virtual ~AssetLoader() noexcept;
 
+        AssetHandle openSubAsset( const std::string & pAssetRefName );
+
         AssetDirectoryHandle openDirectory( std::string pDirectoryName );
 
         bool checkDirectoryExists( const std::string & pDirectoryName ) const;
@@ -38,6 +40,7 @@ namespace ts3::system
     private:
         void _nativeConstructor();
         void _nativeDestructor() noexcept;
+        AssetHandle _nativOopenSubAsset( FileAPI::FilePathInfo pAssetPathInfo );
         AssetDirectoryHandle _nativeOpenDirectory( std::string pDirectoryName );
         bool _nativeCheckDirectoryExists( const std::string & pDirectoryName ) const;
     };
@@ -67,7 +70,7 @@ namespace ts3::system
         void _nativeConstructor();
         void _nativeDestructor() noexcept;
         void _nativeRefreshAssetList();
-        AssetHandle _nativeOpenAsset( std::string mAssetName );
+        AssetHandle _nativeOpenAsset( std::string pAssetName );
         bool _nativeCheckAssetExists( const std::string & pAssetName ) const;
     };
 
@@ -81,6 +84,7 @@ namespace ts3::system
         const std::string & mName;
 
     public:
+        explicit Asset( AssetLoaderHandle pAssetLoader );
         explicit Asset( AssetDirectoryHandle pAssetDirectory );
         virtual ~Asset() noexcept;
 

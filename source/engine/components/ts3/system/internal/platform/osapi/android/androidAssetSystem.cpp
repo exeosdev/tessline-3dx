@@ -29,6 +29,24 @@ namespace ts3::system
         mInternal->nativeDataPriv.resetSessionData();
     }
 
+    AssetHandle AssetLoader::_nativOopenSubAsset( FileAPI::FilePathInfo pAssetPathInfo )
+    {
+        AssetHandle asset = nullptr;
+
+        if( auto * aAssetDir = AAssetManager_openDir( mInternal->nativeDataPriv.aAssetManager, pAssetPathInfo.directory.c_str() ) )
+        {
+            if( auto * aAsset = AAssetManager_open( mInternal->nativeDataPriv.aAssetManager, pAssetPathInfo.fileName.c_str(), AASSET_MODE_RANDOM ) )
+            {
+                asset = createSysObject<Asset>( nullptr );
+                asset->mInternal->name = std::move( pAssetPathInfo.fileName );
+                asset->mInternal->nativeDataPriv.aAsset = aAsset;
+                asset->mInternal->nativeDataPriv.aAssetManager = mInternal->nativeDataPriv.aAssetManager;
+            }
+        }
+
+        return asset;
+    }
+
     AssetDirectoryHandle AssetLoader::_nativeOpenDirectory( std::string pDirectoryName )
     {
         std::string assetDirRefName = "assets";
@@ -90,14 +108,14 @@ namespace ts3::system
         }
     }
 
-    AssetHandle AssetDirectory::_nativeOpenAsset( std::string mAssetName )
+    AssetHandle AssetDirectory::_nativeOpenAsset( std::string pAssetName )
     {
         AssetHandle asset = nullptr;
 
-        if( auto * aAsset = AAssetManager_open( mInternal->nativeDataPriv.aAssetManager, mAssetName.c_str(), AASSET_MODE_RANDOM ) )
+        if( auto * aAsset = AAssetManager_open( mInternal->nativeDataPriv.aAssetManager, pAssetName.c_str(), AASSET_MODE_RANDOM ) )
         {
             asset = createSysObject<Asset>( getHandle<AssetDirectory>() );
-            asset->mInternal->name = std::move( mAssetName );
+            asset->mInternal->name = std::move( pAssetName );
             asset->mInternal->nativeDataPriv.aAsset = aAsset;
             asset->mInternal->nativeDataPriv.aAssetManager = mInternal->nativeDataPriv.aAssetManager;
         }
