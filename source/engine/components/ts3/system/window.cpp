@@ -39,7 +39,7 @@ namespace ts3::system
 
             newWindowGeometry.position = { 0, 0 };
             newWindowGeometry.size = screenSize;
-            newWindowGeometry.frameStyle = WindowFrameStyle::Overlay;
+            newWindowGeometry.frameStyle = EWindowFrameStyle::Overlay;
 
             mInternal->preFullscreenSavedSize = getFrameSize();
             mInternal->stateFlags.set( E_WINDOW_STATE_FLAG_FULLSCREEN_BIT );
@@ -53,7 +53,7 @@ namespace ts3::system
 
             newWindowGeometry.position = cvWindowPositionAuto;
             newWindowGeometry.size = mInternal->preFullscreenSavedSize;
-            newWindowGeometry.frameStyle = WindowFrameStyle::Caption;
+            newWindowGeometry.frameStyle = EWindowFrameStyle::Caption;
 
             mInternal->preFullscreenSavedSize = cvWindowSizeAuto;
             mInternal->stateFlags.unset( E_WINDOW_STATE_FLAG_FULLSCREEN_BIT );
@@ -61,7 +61,7 @@ namespace ts3::system
 
         newWindowGeometry = mWindowManager->validateWindowGeometry( newWindowGeometry );
 
-        _nativeUpdateGeometry( newWindowGeometry, WindowSizeMode::FrameRect );
+        _nativeUpdateGeometry( newWindowGeometry, EWindowSizeMode::FrameRect );
     }
 
     void Window::resizeClientArea( const WindowSize & pNewWindowSize )
@@ -69,11 +69,11 @@ namespace ts3::system
         WindowGeometry newWindowGeometry;
         newWindowGeometry.position = cvWindowPositionAuto;
         newWindowGeometry.size = pNewWindowSize;
-        newWindowGeometry.frameStyle = WindowFrameStyle::Unspecified;
+        newWindowGeometry.frameStyle = EWindowFrameStyle::Unspecified;
 
         newWindowGeometry = mWindowManager->validateWindowGeometry( newWindowGeometry );
 
-        _nativeUpdateGeometry( newWindowGeometry, WindowSizeMode::ClientArea );
+        _nativeUpdateGeometry( newWindowGeometry, EWindowSizeMode::ClientArea );
     }
 
     void Window::resizeFrame( const WindowSize & pNewWindowSize )
@@ -81,11 +81,11 @@ namespace ts3::system
         WindowGeometry newWindowGeometry;
         newWindowGeometry.position = cvWindowPositionAuto;
         newWindowGeometry.size = pNewWindowSize;
-        newWindowGeometry.frameStyle = WindowFrameStyle::Unspecified;
+        newWindowGeometry.frameStyle = EWindowFrameStyle::Unspecified;
 
         newWindowGeometry = mWindowManager->validateWindowGeometry( newWindowGeometry );
 
-        _nativeUpdateGeometry( newWindowGeometry, WindowSizeMode::FrameRect );
+        _nativeUpdateGeometry( newWindowGeometry, EWindowSizeMode::FrameRect );
     }
 
     void Window::setTitleText( const std::string & pTitleText )
@@ -93,7 +93,7 @@ namespace ts3::system
         _nativeSetTitleText( pTitleText );
     }
 
-    void Window::updateGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode )
+    void Window::updateGeometry( const WindowGeometry & pWindowGeometry, EWindowSizeMode pSizeMode )
     {
         auto windowGeometry = mWindowManager->validateWindowGeometry( pWindowGeometry );
         _nativeUpdateGeometry( windowGeometry, pSizeMode );
@@ -105,14 +105,14 @@ namespace ts3::system
     WindowSize Window::getClientAreaSize() const
     {
         WindowSize result;
-        _nativeGetSize( WindowSizeMode::ClientArea, result );
+        _nativeGetSize( EWindowSizeMode::ClientArea, result );
         return result;
     }
 
     WindowSize Window::getFrameSize() const
     {
         WindowSize result;
-        _nativeGetSize( WindowSizeMode::FrameRect, result );
+        _nativeGetSize( EWindowSizeMode::FrameRect, result );
         return result;
     }
 

@@ -45,6 +45,8 @@ namespace ts3::system
 
         std::string generateTemporaryFileName();
 
+        bool checkDirectoryExists( const std::string & pDirPath );
+
     private:
         FileHandle _createFileInstance();
         void _releaseFile( File & pFile );

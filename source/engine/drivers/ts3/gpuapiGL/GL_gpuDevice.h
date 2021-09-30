@@ -25,7 +25,7 @@ namespace ts3::gpuapi
 		friend class GLVertexStreamStateObject;
 
 	public:
-		SysGLDriverHandle const mSysGLDriver;
+		system::GLSystemDriverHandle const mSysGLDriver;
 
 	public:
 		explicit GLGPUDevice( GLGPUDriver & pGLGPUDriver );

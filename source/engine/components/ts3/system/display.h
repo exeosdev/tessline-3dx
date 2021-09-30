@@ -31,7 +31,7 @@ namespace ts3::system
         const DisplayManagerNativeData * const mNativeData = nullptr;
 
     public:
-        explicit DisplayManager( SysContextHandle pSysContext );
+        explicit DisplayManager( system::SysContextHandle pSysContext );
         virtual ~DisplayManager() noexcept;
 
         TS3_PCL_ATTR_NO_DISCARD DisplayDriverHandle createDisplayDriver( EDisplayDriverType pDriverID );

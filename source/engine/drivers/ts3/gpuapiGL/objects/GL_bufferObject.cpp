@@ -204,7 +204,7 @@ namespace ts3::gpuapi
 		ts3GLHandleLastError();
 
 		MemoryRegion mappedRegion;
-		mappedRegion.offset = static_cast<gpu_memory_size_t>( mapOffset );
+		mappedRegion.offset = static_cast<memory_size_t>( mapOffset );
 		mappedRegion.size = static_cast<memory_size_t>( mapLength );
 
 		return mappedRegion;

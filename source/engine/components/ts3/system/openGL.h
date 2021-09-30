@@ -192,7 +192,7 @@ namespace ts3::system
                                                                                EDepthStencilFormat pDepthStencilFormat ) const;
 
         /// @brief
-        TS3_PCL_ATTR_NO_DISCARD void resetContextBinding();
+        void resetContextBinding();
 
         /// @brief
         TS3_PCL_ATTR_NO_DISCARD bool isRenderContextBound() const;

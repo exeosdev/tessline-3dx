@@ -92,7 +92,7 @@ namespace ts3::gpuapi
 	}
 
 	ComPtr<IDXGISwapChain3> DX12CoreAPIProxy::createD3D12SwapChainForExfWindow( const ComPtr<ID3D12CommandQueue> & pD3D12PresentCommandQueue,
-	                                                                    void * pExfSysWindow, /* It must be an ts3::SysWindow */
+	                                                                    void * pExfSysWindow, /* It must be an system::Window */
 	                                                                    Bitmask<UINT> pDXGIFlags )
 	{
 		UINT dxgiFactoryCreateFlags = 0;
@@ -108,7 +108,7 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
-		auto * exfWindowPtr = static_cast<ts3::SysWindow *>( pExfSysWindow );
+		auto * exfWindowPtr = static_cast<system::Window *>( pExfSysWindow );
 		auto windowHWND = reinterpret_cast<HWND>( exfWindowPtr->getNativeHandle() );
 		auto presentationLayerSize = exfWindowPtr->getClientSize();
 

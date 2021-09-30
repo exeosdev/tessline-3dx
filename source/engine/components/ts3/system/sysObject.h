@@ -16,10 +16,10 @@ namespace ts3::system
     {
     public:
         // Public handle to the SysContext. This is always non-null and specified at construction time.
-        SysContextHandle const mSysContext;
+        system::SysContextHandle const mSysContext;
 
     public:
-        explicit SysObject( SysContextHandle pSysContext );
+        explicit SysObject( system::SysContextHandle pSysContext );
         virtual ~SysObject();
     };
 

@@ -6,18 +6,18 @@
 
 #include "displayCommon.h"
 #include <ts3/system/displayCommon.h>
-#include <ts3/system/eventDefs.h>
-#include <ts3/system/windowDefs.h>
+#include <ts3/system/eventCommon.h>
+#include <ts3/system/windowCommon.h>
 
 namespace ts3::gpuapi
 {
 
 	struct PresentationLayerCreateInfo
 	{
-		SysDisplayManagerHandle sysDisplayManager = nullptr;
-		SysWindowManagerHandle sysWindowManager = nullptr;
+		system::DisplayManagerHandle sysDisplayManager = nullptr;
+		system::WindowManagerHandle sysWindowManager = nullptr;
+		system::VisualConfig visualConfig = system::vsxGetDefaultVisualConfigForSysWindow();
 		ScreenRect screenRect;
-		ts3::SysVisualConfig visualConfig;
 		Bitmask<EDisplayConfigurationFlags> displayConfigFlags = 0u;
 	};
 
@@ -30,7 +30,7 @@ namespace ts3::gpuapi
 		explicit PresentationLayer( GPUDevice & pGPUDevice );
 		virtual ~PresentationLayer();
 
-		virtual SysEventSource * querySysEventSourceObject() const noexcept;
+		virtual system::EventSource * getInternalSystemEventSource() const noexcept;
 
 		virtual void bindRenderTarget( CommandContext * pCmdContext ) = 0;
 

@@ -1,5 +1,4 @@
 
-#include <ts3/system/displayManager.h>
 #include <ts3/core/coreEngineState.h>
 #include <ts3/gpuapi/gpuDevice.h>
 #include <ts3/gpuapi/gpuDriver.h>
@@ -32,15 +31,30 @@
 #include "test1-meshDefs.h"
 
 #include <ts3/engine/gpuapi/vertexFormatDefs.h>
+#include <ts3/engine/gpuapi/hwBuffer.h>
+#include <ts3/system/eventCoreTypes.h>
+#include <ts3/system/eventObject.h>
 
 namespace math = ts3::math;
 
 static bool appExec = true;
 
+#define D_OPENGL 1
+
 #if( _WIN32 )
 static const std::string sWorkspaceDirectory = "C:\\Repo\\ESD\\tessline-3dx-workspace\\modules\\tessline-3dx";
 #elif( TS3_PCL_TARGET_OS_LINUX )
 static const std::string sWorkspaceDirectory = "/home/mateusz/Dev/Projects/Exeos/Repo/tessline-3dx";
+#endif
+
+#if ( D_OPENGL || !_WIN32 )
+static const std::string sBaseShaderDir = "/assets/shaders";
+static const std::string sDriverName = "GL4";
+static const std::string sShaderExtension = "glsl";
+#else
+static const std::string sBaseShaderDir = "/assets/shaders";
+static const std::string sDriverName = "DX11";
+static const std::string sShaderExtension = "hlsl";
 #endif
 
 struct GraphicsDriverState
@@ -51,7 +65,7 @@ struct GraphicsDriverState
 	std::unique_ptr<ts3::gpuapi::CommandContextDirectGraphics> cmdContext = nullptr;
 };
 
-GraphicsDriverState initializeGraphicsDriver( ts3::SysContextHandle pSysContext, const std::string & pDriverID );
+GraphicsDriverState initializeGraphicsDriver( ts3::system::SysContextHandle pSysContext, const std::string & pDriverID );
 
 using namespace ts3::math;
 
@@ -63,25 +77,29 @@ struct CB0Data
 	Mat4x4f projectionMatrix;
 };
 
-#define D_OPENGL 1
-
-#include <ts3/engine/gpuapi/hwBuffer.h>
-
-struct EventReactor
+#if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
+int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 {
-	uint64 onEvent( ts3::HWBuffer & )
-	{
-		printf( "GPUBufferRef has been locked!\n" );
-		return 0x77;
-	}
-};
-
-int main( int argc, char ** argv )
+    ts3::system::SysContextCreateInfo sysContextCreateInfo {};
+    sysContextCreateInfo.nativeParams.aCommonAppState = pAppState;
+    sysContextCreateInfo.flags = 0;
+    auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+#elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
+int main( int pArgc, const char ** pArgv )
 {
-	EventReactor er;
-	ts3::HWBuffer hwb;
-	hwb.mEventProxy.eLocked.connect( &er, &EventReactor::onEvent );
-	hwb.mEventProxy.eLocked.connect( &er, &EventReactor::onEvent );
+    ts3::system::SysContextCreateInfo sysContextCreateInfo;
+    sysContextCreateInfo.flags = 0;
+    sysContextCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
+    auto sysContext = ts3::system::nativeSysContextCreate( sysContextCreateInfo );
+#elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
+int main( int pArgc, const char ** pArgv )
+{
+    ts3::system::SysContextCreateInfo sysContextCreateInfo;
+    sysContextCreateInfo.flags = 0;
+    auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+#endif
+
+    GraphicsDriverState gxCoreState;
 
 	srand( time( nullptr ) );
 
@@ -91,99 +109,130 @@ int main( int argc, char ** argv )
 	ts3::CameraController cameraController;
 	cameraController.initialize( cameraOriginPoint, cameraTargetPoint, 60.0f );
 
-	auto sysContext = ts3::sysCreateContext( {} );
-	auto eventController = ts3::SysEventController::create( sysContext );
-	auto eventDispatcher = eventController->createEventDispatcher();
-	eventController->setActiveDispatcher( *eventDispatcher );
+	auto evtController = ts3::system::createSysObject<ts3::system::EventController>( sysContext );
+	auto evtDispatcher = evtController->createEventDispatcher();
+	evtController->setActiveEventDispatcher( *evtDispatcher );
 
-	eventDispatcher->bindEventHandler(
-			ts3::ESysEventCodeIndex::AppActivityQuit,
-			[]( ts3::SysEvent & e ) -> bool {
-				appExec = false;
-				return true;
-			});
-	eventDispatcher->bindEventHandler(
-			ts3::ESysEventCodeIndex::InputMouseScroll,
-			[&cameraController]( ts3::SysEvent & e ) -> bool {
-				const auto & escroll = e.eInputMouseScroll;
-				if( escroll.scrollDelta.y > 0 )
-				{
-					cameraController.zoom( 1 );
-				}
-				else if( escroll.scrollDelta.y < 0 )
-				{
-					cameraController.zoom( -1 );
-				}
-				return true;
-			});
-	eventDispatcher->bindEventHandler(
-			ts3::ESysEventCodeIndex::InputMouseMove,
-			[&cameraController]( ts3::SysEvent & e ) -> bool {
-				const auto & emove = e.eInputMouseMove;
-				if( emove.buttonStateMask.isSet( ts3::E_SYS_MOUSE_BUTTON_FLAG_LEFT_BIT ) )
-				{
-					cameraController.rotateAroundOrigin( emove.movementDelta.x, emove.movementDelta.y );
-				}
-				else if( emove.buttonStateMask.isSet( ts3::E_SYS_MOUSE_BUTTON_FLAG_RIGHT_BIT ) )
-				{
-					cameraController.rotateAroundTarget( emove.movementDelta.x, emove.movementDelta.y );
-				}
-				return true;
-			});
-	eventDispatcher->bindEventHandler(
-			ts3::ESysEventCodeIndex::InputKeyboardKey,
-			[&cameraController]( ts3::SysEvent & e ) -> bool {
-				auto & ekey = e.eInputKeyboardKey;
-				if( ekey.keyAction == ts3::SysKeyActionType::Press )
-				{
-					if( ekey.keyCode == ts3::SysKeyCode::CharW )
-					{
-						cameraController.move( 1.0f );
-					}
-					if( ekey.keyCode == ts3::SysKeyCode::CharS )
-					{
-						cameraController.move( -1.0f );
-					}
-					if( ekey.keyCode == ts3::SysKeyCode::CharA )
-					{
-						cameraController.moveSide( -1.0f );
-					}
-					if( ekey.keyCode == ts3::SysKeyCode::CharD )
-					{
-						cameraController.moveSide( 1.0f );
-					}
-					if( ekey.keyCode == ts3::SysKeyCode::CharQ )
-					{
-						cameraController.roll( 1.0f );
-					}
-					if( ekey.keyCode == ts3::SysKeyCode::CharE )
-					{
-						cameraController.roll( -1.0f );
-					}
-					if( ekey.keyCode == ts3::SysKeyCode::CharC )
-					{
-						cameraController.moveUpDown( -1.0f );
-					}
-					if( ekey.keyCode == ts3::SysKeyCode::Space )
-					{
-						cameraController.moveUpDown( 1.0f );
-					}
-					if( ekey.keyCode == ts3::SysKeyCode::Escape )
-					{
-						appExec = false;
-					}
-				}
-				return true;
-			});
+#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_OS_ANDROID )
+	{
+	    bool waitForDisplay = true;
 
-#if ( D_OPENGL || !_WIN32 )
-	const std::string cBaseShaderDir = "/assets/shaders";
-	const std::string cDriverName = "GL4";
-	const std::string cShaderExtension = "glsl";
-#else
-	const std::string cBaseShaderDir = "/assets/shaders";
-	const std::string cDriverName = "DX11";
-	const std::string cShaderExtension = "hlsl";
+	    evtDispatcher->bindEventHandler(
+            ts3::system::EEventCodeIndex::AppActivityDisplayInit,
+            [&waitForDisplay,&sysContext](const ts3::system::EventObject & pEvt) -> bool {
+                waitForDisplay = false;
+                return true;
+            });
+	    while( waitForDisplay )
+	    {
+	        evtController->updateSysQueueAuto();
+	    }
+	    evtDispatcher->bindEventHandler( ts3::system::EEventCodeIndex::AppActivityDisplayInit, nullptr );
+	}
+#endif
+
+	evtDispatcher->bindEventHandler(
+        ts3::system::EEventCodeIndex::AppActivityQuit,
+        []( const ts3::system::EventObject & pEvt ) -> bool {
+            appExec = false;
+            return true;
+        });
+	evtDispatcher->bindEventHandler(
+        ts3::system::EEventCodeIndex::InputMouseScroll,
+        [&cameraController]( const ts3::system::EventObject & pEvt ) -> bool {
+            const auto & escroll = pEvt.eInputMouseScroll;
+            if( escroll.scrollDelta.y > 0 )
+            {
+                cameraController.zoom( 1 );
+            }
+            else if( escroll.scrollDelta.y < 0 )
+            {
+                cameraController.zoom( -1 );
+            }
+            return true;
+        });
+	evtDispatcher->bindEventHandler(
+        ts3::system::EEventCodeIndex::InputMouseMove,
+        [&cameraController]( const ts3::system::EventObject & pEvt ) -> bool {
+            const auto & emove = pEvt.eInputMouseMove;
+            if( emove.buttonStateMask.isSet( ts3::system::E_MOUSE_BUTTON_FLAG_LEFT_BIT ) )
+            {
+                cameraController.rotateAroundOrigin( emove.movementDelta.x, emove.movementDelta.y );
+            }
+            else if( emove.buttonStateMask.isSet( ts3::system::E_MOUSE_BUTTON_FLAG_RIGHT_BIT ) )
+            {
+                cameraController.rotateAroundTarget( emove.movementDelta.x, emove.movementDelta.y );
+            }
+            return true;
+        });
+	evtDispatcher->bindEventHandler(
+        ts3::system::EEventCodeIndex::InputKeyboardKey,
+        [&cameraController]( const ts3::system::EventObject & pEvt ) -> bool {
+            auto & ekey = pEvt.eInputKeyboardKey;
+            if( ekey.keyAction == ts3::system::EKeyActionType::Press )
+            {
+                if( ekey.keyCode == ts3::system::EKeyCode::CharW )
+                {
+                    cameraController.move( 1.0f );
+                }
+                if( ekey.keyCode == ts3::system::EKeyCode::CharS )
+                {
+                    cameraController.move( -1.0f );
+                }
+                if( ekey.keyCode == ts3::system::EKeyCode::CharA )
+                {
+                    cameraController.moveSide( -1.0f );
+                }
+                if( ekey.keyCode == ts3::system::EKeyCode::CharD )
+                {
+                    cameraController.moveSide( 1.0f );
+                }
+                if( ekey.keyCode == ts3::system::EKeyCode::CharQ )
+                {
+                    cameraController.roll( 1.0f );
+                }
+                if( ekey.keyCode == ts3::system::EKeyCode::CharE )
+                {
+                    cameraController.roll( -1.0f );
+                }
+                if( ekey.keyCode == ts3::system::EKeyCode::CharC )
+                {
+                    cameraController.moveUpDown( -1.0f );
+                }
+                if( ekey.keyCode == ts3::system::EKeyCode::Space )
+                {
+                    cameraController.moveUpDown( 1.0f );
+                }
+                if( ekey.keyCode == ts3::system::EKeyCode::Escape )
+                {
+                    appExec = false;
+                }
+            }
+            return true;
+        });
+
+#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_OS_ANDROID + 1 )
+
+	evtDispatcher->bindEventHandler(
+        ts3::system::EEventCodeIndex::AppActivityDisplayInit,
+        [&gxCoreState](const ts3::system::EventObject & pEvt) -> bool {
+            initializeGraphicsGL( gfxState );
+            gfxState.glContext->bindForCurrentThread( *(gfxState.glSurface) );
+            gfxState.pauseAnimation = false;
+            return true;
+        });
+
+	evtDispatcher->bindEventHandler(
+        ts3::system::EEventCodeIndex::AppActivityDisplayTerm,
+        [&gxCoreState](const ts3::system::EventObject & pEvt) -> bool {
+            //gfxState.glSystemDriver->invalidate();
+            gfxState.glContext = nullptr;
+            gfxState.glSurface = nullptr;
+            gfxState.glSystemDriver = nullptr;
+            gfxState.pauseAnimation = true;
+            return true;
+        });
+
 #endif
 
 	auto imagePath = sWorkspaceDirectory + "/assets/bitmaps/rog-logo1-512.bmp";
@@ -192,19 +241,19 @@ int main( int argc, char ** argv )
 	auto gxDriverState = initializeGraphicsDriver( sysContext, cDriverName );
 	auto & gpuDevice = *( gxDriverState.device );
 
-	if( auto * eventSource = gxDriverState.presentationLayer->querySysEventSourceObject() )
+	if( auto * eventSource = gxDriverState.presentationLayer->getInternalSystemEventSource() )
 	{
-		eventController->addEventSource( *eventSource );
+		evtController->registerEventSource( *eventSource );
 	}
 
 	const std::string cVertexShaderFilePath = cBaseShaderDir + "/" + cDriverName + "/simple_passthrough_vs." + cShaderExtension;
 	const std::string cPixelShaderFilePath = cBaseShaderDir + "/" + cDriverName + "/simple_passthrough_ps." + cShaderExtension;
 
-	auto vertexShader = ts3::gpuapi::Utils::createShaderFromFile( gpuDevice,
+	auto vertexShader = ts3::gpuapi::utils::createShaderFromFile( gpuDevice,
 	                                                              ts3::gpuapi::EShaderType::VertexShader,
 	                                                              sWorkspaceDirectory + cVertexShaderFilePath );
 
-	auto pixelShader = ts3::gpuapi::Utils::createShaderFromFile( gpuDevice,
+	auto pixelShader = ts3::gpuapi::utils::createShaderFromFile( gpuDevice,
 	                                                             ts3::gpuapi::EShaderType::PixelShader,
 	                                                             sWorkspaceDirectory + cPixelShaderFilePath );
 
@@ -428,8 +477,8 @@ int main( int argc, char ** argv )
 	vpDescTexture.depthRange.zNear = 0.0f;
 	vpDescTexture.depthRange.zFar = 1.0f;
 
-	ts3::sys_perf_counter_value_t u1ts = ts3::SysPerfCounter::queryCurrentStamp();
-	ts3::sys_perf_counter_value_t u2ts = ts3::SysPerfCounter::queryCurrentStamp();
+	ts3::system::perf_counter_value_t u1ts = ts3::system::PerfCounter::queryCurrentStamp();
+	ts3::system::perf_counter_value_t u2ts = ts3::system::PerfCounter::queryCurrentStamp();
 	const float update1ts = 3.0f;
 	const float update2ts = 10.0f;
 	float u1angle = 0.0f;
@@ -437,13 +486,13 @@ int main( int argc, char ** argv )
 
 	while( appExec )
 	{
-		auto pcstamp = ts3::SysPerfCounter::queryCurrentStamp();
-		if( ts3::SysPerfCounter::convertToDuration<ts3::DurationPeriod::Millisecond>( pcstamp - u1ts ) >= update1ts )
+		auto pcstamp = ts3::system::PerfCounter::queryCurrentStamp();
+		if( ts3::system::PerfCounter::convertToDuration<ts3::DurationPeriod::Millisecond>( pcstamp - u1ts ) >= update1ts )
 		{
 			u1angle += ts3::math::constants::cxFloatRad1Degree * 10 * ( 1.0f / update1ts );
 			u1ts = pcstamp;
 		}
-		if( ts3::SysPerfCounter::convertToDuration<ts3::DurationPeriod::Millisecond>( pcstamp - u2ts ) >= update2ts )
+		if( ts3::system::PerfCounter::convertToDuration<ts3::DurationPeriod::Millisecond>( pcstamp - u2ts ) >= update2ts )
 		{
 			u2angle += ts3::math::constants::cxFloatRad1Degree * 10 * ( 1.0f / update2ts);
 			u2ts = pcstamp;
@@ -451,7 +500,7 @@ int main( int argc, char ** argv )
 
 		try
 		{
-			eventController->dispatchQueuedEvents();
+			evtController->updateSysQueueAuto();
 
 			auto ts3ViewScreen = cameraController.computeViewMatrixLH();
 
@@ -550,7 +599,7 @@ int main( int argc, char ** argv )
 	return 0;
 }
 
-GraphicsDriverState initializeGraphicsDriver( ts3::SysContextHandle pSysContext, const std::string & pDriverID )
+GraphicsDriverState initializeGraphicsDriver( ts3::system::SysContextHandle pSysContext, const std::string & pDriverID )
 {
 	ts3::gpuapi::GPUDriverInterface * gpuDriverInterface = nullptr;
 
@@ -577,13 +626,9 @@ GraphicsDriverState initializeGraphicsDriver( ts3::SysContextHandle pSysContext,
 	auto gxdev = gxdrv->createDevice(devci);
 
 	ts3::gpuapi::PresentationLayerCreateInfo scci;
-	scci.sysDisplayManager = ts3::SysDisplayManager::create( pSysContext );
-	scci.visualConfig = ts3::sysDsmGetDefaultVisualConfigForSystemWindow();
 	scci.displayConfigFlags = ts3::gpuapi::E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT;
-    scci.screenRect.offset.x = 10;
-    scci.screenRect.offset.y = 10;
-    scci.screenRect.size.x = 720;
-    scci.screenRect.size.y = 720;
+	scci.screenRect.offset = ts3::system::cvWindowPositionOrigin;
+	scci.screenRect.size = ts3::system::cvWindowSizeMax;
 	auto scn = gpuDriverInterface->createScreenPresentationLayer( *gxdev, scci );
 
 	gxdev->setPresentationLayer( scn );

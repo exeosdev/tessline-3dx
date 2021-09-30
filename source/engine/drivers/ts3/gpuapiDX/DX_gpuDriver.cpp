@@ -5,7 +5,7 @@
 namespace ts3::gpuapi
 {
 
-	DXGPUDriver::DXGPUDriver( SysContextHandle pSysContext ) noexcept
+	DXGPUDriver::DXGPUDriver( system::SysContextHandle pSysContext ) noexcept
 	: GPUDriver( pSysContext )
 	{}
 

@@ -5,7 +5,7 @@
 namespace ts3::system
 {
 
-    EventSource::EventSource( SysContextHandle pSysContext )
+    EventSource::EventSource( system::SysContextHandle pSysContext )
     : SysObject( std::move( pSysContext ) )
     {}
 
@@ -239,7 +239,7 @@ namespace ts3::system
     }
 
 
-    EventController::EventController( SysContextHandle pSysContext )
+    EventController::EventController( system::SysContextHandle pSysContext )
     : SysObject( pSysContext )
     , mInternal( std::make_unique<ObjectInternalData>( this ) )
 	{

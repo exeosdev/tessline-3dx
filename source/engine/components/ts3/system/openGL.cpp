@@ -200,7 +200,7 @@ namespace ts3::system
         if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
         {
             ctxCreateInfo.windowGeometry.size = cvWindowSizeMax;
-            ctxCreateInfo.windowGeometry.frameStyle = WindowFrameStyle::Overlay;
+            ctxCreateInfo.windowGeometry.frameStyle = EWindowFrameStyle::Overlay;
         }
         else
         {

@@ -29,7 +29,7 @@ namespace ts3::system
 	constexpr WindowSize cvWindowSizeMax { CX_UINT32_MAX, CX_UINT32_MAX };
 
 	/// @brief Window styles supported by the system.
-	enum class WindowFrameStyle : enum_default_value_t
+	enum class EWindowFrameStyle : enum_default_value_t
 	{
 	    //
 	    Unspecified,
@@ -46,14 +46,14 @@ namespace ts3::system
 	};
 
 	/// @brief
-	enum class WindowSizeMode : enum_default_value_t
+	enum class EWindowSizeMode : enum_default_value_t
     {
 	    ClientArea,
 	    FrameRect
     };
 
 	/// @brief
-	enum class WindowVisibilityMode : enum_default_value_t
+	enum class EWindowVisibilityMode : enum_default_value_t
     {
 	    Hidden,
 	    VisibleDefault,
@@ -65,7 +65,7 @@ namespace ts3::system
 	{
 		WindowPos position;
 		WindowSize size;
-		WindowFrameStyle frameStyle;
+		EWindowFrameStyle frameStyle;
 	};
 
 	/// @brief

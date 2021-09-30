@@ -26,7 +26,7 @@ else()
 endif()
 
 set_target_properties( ts3ext-rcsupport PROPERTIES
-        OUTPUT_NAME "ts3dx-driver-gpuapi-dx11" )
+        OUTPUT_NAME "ts3ext-rcsupport" )
 
 target_compile_definitions( ts3ext-rcsupport PRIVATE
         )

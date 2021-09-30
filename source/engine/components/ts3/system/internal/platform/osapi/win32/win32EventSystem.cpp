@@ -567,7 +567,7 @@ namespace ts3::system
 
 	Bitmask<EMouseButtonFlagBits> _win32GetMouseButtonStateMask( WPARAM pWparam )
 	{
-		return static_cast<EMouseButtonFlagBits>( static_cast<uint32>( pWparam ) & E_SYS_MOUSE_BUTTON_FLAG_ALL_BIT );
+		return static_cast<EMouseButtonFlagBits>( static_cast<uint32>( pWparam ) & E_MOUSE_BUTTON_FLAG_ALL_BIT );
 	}
 
 } // namespace ts3::system

@@ -62,7 +62,7 @@ namespace ts3::system
         if( !fileHandle )
         {
             auto lastErrorCode = ::GetLastError();
-            auto errorMessage = platform::wnfQuerySystemErrorMessage( lastErrorCode );
+            auto errorMessage = platform::mseQuerySystemErrorMessage( lastErrorCode );
 
             ts3ThrowAutoEx( E_EXC_SYSTEM_FILE_OPEN_ERROR, std::move( errorMessage ), std::move( pFilePath ) );
         }
@@ -77,7 +77,7 @@ namespace ts3::system
         if( closeResult == FALSE )
         {
             auto lastErrorCode = ::GetLastError();
-            auto errorMessage = platform::wnfQuerySystemErrorMessage( lastErrorCode );
+            auto errorMessage = platform::mseQuerySystemErrorMessage( lastErrorCode );
 
             ts3ThrowAutoEx( E_EXC_SYSTEM_FILE_OPEN_ERROR, std::move( errorMessage ), pFile.mInternal->fullPath );
         }

@@ -1,8 +1,8 @@
 
 #include <ts3/system/perfCounter.h>
-#include "wnfPerfCounter.h"
+#include "msePerfCounter.h"
 
-#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINFAMILY )
+#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_MSE )
 namespace ts3::system
 {
 

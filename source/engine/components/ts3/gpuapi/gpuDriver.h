@@ -5,7 +5,7 @@
 #define __TS3_GPUAPI_GPU_DRIVER_H__
 
 #include "prerequisites.h"
-#include <ts3/system/systemContext.h>
+#include <ts3/system/sysContextNative.h>
 
 namespace ts3::gpuapi
 {
@@ -14,18 +14,18 @@ namespace ts3::gpuapi
 
 	struct GPUDriverCreateInfo
 	{
-		SysContextHandle sysContext = nullptr;
-		SysContextCreateInfo sysContextCreateInfo;
+		system::SysContextHandle sysContext = nullptr;
+		system::SysContextCreateInfo sysContextCreateInfo;
 		Bitmask<GPUDriverConfigFlags> configFlags = GPU_DRIVER_CONFIG_FLAGS_DEFAULT;
 	};
 
 	class TS3_GPUAPI_CLASS GPUDriver : public DynamicInterface
 	{
 	public:
-		SysContextHandle const mSysContext;
+		system::SysContextHandle const mSysContext;
 
 	public:
-		explicit GPUDriver( SysContextHandle pSysContext ) noexcept;
+		explicit GPUDriver( system::SysContextHandle pSysContext ) noexcept;
 		virtual ~GPUDriver() noexcept;
 
 		virtual DisplayManagerHandle createDefaultDisplayManager() = 0;

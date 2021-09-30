@@ -7,11 +7,21 @@ set( TS3_DRIVERS_INCLUDE_DIR_INTERNAL
         ${TS3_DRIVERS_INCLUDE_DIR}
         "${TS3_BASE_DIR}/source/engine/drivers" )
 
-add_subdirectory( "ts3/gpuapiGL" )
-add_subdirectory( "ts3/gpuapiGL4" )
-#add_subdirectory( "ts3/gpuapiGLES3" )
-add_subdirectory( "ts3/gpuapiDX" )
-add_subdirectory( "ts3/gpuapiDX11" )
-#add_subdirectory( "ts3/gpuapiDX12" )
-#add_subdirectory( "ts3/gpuapiVK" )
-#add_subdirectory( "ts3/gpuapiVK10" )
+set( _EBS_ENGINE_DRIVERS_TARGET_LIST
+        "gpuapiGL"
+        "gpuapiGL4"
+        "gpuapiGLES3"
+        # "gpuapiDX"
+        # "gpuapiDX11"
+        # "gpuapiDX12"
+        # "gpuapiVK"
+        # "gpuapiVK11"
+        )
+
+foreach( target ${_EBS_ENGINE_DRIVERS_TARGET_LIST} )
+    add_subdirectory( "ts3/${target}" )
+    if( TARGET "ts3drv-${target}" )
+        set_property( TARGET "ts3drv-${target}" PROPERTY CXX_STANDARD 17 )
+        target_compile_features( "ts3drv-${target}" PRIVATE cxx_std_17 )
+    endif()
+endforeach()

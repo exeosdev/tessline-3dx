@@ -4,6 +4,7 @@
 #include <ts3/system/windowNative.h>
 #include <ts3/system/eventSystemNative.h>
 #include <ts3/system/openGL.h>
+#include <ts3/system/assetSystemNative.h>
 
 using namespace ts3::system;
 
@@ -26,7 +27,7 @@ void initializeGraphicsCreateSurface( GfxState & pGfxState )
 {
     GLDisplaySurfaceCreateInfo surfaceCreateInfo;
     surfaceCreateInfo.windowGeometry.size = {0, 0 };
-    surfaceCreateInfo.windowGeometry.frameStyle = WindowFrameStyle::Caption;
+    surfaceCreateInfo.windowGeometry.frameStyle = EWindowFrameStyle::Caption;
     surfaceCreateInfo.visualConfig = vsxGetDefaultVisualConfigForSysWindow();
     surfaceCreateInfo.flags.set( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 
@@ -58,26 +59,52 @@ void initializeGraphics( SysContextHandle pSysContext, GfxState & pGfxState )
 }
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
+
 int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 {
-    ts3::system::SysContextCreateInfo sysContextCreateInfo {};
+    SysContextCreateInfo sysContextCreateInfo {};
     sysContextCreateInfo.nativeParams.aCommonAppState = pAppState;
     sysContextCreateInfo.flags = 0;
     auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+
+    AssetLoaderCreateInfo aslCreateInfo;
+    aslCreateInfo.sysContext = sysContext;
+    auto assetLoader = createAssetLoader( aslCreateInfo );
+
+    aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
+
 int main( int pArgc, const char ** pArgv )
 {
     SysContextCreateInfo sysContextCreateInfo;
     sysContextCreateInfo.flags = 0;
     sysContextCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
     auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+
+    AssetLoaderCreateInfo aslCreateInfo;
+    aslCreateInfo.sysContext = sysContext;
+    aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+    auto assetLoader = createAssetLoader( aslCreateInfo );
+
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
+
 int main( int pArgc, const char ** pArgv )
 {
     SysContextCreateInfo sysContextCreateInfo;
     sysContextCreateInfo.flags = 0;
     auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+
+    AssetLoaderCreateInfo aslCreateInfo;
+    aslCreateInfo.sysContext = sysContext;
+    aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+    auto assetLoader = createAssetLoader( aslCreateInfo );
+
 #endif
+
+    auto fontsDir = assetLoader->openDirectory( "shaders/GL4" );
+    auto fontsList = fontsDir->getAssetList();
+    auto vsAsset = assetLoader->openSubAsset( "shaders/GL4/fx_passthrough_vs.glsl" );
 
     GfxState gfxState;
 
@@ -130,11 +157,6 @@ int main( int pArgc, const char ** pArgv )
     evtDispatcher->bindEventHandler(
             EEventCodeIndex::AppActivityQuit,
             [&runApp,&gfxState](const EventObject & pEvt) -> bool {
-                // if( displaySurface )
-                // {
-                //     displaySurface->destroy();
-                //     displaySurface = nullptr;
-                // }
                 runApp = false;
                 return true;
             });
@@ -153,14 +175,6 @@ int main( int pArgc, const char ** pArgv )
                 if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::Escape )
                 {
                     evtDispatcher->postEventAppQuit();
-                }
-                else if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::CharF )
-                {
-                    //appWindow->setFullscreenMode( true );
-                }
-                else if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::CharG )
-                {
-                    //appWindow->setFullscreenMode( false );
                 }
                 return true;
             });

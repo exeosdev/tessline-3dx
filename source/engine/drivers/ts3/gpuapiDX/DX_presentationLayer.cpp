@@ -58,19 +58,19 @@ namespace ts3::gpuapi
 				sysWindowManager = SysWindowManager::create( sysDisplayManager );
 			}
 
-			ts3::SysWindowCreateInfo windowCreateInfo;
+			system::WindowCreateInfo windowCreateInfo;
 			windowCreateInfo.properties.title = "DXWindow";
 
 			if( pCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT ) )
 			{
 				windowCreateInfo.properties.geometry.size = ts3::cvSysWindowSizeMax;
-				windowCreateInfo.properties.geometry.frameStyle = ts3::SysWindowFrameStyle::Overlay;
+				windowCreateInfo.properties.geometry.frameStyle = system::EWindowFrameStyle::Overlay;
 			}
 			else
 			{
 				windowCreateInfo.properties.geometry.position = pCreateInfo.screenRect.offset;
 				windowCreateInfo.properties.geometry.size = pCreateInfo.screenRect.size;
-				windowCreateInfo.properties.geometry.frameStyle = ts3::SysWindowFrameStyle::Fixed;
+				windowCreateInfo.properties.geometry.frameStyle = system::EWindowFrameStyle::Fixed;
 			}
 
 			auto sysWindow = sysWindowManager->createWindow( windowCreateInfo );

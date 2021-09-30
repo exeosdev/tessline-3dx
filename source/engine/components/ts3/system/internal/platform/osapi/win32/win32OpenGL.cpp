@@ -63,7 +63,7 @@ namespace ts3::system
 	    WindowCreateInfo tempWindowCreateInfo;
 	    tempWindowCreateInfo.properties.geometry.position = cvWindowPositionOrigin;
 	    tempWindowCreateInfo.properties.geometry.size = WindowSize( 600, 600 );
-	    tempWindowCreateInfo.properties.geometry.frameStyle = WindowFrameStyle::Overlay;
+	    tempWindowCreateInfo.properties.geometry.frameStyle = EWindowFrameStyle::Overlay;
 
 	    VisualConfig legacyVisualConfig;
 	    legacyVisualConfig = vsxGetDefaultVisualConfigForSysWindow();

@@ -52,7 +52,7 @@ namespace ts3::system
         XFlush( xSessionData.display );
     }
 
-    void Window::_nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, WindowSizeMode pSizeMode )
+    void Window::_nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, EWindowSizeMode pSizeMode )
     {
         auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 
@@ -69,7 +69,7 @@ namespace ts3::system
         XFlush( xSessionData.display );
     }
 
-    void Window::_nativeGetSize( WindowSizeMode pSizeMode, WindowSize & pOutSize ) const
+    void Window::_nativeGetSize( EWindowSizeMode pSizeMode, WindowSize & pOutSize ) const
 	{
         auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
 
@@ -78,7 +78,7 @@ namespace ts3::system
                               mInternal->nativeDataPriv.windowXID,
 		                      &windowAttributes );
 
-        if( pSizeMode == WindowSizeMode::ClientArea )
+        if( pSizeMode == EWindowSizeMode::ClientArea )
         {
             pOutSize.x = windowAttributes.width - windowAttributes.border_width;
             pOutSize.y = windowAttributes.height - windowAttributes.border_width;

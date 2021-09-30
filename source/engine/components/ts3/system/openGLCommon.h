@@ -100,10 +100,10 @@ namespace ts3::system
 } // namespace ts3::system
 
 #if( TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS )
-#  define ts3GLCheckLastResult()             GLCoreAPI::checkLastResult()
-#  define ts3GLCheckLastError( pErrorCode )  GLCoreAPI::checkLastError( pErrorCode )
-#  define ts3GLHandleLastError()             GLCoreAPI::handleLastError()
-#  define ts3GLResetErrorQueue()             GLCoreAPI::resetErrorQueue()
+#  define ts3GLCheckLastResult()             ::ts3::system::GLCoreAPI::checkLastResult()
+#  define ts3GLCheckLastError( pErrorCode )  ::ts3::system::GLCoreAPI::checkLastError( pErrorCode )
+#  define ts3GLHandleLastError()             ::ts3::system::GLCoreAPI::handleLastError()
+#  define ts3GLResetErrorQueue()             ::ts3::system::GLCoreAPI::resetErrorQueue()
 #else
 #  define ts3GLCheckLastResult()
 #  define ts3GLCheckLastError( pErrorCode )

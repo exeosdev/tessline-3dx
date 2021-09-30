@@ -18,6 +18,7 @@ set( TS3_SYSTEM_SRC_FILES
         "eventSystem.cpp"
         "eventSystemNative.h"
         "fileCommon.h"
+        "fileCommon.cpp"
         "fileManager.h"
         "fileManager.cpp"
         "openGL.h"
@@ -39,24 +40,21 @@ set( TS3_SYSTEM_SRC_FILES
         "window.cpp"
         "windowCommon.h"
         "windowNative.h"
-
-        "internal/platform/default/defaultAssetSystem.h"
-        "internal/platform/default/defaultAssetSystem.cpp"
         )
 
-if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_WINFAMILY} )
+if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_MSE} )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/shared/dxgi/dxgiDisplay.h"
             "internal/platform/shared/dxgi/dxgiDisplay.cpp"
-            "internal/platform/shared/wnf/wnfCommon.h"
-            "internal/platform/shared/wnf/wnfCommon.cpp"
-            "internal/platform/shared/wnf/wnfPerfCounter.h"
-            "internal/platform/shared/wnf/wnfPerfCounter.cpp"
+            "internal/platform/shared/mse/mseCommon.h"
+            "internal/platform/shared/mse/mseCommon.cpp"
+            "internal/platform/shared/mse/msePerfCounter.h"
+            "internal/platform/shared/mse/msePerfCounter.cpp"
             )
 endif()
 
-if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_POSIX} )
+if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_POSIX} )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/shared/posix/posixPerfCounter.h"
@@ -66,7 +64,7 @@ if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_POSIX} )
             )
 endif()
 
-if( "${CM_EBS_SYSCONF_TARGET_FLAG_OSF_GLAPI}" STREQUAL "EGL" )
+if( "${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_GLAPI}" STREQUAL "EGL" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/shared/egl/eglCoreUtils.h"
@@ -95,17 +93,22 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Android" )
             "internal/platform/osapi/android/androidWindow.h"
             "internal/platform/osapi/android/androidWindow.cpp"
             )
+    set( CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG TRUE )
 endif()
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
+            "internal/platform/osapi/win32/win32AssetSystem.h"
+            "internal/platform/osapi/win32/win32AssetSystem.cpp"
             "internal/platform/osapi/win32/win32Common.h"
             "internal/platform/osapi/win32/win32Common.cpp"
             "internal/platform/osapi/win32/win32Display.h"
             "internal/platform/osapi/win32/win32Display.cpp"
             "internal/platform/osapi/win32/win32EventSystem.h"
             "internal/platform/osapi/win32/win32EventSystem.cpp"
+            "internal/platform/osapi/win32/win32FileAPI.h"
+            "internal/platform/osapi/win32/win32FileAPI.cpp"
             "internal/platform/osapi/win32/win32FileManager.h"
             "internal/platform/osapi/win32/win32FileManager.cpp"
             "internal/platform/osapi/win32/win32OpenGL.h"
@@ -115,6 +118,7 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
             "internal/platform/osapi/win32/win32Window.h"
             "internal/platform/osapi/win32/win32Window.cpp"
             )
+    set( CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG TRUE )
 endif()
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
@@ -133,6 +137,14 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
             "internal/platform/osapi/x11/x11SysContext.cpp"
             "internal/platform/osapi/x11/x11Window.h"
             "internal/platform/osapi/x11/x11Window.cpp"
+            )
+endif()
+
+if( NOT  "${CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG}" )
+    set( TS3_SYSTEM_SRC_FILES
+            ${TS3_SYSTEM_SRC_FILES}
+            "internal/platform/default/defaultAssetSystem.h"
+            "internal/platform/default/defaultAssetSystem.cpp"
             )
 endif()
 
@@ -189,7 +201,7 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
             )
 endif()
 
-if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_VULKAN} )
+if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_VULKAN} )
     target_link_libraries( ts3-system PUBLIC
             #shaderc
             #shaderc_util

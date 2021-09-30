@@ -31,7 +31,7 @@ namespace ts3::gpuapi
 	{
 	public:
 		EGPUDriverID const mGPUDriverID;
-		SysContextHandle const mSysContext;
+		system::SysContextHandle const mSysContext;
 
 		explicit GPUDevice( GPUDriver & pDriver );
 		virtual ~GPUDevice();

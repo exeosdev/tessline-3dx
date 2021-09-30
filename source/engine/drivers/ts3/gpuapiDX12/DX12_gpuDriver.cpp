@@ -6,7 +6,7 @@
 namespace ts3::gpuapi
 {
 
-	DX12GPUDriver::DX12GPUDriver( ts3::SystemContext * pExfSystemContext )
+	DX12GPUDriver::DX12GPUDriver( system::temContext * pExfSystemContext )
 	: DXGPUDriver( pExfSystemContext )
 	{ }
 
@@ -31,7 +31,7 @@ namespace ts3::gpuapi
 	{
 		auto * exfDisplayManager = mExfSystemContext->getDisplayManager();
 
-		ts3::SysDisplayDriverCreateInfoDXGI dxgiDriverCreateInfo;
+		system::DisplayDriverCreateInfoDXGI dxgiDriverCreateInfo;
 
 		return nullptr;
 	}

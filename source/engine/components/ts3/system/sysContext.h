@@ -22,6 +22,9 @@ namespace ts3::system
     public:
         SysContext();
         ~SysContext() noexcept;
+
+        static std::string queryCurrentProcessExecutableDirectory();
+        static std::string queryCurrentProcessExecutableFilePath();
     };
 
 } // namespace ts3::system

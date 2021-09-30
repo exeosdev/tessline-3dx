@@ -12,10 +12,12 @@ namespace ts3::system
 
     void DisplayManager::_nativeConstructor()
 	{
+        mInternal->nativeDataPriv.setSessionData( nativeAndroidGetASessionData( *mSysContext ) );
 	}
 
     void DisplayManager::_nativeDestructor() noexcept
 	{
+        mInternal->nativeDataPriv.resetSessionData();
 	}
 
     void DisplayManager::_nativeQueryMinWindowSize( DisplaySize & pOutSize ) const
