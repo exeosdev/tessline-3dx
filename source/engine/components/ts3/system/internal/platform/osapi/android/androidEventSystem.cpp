@@ -35,9 +35,6 @@ namespace ts3::system
     void EventController::_nativeUnregisterEventSource( EventSource & /* pEventSource */ )
     {}
 
-    void EventController::_nativeDestroyEventSourcePrivateData( EventSource & /* pEventSource */, void * /* pData */ )
-    {}
-
     bool EventController::_nativeUpdateSysQueue()
 	{
 		// Note for Android event dispatching:
@@ -115,7 +112,7 @@ namespace ts3::system
         return false;
 	}
 
-    void EventController::_nativeOnActiveDispatcherChange( EventDispatcher * /* pDispatcher */ )
+    void EventController::_nativeOnActiveDispatcherChange( EventDispatcher * /* pEventDispatcher */ )
     {}
 
 

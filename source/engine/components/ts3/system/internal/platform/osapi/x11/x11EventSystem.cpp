@@ -30,9 +30,6 @@ namespace ts3::system
     void EventController::_nativeUnregisterEventSource( EventSource & /* pEventSource */ )
     {}
 
-    void EventController::_nativeDestroyEventSourcePrivateData( EventSource & /* pEventSource */, void * /* pData */ )
-    {}
-
     bool EventController::_nativeUpdateSysQueue()
     {
         auto & xSessionData = nativeX11GetXSessionData( *mSysContext );
@@ -63,7 +60,7 @@ namespace ts3::system
         return false;
     }
 
-    void EventController::_nativeOnActiveDispatcherChange( EventDispatcher * /* pDispatcher */ )
+    void EventController::_nativeOnActiveDispatcherChange( EventDispatcher * /* pEventDispatcher */ )
     {}
 
 

@@ -86,8 +86,8 @@ int main( int pArgc, const char ** pArgv )
     //////////////////////////////////////////////////////////////////////////////////////////
 
     auto evtController = createSysObject<EventController>( sysContext );
-    evtController->setActiveEventDispatcherDefault();
-    auto * evtDispatcher = evtController->getEventDispatcher( CX_EVENT_DISPATCHER_ID_DEFAULT );
+    auto evtDispatcher = evtController->createEventDispatcher();
+    evtController->setActiveEventDispatcher( *evtDispatcher );
 
 #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_OS_ANDROID )
     bool waitForDisplay = true;

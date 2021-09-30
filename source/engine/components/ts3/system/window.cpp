@@ -11,11 +11,12 @@ namespace ts3::system
     , mInternal( std::make_unique<ObjectInternalData>() )
     , mNativeData( &( mInternal->nativeDataPriv ) )
     {
-        setEventSourceNativeData( &( mInternal->nativeDataPriv ) );
+        setEventSourceNativeData( mInternal->nativeDataPriv );
     }
 
     Window::~Window() noexcept
     {
+        resetEventSourceNativeData();
         mWindowManager->onWindowDestroy( *this );
     }
 
@@ -171,8 +172,6 @@ namespace ts3::system
             {
                 ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
             }
-
-            pWindow.unregisterEventSourceAuto();
 
             _nativeDestroyWindow( pWindow );
         }
