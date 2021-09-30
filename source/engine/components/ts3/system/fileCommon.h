@@ -8,14 +8,14 @@
 namespace ts3::system
 {
 
-    class File;
-    class FileManager;
+    ts3SysDeclareHandle( FileManager );
+
+    using FileHandle = std::shared_ptr<class File>;
 
     using file_char_t = char;
     using file_str_t = std::basic_string<file_char_t>;
     using file_offset_t = native_int;
     using file_size_t = native_uint;
-    using FileHandle = std::shared_ptr<File>;
 
     inline constexpr auto CX_FILE_SIZE_MAX = Limits<file_size_t>::maxValue;
 
@@ -77,7 +77,7 @@ namespace ts3::system
         E_FILE_API_FLAGS_SPLIT_PATH_DEFAULT = E_FILE_API_FLAG_SPLIT_PATH_ASSUME_DIRECTORY_BIT
     };
 
-    class FileAPI
+    class FileUtilityAPI
     {
     public:
         struct FilePathInfo
@@ -85,6 +85,7 @@ namespace ts3::system
             std::string directory;
             std::string fileName;
         };
+
     public:
         static std::string normalizePath( const std::string & pPath );
 

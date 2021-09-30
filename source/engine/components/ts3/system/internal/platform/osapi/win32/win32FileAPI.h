@@ -11,13 +11,11 @@ namespace ts3::system
     namespace platform
     {
 
-        void win32FAOpenFileGeneric( File & pFile, std::string pFilePath, DWORD pFileAccess, DWORD pOpenMode, DWORD pFileFlags );
+        DWORD win32TranslateFileOpenModeToWin32Access( EFileOpenMode pOpenMode );
 
-        bool win32FACheckDirectoryExists( const std::string & pDirPath );
+        DWORD win32TranslateFileOpenModeToWin32CreationDisposition( EFileOpenMode pOpenMode );
 
-        bool win32FACheckFileExists( const std::string & pFilePath );
-
-        DWORD win32FATranslateFilePointerRefPos( EFilePointerRefPos pFileRefPos );
+        DWORD win32TranslateFilePointerRefPos( EFilePointerRefPos pFileRefPos );
 
     }
 

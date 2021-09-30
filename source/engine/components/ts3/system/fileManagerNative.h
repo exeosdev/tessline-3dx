@@ -17,14 +17,6 @@
 namespace ts3::system
 {
 
-    struct FileDeleter
-    {
-        void operator()( File * pFile ) const
-        {
-            pFile->mFileManager->_releaseFile( *pFile );
-        }
-    };
-
     struct File::ObjectInternalData
     {
         FileNativeData nativeDataPriv;
@@ -32,53 +24,8 @@ namespace ts3::system
         file_str_t fullPath;
     };
 
-    struct FileInstance
-    {
-        File::ObjectInternalData privateData;
-
-        File fileObject;
-
-        std::list<FileInstance>::iterator fileListRef;
-
-        FileInstance( FileManager * pFileManager )
-        : fileObject( pFileManager, &privateData )
-        {}
-    };
-
     struct FileManager::ObjectInternalData
     {
-        using FileList = std::list<FileInstance>;
-        using FileMap = std::map<File *, FileInstance *>;
-
-        struct FileRef
-        {
-            FileInstance * fileInstance = nullptr;
-            FileList::iterator listIter;
-            FileMap::iterator mapIter;
-
-            explicit operator bool() const
-            {
-                return fileInstance != nullptr;
-            }
-        };
-
-        FileList fileList;
-        FileMap fileMap;
-
-        FileRef findFile( File * pFile )
-        {
-            FileRef fileRef;
-
-            auto fileMapIter = fileMap.find( pFile );
-            if( fileMapIter != fileMap.end() )
-            {
-                fileRef.mapIter = fileMapIter;
-                fileRef.fileInstance = fileMapIter->second;
-                fileRef.listIter = fileMapIter->second->fileListRef;
-            }
-
-            return fileRef;
-        }
     };
 
 }

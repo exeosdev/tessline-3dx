@@ -4,45 +4,110 @@
 namespace ts3::system
 {
 
+    File::File( FileManagerHandle pFileManager )
+    : SysObject( pFileManager->mSysContext )
+    , mFileManager( std::move( pFileManager ) )
+    , mInternal( std::make_unique<ObjectInternalData>() )
+    , mName( mInternal->name )
+    , mFullPath( mInternal->fullPath )
+    {
+        _nativeConstructor();
+    }
+
+    File::~File() noexcept
+    {
+        _nativeDestructor();
+    }
+
+    file_offset_t File::setFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
+    {
+        return _nativeSetFilePointer( pOffset, pRefPos );
+    }
+
+
+    FileManager::FileManager( SysContextHandle pSysContext )
+    : SysObject( std::move( pSysContext ) )
+    {
+        _nativeConstructor();
+    }
+
+    FileManager::~FileManager() noexcept
+    {
+        _nativeDestructor();
+    }
+
     FileHandle FileManager::openFile( std::string pFilePath, EFileOpenMode pOpenMode )
     {
-        auto fileHandle = _createFileInstance();
-        return fileHandle;
+        auto fileObject = createSysObject<File>( getHandle<FileManager>() );
+        _nativeOpenFile( *fileObject, std::move( pFilePath ), pOpenMode );
+        return fileObject;
 
     }
 
     FileHandle FileManager::createFile( std::string pFilePath )
     {
-        auto fileHandle = _createFileInstance();
-        return fileHandle;
+        auto fileObject = createSysObject<File>( getHandle<FileManager>() );
+        _nativeCreateFile( *fileObject, std::move( pFilePath ) );
+        return fileObject;
     }
 
     FileHandle FileManager::createTemporaryFile()
     {
-        auto fileHandle = _createFileInstance();
-        return fileHandle;
+        auto fileObject = createSysObject<File>( getHandle<FileManager>() );
+        _nativeCreateTemporaryFile( *fileObject );
+        return fileObject;
     }
 
-    FileHandle FileManager::_createFileInstance()
+    FileList FileManager::openDirectoryFiles( const std::string & pDirectory )
     {
-        auto fileListIter = mInternal->fileList.emplace( mInternal->fileList.end(), this );
+        FileList resultFileList;
 
-        auto & fileInstance = *fileListIter;
-        auto & fileObject = fileListIter->fileObject;
+        auto fileNameList = enumDirectoryFiles( pDirectory );
 
-        mInternal->fileMap[&fileObject] = &fileInstance;
+        if( !fileNameList.empty() )
+        {
+            resultFileList.reserve( fileNameList.size() );
 
-        return FileHandle{ &fileObject, FileDeleter() };
+            for( auto & fileName : fileNameList )
+            {
+                auto fileHandle = openFile( std::move( fileName ), EFileOpenMode::ReadOnly );
+                resultFileList.push_back( std::move( fileHandle ) );
+            }
+        }
+
+        return resultFileList;
     }
 
+    FileNameList FileManager::enumDirectoryFiles( const std::string & pDirectory )
+    {
+        if( pDirectory.empty() )
+        {
+            return {};
+        }
+        return _nativeEnumDirectoryFileNameList( pDirectory );
+    }
 
-    File::File( FileManager * pFileManager, ObjectInternalData * pPrivate )
-    : mFileManager( pFileManager )
-    , mInternal( pPrivate )
-    , mName( mInternal->name )
-    , mFullPath( mInternal->fullPath )
-    {}
+    std::string FileManager::generateTemporaryFileName()
+    {
+        return _nativeGenerateTemporaryFileName();
+    }
 
-    File::~File() = default;
+    bool FileManager::checkDirectoryExists( const std::string & pDirPath )
+    {
+        if( pDirPath.empty() )
+        {
+            return false;
+        }
+        return _nativeCheckDirectoryExists( pDirPath );
+    }
+
+    bool FileManager::checkFileExists( const std::string & pFilePath )
+    {
+        if( pFilePath.empty() )
+        {
+            return false;
+        }
+        return _nativeCheckFileExists( pFilePath );
+    }
 
 }

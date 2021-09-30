@@ -5,7 +5,7 @@
 namespace ts3::system
 {
 
-    std::string FileAPI::normalizePath( const std::string & pPath )
+    std::string FileUtilityAPI::normalizePath( const std::string & pPath )
     {
         auto localPathString = pPath;
         std::replace( localPathString.begin(),
@@ -71,7 +71,7 @@ namespace ts3::system
         return result;
     }
 
-    FileAPI::FilePathInfo FileAPI::splitFilePath( std::string pFilePath, Bitmask<EFileAPIFlags> pFlags )
+    FileUtilityAPI::FilePathInfo FileUtilityAPI::splitFilePath( std::string pFilePath, Bitmask<EFileAPIFlags> pFlags )
     {
         FilePathInfo pathInfo;
 
@@ -115,7 +115,7 @@ namespace ts3::system
         return pathInfo;
     }
 
-    bool FileAPI::isFilenameWithExtension( const std::string & pFilename )
+    bool FileUtilityAPI::isFilenameWithExtension( const std::string & pFilename )
     {
         if( !pFilename.empty() )
         {

@@ -7,19 +7,51 @@ namespace ts3::system
     namespace platform
     {
 
-        bool win32FACheckDirectoryExists( const std::string & pDirPath )
+        DWORD win32TranslateFileOpenModeToWin32Access( EFileOpenMode pOpenMode )
         {
-            Bitmask<DWORD> targetFileAttributes = ::GetFileAttributesA( pDirPath.c_str() );
-            return ( targetFileAttributes != INVALID_FILE_ATTRIBUTES ) && targetFileAttributes.isSet( FILE_ATTRIBUTE_DIRECTORY );
+            switch( pOpenMode )
+            {
+            case EFileOpenMode::ReadOnly:
+                return GENERIC_READ;
+
+            case EFileOpenMode::ReadWrite:
+                return GENERIC_READ | GENERIC_WRITE;
+
+            case EFileOpenMode::WriteAppend:
+                return GENERIC_WRITE;
+
+            case EFileOpenMode::WriteOverwrite:
+                return GENERIC_READ | GENERIC_WRITE;
+
+            default:
+                break;
+            }
+            return GENERIC_READ | GENERIC_WRITE;
         }
 
-        bool win32FACheckFileExists( const std::string & pFilePath )
+        DWORD win32TranslateFileOpenModeToWin32CreationDisposition( EFileOpenMode pOpenMode )
         {
-            Bitmask<DWORD> targetFileAttributes = ::GetFileAttributesA( pFilePath.c_str() );
-            return ( targetFileAttributes != INVALID_FILE_ATTRIBUTES ) && !targetFileAttributes.isSet( FILE_ATTRIBUTE_DIRECTORY );
+            switch( pOpenMode )
+            {
+            case EFileOpenMode::ReadOnly:
+                return OPEN_EXISTING;
+
+            case EFileOpenMode::ReadWrite:
+                return OPEN_ALWAYS;
+
+            case EFileOpenMode::WriteAppend:
+                return OPEN_ALWAYS;
+
+            case EFileOpenMode::WriteOverwrite:
+                return CREATE_ALWAYS;
+
+            default:
+                break;
+            }
+            return OPEN_ALWAYS;
         }
 
-        DWORD win32FATranslateFilePointerRefPos( EFilePointerRefPos pFileRefPos )
+        DWORD win32TranslateFilePointerRefPos( EFilePointerRefPos pFileRefPos )
         {
             DWORD win32FPMoveMode = 0;
 
