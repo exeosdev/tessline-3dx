@@ -9,16 +9,14 @@ namespace ts3::system
 
         bool win32FACheckDirectoryExists( const std::string & pDirPath )
         {
-            const DWORD directoryFlags = FILE_ATTRIBUTE_DIRECTORY;
             Bitmask<DWORD> targetFileAttributes = ::GetFileAttributesA( pDirPath.c_str() );
-            return ( targetFileAttributes != INVALID_FILE_ATTRIBUTES ) && targetFileAttributes.isSetAnyOf( directoryFlags );
+            return ( targetFileAttributes != INVALID_FILE_ATTRIBUTES ) && targetFileAttributes.isSet( FILE_ATTRIBUTE_DIRECTORY );
         }
 
-        bool win32FACheckFileExists( const std::string & pDirPath )
+        bool win32FACheckFileExists( const std::string & pFilePath )
         {
-            const DWORD fileFlags = FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_COMPRESSED;
-            Bitmask<DWORD> targetFileAttributes = ::GetFileAttributesA( pDirPath.c_str() );
-            return ( targetFileAttributes != INVALID_FILE_ATTRIBUTES ) && targetFileAttributes.isSetAnyOf( fileFlags );
+            Bitmask<DWORD> targetFileAttributes = ::GetFileAttributesA( pFilePath.c_str() );
+            return ( targetFileAttributes != INVALID_FILE_ATTRIBUTES ) && !targetFileAttributes.isSet( FILE_ATTRIBUTE_DIRECTORY );
         }
 
         DWORD win32FATranslateFilePointerRefPos( EFilePointerRefPos pFileRefPos )

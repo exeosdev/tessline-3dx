@@ -15,7 +15,7 @@ namespace ts3::system
 
         bool win32FACheckDirectoryExists( const std::string & pDirPath );
 
-        bool win32FACheckFileExists( const std::string & pDirPath );
+        bool win32FACheckFileExists( const std::string & pFilePath );
 
         DWORD win32FATranslateFilePointerRefPos( EFilePointerRefPos pFileRefPos );
 
