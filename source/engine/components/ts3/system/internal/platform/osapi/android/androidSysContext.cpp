@@ -38,5 +38,22 @@ namespace ts3::system
 
 	}
 
+
+	std::string SysContext::queryCurrentProcessExecutableFilePath()
+	{
+		pid_t currentProcessID = getpid();
+
+		std::string executableFilePath;
+		std::string exeLink = std::string( "/proc/" ) + std::to_string( currentProcessID ) + std::string( "/exe" );
+
+		if( char * bufferPtr = realpath( exeLink.c_str(), nullptr ) )
+		{
+			executableFilePath = bufferPtr;
+			free( bufferPtr );
+		}
+
+		return executableFilePath;
+	}
+
 } // namespace ts3::system
 #endif // TS3_PCL_TARGET_SYSAPI_ANDROID
