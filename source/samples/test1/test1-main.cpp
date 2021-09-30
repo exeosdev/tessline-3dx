@@ -249,11 +249,11 @@ int main( int pArgc, const char ** pArgv )
 	const std::string cVertexShaderFilePath = cBaseShaderDir + "/" + cDriverName + "/simple_passthrough_vs." + cShaderExtension;
 	const std::string cPixelShaderFilePath = cBaseShaderDir + "/" + cDriverName + "/simple_passthrough_ps." + cShaderExtension;
 
-	auto vertexShader = ts3::gpuapi::Utils::createShaderFromFile( gpuDevice,
+	auto vertexShader = ts3::gpuapi::utils::createShaderFromFile( gpuDevice,
 	                                                              ts3::gpuapi::EShaderType::VertexShader,
 	                                                              sWorkspaceDirectory + cVertexShaderFilePath );
 
-	auto pixelShader = ts3::gpuapi::Utils::createShaderFromFile( gpuDevice,
+	auto pixelShader = ts3::gpuapi::utils::createShaderFromFile( gpuDevice,
 	                                                             ts3::gpuapi::EShaderType::PixelShader,
 	                                                             sWorkspaceDirectory + cPixelShaderFilePath );
 

@@ -18,6 +18,7 @@ set( TS3_SYSTEM_SRC_FILES
         "eventSystem.cpp"
         "eventSystemNative.h"
         "fileCommon.h"
+        "fileCommon.cpp"
         "fileManager.h"
         "fileManager.cpp"
         "openGL.h"
@@ -39,9 +40,6 @@ set( TS3_SYSTEM_SRC_FILES
         "window.cpp"
         "windowCommon.h"
         "windowNative.h"
-
-        "internal/platform/default/defaultAssetSystem.h"
-        "internal/platform/default/defaultAssetSystem.cpp"
         )
 
 if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSF_WINFAMILY} )
@@ -95,17 +93,22 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Android" )
             "internal/platform/osapi/android/androidWindow.h"
             "internal/platform/osapi/android/androidWindow.cpp"
             )
+    set( CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG TRUE )
 endif()
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
+            "internal/platform/osapi/win32/win32AssetSystem.h"
+            "internal/platform/osapi/win32/win32AssetSystem.cpp"
             "internal/platform/osapi/win32/win32Common.h"
             "internal/platform/osapi/win32/win32Common.cpp"
             "internal/platform/osapi/win32/win32Display.h"
             "internal/platform/osapi/win32/win32Display.cpp"
             "internal/platform/osapi/win32/win32EventSystem.h"
             "internal/platform/osapi/win32/win32EventSystem.cpp"
+            "internal/platform/osapi/win32/win32FileAPI.h"
+            "internal/platform/osapi/win32/win32FileAPI.cpp"
             "internal/platform/osapi/win32/win32FileManager.h"
             "internal/platform/osapi/win32/win32FileManager.cpp"
             "internal/platform/osapi/win32/win32OpenGL.h"
@@ -115,6 +118,7 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
             "internal/platform/osapi/win32/win32Window.h"
             "internal/platform/osapi/win32/win32Window.cpp"
             )
+    set( CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG TRUE )
 endif()
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
@@ -133,6 +137,14 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
             "internal/platform/osapi/x11/x11SysContext.cpp"
             "internal/platform/osapi/x11/x11Window.h"
             "internal/platform/osapi/x11/x11Window.cpp"
+            )
+endif()
+
+if( NOT  "${CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG}" )
+    set( TS3_SYSTEM_SRC_FILES
+            ${TS3_SYSTEM_SRC_FILES}
+            "internal/platform/default/defaultAssetSystem.h"
+            "internal/platform/default/defaultAssetSystem.cpp"
             )
 endif()
 

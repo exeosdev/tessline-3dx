@@ -4,6 +4,7 @@
 #include <ts3/system/windowNative.h>
 #include <ts3/system/eventSystemNative.h>
 #include <ts3/system/openGL.h>
+#include <ts3/system/assetSystemNative.h>
 
 using namespace ts3::system;
 
@@ -58,26 +59,49 @@ void initializeGraphics( SysContextHandle pSysContext, GfxState & pGfxState )
 }
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
+
 int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 {
     SysContextCreateInfo sysContextCreateInfo {};
     sysContextCreateInfo.nativeParams.aCommonAppState = pAppState;
     sysContextCreateInfo.flags = 0;
     auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+
+    AssetLoaderCreateInfo aslCreateInfo;
+    aslCreateInfo.sysContext = sysContext;
+    auto assetLoader = createAssetLoader( aslCreateInfo );
+
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
+
 int main( int pArgc, const char ** pArgv )
 {
     SysContextCreateInfo sysContextCreateInfo;
     sysContextCreateInfo.flags = 0;
     sysContextCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
     auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+
+    AssetLoaderCreateInfo aslCreateInfo;
+    aslCreateInfo.sysContext = sysContext;
+    aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+    auto assetLoader = createAssetLoader( aslCreateInfo );
+
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
+
 int main( int pArgc, const char ** pArgv )
 {
     SysContextCreateInfo sysContextCreateInfo;
     sysContextCreateInfo.flags = 0;
     auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+
+    AssetLoaderCreateInfo aslCreateInfo;
+    aslCreateInfo.sysContext = sysContext;
+    aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+    auto assetLoader = createAssetLoader( aslCreateInfo );
+
 #endif
+
+    auto fontsDir = assetLoader->openDirectory( "fonts" );
+    auto fontsList = fontsDir->getAssetList();
 
     GfxState gfxState;
 
