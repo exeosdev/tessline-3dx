@@ -4,6 +4,7 @@
 
 #include "fileCommon.h"
 #include "sysObject.h"
+#include <ts3/stdext/memoryBuffer.h>
 
 namespace ts3::system
 {
@@ -24,12 +25,19 @@ namespace ts3::system
         File( FileManagerHandle pFileManager );
         ~File() noexcept;
 
+        file_size_t readData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize = CX_FILE_SIZE_MAX );
+        file_size_t readData( MemoryBuffer & pBuffer, file_size_t pReadSize = CX_FILE_SIZE_MAX );
+
         file_offset_t setFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos = EFilePointerRefPos::FileBeginning );
+
+        file_size_t getSize() const;
 
     private:
         void _nativeConstructor();
         void _nativeDestructor() noexcept;
+        file_size_t _nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize );
         file_offset_t _nativeSetFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos );
+        file_size_t _nativeGetSize() const;
     };
 
     class FileManager : public SysObject

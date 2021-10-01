@@ -38,7 +38,7 @@ android {
     sourceSets {
         main {
             assets {
-                srcDirs 'src\\main\\assets', 'src\\main\\assets\\shaders', 'src\\main\\assets\\shaders\\GL4'
+                srcDirs 'src\\main\\assets', 'src\\main\\assets\\shaders', 'src\\main\\assets\\shaders\\GLES3'
             }
         }
     }

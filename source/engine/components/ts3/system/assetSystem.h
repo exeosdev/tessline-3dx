@@ -108,6 +108,24 @@ namespace ts3::system
             return readData( pVector.data(), pVector.size() * sizeof( TpValue ), pReadSize );
         }
 
+        template <typename TpChar>
+        file_size_t readAll( std::basic_string<TpChar> & pString )
+        {
+            const auto assetSize = _nativeGetSize();
+            const auto strLength = assetSize / sizeof( TpChar );
+            pString.resize( strLength + 1 );
+            return readData( pString.data(), pString.length() * sizeof( TpChar ), assetSize );
+        }
+
+        template <typename TpValue>
+        file_size_t readAll( std::vector<TpValue> & pVector )
+        {
+            const auto assetSize = _nativeGetSize();
+            const auto vectorSize = assetSize / sizeof( TpValue );
+            pVector.resize( vectorSize );
+            return readData( pVector.data(), pVector.size() * sizeof( TpValue ), vectorSize );
+        }
+
         file_offset_t setReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos = EFilePointerRefPos::FileBeginning );
 
         void resetReadPointer();
@@ -115,7 +133,9 @@ namespace ts3::system
     private:
         void _nativeConstructor();
         void _nativeDestructor() noexcept;
+        file_size_t _nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize );
         file_offset_t _nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos );
+        file_size_t _nativeGetSize() const;
     };
 
 } // namespace ts3::system

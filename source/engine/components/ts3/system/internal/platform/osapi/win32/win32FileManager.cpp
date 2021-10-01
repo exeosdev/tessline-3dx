@@ -22,6 +22,21 @@ namespace ts3::system
         }
     }
 
+    file_size_t File::_nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
+    {
+        DWORD readBytesNum = 0u;
+        auto readResult = ::ReadFile( mInternal->nativeDataPriv.fileHandle, pBuffer, pBufferSize, &readBytesNum, nullptr );
+
+        if( !readResult )
+        {
+            auto errorCode = ::GetLastError();
+            auto errorMessage = platform::mseQuerySystemErrorMessage( errorCode );
+            ts3ThrowAutoEx( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
+        }
+
+        return trunc_numeric_cast<file_size_t>( readBytesNum );
+    }
+
     file_offset_t File::_nativeSetFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
     {
         LARGE_INTEGER u64FileOffset;
@@ -45,6 +60,14 @@ namespace ts3::system
         }
 
         return trunc_numeric_cast<file_offset_t>( u64FileOffset.QuadPart );
+    }
+
+    file_size_t File::_nativeGetSize() const
+    {
+        ULARGE_INTEGER u64FileSize;
+        u64FileSize.LowPart = ::GetFileSize( mInternal->nativeDataPriv.fileHandle, &( u64FileSize.HighPart ) );
+
+        return trunc_numeric_cast<file_size_t>( u64FileSize.QuadPart );
     }
 
 

@@ -19,9 +19,35 @@ namespace ts3::system
         _nativeDestructor();
     }
 
+    file_size_t File::readData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
+    {
+        if( !pBuffer || ( pBufferSize == 0 ) )
+        {
+            return 0;
+        }
+
+        return _nativeReadData( pBuffer, pBufferSize, getMinOf( pBufferSize, pReadSize ) );
+    }
+
+    file_size_t File::readData( MemoryBuffer & pBuffer, file_size_t pReadSize )
+    {
+        if( pBuffer.empty() )
+        {
+            return 0;
+        }
+
+        auto bufferSize = pBuffer.size();
+        return _nativeReadData( pBuffer.dataPtr(), bufferSize, getMinOf( bufferSize, pReadSize ) );
+    }
+
     file_offset_t File::setFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
     {
         return _nativeSetFilePointer( pOffset, pRefPos );
+    }
+
+    file_size_t File::getSize() const
+    {
+        return _nativeGetSize();
     }
 
 

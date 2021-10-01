@@ -127,12 +127,13 @@ namespace ts3::system
 
     file_size_t Asset::readData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
     {
-        return 0u;
+        return _nativeReadData( pBuffer, pBufferSize, getMinOf( pBufferSize, pReadSize ) );
     }
 
     file_size_t Asset::readData( MemoryBuffer & pBuffer, file_size_t pReadSize )
     {
-        return 0u;
+        auto bufferSize = pBuffer.size();
+        return _nativeReadData( pBuffer.dataPtr(), bufferSize, getMinOf( bufferSize, pReadSize ) );
     }
 
     file_offset_t Asset::setReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )

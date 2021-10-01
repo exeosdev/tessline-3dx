@@ -153,9 +153,19 @@ namespace ts3::system
         mInternal->nativeDataPriv.fileHandle.reset();
     }
 
+    file_size_t Asset::_nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
+    {
+        return mInternal->nativeDataPriv.fileHandle->readData( pBuffer, pBufferSize, pReadSize );
+    }
+
     file_offset_t Asset::_nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
     {
         return mInternal->nativeDataPriv.fileHandle->setFilePointer( pOffset, pRefPos );
+    }
+
+    file_size_t Asset::_nativeGetSize() const
+    {
+        return mInternal->nativeDataPriv.fileHandle->getSize();
     }
 
 

@@ -4,6 +4,9 @@
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 namespace ts3::system
 {
+    
+    int _androidTranslateFilePointerRefPos( EFilePointerRefPos pFileRefPos );
+    AAsset * _androidResolveAsset( AAssetManager * pAAssetManager, AAssetDir * pAAssetDir, FileUtilityAPI::FilePathInfo & pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags );
 
     AssetLoaderHandle createAssetLoader( AssetLoaderCreateInfo pCreateInfo )
     {
@@ -29,49 +32,6 @@ namespace ts3::system
         mInternal->nativeDataPriv.resetSessionData();
     }
 
-    AAsset * _resolveAssetNameAndOpen( AAssetManager * pAAssetManager, AAssetDir * pAAssetDir, FileUtilityAPI::FilePathInfo & pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags )
-    {
-        AAsset * aAsset = nullptr;
-        bool aAssetDirOwnershipFlag = false;
-
-        if( !pAAssetDir )
-        {
-            pAAssetDir = AAssetManager_openDir( pAAssetManager, pAssetPathInfo.directory.c_str() );
-            aAssetDirOwnershipFlag = true;
-        }
-
-        if( pAAssetDir )
-        {
-            aAsset = AAssetManager_open( pAAssetManager, pAssetPathInfo.fileName.c_str(), AASSET_MODE_RANDOM );
-
-            if( !aAsset && pFlags.isSet( E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT ) )
-            {
-                while( auto * assetFilename = AAssetDir_getNextFileName( pAAssetDir ) )
-                {
-                    auto assetNameStr = std::string( assetFilename );
-                    auto assetNamePos = assetNameStr.find( pAssetPathInfo.fileName );
-
-                    if( assetNamePos == 0 )
-                    {
-                        aAsset = AAssetManager_open( pAAssetManager, assetFilename, AASSET_MODE_RANDOM );
-                        pAssetPathInfo.fileName = std::move( assetNameStr );
-                        break;
-                    }
-                }
-
-                AAssetDir_rewind( pAAssetDir );
-            }
-
-            if( aAssetDirOwnershipFlag )
-            {
-                AAssetDir_close( pAAssetDir );
-                pAAssetDir = nullptr;
-                aAssetDirOwnershipFlag = false;
-            }
-        }
-
-        return aAsset;
-    }
 
     AssetHandle AssetLoader::_nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags )
     {
@@ -79,7 +39,7 @@ namespace ts3::system
 
         auto * aAssetManager = mInternal->nativeDataPriv.aAssetManager;
 
-        if( auto * aAsset = _resolveAssetNameAndOpen( aAssetManager, nullptr, pAssetPathInfo, pFlags ) )
+        if( auto * aAsset = _androidResolveAsset( aAssetManager, nullptr, pAssetPathInfo, pFlags ) )
         {
             asset = createSysObject<Asset>( getHandle<AssetLoader>() );
             asset->mInternal->name = std::move( pAssetPathInfo.fileName );
@@ -167,7 +127,7 @@ namespace ts3::system
         auto * aAssetManager = mInternal->nativeDataPriv.aAssetManager;
         auto * aAssetDir = mInternal->nativeDataPriv.aAssetDir;
 
-        if( auto * aAsset = _resolveAssetNameAndOpen( aAssetManager, aAssetDir, assetPathInfo, pFlags ) )
+        if( auto * aAsset = _androidResolveAsset( aAssetManager, aAssetDir, assetPathInfo, pFlags ) )
         {
             asset = createSysObject<Asset>( getHandle<AssetLoader>() );
             asset->mInternal->name = std::move( assetPathInfo.fileName );
@@ -204,9 +164,94 @@ namespace ts3::system
         }
     }
 
+    file_size_t Asset::_nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
+    {
+        int readResult = AAsset_read( mInternal->nativeDataPriv.aAsset, pBuffer, pReadSize );
+        return trunc_numeric_cast<file_size_t>( readResult );
+    }
+
     file_offset_t Asset::_nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
     {
-        return 0;
+        auto seekOrigin = _androidTranslateFilePointerRefPos( pRefPos );
+        auto seekResult = AAsset_seek64( mInternal->nativeDataPriv.aAsset, pOffset, seekOrigin );
+        return trunc_numeric_cast<file_offset_t>( seekResult );
+    }
+
+    file_size_t Asset::_nativeGetSize() const
+    {
+        auto assetSize = AAsset_getLength64( mInternal->nativeDataPriv.aAsset );
+        return trunc_numeric_cast<file_offset_t>( assetSize );
+    }
+
+
+    int _androidTranslateFilePointerRefPos( EFilePointerRefPos pFileRefPos )
+    {
+        int seekOrigin = 0;
+
+        switch( pFileRefPos )
+        {
+            case EFilePointerRefPos::FileBeginning:
+            {
+                seekOrigin = SEEK_SET;
+                break;
+            }
+            case EFilePointerRefPos::FileEnd:
+            {
+                seekOrigin = SEEK_END;
+                break;
+            }
+            case EFilePointerRefPos::PtrCurrent:
+            {
+                seekOrigin = SEEK_CUR;
+                break;
+            }
+        }
+
+        return seekOrigin;
+    }
+
+    AAsset * _androidResolveAsset( AAssetManager * pAAssetManager, AAssetDir * pAAssetDir, FileUtilityAPI::FilePathInfo & pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags )
+    {
+        AAsset * aAsset = nullptr;
+        bool aAssetDirOwnershipFlag = false;
+
+        if( !pAAssetDir )
+        {
+            pAAssetDir = AAssetManager_openDir( pAAssetManager, pAssetPathInfo.directory.c_str() );
+            aAssetDirOwnershipFlag = true;
+        }
+
+        if( pAAssetDir )
+        {
+            aAsset = AAssetManager_open( pAAssetManager, pAssetPathInfo.fileName.c_str(), AASSET_MODE_RANDOM );
+
+            if( !aAsset && pFlags.isSet( E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT ) )
+            {
+                while( auto * assetFilename = AAssetDir_getNextFileName( pAAssetDir ) )
+                {
+                    auto assetNameStr = std::string( assetFilename );
+                    auto assetNamePos = assetNameStr.find( pAssetPathInfo.fileName );
+
+                    if( assetNamePos == 0 )
+                    {
+                        aAsset = AAssetManager_open( pAAssetManager, assetFilename, AASSET_MODE_RANDOM );
+                        pAssetPathInfo.fileName = std::move( assetNameStr );
+                        break;
+                    }
+                }
+
+                AAssetDir_rewind( pAAssetDir );
+            }
+
+            if( aAssetDirOwnershipFlag )
+            {
+                AAssetDir_close( pAAssetDir );
+                pAAssetDir = nullptr;
+                aAssetDirOwnershipFlag = false;
+            }
+        }
+
+        return aAsset;
     }
 
 } // namespace ts3::system
