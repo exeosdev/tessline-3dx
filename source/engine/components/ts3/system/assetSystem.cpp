@@ -17,7 +17,7 @@ namespace ts3::system
         _nativeDestructor();
     }
 
-    AssetHandle AssetLoader::openSubAsset( const std::string & pAssetRefName )
+    AssetHandle AssetLoader::openSubAsset( const std::string & pAssetRefName, Bitmask<EAssetOpenFlags> pFlags )
     {
         if( pAssetRefName.empty() )
         {
@@ -27,7 +27,7 @@ namespace ts3::system
         auto assetRefName = FileUtilityAPI::normalizePath( pAssetRefName );
         auto assetPathInfo = FileUtilityAPI::splitFilePath( std::move( assetRefName ), E_FILE_API_FLAG_SPLIT_PATH_ASSUME_FILE_BIT );
 
-        return _nativeOpenSubAsset( std::move( assetPathInfo ) );
+        return _nativeOpenSubAsset( std::move( assetPathInfo ), pFlags );
     }
 
     AssetDirectoryHandle AssetLoader::openDirectory( std::string pDirectoryName )
@@ -80,13 +80,13 @@ namespace ts3::system
         _nativeRefreshAssetList();
     }
 
-    AssetHandle AssetDirectory::openAsset( std::string pAssetName )
+    AssetHandle AssetDirectory::openAsset( std::string pAssetName, Bitmask<EAssetOpenFlags> pFlags )
     {
         if( pAssetName.empty() )
         {
             return nullptr;
         }
-        return _nativeOpenAsset( std::move( pAssetName ) );
+        return _nativeOpenAsset( std::move( pAssetName ), pFlags );
     }
 
     const AssetNameList & AssetDirectory::getAssetList() const

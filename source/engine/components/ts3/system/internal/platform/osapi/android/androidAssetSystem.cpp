@@ -29,19 +29,62 @@ namespace ts3::system
         mInternal->nativeDataPriv.resetSessionData();
     }
 
-    AssetHandle AssetLoader::_nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo )
+    AAsset * _resolveAssetNameAndOpen( AAssetManager * pAAssetManager, AAssetDir * pAAssetDir, FileUtilityAPI::FilePathInfo & pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags )
+    {
+        AAsset * aAsset = nullptr;
+        bool aAssetDirOwnershipFlag = false;
+
+        if( !pAAssetDir )
+        {
+            pAAssetDir = AAssetManager_openDir( pAAssetManager, pAssetPathInfo.directory.c_str() );
+            aAssetDirOwnershipFlag = true;
+        }
+
+        if( pAAssetDir )
+        {
+            aAsset = AAssetManager_open( pAAssetManager, pAssetPathInfo.fileName.c_str(), AASSET_MODE_RANDOM );
+
+            if( !aAsset && pFlags.isSet( E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT ) )
+            {
+                while( auto * assetFilename = AAssetDir_getNextFileName( pAAssetDir ) )
+                {
+                    auto assetNameStr = std::string( assetFilename );
+                    auto assetNamePos = assetNameStr.find( pAssetPathInfo.fileName );
+
+                    if( assetNamePos == 0 )
+                    {
+                        aAsset = AAssetManager_open( pAAssetManager, assetFilename, AASSET_MODE_RANDOM );
+                        pAssetPathInfo.fileName = std::move( assetNameStr );
+                        break;
+                    }
+                }
+
+                AAssetDir_rewind( pAAssetDir );
+            }
+
+            if( aAssetDirOwnershipFlag )
+            {
+                AAssetDir_close( pAAssetDir );
+                pAAssetDir = nullptr;
+                aAssetDirOwnershipFlag = false;
+            }
+        }
+
+        return aAsset;
+    }
+
+    AssetHandle AssetLoader::_nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags )
     {
         AssetHandle asset = nullptr;
 
-        if( auto * aAssetDir = AAssetManager_openDir( mInternal->nativeDataPriv.aAssetManager, pAssetPathInfo.directory.c_str() ) )
+        auto * aAssetManager = mInternal->nativeDataPriv.aAssetManager;
+
+        if( auto * aAsset = _resolveAssetNameAndOpen( aAssetManager, nullptr, pAssetPathInfo, pFlags ) )
         {
-            if( auto * aAsset = AAssetManager_open( mInternal->nativeDataPriv.aAssetManager, pAssetPathInfo.fileName.c_str(), AASSET_MODE_RANDOM ) )
-            {
-                asset = createSysObject<Asset>( nullptr );
-                asset->mInternal->name = std::move( pAssetPathInfo.fileName );
-                asset->mInternal->nativeDataPriv.aAsset = aAsset;
-                asset->mInternal->nativeDataPriv.aAssetManager = mInternal->nativeDataPriv.aAssetManager;
-            }
+            asset = createSysObject<Asset>( getHandle<AssetLoader>() );
+            asset->mInternal->name = std::move( pAssetPathInfo.fileName );
+            asset->mInternal->nativeDataPriv.aAsset = aAsset;
+            asset->mInternal->nativeDataPriv.aAssetManager = mInternal->nativeDataPriv.aAssetManager;
         }
 
         return asset;
@@ -86,6 +129,7 @@ namespace ts3::system
     {
         auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
         mInternal->nativeDataPriv.setSessionData( aSessionData );
+        mInternal->nativeDataPriv.aAssetManager = mAssetLoader->mInternal->nativeDataPriv.aAssetManager;
     }
 
     void AssetDirectory::_nativeDestructor() noexcept
@@ -95,6 +139,8 @@ namespace ts3::system
             AAssetDir_close( mInternal->nativeDataPriv.aAssetDir );
             mInternal->nativeDataPriv.aAssetDir = nullptr;
         }
+
+        mInternal->nativeDataPriv.aAssetManager = nullptr;
         mInternal->nativeDataPriv.resetSessionData();
     }
 
@@ -106,16 +152,25 @@ namespace ts3::system
         {
             mInternal->assetNameList.push_back( std::string( aAssetName ) );
         }
+
+        AAssetDir_rewind( mInternal->nativeDataPriv.aAssetDir );
     }
 
-    AssetHandle AssetDirectory::_nativeOpenAsset( std::string pAssetName )
+    AssetHandle AssetDirectory::_nativeOpenAsset( std::string pAssetName, Bitmask<EAssetOpenFlags> pFlags )
     {
         AssetHandle asset = nullptr;
 
-        if( auto * aAsset = AAssetManager_open( mInternal->nativeDataPriv.aAssetManager, pAssetName.c_str(), AASSET_MODE_RANDOM ) )
+        FileUtilityAPI::FilePathInfo assetPathInfo;
+        assetPathInfo.directory = mInternal->dirName;
+        assetPathInfo.fileName = std::move( pAssetName );
+
+        auto * aAssetManager = mInternal->nativeDataPriv.aAssetManager;
+        auto * aAssetDir = mInternal->nativeDataPriv.aAssetDir;
+
+        if( auto * aAsset = _resolveAssetNameAndOpen( aAssetManager, aAssetDir, assetPathInfo, pFlags ) )
         {
-            asset = createSysObject<Asset>( getHandle<AssetDirectory>() );
-            asset->mInternal->name = std::move( pAssetName );
+            asset = createSysObject<Asset>( getHandle<AssetLoader>() );
+            asset->mInternal->name = std::move( assetPathInfo.fileName );
             asset->mInternal->nativeDataPriv.aAsset = aAsset;
             asset->mInternal->nativeDataPriv.aAssetManager = mInternal->nativeDataPriv.aAssetManager;
         }

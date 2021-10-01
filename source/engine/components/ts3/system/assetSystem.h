@@ -20,6 +20,11 @@ namespace ts3::system
 
     using AssetNameList = std::vector<std::string>;
 
+    enum EAssetOpenFlags : uint32
+    {
+        E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT = 0x0001
+    };
+
     class AssetLoader : public SysObject
     {
     public:
@@ -31,7 +36,7 @@ namespace ts3::system
         explicit AssetLoader( SysContextHandle pSysContext );
         virtual ~AssetLoader() noexcept;
 
-        AssetHandle openSubAsset( const std::string & pAssetRefName );
+        AssetHandle openSubAsset( const std::string & pAssetRefName, Bitmask<EAssetOpenFlags> pFlags = 0u );
 
         AssetDirectoryHandle openDirectory( std::string pDirectoryName );
 
@@ -40,7 +45,7 @@ namespace ts3::system
     private:
         void _nativeConstructor();
         void _nativeDestructor() noexcept;
-        AssetHandle _nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo );
+        AssetHandle _nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags );
         AssetDirectoryHandle _nativeOpenDirectory( std::string pDirectoryName );
         bool _nativeCheckDirectoryExists( const std::string & pDirectoryName ) const;
     };
@@ -60,7 +65,7 @@ namespace ts3::system
 
         void refreshAssetList();
 
-        AssetHandle openAsset( std::string pAssetName );
+        AssetHandle openAsset( std::string pAssetName, Bitmask<EAssetOpenFlags> pFlags = 0u );
 
         const AssetNameList & getAssetList() const;
 
@@ -70,7 +75,7 @@ namespace ts3::system
         void _nativeConstructor();
         void _nativeDestructor() noexcept;
         void _nativeRefreshAssetList();
-        AssetHandle _nativeOpenAsset( std::string pAssetName );
+        AssetHandle _nativeOpenAsset( std::string pAssetName, Bitmask<EAssetOpenFlags> pFlags );
         bool _nativeCheckAssetExists( const std::string & pAssetName ) const;
     };
 

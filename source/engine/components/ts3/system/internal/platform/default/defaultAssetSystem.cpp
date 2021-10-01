@@ -6,6 +6,9 @@
 namespace ts3::system
 {
 
+    std::string _resolveFileName( FileUtilityAPI::FilePathInfo & pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags );
+
+
     AssetLoaderHandle createAssetLoader( AssetLoaderCreateInfo pCreateInfo )
     {
         if( !pCreateInfo.sysContext || !FileManager::checkDirectoryExists( pCreateInfo.nativeParams.relativeAssetRootDir ) )
@@ -38,18 +41,19 @@ namespace ts3::system
     void AssetLoader::_nativeDestructor() noexcept
     {}
 
-    AssetHandle AssetLoader::_nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo )
+    AssetHandle AssetLoader::_nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags )
     {
         AssetHandle asset = nullptr;
 
-        auto combinedFilePath = mInternal->nativeDataPriv.rootDir;
-        combinedFilePath.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
-        combinedFilePath.append( pAssetPathInfo.directory );
+        auto fileDirectoryPath = mInternal->nativeDataPriv.rootDir;
+        fileDirectoryPath.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
+        fileDirectoryPath.append( pAssetPathInfo.directory );
 
-        if( FileManager::checkDirectoryExists( combinedFilePath ) )
+        pAssetPathInfo.directory = std::move( fileDirectoryPath );
+
+        if( FileManager::checkDirectoryExists( pAssetPathInfo.directory ) )
         {
-            combinedFilePath.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
-            combinedFilePath.append( pAssetPathInfo.fileName );
+            auto combinedFilePath = _resolveFileName( pAssetPathInfo, pFlags );
 
             if( FileManager::checkFileExists( combinedFilePath ) )
             {
@@ -105,23 +109,28 @@ namespace ts3::system
         mInternal->assetNameList = FileManager::enumDirectoryFiles( mInternal->nativeDataPriv.combinedDirPath );
     }
 
-    AssetHandle AssetDirectory::_nativeOpenAsset( std::string pAssetName )
+    AssetHandle AssetDirectory::_nativeOpenAsset( std::string pAssetName, Bitmask<EAssetOpenFlags> pFlags )
     {
-        auto combinedFilePath = mInternal->nativeDataPriv.combinedDirPath;
-        combinedFilePath.append( 1, '\\' );
-        combinedFilePath.append( pAssetName );
-
         AssetHandle asset = nullptr;
 
-        if( FileManager::checkFileExists( combinedFilePath ) )
-        {
-            auto fileManager = mAssetLoader->mInternal->nativeDataPriv.fileManager;
-            auto fileHandle = fileManager->openFile( combinedFilePath, EFileOpenMode::ReadOnly );
+        FileUtilityAPI::FilePathInfo assetPathInfo;
+        assetPathInfo.directory = mInternal->nativeDataPriv.combinedDirPath;
+        assetPathInfo.fileName = std::move( pAssetName );
 
-            asset = createSysObject<Asset>( getHandle<AssetLoader>() );
-            asset->mInternal->name = std::move( pAssetName );
-            asset->mInternal->nativeDataPriv.fileHandle = fileHandle;
-            asset->mInternal->nativeDataPriv.filePath = std::move( combinedFilePath );
+        if( FileManager::checkDirectoryExists( mInternal->nativeDataPriv.combinedDirPath ) )
+        {
+            auto combinedFilePath = _resolveFileName( assetPathInfo, pFlags );
+
+            if( FileManager::checkFileExists( combinedFilePath ) )
+            {
+                auto fileManager = mAssetLoader->mInternal->nativeDataPriv.fileManager;
+                auto fileHandle = fileManager->openFile( combinedFilePath, EFileOpenMode::ReadOnly );
+
+                asset = createSysObject<Asset>( getHandle<AssetDirectory>() );
+                asset->mInternal->name = std::move( assetPathInfo.fileName );
+                asset->mInternal->nativeDataPriv.fileHandle = fileHandle;
+                asset->mInternal->nativeDataPriv.filePath = std::move( combinedFilePath );
+            }
         }
 
         return asset;
@@ -147,6 +156,42 @@ namespace ts3::system
     file_offset_t Asset::_nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
     {
         return mInternal->nativeDataPriv.fileHandle->setFilePointer( pOffset, pRefPos );
+    }
+
+
+    std::string _resolveFileName( FileUtilityAPI::FilePathInfo & pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags )
+    {
+        auto combinedFilePath = pAssetPathInfo.directory;
+        combinedFilePath.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
+        combinedFilePath.append( pAssetPathInfo.fileName );
+
+        if( !FileManager::checkFileExists( combinedFilePath ) )
+        {
+            combinedFilePath.clear();
+
+            if( pFlags.isSet( E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT ) )
+            {
+                auto fileNameList = FileManager::enumDirectoryFiles( pAssetPathInfo.directory );
+                if( !fileNameList.empty() )
+                {
+                    for( auto & fileName : fileNameList )
+                    {
+                        auto assetNamePos = fileName.find( pAssetPathInfo.fileName );
+                        if( assetNamePos == 0 )
+                        {
+                            pAssetPathInfo.fileName = std::move( fileName );
+                            combinedFilePath = pAssetPathInfo.directory;
+                            combinedFilePath.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
+                            combinedFilePath.append( pAssetPathInfo.fileName );
+
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return combinedFilePath;
     }
 
 }

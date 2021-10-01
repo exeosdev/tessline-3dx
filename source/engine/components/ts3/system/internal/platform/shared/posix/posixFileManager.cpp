@@ -16,12 +16,4 @@ namespace ts3::system
     {
     }
 
-    void FileManager::_nativeCloseFile( File & pFile )
-    {
-    }
-
-    void FileManager::_nativeGenerateTemporaryFileName( std::string & pOutName )
-    {
-    }
-
 }
