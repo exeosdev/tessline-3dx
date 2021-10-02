@@ -247,12 +247,12 @@ namespace ts3::system
             }
             case APP_CMD_DESTROY:
             {
-                pOutEvent.code = E_EVENT_CODE_APP_ACTIVITY_QUIT;
+                pOutEvent.code = E_EVENT_CODE_APP_ACTIVITY_TERMINATE;
                 break;
             }
             case E_ANDROID_EVT_CMD_USER_DESTROY_REQUESTED:
             {
-                pOutEvent.code = E_EVENT_CODE_APP_ACTIVITY_TERMINATE;
+                pOutEvent.code = E_EVENT_CODE_APP_ACTIVITY_QUIT;
                 break;
             }
             default:

@@ -6,6 +6,7 @@
 
 #include "fontTexture.h"
 #include <ts3/stdext/sortedArray.h>
+#include <unordered_map>
 
 namespace ts3
 {

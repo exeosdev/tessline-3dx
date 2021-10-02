@@ -71,8 +71,6 @@ int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
     aslCreateInfo.sysContext = sysContext;
     auto assetLoader = createAssetLoader( aslCreateInfo );
 
-    aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
-
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
 
 int main( int pArgc, const char ** pArgv )
@@ -102,9 +100,14 @@ int main( int pArgc, const char ** pArgv )
 
 #endif
 
-    auto fontsDir = assetLoader->openDirectory( "shaders/GL4" );
-    auto fontsList = fontsDir->getAssetList();
-    auto vsAsset = assetLoader->openSubAsset( "shaders/GL4/fx_passthrough_vs.glsl" );
+    auto psAsset = assetLoader->openSubAsset( "shaders/GLES3/fx_passthrough_ps", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
+    auto vsAsset = assetLoader->openSubAsset( "shaders/GLES3/fx_passthrough_vs", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
+
+    std::string shaderCodePS;
+    psAsset->readAll( shaderCodePS );
+
+    std::string shaderCodeVS;
+    vsAsset->readAll( shaderCodeVS );
 
     GfxState gfxState;
 
@@ -199,8 +202,6 @@ int main( int pArgc, const char ** pArgv )
         gfxState.glSurface->clearColorBuffer();
         gfxState.glSurface->swapBuffers();
     }
-
-    //wmgr->reset();
 
     return 0;
 }

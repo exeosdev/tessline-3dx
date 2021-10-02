@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef __TS3DRIVER_GPUAPI_GL4_GRAPHICS_DRIVER_H__
-#define __TS3DRIVER_GPUAPI_GL4_GRAPHICS_DRIVER_H__
+#ifndef __TS3DRIVER_GPUAPI_GL4_GPU_DRIVER__
+#define __TS3DRIVER_GPUAPI_GL4_GPU_DRIVER__
 
 #include "GL4_prerequisites.h"
 #include <ts3/gpuapiGL/GL_gpuDriver.h>
@@ -31,4 +31,4 @@ namespace ts3::gpuapi
 
 }
 
-#endif // __TS3DRIVER_GPUAPI_GL4_GRAPHICS_DRIVER_H__
+#endif // __TS3DRIVER_GPUAPI_GL4_GPU_DRIVER__

@@ -125,11 +125,11 @@ namespace ts3::gpuapi
 			}
 
 		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
-			for( auto streamIndex : vertexDataSourceDescriptor.dataSourceDesc.vertexStreamActiveIndexArray )
+			for( auto streamIndex : openglVertexStreamSO->mGLVertexDataSourceBinding.vertexStreamActiveIndexArray )
 			{
-				const auto buffer = vertexBufferBinding.bufferArray[streamIndex];
-				const auto offset = vertexBufferBinding.offsetArray[streamIndex];
-				const auto stride = vertexBufferBinding.strideArray[streamIndex];
+				const auto buffer = vertexBufferBinding[streamIndex].buffer;
+				const auto offset = vertexBufferBinding[streamIndex].offset;
+				const auto stride = vertexBufferBinding[streamIndex].stride;
 
 				glBindVertexBuffer( streamIndex, buffer, offset, stride );
 				ts3GLHandleLastError();
@@ -261,8 +261,10 @@ namespace ts3::gpuapi
 		glFrontFace( pGLStateDescriptor.configDesc.triangleFrontFaceOrder );
 		ts3GLHandleLastError();
 
+	#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
 		glPolygonMode( GL_FRONT_AND_BACK, pGLStateDescriptor.configDesc.primitiveFillMode );
 		ts3GLHandleLastError();
+	#endif
 	}
 
 }

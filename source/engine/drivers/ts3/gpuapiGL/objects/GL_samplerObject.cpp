@@ -57,11 +57,13 @@ namespace ts3::gpuapi
 		glSamplerParameteri( mGLHandle, GL_TEXTURE_MIN_FILTER, pSamplerState.minFilter );
 		ts3GLCheckLastResult();
 
+	#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_ANISOTROPIC_FILTER )
 		if( pSamplerState.anisotropyLevel > 0 )
 		{
 			glSamplerParameteri( mGLHandle, GL_TEXTURE_MAX_ANISOTROPY, pSamplerState.anisotropyLevel );
 			ts3GLCheckLastResult();
 		}
+	#endif
 
 		glSamplerParameterf( mGLHandle, GL_TEXTURE_MIN_LOD, pSamplerState.mipLODRange.first );
 		ts3GLCheckLastResult();
@@ -69,8 +71,10 @@ namespace ts3::gpuapi
 		glSamplerParameterf( mGLHandle, GL_TEXTURE_MAX_LOD, pSamplerState.mipLODRange.second );
 		ts3GLCheckLastResult();
 
+	#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_EXTENDED_ADDRESS_MODE )
 		glSamplerParameterfv( mGLHandle, GL_TEXTURE_BORDER_COLOR, &( pSamplerState.borderColor.rgbaArray[0] ) );
 		ts3GLCheckLastResult();
+	#endif
 
 		glSamplerParameteri( mGLHandle, GL_TEXTURE_COMPARE_MODE, pSamplerState.textureCompareMode );
 		ts3GLCheckLastResult();

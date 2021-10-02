@@ -53,7 +53,7 @@ namespace ts3::system
 
     void nativeEGLReleaseGLDriver( EGLDriverNativeData & pEGLDriverNativeData );
 
-    EGLConfig nativeEGLChooseCoreFBConfig( EGLDisplay pDisplay, const VisualConfig & pVisualConfig );
+    EGLConfig nativeEGLChooseCoreFBConfig( EGLDisplay pDisplay, const VisualConfig & pVisualConfig, const Version & pTargetAPIVersion );
 
     EGLint nativeEGLQueryFBConfigAttribute( EGLDisplay pEGLDisplay, EGLConfig pEGLConfig, EGLenum pAttribute );
 

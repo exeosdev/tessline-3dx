@@ -54,6 +54,7 @@ namespace ts3::gpuapi
 			return false;
 		}
 
+	#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_ANISOTROPIC_FILTER )
 		pOutSamplerState.anisotropyLevel = pSamplerDesc.filterConfig.anisotropyLevel;
 		if( pOutSamplerState.anisotropyLevel > 0 )
 		{
@@ -67,6 +68,7 @@ namespace ts3::gpuapi
 				pOutSamplerState.anisotropyLevel = maxAnisotropy;
 			}
 		}
+	#endif
 
 		if( pSamplerDesc.textureCompareState == ETextureCompareState::Enabled )
 		{

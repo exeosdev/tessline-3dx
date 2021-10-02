@@ -5,6 +5,7 @@
 #include <ts3/gpuapi/resources/shaderCommon.h>
 #include <ts3/gpuapi/resources/textureCommon.h>
 #include <ts3/stdext/mapUtils.h>
+#include <unordered_map>
 
 namespace ts3::gpuapi
 {
@@ -18,6 +19,7 @@ namespace ts3::gpuapi
 	#endif
 	}
 
+#if( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL43 )
 	GLenum GLCoreAPIProxy::chooseGLBufferStorageFlags( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags )
 	{
 		Bitmask<GLenum> storageFlags = 0;
@@ -56,6 +58,7 @@ namespace ts3::gpuapi
 
 		return storageFlags;
 	}
+#endif
 
 	GLenum GLCoreAPIProxy::chooseGLBufferUsagePolicy( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags )
 	{
@@ -91,7 +94,7 @@ namespace ts3::gpuapi
 			usagePolicy = GL_STATIC_DRAW;
 		}
 
-		if( ( pBindTarget == GL_COPY_READ_BUFFER ) || ( pBindTarget == GL_QUERY_BUFFER ) || ( pBindTarget == GL_TRANSFORM_FEEDBACK_BUFFER ) )
+		if( ( pBindTarget == GL_COPY_READ_BUFFER ) || ( pBindTarget == GL_TRANSFORM_FEEDBACK_BUFFER ) )
 		{
 			// Advance from GL_XXX_DRAW to GL_XXX_READ
 			usagePolicy += 1;
@@ -180,154 +183,145 @@ namespace ts3::gpuapi
 
 	GLsizei GLCoreAPIProxy::queryGLTextureInternalFormatBPP( GLenum pGLInternalFormat )
 	{
-		static const std::unordered_map<GLenum, GLsizei> internalFormatSizeMap =
+		switch( pGLInternalFormat )
 		{
-			{ GL_R32F         , 32  },
-			{ GL_R32I         , 32  },
-			{ GL_R32UI        , 32  },
-			{ GL_RG32F        , 64  },
-			{ GL_RG32I        , 64  },
-			{ GL_RG32UI       , 64  },
-			{ GL_RGB32F       , 96  },
-			{ GL_RGB32I       , 96  },
-			{ GL_RGB32UI      , 96  },
-			{ GL_RGBA32F      , 128 },
-			{ GL_RGBA32I      , 128 },
-			{ GL_RGBA32UI     , 128 },
-			{ GL_R16F         , 16  },
-			{ GL_R16I         , 16  },
-			{ GL_R16UI        , 16  },
-			{ GL_R16_SNORM    , 16  },
-			{ GL_R16          , 16  },
-			{ GL_RG16F        , 32  },
-			{ GL_RG16I        , 32  },
-			{ GL_RG16UI       , 32  },
-			{ GL_RG16_SNORM   , 32  },
-			{ GL_RG16         , 32  },
-			{ GL_RGBA16F      , 64  },
-			{ GL_RGBA16I      , 64  },
-			{ GL_RGBA16UI     , 64  },
-			{ GL_RGBA16_SNORM , 64  },
-			{ GL_RGBA16       , 64  },
-			{ GL_R8I          , 8   },
-			{ GL_R8UI         , 8   },
-			{ GL_R8_SNORM     , 8   },
-			{ GL_R8           , 8   },
-			{ GL_RG8I         , 16  },
-			{ GL_RG8UI        , 16  },
-			{ GL_RG8_SNORM    , 16  },
-			{ GL_RG8          , 16  },
-			{ GL_RGB8         , 24  },
-			{ GL_SRGB8        , 24  },
-			{ GL_RGBA8        , 32  },
-			{ GL_SRGB8_ALPHA8 , 32  },
-			{ GL_RGBA8I       , 32  },
-			{ GL_RGBA8UI      , 32  },
-			{ GL_RGBA8_SNORM  , 32  },
-			{ GL_RGBA8        , 32  },
-			{ GL_SRGB8_ALPHA8 , 32  },
+			ts3CaseReturn( GL_R32F         , 32  );
+			ts3CaseReturn( GL_R32I         , 32  );
+			ts3CaseReturn( GL_R32UI        , 32  );
+			ts3CaseReturn( GL_RG32F        , 64  );
+			ts3CaseReturn( GL_RG32I        , 64  );
+			ts3CaseReturn( GL_RG32UI       , 64  );
+			ts3CaseReturn( GL_RGB32F       , 96  );
+			ts3CaseReturn( GL_RGB32I       , 96  );
+			ts3CaseReturn( GL_RGB32UI      , 96  );
+			ts3CaseReturn( GL_RGBA32F      , 128 );
+			ts3CaseReturn( GL_RGBA32I      , 128 );
+			ts3CaseReturn( GL_RGBA32UI     , 128 );
+			ts3CaseReturn( GL_R16F         , 16  );
+			ts3CaseReturn( GL_R16I         , 16  );
+			ts3CaseReturn( GL_R16UI        , 16  );
+			ts3CaseReturn( GL_RG16F        , 32  );
+			ts3CaseReturn( GL_RG16I        , 32  );
+			ts3CaseReturn( GL_RG16UI       , 32  );
+			ts3CaseReturn( GL_RGBA16F      , 64  );
+			ts3CaseReturn( GL_RGBA16I      , 64  );
+			ts3CaseReturn( GL_RGBA16UI     , 64  );
+			ts3CaseReturn( GL_R8I          , 8   );
+			ts3CaseReturn( GL_R8UI         , 8   );
+			ts3CaseReturn( GL_R8_SNORM     , 8   );
+			ts3CaseReturn( GL_R8           , 8   );
+			ts3CaseReturn( GL_RG8I         , 16  );
+			ts3CaseReturn( GL_RG8UI        , 16  );
+			ts3CaseReturn( GL_RG8_SNORM    , 16  );
+			ts3CaseReturn( GL_RG8          , 16  );
+			ts3CaseReturn( GL_RGB8         , 24  );
+			ts3CaseReturn( GL_SRGB8        , 24  );
+			ts3CaseReturn( GL_RGBA8        , 32  );
+			ts3CaseReturn( GL_SRGB8_ALPHA8 , 32  );
+			ts3CaseReturn( GL_RGBA8I       , 32  );
+			ts3CaseReturn( GL_RGBA8UI      , 32  );
+			ts3CaseReturn( GL_RGBA8_SNORM  , 32  );
 
-			{ GL_RGB5_A1            , 16 },
-			{ GL_RGB565             , 16 },
-			{ GL_RGB9_E5            , 32 },
-			{ GL_RGB10_A2UI         , 32 },
-			{ GL_RGB10_A2           , 32 },
-			{ GL_R11F_G11F_B10F     , 32 },
-			{ GL_DEPTH_COMPONENT16  , 16 },
-			{ GL_DEPTH24_STENCIL8   , 32 },
-			{ GL_DEPTH_COMPONENT24  , 24 },
-			{ GL_DEPTH_COMPONENT32F , 32 },
-			{ GL_DEPTH32F_STENCIL8  , 64 },
+			ts3CaseReturn( GL_RGB5_A1            , 16 );
+			ts3CaseReturn( GL_RGB565             , 16 );
+			ts3CaseReturn( GL_RGB9_E5            , 32 );
+			ts3CaseReturn( GL_RGB10_A2UI         , 32 );
+			ts3CaseReturn( GL_RGB10_A2           , 32 );
+			ts3CaseReturn( GL_R11F_G11F_B10F     , 32 );
+			ts3CaseReturn( GL_DEPTH_COMPONENT16  , 16 );
+			ts3CaseReturn( GL_DEPTH24_STENCIL8   , 32 );
+			ts3CaseReturn( GL_DEPTH_COMPONENT24  , 24 );
+			ts3CaseReturn( GL_DEPTH_COMPONENT32F , 32 );
+			ts3CaseReturn( GL_DEPTH32F_STENCIL8  , 64 );
 
-			{ GL_TEXFMT_COMPRESSED_BC1        , 4 },
-			{ GL_TEXFMT_COMPRESSED_BC1_SRGBA  , 4 },
-			{ GL_TEXFMT_COMPRESSED_BC2        , 4 },
-			{ GL_TEXFMT_COMPRESSED_BC2_SRGB   , 8 },
-			{ GL_TEXFMT_COMPRESSED_BC3        , 8 },
-			{ GL_TEXFMT_COMPRESSED_BC3_SRGB   , 8 },
-			{ GL_TEXFMT_COMPRESSED_BC4_SNORM  , 8 },
-			{ GL_TEXFMT_COMPRESSED_BC4_UNORM  , 8 },
-			{ GL_TEXFMT_COMPRESSED_BC5_SNORM  , 8 },
-			{ GL_TEXFMT_COMPRESSED_BC5_UNORM  , 0 },
-			{ GL_TEXFMT_COMPRESSED_BC6H_SFLOAT, 0 },
-			{ GL_TEXFMT_COMPRESSED_BC6H_UFLOAT, 0 },
-			{ GL_TEXFMT_COMPRESSED_BC7        , 0 },
-			{ GL_TEXFMT_COMPRESSED_BC7_SRGB   , 0 },
-		};
-		return ts3::getMapValueOrDefault( internalFormatSizeMap, pGLInternalFormat, 0 );
+		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_CORE )
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC1        , 4 );
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC1_SRGBA  , 4 );
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC2        , 4 );
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC2_SRGB   , 8 );
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC3        , 8 );
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC3_SRGB   , 8 );
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC4_SNORM  , 8 );
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC4_UNORM  , 8 );
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC5_SNORM  , 8 );
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC5_UNORM  , 0 );
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC6H_SFLOAT, 0 );
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC6H_UFLOAT, 0 );
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC7        , 0 );
+			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC7_SRGB   , 0 );
+		#endif
+		}
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLBaseDataType( EBaseDataType pBaseDataType )
 	{
-		static const GLenum baseDataTypeArray[] =
-		{
-			GL_BYTE,
-			GL_UNSIGNED_BYTE,
-			GL_SHORT,
-			GL_UNSIGNED_SHORT,
-			GL_INT,
-			GL_UNSIGNED_INT,
-			GL_INT64_ARB,
-			GL_UNSIGNED_INT64_ARB,
-			GL_HALF_FLOAT,
-			GL_FLOAT,
-			GL_DOUBLE,
-			GL_UNSIGNED_INT_24_8,
-			GL_FLOAT_32_UNSIGNED_INT_24_8_REV,
-		};
 		auto baseDataTypeIndex = ecGetBaseDataTypeIndex( pBaseDataType );
-		return ts3::staticArrayElementOrDefault( baseDataTypeArray, baseDataTypeIndex, GL_TS3_ERR_INVALID_PARAM );
+		switch( baseDataTypeIndex )
+		{
+			ts3CaseReturn( 0u, GL_BYTE                           );
+			ts3CaseReturn( 1u, GL_UNSIGNED_BYTE                  );
+			ts3CaseReturn( 2u, GL_SHORT                          );
+			ts3CaseReturn( 3u, GL_UNSIGNED_SHORT                 );
+			ts3CaseReturn( 4u, GL_INT                            );
+			ts3CaseReturn( 5u, GL_UNSIGNED_INT                   );
+			ts3CaseReturn( 6u, GL_HALF_FLOAT                     );
+			ts3CaseReturn( 7u, GL_FLOAT                          );
+			ts3CaseReturn( 8u, GL_UNSIGNED_INT_24_8              );
+			ts3CaseReturn( 9u, GL_FLOAT_32_UNSIGNED_INT_24_8_REV );
+		}
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLBlendFactor( EBlendFactor pBlendFactor )
 	{
-		static const GLenum blendFactorArray[] =
+		switch( pBlendFactor )
 		{
-			GL_ZERO,
-			GL_ONE,
-			GL_CONSTANT_COLOR,
-			GL_ONE_MINUS_CONSTANT_COLOR,
-			GL_SRC_COLOR,
-			GL_SRC_ALPHA,
-			GL_DST_COLOR,
-			GL_DST_ALPHA,
-			GL_ONE_MINUS_SRC_COLOR,
-			GL_ONE_MINUS_SRC_ALPHA,
-			GL_ONE_MINUS_DST_COLOR,
-			GL_ONE_MINUS_DST_ALPHA,
+			ts3CaseReturn( EBlendFactor::Zero        , GL_ZERO                     );
+			ts3CaseReturn( EBlendFactor::One         , GL_ONE                      );
+			ts3CaseReturn( EBlendFactor::Const       , GL_CONSTANT_COLOR           );
+			ts3CaseReturn( EBlendFactor::ConstInv    , GL_ONE_MINUS_CONSTANT_COLOR );
+			ts3CaseReturn( EBlendFactor::SrcColor    , GL_SRC_COLOR                );
+			ts3CaseReturn( EBlendFactor::SrcAlpha    , GL_SRC_ALPHA                );
+			ts3CaseReturn( EBlendFactor::DstColor    , GL_DST_COLOR                );
+			ts3CaseReturn( EBlendFactor::DstAlpha    , GL_DST_ALPHA                );
+			ts3CaseReturn( EBlendFactor::SrcColorInv , GL_ONE_MINUS_SRC_COLOR      );
+			ts3CaseReturn( EBlendFactor::SrcAlphaInv , GL_ONE_MINUS_SRC_ALPHA      );
+			ts3CaseReturn( EBlendFactor::DstColorInv , GL_ONE_MINUS_DST_COLOR      );
+			ts3CaseReturn( EBlendFactor::DstAlphaInv , GL_ONE_MINUS_DST_ALPHA      );
 		};
-		return ts3::staticArrayElementOrDefault( blendFactorArray, pBlendFactor, GL_TS3_ERR_INVALID_PARAM );
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLBlendOp( EBlendOp pBlendOp )
 	{
-		static const GLenum blendOpArray[] =
+		switch( pBlendOp )
 		{
-			GL_FUNC_ADD,
-			GL_MIN,
-			GL_MAX,
-			GL_FUNC_SUBTRACT,
-			GL_FUNC_REVERSE_SUBTRACT
+			ts3CaseReturn( EBlendOp::Add         , GL_FUNC_ADD              );
+			ts3CaseReturn( EBlendOp::Min         , GL_MIN                   );
+			ts3CaseReturn( EBlendOp::Max         , GL_MAX                   );
+			ts3CaseReturn( EBlendOp::Subtract    , GL_FUNC_SUBTRACT         );
+			ts3CaseReturn( EBlendOp::SubtractRev , GL_FUNC_REVERSE_SUBTRACT );
 		};
-		return ts3::staticArrayElementOrDefault( blendOpArray, pBlendOp, GL_TS3_ERR_INVALID_PARAM );
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLBufferBindTarget( EGPUBufferTarget pBufferTarget )
 	{
-		static const std::unordered_map<EGPUBufferTarget, GLenum> bufferTargetMap =
+		switch( pBufferTarget )
 		{
-			{ EGPUBufferTarget::ConstantBuffer         , GL_UNIFORM_BUFFER            },
-			{ EGPUBufferTarget::VertexBuffer           , GL_ARRAY_BUFFER              },
-			{ EGPUBufferTarget::IndexBuffer            , GL_ELEMENT_ARRAY_BUFFER      },
-			{ EGPUBufferTarget::ShaderInputBuffer      , GL_TEXTURE_BUFFER            },
-			{ EGPUBufferTarget::ShaderUAVBuffer        , GL_SHADER_STORAGE_BUFFER     },
-			{ EGPUBufferTarget::StreamOutputBuffer     , GL_TRANSFORM_FEEDBACK_BUFFER },
-			{ EGPUBufferTarget::IndirectDispatchBuffer , GL_DISPATCH_INDIRECT_BUFFER  },
-			{ EGPUBufferTarget::IndirectDrawBuffer     , GL_DRAW_INDIRECT_BUFFER      },
-			{ EGPUBufferTarget::TransferSourceBuffer   , GL_COPY_READ_BUFFER          },
-			{ EGPUBufferTarget::TransferTargetBuffer   , GL_COPY_WRITE_BUFFER         },
+			ts3CaseReturn( EGPUBufferTarget::ConstantBuffer         , GL_UNIFORM_BUFFER            );
+			ts3CaseReturn( EGPUBufferTarget::VertexBuffer           , GL_ARRAY_BUFFER              );
+			ts3CaseReturn( EGPUBufferTarget::IndexBuffer            , GL_ELEMENT_ARRAY_BUFFER      );
+			ts3CaseReturn( EGPUBufferTarget::ShaderInputBuffer      , GL_SHADER_STORAGE_BUFFER     );
+			ts3CaseReturn( EGPUBufferTarget::ShaderUAVBuffer        , GL_SHADER_STORAGE_BUFFER     );
+			ts3CaseReturn( EGPUBufferTarget::StreamOutputBuffer     , GL_TRANSFORM_FEEDBACK_BUFFER );
+			ts3CaseReturn( EGPUBufferTarget::IndirectDispatchBuffer , GL_DISPATCH_INDIRECT_BUFFER  );
+			ts3CaseReturn( EGPUBufferTarget::IndirectDrawBuffer     , GL_DRAW_INDIRECT_BUFFER      );
+			ts3CaseReturn( EGPUBufferTarget::TransferSourceBuffer   , GL_COPY_READ_BUFFER          );
+			ts3CaseReturn( EGPUBufferTarget::TransferTargetBuffer   , GL_COPY_WRITE_BUFFER         );
 		};
-		return ts3::getMapValueOrDefault( bufferTargetMap, pBufferTarget, GL_TS3_ERR_INVALID_PARAM );
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLBufferMapFlags( EGPUMemoryMapMode pMapMode, Bitmask<EGPUMemoryFlags> pMemoryFlags )
@@ -347,6 +341,8 @@ namespace ts3::gpuapi
 		{
 			openglMapFlags.set( GL_MAP_INVALIDATE_BUFFER_BIT );
 		}
+
+	#if( TS3GX_GL_FEATURE_SUPPORT_BUFFER_PERSISTENT_MAP )
 		if( pMemoryFlags.isSet( E_GPU_MEMORY_HEAP_PROPERTY_FLAG_PERSISTENT_MAP_BIT ) )
 		{
 			openglMapFlags.set( GL_MAP_PERSISTENT_BIT );
@@ -359,385 +355,368 @@ namespace ts3::gpuapi
 		{
 			openglMapFlags.set( GL_MAP_FLUSH_EXPLICIT_BIT );
 		}
+	#endif
 
 		return openglMapFlags;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLCompFunc( ECompFunc pCompFunc )
 	{
-		static const GLenum compFuncArray[] =
+		switch( pCompFunc )
 		{
-			GL_NEVER,
-			GL_ALWAYS,
-			GL_EQUAL,
-			GL_NOTEQUAL,
-			GL_GREATER,
-			GL_GEQUAL,
-			GL_LESS,
-			GL_LEQUAL,
+			ts3CaseReturn( ECompFunc::Never        , GL_NEVER    );
+			ts3CaseReturn( ECompFunc::Always       , GL_ALWAYS   );
+			ts3CaseReturn( ECompFunc::Equal        , GL_EQUAL    );
+			ts3CaseReturn( ECompFunc::NotEqual     , GL_NOTEQUAL );
+			ts3CaseReturn( ECompFunc::Greater      , GL_GREATER  );
+			ts3CaseReturn( ECompFunc::GreaterEqual , GL_GEQUAL   );
+			ts3CaseReturn( ECompFunc::Less         , GL_LESS     );
+			ts3CaseReturn( ECompFunc::LessEqual    , GL_LEQUAL   );
 		};
-		return ts3::staticArrayElementOrDefault( compFuncArray, pCompFunc, GL_TS3_ERR_INVALID_PARAM );
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLCullMode( ECullMode pCullMode )
 	{
-		static const GLenum cullModeArray[] =
+		switch( pCullMode )
 		{
-			0,
-			GL_BACK,
-			GL_FRONT,
+			ts3CaseReturn( ECullMode::None  , 0 );
+			ts3CaseReturn( ECullMode::Back  , GL_BACK  );
+			ts3CaseReturn( ECullMode::Front , GL_FRONT );
 		};
-		return ts3::staticArrayElementOrDefault( cullModeArray, pCullMode, GL_TS3_ERR_INVALID_PARAM );
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLPrimitiveFillMode( EPrimitiveFillMode pFillMode )
 	{
-		static const GLenum fillModeArray[] =
+	#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
+		switch( pFillMode )
 		{
-			GL_FILL,
-			GL_LINE,
+			ts3CaseReturn( EPrimitiveFillMode::Solid     , GL_FILL );
+			ts3CaseReturn( EPrimitiveFillMode::Wireframe , GL_LINE );
 		};
-		return ts3::staticArrayElementOrDefault( fillModeArray, pFillMode, GL_TS3_ERR_INVALID_PARAM );
+	#endif
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLPrimitiveTopology( EPrimitiveTopology pTopology )
 	{
-		static const GLenum primitiveTopologyArray[] =
+		switch( pTopology )
 		{
-			GL_POINTS,
-			GL_LINES,
-			GL_LINES_ADJACENCY,
-			GL_LINE_STRIP,
-			GL_LINE_STRIP_ADJACENCY,
-			GL_TRIANGLES,
-			GL_TRIANGLES_ADJACENCY,
-			GL_TRIANGLE_STRIP,
-			GL_TRIANGLE_STRIP_ADJACENCY,
-			GL_PATCHES
+			ts3CaseReturn( EPrimitiveTopology::PointList        , GL_POINTS );
+			ts3CaseReturn( EPrimitiveTopology::LineList         , GL_LINES );
+			ts3CaseReturn( EPrimitiveTopology::LineStrip        , GL_LINE_STRIP );
+			ts3CaseReturn( EPrimitiveTopology::TriangleList     , GL_TRIANGLES );
+			ts3CaseReturn( EPrimitiveTopology::TriangleStrip    , GL_TRIANGLE_STRIP );
+		#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_TYPE_ADJACENCY )
+			ts3CaseReturn( EPrimitiveTopology::LineListAdj      , GL_LINES_ADJACENCY );
+			ts3CaseReturn( EPrimitiveTopology::LineStripAdj     , GL_LINE_STRIP_ADJACENCY );
+			ts3CaseReturn( EPrimitiveTopology::TriangleListAdj  , GL_TRIANGLES_ADJACENCY );
+			ts3CaseReturn( EPrimitiveTopology::TriangleStripAdj , GL_TRIANGLE_STRIP_ADJACENCY );
+        #endif
+		#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_TYPE_PATCHES )
+			ts3CaseReturn( EPrimitiveTopology::TesselationPatch , GL_PATCHES );
+		#endif
 		};
-		return ts3::staticArrayElementOrDefault( primitiveTopologyArray, pTopology, GL_TS3_ERR_INVALID_PARAM );
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLEShaderType( EShaderType pShaderType )
 	{
-		static const GLenum shaderTypeArray[] =
+		switch( pShaderType )
 		{
-			GL_VERTEX_SHADER,
-			GL_TESS_CONTROL_SHADER,
-			GL_TESS_EVALUATION_SHADER,
-			GL_GEOMETRY_SHADER,
-			GL_FRAGMENT_SHADER,
-			GL_COMPUTE_SHADER,
+			ts3CaseReturn( EShaderType::VertexShader , GL_VERTEX_SHADER   );
+			ts3CaseReturn( EShaderType::PixelShader  , GL_FRAGMENT_SHADER );
+		#if( TS3GX_GL_FEATURE_SUPPORT_SHADER_TYPE_GEOMETRY )
+			ts3CaseReturn( EShaderType::GeometryShader , GL_GEOMETRY_SHADER );
+        #endif
+		#if( TS3GX_GL_FEATURE_SUPPORT_SHADER_TYPE_TESSELATION )
+			ts3CaseReturn( EShaderType::TessControlShader    , GL_TESS_CONTROL_SHADER    );
+			ts3CaseReturn( EShaderType::TessEvaluationShader , GL_TESS_EVALUATION_SHADER );
+        #endif
+		#if( TS3GX_GL_FEATURE_SUPPORT_SHADER_TYPE_COMPUTE )
+			ts3CaseReturn( EShaderType::ComputeShader , GL_COMPUTE_SHADER );
+		#endif
 		};
-		const auto stageIndex = ecGetEShaderStageIndex( pShaderType );
-		return ts3::staticArrayElementOrDefault( shaderTypeArray, stageIndex, GL_TS3_ERR_INVALID_PARAM );
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLStencilOp( EStencilOp pStencilOp )
 	{
-		static const GLenum stencilOpArray[] =
+		switch( pStencilOp )
 		{
-			GL_ZERO,
-			GL_KEEP,
-			GL_REPLACE,
-			GL_INCR,
-			GL_INCR_WRAP,
-			GL_DECR,
-			GL_DECR_WRAP,
-			GL_INVERT,
+			ts3CaseReturn( EStencilOp::Zero      , GL_ZERO      );
+			ts3CaseReturn( EStencilOp::Keep      , GL_KEEP      );
+			ts3CaseReturn( EStencilOp::Replace   , GL_REPLACE   );
+			ts3CaseReturn( EStencilOp::IncrClamp , GL_INCR      );
+			ts3CaseReturn( EStencilOp::IncrWrap  , GL_INCR_WRAP );
+			ts3CaseReturn( EStencilOp::DecrClamp , GL_DECR      );
+			ts3CaseReturn( EStencilOp::DecrWrap  , GL_DECR_WRAP );
+			ts3CaseReturn( EStencilOp::Invert    , GL_INVERT    );
 		};
-		return ts3::staticArrayElementOrDefault( stencilOpArray, pStencilOp, GL_TS3_ERR_INVALID_PARAM );
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLETextureAddressMode( ETextureAddressMode pAddressMode )
 	{
-		static const GLenum addressModeArray[] =
+		switch( pAddressMode )
 		{
-			GL_CLAMP_TO_BORDER,
-			GL_CLAMP_TO_EDGE,
-			GL_MIRRORED_REPEAT,
-			GL_MIRROR_CLAMP_TO_EDGE,
-			GL_REPEAT,
+			ts3CaseReturn( ETextureAddressMode::Clamp  , GL_CLAMP_TO_EDGE   );
+			ts3CaseReturn( ETextureAddressMode::Mirror , GL_MIRRORED_REPEAT );
+			ts3CaseReturn( ETextureAddressMode::Wrap   , GL_REPEAT          );
+		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_EXTENDED_ADDRESS_MODE )
+			ts3CaseReturn( ETextureAddressMode::BorderColor     , GL_CLAMP_TO_BORDER      );
+			ts3CaseReturn( ETextureAddressMode::MirrorOnceClamp , GL_MIRROR_CLAMP_TO_EDGE );
+		#endif
 		};
-		return ts3::staticArrayElementOrDefault( addressModeArray, pAddressMode, GL_TS3_ERR_INVALID_PARAM );
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLTextureBindTarget( ETextureDimensionClass pTextureDimensionClass )
 	{
-		static const std::unordered_map<ETextureDimensionClass, GLenum> bindTargetMap =
+		switch( pTextureDimensionClass )
 		{
-			{ ETextureDimensionClass::Texture2D      , GL_TEXTURE_2D             },
-			{ ETextureDimensionClass::Texture2DArray , GL_TEXTURE_2D_ARRAY       },
-			{ ETextureDimensionClass::Texture2DMS    , GL_TEXTURE_2D_MULTISAMPLE },
-			{ ETextureDimensionClass::Texture3D      , GL_TEXTURE_3D             },
-			{ ETextureDimensionClass::TextureCubeMap    , GL_TEXTURE_CUBE_MAP       },
+			ts3CaseReturn( ETextureDimensionClass::Texture2D      , GL_TEXTURE_2D             );
+			ts3CaseReturn( ETextureDimensionClass::Texture2DArray , GL_TEXTURE_2D_ARRAY       );
+			ts3CaseReturn( ETextureDimensionClass::Texture2DMS    , GL_TEXTURE_2D_MULTISAMPLE );
+			ts3CaseReturn( ETextureDimensionClass::Texture3D      , GL_TEXTURE_3D             );
+			ts3CaseReturn( ETextureDimensionClass::TextureCubeMap , GL_TEXTURE_CUBE_MAP       );
 		};
-		return ts3::getMapValueOrDefault( bindTargetMap, pTextureDimensionClass, GL_TS3_ERR_INVALID_PARAM );
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLTextureInternalFormat( ETextureFormat pTextureFormat )
 	{
-		static const std::unordered_map<ETextureFormat, GLenum> internalFormatMap =
+		switch( pTextureFormat )
 		{
-			{ ETextureFormat::R32_FLOAT           , GL_R32F         },
-			{ ETextureFormat::R32_SINT            , GL_R32I         },
-			{ ETextureFormat::R32_UINT            , GL_R32UI        },
-			{ ETextureFormat::R32G32_FLOAT        , GL_RG32F        },
-			{ ETextureFormat::R32G32_SINT         , GL_RG32I        },
-			{ ETextureFormat::R32G32_UINT         , GL_RG32UI       },
-			{ ETextureFormat::R32G32B32_FLOAT     , GL_RGB32F       },
-			{ ETextureFormat::R32G32B32_SINT      , GL_RGB32I       },
-			{ ETextureFormat::R32G32B32_UINT      , GL_RGB32UI      },
-			{ ETextureFormat::R32G32B32A32_FLOAT  , GL_RGBA32F      },
-			{ ETextureFormat::R32G32B32A32_SINT   , GL_RGBA32I      },
-			{ ETextureFormat::R32G32B32A32_UINT   , GL_RGBA32UI     },
-			{ ETextureFormat::R16_FLOAT           , GL_R16F         },
-			{ ETextureFormat::R16_SINT            , GL_R16I         },
-			{ ETextureFormat::R16_UINT            , GL_R16UI        },
-			{ ETextureFormat::R16_SNORM           , GL_R16_SNORM    },
-			{ ETextureFormat::R16_UNORM           , GL_R16          },
-			{ ETextureFormat::R16G16_FLOAT        , GL_RG16F        },
-			{ ETextureFormat::R16G16_SINT         , GL_RG16I        },
-			{ ETextureFormat::R16G16_UINT         , GL_RG16UI       },
-			{ ETextureFormat::R16G16_SNORM        , GL_RG16_SNORM   },
-			{ ETextureFormat::R16G16_UNORM        , GL_RG16         },
-			{ ETextureFormat::R16G16B16A16_FLOAT  , GL_RGBA16F      },
-			{ ETextureFormat::R16G16B16A16_SINT   , GL_RGBA16I      },
-			{ ETextureFormat::R16G16B16A16_UINT   , GL_RGBA16UI     },
-			{ ETextureFormat::R16G16B16A16_SNORM  , GL_RGBA16_SNORM },
-			{ ETextureFormat::R16G16B16A16_UNORM  , GL_RGBA16       },
-			{ ETextureFormat::R8_SINT             , GL_R8I          },
-			{ ETextureFormat::R8_UINT             , GL_R8UI         },
-			{ ETextureFormat::R8_SNORM            , GL_R8_SNORM     },
-			{ ETextureFormat::R8_UNORM            , GL_R8           },
-			{ ETextureFormat::R8G8_SINT           , GL_RG8I         },
-			{ ETextureFormat::R8G8_UINT           , GL_RG8UI        },
-			{ ETextureFormat::R8G8_SNORM          , GL_RG8_SNORM    },
-			{ ETextureFormat::R8G8_UNORM          , GL_RG8          },
-			{ ETextureFormat::B8G8R8X8_UNORM      , GL_RGB8         },
-			{ ETextureFormat::B8G8R8X8_SRGB       , GL_SRGB8        },
-			{ ETextureFormat::B8G8R8A8_UNORM      , GL_RGBA8        },
-			{ ETextureFormat::B8G8R8A8_SRGB       , GL_SRGB8_ALPHA8 },
-			{ ETextureFormat::R8G8B8A8_SINT       , GL_RGBA8I       },
-			{ ETextureFormat::R8G8B8A8_UINT       , GL_RGBA8UI      },
-			{ ETextureFormat::R8G8B8A8_SNORM      , GL_RGBA8_SNORM  },
-			{ ETextureFormat::R8G8B8A8_UNORM      , GL_RGBA8        },
-			{ ETextureFormat::R8G8B8A8_SRGB       , GL_SRGB8_ALPHA8 },
-
-			{ ETextureFormat::R5G5B5A1            , GL_RGB5_A1            },
-			{ ETextureFormat::R5G6B5              , GL_RGB565             },
-			{ ETextureFormat::R9G9B9E5            , GL_RGB9_E5            },
-			{ ETextureFormat::R10G10B10A2_UINT    , GL_RGB10_A2UI         },
-			{ ETextureFormat::R10G10B10A2_UNORM   , GL_RGB10_A2           },
-			{ ETextureFormat::R11G11B10_FLOAT32   , GL_R11F_G11F_B10F     },
-			{ ETextureFormat::D16_UNORM           , GL_DEPTH_COMPONENT16  },
-			{ ETextureFormat::D24_UNORM_S8_UINT   , GL_DEPTH24_STENCIL8   },
-			{ ETextureFormat::D24_UNORM_X8        , GL_DEPTH_COMPONENT24  },
-			{ ETextureFormat::D32_FLOAT           , GL_DEPTH_COMPONENT32F },
-
-			{ ETextureFormat::BC1_RGBA_UNORM      , GL_TEXFMT_COMPRESSED_BC1         },
-			{ ETextureFormat::BC1_RGBA_UNORM_SRGB , GL_TEXFMT_COMPRESSED_BC1_SRGBA   },
-			{ ETextureFormat::BC2_UNORM           , GL_TEXFMT_COMPRESSED_BC2         },
-			{ ETextureFormat::BC2_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC2_SRGB    },
-			{ ETextureFormat::BC3_UNORM           , GL_TEXFMT_COMPRESSED_BC3         },
-			{ ETextureFormat::BC3_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC3_SRGB    },
-			{ ETextureFormat::BC4_SNORM           , GL_TEXFMT_COMPRESSED_BC4_SNORM   },
-			{ ETextureFormat::BC4_UNORM           , GL_TEXFMT_COMPRESSED_BC4_UNORM   },
-			{ ETextureFormat::BC5_SNORM           , GL_TEXFMT_COMPRESSED_BC5_SNORM   },
-			{ ETextureFormat::BC5_UNORM           , GL_TEXFMT_COMPRESSED_BC5_UNORM   },
-			{ ETextureFormat::BC6H_SFLOAT         , GL_TEXFMT_COMPRESSED_BC6H_SFLOAT },
-			{ ETextureFormat::BC6H_UFLOAT         , GL_TEXFMT_COMPRESSED_BC6H_UFLOAT },
-			{ ETextureFormat::BC7_UNORM           , GL_TEXFMT_COMPRESSED_BC7         },
-			{ ETextureFormat::BC7_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC7_SRGB    },
+			ts3CaseReturn( ETextureFormat::R32_FLOAT           , GL_R32F         );
+			ts3CaseReturn( ETextureFormat::R32_SINT            , GL_R32I         );
+			ts3CaseReturn( ETextureFormat::R32_UINT            , GL_R32UI        );
+			ts3CaseReturn( ETextureFormat::R32G32_FLOAT        , GL_RG32F        );
+			ts3CaseReturn( ETextureFormat::R32G32_SINT         , GL_RG32I        );
+			ts3CaseReturn( ETextureFormat::R32G32_UINT         , GL_RG32UI       );
+			ts3CaseReturn( ETextureFormat::R32G32B32_FLOAT     , GL_RGB32F       );
+			ts3CaseReturn( ETextureFormat::R32G32B32_SINT      , GL_RGB32I       );
+			ts3CaseReturn( ETextureFormat::R32G32B32_UINT      , GL_RGB32UI      );
+			ts3CaseReturn( ETextureFormat::R32G32B32A32_FLOAT  , GL_RGBA32F      );
+			ts3CaseReturn( ETextureFormat::R32G32B32A32_SINT   , GL_RGBA32I      );
+			ts3CaseReturn( ETextureFormat::R32G32B32A32_UINT   , GL_RGBA32UI     );
+			ts3CaseReturn( ETextureFormat::R16_FLOAT           , GL_R16F         );
+			ts3CaseReturn( ETextureFormat::R16_SINT            , GL_R16I         );
+			ts3CaseReturn( ETextureFormat::R16_UINT            , GL_R16UI        );
+			ts3CaseReturn( ETextureFormat::R16G16_FLOAT        , GL_RG16F        );
+			ts3CaseReturn( ETextureFormat::R16G16_SINT         , GL_RG16I        );
+			ts3CaseReturn( ETextureFormat::R16G16_UINT         , GL_RG16UI       );
+			ts3CaseReturn( ETextureFormat::R16G16B16A16_FLOAT  , GL_RGBA16F      );
+			ts3CaseReturn( ETextureFormat::R16G16B16A16_SINT   , GL_RGBA16I      );
+			ts3CaseReturn( ETextureFormat::R16G16B16A16_UINT   , GL_RGBA16UI     );
+			ts3CaseReturn( ETextureFormat::R8_SINT             , GL_R8I          );
+			ts3CaseReturn( ETextureFormat::R8_UINT             , GL_R8UI         );
+			ts3CaseReturn( ETextureFormat::R8_SNORM            , GL_R8_SNORM     );
+			ts3CaseReturn( ETextureFormat::R8_UNORM            , GL_R8           );
+			ts3CaseReturn( ETextureFormat::R8G8_SINT           , GL_RG8I         );
+			ts3CaseReturn( ETextureFormat::R8G8_UINT           , GL_RG8UI        );
+			ts3CaseReturn( ETextureFormat::R8G8_SNORM          , GL_RG8_SNORM    );
+			ts3CaseReturn( ETextureFormat::R8G8_UNORM          , GL_RG8          );
+			ts3CaseReturn( ETextureFormat::R8G8B8A8_SINT       , GL_RGBA8I       );
+			ts3CaseReturn( ETextureFormat::R8G8B8A8_UINT       , GL_RGBA8UI      );
+			ts3CaseReturn( ETextureFormat::R8G8B8A8_SNORM      , GL_RGBA8_SNORM  );
+			ts3CaseReturn( ETextureFormat::R8G8B8A8_UNORM      , GL_RGBA8        );
+			ts3CaseReturn( ETextureFormat::R8G8B8A8_SRGB       , GL_SRGB8_ALPHA8 );
+		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_BGR )
+			ts3CaseReturn( ETextureFormat::B8G8R8X8_UNORM , GL_RGB8         );
+			ts3CaseReturn( ETextureFormat::B8G8R8X8_SRGB  , GL_SRGB8        );
+			ts3CaseReturn( ETextureFormat::B8G8R8A8_UNORM , GL_RGBA8        );
+			ts3CaseReturn( ETextureFormat::B8G8R8A8_SRGB  , GL_SRGB8_ALPHA8 );
+		#endif
+			ts3CaseReturn( ETextureFormat::R5G5B5A1            , GL_RGB5_A1            );
+			ts3CaseReturn( ETextureFormat::R5G6B5              , GL_RGB565             );
+			ts3CaseReturn( ETextureFormat::R9G9B9E5            , GL_RGB9_E5            );
+			ts3CaseReturn( ETextureFormat::R10G10B10A2_UINT    , GL_RGB10_A2UI         );
+			ts3CaseReturn( ETextureFormat::R10G10B10A2_UNORM   , GL_RGB10_A2           );
+			ts3CaseReturn( ETextureFormat::R11G11B10_FLOAT32   , GL_R11F_G11F_B10F     );
+			ts3CaseReturn( ETextureFormat::D16_UNORM           , GL_DEPTH_COMPONENT16  );
+			ts3CaseReturn( ETextureFormat::D24_UNORM_S8_UINT   , GL_DEPTH24_STENCIL8   );
+			ts3CaseReturn( ETextureFormat::D24_UNORM_X8        , GL_DEPTH_COMPONENT24  );
+			ts3CaseReturn( ETextureFormat::D32_FLOAT           , GL_DEPTH_COMPONENT32F );
+		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_COMPRESSED_BCX )
+			ts3CaseReturn( ETextureFormat::BC1_RGBA_UNORM      , GL_TEXFMT_COMPRESSED_BC1         );
+			ts3CaseReturn( ETextureFormat::BC1_RGBA_UNORM_SRGB , GL_TEXFMT_COMPRESSED_BC1_SRGBA   );
+			ts3CaseReturn( ETextureFormat::BC2_UNORM           , GL_TEXFMT_COMPRESSED_BC2         );
+			ts3CaseReturn( ETextureFormat::BC2_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC2_SRGB    );
+			ts3CaseReturn( ETextureFormat::BC3_UNORM           , GL_TEXFMT_COMPRESSED_BC3         );
+			ts3CaseReturn( ETextureFormat::BC3_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC3_SRGB    );
+			ts3CaseReturn( ETextureFormat::BC4_SNORM           , GL_TEXFMT_COMPRESSED_BC4_SNORM   );
+			ts3CaseReturn( ETextureFormat::BC4_UNORM           , GL_TEXFMT_COMPRESSED_BC4_UNORM   );
+			ts3CaseReturn( ETextureFormat::BC5_SNORM           , GL_TEXFMT_COMPRESSED_BC5_SNORM   );
+			ts3CaseReturn( ETextureFormat::BC5_UNORM           , GL_TEXFMT_COMPRESSED_BC5_UNORM   );
+			ts3CaseReturn( ETextureFormat::BC6H_SFLOAT         , GL_TEXFMT_COMPRESSED_BC6H_SFLOAT );
+			ts3CaseReturn( ETextureFormat::BC6H_UFLOAT         , GL_TEXFMT_COMPRESSED_BC6H_UFLOAT );
+			ts3CaseReturn( ETextureFormat::BC7_UNORM           , GL_TEXFMT_COMPRESSED_BC7         );
+			ts3CaseReturn( ETextureFormat::BC7_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC7_SRGB    );
+		#endif
 		};
-		return ts3::getMapValueOrDefault( internalFormatMap, pTextureFormat, GL_TS3_ERR_INVALID_PARAM );
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLTexturePixelDataLayout( ETextureFormat pTextureFormat )
 	{
-		static const std::unordered_map<ETextureFormat, GLenum> pixelDataLayoutMap =
+		switch( pTextureFormat )
 		{
-			{ ETextureFormat::R32_FLOAT           , GL_RED  },
-			{ ETextureFormat::R32_SINT            , GL_RED  },
-			{ ETextureFormat::R32_UINT            , GL_RED  },
-			{ ETextureFormat::R32G32_FLOAT        , GL_RG   },
-			{ ETextureFormat::R32G32_SINT         , GL_RG   },
-			{ ETextureFormat::R32G32_UINT         , GL_RG   },
-			{ ETextureFormat::R32G32B32_FLOAT     , GL_RGB  },
-			{ ETextureFormat::R32G32B32_SINT      , GL_RGB  },
-			{ ETextureFormat::R32G32B32_UINT      , GL_RGB  },
-			{ ETextureFormat::R32G32B32A32_FLOAT  , GL_RGBA },
-			{ ETextureFormat::R32G32B32A32_SINT   , GL_RGBA },
-			{ ETextureFormat::R32G32B32A32_UINT   , GL_RGBA },
-			{ ETextureFormat::R16_FLOAT           , GL_RED  },
-			{ ETextureFormat::R16_SINT            , GL_RED  },
-			{ ETextureFormat::R16_UINT            , GL_RED  },
-			{ ETextureFormat::R16_SNORM           , GL_RED  },
-			{ ETextureFormat::R16_UNORM           , GL_RED  },
-			{ ETextureFormat::R16G16_FLOAT        , GL_RG   },
-			{ ETextureFormat::R16G16_SINT         , GL_RG   },
-			{ ETextureFormat::R16G16_UINT         , GL_RG   },
-			{ ETextureFormat::R16G16_SNORM        , GL_RG   },
-			{ ETextureFormat::R16G16_UNORM        , GL_RG   },
-			{ ETextureFormat::R16G16B16A16_FLOAT  , GL_RGBA },
-			{ ETextureFormat::R16G16B16A16_SINT   , GL_RGBA },
-			{ ETextureFormat::R16G16B16A16_UINT   , GL_RGBA },
-			{ ETextureFormat::R16G16B16A16_SNORM  , GL_RGBA },
-			{ ETextureFormat::R16G16B16A16_UNORM  , GL_RGBA },
-			{ ETextureFormat::R8_SINT             , GL_RED  },
-			{ ETextureFormat::R8_UINT             , GL_RED  },
-			{ ETextureFormat::R8_SNORM            , GL_RED  },
-			{ ETextureFormat::R8_UNORM            , GL_RED  },
-			{ ETextureFormat::R8G8_SINT           , GL_RG   },
-			{ ETextureFormat::R8G8_UINT           , GL_RG   },
-			{ ETextureFormat::R8G8_SNORM          , GL_RG   },
-			{ ETextureFormat::R8G8_UNORM          , GL_RG   },
-			{ ETextureFormat::B8G8R8X8_UNORM      , GL_BGR  },
-			{ ETextureFormat::B8G8R8X8_SRGB       , GL_BGR  },
-			{ ETextureFormat::B8G8R8A8_UNORM      , GL_BGRA },
-			{ ETextureFormat::B8G8R8A8_SRGB       , GL_BGRA },
-			{ ETextureFormat::R8G8B8A8_SINT       , GL_RGBA },
-			{ ETextureFormat::R8G8B8A8_UINT       , GL_RGBA },
-			{ ETextureFormat::R8G8B8A8_SNORM      , GL_RGBA },
-			{ ETextureFormat::R8G8B8A8_UNORM      , GL_RGBA },
-			{ ETextureFormat::R8G8B8A8_SRGB       , GL_RGBA },
+			ts3CaseReturn( ETextureFormat::R32_FLOAT           , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R32_SINT            , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R32_UINT            , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R32G32_FLOAT        , GL_RG   );
+			ts3CaseReturn( ETextureFormat::R32G32_SINT         , GL_RG   );
+			ts3CaseReturn( ETextureFormat::R32G32_UINT         , GL_RG   );
+			ts3CaseReturn( ETextureFormat::R32G32B32_FLOAT     , GL_RGB  );
+			ts3CaseReturn( ETextureFormat::R32G32B32_SINT      , GL_RGB  );
+			ts3CaseReturn( ETextureFormat::R32G32B32_UINT      , GL_RGB  );
+			ts3CaseReturn( ETextureFormat::R32G32B32A32_FLOAT  , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::R32G32B32A32_SINT   , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::R32G32B32A32_UINT   , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::R16_FLOAT           , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R16_SINT            , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R16_UINT            , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R16G16_FLOAT        , GL_RG   );
+			ts3CaseReturn( ETextureFormat::R16G16_SINT         , GL_RG   );
+			ts3CaseReturn( ETextureFormat::R16G16_UINT         , GL_RG   );
+			ts3CaseReturn( ETextureFormat::R16G16B16A16_FLOAT  , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::R16G16B16A16_SINT   , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::R16G16B16A16_UINT   , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::R8_SINT             , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R8_UINT             , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R8_SNORM            , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R8_UNORM            , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R8G8_SINT           , GL_RG   );
+			ts3CaseReturn( ETextureFormat::R8G8_UINT           , GL_RG   );
+			ts3CaseReturn( ETextureFormat::R8G8_SNORM          , GL_RG   );
+			ts3CaseReturn( ETextureFormat::R8G8_UNORM          , GL_RG   );
+		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_BGR )
+			ts3CaseReturn( ETextureFormat::B8G8R8X8_UNORM      , GL_BGR  );
+			ts3CaseReturn( ETextureFormat::B8G8R8X8_SRGB       , GL_BGR  );
+			ts3CaseReturn( ETextureFormat::B8G8R8A8_UNORM      , GL_BGRA );
+			ts3CaseReturn( ETextureFormat::B8G8R8A8_SRGB       , GL_BGRA );
+		#endif
+			ts3CaseReturn( ETextureFormat::R8G8B8A8_SINT       , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::R8G8B8A8_UINT       , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::R8G8B8A8_SNORM      , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::R8G8B8A8_UNORM      , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::R8G8B8A8_SRGB       , GL_RGBA );
 
-			{ ETextureFormat::R5G5B5A1            , GL_RGB5_A1            },
-			{ ETextureFormat::R5G6B5              , GL_RGB565             },
-			{ ETextureFormat::R9G9B9E5            , GL_RGB9_E5            },
-			{ ETextureFormat::R10G10B10A2_UINT    , GL_RGB10_A2UI         },
-			{ ETextureFormat::R10G10B10A2_UNORM   , GL_RGB10_A2           },
-			{ ETextureFormat::R11G11B10_FLOAT32   , GL_R11F_G11F_B10F     },
-			{ ETextureFormat::D16_UNORM           , GL_DEPTH_COMPONENT16  },
-			{ ETextureFormat::D24_UNORM_S8_UINT   , GL_DEPTH24_STENCIL8   },
-			{ ETextureFormat::D24_UNORM_X8        , GL_DEPTH_COMPONENT24  },
-			{ ETextureFormat::D32_FLOAT           , GL_DEPTH_COMPONENT32F },
-
-			{ ETextureFormat::BC1_RGBA_UNORM      , GL_TEXFMT_COMPRESSED_BC1         },
-			{ ETextureFormat::BC1_RGBA_UNORM_SRGB , GL_TEXFMT_COMPRESSED_BC1_SRGBA   },
-			{ ETextureFormat::BC2_UNORM           , GL_TEXFMT_COMPRESSED_BC2         },
-			{ ETextureFormat::BC2_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC2_SRGB    },
-			{ ETextureFormat::BC3_UNORM           , GL_TEXFMT_COMPRESSED_BC3         },
-			{ ETextureFormat::BC3_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC3_SRGB    },
-			{ ETextureFormat::BC4_SNORM           , GL_TEXFMT_COMPRESSED_BC4_SNORM   },
-			{ ETextureFormat::BC4_UNORM           , GL_TEXFMT_COMPRESSED_BC4_UNORM   },
-			{ ETextureFormat::BC5_SNORM           , GL_TEXFMT_COMPRESSED_BC5_SNORM   },
-			{ ETextureFormat::BC5_UNORM           , GL_TEXFMT_COMPRESSED_BC5_UNORM   },
-			{ ETextureFormat::BC6H_SFLOAT         , GL_TEXFMT_COMPRESSED_BC6H_SFLOAT },
-			{ ETextureFormat::BC6H_UFLOAT         , GL_TEXFMT_COMPRESSED_BC6H_UFLOAT },
-			{ ETextureFormat::BC7_UNORM           , GL_TEXFMT_COMPRESSED_BC7         },
-			{ ETextureFormat::BC7_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC7_SRGB    },
+			ts3CaseReturn( ETextureFormat::R5G5B5A1            , GL_RGB5_A1            );
+			ts3CaseReturn( ETextureFormat::R5G6B5              , GL_RGB565             );
+			ts3CaseReturn( ETextureFormat::R9G9B9E5            , GL_RGB9_E5            );
+			ts3CaseReturn( ETextureFormat::R10G10B10A2_UINT    , GL_RGB10_A2UI         );
+			ts3CaseReturn( ETextureFormat::R10G10B10A2_UNORM   , GL_RGB10_A2           );
+			ts3CaseReturn( ETextureFormat::R11G11B10_FLOAT32   , GL_R11F_G11F_B10F     );
+			ts3CaseReturn( ETextureFormat::D16_UNORM           , GL_DEPTH_COMPONENT16  );
+			ts3CaseReturn( ETextureFormat::D24_UNORM_S8_UINT   , GL_DEPTH24_STENCIL8   );
+			ts3CaseReturn( ETextureFormat::D24_UNORM_X8        , GL_DEPTH_COMPONENT24  );
+			ts3CaseReturn( ETextureFormat::D32_FLOAT           , GL_DEPTH_COMPONENT32F );
+		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_COMPRESSED_BCX )
+			ts3CaseReturn( ETextureFormat::BC1_RGBA_UNORM      , GL_TEXFMT_COMPRESSED_BC1         );
+			ts3CaseReturn( ETextureFormat::BC1_RGBA_UNORM_SRGB , GL_TEXFMT_COMPRESSED_BC1_SRGBA   );
+			ts3CaseReturn( ETextureFormat::BC2_UNORM           , GL_TEXFMT_COMPRESSED_BC2         );
+			ts3CaseReturn( ETextureFormat::BC2_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC2_SRGB    );
+			ts3CaseReturn( ETextureFormat::BC3_UNORM           , GL_TEXFMT_COMPRESSED_BC3         );
+			ts3CaseReturn( ETextureFormat::BC3_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC3_SRGB    );
+			ts3CaseReturn( ETextureFormat::BC4_SNORM           , GL_TEXFMT_COMPRESSED_BC4_SNORM   );
+			ts3CaseReturn( ETextureFormat::BC4_UNORM           , GL_TEXFMT_COMPRESSED_BC4_UNORM   );
+			ts3CaseReturn( ETextureFormat::BC5_SNORM           , GL_TEXFMT_COMPRESSED_BC5_SNORM   );
+			ts3CaseReturn( ETextureFormat::BC5_UNORM           , GL_TEXFMT_COMPRESSED_BC5_UNORM   );
+			ts3CaseReturn( ETextureFormat::BC6H_SFLOAT         , GL_TEXFMT_COMPRESSED_BC6H_SFLOAT );
+			ts3CaseReturn( ETextureFormat::BC6H_UFLOAT         , GL_TEXFMT_COMPRESSED_BC6H_UFLOAT );
+			ts3CaseReturn( ETextureFormat::BC7_UNORM           , GL_TEXFMT_COMPRESSED_BC7         );
+			ts3CaseReturn( ETextureFormat::BC7_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC7_SRGB    );
+		#endif
 		};
-		return ts3::getMapValueOrDefault( pixelDataLayoutMap, pTextureFormat, GL_TS3_ERR_INVALID_PARAM );
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	GLenum GLCoreAPIProxy::translateGLTriangleVerticesOrder( ETriangleVerticesOrder pVerticesOrder )
 	{
-		static const GLenum verticesOrderArray[] =
+		switch( pVerticesOrder )
 		{
-			GL_CW,
-			GL_CCW,
-		};
-		return ts3::staticArrayElementOrDefault( verticesOrderArray, pVerticesOrder, GL_TS3_ERR_INVALID_PARAM );
+			ts3CaseReturn( ETriangleVerticesOrder::Clockwise        , GL_CW  );
+			ts3CaseReturn( ETriangleVerticesOrder::CounterClockwise , GL_CCW );
+		}
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 	const char * GLCoreAPIProxy::translateGLDebugOutputExtensionName( GLDebugOutputVersion pDebugOutputVersion )
 	{
 		switch( pDebugOutputVersion )
 		{
-			case GLDebugOutputVersion::AMDExt:
-				return "GL_AMD_debug_output";
-			case GLDebugOutputVersion::ARBExt:
-				return "GL_ARB_debug_output";
-			case GLDebugOutputVersion::KHRCore:
-				return "GL_KHR_debug";
-			default:
-				return "Unknown";
+			ts3CaseReturn( GLDebugOutputVersion::AMDExt  , "GL_AMD_debug_outputr" );
+			ts3CaseReturn( GLDebugOutputVersion::ARBExt  , "GL_ARB_debug_output"  );
+			ts3CaseReturn( GLDebugOutputVersion::KHRCore , "GL_KHR_debug"         );
 		}
+		return "Unknown";
 	}
 
 	const char * GLCoreAPIProxy::translateGLDebugEventCategoryStrAMD( GLenum pEventCategory )
 	{
+	#if( TS3GX_GL_FEATURE_SUPPORT_DEBUG_OUTPUT )
 		switch( pEventCategory )
 		{
-			case GL_DEBUG_CATEGORY_API_ERROR_AMD:
-				return "API error";
-			case GL_DEBUG_CATEGORY_WINDOW_SYSTEM_AMD:
-				return "Window system";
-			case GL_DEBUG_CATEGORY_DEPRECATION_AMD:
-				return "Deprecation";
-			case GL_DEBUG_CATEGORY_UNDEFINED_BEHAVIOR_AMD:
-				return "Undefined behavior";
-			case GL_DEBUG_CATEGORY_PERFORMANCE_AMD:
-				return "Performance";
-			case GL_DEBUG_CATEGORY_SHADER_COMPILER_AMD:
-				return "Shader compiler";
-			case GL_DEBUG_CATEGORY_APPLICATION_AMD:
-				return "Application";
-			case GL_DEBUG_CATEGORY_OTHER_AMD:
-				return "Other";
-			default:
-				return "Unknown";
+			ts3CaseReturn( GL_DEBUG_CATEGORY_API_ERROR_AMD          , "API error"          );
+			ts3CaseReturn( GL_DEBUG_CATEGORY_WINDOW_SYSTEM_AMD      , "Window system"      );
+			ts3CaseReturn( GL_DEBUG_CATEGORY_DEPRECATION_AMD        , "Deprecation"        );
+			ts3CaseReturn( GL_DEBUG_CATEGORY_UNDEFINED_BEHAVIOR_AMD , "Undefined behavior" );
+			ts3CaseReturn( GL_DEBUG_CATEGORY_PERFORMANCE_AMD        , "Performance"        );
+			ts3CaseReturn( GL_DEBUG_CATEGORY_SHADER_COMPILER_AMD    , "Shader compiler"    );
+			ts3CaseReturn( GL_DEBUG_CATEGORY_APPLICATION_AMD        , "Application"        );
+			ts3CaseReturn( GL_DEBUG_CATEGORY_OTHER_AMD              , "Other"              );
 		}
+	#endif
+		return "Unknown";
 	}
 
 	const char * GLCoreAPIProxy::translateGLDebugEventSeverityStr( GLenum pEventSeverity )
 	{
-		switch( pEventSeverity )
+	#if( TS3GX_GL_FEATURE_SUPPORT_DEBUG_OUTPUT )
+	    switch( pEventSeverity )
 		{
-			case GL_DEBUG_SEVERITY_HIGH_ARB:
-				return "High";
-			case GL_DEBUG_SEVERITY_MEDIUM_ARB:
-				return "Medium";
-			case GL_DEBUG_SEVERITY_LOW_ARB:
-				return "Low";
-			case GL_DEBUG_SEVERITY_NOTIFICATION:
-				return "Notification";
-			default:
-				return "Unknown";
+			ts3CaseReturn( GL_DEBUG_SEVERITY_HIGH_ARB     , "High"         );
+			ts3CaseReturn( GL_DEBUG_SEVERITY_MEDIUM_ARB   , "Medium"       );
+			ts3CaseReturn( GL_DEBUG_SEVERITY_LOW_ARB      , "Low"          );
+			ts3CaseReturn( GL_DEBUG_SEVERITY_NOTIFICATION , "Notification" );
 		}
+	#endif
+		return "Unknown";
 	}
 
 	const char * GLCoreAPIProxy::translateGLDebugEventSourceStr( GLenum pEventSource )
 	{
-		switch( pEventSource )
+	#if( TS3GX_GL_FEATURE_SUPPORT_DEBUG_OUTPUT )
+	    switch( pEventSource )
 		{
-			case GL_DEBUG_SOURCE_API_ARB:
-				return "GL API";
-			case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
-				return "Window system";
-			case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
-				return "Shader compiler";
-			case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
-				return "Third party";
-			case GL_DEBUG_SOURCE_APPLICATION_ARB:
-				return "Application";
-			case GL_DEBUG_SOURCE_OTHER_ARB:
-				return "Other";
-			default:
-				return "Unknown";
+			ts3CaseReturn( GL_DEBUG_SOURCE_API_ARB             , "GL API"          );
+			ts3CaseReturn( GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB   , "Window system"   );
+			ts3CaseReturn( GL_DEBUG_SOURCE_SHADER_COMPILER_ARB , "Shader compiler" );
+			ts3CaseReturn( GL_DEBUG_SOURCE_THIRD_PARTY_ARB     , "Third party"     );
+			ts3CaseReturn( GL_DEBUG_SOURCE_APPLICATION_ARB     , "Application"     );
+			ts3CaseReturn( GL_DEBUG_SOURCE_OTHER_ARB           , "Other"           );
 		}
+	#endif
+		return "Unknown";
 	}
 
 	const char * GLCoreAPIProxy::translateGLDebugEventTypeStr( GLenum pEventType )
 	{
-		switch( pEventType )
+	#if( TS3GX_GL_FEATURE_SUPPORT_DEBUG_OUTPUT )
+	    switch( pEventType )
 		{
-			case GL_DEBUG_TYPE_ERROR_ARB:
-				return "Error";
-			case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
-				return "Deprecated behavior";
-			case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
-				return "Undefined behavior";
-			case GL_DEBUG_TYPE_PORTABILITY_ARB:
-				return "Portability";
-			case GL_DEBUG_TYPE_PERFORMANCE_ARB:
-				return "Performance";
-			case GL_DEBUG_TYPE_OTHER_ARB:
-				return "Other";
-			default:
-				return "Unknown";
+			ts3CaseReturn( GL_DEBUG_TYPE_ERROR_ARB               , "GL API"          );
+			ts3CaseReturn( GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB , "Window system"   );
+			ts3CaseReturn( GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB  , "Shader compiler" );
+			ts3CaseReturn( GL_DEBUG_TYPE_PORTABILITY_ARB         , "Third party"     );
+			ts3CaseReturn( GL_DEBUG_TYPE_PERFORMANCE_ARB         , "Application"     );
+			ts3CaseReturn( GL_DEBUG_TYPE_OTHER_ARB               , "Other"           );
 		}
+	#endif
+		return "Unknown";
 	}
 
 }

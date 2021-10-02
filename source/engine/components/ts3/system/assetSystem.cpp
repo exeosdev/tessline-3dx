@@ -17,17 +17,17 @@ namespace ts3::system
         _nativeDestructor();
     }
 
-    AssetHandle AssetLoader::openSubAsset( const std::string & pAssetRefName )
+    AssetHandle AssetLoader::openSubAsset( const std::string & pAssetRefName, Bitmask<EAssetOpenFlags> pFlags )
     {
         if( pAssetRefName.empty() )
         {
             return nullptr;
         }
 
-        auto assetRefName = FileAPI::normalizePath( pAssetRefName );
-        auto assetPathInfo = FileAPI::splitFilePath( std::move( assetRefName ), E_FILE_API_FLAG_SPLIT_PATH_ASSUME_FILE_BIT );
+        auto assetRefName = FileUtilityAPI::normalizePath( pAssetRefName );
+        auto assetPathInfo = FileUtilityAPI::splitFilePath( std::move( assetRefName ), E_FILE_API_FLAG_SPLIT_PATH_ASSUME_FILE_BIT );
 
-        return _nativOopenSubAsset( std::move( assetPathInfo ) );
+        return _nativeOpenSubAsset( std::move( assetPathInfo ), pFlags );
     }
 
     AssetDirectoryHandle AssetLoader::openDirectory( std::string pDirectoryName )
@@ -80,13 +80,13 @@ namespace ts3::system
         _nativeRefreshAssetList();
     }
 
-    AssetHandle AssetDirectory::openAsset( std::string pAssetName )
+    AssetHandle AssetDirectory::openAsset( std::string pAssetName, Bitmask<EAssetOpenFlags> pFlags )
     {
         if( pAssetName.empty() )
         {
             return nullptr;
         }
-        return _nativeOpenAsset( std::move( pAssetName ) );
+        return _nativeOpenAsset( std::move( pAssetName ), pFlags );
     }
 
     const AssetNameList & AssetDirectory::getAssetList() const
@@ -127,22 +127,23 @@ namespace ts3::system
 
     file_size_t Asset::readData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
     {
-        return 0u;
+        return _nativeReadData( pBuffer, pBufferSize, getMinOf( pBufferSize, pReadSize ) );
     }
 
     file_size_t Asset::readData( MemoryBuffer & pBuffer, file_size_t pReadSize )
     {
-        return 0u;
+        auto bufferSize = pBuffer.size();
+        return _nativeReadData( pBuffer.dataPtr(), bufferSize, getMinOf( bufferSize, pReadSize ) );
     }
 
-    file_offset_t Asset::setReadPointer( EFilePointerRefPos pRefPos, file_offset_t pOffset )
+    file_offset_t Asset::setReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
     {
-        return _nativeSetReadPointer( pRefPos, pOffset );
+        return _nativeSetReadPointer( pOffset, pRefPos );
     }
 
     void Asset::resetReadPointer()
     {
-        _nativeSetReadPointer( EFilePointerRefPos::FileBeginning, 0 );
+        _nativeSetReadPointer( 0, EFilePointerRefPos::FileBeginning );
     }
 
 } // namespace ts3::system

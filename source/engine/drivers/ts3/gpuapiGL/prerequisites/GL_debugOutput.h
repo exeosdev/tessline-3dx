@@ -6,6 +6,10 @@
 
 #include <unordered_set>
 
+#if( TS3_SYSTEM_GL_PLATFORM_TYPE == TS3_SYSTEM_GL_PLATFORM_TYPE_ES )
+#  define GLAPIENTRY
+#endif
+
 namespace ts3::gpuapi
 {
 
@@ -66,6 +70,8 @@ namespace ts3::gpuapi
 	};
 
 
+#if( TS3_SYSTEM_GL_PLATFORM_TYPE == TS3_SYSTEM_GL_PLATFORM_TYPE_CORE )
+
 	class GLDebugOutputAMDExt final : public GLDebugOutput
 	{
 	public:
@@ -78,11 +84,11 @@ namespace ts3::gpuapi
 		void handleEvent( GLuint pEventID, GLenum pEventCategory, GLenum pEventSeverity, const GLchar * pMessage );
 
 		static void GLAPIENTRY eventCallback( GLuint pEventID,
-		                                      GLenum pEventCategory,
-		                                      GLenum pEventSeverity,
-		                                      GLsizei pLength,
-		                                      const GLchar * pMessage,
-		                                      GLvoid * pUserParam );
+                                              GLenum pEventCategory,
+                                              GLenum pEventSeverity,
+                                              GLsizei pLength,
+                                              const GLchar * pMessage,
+                                              GLvoid * pUserParam );
 	};
 
 	class GLDebugOutputARBExt final : public GLDebugOutput
@@ -99,12 +105,12 @@ namespace ts3::gpuapi
 		void handleEvent( GLuint pEventID, GLenum pEventCategory, GLenum pEventType, GLenum pEventSeverity, const GLchar * pMessage );
 
 		static void GLAPIENTRY eventCallback( GLuint pEventID,
-		                                      GLenum pEventSource,
-		                                      GLenum pEventType,
-		                                      GLenum pEventSeverity,
-		                                      GLsizei pLength,
-		                                      const GLchar * pMessage,
-		                                      const GLvoid * pUserParam );
+                                              GLenum pEventSource,
+                                              GLenum pEventType,
+                                              GLenum pEventSeverity,
+                                              GLsizei pLength,
+                                              const GLchar * pMessage,
+                                              const GLvoid * pUserParam );
 	};
 
 	class GLDebugOutputKHRCore final : public GLDebugOutput
@@ -121,13 +127,15 @@ namespace ts3::gpuapi
 		void handleEvent( GLuint pEventID, GLenum pEventCategory, GLenum pEventType, GLenum pEventSeverity, const GLchar * pMessage );
 
 		static void GLAPIENTRY eventCallback( GLuint pEventID,
-		                                      GLenum pEventSource,
-		                                      GLenum pEventType,
-		                                      GLenum pEventSeverity,
-		                                      GLsizei pLength,
-		                                      const GLchar * pMessage,
-		                                      const GLvoid * pUserParam );
+                                              GLenum pEventSource,
+                                              GLenum pEventType,
+                                              GLenum pEventSeverity,
+                                              GLsizei pLength,
+                                              const GLchar * pMessage,
+                                              const GLvoid * pUserParam );
 	};
+
+#endif
 
 }
 

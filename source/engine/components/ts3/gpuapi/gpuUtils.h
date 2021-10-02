@@ -6,15 +6,27 @@
 
 #include "resources/shaderCommon.h"
 
-namespace ts3::gpuapi::Utils
+namespace ts3::gpuapi
 {
 
-	TS3_GPUAPI_API ShaderHandle createShaderFromFile( GPUDevice & pGPUDevice, EShaderType pShaderType, const char * pFilename );
+    namespace utils
+    {
 
-	inline ShaderHandle createShaderFromFile( GPUDevice & pGPUDevice, EShaderType pShaderType, const std::string & pFilename )
-	{
-		return createShaderFromFile( pGPUDevice, pShaderType, pFilename.c_str() );
-	}
+        TS3_GPUAPI_API ShaderHandle createShaderFromSource( GPUDevice & pGPUDevice, EShaderType pShaderType, const void * pSource, size_t pSourceLength );
+
+        inline ShaderHandle createShaderFromSource( GPUDevice & pGPUDevice, EShaderType pShaderType, const std::string & pSource )
+        {
+            return createShaderFromSource( pGPUDevice, pShaderType, pSource.c_str(), pSource.length() );
+        }
+
+        TS3_GPUAPI_API ShaderHandle createShaderFromFile( GPUDevice & pGPUDevice, EShaderType pShaderType, const char * pFilename );
+
+        inline ShaderHandle createShaderFromFile( GPUDevice & pGPUDevice, EShaderType pShaderType, const std::string & pFilename )
+        {
+            return createShaderFromFile( pGPUDevice, pShaderType, pFilename.c_str() );
+        }
+
+    }
 
 }
 

@@ -30,9 +30,13 @@ namespace ts3::gpuapi
 		{
 			auto * openglGPUDevice = mGPUDevice.queryInterface<GLGPUDevice>();
 			auto * openglDebugOutput = openglGPUDevice->getDebugOutputInterface();
-			openglDebugOutput->enableDebugOutput( true );
-			openglDebugOutput->enableBreakOnEvent( true );
-			openglDebugOutput->enableSync( true );
+
+			if( openglDebugOutput )
+			{
+			    openglDebugOutput->enableDebugOutput( true );
+			    openglDebugOutput->enableBreakOnEvent( true );
+			    openglDebugOutput->enableSync( true );
+			}
 		}
 
 		return commandContext;
@@ -111,18 +115,15 @@ namespace ts3::gpuapi
 		{
 			system::GLRenderContextCreateInfo contextCreateInfo;
 			contextCreateInfo.shareContext = nullptr;
-			contextCreateInfo.flags.set( system::E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
 
 		#if( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL43 )
 			contextCreateInfo.requiredAPIVersion.major = 4;
 			contextCreateInfo.requiredAPIVersion.minor = 3;
 			contextCreateInfo.targetAPIProfile = system::EGLAPIProfile::Core;
-			contextCreateInfo.flags.set( system::E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT );
 		#elif( TS3GX_GL_TARGET == TS3GX_GL_TARGET_ES31 )
 			contextCreateInfo.requiredAPIVersion.major = 3;
 			contextCreateInfo.requiredAPIVersion.minor = 1;
-			contextCreateInfo.targetAPIProfile = ESysGLAPIProfile::GLES;
-			contextCreateInfo.flags.set( system::E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
+			contextCreateInfo.targetAPIProfile = system::EGLAPIProfile::GLES;
 		#endif
 
 			if( pGLGPUDevice.isDebugDevice() )
@@ -130,16 +131,19 @@ namespace ts3::gpuapi
 				contextCreateInfo.flags.set( system::E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT );
 			}
 
-			auto sysGLRenderContext = pSysGLDisplaySurface->mDriver->createRenderContext( *pSysGLDisplaySurface, contextCreateInfo );
+			sysGLRenderContext = pSysGLDisplaySurface->mDriver->createRenderContext( *pSysGLDisplaySurface, contextCreateInfo );
+			sysGLRenderContext->bindForCurrentThread( *pSysGLDisplaySurface );
 
-			return sysGLRenderContext;
+			auto sysVersionInfo = sysGLRenderContext->querySystemVersionInfo();
+			auto sysVersionInfoStr = sysVersionInfo.toString();
+			ts3DebugOutputFmt( "%s\n", sysVersionInfoStr.c_str() );
 		}
 		catch ( ... )
 		{
 			ts3DebugInterrupt();
 		}
 
-		return nullptr;
+		return sysGLRenderContext;
 	}
 
 

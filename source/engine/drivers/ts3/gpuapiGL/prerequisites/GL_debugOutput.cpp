@@ -5,6 +5,8 @@
 namespace ts3::gpuapi
 {
 
+#if( TS3_SYSTEM_GL_PLATFORM_TYPE == TS3_SYSTEM_GL_PLATFORM_TYPE_CORE )
+
 	static const size_t sEventInfoBufferSize = 1024;
 
 	GLDebugOutput::GLDebugOutput( GLDebugOutputVersion pVersion )
@@ -237,7 +239,7 @@ namespace ts3::gpuapi
 
 
 	GLDebugOutputARBExt::GLDebugOutputARBExt()
-	: GLDebugOutput( GLDebugOutputVersion::AMDExt )
+	: GLDebugOutput( GLDebugOutputVersion::ARBExt )
 	{}
 
 	GLDebugOutputARBExt::~GLDebugOutputARBExt() = default;
@@ -382,5 +384,79 @@ namespace ts3::gpuapi
 		auto * debugOutputInterface = reinterpret_cast<GLDebugOutputKHRCore *>( const_cast<void *>( pUserParam ) );
 		debugOutputInterface->handleEvent( pEventID, pEventSource, pEventType, pEventSeverity, pMessage );
 	}
+
+#elif( TS3_SYSTEM_GL_PLATFORM_TYPE == TS3_SYSTEM_GL_PLATFORM_TYPE_ES )
+
+	GLDebugOutput::GLDebugOutput( GLDebugOutputVersion /* pVersion */ )
+	: _apiVersion( GLDebugOutputVersion::Unknown )
+	, _processedEventsNum( 0 )
+	, _stateFlags( 0 )
+	{}
+
+	GLDebugOutput::~GLDebugOutput()
+	{}
+
+	void GLDebugOutput::enableDebugOutput( bool pEnable )
+	{}
+
+	void GLDebugOutput::enableSync( bool pEnable )
+	{}
+
+	void GLDebugOutput::enableBreakOnEvent( bool pEnable )
+	{}
+
+	void GLDebugOutput::enableEventFilter( bool pEnable )
+	{}
+
+	void GLDebugOutput::setEventFilter( GLuint pEventID, bool pIgnored )
+	{}
+
+	void GLDebugOutput::resetEventFilters()
+	{}
+
+	const char * GLDebugOutput::getExtensionName() const
+	{
+		return GLCoreAPIProxy::translateGLDebugOutputExtensionName( GLDebugOutputVersion::Unknown );
+	}
+
+	uint64 GLDebugOutput::getEventsCounter() const
+	{
+		return 0;
+	}
+
+	GLDebugOutputVersion GLDebugOutput::getVersion() const
+	{
+		return GLDebugOutputVersion::Unknown;
+	}
+
+	bool GLDebugOutput::isDebugOutputActive() const
+	{
+		return false;
+	}
+
+	bool GLDebugOutput::isEventIgnored( GLuint pEventID ) const
+	{
+		return true;
+	}
+
+	std::unique_ptr<GLDebugOutput> GLDebugOutput::createInterface( GLDebugOutputVersion pHint )
+	{
+		return nullptr;
+	}
+
+	void GLDebugOutput::processEvent( GLenum pEventSeverity, const char * pEventInfo )
+	{}
+
+	bool GLDebugOutput::checkAPISupport( GLDebugOutputVersion pVersion )
+	{
+		return pVersion == GLDebugOutputVersion::Unknown;
+	}
+
+	bool GLDebugOutput::validateVersion( GLDebugOutputVersion pVersion )
+	{
+		return pVersion == GLDebugOutputVersion::Unknown;
+	}
+
+#endif
 
 }

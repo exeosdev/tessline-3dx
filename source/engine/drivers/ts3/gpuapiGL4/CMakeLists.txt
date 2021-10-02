@@ -10,7 +10,6 @@ set( TS3_DRIVER_GPUAPI_GL4_SRC_FILES
         "GL4_gpuDriver.cpp"
         "GL4_gpuDriverAPI.h"
         "GL4_gpuDriverAPI.cpp"
-
         )
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )

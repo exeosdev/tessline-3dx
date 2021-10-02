@@ -8,7 +8,7 @@ namespace ts3::gpuapi
 
 #if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
 	// OpenGL ES 3.1 exposes neither the immutable storage API (glBufferStorage), nor the persistent mapping
-	// (as a natural consequence of the former). Thus, explicit coherency/persistency flags are not used.
+	// (as a natural consequence of the former). Thus, explicit coherency/persistence flags are not used.
 	static constexpr uint32 sSupportedEGPUMemoryFlags = E_GPU_MEMORY_ACCESS_MASK_CPU_READ_WRITE | E_GPU_MEMORY_ACCESS_MASK_GPU_READ_WRITE;
 #else
 	// Core supports full set of features, including immutable storage, persistent mapping and explicit flushes.
@@ -84,6 +84,8 @@ namespace ts3::gpuapi
 	bool GLGPUBuffer::mapRegion( void * pCommandObject, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode )
 	{
 		void * mappedMemoryPtr = nullptr;
+
+	#if( TS3GX_GL_FEATURE_SUPPORT_BUFFER_PERSISTENT_MAP )
 		if( mPersistentMapPtr )
 		{
 			if( !mResourceMemory.memoryFlags.isSet( E_GPU_MEMORY_HEAP_PROPERTY_FLAG_CPU_COHERENT_BIT ) )
@@ -94,6 +96,7 @@ namespace ts3::gpuapi
 			mappedMemoryPtr = mPersistentMapPtr;
 		}
 		else
+    #endif
 		{
 			auto openglMapFlags = GLCoreAPIProxy::translateGLBufferMapFlags( pMapMode, mResourceMemory.memoryFlags );
 			if( mGLBufferObject->map( pRegion.offset, pRegion.size, openglMapFlags ) )

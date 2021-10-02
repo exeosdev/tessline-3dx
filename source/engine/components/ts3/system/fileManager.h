@@ -4,25 +4,40 @@
 
 #include "fileCommon.h"
 #include "sysObject.h"
+#include <ts3/stdext/memoryBuffer.h>
 
 namespace ts3::system
 {
 
-    class File
+    using FileList = std::vector<FileHandle>;
+    using FileNameList = std::vector<std::string>;
+
+    class File : public SysObject
     {
     public:
         struct ObjectInternalData;
-        FileManager * const mFileManager = nullptr;
-        ObjectInternalData * const mInternal = nullptr;
+        FileManagerHandle mFileManager = nullptr;
+        std::unique_ptr<ObjectInternalData> const mInternal;
         const file_str_t & mName;
         const file_str_t & mFullPath;
 
     public:
-        File( FileManager * pFileManager, ObjectInternalData * pPrivate );
-        ~File();
+        File( FileManagerHandle pFileManager );
+        ~File() noexcept;
+
+        file_size_t readData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize = CX_FILE_SIZE_MAX );
+        file_size_t readData( MemoryBuffer & pBuffer, file_size_t pReadSize = CX_FILE_SIZE_MAX );
+
+        file_offset_t setFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos = EFilePointerRefPos::FileBeginning );
+
+        file_size_t getSize() const;
 
     private:
-        void _release();
+        void _nativeConstructor();
+        void _nativeDestructor() noexcept;
+        file_size_t _nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize );
+        file_offset_t _nativeSetFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos );
+        file_size_t _nativeGetSize() const;
     };
 
     class FileManager : public SysObject
@@ -34,28 +49,36 @@ namespace ts3::system
         std::unique_ptr<ObjectInternalData> const mInternal;
 
     public:
-        explicit FileManager( SysContext pSysContext );
-        ~FileManager();
+        explicit FileManager( SysContextHandle pSysContext );
+        ~FileManager() noexcept;
 
         FileHandle openFile( std::string pFilePath, EFileOpenMode pOpenMode );
+
         FileHandle createFile( std::string pFilePath );
+
         FileHandle createTemporaryFile();
 
-        void renameFile( const std::string & pFileName, const std::string & pNewName );
+        FileList openDirectoryFiles( const std::string & pDirectory );
 
-        std::string generateTemporaryFileName();
+        static FileNameList enumDirectoryFiles( const std::string & pDirectory );
 
-        bool checkDirectoryExists( const std::string & pDirPath );
+        static std::string generateTemporaryFileName();
+
+        static bool checkDirectoryExists( const std::string & pDirPath );
+
+        static bool checkFileExists( const std::string & pFilePath );
 
     private:
-        FileHandle _createFileInstance();
-        void _releaseFile( File & pFile );
+        void _nativeConstructor();
+        void _nativeDestructor() noexcept;
 
-        void _nativeOpenFile( File & pFile, std::string pFilePath, EFileOpenMode pOpenMode );
-        void _nativeCreateFile( File & pFile, std::string pFilePath );
-        void _nativeCreateTemporaryFile( File & pFile );
-        void _nativeCloseFile( File & pFile );
-        void _nativeGenerateTemporaryFileName( std::string & pOutName );
+        static void _nativeOpenFile( File & pFile, std::string pFilePath, EFileOpenMode pOpenMode );
+        static void _nativeCreateFile( File & pFile, std::string pFilePath );
+        static void _nativeCreateTemporaryFile( File & pFile );
+        static FileNameList _nativeEnumDirectoryFileNameList( const std::string & pDirectory );
+        static std::string _nativeGenerateTemporaryFileName();
+        static bool _nativeCheckDirectoryExists( const std::string & pDirPath );
+        static bool _nativeCheckFileExists( const std::string & pFilePath );
     };
 
 }

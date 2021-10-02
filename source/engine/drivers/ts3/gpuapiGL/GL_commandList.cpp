@@ -89,7 +89,7 @@ namespace ts3::gpuapi
 		glViewport( pViewportDesc.vpRect.opX, pViewportDesc.vpRect.opY, pViewportDesc.vpRect.sizeX, pViewportDesc.vpRect.sizeY );
 		ts3GLHandleLastError();
 
-		glDepthRange( pViewportDesc.depthRange.zNear, pViewportDesc.depthRange.zFar );
+		glDepthRangef( pViewportDesc.depthRange.zNear, pViewportDesc.depthRange.zFar );
 		ts3GLHandleLastError();
 	}
 

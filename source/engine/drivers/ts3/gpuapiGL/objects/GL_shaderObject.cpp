@@ -200,16 +200,22 @@ namespace ts3::gpuapi
 
 	GLbitfield GLShaderObject::getStageMaskForEShaderType( GLenum pGLEShaderType )
 	{
-		static const std::unordered_map<GLenum, GLbitfield> shaderTypeStageMaskMap =
+		switch( pGLEShaderType )
 		{
-			{ GL_VERTEX_SHADER          , GL_VERTEX_SHADER_BIT          },
-			{ GL_TESS_CONTROL_SHADER    , GL_TESS_CONTROL_SHADER_BIT    },
-			{ GL_TESS_EVALUATION_SHADER , GL_TESS_EVALUATION_SHADER_BIT },
-			{ GL_GEOMETRY_SHADER        , GL_GEOMETRY_SHADER_BIT        },
-			{ GL_FRAGMENT_SHADER        , GL_FRAGMENT_SHADER_BIT        },
-			{ GL_COMPUTE_SHADER         , GL_COMPUTE_SHADER_BIT         },
+			ts3CaseReturn( GL_VERTEX_SHADER   , GL_VERTEX_SHADER_BIT   );
+			ts3CaseReturn( GL_FRAGMENT_SHADER , GL_FRAGMENT_SHADER_BIT );
+		#if( TS3GX_GL_FEATURE_SUPPORT_SHADER_TYPE_GEOMETRY )
+			ts3CaseReturn( GL_GEOMETRY_SHADER , GL_GEOMETRY_SHADER_BIT );
+		#endif
+		#if( TS3GX_GL_FEATURE_SUPPORT_SHADER_TYPE_TESSELATION )
+			ts3CaseReturn( GL_TESS_CONTROL_SHADER    , GL_TESS_CONTROL_SHADER_BIT    );
+			ts3CaseReturn( GL_TESS_EVALUATION_SHADER , GL_TESS_EVALUATION_SHADER_BIT );
+		#endif
+		#if( TS3GX_GL_FEATURE_SUPPORT_SHADER_TYPE_COMPUTE )
+			ts3CaseReturn( GL_COMPUTE_SHADER , GL_COMPUTE_SHADER_BIT );
+		#endif
 		};
-		return ts3::getMapValueOrDefault( shaderTypeStageMaskMap, pGLEShaderType, cvGLInvalidValue );
+		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
 }

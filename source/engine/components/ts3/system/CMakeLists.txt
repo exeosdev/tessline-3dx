@@ -99,8 +99,8 @@ endif()
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
-            "internal/platform/osapi/win32/win32AssetSystem.h"
-            "internal/platform/osapi/win32/win32AssetSystem.cpp"
+            #"internal/platform/osapi/win32/win32AssetSystem.h"
+            #"internal/platform/osapi/win32/win32AssetSystem.cpp"
             "internal/platform/osapi/win32/win32Common.h"
             "internal/platform/osapi/win32/win32Common.cpp"
             "internal/platform/osapi/win32/win32Display.h"
@@ -118,7 +118,7 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
             "internal/platform/osapi/win32/win32Window.h"
             "internal/platform/osapi/win32/win32Window.cpp"
             )
-    set( CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG TRUE )
+    #set( CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG TRUE )
 endif()
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )

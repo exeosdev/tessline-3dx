@@ -22,6 +22,8 @@ namespace ts3::system
         //
         WindowGeometry windowGeometry;
         //
+        Version targetAPIVersion = { 1, 0 };
+        //
         Bitmask<EGLSurfaceCreateFlags> flags = 0;
     };
 

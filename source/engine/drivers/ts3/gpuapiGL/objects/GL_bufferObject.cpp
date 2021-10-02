@@ -68,12 +68,16 @@ namespace ts3::gpuapi
 
 	bool GLBufferObject::mapPersistent( GLenum pFlags, GLenum pActiveBindTarget )
 	{
+	#if( TS3GX_GL_FEATURE_SUPPORT_BUFFER_PERSISTENT_MAP )
 		// Unset all flags which may be redundant and/or invalid (like INVALIDATE_BUFFER_RANGE or UNSYNCHRONIZED).
 		pFlags &= ( GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_COHERENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT );
 		// Make sure a persistent version of the mapping will be requested.
 		pFlags |= GL_MAP_PERSISTENT_BIT;
-
+		// Map the buffer persistently
 		return map( 0, mSize, pFlags );
+    #else
+		return false;
+    #endif
 	}
 
 	void GLBufferObject::unmap( GLenum pActiveBindTarget )

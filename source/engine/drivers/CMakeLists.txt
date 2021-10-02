@@ -7,16 +7,47 @@ set( TS3_DRIVERS_INCLUDE_DIR_INTERNAL
         ${TS3_DRIVERS_INCLUDE_DIR}
         "${TS3_BASE_DIR}/source/engine/drivers" )
 
-set( _EBS_ENGINE_DRIVERS_TARGET_LIST
-        "gpuapiGL"
-        "gpuapiGL4"
-        "gpuapiGLES3"
-        # "gpuapiDX"
-        # "gpuapiDX11"
-        # "gpuapiDX12"
-        # "gpuapiVK"
-        # "gpuapiVK11"
-        )
+if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Android" )
+    set( _EBS_ENGINE_DRIVERS_TARGET_LIST
+            "gpuapiGL"
+            "gpuapiGLES3"
+            )
+elseif( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
+    set( _EBS_ENGINE_DRIVERS_TARGET_LIST
+            "gpuapiGL"
+            "gpuapiGL4"
+            #"gpuapiVK"
+            #"gpuapiVK11"
+            )
+elseif( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
+    set( _EBS_ENGINE_DRIVERS_TARGET_LIST
+            "gpuapiGL"
+            "gpuapiGL4"
+            # "gpuapiMTL"
+            # "gpuapiMTL3"
+            )
+elseif( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "iOS" )
+    set( _EBS_ENGINE_DRIVERS_TARGET_LIST
+            # "gpuapiMTL"
+            # "gpuapiMTL3"
+            )
+elseif( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
+    set( _EBS_ENGINE_DRIVERS_TARGET_LIST
+            "gpuapiGL"
+            "gpuapiGL4"
+            #"gpuapiDX"
+            #"gpuapiDX11"
+            #"gpuapiDX12"
+            )
+elseif( "${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_MSE}" )
+    set( _EBS_ENGINE_DRIVERS_TARGET_LIST
+            "gpuapiDX"
+            "gpuapiDX11"
+            "gpuapiDX12"
+            )
+endif()
+
+setInternal( CM_EBS__ENGINE_DRIVERS_TARGET_LIST "${_EBS_ENGINE_DRIVERS_TARGET_LIST}" )
 
 foreach( target ${_EBS_ENGINE_DRIVERS_TARGET_LIST} )
     add_subdirectory( "ts3/${target}" )

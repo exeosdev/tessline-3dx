@@ -162,18 +162,22 @@ namespace ts3::gpuapi
 		auto textureBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
 		memory_size_t textureImageSize = 0;
-
 		GLint textureCompressedFlag = 0;
+
+	#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_COMPRESSED_BCX )
 		glGetTexLevelParameteriv( textureBindTarget, 0, GL_TEXTURE_COMPRESSED, &textureCompressedFlag );
 		ts3GLHandleLastError();
+	#endif
 
 		if( textureCompressedFlag )
 		{
+		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_COMPRESSED_BCX )
 			GLint textureCompressedImageSize = 0;
 			glGetTexLevelParameteriv( textureBindTarget, 0, GL_TEXTURE_COMPRESSED_IMAGE_SIZE, &textureCompressedImageSize );
 			ts3GLHandleLastError();
 
 			textureImageSize = textureCompressedImageSize;
+		#endif
 		}
 		else
 		{
