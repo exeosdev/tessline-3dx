@@ -1,5 +1,6 @@
+#version 310 es
 
-#version 430 core
+precision highp float;
 
 in vec2 psTexCoord0;
 
@@ -12,4 +13,3 @@ void main()
 	vec4 sampledColor = texture( uSampler0, psTexCoord0 );
 	outPixelColor = vec4( sampledColor.xyz, 1.0f );
 }
-

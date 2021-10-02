@@ -40,7 +40,7 @@ namespace ts3::system
         {
             auto * errorMessageStr = translateErrorCode( errorCode );
             ts3DebugOutputFmt( "OpenGL API error: %s.", errorMessageStr );
-            ts3DebugInterrupt();
+             ts3DebugInterrupt();
         }
     }
 

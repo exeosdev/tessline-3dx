@@ -41,7 +41,7 @@ namespace ts3::system
         auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
         auto & driverNativeData = mInternal->nativeDataPriv;
 
-        EGLConfig fbConfig = nativeEGLChooseCoreFBConfig( driverNativeData.eDisplay, pCreateInfo.visualConfig );
+        EGLConfig fbConfig = nativeEGLChooseCoreFBConfig( driverNativeData.eDisplay, pCreateInfo.visualConfig, pCreateInfo.targetAPIVersion );
 
         // EGL_NATIVE_VISUAL_ID is an attribute of the EGLConfig that is guaranteed to be
         // accepted by ANativeWindow_setBuffersGeometry(). As soon as we retrieve an EGLConfig,
