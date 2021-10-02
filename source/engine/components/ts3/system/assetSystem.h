@@ -108,6 +108,13 @@ namespace ts3::system
             return readData( pVector.data(), pVector.size() * sizeof( TpValue ), pReadSize );
         }
 
+        file_size_t readAll( DynamicMemoryBuffer & pBuffer )
+        {
+            const auto assetSize = _nativeGetSize();
+            pBuffer.resize( assetSize );
+            return readData( pBuffer.dataPtr(), assetSize, assetSize );
+        }
+
         template <typename TpChar>
         file_size_t readAll( std::basic_string<TpChar> & pString )
         {

@@ -100,10 +100,8 @@ int main( int pArgc, const char ** pArgv )
 
 #endif
 
-    auto fontsDir = assetLoader->openDirectory( "shaders/GLES3" );
-    auto psAsset = fontsDir->openAsset( "fx_passthrough_ps", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
-    auto fontsList = fontsDir->getAssetList();
-    auto vsAsset = assetLoader->openSubAsset( "shaders/GL4/fx_passthrough_vs", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
+    auto psAsset = assetLoader->openSubAsset( "shaders/GLES3/fx_passthrough_ps", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
+    auto vsAsset = assetLoader->openSubAsset( "shaders/GLES3/fx_passthrough_vs", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
 
     std::string shaderCodePS;
     psAsset->readAll( shaderCodePS );
