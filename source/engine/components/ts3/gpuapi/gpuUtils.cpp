@@ -3,44 +3,58 @@
 #include "gpuDevice.h"
 #include <fstream>
 
-namespace ts3::gpuapi::Utils
+namespace ts3::gpuapi
 {
 
-	ShaderHandle createShaderFromFile( GPUDevice & pGPUDevice, EShaderType pShaderType, const char * pFilename )
-	{
-		std::ifstream inputFile( pFilename, std::ios::in );
-		if( !inputFile )
-		{
-			return nullptr;
-		}
+    namespace utils
+    {
 
-		inputFile.seekg( 0, std::ios::end );
+        ShaderHandle createShaderFromSource( GPUDevice & pGPUDevice, EShaderType pShaderType, const void * pSource, size_t pSourceLength )
+        {
+            ShaderCreateInfo shaderCreateInfo;
+            shaderCreateInfo.shaderType = pShaderType;
+            shaderCreateInfo.sourceCode = pSource;
+            shaderCreateInfo.sourceCodeLength = pSourceLength;
 
-		size_t fileSize = inputFile.tellg();
-		if( fileSize == static_cast<std::ifstream::pos_type>( -1 ) )
-		{
-			return nullptr;
-		}
+            if( pGPUDevice.isDebugDevice() )
+            {
+                shaderCreateInfo.createFlags = E_SHADER_CREATE_FLAG_DEBUG_BIT;
+            }
+            else
+            {
+                shaderCreateInfo.createFlags = E_SHADER_CREATE_FLAG_OPTIMIZATION_L1_BIT;
+            }
 
-		inputFile.seekg( 0, std::ios::beg );
+            auto shader = pGPUDevice.createShader( shaderCreateInfo );
+            return shader;
+        }
 
-		std::vector<char> fileContent;
-		fileContent.resize( fileSize + 1 );
-		inputFile.read( fileContent.data(), fileSize );
-		fileContent[fileSize] = 0;
+        ShaderHandle createShaderFromFile( GPUDevice & pGPUDevice, EShaderType pShaderType, const char * pFilename )
+	    {
+            std::ifstream inputFile( pFilename, std::ios::in );
+            if( !inputFile )
+            {
+                return nullptr;
+            }
 
-		ShaderCreateInfo shaderCreateInfo;
-		shaderCreateInfo.shaderType = pShaderType;
-		shaderCreateInfo.sourceCode = fileContent.data();
-		shaderCreateInfo.sourceCodeLength = fileSize;
-	#if ( TS3_DEBUG )
-		shaderCreateInfo.createFlags = E_SHADER_CREATE_FLAG_DEBUG_BIT;
-	#else
-		shaderCreateInfo.createFlags = E_SHADER_CREATE_FLAG_OPTIMIZATION_L1_BIT;
-	#endif
+            inputFile.seekg( 0, std::ios::end );
 
-		auto shader = pGPUDevice.createShader( shaderCreateInfo );
-		return shader;
-	}
+            size_t fileSize = inputFile.tellg();
+            if( fileSize == static_cast<std::ifstream::pos_type>( -1 ) )
+            {
+                return nullptr;
+            }
+
+            inputFile.seekg( 0, std::ios::beg );
+
+            std::vector<char> fileContent;
+            fileContent.resize( fileSize + 1 );
+            inputFile.read( fileContent.data(), fileSize );
+            fileContent[fileSize] = 0;
+
+            return createShaderFromSource( pGPUDevice, pShaderType, fileContent.data(), fileContent.size() );
+        }
+
+    }
 
 }
