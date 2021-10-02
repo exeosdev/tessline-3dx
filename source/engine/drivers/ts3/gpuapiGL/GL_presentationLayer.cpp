@@ -18,6 +18,17 @@ namespace ts3::gpuapi
 			surfaceCreateInfo.visualConfig = pPLCreateInfo.visualConfig;
 			surfaceCreateInfo.flags = 0u;
 
+		#if( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL32 )
+			surfaceCreateInfo.targetAPIVersion.major = 3;
+			surfaceCreateInfo.targetAPIVersion.minor = 2;
+		#elif( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL43 )
+			surfaceCreateInfo.targetAPIVersion.major = 4;
+			surfaceCreateInfo.targetAPIVersion.minor = 3;
+		#elif( TS3GX_GL_TARGET == TS3GX_GL_TARGET_ES31 )
+			surfaceCreateInfo.targetAPIVersion.major = 3;
+			surfaceCreateInfo.targetAPIVersion.minor = 1;
+        #endif
+
 			if( pPLCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT ) )
 			{
 				surfaceCreateInfo.flags.set( system::E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );

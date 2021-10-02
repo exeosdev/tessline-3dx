@@ -6,6 +6,7 @@
 
 #include "pipelineStateDesc.h"
 #include <map>
+#include <unordered_map>
 
 namespace ts3::gpuapi
 {

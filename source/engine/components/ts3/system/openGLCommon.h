@@ -15,6 +15,7 @@
 #  define TS3_SYSTEM_GL_PLATFORM_TYPE TS3_SYSTEM_GL_PLATFORM_TYPE_ES
 #  include <GLES3/gl3platform.h>
 #  include <GLES3/gl3.h>
+#  include <GLES3/gl31.h>
 #endif
 
 #if !defined( TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS )

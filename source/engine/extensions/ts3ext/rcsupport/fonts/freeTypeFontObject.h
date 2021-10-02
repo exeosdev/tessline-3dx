@@ -3,6 +3,7 @@
 #define __TS3EXT_RCSUPPORT_FREE_TYPE_LIBRARY_H__
 
 #include "freeTypeCommon.h"
+#include <unordered_map>
 
 namespace ts3
 {

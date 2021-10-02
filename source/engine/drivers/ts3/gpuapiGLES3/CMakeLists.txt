@@ -8,7 +8,9 @@ set( TS3_DRIVER_GPUAPI_GLES3_SRC_FILES
         "GLES3_gpuDevice.cpp"
         "GLES3_gpuDriver.h"
         "GLES3_gpuDriver.cpp"
-)
+        "GLES3_gpuDriverAPI.h"
+        "GLES3_gpuDriverAPI.cpp"
+        )
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
     add_library( ts3drv-gpuapi-gles3 STATIC ${TS3_DRIVER_GPUAPI_GLES3_SRC_FILES} )

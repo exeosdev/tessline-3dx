@@ -6,6 +6,9 @@
 
 #include <memory>
 
+#define ts3CaseReturn( pCaseLabel, pReturnValue ) \
+	case pCaseLabel: return pReturnValue
+
 namespace ts3
 {
 

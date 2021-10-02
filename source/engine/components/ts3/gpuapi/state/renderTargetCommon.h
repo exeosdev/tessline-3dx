@@ -154,6 +154,8 @@ namespace ts3::gpuapi
 
 	TS3_GPUAPI_OBJ const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultBGRA8;
 	TS3_GPUAPI_OBJ const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultBGRA8D24S8;
+	TS3_GPUAPI_OBJ const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultRGBA8;
+	TS3_GPUAPI_OBJ const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultRGBA8D24S8;
 
 	TS3_GPUAPI_API bool createRenderTargetLayout( const RenderTargetLayoutDesc & pRTLayoutDesc,
 	                                              RenderTargetLayout & pOutRTLayout );

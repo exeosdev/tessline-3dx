@@ -35,6 +35,33 @@ namespace ts3::gpuapi
 		}
 	};
 
+	const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultRGBA8 =
+	{
+		{
+			RenderTargetLayoutDesc::AttachmentLayoutDesc
+			{
+				ERenderTargetAttachmentID::RTColor0,
+				ETextureFormat::R8G8B8A8_UNORM
+			}
+		}
+	};
+
+	const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultRGBA8D24S8 =
+	{
+		{
+			RenderTargetLayoutDesc::AttachmentLayoutDesc
+			{
+				ERenderTargetAttachmentID::RTColor0,
+				ETextureFormat::R8G8B8A8_UNORM
+			},
+			RenderTargetLayoutDesc::AttachmentLayoutDesc
+			{
+				ERenderTargetAttachmentID::RTDepthStencil,
+				ETextureFormat::D24_UNORM_S8_UINT
+			}
+		}
+	};
+
 
 	bool createRenderTargetLayout( const RenderTargetLayoutDesc & pRTLayoutDesc,
 	                               RenderTargetLayout & pOutRTLayout )
