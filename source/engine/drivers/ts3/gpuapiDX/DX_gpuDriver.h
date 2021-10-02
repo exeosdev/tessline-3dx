@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef __TS3DRIVER_GPUAPI_DXCOMMON_GRAPHICS_DRIVER_H__
-#define __TS3DRIVER_GPUAPI_DXCOMMON_GRAPHICS_DRIVER_H__
+#ifndef __TS3DRIVER_GPUAPI_DXCOMMON_GPU_DRIVER__
+#define __TS3DRIVER_GPUAPI_DXCOMMON_GPU_DRIVER__
 
 #include "DX_prerequisites.h"
 #include <ts3/gpuapi/gpuDriver.h>
@@ -19,4 +19,4 @@ namespace ts3::gpuapi
 
 }
 
-#endif // __TS3DRIVER_GPUAPI_DXCOMMON_GRAPHICS_DRIVER_H__
+#endif // __TS3DRIVER_GPUAPI_DXCOMMON_GPU_DRIVER__

@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef __TS3DRIVER_GPUAPI_DX12_GRAPHICS_DRIVER_H__
-#define __TS3DRIVER_GPUAPI_DX12_GRAPHICS_DRIVER_H__
+#ifndef __TS3DRIVER_GPUAPI_DX12_GPU_DRIVER__
+#define __TS3DRIVER_GPUAPI_DX12_GPU_DRIVER__
 
 #include "DX12_prerequisites.h"
 #include <ts3/gpuapiDX/DX_gpuDriver.h>
@@ -30,4 +30,4 @@ namespace ts3::gpuapi
 
 }
 
-#endif // __TS3DRIVER_GPUAPI_DX12_GRAPHICS_DRIVER_H__
+#endif // __TS3DRIVER_GPUAPI_DX12_GPU_DRIVER__
