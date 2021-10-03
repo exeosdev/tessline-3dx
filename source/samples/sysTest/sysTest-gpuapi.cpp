@@ -224,6 +224,11 @@ int main( int pArgc, const char ** pArgv )
 
     initializeGraphicsDriver( sysContext, gxDriverState );
 
+    if( auto * eventSource = gxDriverState.presentationLayer->getInternalSystemEventSource() )
+    {
+        evtController->registerEventSource( *eventSource );
+    }
+
     auto vertexShader = utils::createShaderFromSource( *(gxDriverState.device), EShaderType::VertexShader, appResources.fxSrcPassThroughVs );
     auto pixelShader = utils::createShaderFromSource( *(gxDriverState.device), EShaderType::PixelShader, appResources.fxSrcPassThroughPs );
 
@@ -400,6 +405,41 @@ int main( int pArgc, const char ** pArgv )
 
     ts3::CameraController cameraController;
     cameraController.initialize( cameraOriginPoint, cameraTargetPoint, 60.0f );
+
+    bool rotate = false;
+
+    evtDispatcher->bindEventHandler(
+            ts3::system::EEventCodeIndex::InputMouseButton,
+            [&cameraController,&rotate]( const ts3::system::EventObject & pEvt ) -> bool {
+                const auto & eButton = pEvt.eInputMouseButton;
+                if( eButton.buttonAction == EMouseButtonActionType::Click )
+                {
+                    rotate = true;
+                }
+                else if( eButton.buttonAction == EMouseButtonActionType::Release )
+                {
+                    rotate = false;
+                }
+                return true;
+            });
+    evtDispatcher->bindEventHandler(
+            ts3::system::EEventCodeIndex::InputMouseMove,
+            [&cameraController,&rotate]( const ts3::system::EventObject & pEvt ) -> bool {
+                //if( rotate )
+                {
+                    const auto & emove = pEvt.eInputMouseMove;
+                    cameraController.rotateAroundTarget( emove.movementDelta.x, emove.movementDelta.y );
+                    //if( emove.buttonStateMask.isSet( ts3::system::E_MOUSE_BUTTON_FLAG_LEFT_BIT ) )
+                    //{
+                    //    cameraController.rotateAroundOrigin( emove.movementDelta.x, emove.movementDelta.y );
+                    //}
+                    //else if( emove.buttonStateMask.isSet( ts3::system::E_MOUSE_BUTTON_FLAG_RIGHT_BIT ) )
+                    //{
+                    //    cameraController.rotateAroundTarget( emove.movementDelta.x, emove.movementDelta.y );
+                    //}
+                }
+                return true;
+            });
 
     CB0Data cb0Data =
     {
