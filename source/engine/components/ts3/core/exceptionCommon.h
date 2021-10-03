@@ -40,8 +40,8 @@ namespace ts3
         Interrupt,
         // Defined primarily within the ::Math component.
         Math,
-        // Dedicated type for exceptions carrying Results as an error indicator.
-        Result,
+        // Dedicated type for exceptions carrying ResultProxy as an error indicator.
+        ResultProxy,
         // System-specific exceptions, extended in platform-specific manner. Defined primarily within the ::System component.
         System,
         //

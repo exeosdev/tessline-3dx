@@ -62,6 +62,15 @@ namespace ts3::system
         Legacy
     };
 
+    enum : exception_code_value_t
+    {
+        E_EXCEPTION_CODE_SYSTEM_OPENGL_CORE_ERROR    = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE0 ),
+        E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_AGL = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE1 ),
+        E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_EGL = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE2 ),
+        E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_GLX = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE3 ),
+        E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_WGL = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE4 )
+    };
+
     /// @brief Represents combined info about the current OpenGL subsystem version.
     /// Basically, this struct stores the output from all version-related GL queries.
     struct GLSystemVersionInfo
@@ -81,6 +90,48 @@ namespace ts3::system
     public:
         std::string toString() const;
     };
+
+    struct GLErrorInfo
+    {
+    public:
+        // The error code. It will contains either a common OpenGL error
+        // code (GLenum) or one of the subsystem-specific ones (AGL/EGL/GLX/WGL).
+        uint32 errorCode;
+
+        // Message describing
+        const char * errorString;
+
+    public:
+        constexpr GLErrorInfo( bool pStatus )
+        : errorCode( pStatus ? 0u : Limits<uint32>::maxValue )
+        , errorString( CX_STR_CHAR_EMPTY )
+        {}
+
+        template <typename TpGLErrorCode>
+        constexpr GLErrorInfo( TpGLErrorCode pErrorCode, const char * pErrorMessage = nullptr )
+        : errorCode( trunc_numeric_cast<uint32>( pErrorCode ) )
+        , errorString( pErrorMessage ? CX_STR_CHAR_EMPTY : pErrorMessage )
+        {}
+    };
+
+    class GLSystemException : public SystemException
+    {
+    public:
+        GLErrorInfo mGLErrorInfo;
+
+    public:
+        explicit GLSystemException( ExceptionInfo pExceptionInfo )
+        : SystemException( std::move( pExceptionInfo ) )
+        , mGLErrorInfo( true )
+        {}
+
+        GLSystemException( ExceptionInfo pExceptionInfo, GLErrorInfo pGLErrorInfo )
+        : SystemException( std::move( pExceptionInfo ) )
+        , mGLErrorInfo( std::move( pGLErrorInfo ) )
+        {}
+    };
+
+    ts3SetExceptionCategoryType( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, GLSystemException );
 
     class GLCoreAPI
     {

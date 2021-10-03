@@ -41,12 +41,12 @@ namespace ts3::system
         auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
         auto & driverNativeData = mInternal->nativeDataPriv;
 
-        EGLConfig fbConfig = nativeEGLChooseCoreFBConfig( driverNativeData.eDisplay, pCreateInfo.visualConfig, pCreateInfo.targetAPIVersion );
+        EGLConfig fbConfig = platform::eglChooseCoreFBConfig( driverNativeData.eDisplay, pCreateInfo.visualConfig, pCreateInfo.targetAPIVersion );
 
         // EGL_NATIVE_VISUAL_ID is an attribute of the EGLConfig that is guaranteed to be
         // accepted by ANativeWindow_setBuffersGeometry(). As soon as we retrieve an EGLConfig,
         // we can reconfigure the ANativeWindow buffers using the value of EGL_NATIVE_VISUAL_ID.
-        EGLint fbConfigNativeVisualID = nativeEGLQueryFBConfigAttribute( driverNativeData.eDisplay,
+        EGLint fbConfigNativeVisualID = platform::eglQueryFBConfigAttribute( driverNativeData.eDisplay,
                                                                          fbConfig,
                                                                          EGL_NATIVE_VISUAL_ID );
 
@@ -56,10 +56,10 @@ namespace ts3::system
                                                                fbConfigNativeVisualID );
         if( aNativeResult < 0 )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
-        nativeEGLCreateSurface( pDisplaySurface.mInternal->nativeDataPriv,
+        platform::eglCreateSurface( pDisplaySurface.mInternal->nativeDataPriv,
                                 driverNativeData.eDisplay,
                                 driverNativeData.eNativeWindow,
                                 fbConfig,
@@ -73,7 +73,7 @@ namespace ts3::system
     {
         auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
 
-        nativeEGLCreateSurfaceForCurrentThread( pDisplaySurface.mInternal->nativeDataPriv );
+        platform::eglCreateSurfaceForCurrentThread( pDisplaySurface.mInternal->nativeDataPriv );
 
         pDisplaySurface.mInternal->nativeDataPriv.setSessionData( aSessionData );
         pDisplaySurface.mInternal->nativeDataPriv.eNativeWindow = aSessionData.aNativeWindow;
@@ -81,7 +81,7 @@ namespace ts3::system
 
     void GLSystemDriver::_nativeDestroyDisplaySurface( GLDisplaySurface & pDisplaySurface )
     {
-        nativeEGLDestroySurface( pDisplaySurface.mInternal->nativeDataPriv );
+        platform::eglDestroySurface( pDisplaySurface.mInternal->nativeDataPriv );
         pDisplaySurface.mInternal->nativeDataPriv.resetSessionData();
     }
 
@@ -91,7 +91,7 @@ namespace ts3::system
     {
         auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
 
-        nativeEGLCreateCoreContext( pRenderContext.mInternal->nativeDataPriv,
+        platform::eglCreateCoreContext( pRenderContext.mInternal->nativeDataPriv,
                                     pDisplaySurface.mInternal->nativeDataPriv,
                                     pCreateInfo );
 
@@ -102,14 +102,14 @@ namespace ts3::system
     {
         auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
 
-        nativeEGLCreateCoreContextForCurrentThread( pRenderContext.mInternal->nativeDataPriv );
+        platform::eglCreateCoreContextForCurrentThread( pRenderContext.mInternal->nativeDataPriv );
 
         pRenderContext.mInternal->nativeDataPriv.setSessionData( aSessionData );
     }
 
     void GLSystemDriver::_nativeDestroyRenderContext( GLRenderContext & pRenderContext )
     {
-        nativeEGLDestroyRenderContext( pRenderContext.mInternal->nativeDataPriv );
+        platform::eglDestroyRenderContext( pRenderContext.mInternal->nativeDataPriv );
         pRenderContext.mInternal->nativeDataPriv.resetSessionData();
     }
 
@@ -159,7 +159,7 @@ namespace ts3::system
 
     void GLRenderContext::_nativeBindForCurrentThread( const GLDisplaySurface & pTargetSurface )
     {
-        nativeEGLBindContextForCurrentThread( mInternal->nativeDataPriv, pTargetSurface.mInternal->nativeDataPriv );
+        platform::eglBindContextForCurrentThread( mInternal->nativeDataPriv, pTargetSurface.mInternal->nativeDataPriv );
     }
 
 
@@ -170,12 +170,12 @@ namespace ts3::system
         pGLDriverNativeData.setSessionData( aSessionData );
         pGLDriverNativeData.eNativeWindow = aSessionData.aNativeWindow;
 
-        nativeEGLInitializeGLDriver( pGLDriverNativeData );
+        platform::eglInitializeGLDriver( pGLDriverNativeData );
     }
 
     void _androidReleaseDriver( GLSystemDriverNativeData & pGLDriverNativeData )
     {
-        nativeEGLReleaseGLDriver( pGLDriverNativeData );
+        platform::eglReleaseGLDriver( pGLDriverNativeData );
 
         pGLDriverNativeData.eNativeWindow = nullptr;
         pGLDriverNativeData.resetSessionData();

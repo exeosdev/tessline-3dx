@@ -38,7 +38,7 @@ namespace ts3::system
             {
                 if( pathComponentIndex == 0 )
                 {
-                    ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+                    ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
                 }
 
                 auto & prevComponent = pathComponents[pathComponentIndex - 1];

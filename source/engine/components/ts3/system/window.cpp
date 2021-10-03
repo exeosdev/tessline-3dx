@@ -170,7 +170,7 @@ namespace ts3::system
         {
             if( !isWindowValid( pWindow ) )
             {
-                ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+                ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
             }
 
             _nativeDestroyWindow( pWindow );

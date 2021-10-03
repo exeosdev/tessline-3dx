@@ -20,7 +20,6 @@ namespace ts3::system
 
 	    std::string mseQuerySystemErrorMessage( DWORD pErrorCode );
 
-
 	}
 
 } // namespace ts3::system

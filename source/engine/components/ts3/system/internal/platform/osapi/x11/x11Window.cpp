@@ -132,7 +132,7 @@ namespace ts3::system
 
 		if( windowXID == E_X11_XID_NONE )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		if( pCreateInfo.fullscreenMode )

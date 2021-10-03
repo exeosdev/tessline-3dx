@@ -6,6 +6,10 @@
 
 #include <memory>
 
+#define _ts3MakeStr2( pValue ) #pValue
+
+#define ts3MakeStr( pValue ) _ts3MakeStr2( pValue )
+
 #define ts3CaseReturn( pCaseLabel, pReturnValue ) \
 	case pCaseLabel: return pReturnValue
 

@@ -1,40 +1,56 @@
 
 #include <ts3/system/openGLNative.h>
+#include "eglCoreUtils.h"
 
 namespace ts3::system
 {
 
-	static EGLContext _eglCreateCoreContextDefault( EGLRenderContextNativeData & pEGLContextNativeData,
-													const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-													const GLRenderContextCreateInfo & pCreateInfo,
-													EGLContext pEGLShareContext );
-	static EGLContext _eglCreateCoreContextES( EGLRenderContextNativeData & pEGLContextNativeData,
-											   const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-											   const GLRenderContextCreateInfo & pCreateInfo,
-											   EGLContext pEGLShareContext );
-	static std::vector<EGLConfig> _eglQueryCompatibleEGLConfigList( EGLDisplay pDisplay, const VisualConfig & pVisualConfig, const Version & pTargetAPIVersion );
-	static int _eglGetEGLConfigMatchRate( EGLDisplay pDisplay, EGLConfig pEGLConfig, const VisualConfig & pVisualConfig );
-	static void _eglGetAttribArrayForVisualConfig( const VisualConfig & pVisualConfig, const Version & pTargetAPIVersion, int * pAttribArray );
-	static void _eglValidateRequestedContextVersion( Version & pVersion );
+    // Returns an array of EGLConfigs matching specified VisualConfig definition and API version (ES).
+	static std::vector<EGLConfig> _eglQueryCompatibleEGLConfigList( EGLDisplay pDisplay,
+                                                                    const VisualConfig & pVisualConfig,
+                                                                    const Version & pTargetAPIVersion );
 
-	void nativeEGLInitializeGLDriver( EGLDriverNativeData & pEGLDriverNativeData )
+    // Computes a "compatibility rate", i.e. how much the specified FBConfig matches the visual.
+    static int _eglGetEGLConfigMatchRate( EGLDisplay pDisplay, EGLConfig pEGLConfig,
+                                          const VisualConfig & pVisualConfig );
+
+    // Translation: VisualConfig+APIVersion --> array of EGL_* attributes required by the system API. Used for surface/context creation.
+    static void _eglGetAttribArrayForVisualConfig( const VisualConfig & pVisualConfig,
+                                                   const Version & pTargetAPIVersion,
+                                                   int * pAttribArray );
+
+    // Validates specified API version using selected target API profile (Core/ES).
+    // 'Version' parameter is an IN/OUT parameter and updated with a valid version number.
+	static void _eglValidateRequestedContextVersion( EGLAPIProfile pTargetAPIProfile, Version & pVersion );
+
+	// Creates an EGL rendering context for the Core/Legacy API profile.
+	// Uses full set of context creation features (debug and forward compatibility flags, detailed version, etc).
+    static EGLContext _eglCreateCoreContextDefault( EGLRenderContextNativeData & pEGLContextNativeData,
+                                                    const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
+                                                    const GLRenderContextCreateInfo & pCreateInfo,
+                                                    EGLContext pEGLShareContext );
+
+	// Creates an EGL rendering context for the ES API profile.
+	// Uses only the client API version number.
+    static EGLContext _eglCreateCoreContextES( EGLRenderContextNativeData & pEGLContextNativeData,
+                                               const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
+                                               const Version & pTargetAPIVersion,
+                                               EGLContext pEGLShareContext );
+
+	void platform::eglInitializeGLDriver( EGLDriverNativeData & pEGLDriverNativeData )
 	{
 		EGLDisplay eglDisplay = ::eglGetDisplay( EGL_DEFAULT_DISPLAY );
-
         if( eglDisplay == EGL_NO_DISPLAY )
         {
-            // auto errorMessage = eglQueryLastErrorMessage();
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3ThrowEx( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_EGL, ts3EGLGetLastErrorInfo() );
         }
 
 		EGLint eglVersionMajor = 0;
 		EGLint eglVersionMinor = 0;
 		auto initResult = ::eglInitialize( eglDisplay, &eglVersionMajor, &eglVersionMinor );
-
 		if( initResult == EGL_FALSE )
 		{
-			// auto errorMessage = eglQueryLastErrorMessage();
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3ThrowEx( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_EGL, ts3EGLGetLastErrorInfo() );
 		}
 
 		pEGLDriverNativeData.eDisplay = eglDisplay;
@@ -42,7 +58,7 @@ namespace ts3::system
 		pEGLDriverNativeData.eglVersion.minor = eglVersionMinor;
 	}
 
-	void nativeEGLReleaseGLDriver( EGLDriverNativeData & pEGLDriverNativeData )
+	void platform::eglReleaseGLDriver( EGLDriverNativeData & pEGLDriverNativeData )
 	{
 		auto eglResult = ::eglTerminate( pEGLDriverNativeData.eDisplay );
 		pEGLDriverNativeData.eDisplay = EGL_NO_DISPLAY;
@@ -50,45 +66,47 @@ namespace ts3::system
 		pEGLDriverNativeData.eglVersion.minor = 0;
 	}
 
-	EGLConfig nativeEGLChooseCoreFBConfig( EGLDisplay pDisplay, const VisualConfig & pVisualConfig, const Version & pTargetAPIVersion )
+	EGLConfig platform::eglChooseCoreFBConfig( EGLDisplay pDisplay,
+											   const VisualConfig & pVisualConfig,
+											   const Version & pTargetAPIVersion )
 	{
-		auto EGLConfigList = _eglQueryCompatibleEGLConfigList( pDisplay, pVisualConfig, pTargetAPIVersion );
+		auto eglConfigList = _eglQueryCompatibleEGLConfigList( pDisplay, pVisualConfig, pTargetAPIVersion );
 
 		int bestMatchRate = 0;
 		EGLConfig bestEGLConfig = nullptr;
 
-		for ( auto EGLConfig : EGLConfigList )
+		for ( auto eglConfig : eglConfigList )
 		{
-			int matchRate = _eglGetEGLConfigMatchRate( pDisplay, EGLConfig, pVisualConfig );
+			int matchRate = _eglGetEGLConfigMatchRate( pDisplay, eglConfig, pVisualConfig );
 			if ( matchRate > bestMatchRate )
 			{
 				bestMatchRate = matchRate;
-				bestEGLConfig = EGLConfig;
+				bestEGLConfig = eglConfig;
 			}
 		}
 
 		// return bestEGLConfig;
-		return EGLConfigList[0];
+		return eglConfigList[0];
 	}
 
-	EGLint nativeEGLQueryFBConfigAttribute( EGLDisplay pEGLDisplay, EGLConfig pEGLConfig, EGLenum pAttribute )
+	EGLint platform::eglQueryFBConfigAttribute( EGLDisplay pEGLDisplay, EGLConfig pEGLConfig, EGLenum pAttribute )
 	{
 		EGLint fbConfigAttribute = 0;
 
 		auto eglResult = ::eglGetConfigAttrib( pEGLDisplay, pEGLConfig, pAttribute, &fbConfigAttribute );
 		if( eglResult == EGL_FALSE )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3ThrowEx( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_EGL, ts3EGLGetLastErrorInfo() );
 		}
 
 		return fbConfigAttribute;
 	}
 
-	void nativeEGLCreateSurface( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-								 EGLDisplay pEGLDisplay,
-								 EGLNativeWindowType pWindow,
-								 EGLConfig pEGLConfig,
-								 const VisualConfig & pVisualConfig )
+	void platform::eglCreateSurface( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
+									 EGLDisplay pEGLDisplay,
+									 EGLNativeWindowType pWindow,
+									 EGLConfig pEGLConfig,
+									 const VisualConfig & pVisualConfig )
 	{
 		const EGLint defaultSurfaceAttributeList[] = { EGL_NONE };
 		const EGLint sRGBSurfaceAttributeList[] = { EGL_GL_COLORSPACE, EGL_GL_COLORSPACE_SRGB, EGL_NONE };
@@ -100,11 +118,9 @@ namespace ts3::system
 		}
 
 		auto surfaceHandle = ::eglCreateWindowSurface( pEGLDisplay, pEGLConfig, pWindow, surfaceAttributeList );
-		ts3EGLHandleLastError();
-
 		if( surfaceHandle == EGL_NO_SURFACE )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3ThrowEx( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_EGL, ts3EGLGetLastErrorInfo() );
 		}
 
 		pEGLSurfaceNativeData.eDisplay = pEGLDisplay;
@@ -112,7 +128,7 @@ namespace ts3::system
 		pEGLSurfaceNativeData.eFBConfig = pEGLConfig;
 	}
 
-	void nativeEGLCreateSurfaceForCurrentThread( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData )
+	void platform::eglCreateSurfaceForCurrentThread( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData )
 	{
 		auto eDisplay = ::eglGetCurrentDisplay();
 		auto eSurfaceHandle = ::eglGetCurrentSurface( EGL_DRAW );
@@ -122,7 +138,7 @@ namespace ts3::system
 		auto eglResult = ::eglQuerySurface( eDisplay, eSurfaceHandle, EGL_CONFIG_ID, &surfaceConfigID );
 		if( eglResult == EGL_FALSE )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3ThrowEx( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_EGL, ts3EGLGetLastErrorInfo() );
 		}
 
 		EGLConfig surfaceConfig;
@@ -132,7 +148,7 @@ namespace ts3::system
 		eglResult = ::eglChooseConfig( eDisplay, &( scAttributeList[0] ), &surfaceConfig, 1, &resultConfigsNum );
 		if( eglResult == EGL_FALSE )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3ThrowEx( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_EGL, ts3EGLGetLastErrorInfo() );
 		}
 
 		pEGLSurfaceNativeData.eDisplay = eDisplay;
@@ -140,7 +156,7 @@ namespace ts3::system
 		pEGLSurfaceNativeData.eFBConfig = surfaceConfig;
 	}
 
-	void nativeEGLDestroySurface( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData )
+	void platform::eglDestroySurface( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData )
 	{
 		auto eglResult = ::eglDestroySurface( pEGLSurfaceNativeData.eDisplay, pEGLSurfaceNativeData.eSurfaceHandle );
 
@@ -150,12 +166,12 @@ namespace ts3::system
 		pEGLSurfaceNativeData.eNativeWindow = nullptr;
 	}
 
-	void nativeEGLCreateCoreContext( EGLRenderContextNativeData & pEGLContextNativeData,
-									 const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-									 const GLRenderContextCreateInfo & pCreateInfo )
+	void platform::eglCreateCoreContext( EGLRenderContextNativeData & pEGLContextNativeData,
+										 const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
+										 const GLRenderContextCreateInfo & pCreateInfo )
 	{
 		auto createInfo = pCreateInfo;
-		_eglValidateRequestedContextVersion( createInfo.requiredAPIVersion );
+		_eglValidateRequestedContextVersion( pCreateInfo.targetAPIProfile, createInfo.requiredAPIVersion );
 
 		EGLContext shareContextHandle = EGL_NO_CONTEXT;
 		EGLContext contextHandle = EGL_NO_CONTEXT;
@@ -168,21 +184,33 @@ namespace ts3::system
 			}
 		}
 
+		auto api = eglQueryAPI();
+		if( api == EGL_OPENGL_ES_API )
+		{
+			api = 0;
+		}
+
 		if ( createInfo.targetAPIProfile != EGLAPIProfile::GLES )
 		{
-			contextHandle = _eglCreateCoreContextDefault( pEGLContextNativeData, pEGLSurfaceNativeData, createInfo, shareContextHandle );
+			contextHandle = _eglCreateCoreContextDefault( pEGLContextNativeData,
+														  pEGLSurfaceNativeData,
+														  createInfo,
+														  shareContextHandle );
 		}
 
 		if( ( createInfo.targetAPIProfile == EGLAPIProfile::GLES ) || !contextHandle )
 		{
-			contextHandle = _eglCreateCoreContextES( pEGLContextNativeData, pEGLSurfaceNativeData, createInfo, shareContextHandle );
+			contextHandle = _eglCreateCoreContextES( pEGLContextNativeData,
+													 pEGLSurfaceNativeData,
+													 createInfo.requiredAPIVersion,
+													 shareContextHandle );
 		}
 
 		pEGLContextNativeData.eDisplay = pEGLSurfaceNativeData.eDisplay;
 		pEGLContextNativeData.eContextHandle = contextHandle;
 	}
 
-	void nativeEGLCreateCoreContextForCurrentThread( EGLRenderContextNativeData & pEGLContextNativeData )
+	void platform::eglCreateCoreContextForCurrentThread( EGLRenderContextNativeData & pEGLContextNativeData )
 	{
 		auto eDisplay = ::eglGetCurrentDisplay();
 		auto eContextHandle = ::eglGetCurrentContext();
@@ -191,7 +219,7 @@ namespace ts3::system
 		pEGLContextNativeData.eContextHandle = eContextHandle;
 	}
 
-	void nativeEGLDestroyRenderContext( EGLRenderContextNativeData & pEGLContextNativeData )
+	void platform::eglDestroyRenderContext( EGLRenderContextNativeData & pEGLContextNativeData )
 	{
 		if( pEGLContextNativeData.eContextHandle != nullptr )
 		{
@@ -201,21 +229,22 @@ namespace ts3::system
 				::eglMakeCurrent( pEGLContextNativeData.eDisplay, nullptr, nullptr, nullptr );
 			}
 
-			auto eglResult = ::eglDestroyContext( pEGLContextNativeData.eDisplay, pEGLContextNativeData.eContextHandle );
+			::eglDestroyContext( pEGLContextNativeData.eDisplay, pEGLContextNativeData.eContextHandle );
 
 			pEGLContextNativeData.eDisplay = nullptr;
 			pEGLContextNativeData.eContextHandle = nullptr;
 		}
 	}
 
-	void nativeEGLBindContextForCurrentThread( const EGLRenderContextNativeData & pEGLContextNativeData,
-											   const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData )
+	void platform::eglBindContextForCurrentThread( const EGLRenderContextNativeData & pEGLContextNativeData,
+												   const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData )
 	{
 		::eglMakeCurrent( pEGLContextNativeData.eDisplay,
 						  pEGLSurfaceNativeData.eSurfaceHandle,
 						  pEGLSurfaceNativeData.eSurfaceHandle,
 						  pEGLContextNativeData.eContextHandle );
 	}
+
 
     std::vector<EGLConfig> _eglQueryCompatibleEGLConfigList( EGLDisplay pDisplay, const VisualConfig & pVisualConfig, const Version & pTargetAPIVersion )
     {
@@ -235,11 +264,13 @@ namespace ts3::system
 												   eglConfigArray,
 												   cvEGLMaxEGLConfigsNum,
 												   &returnedEGLConfigsNum );
-		ts3EGLHandleLastError();
-
-		if ( ( enumResult == EGL_FALSE ) || ( returnedEGLConfigsNum <= 0 ) )
+		if ( enumResult == EGL_FALSE )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3ThrowEx( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_EGL, ts3EGLGetLastErrorInfo() );
+		}
+		if( returnedEGLConfigsNum <= 0 )
+		{
+			ts3ThrowDesc( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_EGL, "No matching EGLConfigs found." );
 		}
 
         result.reserve( static_cast<size_t>( returnedEGLConfigsNum ) );
@@ -247,92 +278,6 @@ namespace ts3::system
 
         return result;
     }
-
-
-	EGLContext _eglCreateCoreContextDefault( EGLRenderContextNativeData & pEGLContextNativeData,
-											 const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-											 const GLRenderContextCreateInfo & pCreateInfo,
-											 EGLContext pEGLShareContext )
-	{
-		int contextProfile = 0;
-
-		if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::Core )
-		{
-			contextProfile = EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT;
-		}
-		else if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::Legacy )
-		{
-			contextProfile = EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT;
-		}
-
-		EGLint debugContextFlag = EGL_FALSE;
-		if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
-		{
-			debugContextFlag = EGL_TRUE;
-		}
-
-		EGLint forwardCompatibleContextFlag = EGL_FALSE;
-		if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
-		{
-			forwardCompatibleContextFlag = EGL_TRUE;
-		}
-
-		const EGLint contextAttributesCore[] =
-		{
-			// Requested OpenGL API version: major part
-			EGL_CONTEXT_MAJOR_VERSION, pCreateInfo.requiredAPIVersion.major,
-			// Requested OpenGL API version: minor part
-			EGL_CONTEXT_MINOR_VERSION, pCreateInfo.requiredAPIVersion.minor,
-			//
-			EGL_CONTEXT_OPENGL_PROFILE_MASK, contextProfile,
-			//
-			EGL_CONTEXT_OPENGL_DEBUG, debugContextFlag,
-			//
-			EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE, forwardCompatibleContextFlag,
-			// Terminator
-			EGL_NONE
-		};
-
-		EGLContext contextHandle = ::eglCreateContext( pEGLSurfaceNativeData.eDisplay,
-													   pEGLSurfaceNativeData.eFBConfig,
-													   pEGLShareContext,
-													   contextAttributesCore );
-
-		if( contextHandle == EGL_NO_CONTEXT )
-		{
-			ts3EGLHandleLastError();
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
-		}
-
-		return contextHandle;
-	}
-
-	EGLContext _eglCreateCoreContextES( EGLRenderContextNativeData & pEGLContextNativeData,
-										const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-										const GLRenderContextCreateInfo & pCreateInfo,
-										EGLContext pEGLShareContext )
-	{
-		const EGLint contextAttributesES[] =
-		{
-			//
-			EGL_CONTEXT_CLIENT_VERSION, pCreateInfo.requiredAPIVersion.major,
-			// Terminator
-			EGL_NONE
-		};
-
-		EGLContext contextHandle = ::eglCreateContext( pEGLSurfaceNativeData.eDisplay,
-													   pEGLSurfaceNativeData.eFBConfig,
-													   pEGLShareContext,
-													   contextAttributesES );
-
-		if( contextHandle == EGL_NO_CONTEXT )
-		{
-			ts3EGLHandleLastError();
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
-		}
-
-		return contextHandle;
-	}
 
 	int _eglGetEGLConfigMatchRate( EGLDisplay pDisplay, EGLConfig pEGLConfig, const VisualConfig & pVisualConfig )
 	{
@@ -420,34 +365,154 @@ namespace ts3::system
 		pAttribArray[attribIndex++] = EGL_NONE;
 	}
 
-	void _eglValidateRequestedContextVersion( Version & pVersion )
+	void _eglValidateRequestedContextVersion( EGLAPIProfile pTargetAPIProfile, Version & pVersion )
 	{
-		if( pVersion.major == 1 )
+		auto validatedVersion = cvVersionInvalid;
+
+		if( pTargetAPIProfile == EGLAPIProfile::GLES )
 		{
-			if( pVersion.minor > 1 )
+			const Version esVersionList[] =
 			{
-				pVersion.minor = 1;
-			}
-		}
-		else if( pVersion.major == 2 )
-		{
-			if( pVersion.minor > 0 )
+				{ 1, 0 },
+				{ 1, 1 },
+				{ 2, 0 },
+				{ 3, 0 },
+				{ 3, 1 },
+				{ 3, 2 }
+			};
+
+			for( const auto & esVersion : esVersionList )
 			{
-				pVersion.minor = 0;
-			}
-		}
-		else if( pVersion.major == 3 )
-		{
-			if( pVersion.minor > 2 )
-			{
-				pVersion.minor = 2;
+				if( pVersion == esVersion )
+				{
+					validatedVersion = pVersion;
+					break;
+				}
 			}
 		}
 		else
 		{
-			pVersion.major = 3;
-			pVersion.major = 1;
+			const Version coreVersionList[] =
+			{
+				{ 1, 0 },
+				{ 1, 1 },
+				{ 1, 2 },
+				{ 1, 3 },
+				{ 1, 4 },
+				{ 1, 5 },
+				{ 2, 0 },
+				{ 2, 1 },
+				{ 3, 0 },
+				{ 3, 1 },
+				{ 3, 2 },
+				{ 3, 3 },
+				{ 4, 0 },
+				{ 4, 1 },
+				{ 4, 2 },
+				{ 4, 3 },
+				{ 4, 4 },
+				{ 4, 5 },
+				{ 4, 6 },
+			};
+
+			for( const auto & coreVersion : coreVersionList )
+			{
+				if( pVersion == coreVersion )
+				{
+					validatedVersion = pVersion;
+					break;
+				}
+			}
 		}
+
+		if( validatedVersion == cvVersionInvalid )
+		{
+			validatedVersion = { 1, 0 };
+		}
+
+		pVersion = validatedVersion;
 	}
+
+
+    EGLContext _eglCreateCoreContextDefault( EGLRenderContextNativeData & pEGLContextNativeData,
+                                             const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
+                                             const GLRenderContextCreateInfo & pCreateInfo,
+                                             EGLContext pEGLShareContext )
+    {
+        int contextProfile = 0;
+
+        if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::Core )
+        {
+            contextProfile = EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT;
+        }
+        else if ( pCreateInfo.targetAPIProfile == EGLAPIProfile::Legacy )
+        {
+            contextProfile = EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT;
+        }
+
+        EGLint debugContextFlag = EGL_FALSE;
+        if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
+        {
+            debugContextFlag = EGL_TRUE;
+        }
+
+        EGLint forwardCompatibleContextFlag = EGL_FALSE;
+        if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
+        {
+            forwardCompatibleContextFlag = EGL_TRUE;
+        }
+
+        const EGLint contextAttributesCore[] =
+        {
+            // Requested OpenGL API version: major part
+            EGL_CONTEXT_MAJOR_VERSION, pCreateInfo.requiredAPIVersion.major,
+            // Requested OpenGL API version: minor part
+            EGL_CONTEXT_MINOR_VERSION, pCreateInfo.requiredAPIVersion.minor,
+            //
+            EGL_CONTEXT_OPENGL_PROFILE_MASK, contextProfile,
+            //
+            EGL_CONTEXT_OPENGL_DEBUG, debugContextFlag,
+            //
+            EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE, forwardCompatibleContextFlag,
+            // Terminator
+            EGL_NONE
+        };
+
+        EGLContext contextHandle = ::eglCreateContext( pEGLSurfaceNativeData.eDisplay,
+                                                       pEGLSurfaceNativeData.eFBConfig,
+                                                       pEGLShareContext,
+                                                       contextAttributesCore );
+        if( contextHandle == EGL_NO_CONTEXT )
+        {
+			ts3ThrowEx( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_EGL, ts3EGLGetLastErrorInfo() );
+        }
+
+        return contextHandle;
+    }
+
+    EGLContext _eglCreateCoreContextES( EGLRenderContextNativeData & pEGLContextNativeData,
+                                        const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
+										const Version & pTargetAPIVersion,
+                                        EGLContext pEGLShareContext )
+    {
+        const EGLint contextAttributesES[] =
+        {
+            //
+            EGL_CONTEXT_CLIENT_VERSION, pTargetAPIVersion.major,
+            // Terminator
+            EGL_NONE
+        };
+
+        EGLContext contextHandle = ::eglCreateContext( pEGLSurfaceNativeData.eDisplay,
+                                                       pEGLSurfaceNativeData.eFBConfig,
+                                                       pEGLShareContext,
+                                                       contextAttributesES );
+        if( contextHandle == EGL_NO_CONTEXT )
+        {
+			ts3ThrowEx( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_EGL, ts3EGLGetLastErrorInfo() );
+        }
+
+        return contextHandle;
+    }
 
 } // namespace ts3::system

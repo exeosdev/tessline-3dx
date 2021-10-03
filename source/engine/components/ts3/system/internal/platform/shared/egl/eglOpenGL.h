@@ -33,63 +33,42 @@ namespace ts3::system
         Version eglVersion;
     };
 
-    class EGLCoreAPI
+    namespace platform
     {
-    public:
-        static Version queryRuntimeVersion();
 
-        static bool checkLastResult();
+        void eglInitializeGLDriver( EGLDriverNativeData & pEGLDriverNativeData );
 
-        static bool checkLastError( GLenum pErrorCode );
+        void eglReleaseGLDriver( EGLDriverNativeData & pEGLDriverNativeData );
 
-        static void handleLastError();
+        EGLConfig eglChooseCoreFBConfig( EGLDisplay pDisplay,
+                                         const VisualConfig & pVisualConfig,
+                                         const Version & pTargetAPIVersion );
 
-        static void resetErrorQueue();
+        EGLint eglQueryFBConfigAttribute( EGLDisplay pEGLDisplay, EGLConfig pEGLConfig, EGLenum pAttribute );
 
-        static const char * translateErrorCode( GLenum pError );
-    };
+        void eglCreateSurface( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
+                               EGLDisplay pEGLDisplay,
+                               EGLNativeWindowType pWindow,
+                               EGLConfig pEGLConfig,
+                               const VisualConfig & pVisualConfig );
 
-    void nativeEGLInitializeGLDriver( EGLDriverNativeData & pEGLDriverNativeData );
+        void eglCreateSurfaceForCurrentThread( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData );
 
-    void nativeEGLReleaseGLDriver( EGLDriverNativeData & pEGLDriverNativeData );
+        void eglDestroySurface( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData );
 
-    EGLConfig nativeEGLChooseCoreFBConfig( EGLDisplay pDisplay, const VisualConfig & pVisualConfig, const Version & pTargetAPIVersion );
+        void eglCreateCoreContext( EGLRenderContextNativeData & pEGLContextNativeData,
+                                   const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
+                                   const GLRenderContextCreateInfo & pCreateInfo );
 
-    EGLint nativeEGLQueryFBConfigAttribute( EGLDisplay pEGLDisplay, EGLConfig pEGLConfig, EGLenum pAttribute );
+        void eglCreateCoreContextForCurrentThread( EGLRenderContextNativeData & pEGLContextNativeData );
 
-    void nativeEGLCreateSurface( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-                                 EGLDisplay pEGLDisplay,
-                                 EGLNativeWindowType pWindow,
-                                 EGLConfig pEGLConfig,
-                                 const VisualConfig & pVisualConfig );
+        void eglDestroyRenderContext( EGLRenderContextNativeData & pEGLContextNativeData );
 
-    void nativeEGLCreateSurfaceForCurrentThread( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData );
+        void eglBindContextForCurrentThread( const EGLRenderContextNativeData & pEGLContextNativeData,
+                                             const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData );
 
-    void nativeEGLDestroySurface( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData );
-
-    void nativeEGLCreateCoreContext( EGLRenderContextNativeData & pEGLContextNativeData,
-                                     const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-                                     const GLRenderContextCreateInfo & pCreateInfo );
-
-    void nativeEGLCreateCoreContextForCurrentThread( EGLRenderContextNativeData & pEGLContextNativeData );
-
-    void nativeEGLDestroyRenderContext( EGLRenderContextNativeData & pEGLContextNativeData );
-
-    void nativeEGLBindContextForCurrentThread( const EGLRenderContextNativeData & pEGLContextNativeData,
-                                               const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData );
+    }
 
 } // namespace ts3::system
-
-#if( TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS )
-#  define ts3EGLCheckLastResult()             EGLCoreAPI::checkLastResult()
-#  define ts3EGLCheckLastError( pErrorCode )  EGLCoreAPI::checkLastError( pErrorCode )
-#  define ts3EGLHandleLastError()             EGLCoreAPI::handleLastError()
-#  define ts3EGLResetErrorQueue()             EGLCoreAPI::resetErrorQueue()
-#else
-#  define ts3EGLCheckLastResult()
-#  define ts3EGLCheckLastError( pErrorCode )
-#  define ts3EGLHandleLastError()
-#  define ts3EGLResetErrorQueue()
-#endif
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_EGL_OPENGL_H__

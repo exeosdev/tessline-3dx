@@ -84,7 +84,7 @@ namespace ts3::system
 	    tmpContextNativeData.contextHandle = ::wglCreateContext( tmpSurfaceNativeData.hdc );
 	    if ( tmpContextNativeData.contextHandle == nullptr )
 	    {
-	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	        ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 
 	    // Bind context as current, so GL calls may be used normally.
@@ -93,19 +93,19 @@ namespace ts3::system
 
 	    if ( makeCurrentResult == FALSE )
 	    {
-	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	        ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 
 	    auto glewResult = glewInit();
 	    if ( glewResult != GLEW_OK )
 	    {
-	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	        ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 
 	    glewResult = wglewInit();
 	    if ( glewResult != GLEW_OK )
 	    {
-	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	        ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 	}
 
@@ -177,7 +177,7 @@ namespace ts3::system
 	    auto hdc = ::wglGetCurrentDC();
 	    if ( hdc == nullptr )
 	    {
-	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	        ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 
 	    pDisplaySurface.mInternal->nativeDataPriv.hdc = hdc;
@@ -257,7 +257,7 @@ namespace ts3::system
 
 	    if ( contextHandle == nullptr )
 	    {
-	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	        ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 
 	    auto & contextNativeData = pRenderContext.mInternal->nativeDataPriv;
@@ -269,7 +269,7 @@ namespace ts3::system
 	    auto contextHandle = ::wglGetCurrentContext();
 	    if ( contextHandle == nullptr )
 	    {
-	        ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	        ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	    }
 	    pRenderContext.mInternal->nativeDataPriv.contextHandle = contextHandle;
 	}
@@ -364,7 +364,7 @@ namespace ts3::system
 		BOOL spfResult = ::SetPixelFormat( hdc, pGLSurfaceNativeData.pixelFormatIndex, &pixelFormatDescriptor );
 		if ( spfResult == FALSE )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 	}
 
@@ -445,7 +445,7 @@ namespace ts3::system
 
 		if ( ( enumResult == FALSE ) || ( returnedPixelFormatsNum == 0 ) )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		std::vector<int> result;

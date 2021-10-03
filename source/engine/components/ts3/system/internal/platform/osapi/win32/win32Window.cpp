@@ -93,7 +93,7 @@ namespace ts3::system
 
 		if ( windowHwnd == nullptr )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		::SetWindowPos( windowHwnd,
@@ -169,7 +169,7 @@ namespace ts3::system
 			auto wndClassID = ::RegisterClassExA( &windowClass );
 			if ( wndClassID == 0 )
 			{
-				ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+				ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 			}
 
 			pWindowNativeData.wndClsID = wndClassID;

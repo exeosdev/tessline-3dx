@@ -43,8 +43,8 @@ namespace ts3
 			gpuapi::gpu_memory_size_t currentAllocOffset;
 		};
 
-		Result allocateGPUBufferExplicit( gpuapi_buffer_ref_id_t pGPUBufferRefID,
-		                                  const gpuapi::GPUBufferCreateInfo & pGPUBufferCreateInfo );
+		ResultCode allocateGPUBufferExplicit( gpuapi_buffer_ref_id_t pGPUBufferRefID,
+											  const gpuapi::GPUBufferCreateInfo & pGPUBufferCreateInfo );
 
 		HWVertexBufferHandle createVertexBuffer( const HWBufferCreateInfo & pHWBCreateInfo );
 

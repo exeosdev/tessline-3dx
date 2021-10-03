@@ -24,6 +24,9 @@ namespace ts3::gpuapi
 	class GPUDriverInterface
 	{
 	public:
+		GPUDriverInterface() = default;
+		virtual ~GPUDriverInterface() = default;
+
 		virtual GPUDriverHandle createDriver( const GPUDriverCreateInfo & pCreateInfo ) = 0;
 		virtual PresentationLayerHandle createScreenPresentationLayer( GPUDevice & pDevice, const PresentationLayerCreateInfo & pCreateInfo ) = 0;
 	};

@@ -24,7 +24,7 @@ namespace ts3::system
     {
         if( !isValid() )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         glClearColor( 0.1f, 0.33f, 0.9f, 1.0f );
@@ -38,7 +38,7 @@ namespace ts3::system
     {
         if( !isValid() )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         _nativeSwapBuffers();
@@ -48,7 +48,7 @@ namespace ts3::system
     {
         if( !isValid() )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         WindowSize result;
@@ -84,7 +84,7 @@ namespace ts3::system
     {
         if( !isValid() )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
         _nativeBindForCurrentThread( pSurface );
     }
@@ -93,7 +93,7 @@ namespace ts3::system
     {
         if( !isValid() )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         GLSystemVersionInfo systemVersionInfo;

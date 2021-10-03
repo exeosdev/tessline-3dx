@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_EGL_OPENGL_H__
-#define __TS3_SYSTEM_PLATFORM_OSAPI_EGL_OPENGL_H__
+#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_EGL_CORE_UTILS_H__
+#define __TS3_SYSTEM_PLATFORM_OSAPI_EGL_CORE_UTILS_H__
 
 #include <ts3/system/openGLCommon.h>
 #include <EGL/egl.h>
@@ -9,6 +9,22 @@
 namespace ts3::system
 {
 
+    struct EGLError
+    {
+    public:
+        EGLenum errorCode;
+
+    public:
+        EGLError( EGLenum pErrorCode )
+        : errorCode( pErrorCode )
+        {}
+
+        constexpr explicit operator bool() const
+        {
+            return errorCode != EGL_SUCCESS;
+        }
+    };
+
     class EGLCoreAPI
     {
     public:
@@ -16,22 +32,31 @@ namespace ts3::system
 
         static bool checkLastResult();
 
-        static bool checkLastError( GLenum pErrorCode );
+        static bool checkLastError( EGLenum pErrorCode );
+
+        static EGLError getLastError();
 
         static void handleLastError();
 
         static void resetErrorQueue();
 
-        static const char * translateErrorCode( GLenum pError );
+        static const char * translateErrorCode( EGLenum pError );
     };
+
+#define ts3EGLMakeErrorInfo( pEGLError ) \
+    GLErrorInfo( pEGLError, EGLCoreAPI::translateErrorCode( pEGLError ) )
+
+#define ts3EGLGetLastErrorInfo() \
+    ts3EGLMakeErrorInfo( ::eglGetError() )
 
 } // namespace ts3::system
 
 #if( TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS )
-#  define ts3EGLCheckLastResult()             ::ts3::system::EGLCoreAPI::checkLastResult()
-#  define ts3EGLCheckLastError( pErrorCode )  ::ts3::system::EGLCoreAPI::checkLastError( pErrorCode )
-#  define ts3EGLHandleLastError()             ::ts3::system::EGLCoreAPI::handleLastError()
-#  define ts3EGLResetErrorQueue()             ::ts3::system::EGLCoreAPI::resetErrorQueue()
+#  define ts3EGLCheckLastResult()             EGLCoreAPI::checkLastResult()
+#  define ts3EGLCheckLastError( pErrorCode )  EGLCoreAPI::checkLastError( pErrorCode )
+#  define ts3EGLHandleLastError()             EGLCoreAPI::handleLastError()
+#  define ts3EGLHandleLastError()             EGLCoreAPI::handleLastError()
+#  define ts3EGLResetErrorQueue()             EGLCoreAPI::resetErrorQueue()
 #else
 #  define ts3EGLCheckLastResult()
 #  define ts3EGLCheckLastError( pErrorCode )
@@ -39,4 +64,4 @@ namespace ts3::system
 #  define ts3EGLResetErrorQueue()
 #endif
 
-#endif // __TS3_SYSTEM_PLATFORM_OSAPI_EGL_OPENGL_H__
+#endif // __TS3_SYSTEM_PLATFORM_OSAPI_EGL_CORE_UTILS_H__

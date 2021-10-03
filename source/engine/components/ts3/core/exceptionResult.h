@@ -60,7 +60,7 @@ namespace ts3
 
         TS3_PCL_ATTR_NO_DISCARD bool isError() const
         {
-            return ts3ResultIsError( result ) || exception;
+            return !result || exception;
         }
     };
 

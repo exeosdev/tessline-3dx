@@ -76,7 +76,7 @@ namespace ts3::system
         // Check for possible violation attempt.
         if ( baseTypeValue >= CX_ENUM_EVENT_BASE_TYPE_COUNT )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
         mInternal->handlerMapByBaseType[baseTypeValue] = std::move( pHandler );
     }
@@ -88,7 +88,7 @@ namespace ts3::system
         // Check for possible violation attempt.
         if ( categoryValue >= CX_ENUM_EVENT_CATEGORY_COUNT )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
         mInternal->handlerMapByCategory[categoryValue] = std::move( pHandler );
     }
@@ -100,7 +100,7 @@ namespace ts3::system
         // Check for possible violation attempt.
         if ( codeIndexValue >= CX_ENUM_EVENT_CODE_INDEX_COUNT )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
         mInternal->handlerMapByCodeIndex[codeIndexValue] = std::move( pHandler );
     }
@@ -434,7 +434,7 @@ namespace ts3::system
     {
         if( !hasActiveDispatcher() )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         ts3DebugAssert( mInternal->currentInputState != nullptr );
@@ -463,13 +463,13 @@ namespace ts3::system
     {
         if( pEventDispatcher.mEventController != this )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         auto eventDispatcherRef = mInternal->findEventDispatcherInternal( &pEventDispatcher );
         if( !eventDispatcherRef.first || ( *( eventDispatcherRef.second ) != &pEventDispatcher ) )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
     }
 
@@ -478,7 +478,7 @@ namespace ts3::system
         auto eventDispatcherRef = mInternal->findEventDispatcherInternal( &pEventDispatcher );
         if( eventDispatcherRef.first )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         mInternal->eventDispatcherList.push_back( &pEventDispatcher );
@@ -489,7 +489,7 @@ namespace ts3::system
         auto eventDispatcherRef = mInternal->findEventDispatcherInternal( &pEventDispatcher );
         if( !eventDispatcherRef.first )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         mInternal->eventDispatcherList.erase( eventDispatcherRef.second );
@@ -500,7 +500,7 @@ namespace ts3::system
         auto eventSourceRef = mInternal->findEventSourceInternal( &pEventSource );
         if( eventSourceRef.first )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         mInternal->eventSourceList.push_back( &pEventSource );
@@ -513,7 +513,7 @@ namespace ts3::system
         auto eventSourceRef = mInternal->findEventSourceInternal( &pEventSource );
         if( !eventSourceRef.first )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         mInternal->eventSourceList.erase( eventSourceRef.second );

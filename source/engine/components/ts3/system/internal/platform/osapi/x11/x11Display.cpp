@@ -97,7 +97,7 @@ namespace ts3::system
 
             if ( XRRQueryVersion( xSessionData.display, &xrrVersionMajor, &xrrVersionMinor ) == False )
             {
-                ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Not_Supported );
+                ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Not_Supported );
             }
 
             driverNativeData.xrrVersion.major = static_cast<uint16>( xrrVersionMajor );
@@ -109,7 +109,7 @@ namespace ts3::system
                                                                      xSessionData.rootWindowXID );
         if ( driverNativeData.xrrScreenResources == nullptr )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Internal_Error );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Internal_Error );
         }
 
         //
@@ -120,7 +120,7 @@ namespace ts3::system
 
         if ( ( driverNativeData.xrrMonitorList == nullptr ) || ( driverNativeData.xrrMonitorsNum <= 0 ) )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Internal_Error );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Internal_Error );
         }
 
         for ( int monitorIndex = 0; monitorIndex < driverNativeData.xrrMonitorsNum; ++monitorIndex )
@@ -241,7 +241,7 @@ namespace ts3::system
                                               outputNativeData.xrrOutputID );
         if ( outputInfo == nullptr )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         if ( outputInfo->modes != nullptr )

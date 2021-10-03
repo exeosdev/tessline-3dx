@@ -33,6 +33,12 @@ namespace ts3::system
         return ( pErrorCode != EGL_SUCCESS ) && ( errorCode == pErrorCode );
     }
 
+    EGLError EGLCoreAPI::getLastError()
+    {
+        GLenum errorCode = ::eglGetError();
+        return EGLError{ errorCode };
+    }
+
     void EGLCoreAPI::handleLastError()
     {
         GLenum errorCode = ::eglGetError();

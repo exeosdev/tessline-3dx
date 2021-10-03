@@ -6,8 +6,8 @@
 namespace ts3
 {
 
-	Result HWBufferManager::allocateGPUBufferExplicit( gpuapi_buffer_ref_id_t pGPUBufferRefID,
-	                                                   const gpuapi::GPUBufferCreateInfo & pGBCreateInfo )
+	ResultCode HWBufferManager::allocateGPUBufferExplicit( gpuapi_buffer_ref_id_t pGPUBufferRefID,
+														   const gpuapi::GPUBufferCreateInfo & pGBCreateInfo )
 	{
 	    return {};
 	}

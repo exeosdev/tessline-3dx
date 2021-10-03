@@ -24,13 +24,16 @@ namespace ts3::system
 	// Selects matching pixel format for surface described with a VisualConfig. Uses new EXT API and supports stuff like MSAA.
 	GLXFBConfig _x11ChooseCoreGLFBConfig( XDisplay pDisplay, int pScreenIndex, const VisualConfig & pVisualConfig );
 
-	// Returns an array of FBConfigs matching specified VisualConfig structure.
-	std::vector<GLXFBConfig> _x11QueryCompatibleFBConfigList( XDisplay pDisplay, int pScreenIndex, const VisualConfig & pVisualConfig );
+	// Returns an array of FBConfigs matching specified VisualConfig definition.
+	std::vector<GLXFBConfig> _x11QueryCompatibleFBConfigList( XDisplay pDisplay,
+															  int pScreenIndex,
+															  const VisualConfig & pVisualConfig );
 
 	// Computes a "compatibility rate", i.e. how much the specified FBConfig matches the visual.
 	int _x11GetFBConfigMatchRate( XDisplay pDisplay, GLXFBConfig pFBConfig, const VisualConfig & pVisualConfig );
 
-	// Translation: VisualConfig --> array of GLX_* attributes required by the system API. Used for surface/context creation.
+	// Translation: VisualConfig --> array of GLX_* attributes required by the system API.
+	// Used for surface/context creation.
 	void _x11GetAttribArrayForVisualConfig( const VisualConfig & pVisualConfig, int * pAttribArray );
 
 
@@ -71,7 +74,7 @@ namespace ts3::system
         // We need at least version 1.3 of the GLX runtime (that's rather a pretty old one...).
 		if( ( glxVersionMajor <= 0 ) || ( ( glxVersionMajor == 1 ) && ( glxVersionMinor < 3 ) ) )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		VisualConfig legacyVisualConfig;
@@ -90,13 +93,13 @@ namespace ts3::system
         auto glewResult = glewInit();
         if ( glewResult != GLEW_OK )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         glewResult = glxewInit();
         if ( glewResult != GLEW_OK )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 	}
 
@@ -135,7 +138,8 @@ namespace ts3::system
         mInternal->nativeDataPriv.initState = nullptr;
 	}
 
-	void GLSystemDriver::_nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo )
+	void GLSystemDriver::_nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface,
+													  const GLDisplaySurfaceCreateInfo & pCreateInfo )
 	{
         auto & xSessionData = nativeX11GetXSessionData( mInternal->nativeDataPriv );
 
@@ -181,12 +185,14 @@ namespace ts3::system
 
 		if( glXCreateContextAttribsProc == nullptr )
 		{
-			glXCreateContextAttribsProc = (PFNGLXCREATECONTEXTATTRIBSARBPROC)glXGetProcAddressARB( (const GLubyte *) "glXCreateContextAttribsARB" );
+			autp procAddress = glXGetProcAddressARB( (const GLubyte *) "glXCreateContextAttribsARB" );
+			glXCreateContextAttribsProc =reinterpret_cast<PFNGLXCREATECONTEXTATTRIBSARBPROC>( procAddress );
 		}
 
 		if( glXSwapIntervalEXTProc == nullptr )
 		{
-			glXSwapIntervalEXTProc = (PFNGLXSWAPINTERVALEXTPROC)glXGetProcAddressARB( (const GLubyte *) "glXSwapIntervalEXT" );
+			autp procAddress = glXGetProcAddressARB( (const GLubyte *) "glXSwapIntervalEXT" );
+			glXSwapIntervalEXTProc =reinterpret_cast<PFNGLXCREATECONTEXTATTRIBSARBPROC>( procAddress );
 		}
 
 		int contextProfile = 0;
@@ -255,7 +261,7 @@ namespace ts3::system
 			}
 			if ( !contextHandle )
 			{
-				ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+				ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 			}
 		}
 
@@ -271,7 +277,7 @@ namespace ts3::system
 		auto contextHandle = ::glXGetCurrentContext();
 		if ( contextHandle == nullptr )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
         auto & contextNativeData = pRenderContext.mInternal->nativeDataPriv;
@@ -378,13 +384,13 @@ namespace ts3::system
 
 		if( windowFBConfig == nullptr )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		auto * fbConfigVisualInfo = glXGetVisualFromFBConfig( xSessionData.display, windowFBConfig );
 		if( fbConfigVisualInfo == nullptr )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		pGLSurfaceNativeData.fbConfig = windowFBConfig;
@@ -415,7 +421,7 @@ namespace ts3::system
                                                      True );
         if ( tempContextHandle == nullptr )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
         pGLContextNativeData.setSessionData( xSessionData );
@@ -426,7 +432,7 @@ namespace ts3::system
                                                    pGLContextNativeData.contextHandle );
         if ( makeCurrentResult == False )
         {
-            ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
     }
 
@@ -470,7 +476,7 @@ namespace ts3::system
 			fbConfigList = glXChooseFBConfig( pDisplay, pScreenIndex, defaultVisualAttribsNoDepthStencil, &fbConfigListSize );
 			if( ( fbConfigList == nullptr ) || ( fbConfigListSize == 0 ) )
 			{
-				ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+				ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 			}
 		}
 
@@ -529,7 +535,9 @@ namespace ts3::system
 
     static constexpr size_t cxX11MaxGLXFBConfigAttributesNum = 64u;
 
-	std::vector<GLXFBConfig> _x11QueryCompatibleFBConfigList( XDisplay pDisplay, int pScreenIndex, const VisualConfig & pVisualConfig )
+	std::vector<GLXFBConfig> _x11QueryCompatibleFBConfigList( XDisplay pDisplay,
+															  int pScreenIndex,
+															  const VisualConfig & pVisualConfig )
 	{
 		std::vector<GLXFBConfig> result;
 
@@ -541,7 +549,7 @@ namespace ts3::system
 
 		if ( ( pFBConfigList == nullptr ) || ( pFBConfigListSize == 0 ) )
 		{
-			ts3ThrowAuto( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 		}
 
 		for ( int pFBConfigIndex = 0; pFBConfigIndex < pFBConfigListSize; ++pFBConfigIndex )

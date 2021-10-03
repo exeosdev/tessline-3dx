@@ -12,10 +12,10 @@ namespace ts3
 {
 
 	/// @brief Represents empty char* literal.
-	constexpr const char * cxEmptyCstr = "";
+	inline constexpr const char * CX_STR_CHAR_EMPTY = "";
 
 	/// @brief Represents empty wchar_t* literal.
-	constexpr const wchar_t * cxEmptyWstr = L"";
+	inline constexpr const wchar_t * CX_STR_WCHAR_EMPTY = L"";
 
 	struct FileLocationInfo
 	{
@@ -29,8 +29,8 @@ namespace ts3
 		FileLocationInfo & operator=( const FileLocationInfo & ) = default;
 
 		FileLocationInfo()
-		: function( cxEmptyCstr )
-		, filename( cxEmptyCstr )
+		: function( CX_STR_CHAR_EMPTY )
+		, filename( CX_STR_CHAR_EMPTY )
 		, lineNumber( 0 )
 		{}
 

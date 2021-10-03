@@ -31,7 +31,7 @@ namespace ts3::system
         {
             auto errorCode = ::GetLastError();
             auto errorMessage = platform::mseQuerySystemErrorMessage( errorCode );
-            ts3ThrowAutoEx( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
+            ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
         }
 
         return trunc_numeric_cast<file_size_t>( readBytesNum );
@@ -55,7 +55,7 @@ namespace ts3::system
             if( lastError != NO_ERROR )
             {
                 auto errorMessage = platform::mseQuerySystemErrorMessage( lastError );
-                ts3ThrowAutoEx( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
+                ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
             }
         }
 
@@ -124,7 +124,7 @@ namespace ts3::system
         {
             auto lastError = ::GetLastError();
             auto lastErrorMessage = platform::mseQuerySystemErrorMessage( lastError );
-            ts3ThrowAutoEx( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( lastErrorMessage ) );
+            ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( lastErrorMessage ) );
         }
 
         while( win32FindFileHandle )
@@ -150,7 +150,7 @@ namespace ts3::system
                 else
                 {
                     auto lastErrorMessage = platform::mseQuerySystemErrorMessage( lastError );
-                    ts3ThrowAutoEx( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( lastErrorMessage ) );
+                    ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( lastErrorMessage ) );
                 }
             }
         }
@@ -192,7 +192,7 @@ namespace ts3::system
             auto lastErrorCode = ::GetLastError();
             auto errorMessage = platform::mseQuerySystemErrorMessage( lastErrorCode );
 
-            ts3ThrowAutoEx( E_EXC_SYSTEM_FILE_OPEN_ERROR, std::move( errorMessage ), std::move( pFilePath ) );
+            ts3ThrowDesc( E_EXC_SYSTEM_FILE_OPEN_ERROR, std::move( errorMessage ), std::move( pFilePath ) );
         }
 
         return fileHandle;
