@@ -3,6 +3,7 @@
 #include <ts3/system/sysContextNative.h>
 #include <android/input.h>
 #include <android/keycodes.h>
+#include <ts3/math/vectorOps.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 namespace ts3::system
@@ -153,6 +154,8 @@ namespace ts3::system
         auto & aSessionData = nativeAndroidGetASessionData( *( pEventController.mSysContext ) );
         auto * aCommonAppState = aSessionData.aCommonAppState;
 
+        pOutEvent.commonData.eventCode != E_EVENT_CODE_UNDEFINED;
+
 		if( pNativeEvent.type == ANativeEventType::AppCommand )
 		{
 			if( _androidTranslateAppCommand( aCommonAppState, pNativeEvent.eAppCommand, pOutEvent ) )
@@ -173,8 +176,6 @@ namespace ts3::system
 
     bool _androidTranslateAppCommand( AndroidAppState * pAppState, int32_t pCommand, EventObject & pOutEvent )
     {
-        pOutEvent.code = E_EVENT_CODE_UNDEFINED;
-
         switch( pCommand )
         {
             case APP_CMD_INPUT_CHANGED:
@@ -287,7 +288,67 @@ namespace ts3::system
 
     bool _androidTranslateInputEventTouch( AndroidAppState * pAppState, AInputEvent * pInputEvent, EventObject & pOutEvent )
     {
-        return false;
+        auto * eventController = pAppState->ts3GetUserDataAs<EventController>( E_ANDROID_APP_STATE_USER_DATA_INDEX_EVENT_CONTROLLER );
+
+        int32_t eventType = AInputEvent_getType( pInputEvent );
+        switch( eventType )
+        {
+            case AINPUT_EVENT_TYPE_MOTION:
+            {
+                auto & inputState = eventController->mInternal->getCurrentInputState();
+
+                decltype( inputState.mouseLastRegPos ) cursorPos;
+                cursorPos.x = AMotionEvent_getX( pInputEvent, 0u );
+                cursorPos.y = AMotionEvent_getY( pInputEvent, 0u );
+
+                if ( inputState.mouseLastRegPos == CX_EVENT_MOUSE_POS_INVALID )
+                {
+                    inputState.mouseLastRegPos = cursorPos;
+                }
+
+                int32_t eventSource = AInputEvent_getSource( pInputEvent );
+                if( eventSource == AINPUT_SOURCE_TOUCHSCREEN )
+                {
+                    int action = AKeyEvent_getAction( pInputEvent );
+                    action &= AMOTION_EVENT_ACTION_MASK;
+
+                    switch( action )
+                    {
+                        case AMOTION_EVENT_ACTION_DOWN:
+                        {
+                            auto & eInputMouseButton = pOutEvent.eInputMouseButton;
+                            eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
+                            eInputMouseButton.cursorPos = cursorPos;
+                            eInputMouseButton.buttonAction = EMouseButtonActionType::Click;
+                            eInputMouseButton.buttonID = EMouseButtonID::Left;
+                            inputState.mouseLastRegPos = cursorPos;
+                            break;
+                        }
+                        case AMOTION_EVENT_ACTION_MOVE:
+                        {
+                            auto & eInputMouseMove = pOutEvent.eInputMouseMove;
+                            eInputMouseMove.eventCode = E_EVENT_CODE_INPUT_MOUSE_MOVE;
+                            eInputMouseMove.cursorPos = cursorPos;
+                            eInputMouseMove.movementDelta = ( cursorPos - inputState.mouseLastRegPos ) * 0.2f;
+                            inputState.mouseLastRegPos = cursorPos;
+                            break;
+                        }
+                        case AMOTION_EVENT_ACTION_UP:
+                        {
+                            auto & eInputMouseButton = pOutEvent.eInputMouseButton;
+                            eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
+                            eInputMouseButton.cursorPos = cursorPos;
+                            eInputMouseButton.buttonAction = EMouseButtonActionType::Release;
+                            eInputMouseButton.buttonID = EMouseButtonID::Left;
+                            inputState.mouseLastRegPos = cursorPos;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return pOutEvent.commonData.eventCode != E_EVENT_CODE_UNDEFINED;
     }
     
 }
