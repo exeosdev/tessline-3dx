@@ -49,6 +49,12 @@ namespace ts3::system
 #define ts3EGLGetLastErrorInfo() \
     ts3EGLMakeErrorInfo( ::eglGetError() )
 
+#define ts3EGLThrowError( pErrorDesc ) \
+    ts3ThrowDesc( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_EGL, pErrorDesc )
+
+#define ts3EGLThrowLastError() \
+    ts3ThrowEx( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_EGL, ts3EGLGetLastErrorInfo() )
+
 } // namespace ts3::system
 
 #if( TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS )
