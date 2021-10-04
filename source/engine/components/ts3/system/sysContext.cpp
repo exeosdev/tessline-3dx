@@ -5,7 +5,7 @@ namespace ts3::system
 {
 
     SysContext::SysContext()
-    : mInternal( std::make_unique<ContextPrivateData>() )
+    : mInternal( std::make_unique<ObjectInternalData>() )
     , mNativeData( &( mInternal->nativeDataPriv ) )
     {}
 

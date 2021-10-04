@@ -29,7 +29,7 @@
 
 #include "test1-meshDefs.h"
 
-#include <ts3/system/eventCoreTypes.h>
+#include <ts3/system/eventDefApp.h>
 #include <ts3/system/eventObject.h>
 
 namespace math = ts3::math;
@@ -476,12 +476,12 @@ int main( int pArgc, const char ** pArgv )
 	while( appExec )
 	{
 		auto pcstamp = ts3::system::PerfCounter::queryCurrentStamp();
-		if( ts3::system::PerfCounter::convertToDuration<ts3::DurationPeriod::Millisecond>( pcstamp - u1ts ) >= update1ts )
+		if( ts3::system::PerfCounter::convertToDuration<ts3::EDurationPeriod::Millisecond>( pcstamp - u1ts ) >= update1ts )
 		{
 			u1angle += ts3::math::constants::cxFloatRad1Degree * 10 * ( 1.0f / update1ts );
 			u1ts = pcstamp;
 		}
-		if( ts3::system::PerfCounter::convertToDuration<ts3::DurationPeriod::Millisecond>( pcstamp - u2ts ) >= update2ts )
+		if( ts3::system::PerfCounter::convertToDuration<ts3::EDurationPeriod::Millisecond>( pcstamp - u2ts ) >= update2ts )
 		{
 			u2angle += ts3::math::constants::cxFloatRad1Degree * 10 * ( 1.0f / update2ts);
 			u2ts = pcstamp;

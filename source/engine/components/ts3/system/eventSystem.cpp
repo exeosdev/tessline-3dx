@@ -50,8 +50,14 @@ namespace ts3::system
 
 
     void _internalEventPreProcess( EventObject & pEvent, EventController & pEventController );
-    void _internalEventOnInputMouseButton( EventObject & pEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState );
-    void _internalEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState );
+
+    void _internalEventOnInputMouseButton( EventObject & pEvent,
+                                           const EventSystemInternalConfig & pConfig,
+                                           ESSharedInputMouseState & pInputMouseState );
+
+    void _internalEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent,
+                                                     const EventSystemInternalConfig & pConfig,
+                                                     ESSharedInputMouseState & pInputMouseState );
 
     EventDispatcher::EventDispatcher( EventControllerHandle pEventController )
     : SysObject( pEventController->mSysContext )
@@ -112,7 +118,7 @@ namespace ts3::system
 
     void EventDispatcher::setIdleProcessingMode( bool pIdle )
     {
-        mInternal->internalConfig.configFlags.setOrUnset( pIdle, E_EVENT_SYSTEM_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT );
+        mInternal->evtSysInternalConfig.configFlags.setOrUnset( pIdle, E_EVENT_SYSTEM_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT );
     }
 
     bool EventDispatcher::postEvent( EventObject pEvent )
@@ -185,42 +191,46 @@ namespace ts3::system
         {
             _internalEventOnInputMouseButton( pEvent,
                                               pEventController.mInternal->getCurrentInternalConfig(),
-                                              pEventController.mInternal->getCurrentInputState() );
+                                              pEventController.mInternal->getCurrentSharedState().inputMouseState );
         }
     }
 
-    void _internalEventOnInputMouseButton( EventObject & pEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState )
+    void _internalEventOnInputMouseButton( EventObject & pEvent,
+                                           const EventSystemInternalConfig & pConfig,
+                                           ESSharedInputMouseState & pInputMouseState )
     {
         if ( pConfig.configFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT ) )
         {
             auto & eInputMouseButton = pEvent.eInputMouseButton;
             if ( eInputMouseButton.buttonAction == EMouseButtonActionType::Click )
             {
-                _internalEventOnInputMouseButtonMultiClick( eInputMouseButton, pConfig, pInputState );
+                _internalEventOnInputMouseButtonMultiClick( eInputMouseButton, pConfig, pInputMouseState );
             }
         }
     }
 
-    void _internalEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent, const EventSystemInternalConfig & pConfig, EventInputState & pInputState )
+    void _internalEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent,
+                                                     const EventSystemInternalConfig & pConfig,
+                                                     ESSharedInputMouseState & pInputMouseState )
     {
         bool multiClickEventSet = false;
 
-        if ( pInputState.mouseLastPressButton == pMouseButtonEvent.buttonID )
+        if ( pInputMouseState.lastPressButtonID == pMouseButtonEvent.buttonID )
         {
-            auto lastClickDiff = pMouseButtonEvent.timeStamp - pInputState.mouseLastPressTimestamp;
-            auto lastClickDiffMs = PerfCounter::convertToDuration<DurationPeriod::Millisecond>( lastClickDiff );
+            auto lastClickDiff = pMouseButtonEvent.timeStamp - pInputMouseState.lastPressTimestamp;
+            auto lastClickDiffMs = PerfCounter::convertToDuration<EDurationPeriod::Millisecond>( lastClickDiff );
             if ( lastClickDiffMs <= pConfig.mouseClickSequenceTimeoutMs )
             {
-                if( pInputState.mouseClickSequenceLength == 1 )
+                if( pInputMouseState.multiClickSequenceLength == 1 )
                 {
                     pMouseButtonEvent.buttonAction = EMouseButtonActionType::DoubleClick;
-                    pInputState.mouseClickSequenceLength = 2;
+                    pInputMouseState.multiClickSequenceLength = 2;
                     multiClickEventSet = true;
                 }
                 else if ( pConfig.configFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT ) )
                 {
                     pMouseButtonEvent.buttonAction = EMouseButtonActionType::MultiClick;
-                    pInputState.mouseClickSequenceLength += 1;
+                    pInputMouseState.multiClickSequenceLength += 1;
                     multiClickEventSet = true;
                 }
             }
@@ -230,12 +240,12 @@ namespace ts3::system
         {
             // Multi-click has not been detected/updated. Possible reasons: different button ID,
             // click timeout (mouse button clicked too slow), multi-click support is disabled.
-            pInputState.mouseLastPressButton = pMouseButtonEvent.buttonID;
-            pInputState.mouseClickSequenceLength = 1;
+            pInputMouseState.lastPressButtonID = pMouseButtonEvent.buttonID;
+            pInputMouseState.multiClickSequenceLength = 1;
         }
 
-        pInputState.mouseLastPressTimestamp = pMouseButtonEvent.timeStamp;
-        pInputState.mouseLastRegPos = pMouseButtonEvent.cursorPos;
+        pInputMouseState.lastPressTimestamp = pMouseButtonEvent.timeStamp;
+        pInputMouseState.lastCursorPos = pMouseButtonEvent.cursorPos;
     }
 
 
@@ -437,7 +447,7 @@ namespace ts3::system
             ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
         }
 
-        ts3DebugAssert( mInternal->currentInputState != nullptr );
+        ts3DebugAssert( mInternal->currentSharedState != nullptr );
         ts3DebugAssert( mInternal->currentInternalConfig != nullptr );
     }
     
@@ -447,12 +457,12 @@ namespace ts3::system
 
         if( pEventDispatcher )
         {
-            mInternal->currentInputState = &( pEventDispatcher->mInternal->inputState );
-            mInternal->currentInternalConfig = &( pEventDispatcher->mInternal->internalConfig );
+            mInternal->currentSharedState = &( pEventDispatcher->mInternal->evtSysSharedState );
+            mInternal->currentInternalConfig = &( pEventDispatcher->mInternal->evtSysInternalConfig );
         }
         else
         {
-            mInternal->currentInputState = nullptr;
+            mInternal->currentSharedState = nullptr;
             mInternal->currentInternalConfig = nullptr;
         }
 

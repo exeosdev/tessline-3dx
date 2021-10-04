@@ -28,9 +28,11 @@ namespace ts3::system
         Bitmask<ESysContextCreateFlags> flags = E_CORE_SESSION_CONTEXT_CREATE_FLAG_INIT_DEFAULT;
     };
 
-    struct SysContext::ContextPrivateData
+    struct SysContext::ObjectInternalData
     {
         SysContextNativeData nativeDataPriv;
+
+        EventControllerHandle sharedEventController = nullptr;
     };
 
     void nativeSysContextInternalInitialize( SysContext & pSysContext, const SysContextCreateInfo & pCreateInfo );

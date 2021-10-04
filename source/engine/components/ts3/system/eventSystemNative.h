@@ -23,9 +23,6 @@ namespace ts3::system
     class Window;
     class WindowManager;
 
-    // Represents invalid mouse position. Used as a default value for last position registered.
-    constexpr math::Vec2i32 CX_EVENT_MOUSE_POS_INVALID { CX_INT32_MAX, CX_INT32_MAX };
-
     enum EEventSystemConfigFlags : uint32
     {
         E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT = 0x0001,
@@ -42,25 +39,10 @@ namespace ts3::system
         duration_value_t mouseClickSequenceTimeoutMs = 100;
     };
 
-    struct EventInputState
+    struct EventSystemSharedState
     {
-        // Current state of the keyboard.
-        KeyboardState keyboardState;
-
-        // Last cursor position registered by the event system.
-        math::Vec2i32 mouseLastRegPos = CX_EVENT_MOUSE_POS_INVALID;
-
-        // State of the mouse buttons. Used for motion events on systems which do not have reliable states (X11).
-        Bitmask<EMouseButtonFlagBits> mouseButtonStateMask = 0;
-
-        // Last mouse button pressed. Used to detect multi-click sequences.
-        EMouseButtonID mouseLastPressButton = EMouseButtonID::Unknown;
-
-        // Current sequence length, i.e. number of clicks of the same button in a row.
-        uint32 mouseClickSequenceLength = 1;
-
-        // Timestamp of last registered mouse button press.
-        perf_counter_value_t mouseLastPressTimestamp = 0u;
+        ESSharedInputKeyboardState inputKeyboardState;
+        ESSharedInputMouseState inputMouseState;
     };
 
     /// @brief Private, implementation-specific data of the EventController class.
@@ -85,7 +67,7 @@ namespace ts3::system
         const EventSystemInternalConfig * currentInternalConfig = nullptr;
 
         // Pointer to the configuration data from currently bound dispatcher.
-        EventInputState * currentInputState = nullptr;
+        EventSystemSharedState * currentSharedState = nullptr;
 
         explicit ObjectInternalData( EventController * pController )
         : parentController( pController )
@@ -113,10 +95,10 @@ namespace ts3::system
             return *currentInternalConfig;
         }
 
-        EventInputState & getCurrentInputState() const
+        EventSystemSharedState & getCurrentSharedState() const
         {
-            ts3DebugAssert( currentInputState != nullptr );
-            return *currentInputState;
+            ts3DebugAssert( currentSharedState != nullptr );
+            return *currentSharedState;
         }
     };
 
@@ -135,10 +117,10 @@ namespace ts3::system
 
         // Internal configuration of the event system. The configuration is stored per-dispatcher, so that in case
         // of multiple instances, configuration is properly restored each time a dispatcher is set as an active one.
-        EventSystemInternalConfig internalConfig;
+        EventSystemInternalConfig evtSysInternalConfig;
 
-        // Input state
-        EventInputState inputState;
+        // Shared state
+        EventSystemSharedState evtSysSharedState;
 
         // A default handler. If set, it is called if there is no handler registered for a given code/category/base type.
         EventHandler defaultHandler;

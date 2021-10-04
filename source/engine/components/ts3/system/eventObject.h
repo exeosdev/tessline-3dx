@@ -2,7 +2,11 @@
 #ifndef __TS3_SYSTEM_EVENT_OBJECT_H__
 #define __TS3_SYSTEM_EVENT_OBJECT_H__
 
-#include "eventCoreTypes.h"
+#include "eventDefApp.h"
+#include "eventDefInputKeyboard.h"
+#include "eventDefInputMouse.h"
+#include "eventDefInputTouch.h"
+#include "eventDefWindow.h"
 
 namespace ts3::system
 {

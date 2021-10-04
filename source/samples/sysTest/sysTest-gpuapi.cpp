@@ -484,12 +484,12 @@ int main( int pArgc, const char ** pArgv )
         }
 
         auto pcstamp = PerfCounter::queryCurrentStamp();
-        if( PerfCounter::convertToDuration<ts3::DurationPeriod::Millisecond>( pcstamp - u1ts ) >= update1ts )
+        if( PerfCounter::convertToDuration<ts3::EDurationPeriod::Millisecond>( pcstamp - u1ts ) >= update1ts )
         {
             u1angle += math::constants::cxFloatRad1Degree * 10 * ( 1.0f / update1ts );
             u1ts = pcstamp;
         }
-        if( PerfCounter::convertToDuration<ts3::DurationPeriod::Millisecond>( pcstamp - u2ts ) >= update2ts )
+        if( PerfCounter::convertToDuration<ts3::EDurationPeriod::Millisecond>( pcstamp - u2ts ) >= update2ts )
         {
             u2angle += math::constants::cxFloatRad1Degree * 10 * ( 1.0f / update2ts);
             u2ts = pcstamp;

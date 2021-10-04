@@ -531,22 +531,22 @@ namespace ts3::system
 
 	static const EKeyCode x11KeycodeMap_AA_B9[] =
 	{
-		/* 0xffaa */ EKeyCode::NumpadMul,
-		/* 0xffab */ EKeyCode::NumpadAdd,
-		/* 0xffac */ EKeyCode::Unknown,
-		/* 0xffad */ EKeyCode::NumpadSub,
-		/* 0xffae */ EKeyCode::NumpadDot,
-		/* 0xffaf */ EKeyCode::NumpadDiv,
-		/* 0xffb0 */ EKeyCode::Numpad0,
-		/* 0xffb1 */ EKeyCode::Numpad1,
-		/* 0xffb2 */ EKeyCode::Numpad2,
-		/* 0xffb3 */ EKeyCode::Numpad3,
-		/* 0xffb4 */ EKeyCode::Numpad4,
-		/* 0xffb5 */ EKeyCode::Numpad5,
-		/* 0xffb6 */ EKeyCode::Numpad6,
-		/* 0xffb7 */ EKeyCode::Numpad7,
-		/* 0xffb8 */ EKeyCode::Numpad8,
-		/* 0xffb9 */ EKeyCode::Numpad9,
+		/* 0xffaa */ EKeyCode::NumPadMul,
+		/* 0xffab */ EKeyCode::NumPadAdd,
+		/* 0xffac */ EKeyCode::UnkPown,
+		/* 0xffad */ EKeyCode::NumPadSub,
+		/* 0xffae */ EKeyCode::NumPadDot,
+		/* 0xffaf */ EKeyCode::NumPadDiv,
+		/* 0xffb0 */ EKeyCode::NumPad0,
+		/* 0xffb1 */ EKeyCode::NumPad1,
+		/* 0xffb2 */ EKeyCode::NumPad2,
+		/* 0xffb3 */ EKeyCode::NumPad3,
+		/* 0xffb4 */ EKeyCode::NumPad4,
+		/* 0xffb5 */ EKeyCode::NumPad5,
+		/* 0xffb6 */ EKeyCode::NumPad6,
+		/* 0xffb7 */ EKeyCode::NumPad7,
+		/* 0xffb8 */ EKeyCode::NumPad8,
+		/* 0xffb9 */ EKeyCode::NumPad9,
 	};
 
 	static const EKeyCode x11KeycodeMap_BE_C9[] =

@@ -9,7 +9,7 @@ namespace ts3
 
 	using duration_value_t = uint64;
 
-	enum class DurationPeriod : enum_default_value_t
+	enum class EDurationPeriod : enum_default_value_t
 	{
 		Nanosecond,
 		Microsecond,
@@ -17,39 +17,39 @@ namespace ts3
 		Second
 	};
 
-	template <DurationPeriod>
+	template <EDurationPeriod>
 	struct DurationTypeWrapper;
 
 	template <>
-	struct DurationTypeWrapper<DurationPeriod::Nanosecond>
+	struct DurationTypeWrapper<EDurationPeriod::Nanosecond>
 	{
 		using Type = std::chrono::nanoseconds;
 	};
 
 	template <>
-	struct DurationTypeWrapper<DurationPeriod::Microsecond>
+	struct DurationTypeWrapper<EDurationPeriod::Microsecond>
 	{
 		using Type = std::chrono::microseconds;
 	};
 
 	template <>
-	struct DurationTypeWrapper<DurationPeriod::Millisecond>
+	struct DurationTypeWrapper<EDurationPeriod::Millisecond>
 	{
 		using Type = std::chrono::milliseconds;
 	};
 
 	template <>
-	struct DurationTypeWrapper<DurationPeriod::Second>
+	struct DurationTypeWrapper<EDurationPeriod::Second>
 	{
 		using Type = std::chrono::seconds;
 	};
 
 
-	template <DurationPeriod tpPeriod>
+	template <EDurationPeriod tpPeriod>
 	using Duration = typename DurationTypeWrapper<tpPeriod>::Type;
 
 
-	template <DurationPeriod tpPeriod>
+	template <EDurationPeriod tpPeriod>
 	struct DurationTraits
 	{
 		using RatioType = typename DurationTypeWrapper<tpPeriod>::Type::period;
@@ -60,10 +60,10 @@ namespace ts3
 		};
 	};
 
-	using Nanoseconds = Duration<DurationPeriod::Nanosecond>;
-	using Microseconds = Duration<DurationPeriod::Microsecond>;
-	using Milliseconds = Duration<DurationPeriod::Millisecond>;
-	using Seconds = Duration<DurationPeriod::Second>;
+	using Nanoseconds = Duration<EDurationPeriod::Nanosecond>;
+	using Microseconds = Duration<EDurationPeriod::Microsecond>;
+	using Milliseconds = Duration<EDurationPeriod::Millisecond>;
+	using Seconds = Duration<EDurationPeriod::Second>;
 
 		/// @brief Infinite timeout expressed as Nanoseconds value.
 	constexpr Nanoseconds cvTimeoutInfiniteNs { CX_INT64_MAX };

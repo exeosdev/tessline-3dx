@@ -234,7 +234,7 @@ namespace ts3::system
 
 	bool _win32TranslateInputEventKeyboard( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
 	{
-	    auto & inputState = pEventController.mInternal->getCurrentInputState();
+	    auto & inputKeyboardState = pEventController.mInternal->getCurrentSharedState().inputKeyboardState;
 
 	    switch( pMSG.message )
 	    {
@@ -242,7 +242,7 @@ namespace ts3::system
 	        {
 	            auto & eInputKeyboardKey = pOutEvent.eInputKeyboardKey;
 	            eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
-	            eInputKeyboardKey.keyboardState = &( inputState.keyboardState );
+	            eInputKeyboardKey.inputKeyboardState = &inputKeyboardState;
 	            eInputKeyboardKey.keyAction = EKeyActionType::Press;
 	            eInputKeyboardKey.keyCode = _win32GetSysKeyCode( pMSG.wParam );
 	            break;
@@ -251,7 +251,7 @@ namespace ts3::system
 	        {
 	            auto & eInputKeyboardKey = pOutEvent.eInputKeyboardKey;
 	            eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
-	            eInputKeyboardKey.keyboardState = &( inputState.keyboardState );
+	            eInputKeyboardKey.inputKeyboardState = &inputKeyboardState;
 	            eInputKeyboardKey.keyAction = EKeyActionType::Release;
 	            eInputKeyboardKey.keyCode = _win32GetSysKeyCode( pMSG.wParam );
 	            break;
@@ -272,11 +272,11 @@ namespace ts3::system
 	        GET_Y_LPARAM( pMSG.lParam )
 	    };
 
-	    auto & inputState = pEventController.mInternal->getCurrentInputState();
+	    auto & inputMouseState = pEventController.mInternal->getCurrentSharedState().inputMouseState;
 
-	    if ( inputState.mouseLastRegPos == CX_EVENT_MOUSE_POS_INVALID )
+	    if ( inputMouseState.lastCursorPos == CX_EVENT_MOUSE_POS_INVALID )
 	    {
-	        inputState.mouseLastRegPos = cursorPos;
+	        inputMouseState.lastCursorPos = cursorPos;
 	    }
 
 	    switch( pMSG.message )
@@ -287,8 +287,9 @@ namespace ts3::system
 	            eInputMouseMove.eventCode = E_EVENT_CODE_INPUT_MOUSE_MOVE;
 	            eInputMouseMove.cursorPos = cursorPos;
 	            eInputMouseMove.buttonStateMask = _win32GetMouseButtonStateMask( pMSG.wParam );
-	            eInputMouseMove.movementDelta = cursorPos - inputState.mouseLastRegPos;
-	            inputState.mouseLastRegPos = cursorPos;
+	            eInputMouseMove.movementDelta = cursorPos - inputMouseState.lastCursorPos;
+	            eInputMouseMove.inputMouseState = &inputMouseState;
+	            inputMouseState.lastCursorPos = cursorPos;
 	            break;
 	        }
 	        case WM_LBUTTONDOWN:
@@ -508,22 +509,22 @@ namespace ts3::system
 		/* 0x005D */ EKeyCode::Unknown,
 		/* 0x005E */ EKeyCode::Unknown,
 		/* 0x005F */ EKeyCode::Unknown,
-		/* 0x0060 */ EKeyCode::Numpad0,
-		/* 0x0061 */ EKeyCode::Numpad1,
-		/* 0x0062 */ EKeyCode::Numpad2,
-		/* 0x0063 */ EKeyCode::Numpad3,
-		/* 0x0064 */ EKeyCode::Numpad4,
-		/* 0x0065 */ EKeyCode::Numpad5,
-		/* 0x0066 */ EKeyCode::Numpad6,
-		/* 0x0067 */ EKeyCode::Numpad7,
-		/* 0x0068 */ EKeyCode::Numpad8,
-		/* 0x0069 */ EKeyCode::Numpad9,
-		/* 0x006A */ EKeyCode::NumpadMul,
-		/* 0x006B */ EKeyCode::NumpadAdd,
+		/* 0x0060 */ EKeyCode::NumPad0,
+		/* 0x0061 */ EKeyCode::NumPad1,
+		/* 0x0062 */ EKeyCode::NumPad2,
+		/* 0x0063 */ EKeyCode::NumPad3,
+		/* 0x0064 */ EKeyCode::NumPad4,
+		/* 0x0065 */ EKeyCode::NumPad5,
+		/* 0x0066 */ EKeyCode::NumPad6,
+		/* 0x0067 */ EKeyCode::NumPad7,
+		/* 0x0068 */ EKeyCode::NumPad8,
+		/* 0x0069 */ EKeyCode::NumPad9,
+		/* 0x006A */ EKeyCode::NumPadMul,
+		/* 0x006B */ EKeyCode::NumPadAdd,
 		/* 0x006C */ EKeyCode::Unknown,
-		/* 0x006D */ EKeyCode::NumpadSub,
-		/* 0x006E */ EKeyCode::NumpadDot,
-		/* 0x006F */ EKeyCode::NumpadDiv,
+		/* 0x006D */ EKeyCode::NumPadSub,
+		/* 0x006E */ EKeyCode::NumPadDot,
+		/* 0x006F */ EKeyCode::NumPadDiv,
 		/* 0x0070 */ EKeyCode::F1,
 		/* 0x0071 */ EKeyCode::F2,
 		/* 0x0072 */ EKeyCode::F3,

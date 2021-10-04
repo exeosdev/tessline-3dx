@@ -26,15 +26,6 @@ namespace ts3::system
         E_EVENT_CONTROLLER_CONFIG_FLAGS_DEFAULT = E_EVENT_CONTROLLER_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT
     };
 
-    /// @brief
-    struct EventControllerConfig
-    {
-        //
-        Bitmask<EventControllerConfigFlagBits> flags = E_EVENT_CONTROLLER_CONFIG_FLAGS_DEFAULT;
-        //
-        event_code_value_t mouseClickSequenceTimeoutMs = 100;
-    };
-
     class EventSource : public SysObject
     {
         friend class EventController;

@@ -10,20 +10,25 @@ namespace ts3::system
     struct SysContextNativeData;
 
     ts3SysDeclareHandle( SysContext );
+    ts3SysDeclareHandle( EventController );
 
 	/// @brief
 	class SysContext
     {
     public:
-        struct ContextPrivateData;
-        std::unique_ptr<ContextPrivateData> const mInternal;
+        struct ObjectInternalData;
+        std::unique_ptr<ObjectInternalData> const mInternal;
         const SysContextNativeData * const mNativeData = nullptr;
 
     public:
         SysContext();
+
         ~SysContext() noexcept;
 
+        EventController & getEventController();
+
         static std::string queryCurrentProcessExecutableDirectory();
+
         static std::string queryCurrentProcessExecutableFilePath();
     };
 

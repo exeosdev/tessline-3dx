@@ -189,6 +189,16 @@ namespace ts3::system
                     auto * sysContext = pAppState->ts3GetUserDataAs<SysContext>( E_ANDROID_APP_STATE_USER_DATA_INDEX_SYS_CONTEXT );
                     nativeAndroidUpdateNativeWindowRef( *sysContext, pAppState->window );
                     pOutEvent.code = E_EVENT_CODE_APP_ACTIVITY_DISPLAY_INIT;
+
+                    JavaVM * javaVM = pAppState->activity->vm;
+                    JNIEnv * jni;
+                    javaVM->AttachCurrentThread( &jni, nullptr );
+                    auto * jActivityClass = jni->GetObjectClass( pAppState->activity->clazz );
+                    auto * jActivityMethod = jni->GetMethodID( jActivityClass, "setRequestedOrientation", "(I)V" );
+
+                    jni->CallVoidMethod( pAppState->activity->clazz, jActivityMethod, 0 );
+
+                    javaVM->DetachCurrentThread();
                 }
                 break;
             }
@@ -295,15 +305,15 @@ namespace ts3::system
         {
             case AINPUT_EVENT_TYPE_MOTION:
             {
-                auto & inputState = eventController->mInternal->getCurrentInputState();
+                auto & inputMouseState = eventController->mInternal->getCurrentSharedState().inputMouseState;
 
-                decltype( inputState.mouseLastRegPos ) cursorPos;
+                decltype( inputMouseState.lastCursorPos ) cursorPos;
                 cursorPos.x = AMotionEvent_getX( pInputEvent, 0u );
                 cursorPos.y = AMotionEvent_getY( pInputEvent, 0u );
 
-                if ( inputState.mouseLastRegPos == CX_EVENT_MOUSE_POS_INVALID )
+                if ( inputMouseState.lastCursorPos == CX_EVENT_MOUSE_POS_INVALID )
                 {
-                    inputState.mouseLastRegPos = cursorPos;
+                    inputMouseState.lastCursorPos = cursorPos;
                 }
 
                 int32_t eventSource = AInputEvent_getSource( pInputEvent );
@@ -321,7 +331,7 @@ namespace ts3::system
                             eInputMouseButton.cursorPos = cursorPos;
                             eInputMouseButton.buttonAction = EMouseButtonActionType::Click;
                             eInputMouseButton.buttonID = EMouseButtonID::Left;
-                            inputState.mouseLastRegPos = cursorPos;
+                            inputMouseState.lastCursorPos = cursorPos;
                             break;
                         }
                         case AMOTION_EVENT_ACTION_MOVE:
@@ -329,8 +339,8 @@ namespace ts3::system
                             auto & eInputMouseMove = pOutEvent.eInputMouseMove;
                             eInputMouseMove.eventCode = E_EVENT_CODE_INPUT_MOUSE_MOVE;
                             eInputMouseMove.cursorPos = cursorPos;
-                            eInputMouseMove.movementDelta = ( cursorPos - inputState.mouseLastRegPos ) * 0.2f;
-                            inputState.mouseLastRegPos = cursorPos;
+                            eInputMouseMove.movementDelta = ( cursorPos - inputMouseState.lastCursorPos ) * 0.2f;
+                            inputMouseState.lastCursorPos = cursorPos;
                             break;
                         }
                         case AMOTION_EVENT_ACTION_UP:
@@ -340,7 +350,7 @@ namespace ts3::system
                             eInputMouseButton.cursorPos = cursorPos;
                             eInputMouseButton.buttonAction = EMouseButtonActionType::Release;
                             eInputMouseButton.buttonID = EMouseButtonID::Left;
-                            inputState.mouseLastRegPos = cursorPos;
+                            inputMouseState.lastCursorPos = cursorPos;
                             break;
                         }
                     }
