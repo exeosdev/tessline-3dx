@@ -13,4 +13,13 @@
 #  define TS3_DEBUG 0
 #endif
 
+#define TS3_FUNC_NO_DISCARD \
+    TS3_PCL_ATTR_NO_DISCARD
+
+#define TS3_FUNC_PURE_VIRTUAL( pFunc ) \
+    virtual pFunc = 0
+
+#define TS3_FUNC_PURE_VIRTUAL_NO_DISCARD( pFunc ) \
+    TS3_PCL_ATTR_NO_DISCARD virtual pFunc = 0
+
 #endif /* __TS3_PLATFORM_CONFIG_PLATFORM_H__ */

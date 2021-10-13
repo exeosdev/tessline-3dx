@@ -1,37 +1,46 @@
 
-#ifndef __TS3_SYSTEM_CORE_SESSION_CONTEXT_H__
-#define __TS3_SYSTEM_CORE_SESSION_CONTEXT_H__
+#ifndef __TS3_SYSTEM_CORE_SYS_CONTEXT_H__
+#define __TS3_SYSTEM_CORE_SYS_CONTEXT_H__
 
 #include "prerequisites.h"
 
 namespace ts3::system
 {
 
-    struct SysContextNativeData;
-
     ts3SysDeclareHandle( SysContext );
+    ts3SysDeclareHandle( AssetLoader );
+    ts3SysDeclareHandle( DisplayManager );
     ts3SysDeclareHandle( EventController );
+    ts3SysDeclareHandle( FileManager );
+    ts3SysDeclareHandle( OpenGLSystemDriver );
+    ts3SysDeclareHandle( WindowManager );
+
+    struct AssetLoaderCreateInfo;
 
 	/// @brief
-	class SysContext
+	class SysContext : public DynamicInterface
     {
     public:
-        struct ObjectInternalData;
-        std::unique_ptr<ObjectInternalData> const mInternal;
-        const SysContextNativeData * const mNativeData = nullptr;
-
-    public:
         SysContext();
+        virtual ~SysContext() noexcept;
 
-        ~SysContext() noexcept;
+        virtual AssetLoaderHandle createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo ) = 0;
 
-        EventController & getEventController();
+        virtual DisplayManagerHandle createDisplayManager() = 0;
 
-        static std::string queryCurrentProcessExecutableDirectory();
+        virtual EventControllerHandle createEventController() = 0;
 
-        static std::string queryCurrentProcessExecutableFilePath();
+        virtual FileManagerHandle createFileManager() = 0;
+
+        virtual OpenGLSystemDriverHandle createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager ) = 0;
+
+        virtual WindowManagerHandle createWindowManager( DisplayManagerHandle pDisplayManager ) = 0;
+
+        virtual std::string queryCurrentProcessExecutableFilePath() const = 0;
+
+        std::string queryCurrentProcessExecutableDirectory() const;
     };
 
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_CORE_SESSION_CONTEXT_H__
+#endif // __TS3_SYSTEM_CORE_SYS_CONTEXT_H__
