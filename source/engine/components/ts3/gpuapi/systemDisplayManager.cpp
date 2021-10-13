@@ -1,7 +1,7 @@
 
 #include "systemDisplayManager.h"
 #include <ts3/system/displayDriver.h>
-#include <ts3/system/displayManager.h>
+#include <ts3/system/displaySystem.h>
 
 namespace ts3::gpuapi
 {

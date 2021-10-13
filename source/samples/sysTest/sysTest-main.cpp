@@ -1,9 +1,9 @@
 
-#include <ts3/system/display.h>
+#include <ts3/system/displayDriver.h>
 #include <ts3/system/sysContextNative.h>
 #include <ts3/system/windowNative.h>
-#include <ts3/system/eventSystemNative.h>
-#include <ts3/system/openGL.h>
+#include <ts3/system/eventCoreNative.h>
+#include <ts3/system/openGLDriver.h>
 #include <ts3/system/assetSystemNative.h>
 
 using namespace ts3::system;
@@ -11,15 +11,15 @@ using namespace ts3::system;
 struct GfxState
 {
     DisplayManagerHandle displayManager;
-    GLSystemDriverHandle glSystemDriver;
-    GLDisplaySurfaceHandle glSurface;
-    GLRenderContextHandle glContext;
+    OpenGLSystemDriverHandle glSystemDriver;
+    OpenGLDisplaySurfaceHandle glSurface;
+    OpenGLRenderContextHandle glContext;
     bool pauseAnimation = false;
 };
 
 void initializeGraphicsCreateDriver( GfxState & pGfxState )
 {
-    pGfxState.glSystemDriver = createSysObject<GLSystemDriver>( pGfxState.displayManager );
+    pGfxState.glSystemDriver = createSysObject<OpenGLSystemDriver>( pGfxState.displayManager );
     pGfxState.glSystemDriver->initializePlatform();
 }
 
@@ -27,7 +27,7 @@ void initializeGraphicsCreateSurface( GfxState & pGfxState )
 {
     GLDisplaySurfaceCreateInfo surfaceCreateInfo;
     surfaceCreateInfo.windowGeometry.size = {0, 0 };
-    surfaceCreateInfo.windowGeometry.frameStyle = EWindowFrameStyle::Caption;
+    surfaceCreateInfo.windowGeometry.frameStyle = EFrameStyle::Caption;
     surfaceCreateInfo.visualConfig = vsxGetDefaultVisualConfigForSysWindow();
     surfaceCreateInfo.flags.set( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 
@@ -122,7 +122,7 @@ int main( int pArgc, const char ** pArgv )
 #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_OS_ANDROID )
     bool waitForDisplay = true;
 
-    evtDispatcher->bindEventHandler(
+    evtDispatcher->setEventHandler(
         EEventCodeIndex::AppActivityDisplayInit,
         [&waitForDisplay,&sysContext](const EventObject & pEvt) -> bool {
             waitForDisplay = false;
@@ -134,7 +134,7 @@ int main( int pArgc, const char ** pArgv )
         evtController->updateSysQueueAuto();
     }
 
-    evtDispatcher->bindEventHandler(
+    evtDispatcher->setEventHandler(
         EEventCodeIndex::AppActivityDisplayInit,
         [&gfxState](const EventObject & pEvt) -> bool {
             initializeGraphicsGL( gfxState );
@@ -143,7 +143,7 @@ int main( int pArgc, const char ** pArgv )
             return true;
         });
 
-    evtDispatcher->bindEventHandler(
+    evtDispatcher->setEventHandler(
         EEventCodeIndex::AppActivityDisplayTerm,
         [&gfxState](const EventObject & pEvt) -> bool {
             //gfxState.glSystemDriver->invalidate();
@@ -157,13 +157,13 @@ int main( int pArgc, const char ** pArgv )
 
     bool runApp = true;
 
-    evtDispatcher->bindEventHandler(
+    evtDispatcher->setEventHandler(
             EEventCodeIndex::AppActivityQuit,
             [&runApp,&gfxState](const EventObject & pEvt) -> bool {
                 runApp = false;
                 return true;
             });
-    evtDispatcher->bindEventHandler(
+    evtDispatcher->setEventHandler(
             EEventCodeIndex::WindowUpdateClose,
             [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
                 if( pEvt.eWindowUpdateClose.checkEventSource( gfxState.glSurface.get() ) )
@@ -172,7 +172,7 @@ int main( int pArgc, const char ** pArgv )
                 }
                 return true;
             });
-    evtDispatcher->bindEventHandler(
+    evtDispatcher->setEventHandler(
             EEventCodeIndex::InputKeyboardKey,
             [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
                 if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::Escape )

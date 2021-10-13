@@ -1,9 +1,8 @@
 
-#include <ts3/system/display.h>
+#include <ts3/system/displaySystem.h>
 #include <ts3/system/sysContextNative.h>
-#include <ts3/system/windowNative.h>
-#include <ts3/system/eventSystemNative.h>
-#include <ts3/system/openGL.h>
+#include <ts3/system/eventCoreNative.h>
+#include <ts3/system/openGLDriver.h>
 #include <ts3/system/assetSystemNative.h>
 #include <ts3/system/perfCounter.h>
 
@@ -99,14 +98,12 @@ int main( int pArgc, const char ** pArgv )
     const std::string sGxDriverName = "GL4";
 
     SysContextCreateInfo sysContextCreateInfo;
-    sysContextCreateInfo.flags = 0;
     sysContextCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
-    auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+    auto sysContext = createSysContext( sysContextCreateInfo );
 
-    AssetLoaderCreateInfo aslCreateInfo;
-    aslCreateInfo.sysContext = sysContext;
+    AssetLoaderCreateInfo aslCreateInfo;\
     aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
-    auto assetLoader = createAssetLoader( aslCreateInfo );
+    auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
 
     GraphicsDriverState gxDriverState;
     gxDriverState.driverID = "GL4";
@@ -139,14 +136,14 @@ int main( int pArgc, const char ** pArgv )
 
     bool runApp = true;
 
-    auto evtController = createSysObject<EventController>( sysContext );
+    auto evtController = sysContext->createEventController();
     auto evtDispatcher = evtController->createEventDispatcher();
     evtController->setActiveEventDispatcher( *evtDispatcher );
 
 #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_OS_ANDROID )
     bool waitForDisplay = true;
 
-    evtDispatcher->bindEventHandler(
+    evtDispatcher->setEventHandler(
             EEventCodeIndex::AppActivityDisplayInit,
             [&waitForDisplay,&sysContext](const EventObject & pEvt) -> bool {
                 waitForDisplay = false;
@@ -158,7 +155,7 @@ int main( int pArgc, const char ** pArgv )
         evtController->updateSysQueueAuto();
     }
 
-//    evtDispatcher->bindEventHandler(
+//    evtDispatcher->setEventHandler(
 //            EEventCodeIndex::AppActivityDisplayInit,
 //            [&gfxState](const EventObject & pEvt) -> bool {
 //                initializeGraphicsGL( gfxState );
@@ -167,7 +164,7 @@ int main( int pArgc, const char ** pArgv )
 //                return true;
 //            });
 //
-//    evtDispatcher->bindEventHandler(
+//    evtDispatcher->setEventHandler(
 //            EEventCodeIndex::AppActivityDisplayTerm,
 //            [&gfxState](const EventObject & pEvt) -> bool {
 //                //gfxState.glSystemDriver->invalidate();
@@ -179,13 +176,13 @@ int main( int pArgc, const char ** pArgv )
 //            });
 #endif
 
-    evtDispatcher->bindEventHandler(
+    evtDispatcher->setEventHandler(
             EEventCodeIndex::AppActivityQuit,
             [&runApp,&gxDriverState](const EventObject & pEvt) -> bool {
                 runApp = false;
                 return true;
             });
-    evtDispatcher->bindEventHandler(
+    evtDispatcher->setEventHandler(
             EEventCodeIndex::WindowUpdateClose,
             [evtDispatcher,&gxDriverState](const EventObject & pEvt) -> bool {
                 if( pEvt.eWindowUpdateClose.checkEventSource( gxDriverState.presentationLayer->getInternalSystemEventSource() ) )
@@ -194,7 +191,7 @@ int main( int pArgc, const char ** pArgv )
                 }
                 return true;
             });
-    evtDispatcher->bindEventHandler(
+    evtDispatcher->setEventHandler(
             EEventCodeIndex::InputKeyboardKey,
             [evtDispatcher,&gxDriverState](const EventObject & pEvt) -> bool {
                 if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::Escape )
@@ -408,7 +405,7 @@ int main( int pArgc, const char ** pArgv )
 
     bool rotate = false;
 
-    evtDispatcher->bindEventHandler(
+    evtDispatcher->setEventHandler(
             ts3::system::EEventCodeIndex::InputMouseButton,
             [&cameraController,&rotate]( const ts3::system::EventObject & pEvt ) -> bool {
                 const auto & eButton = pEvt.eInputMouseButton;
@@ -422,7 +419,7 @@ int main( int pArgc, const char ** pArgv )
                 }
                 return true;
             });
-    evtDispatcher->bindEventHandler(
+    evtDispatcher->setEventHandler(
             ts3::system::EEventCodeIndex::InputMouseMove,
             [&cameraController,&rotate]( const ts3::system::EventObject & pEvt ) -> bool {
                 //if( rotate )

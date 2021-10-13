@@ -18,16 +18,16 @@ namespace ts3::gpuapi
 	class TS3GX_GL_CLASS GLGPUDriver : public GPUDriver
 	{
 	public:
-		system::GLSystemDriverHandle const mSysGLDriver;
+		system::OpenGLSystemDriverHandle const mSysGLDriver;
 
 	public:
-		explicit GLGPUDriver( system::GLSystemDriverHandle pSysGLDriver );
+		explicit GLGPUDriver( system::OpenGLSystemDriverHandle pSysGLDriver );
 		virtual ~GLGPUDriver();
 
 	protected:
 		/// @brief Helper method. Initializes EXF OpenGL driver component.
 		/// Used by specific sub-classes (drivers) when a driver is created.
-		static system::GLSystemDriverHandle initializeSysGLDriver( system::SysContextHandle pSysContext );
+		static system::OpenGLSystemDriverHandle initializeSysGLDriver( system::SysContextHandle pSysContext );
 	};
 
 }

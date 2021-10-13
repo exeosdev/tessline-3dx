@@ -106,7 +106,7 @@ int main( int pArgc, const char ** pArgv )
 	{
 	    bool waitForDisplay = true;
 
-	    evtDispatcher->bindEventHandler(
+	    evtDispatcher->setEventHandler(
             ts3::system::EEventCodeIndex::AppActivityDisplayInit,
             [&waitForDisplay,&sysContext](const ts3::system::EventObject & pEvt) -> bool {
                 waitForDisplay = false;
@@ -116,17 +116,17 @@ int main( int pArgc, const char ** pArgv )
 	    {
 	        evtController->updateSysQueueAuto();
 	    }
-	    evtDispatcher->bindEventHandler( ts3::system::EEventCodeIndex::AppActivityDisplayInit, nullptr );
+	    evtDispatcher->setEventHandler( ts3::system::EEventCodeIndex::AppActivityDisplayInit, nullptr );
 	}
 #endif
 
-	evtDispatcher->bindEventHandler(
+	evtDispatcher->setEventHandler(
         ts3::system::EEventCodeIndex::AppActivityQuit,
         []( const ts3::system::EventObject & pEvt ) -> bool {
             appExec = false;
             return true;
         });
-	evtDispatcher->bindEventHandler(
+	evtDispatcher->setEventHandler(
         ts3::system::EEventCodeIndex::InputMouseScroll,
         [&cameraController]( const ts3::system::EventObject & pEvt ) -> bool {
             const auto & escroll = pEvt.eInputMouseScroll;
@@ -140,7 +140,7 @@ int main( int pArgc, const char ** pArgv )
             }
             return true;
         });
-	evtDispatcher->bindEventHandler(
+	evtDispatcher->setEventHandler(
         ts3::system::EEventCodeIndex::InputMouseMove,
         [&cameraController]( const ts3::system::EventObject & pEvt ) -> bool {
             const auto & emove = pEvt.eInputMouseMove;
@@ -154,7 +154,7 @@ int main( int pArgc, const char ** pArgv )
             }
             return true;
         });
-	evtDispatcher->bindEventHandler(
+	evtDispatcher->setEventHandler(
         ts3::system::EEventCodeIndex::InputKeyboardKey,
         [&cameraController]( const ts3::system::EventObject & pEvt ) -> bool {
             auto & ekey = pEvt.eInputKeyboardKey;
@@ -202,7 +202,7 @@ int main( int pArgc, const char ** pArgv )
 
 #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_OS_ANDROID + 1 )
 
-	evtDispatcher->bindEventHandler(
+	evtDispatcher->setEventHandler(
         ts3::system::EEventCodeIndex::AppActivityDisplayInit,
         [&gxCoreState](const ts3::system::EventObject & pEvt) -> bool {
             initializeGraphicsGL( gfxState );
@@ -211,7 +211,7 @@ int main( int pArgc, const char ** pArgv )
             return true;
         });
 
-	evtDispatcher->bindEventHandler(
+	evtDispatcher->setEventHandler(
         ts3::system::EEventCodeIndex::AppActivityDisplayTerm,
         [&gxCoreState](const ts3::system::EventObject & pEvt) -> bool {
             //gfxState.glSystemDriver->invalidate();

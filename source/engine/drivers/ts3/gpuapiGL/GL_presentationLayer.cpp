@@ -6,27 +6,27 @@
 namespace ts3::gpuapi
 {
 
-	static system::GLDisplaySurfaceHandle createSysGLSurface( system::GLSystemDriverHandle pSysGLDriver,
+	static system::OpenGLDisplaySurfaceHandle createSysGLSurface( system::OpenGLSystemDriverHandle pSysGLDriver,
                                                               const GLPresentationLayerCreateInfo & pPLCreateInfo )
 	{
 		try
 		{
 		    system::GLDisplaySurfaceCreateInfo surfaceCreateInfo;
-			surfaceCreateInfo.windowGeometry.position = pPLCreateInfo.screenRect.offset;
-			surfaceCreateInfo.windowGeometry.size = pPLCreateInfo.screenRect.size;
-			surfaceCreateInfo.windowGeometry.frameStyle = system::EWindowFrameStyle::Default;
+			surfaceCreateInfo.frameGeometry.position = pPLCreateInfo.screenRect.offset;
+			surfaceCreateInfo.frameGeometry.size = pPLCreateInfo.screenRect.size;
+			surfaceCreateInfo.frameGeometry.style = system::EFrameStyle::Default;
 			surfaceCreateInfo.visualConfig = pPLCreateInfo.visualConfig;
 			surfaceCreateInfo.flags = 0u;
 
 		#if( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL32 )
-			surfaceCreateInfo.targetAPIVersion.major = 3;
-			surfaceCreateInfo.targetAPIVersion.minor = 2;
+			surfaceCreateInfo.runtimeVersionDesc.apiVersion.major = 3;
+			surfaceCreateInfo.runtimeVersionDesc.apiVersion.minor = 2;
 		#elif( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL43 )
-			surfaceCreateInfo.targetAPIVersion.major = 4;
-			surfaceCreateInfo.targetAPIVersion.minor = 3;
+			surfaceCreateInfo.runtimeVersionDesc.apiVersion.major = 4;
+			surfaceCreateInfo.runtimeVersionDesc.apiVersion.minor = 3;
 		#elif( TS3GX_GL_TARGET == TS3GX_GL_TARGET_ES31 )
-			surfaceCreateInfo.targetAPIVersion.major = 3;
-			surfaceCreateInfo.targetAPIVersion.minor = 1;
+			surfaceCreateInfo.runtimeVersionDesc.apiVersion.major = 3;
+			surfaceCreateInfo.runtimeVersionDesc.apiVersion.minor = 1;
         #endif
 
 			if( pPLCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT ) )
@@ -55,7 +55,7 @@ namespace ts3::gpuapi
 		return nullptr;
 	}
 
-	GLPresentationLayer::GLPresentationLayer( GLGPUDevice & pDevice, system::GLDisplaySurfaceHandle pSysGLDisplaySurface )
+	GLPresentationLayer::GLPresentationLayer( GLGPUDevice & pDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
 	: PresentationLayer( pDevice )
 	, mSysGLDisplaySurface( pSysGLDisplaySurface )
 	{ }
@@ -68,7 +68,7 @@ namespace ts3::gpuapi
 	}
 
 
-	GLScreenPresentationLayer::GLScreenPresentationLayer( GLGPUDevice & pDevice, system::GLDisplaySurfaceHandle pSysGLDisplaySurface )
+	GLScreenPresentationLayer::GLScreenPresentationLayer( GLGPUDevice & pDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
 	: GLPresentationLayer( pDevice, pSysGLDisplaySurface )
 	{ }
 

@@ -64,7 +64,7 @@ namespace ts3::gpuapi
 		return cmdSyncObject;
 	}
 
-	void GLCommandSystem::setTargetGLSurface( system::GLDisplaySurfaceHandle pSysGLDisplaySurface )
+	void GLCommandSystem::setTargetGLSurface( system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
 	{
 		// Surface is required to create a GL context. Since CommandSystem is bound to a device
 		// and PresentationLayer is created when device is already available, there is no way
@@ -107,9 +107,9 @@ namespace ts3::gpuapi
 		return true;
 	}
 
-	system::GLRenderContextHandle GLCommandSystem::createSysGLRenderContext( GLGPUDevice & pGLGPUDevice, system::GLDisplaySurfaceHandle pSysGLDisplaySurface )
+	system::OpenGLRenderContextHandle GLCommandSystem::createSysGLRenderContext( GLGPUDevice & pGLGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
 	{
-		system::GLRenderContextHandle sysGLRenderContext = nullptr;
+		system::OpenGLRenderContextHandle sysGLRenderContext = nullptr;
 
 		try
 		{
@@ -117,13 +117,13 @@ namespace ts3::gpuapi
 			contextCreateInfo.shareContext = nullptr;
 
 		#if( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL43 )
-			contextCreateInfo.requiredAPIVersion.major = 4;
-			contextCreateInfo.requiredAPIVersion.minor = 3;
-			contextCreateInfo.targetAPIProfile = system::EGLAPIProfile::Core;
+			contextCreateInfo.runtimeVersionDesc.apiVersion.major = 4;
+			contextCreateInfo.runtimeVersionDesc.apiVersion.minor = 3;
+			contextCreateInfo.runtimeVersionDesc.apiProfile = system::EGLAPIProfile::OpenGL;
 		#elif( TS3GX_GL_TARGET == TS3GX_GL_TARGET_ES31 )
-			contextCreateInfo.requiredAPIVersion.major = 3;
-			contextCreateInfo.requiredAPIVersion.minor = 1;
-			contextCreateInfo.targetAPIProfile = system::EGLAPIProfile::GLES;
+			contextCreateInfo.runtimeVersionDesc.apiVersion.major = 3;
+			contextCreateInfo.runtimeVersionDesc.apiVersion.minor = 1;
+			contextCreateInfo.runtimeVersionDesc.apiProfile = system::EGLAPIProfile::OpenGLES;
 		#endif
 
 			if( pGLGPUDevice.isDebugDevice() )
@@ -131,7 +131,7 @@ namespace ts3::gpuapi
 				contextCreateInfo.flags.set( system::E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT );
 			}
 
-			sysGLRenderContext = pSysGLDisplaySurface->mDriver->createRenderContext( *pSysGLDisplaySurface, contextCreateInfo );
+			sysGLRenderContext = pSysGLDisplaySurface->mGLSystemDriver->createRenderContext( *pSysGLDisplaySurface, contextCreateInfo );
 			sysGLRenderContext->bindForCurrentThread( *pSysGLDisplaySurface );
 
 			auto sysVersionInfo = sysGLRenderContext->querySystemVersionInfo();
