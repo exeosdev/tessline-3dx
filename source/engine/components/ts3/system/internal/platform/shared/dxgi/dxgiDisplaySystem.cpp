@@ -1,5 +1,6 @@
 
-#include <ts3/system/displayNative.h>
+#include "dxgiDisplaySystem.h"
+#include <ts3/system/internal/displaySystemPrivate.h>
 #include <ts3/stdext/mapUtils.h>
 #include <ts3/stdext/stringUtils.h>
 
@@ -7,17 +8,28 @@
 namespace ts3::system
 {
 
-    static void _dxgiEnumAdapterOutputs( DisplayAdapter & pAdapter );
-
-	static DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( EColorFormat pColorFormat );
-
-
-	void DisplayDriverDXGI::_initialize()
+    namespace platform
     {
-        ts3DebugAssert( mInternal->nativeDataPriv.dxgi );
-        auto & dxgiDriverData = *( mInternal->nativeDataPriv.dxgi );
 
-        if( dxgiDriverData.dxgiFactory == nullptr )
+        DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( EColorFormat pColorFormat );
+
+    }
+
+
+	DisplayDriverDXGI::DisplayDriverDXGI( DisplayManagerHandle pDisplayManager )
+	: NativeDisplayDriver( pDisplayManager, EDisplayDriverType::DXGI )
+	{
+	    _initializeDXGIDriverState();
+	}
+
+	DisplayDriverDXGI::~DisplayDriverDXGI() noexcept
+	{
+	    _releaseDXGIDriverState();
+	}
+
+	void DisplayDriverDXGI::_initializeDXGIDriverState()
+    {
+        if( mNativeData.dxgiFactory == nullptr )
         {
             Bitmask<UINT> dxgiFactoryCreateFlags = 0;
         #if ( TS3_DEBUG )
@@ -29,7 +41,7 @@ namespace ts3::system
 
             if( SUCCEEDED( hResult ) )
             {
-                dxgiDriverData.dxgiFactory = dxgiFactory2;
+                mNativeData.dxgiFactory = dxgiFactory2;
             }
             else
             {
@@ -41,24 +53,24 @@ namespace ts3::system
                     ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
                 }
 
-                dxgiDriverData.dxgiFactory = dxgiFactory1;
+                mNativeData.dxgiFactory = dxgiFactory1;
             }
         }
     }
 
-    void DisplayDriverDXGI::_release()
+    void DisplayDriverDXGI::_releaseDXGIDriverState() noexcept
     {}
 
     void DisplayDriverDXGI::_enumAdapterOutputs( DisplayAdapter & pAdapter )
     {
-        auto & adapterNativeData = dsmGetObjectNativeDataDXGI( pAdapter );
+	    auto * adapterDXGI = pAdapter.queryInterface<DisplayAdapterDXGI>();
 
-        auto * dxgiAdapter = adapterNativeData.dxgiAdapter.Get();
+	    auto * dxgiAdapterInterface = adapterDXGI->mNativeData.dxgiAdapter.Get();
 
         for( UINT outputIndex = 0u; ; ++outputIndex )
         {
             ComPtr<IDXGIOutput> dxgiOutput;
-            auto hResult = dxgiAdapter->EnumOutputs( outputIndex, dxgiOutput.GetAddressOf() );
+            auto hResult = dxgiAdapterInterface->EnumOutputs( outputIndex, dxgiOutput.GetAddressOf() );
 
             // Exactly the same situation: if DXGI_ERROR_NOT_FOUND is returned - no more adapters to enumerate.
             if ( hResult == DXGI_ERROR_NOT_FOUND )
@@ -91,12 +103,11 @@ namespace ts3::system
                 ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
             }
 
-            auto * outputObject = addOutput( pAdapter );
-            auto & outputNativeData = dsmGetObjectNativeDataDXGI( *outputObject );
-            auto & outputDesc = dsmGetObjectDesc( *outputObject );
-
-            outputNativeData.dxgiOutput = dxgiOutput1;
-            outputNativeData.dxgiOutputDesc = dxgiOutputDesc;
+            auto outputObject = adapterDXGI->createOutput<DisplayOutputDXGI>();
+            outputObject->mNativeData.dxgiOutput = dxgiOutput1;
+            outputObject->mNativeData.dxgiOutputDesc = dxgiOutputDesc;
+            
+            auto & outputDesc = outputObject->getOutputDescInternal();
             outputDesc.name = strUtils::convertStringRepresentation<char>( dxgiOutputDesc.DeviceName );
             outputDesc.screenRect.offset.x = dxgiOutputDesc.DesktopCoordinates.left;
             outputDesc.screenRect.offset.y = dxgiOutputDesc.DesktopCoordinates.top;
@@ -127,9 +138,9 @@ namespace ts3::system
         }
     }
 
-	void DisplayDriverDXGI::_drvEnumDisplayDevices()
+	void DisplayDriverDXGI::_nativeEnumDisplayDevices()
 	{
-	    auto * dxgiFactory = mInternal->nativeDataPriv.dxgi->dxgiFactory.Get();
+	    auto * dxgiFactory =  mNativeData.dxgiFactory.Get();
 
 	    for( UINT adapterIndex = 0u; ; ++adapterIndex )
 	    {
@@ -161,12 +172,11 @@ namespace ts3::system
 	            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	        }
 
-	        auto * adapterObject = addAdapter();
-	        auto & adapterNativeData = dsmGetObjectNativeDataDXGI( *adapterObject );
-	        auto & adapterDesc = dsmGetObjectDesc( *adapterObject );
+	        auto adapterObject = createAdapter<DisplayAdapterDXGI>();
+	        adapterObject->mNativeData.dxgiAdapter = dxgiAdapter;
+	        adapterObject->mNativeData.dxgiAdapterDesc = dxgiAdapterDesc;
 	        
-	        adapterNativeData.dxgiAdapter = dxgiAdapter;
-	        adapterNativeData.dxgiAdapterDesc = dxgiAdapterDesc;
+	        auto & adapterDesc = adapterObject->getAdapterDescInternal();
 	        adapterDesc.name = strUtils::convertStringRepresentation<char>( dxgiAdapterDesc.Description );
 	        adapterDesc.flags.set( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
 
@@ -189,16 +199,18 @@ namespace ts3::system
 	    }
 	}
 
-	void DisplayDriverDXGI::_drvEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat )
+	void DisplayDriverDXGI::_nativeEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat )
 	{
-	    auto * dxgiOutput = pOutput.mInternal->nativeDataPriv.dxgi->dxgiOutput.Get();
+	    auto * outputDXGI = pOutput.queryInterface<DisplayOutputDXGI>();
+
+	    auto * dxgiOutputInterface = outputDXGI->mNativeData.dxgiOutput.Get();
 
 	    // This should never fail, i.e. the specified format should always yield a value which
 	    // is known to the DXGI translation function. We had an issue with 'SystemNative' format,
 	    // but this has been resolved by proxy function inside DisplayOutput::PrivateData struct.
 	    // If there is a case the call below fails, make sure this function is ALWAYS called with
 	    // a "resolved" color format (look for 'dsmResolveSystemColorFormat').
-	    auto dxgiFormat = _dxgiTranslateColorFormatToDXGIFormat( pColorFormat );
+	    auto dxgiFormat = platform::_dxgiTranslateColorFormatToDXGIFormat( pColorFormat );
 
 	    if ( dxgiFormat == DXGI_FORMAT_UNKNOWN )
 	    {
@@ -207,7 +219,7 @@ namespace ts3::system
 
 	    UINT displayModesNum = 0;
 	    // Passing nullptr as 'pDesc' causes the DXGI runtime to return the total number of supported modes for an adapter.
-	    auto hResult = dxgiOutput->GetDisplayModeList( dxgiFormat, 0, &displayModesNum, nullptr );
+	    auto hResult = dxgiOutputInterface->GetDisplayModeList( dxgiFormat, 0, &displayModesNum, nullptr );
 
 	    if ( FAILED( hResult ) )
 	    {
@@ -219,7 +231,7 @@ namespace ts3::system
 
 	    // Query all supported modes and store them into the pre-allocated array.
 	    // Any optional filtering and processing is done afterwards, it's more efficient to fetch this in one go.
-	    hResult = dxgiOutput->GetDisplayModeList( dxgiFormat, 0, &displayModesNum, dxgiModeList.data() );
+	    hResult = dxgiOutputInterface->GetDisplayModeList( dxgiFormat, 0, &displayModesNum, dxgiModeList.data() );
 
 	    if ( FAILED( hResult ) )
 	    {
@@ -257,11 +269,10 @@ namespace ts3::system
 	            continue;
 	        }
 
-	        auto * videoMode = addVideoMode( pOutput, pColorFormat );
-	        auto & videoModeNativeData = dsmGetObjectNativeDataDXGI( *videoMode );
-	        auto & videoModeDesc = dsmGetObjectDesc( *videoMode );
-
-	        videoModeNativeData.dxgiModeDesc = dxgiDisplayModeDesc;
+	        auto videoModeObject = outputDXGI->createVideoMode<DisplayVideoModeDXGI>( pColorFormat );
+	        videoModeObject->mNativeData.dxgiModeDesc = dxgiDisplayModeDesc;
+	        
+	        auto & videoModeDesc = videoModeObject->getModeDescInternal();
 	        videoModeDesc.settings = videoSettings;
 	        videoModeDesc.settingsHash = settingsHash;
 
@@ -269,30 +280,31 @@ namespace ts3::system
 	    }
 	}
 
-    EColorFormat DisplayDriverDXGI::_drvQueryDefaultSystemColorFormat() const
+    EColorFormat DisplayDriverDXGI::_nativeQueryDefaultSystemColorFormat() const
     {
 	    return EColorFormat::B8G8R8A8;
     }
 
 
-	void _dxgiInitializeDriver( DisplayDriverDXGI & pDriverDXGI )
-	{
-	}
+    namespace platform
+    {
 
-	DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( EColorFormat pColorFormat )
-	{
-		static const std::unordered_map<EColorFormat, DXGI_FORMAT> colorDescMap =
-		{
-			{ EColorFormat::B8G8R8       , DXGI_FORMAT_B8G8R8X8_UNORM      },
-			{ EColorFormat::B8G8R8A8     , DXGI_FORMAT_B8G8R8A8_UNORM      },
-			{ EColorFormat::B8G8R8A8SRGB , DXGI_FORMAT_B8G8R8X8_UNORM_SRGB },
-			{ EColorFormat::R8G8B8A8     , DXGI_FORMAT_R8G8B8A8_UNORM      },
-			{ EColorFormat::R8G8B8A8SRGB , DXGI_FORMAT_R8G8B8A8_UNORM_SRGB },
-			{ EColorFormat::R8G8B8X8     , DXGI_FORMAT_UNKNOWN             },
-			{ EColorFormat::R10G10B10A2  , DXGI_FORMAT_R10G10B10A2_UNORM   },
-		};
-		return getMapValueOrDefault( colorDescMap, pColorFormat, DXGI_FORMAT_UNKNOWN );
-	}
+        DXGI_FORMAT _dxgiTranslateColorFormatToDXGIFormat( EColorFormat pColorFormat )
+        {
+            static const std::unordered_map<EColorFormat, DXGI_FORMAT> colorDescMap =
+            {
+                { EColorFormat::B8G8R8       , DXGI_FORMAT_B8G8R8X8_UNORM      },
+                { EColorFormat::B8G8R8A8     , DXGI_FORMAT_B8G8R8A8_UNORM      },
+                { EColorFormat::B8G8R8A8SRGB , DXGI_FORMAT_B8G8R8X8_UNORM_SRGB },
+                { EColorFormat::R8G8B8A8     , DXGI_FORMAT_R8G8B8A8_UNORM      },
+                { EColorFormat::R8G8B8A8SRGB , DXGI_FORMAT_R8G8B8A8_UNORM_SRGB },
+                { EColorFormat::R8G8B8X8     , DXGI_FORMAT_UNKNOWN             },
+                { EColorFormat::R10G10B10A2  , DXGI_FORMAT_R10G10B10A2_UNORM   },
+            };
+            return getMapValueOrDefault( colorDescMap, pColorFormat, DXGI_FORMAT_UNKNOWN );
+        }
+
+    }
 
 } // namespace ts3::system
 #endif // TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI
