@@ -1,21 +1,14 @@
 
-#include "assetSystemNative.h"
+#include "internal/assetSystemPrivate.h"
 
 namespace ts3::system
 {
 
     AssetLoader::AssetLoader( SysContextHandle pSysContext )
     : SysObject( pSysContext )
-    , mInternal( std::make_unique<ObjectInternalData>() )
-    , mNativeData( &( mInternal->nativeDataPriv ) )
-    {
-        _nativeConstructor();
-    }
+    {}
 
-    AssetLoader::~AssetLoader() noexcept
-    {
-        _nativeDestructor();
-    }
+    AssetLoader::~AssetLoader() noexcept = default;
 
     AssetHandle AssetLoader::openSubAsset( const std::string & pAssetRefName, Bitmask<EAssetOpenFlags> pFlags )
     {
@@ -59,23 +52,16 @@ namespace ts3::system
     AssetDirectory::AssetDirectory( AssetLoaderHandle pAssetLoader )
     : SysObject( pAssetLoader->mSysContext )
     , mAssetLoader( std::move( pAssetLoader ) )
-    , mInternal( std::make_unique<ObjectInternalData>() )
-    , mNativeData( &( mInternal->nativeDataPriv ) )
-    , mDirName( mInternal->dirName )
-    {
-        _nativeConstructor();
-    }
+    , _privateData( std::make_unique<AssetDirectoryPrivateData>() )
+    {}
 
-    AssetDirectory::~AssetDirectory() noexcept
-    {
-        _nativeDestructor();
-    }
+    AssetDirectory::~AssetDirectory() noexcept = default;
 
     void AssetDirectory::refreshAssetList()
     {
-        if( !mInternal->assetNameList.empty() )
+        if( !_privateData->assetNameList.empty() )
         {
-            mInternal->assetNameList.clear();
+            _privateData->assetNameList.clear();
         }
         _nativeRefreshAssetList();
     }
@@ -91,7 +77,7 @@ namespace ts3::system
 
     const AssetNameList & AssetDirectory::getAssetList() const
     {
-        return mInternal->assetNameList;
+        return _privateData->assetNameList;
     }
 
     bool AssetDirectory::checkAssetExists( const std::string & pAssetName ) const
@@ -99,31 +85,40 @@ namespace ts3::system
         return _nativeCheckAssetExists( pAssetName );
     }
 
+    const std::string & AssetDirectory::getDirName() const
+    {
+        return _privateData->dirName;
+    }
+
+    void AssetDirectory::addAsset( std::string pAssetName )
+    {
+        _privateData->assetNameList.push_back( std::move( pAssetName ) );
+    }
+
+    void AssetDirectory::setAssetList( AssetNameList pAssetList )
+    {
+        _privateData->assetNameList = std::move( pAssetList );
+    }
+
+    void AssetDirectory::setDirName( std::string pDirName )
+    {
+        _privateData->dirName = std::move( pDirName );
+    }
+
 
     Asset::Asset( AssetLoaderHandle pAssetLoader )
     : SysObject( pAssetLoader->mSysContext )
     , mAssetDirectory( nullptr )
-    , mInternal( std::make_unique<ObjectInternalData>() )
-    , mNativeData( &( mInternal->nativeDataPriv ) )
-    , mName( mInternal->name )
-    {
-        _nativeConstructor();
-    }
+    , _privateData( std::make_unique<AssetPrivateData>() )
+    {}
 
     Asset::Asset( AssetDirectoryHandle pAssetDirectory )
     : SysObject( pAssetDirectory->mSysContext )
     , mAssetDirectory( std::move( pAssetDirectory ) )
-    , mInternal( std::make_unique<ObjectInternalData>() )
-    , mNativeData( &( mInternal->nativeDataPriv ) )
-    , mName( mInternal->name )
-    {
-        _nativeConstructor();
-    }
+    , _privateData( std::make_unique<AssetPrivateData>() )
+    {}
 
-    Asset::~Asset() noexcept
-    {
-        _nativeDestructor();
-    }
+    Asset::~Asset() noexcept = default;
 
     file_size_t Asset::readData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
     {
@@ -144,6 +139,16 @@ namespace ts3::system
     void Asset::resetReadPointer()
     {
         _nativeSetReadPointer( 0, EFilePointerRefPos::FileBeginning );
+    }
+
+    const std::string & Asset::getName() const
+    {
+        return _privateData->name;
+    }
+
+    void Asset::setName( std::string pAssetName )
+    {
+        _privateData->name = std::move( pAssetName );
     }
 
 } // namespace ts3::system
