@@ -1,5 +1,5 @@
 
-#include "fileManagerNative.h"
+#include "fileManager.h"
 
 namespace ts3::system
 {
@@ -7,17 +7,9 @@ namespace ts3::system
     File::File( FileManagerHandle pFileManager )
     : SysObject( pFileManager->mSysContext )
     , mFileManager( std::move( pFileManager ) )
-    , mInternal( std::make_unique<ObjectInternalData>() )
-    , mName( mInternal->name )
-    , mFullPath( mInternal->fullPath )
-    {
-        _nativeConstructor();
-    }
+    {}
 
-    File::~File() noexcept
-    {
-        _nativeDestructor();
-    }
+    File::~File() noexcept = default;
 
     file_size_t File::readData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
     {
@@ -53,35 +45,24 @@ namespace ts3::system
 
     FileManager::FileManager( SysContextHandle pSysContext )
     : SysObject( std::move( pSysContext ) )
-    {
-        _nativeConstructor();
-    }
+    {}
 
-    FileManager::~FileManager() noexcept
-    {
-        _nativeDestructor();
-    }
+    FileManager::~FileManager() noexcept = default;
 
     FileHandle FileManager::openFile( std::string pFilePath, EFileOpenMode pOpenMode )
     {
-        auto fileObject = createSysObject<File>( getHandle<FileManager>() );
-        _nativeOpenFile( *fileObject, std::move( pFilePath ), pOpenMode );
-        return fileObject;
+        return _nativeOpenFile( std::move( pFilePath ), pOpenMode );
 
     }
 
     FileHandle FileManager::createFile( std::string pFilePath )
     {
-        auto fileObject = createSysObject<File>( getHandle<FileManager>() );
-        _nativeCreateFile( *fileObject, std::move( pFilePath ) );
-        return fileObject;
+        return _nativeCreateFile( std::move( pFilePath ) );
     }
 
     FileHandle FileManager::createTemporaryFile()
     {
-        auto fileObject = createSysObject<File>( getHandle<FileManager>() );
-        _nativeCreateTemporaryFile( *fileObject );
-        return fileObject;
+        return _nativeCreateTemporaryFile();
     }
 
     FileList FileManager::openDirectoryFiles( const std::string & pDirectory )
