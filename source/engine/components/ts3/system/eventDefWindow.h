@@ -36,7 +36,7 @@ namespace ts3::system
 
     struct EvtWindowUpdateResize : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_RESIZE>
     {
-        WindowSize newSize;
+        FrameSize newSize;
     };
 
     struct EvtWindowUpdateVisibility : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY>
