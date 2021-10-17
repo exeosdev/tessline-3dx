@@ -11,7 +11,7 @@ namespace ts3::system
     , _privateData( std::make_unique<DisplayManagerPrivateData>() )
     {
         _privateData->driverFactoryMap[EDisplayDriverType::Generic] = [this]() {
-            return createDisplayDriverGeneric();
+            return createDisplayDriver();
         };
     #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
         _privateData->driverFactoryMap[EDisplayDriverType::DXGI] = [this]() {
@@ -41,9 +41,9 @@ namespace ts3::system
         return displayDriver;
     }
 
-    DisplayDriverHandle DisplayManager::createDisplayDriverGeneric()
+    DisplayDriverHandle DisplayManager::createDisplayDriver()
     {
-        return _nativeCreateDisplayDriverGeneric();
+        return _nativeCreateDisplayDriver();
     }
 
     bool DisplayManager::checkDriverSupport( EDisplayDriverType pDriverID ) const

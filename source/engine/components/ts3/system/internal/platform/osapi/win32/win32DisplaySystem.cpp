@@ -15,15 +15,37 @@ namespace ts3::system
 
     }
 
+
+    Win32DisplayAdapter::Win32DisplayAdapter( Win32DisplayDriver & pDisplayDriver )
+    : Win32NativeObject( pDisplayDriver )
+    {}
+
+    Win32DisplayAdapter::~Win32DisplayAdapter() noexcept = default;
+
+
+    Win32DisplayOutput::Win32DisplayOutput( Win32DisplayAdapter & pDisplayAdapter )
+    : Win32NativeObject( pDisplayAdapter )
+    {}
+
+    Win32DisplayOutput::~Win32DisplayOutput() noexcept = default;
+
+
+    Win32DisplayVideoMode::Win32DisplayVideoMode( Win32DisplayOutput & pDisplayOutput )
+    : Win32NativeObject( pDisplayOutput )
+    {}
+
+    Win32DisplayVideoMode::~Win32DisplayVideoMode() noexcept = default;
+
+
     Win32DisplayManager::Win32DisplayManager( SysContextHandle pSysContext )
-    : DisplayManager( pSysContext )
+    : DisplayManager( std::move( pSysContext ) )
     {}
 
     Win32DisplayManager::~Win32DisplayManager() noexcept = default;
 
-    DisplayDriverHandle Win32DisplayManager::_nativeCreateDisplayDriverGeneric()
+    DisplayDriverHandle Win32DisplayManager::_nativeCreateDisplayDriver()
     {
-        return createSysObject<Win32DisplayDriverGeneric>( getHandle<Win32DisplayManager>() );
+        return createSysObject<Win32DisplayDriver>( getHandle<Win32DisplayManager>() );
     }
 
     void Win32DisplayManager::_nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const
@@ -43,11 +65,11 @@ namespace ts3::system
     }
 
 
-    Win32DisplayDriverGeneric::Win32DisplayDriverGeneric( DisplayManagerHandle pDisplayManager )
-    : NativeDisplayDriver( pDisplayManager, EDisplayDriverType::Generic )
+    Win32DisplayDriver::Win32DisplayDriver( DisplayManagerHandle pDisplayManager )
+    : Win32NativeObject( std::move( pDisplayManager ), EDisplayDriverType::Generic )
     {}
 
-    Win32DisplayDriverGeneric::~Win32DisplayDriverGeneric() noexcept = default;
+    Win32DisplayDriver::~Win32DisplayDriver() noexcept = default;
 
     // -- Note on adapters enumeration:
     // Without the awesome DXGI, EnumDisplayDevices is the only reliable way of enumerating the display stuff.
@@ -58,8 +80,8 @@ namespace ts3::system
     // 1) \\Registry\\Machine\\System\\CurrentControlSet\\Control\\Video\\{79BD17DD-B591-11EA-B520-AC9E17ECDDE5}\\0000
     // 2) \\Registry\\Machine\\System\\CurrentControlSet\\Control\\Video\\{79BD17DD-B591-11EA-B520-AC9E17ECDDE5}\\0001
     // So, to enumerate adapters properly, we must check the UUID of the adapter to not duplicate the entries.
-    // See SysDisplayDriverGenericImplProxy::nativeEnumAdapterList below.
-    void Win32DisplayDriverGeneric::_nativeEnumDisplayDevices()
+    // See SysDisplayDriverImplProxy::nativeEnumAdapterList below.
+    void Win32DisplayDriver::_nativeEnumDisplayDevices()
     {
         // Represents information about a display device in the system. String properties have the following meaning:
         // ::DeviceID - PCI-specific ID, not really interesting
@@ -95,7 +117,7 @@ namespace ts3::system
 
             if( adapterObject == nullptr )
             {
-                auto newAdapterObject = createAdapter<Win32DisplayAdapterGeneric>();
+                auto newAdapterObject = createAdapter<Win32DisplayAdapter>( *this );
                 newAdapterObject->mNativeData.deviceUUID = std::move( adapterUUID );
                 newAdapterObject->mNativeData.deviceName = adapterInfoGDI.DeviceName;
 
@@ -123,7 +145,7 @@ namespace ts3::system
                     break;
                 }
 
-                auto outputObject = adapterObject->createOutput<Win32DisplayOutputGeneric>();
+                auto outputObject = adapterObject->createOutput<Win32DisplayOutput>( *adapterObject );
                 outputObject->mNativeData.displayDeviceName = adapterInfoGDI.DeviceName;
                 outputObject->mNativeData.outputID = outputInfoGDI.DeviceName;
 
@@ -145,10 +167,10 @@ namespace ts3::system
     // This function is called after all output devices in the system have been enumerated and added to the
     // internal list inside the adapter. IMPORTANT: again, this gets called *within* _nativeEnumOutputs()
     // function *per each adapter* (that's why we pass DisplayAdapter* and check for monitors connected to it.
-    BOOL CALLBACK Win32DisplayDriverGeneric::_win32MonitorEnumProc( HMONITOR pMonitorHandle, HDC pHDC, LPRECT pMonitorRect, LPARAM pUserParam )
+    BOOL CALLBACK Win32DisplayDriver::_win32MonitorEnumProc( HMONITOR pMonitorHandle, HDC pHDC, LPRECT pMonitorRect, LPARAM pUserParam )
     {
         // Adapter object for which we are enumerating outputs/monitors.
-        auto * win32DisplayDriver = reinterpret_cast<Win32DisplayDriverGeneric *>( pUserParam );
+        auto * win32DisplayDriver = reinterpret_cast<Win32DisplayDriver *>( pUserParam );
 
         MONITORINFOEXA gdiMonitorInfo;
         gdiMonitorInfo.cbSize = sizeof( MONITORINFOEXA );
@@ -159,7 +181,7 @@ namespace ts3::system
             // Thanks to that, we can obtain the output this monitor refers to.
             if( auto outputObject = win32DisplayDriver->_findAnyOutputForDisplayDeviceName( gdiMonitorInfo.szDevice ) )
             {
-                auto * win32OutputObject = outputObject->queryInterface<Win32DisplayOutputGeneric>();
+                auto * win32OutputObject = outputObject->queryInterface<Win32DisplayOutput>();
                 win32OutputObject->mNativeData.gdiMonitorHandle = pMonitorHandle;
 
                 auto & outputDesc = win32OutputObject->getOutputDescInternal();
@@ -179,9 +201,9 @@ namespace ts3::system
         return TRUE;
     }
 
-    void Win32DisplayDriverGeneric::_nativeEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat )
+    void Win32DisplayDriver::_nativeEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat )
     {
-        auto * outputWin32 = pOutput.queryInterface<Win32DisplayOutputGeneric>();
+        auto * outputWin32 = pOutput.queryInterface<Win32DisplayOutput>();
 
         const auto & colorFormatDesc = vsxGetDescForColorFormat( pColorFormat );
 
@@ -237,7 +259,7 @@ namespace ts3::system
                 continue;
             }
 
-            auto videoModeObject = outputWin32->createVideoMode<Win32DisplayVideoModeGeneric>( pColorFormat );
+            auto videoModeObject = outputWin32->createVideoMode<Win32DisplayVideoMode>( *outputWin32, pColorFormat );
             videoModeObject->mNativeData.gdiModeInfo = gdiDevMode;
 
             auto & videoModeDesc = videoModeObject->getModeDescInternal();
@@ -248,32 +270,32 @@ namespace ts3::system
         }
     }
 
-    EColorFormat Win32DisplayDriverGeneric::_nativeQueryDefaultSystemColorFormat() const
+    EColorFormat Win32DisplayDriver::_nativeQueryDefaultSystemColorFormat() const
     {
         return EColorFormat::B8G8R8A8;
     }
 
 
-    Handle<Win32DisplayAdapterGeneric> Win32DisplayDriverGeneric::_findAdapterByUUID( const std::string & pUUID )
+    Handle<Win32DisplayAdapter> Win32DisplayDriver::_findAdapterByUUID( const std::string & pUUID )
     {
         auto displayAdapter = findAdapter( [&pUUID]( const DisplayAdapter & pAdapter ) -> bool {
-            auto * win32Adapter = pAdapter.queryInterface<Win32DisplayAdapterGeneric>();
+            auto * win32Adapter = pAdapter.queryInterface<Win32DisplayAdapter>();
             return win32Adapter->mNativeData.deviceUUID == pUUID;
         } );
-        return displayAdapter ? displayAdapter->getHandle<Win32DisplayAdapterGeneric>() : nullptr;
+        return displayAdapter ? displayAdapter->getHandle<Win32DisplayAdapter>() : nullptr;
     }
 
-    Handle<Win32DisplayOutputGeneric> Win32DisplayDriverGeneric::_findAdapterOutputForDisplayDeviceName( DisplayAdapter & pAdapter,
+    Handle<Win32DisplayOutput> Win32DisplayDriver::_findAdapterOutputForDisplayDeviceName( DisplayAdapter & pAdapter,
                                                                                             const char * pDeviceName )
     {
         auto displayOutput = pAdapter.findOutput( [pDeviceName]( const DisplayOutput & pOutput ) -> bool {
-            auto * win32Output = pOutput.queryInterface<Win32DisplayOutputGeneric>();
+            auto * win32Output = pOutput.queryInterface<Win32DisplayOutput>();
             return win32Output->mNativeData.displayDeviceName == pDeviceName;
         } );
-        return displayOutput ? displayOutput->getHandle<Win32DisplayOutputGeneric>() : nullptr;
+        return displayOutput ? displayOutput->getHandle<Win32DisplayOutput>() : nullptr;
     }
 
-    Handle<Win32DisplayOutputGeneric> Win32DisplayDriverGeneric::_findAnyOutputForDisplayDeviceName( const char * pDeviceName )
+    Handle<Win32DisplayOutput> Win32DisplayDriver::_findAnyOutputForDisplayDeviceName( const char * pDeviceName )
     {
         for( auto & adapter : _privateData->adapterInstanceList )
         {

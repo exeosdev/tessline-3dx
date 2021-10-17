@@ -18,7 +18,7 @@ namespace ts3::system
 
     }
 
-    class Win32FileManager : public FileManager
+    class Win32FileManager : public Win32NativeObject<FileManager, void>
     {
     public:
         explicit Win32FileManager( SysContextHandle pSysContext );
@@ -34,7 +34,7 @@ namespace ts3::system
         virtual bool _nativeCheckFileExists( const std::string & pFilePath ) override final;
     };
 
-    class Win32File : public File, public NativeObject<platform::Win32FileNativeData>
+    class Win32File : public Win32NativeObject<File, platform::Win32FileNativeData>
     {
         friend class Win32FileManager;
 
@@ -43,7 +43,7 @@ namespace ts3::system
         virtual ~Win32File() noexcept;
 
     friendapi:
-        void setInternalFileHandle( HANDLE pFileHandle );
+        void setInternalWin32FileHandle( HANDLE pFileHandle );
 
     private:
         void _releaseWin32FileHandle();

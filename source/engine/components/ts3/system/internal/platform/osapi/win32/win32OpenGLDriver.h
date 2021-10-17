@@ -45,14 +45,14 @@ namespace ts3::system
 	}
 
 	/// @brief Win32-specific implementation of the OpenGLSystemDriver class.
-	class Win32OpenGLSystemDriver : public OpenGLSystemDriver, public NativeObject<platform::Win32OpenGLSystemDriverNativeData>
+	class Win32OpenGLSystemDriver : public Win32NativeObject<OpenGLSystemDriver, platform::Win32OpenGLSystemDriverNativeData>
     {
     public:
         Win32OpenGLSystemDriver( DisplayManagerHandle pDisplayManager );
         virtual ~Win32OpenGLSystemDriver() noexcept;
 
     private:
-        void _release();
+        void _releaseWin32DriverState();
 
         /// @override OpenGLSystemDriver::_nativeInitializePlatform
         virtual void _nativeInitializePlatform() override final;
@@ -66,12 +66,18 @@ namespace ts3::system
         /// @override OpenGLSystemDriver::_nativeCreateDisplaySurfaceForCurrentThread
         virtual OpenGLDisplaySurfaceHandle _nativeCreateDisplaySurfaceForCurrentThread() override final;
 
+        /// @override OpenGLSystemDriver::_nativeDestroyDisplaySurface
+        virtual void _nativeDestroyDisplaySurface( OpenGLDisplaySurface & pDisplaySurface ) override final;
+
         /// @override OpenGLSystemDriver::_nativeCreateRenderContext
         virtual OpenGLRenderContextHandle _nativeCreateRenderContext( OpenGLDisplaySurface & pDisplaySurface,
                                                                       const GLRenderContextCreateInfo & pCreateInfo ) override final;
 
         /// @override OpenGLSystemDriver::_nativeCreateRenderContextForCurrentThread
         virtual OpenGLRenderContextHandle _nativeCreateRenderContextForCurrentThread() override final;
+
+        /// @override OpenGLSystemDriver::_nativeDestroyDisplaySurface
+        virtual void _nativeDestroyRenderContext( OpenGLRenderContext & pRenderContext ) override final;
 
         /// @override OpenGLSystemDriver::_nativeResetContextBinding
         virtual void _nativeResetContextBinding() override final;
@@ -91,7 +97,7 @@ namespace ts3::system
     };
 
 	/// @brief Win32-specific implementation of the OpenGLDisplaySurface class.
-	class Win32OpenGLDisplaySurface : public OpenGLDisplaySurface, public NativeObject<platform::Win32OpenGLDisplaySurfaceNativeData>
+	class Win32OpenGLDisplaySurface : public Win32NativeObject<OpenGLDisplaySurface, platform::Win32OpenGLDisplaySurfaceNativeData>
     {
     public:
         explicit Win32OpenGLDisplaySurface( Win32OpenGLSystemDriverHandle pGLSystemDriver );
@@ -127,7 +133,7 @@ namespace ts3::system
     };
 
 	/// @brief Win32-specific implementation of the OpenGLRenderContext class.
-	class Win32OpenGLRenderContext : public OpenGLRenderContext, public NativeObject<platform::Win32OpenGLRenderContextNativeData>
+	class Win32OpenGLRenderContext : public Win32NativeObject<OpenGLRenderContext, platform::Win32OpenGLRenderContextNativeData>
     {
     public:
         explicit Win32OpenGLRenderContext( Win32OpenGLSystemDriverHandle pGLSystemDriver );
@@ -136,10 +142,13 @@ namespace ts3::system
     private:
         void _release();
 
+        /// @override OpenGLRenderContext::_nativeBindForCurrentThread
         virtual void _nativeBindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface ) override final;
 
+        /// @override OpenGLRenderContext::_nativeIsCurrent
         virtual bool _nativeIsCurrent() const override final;
 
+        /// @override OpenGLRenderContext::_nativeIsValid
         virtual bool _nativeIsValid() const override final;
     };
 

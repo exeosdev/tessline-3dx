@@ -10,6 +10,11 @@
 namespace ts3::system
 {
 
+    class DisplayDriverDXGI;
+    class DisplayAdapterDXGI;
+    class DisplayOutputDXGI;
+    class DisplayVideoModeDXGI;
+
 	namespace platform
 	{
 
@@ -36,13 +41,39 @@ namespace ts3::system
         };
 
 	}
+	
+	/// @brief
+	class DisplayAdapterDXGI : public DisplayAdapter, public NativeObject<platform::DisplayAdapterNativeDataDXGI>
+    {
+	    friend class DisplayDriverDXGI;
 
-	using DisplayAdapterDXGI = NativeDisplayAdapter<platform::DisplayAdapterNativeDataDXGI>;
-	using DisplayOutputDXGI = NativeDisplayOutput<platform::DisplayOutputNativeDataDXGI>;
-	using DisplayVideoModeDXGI = NativeDisplayVideoMode<platform::DisplayVideoModeNativeDataDXGI>;
+    public:
+        explicit DisplayAdapterDXGI( DisplayDriverDXGI & pDisplayDriver );
+        virtual ~DisplayAdapterDXGI() noexcept;
+    };
 
 	/// @brief
-	class DisplayDriverDXGI : public NativeDisplayDriver<platform::DisplayDriverNativeDataDXGI>
+	class DisplayOutputDXGI : public DisplayOutput, public NativeObject<platform::DisplayOutputNativeDataDXGI>
+    {
+	    friend class DisplayDriverDXGI;
+
+    public:
+        explicit DisplayOutputDXGI( DisplayAdapterDXGI & pDisplayAdapter );
+        virtual ~DisplayOutputDXGI() noexcept;
+    };
+
+	/// @brief
+	class DisplayVideoModeDXGI : public DisplayVideoMode, public NativeObject<platform::DisplayVideoModeNativeDataDXGI>
+    {
+	    friend class DisplayDriverDXGI;
+
+    public:
+        explicit DisplayVideoModeDXGI( DisplayOutputDXGI & pDisplayOutput );
+        virtual ~DisplayVideoModeDXGI() noexcept;
+    };
+
+	/// @brief
+	class DisplayDriverDXGI : public DisplayDriver, public NativeObject<platform::DisplayDriverNativeDataDXGI>
     {
     public:
         explicit DisplayDriverDXGI( DisplayManagerHandle pDisplayManager );

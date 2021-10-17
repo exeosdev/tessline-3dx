@@ -5,7 +5,7 @@
 #include <ts3/system/displayCommon.h>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
-#  include "platform/osapi/android/androidDisplaySystem.h"
+#  include "internal/platform/osapi/android/androidDisplaySystem.h"
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
 #  include "internal/platform/osapi/win32/win32DisplaySystem.h"
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )

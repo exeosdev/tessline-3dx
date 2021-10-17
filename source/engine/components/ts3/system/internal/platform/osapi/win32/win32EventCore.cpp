@@ -30,13 +30,13 @@ namespace ts3::system
     
     
     Win32EventController::Win32EventController( SysContextHandle pSysContext )
-    : EventController( std::move( pSysContext ) )
+    : Win32NativeObject( std::move( pSysContext ) )
     {}
 
     Win32EventController::~Win32EventController() noexcept
     {}
 
-    std::shared_ptr<void> Win32EventController::_nativeRegisterEventSource( EventSource & pEventSource )
+    void Win32EventController::_nativeRegisterEventSource( EventSource & pEventSource )
     {
         auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::Win32EventSourceNativeData>();
         ts3DebugAssert( eventSourceNativeData != nullptr );
@@ -64,8 +64,6 @@ namespace ts3::system
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
 
         setEventSourcePlatformData( pEventSource, std::move( win32EventSourceStatePtr) );
-
-        return win32EventSourceStatePtr;
     }
 
     void Win32EventController::_nativeUnregisterEventSource( EventSource & pEventSource )
@@ -124,7 +122,7 @@ namespace ts3::system
     namespace platform
     {
 
-        bool nativeEventTranslate( EventController & pEventController, const NativeEvent & pNativeEvent, EventObject & pOutEvent )
+        bool nativeEventTranslate( EventController & pEventController, const NativeEventType & pNativeEvent, EventObject & pOutEvent )
         {
             auto * win32EventController = pEventController.queryInterface<Win32EventController>();
 
@@ -158,7 +156,7 @@ namespace ts3::system
                 // TODO: Some validation might be useful to check if this callback is used correctly.
                 auto * win32EventSourceState = reinterpret_cast<Win32EventSourceState *>( windowUserData );
 
-                NativeEvent nativeEvent;
+                Win32NativeEvent nativeEvent;
                 nativeEvent.hwnd = pHWND;
                 nativeEvent.message = pMessage;
                 nativeEvent.wParam = pWparam;
