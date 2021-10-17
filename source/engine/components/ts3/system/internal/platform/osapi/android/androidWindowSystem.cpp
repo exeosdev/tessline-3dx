@@ -1,68 +1,64 @@
 
-#include <ts3/system/windowNative.h>
+#include "androidWindowSystem.h"
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 namespace ts3::system
 {
 
-	math::Size2u nativeAndroidQueryNativeWindowSize( ANativeWindow * pANativeWindow )
+	AndroidWindowManager::AndroidWindowManager( DisplayManagerHandle pDisplayManager )
+	: WindowManager( std::move( pDisplayManager ) )
+	{}
+
+	AndroidWindowManager::~AndroidWindowManager() noexcept = default;
+
+	WindowHandle AndroidWindowManager::_nativeCreateWindow( WindowCreateInfo pCreateInfo )
 	{
-		math::Size2u resultSize{};
-
-		auto width = ANativeWindow_getWidth( pANativeWindow );
-		auto height = ANativeWindow_getHeight( pANativeWindow );
-
-		resultSize.x = trunc_numeric_cast<decltype( resultSize.x )>( width );
-		resultSize.y = trunc_numeric_cast<decltype( resultSize.x )>( height );
-
-		return resultSize;
-	}
-
-	void WindowManager::_nativeConstructor()
-	{
-		mInternal->nativeDataPriv.setSessionData( nativeAndroidGetASessionData( *mSysContext ) );
-	}
-
-	void WindowManager::_nativeDestructor() noexcept
-	{
-		mInternal->nativeDataPriv.resetSessionData();
-	}
-
-	void WindowManager::_nativeCreateWindow( Window & pWindow, const WindowCreateInfo & pCreateInfo )
-	{
-		auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
-
-		auto & windowNativeData = pWindow.mInternal->nativeDataPriv;
-		windowNativeData.setSessionData( aSessionData );
-	}
-
-	void WindowManager::_nativeDestroyWindow( Window & pWindow )
-	{
-		auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
-		auto & windowNativeData = pWindow.mInternal->nativeDataPriv;
-
-		windowNativeData.resetSessionData();
-	}
-
-	bool WindowManager::_nativeIsWindowValid( const Window & pWindow ) const noexcept
-	{
-		auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
-		return aSessionData.aNativeWindow != nullptr;
+		return nullptr;
 	}
 
 
-	void Window::_nativeSetTitleText( const std::string & /* pTitleText */ )
+	AndroidWindow::AndroidWindow( AndroidWindowManagerHandle pWindowManager )
+	: Window( std::move( pWindowManager ), &mNativeData )
+	{}
+
+	AndroidWindow::~AndroidWindow() noexcept = default;
+
+	void AndroidWindow::_nativeResize( const FrameSize & pFrameSize, EFrameSizeMode pSizeMode )
+	{}
+
+	void AndroidWindow::_nativeSetFullscreenMode( bool pEnable )
+	{}
+
+	void AndroidWindow::_nativeSetTitle( const std::string & pTitle )
+	{}
+
+	void AndroidWindow::_nativeUpdateGeometry( const FrameGeometry & pFrameGeometry,
+											   Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags )
+	{}
+
+	FrameSize AndroidWindow::_nativeGetSize( EFrameSizeMode /* pSizeMode */ ) const
 	{
+		auto & aSessionData = platform::androidGetASessionData( *this );
+		return platform::androidQueryNativeWindowSize( aSessionData.aNativeWindow );
 	}
 
-	void Window::_nativeUpdateGeometry( const WindowGeometry & pWindowGeometry, EFrameSizeMode /* pSizeMode */ )
-	{
-	}
 
-	void Window::_nativeGetSize( EFrameSizeMode /* pSizeMode */, WindowSize & pOutSize ) const
+	namespace platform
 	{
-		auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
-		pOutSize = nativeAndroidQueryNativeWindowSize( aSessionData.aNativeWindow );
+
+		math::Size2u androidQueryNativeWindowSize( ANativeWindow * pANativeWindow )
+		{
+			math::Size2u resultSize{};
+
+			auto width = ANativeWindow_getWidth( pANativeWindow );
+			auto height = ANativeWindow_getHeight( pANativeWindow );
+
+			resultSize.x = trunc_numeric_cast<decltype( resultSize.x )>( width );
+			resultSize.y = trunc_numeric_cast<decltype( resultSize.x )>( height );
+
+			return resultSize;
+		}
+
 	}
 
 } // namespace ts3::system
