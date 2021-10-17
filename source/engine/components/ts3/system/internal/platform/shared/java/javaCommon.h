@@ -20,6 +20,8 @@ namespace ts3::system
 
     }
 
+    using JavaNativeInterfacePtr = std::shared_ptr<JavaNativeInterface>;
+
 } // namespace ts3::system
 
 #endif // __TS3_SYSTEM_JAVA_COMMON_H__

@@ -14,6 +14,7 @@ namespace ts3::system
 
     JavaVMInstance::JavaVMInstance( JavaVM * pJavaVM )
     : mJavaVM( pJavaVM )
+    , _privateData( std::make_unique<JavaVMInstancePrivateData>() )
     {}
 
     JavaVMInstance::~JavaVMInstance() noexcept = default;
@@ -44,6 +45,12 @@ namespace ts3::system
         return nullptr;
     }
 
+    void JavaVMInstance::initializeCurrentThreadJNIState()
+    {
+        auto currentThreadID = std::this_thread::get_id();
+        _getJNIThreadState( currentThreadID, true );
+    }
+
     void JavaVMInstance::setCurrentThreadAutoReleaseState( bool pAutoRelease )
     {
         auto currentThreadID = std::this_thread::get_id();
@@ -67,11 +74,7 @@ namespace ts3::system
         // Retrieve the thread state using JNI's thread id. This should never return nullptr,
         // because there is at least one remaining JNI instance (the one being currently destroyed).
         auto * jniThreadState = _getJNIThreadState( pJNI->mJNIThreadID, false );
-        if( !jniThreadState )
-        {
-            ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER,
-                          "onJavaNativeInterfacePtrDestroy(): State mismatch: thread state not found" );
-        }
+        ts3DebugAssert( jniThreadState != nullptr );
 
         auto refCounter = jniThreadState->jniRefCounter.fetch_sub( 1, std::memory_order_acq_rel );
         if( refCounter == 1 )
@@ -145,12 +148,7 @@ namespace ts3::system
         auto jniThreadStateIter = _privateData->jniThreadStateMap.find( pJNIThreadID );
         if( jniThreadStateIter != _privateData->jniThreadStateMap.end() )
         {
-            auto currentThreadID = std::this_thread::get_id();
-            if( pJNIThreadID != currentThreadID )
-            {
-                ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER,
-                              "acquireJNIEnv(): JNIThreadState can be only destroyed by the thread itself" );
-            }
+            ts3DebugAssert( pJNIThreadID == std::this_thread::get_id() );
 
             auto * jniThreadState = jniThreadStateIter->second;
             auto refCounter = jniThreadState->jniRefCounter.load( std::memory_order_acquire );
