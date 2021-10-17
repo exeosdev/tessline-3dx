@@ -1,5 +1,5 @@
 
-#include "sysContext.h"
+#include <ts3/system/internal/sysContextPrivate.h>
 
 namespace ts3::system
 {

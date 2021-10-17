@@ -23,7 +23,7 @@ namespace ts3::gpuapi
 		auto sysContext = pCreateInfo.sysContext;
 		if( !sysContext )
 		{
-			sysContext = system::nativeSysContextCreate( pCreateInfo.sysContextCreateInfo );
+			sysContext = system::createSysContext( pCreateInfo.sysContextCreateInfo );
 			if( !sysContext )
 			{
 				return nullptr;

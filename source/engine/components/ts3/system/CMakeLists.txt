@@ -89,21 +89,26 @@ endif()
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Android" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
-            "internal/platform/osapi/android/androidCommon.h"
-            "internal/platform/osapi/android/androidCommon.cpp"
             "internal/platform/osapi/android/androidAssetSystem.h"
             "internal/platform/osapi/android/androidAssetSystem.cpp"
-            "internal/platform/osapi/android/androidDisplay.h"
-            "internal/platform/osapi/android/androidDisplay.cpp"
-            "internal/platform/osapi/android/androidEventSystem.h"
-            "internal/platform/osapi/android/androidEventSystem.cpp"
+            "internal/platform/osapi/android/androidCommon.h"
+            "internal/platform/osapi/android/androidCommon.cpp"
+            "internal/platform/osapi/android/androidDisplaySystem.h"
+            "internal/platform/osapi/android/androidDisplaySystem.cpp"
+            "internal/platform/osapi/android/androidEventCore.h"
+            "internal/platform/osapi/android/androidEventCore.cpp"
             "internal/platform/osapi/android/androidFileManager.h"
-            "internal/platform/osapi/android/androidOpenGL.h"
-            "internal/platform/osapi/android/androidOpenGL.cpp"
+            "internal/platform/osapi/android/androidOpenGLDriver.h"
+            "internal/platform/osapi/android/androidOpenGLDriver.cpp"
             "internal/platform/osapi/android/androidSysContext.h"
             "internal/platform/osapi/android/androidSysContext.cpp"
-            "internal/platform/osapi/android/androidWindow.h"
-            "internal/platform/osapi/android/androidWindow.cpp"
+            "internal/platform/osapi/android/androidWindowSystem.h"
+            "internal/platform/osapi/android/androidWindowSystem.cpp"
+            "internal/platform/shared/java/javaCommon.h"
+            "internal/platform/shared/java/javaNativeInterface.h"
+            "internal/platform/shared/java/javaNativeInterface.cpp"
+            "internal/platform/shared/java/javaVM.h"
+            "internal/platform/shared/java/javaVM.cpp"
             )
     set( CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG TRUE )
 endif()
@@ -111,8 +116,7 @@ endif()
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
-            #"internal/platform/osapi/win32/win32AssetSystem.h"
-            #"internal/platform/osapi/win32/win32AssetSystem.cpp"
+            "internal/platform/osapi/win32/win32AssetSystem.h"
             "internal/platform/osapi/win32/win32Common.h"
             "internal/platform/osapi/win32/win32Common.cpp"
             "internal/platform/osapi/win32/win32DisplaySystem.h"
@@ -130,7 +134,7 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
             "internal/platform/osapi/win32/win32WindowSystem.h"
             "internal/platform/osapi/win32/win32WindowSystem.cpp"
             )
-    #set( CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG TRUE )
+    set( CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG FALSE )
 endif()
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )

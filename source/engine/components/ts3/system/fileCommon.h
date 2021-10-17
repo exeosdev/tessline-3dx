@@ -11,6 +11,8 @@ namespace ts3::system
     ts3SysDeclareHandle( FileManager );
 
     using FileHandle = std::shared_ptr<class File>;
+    using FileList = std::vector<FileHandle>;
+    using FileNameList = std::vector<std::string>;
 
     using file_char_t = char;
     using file_str_t = std::basic_string<file_char_t>;

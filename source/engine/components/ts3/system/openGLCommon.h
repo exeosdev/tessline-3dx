@@ -33,6 +33,9 @@ namespace ts3::system
     ts3SysDeclareHandle( OpenGLDisplaySurface );
     ts3SysDeclareHandle( OpenGLRenderContext );
 
+    struct GLDisplaySurfaceCreateInfo;
+    struct GLRenderContextCreateInfo;
+
     /// @brief
     enum EGLSurfaceCreateFlags : uint32
     {
