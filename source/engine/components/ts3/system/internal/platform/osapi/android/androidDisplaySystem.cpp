@@ -42,7 +42,7 @@ namespace ts3::system
     {
     }
 
-    void DisplayDriverGeneric::_drvEnumDisplayDevices()
+    void DisplayDriverGeneric::_nativeEnumDisplayDevices()
     {
         auto & driverNativeData = dsmGetObjectNativeDataGeneric( *this );
         auto & aSessionData = driverNativeData.getSessionData();
@@ -66,7 +66,7 @@ namespace ts3::system
         outputDesc.screenRect.size = nativeAndroidQueryNativeWindowSize( aSessionData.aNativeWindow );
     }
 
-    void DisplayDriverGeneric::_drvEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat )
+    void DisplayDriverGeneric::_nativeEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat )
     {
         auto & driverNativeData = dsmGetObjectNativeDataGeneric( *this );
         auto & aSessionData = driverNativeData.getSessionData();
@@ -92,7 +92,7 @@ namespace ts3::system
         videoModeDesc.settingsHash = dsmComputeVideoSettingsHash( pColorFormat, videoModeDesc.settings );
     }
 
-    EColorFormat DisplayDriverGeneric::_drvQueryDefaultSystemColorFormat() const
+    EColorFormat DisplayDriverGeneric::_nativeQueryDefaultSystemColorFormat() const
     {
         auto & driverNativeData = dsmGetObjectNativeDataGeneric( *this );
         auto & aSessionData = driverNativeData.getSessionData();

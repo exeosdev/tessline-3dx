@@ -6,37 +6,37 @@
 namespace ts3::system
 {
 
-    void _androidInitializeDriver( SysContext & pSysContext, GLSystemDriverNativeData & pGLDriverNativeData );
-    void _androidReleaseDriver( GLSystemDriverNativeData & pGLDriverNativeData );
+    void _androidInitializeDriver( SysContext & pSysContext, OpenGLSystemDriverNativeData & pGLDriverNativeData );
+    void _androidReleaseDriver( OpenGLSystemDriverNativeData & pGLDriverNativeData );
 
 
-    void GLSystemDriver::_nativeConstructor()
+    void OpenGLSystemDriver::_nativeConstructor()
     {
         _nativeInitialize();
     }
 
-    void GLSystemDriver::_nativeDestructor() noexcept
+    void OpenGLSystemDriver::_nativeDestructor() noexcept
     {
         _nativeRelease();
     }
 
-    void GLSystemDriver::_nativeInitialize()
+    void OpenGLSystemDriver::_nativeInitialize()
     {
         _androidInitializeDriver( *mSysContext, mInternal->nativeDataPriv );
     }
 
-    void GLSystemDriver::_nativeRelease()
+    void OpenGLSystemDriver::_nativeRelease()
     {
         _androidReleaseDriver( mInternal->nativeDataPriv );
     }
 
-    void GLSystemDriver::_nativeInitializePlatform()
+    void OpenGLSystemDriver::_nativeInitializePlatform()
     {}
 
-    void GLSystemDriver::_nativeReleaseInitState()
+    void OpenGLSystemDriver::_nativeReleaseInitState()
     {}
 
-    void GLSystemDriver::_nativeCreateDisplaySurface( GLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo )
+    void OpenGLSystemDriver::_nativeCreateDisplaySurface( OpenGLDisplaySurface & pDisplaySurface, const GLDisplaySurfaceCreateInfo & pCreateInfo )
     {
         auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
         auto & driverNativeData = mInternal->nativeDataPriv;
@@ -69,7 +69,7 @@ namespace ts3::system
         pDisplaySurface.mInternal->nativeDataPriv.eNativeWindow = aSessionData.aNativeWindow;
     }
 
-    void GLSystemDriver::_nativeCreateDisplaySurfaceForCurrentThread( GLDisplaySurface & pDisplaySurface )
+    void OpenGLSystemDriver::_nativeCreateDisplaySurfaceForCurrentThread( OpenGLDisplaySurface & pDisplaySurface )
     {
         auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
 
@@ -79,14 +79,14 @@ namespace ts3::system
         pDisplaySurface.mInternal->nativeDataPriv.eNativeWindow = aSessionData.aNativeWindow;
     }
 
-    void GLSystemDriver::_nativeDestroyDisplaySurface( GLDisplaySurface & pDisplaySurface )
+    void OpenGLSystemDriver::_nativeDestroyDisplaySurface( OpenGLDisplaySurface & pDisplaySurface )
     {
         platform::eglDestroySurface( pDisplaySurface.mInternal->nativeDataPriv );
         pDisplaySurface.mInternal->nativeDataPriv.resetSessionData();
     }
 
-    void GLSystemDriver::_nativeCreateRenderContext( GLRenderContext & pRenderContext,
-                                                     const GLDisplaySurface & pDisplaySurface,
+    void OpenGLSystemDriver::_nativeCreateRenderContext( OpenGLRenderContext & pRenderContext,
+                                                     const OpenGLDisplaySurface & pDisplaySurface,
                                                      const GLRenderContextCreateInfo & pCreateInfo )
     {
         auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
@@ -98,7 +98,7 @@ namespace ts3::system
         pRenderContext.mInternal->nativeDataPriv.setSessionData( aSessionData );
     }
 
-    void GLSystemDriver::_nativeCreateRenderContextForCurrentThread( GLRenderContext & pRenderContext )
+    void OpenGLSystemDriver::_nativeCreateRenderContextForCurrentThread( OpenGLRenderContext & pRenderContext )
     {
         auto & aSessionData = nativeAndroidGetASessionData( *mSysContext );
 
@@ -107,13 +107,13 @@ namespace ts3::system
         pRenderContext.mInternal->nativeDataPriv.setSessionData( aSessionData );
     }
 
-    void GLSystemDriver::_nativeDestroyRenderContext( GLRenderContext & pRenderContext )
+    void OpenGLSystemDriver::_nativeDestroyRenderContext( OpenGLRenderContext & pRenderContext )
     {
         platform::eglDestroyRenderContext( pRenderContext.mInternal->nativeDataPriv );
         pRenderContext.mInternal->nativeDataPriv.resetSessionData();
     }
 
-    void GLSystemDriver::_nativeResetContextBinding()
+    void OpenGLSystemDriver::_nativeResetContextBinding()
     {
         ::eglMakeCurrent( mInternal->nativeDataPriv.eDisplay,
                           EGL_NO_SURFACE,
@@ -121,49 +121,49 @@ namespace ts3::system
                           EGL_NO_CONTEXT );
     }
 
-    bool GLSystemDriver::_nativeIsRenderContextBound() const
+    bool OpenGLSystemDriver::_nativeIsRenderContextBound() const
     {
         auto currentContext = ::eglGetCurrentContext();
         return currentContext != EGL_NO_CONTEXT;
     }
 
-    bool GLSystemDriver::_nativeIsRenderContextBound( const GLRenderContext & pRenderContext ) const
+    bool OpenGLSystemDriver::_nativeIsRenderContextBound( const OpenGLRenderContext & pRenderContext ) const
     {
         auto currentContext = ::eglGetCurrentContext();
         return currentContext = pRenderContext.mInternal->nativeDataPriv.eContextHandle;
     }
 
-    bool GLSystemDriver::_nativeIsDisplaySurfaceValid( const GLDisplaySurface & pDisplaySurface ) const
+    bool OpenGLSystemDriver::_nativeIsDisplaySurfaceValid( const OpenGLDisplaySurface & pDisplaySurface ) const
     {
         return pDisplaySurface.mInternal->nativeDataPriv.eSurfaceHandle != EGL_NO_SURFACE;
     }
 
-    bool GLSystemDriver::_nativeIsRenderContextValid( const GLRenderContext & pRenderContext ) const
+    bool OpenGLSystemDriver::_nativeIsRenderContextValid( const OpenGLRenderContext & pRenderContext ) const
     {
         return pRenderContext.mInternal->nativeDataPriv.eContextHandle != EGL_NO_CONTEXT;
     }
 
 
-    void GLDisplaySurface::_nativeSwapBuffers()
+    void OpenGLDisplaySurface::_nativeSwapBuffers()
     {
         auto & surfaceNativeData = mInternal->nativeDataPriv;
         ::eglSwapBuffers( surfaceNativeData.eDisplay, surfaceNativeData.eSurfaceHandle );
     }
 
-    void GLDisplaySurface::_nativeQueryRenderAreaSize( WindowSize & pOutSize ) const
+    void OpenGLDisplaySurface::_nativeQueryRenderAreaSize( WindowSize & pOutSize ) const
     {
         auto & surfaceNativeData = mInternal->nativeDataPriv;
         pOutSize = nativeAndroidQueryNativeWindowSize( surfaceNativeData.eNativeWindow );
     }
 
 
-    void GLRenderContext::_nativeBindForCurrentThread( const GLDisplaySurface & pTargetSurface )
+    void OpenGLRenderContext::_nativeBindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface )
     {
         platform::eglBindContextForCurrentThread( mInternal->nativeDataPriv, pTargetSurface.mInternal->nativeDataPriv );
     }
 
 
-    void _androidInitializeDriver( SysContext & pSysContext, GLSystemDriverNativeData & pGLDriverNativeData )
+    void _androidInitializeDriver( SysContext & pSysContext, OpenGLSystemDriverNativeData & pGLDriverNativeData )
     {
         auto & aSessionData = nativeAndroidGetASessionData( pSysContext );
 
@@ -173,7 +173,7 @@ namespace ts3::system
         platform::eglInitializeGLDriver( pGLDriverNativeData );
     }
 
-    void _androidReleaseDriver( GLSystemDriverNativeData & pGLDriverNativeData )
+    void _androidReleaseDriver( OpenGLSystemDriverNativeData & pGLDriverNativeData )
     {
         platform::eglReleaseGLDriver( pGLDriverNativeData );
 

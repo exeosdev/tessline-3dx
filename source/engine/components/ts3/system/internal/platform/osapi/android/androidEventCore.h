@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_EVENT_SYSTEM_H__
-#define __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_EVENT_SYSTEM_H__
+#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_EVENT_CORE_H__
+#define __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_EVENT_CORE_H__
 
 #include "androidCommon.h"
 
@@ -22,6 +22,7 @@ namespace ts3::system
     };
 
     inline constexpr int32_t CX_ANDROID_EVENT_LOOPER_WAIT_TIMEOUT_IMMEDIATE = 0;
+    
     inline constexpr int32_t CX_ANDROID_EVENT_LOOPER_WAIT_TIMEOUT_INFINITY = -1;
 
     struct ANativeEvent
@@ -34,10 +35,6 @@ namespace ts3::system
         };
     };
 
-	struct EventSourceNativeData : public AndroidNativeDataCommon
-	{
-	};
-
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_EVENT_SYSTEM_H__
+#endif // __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_EVENT_CORE_H__

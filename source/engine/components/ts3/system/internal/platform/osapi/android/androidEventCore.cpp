@@ -1,5 +1,5 @@
 
-#include <ts3/system/eventSystemNative.h>
+#include <ts3/system/eventCoreNative.h>
 #include <ts3/system/sysContextNative.h>
 #include <android/input.h>
 #include <android/keycodes.h>
