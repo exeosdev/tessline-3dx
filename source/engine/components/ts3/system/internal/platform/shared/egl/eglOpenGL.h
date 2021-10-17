@@ -1,40 +1,42 @@
 
-#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_EGL_OPENGL_H__
-#define __TS3_SYSTEM_PLATFORM_OSAPI_EGL_OPENGL_H__
+#ifndef __TS3_SYSTEM_PLATFORM_OSAPI_EGL_OPENGL_DRIVER_H__
+#define __TS3_SYSTEM_PLATFORM_OSAPI_EGL_OPENGL_DRIVER_H__
 
+#include <ts3/system/openGLCommon.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#include "eglCoreUtils.h"
 
 namespace ts3::system
 {
 
-    constexpr EGLConfig cvEGLInvalidConfigID = nullptr;
-    constexpr size_t cvEGLMaxEGLConfigsNum = 256u;
-    constexpr size_t cvEGLMaxEGLConfigAttributesNum = 64u;
-
-    struct EGLDisplaySurfaceNativeData
-    {
-        EGLDisplay eDisplay = EGL_NO_DISPLAY;
-        EGLNativeWindowType eNativeWindow = nullptr;
-        EGLConfig eFBConfig = nullptr;
-        EGLSurface eSurfaceHandle = nullptr;
-    };
-
-    struct EGLRenderContextNativeData
-    {
-        EGLDisplay eDisplay = EGL_NO_DISPLAY;
-        EGLContext eContextHandle = nullptr;
-    };
-
-    struct EGLDriverNativeData
-    {
-        EGLDisplay eDisplay = EGL_NO_DISPLAY;
-        EGLNativeWindowType eNativeWindow = nullptr;
-        Version eglVersion;
-    };
-
     namespace platform
     {
+
+        constexpr EGLConfig cvEGLInvalidConfigID = nullptr;
+        constexpr size_t cvEGLMaxEGLConfigsNum = 256u;
+        constexpr size_t cvEGLMaxEGLConfigAttributesNum = 64u;
+
+        struct EGLDisplaySurfaceNativeData
+        {
+            EGLDisplay eDisplay = EGL_NO_DISPLAY;
+            EGLNativeWindowType eNativeWindow = nullptr;
+            EGLConfig eFBConfig = nullptr;
+            EGLSurface eSurfaceHandle = nullptr;
+        };
+
+        struct EGLRenderContextNativeData
+        {
+            EGLDisplay eDisplay = EGL_NO_DISPLAY;
+            EGLContext eContextHandle = nullptr;
+        };
+
+        struct EGLDriverNativeData
+        {
+            EGLDisplay eDisplay = EGL_NO_DISPLAY;
+            EGLNativeWindowType eNativeWindow = nullptr;
+            Version eglVersion;
+        };
 
         void eglInitializeGLDriver( EGLDriverNativeData & pEGLDriverNativeData );
 
@@ -71,4 +73,4 @@ namespace ts3::system
 
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_PLATFORM_OSAPI_EGL_OPENGL_H__
+#endif // __TS3_SYSTEM_PLATFORM_OSAPI_EGL_OPENGL_DRIVER_H__
