@@ -1,7 +1,7 @@
 
 #include "DX_presentationLayer.h"
 #include "DX_gpuDevice.h"
-#include <ts3/system/displayManager.h>
+#include <ts3/system/displaySystem.h>
 #include <ts3/system/windowSystem.h>
 
 namespace ts3::gpuapi
@@ -64,13 +64,13 @@ namespace ts3::gpuapi
 			if( pCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT ) )
 			{
 				windowCreateInfo.properties.geometry.size = ts3::cvSysWindowSizeMax;
-				windowCreateInfo.properties.geometry.frameStyle = system::EWindowFrameStyle::Overlay;
+				windowCreateInfo.properties.geometry.frameStyle = system::EFrameStyle::Overlay;
 			}
 			else
 			{
 				windowCreateInfo.properties.geometry.position = pCreateInfo.screenRect.offset;
 				windowCreateInfo.properties.geometry.size = pCreateInfo.screenRect.size;
-				windowCreateInfo.properties.geometry.frameStyle = system::EWindowFrameStyle::Fixed;
+				windowCreateInfo.properties.geometry.frameStyle = system::EFrameStyle::Fixed;
 			}
 
 			auto sysWindow = sysWindowManager->createWindow( windowCreateInfo );

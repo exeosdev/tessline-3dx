@@ -34,16 +34,16 @@ namespace ts3::gpuapi
 		// the surface and passes it here, so CmdManager has the surface when a CmdContext is created.
 		// Also, that is the reason why no context is created in initialize() function and the requirement of having
 		// a surface bound to the device when acquireContext() is called.
-		void setTargetGLSurface( system::GLDisplaySurfaceHandle pSysGLDisplaySurface );
+		void setTargetGLSurface( system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface );
 
 	private:
 		GLCommandList * acquireCommandList( ECommandExecutionMode pCommandExecutionMode );
 		bool initializeMainCommandList();
 
-		static system::GLRenderContextHandle createSysGLRenderContext( GLGPUDevice & pGLGPUDevice, system::GLDisplaySurfaceHandle pSysGLDisplaySurface );
+		static system::OpenGLRenderContextHandle createSysGLRenderContext( GLGPUDevice & pGLGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface );
 
 	protected:
-		system::GLDisplaySurfaceHandle _targetSysGLSurface;
+		system::OpenGLDisplaySurfaceHandle _targetSysGLSurface;
 		GLCommandListHandle _mainCommandList;
 	};
 	

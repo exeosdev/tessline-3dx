@@ -1,18 +1,14 @@
 
-#include "sysContextNative.h"
+#include "sysContext.h"
 
 namespace ts3::system
 {
 
-    SysContext::SysContext()
-    : mInternal( std::make_unique<ObjectInternalData>() )
-    , mNativeData( &( mInternal->nativeDataPriv ) )
-    {}
+    SysContext::SysContext() = default;
 
-    SysContext::~SysContext() noexcept
-    {}
+    SysContext::~SysContext() noexcept = default;
 
-    std::string SysContext::queryCurrentProcessExecutableDirectory()
+    std::string SysContext::queryCurrentProcessExecutableDirectory() const
     {
         auto executableFileDirectory = queryCurrentProcessExecutableFilePath();
 

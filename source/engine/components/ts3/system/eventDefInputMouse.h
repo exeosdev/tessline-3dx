@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_EVENT_DEFS_MOUSE_H__
-#define __TS3_SYSTEM_EVENT_DEFS_MOUSE_H__
+#ifndef __TS3_SYSTEM_EVENT_DEF_INPUT_MOUSE_H__
+#define __TS3_SYSTEM_EVENT_DEF_INPUT_MOUSE_H__
 
 #include "eventDefInput.h"
 
@@ -96,4 +96,4 @@ namespace ts3::system
 
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_EVENT_DEFS_MOUSE_H__
+#endif // __TS3_SYSTEM_EVENT_DEF_INPUT_MOUSE_H__

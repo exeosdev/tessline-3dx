@@ -57,6 +57,18 @@ namespace ts3::system
         E_EXCEPTION_CATEGORY_SYSTEM_WINDOW           = ecDeclareExceptionCategory( ExceptionBaseType::System, 9 ),
     };
 
+    template <typename TpNativeData>
+    class NativeObject
+    {
+    public:
+        TpNativeData mNativeData;
+
+    public:
+        NativeObject() = default;
+
+        virtual ~NativeObject() = default;
+    };
+
 } // namespace ts3::system
 
 #endif // __TS3_SYSTEM_PREREQUISITES_H__

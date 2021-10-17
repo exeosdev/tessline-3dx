@@ -9,6 +9,8 @@
 #include <ts3/stdext/bitmask.h>
 #include <ts3/stdext/uuid.h>
 
+#include <functional>
+
 #if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
@@ -53,6 +55,10 @@ namespace ts3::system
 	using DisplayAdapterList = std::vector<DisplayAdapter *>;
 	using DisplayOutputList = std::vector<DisplayOutput *>;
 	using DisplayVideoModeList = std::vector<DisplayVideoMode *>;
+
+	using DisplayAdapterPredicate = std::function<bool( const DisplayAdapter & )>;
+	using DisplayOutputPredicate = std::function<bool( const DisplayOutput & )>;
+	using DisplayVideoModePredicate = std::function<bool( const DisplayVideoMode & )>;
 
 	/// @brief Represents invalid display system index (of an adapter or an output, for example).
 	inline constexpr dsm_index_t CX_DSM_INDEX_INVALID = Limits<dsm_index_t>::maxValue - 1;

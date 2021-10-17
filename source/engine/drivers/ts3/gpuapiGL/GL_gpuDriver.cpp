@@ -2,24 +2,24 @@
 #include <ts3/gpuapiGL/GL_gpuDriver.h>
 #include <ts3/gpuapiGL/GL_gpuDevice.h>
 #include <ts3/gpuapiGL/GL_presentationLayer.h>
-#include <ts3/system/display.h>
+#include <ts3/system/displaySystem.h>
 
 namespace ts3::gpuapi
 {
 
-	GLGPUDriver::GLGPUDriver( system::GLSystemDriverHandle pSysGLDriver )
+	GLGPUDriver::GLGPUDriver( system::OpenGLSystemDriverHandle pSysGLDriver )
 	: GPUDriver( pSysGLDriver->mSysContext )
 	, mSysGLDriver( std::move( pSysGLDriver ) )
 	{ }
 
 	GLGPUDriver::~GLGPUDriver() = default;
 
-	system::GLSystemDriverHandle GLGPUDriver::initializeSysGLDriver( system::SysContextHandle pSysContext )
+	system::OpenGLSystemDriverHandle GLGPUDriver::initializeSysGLDriver( system::SysContextHandle pSysContext )
 	{
 		try
 		{
-		    auto sysDisplayManager = system::createSysObject<system::DisplayManager>( pSysContext );
-		    auto sysGLDriver = system::createSysObject<system::GLSystemDriver>( sysDisplayManager );
+		    auto sysDisplayManager = pSysContext->createDisplayManager();
+		    auto sysGLDriver = pSysContext->createOpenGLSystemDriver( sysDisplayManager );
 
 			sysGLDriver->initializePlatform();
 

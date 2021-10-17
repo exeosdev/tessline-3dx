@@ -29,9 +29,9 @@
 namespace ts3::system
 {
 
-    ts3SysDeclareHandle( GLSystemDriver );
-    ts3SysDeclareHandle( GLDisplaySurface );
-    ts3SysDeclareHandle( GLRenderContext );
+    ts3SysDeclareHandle( OpenGLSystemDriver );
+    ts3SysDeclareHandle( OpenGLDisplaySurface );
+    ts3SysDeclareHandle( OpenGLRenderContext );
 
     /// @brief
     enum EGLSurfaceCreateFlags : uint32
@@ -53,13 +53,19 @@ namespace ts3::system
         E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT = 0x0040
     };
 
-    /// @brief
     enum class EGLAPIProfile : enum_default_value_t
+    {
+        OpenGL,
+        OpenGLES
+    };
+
+    /// @brief
+    enum class EGLContextProfile : enum_default_value_t
     {
         Auto,
         Core,
         GLES,
-        Legacy
+        Legacy,
     };
 
     enum : exception_code_value_t
@@ -70,6 +76,14 @@ namespace ts3::system
         E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_GLX = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE3 ),
         E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYSTEM_WGL = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE4 )
     };
+
+    inline constexpr Version CX_GL_VERSION_BEST_SUPPORTED{ CX_UINT16_MAX, CX_UINT16_MAX };
+
+    inline constexpr Version CX_GL_VERSION_UNKNOWN{ 0, 0 };
+
+    inline constexpr Version CX_GL_VERSION_MAX_DESKTOP{ 4, 6 };
+
+    inline constexpr Version CX_GL_VERSION_MAX_ES{ 3, 2 };
 
     /// @brief Represents combined info about the current OpenGL subsystem version.
     /// Basically, this struct stores the output from all version-related GL queries.

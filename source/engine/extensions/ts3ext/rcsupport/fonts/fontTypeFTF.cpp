@@ -94,10 +94,10 @@ namespace ts3
 		// Size, in bytes, of a single pixel of a texture/glyph image.
 		const uint32 cxPixelByteSize = gpuapi::ecGetTextureFormatByteSize( pFontCreateInfo.textureFormat );
 
-		const auto cxTextureWidth = pFontCreateInfo.textureDimensions.x;       // Width of a single font texture, in pixels.
-		const auto cxTextureHeight = pFontCreateInfo.textureDimensions.y;      // Height of a single font texture, in pixels.
-		const auto cxTextureRowPitch = cxTextureWidth * cxPixelByteSize; // Size, in bytes, of a single pixel row of a texture.
-		const auto cxTextureSize = cxTextureHeight * cxTextureRowPitch;  // Size, in bytes, of a whole font texture.
+		const auto cxTextureWidth = pFontCreateInfo.textureDimensions.x;  // Width of a single font texture, in pixels.
+		const auto cxTextureHeight = pFontCreateInfo.textureDimensions.y; // Height of a single font texture, in pixels.
+		const auto cxTextureRowPitch = cxTextureWidth * cxPixelByteSize;  // Size, in bytes, of a single pixel row of a texture.
+		const auto cxTextureSize = cxTextureHeight * cxTextureRowPitch;   // Size, in bytes, of a whole font texture.
 
 		RectAllocatorConfig textureLayerAllocatorConfig;
 		textureLayerAllocatorConfig.horizontalLayout.hSpacing = 2;

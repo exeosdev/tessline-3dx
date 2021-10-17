@@ -14,10 +14,6 @@ namespace ts3::system
     ts3SysDeclareHandle( AssetDirectory );
     ts3SysDeclareHandle( AssetLoader );
 
-    struct AssetNativeData;
-    struct AssetDirectoryNativeData;
-    struct AssetLoaderNativeData;
-
     using AssetNameList = std::vector<std::string>;
 
     enum EAssetOpenFlags : uint32
@@ -27,11 +23,6 @@ namespace ts3::system
 
     class AssetLoader : public SysObject
     {
-    public:
-        struct ObjectInternalData;
-        std::unique_ptr<ObjectInternalData> const mInternal;
-        const AssetLoaderNativeData * const mNativeData;
-
     public:
         explicit AssetLoader( SysContextHandle pSysContext );
         virtual ~AssetLoader() noexcept;
@@ -43,21 +34,17 @@ namespace ts3::system
         bool checkDirectoryExists( const std::string & pDirectoryName ) const;
 
     private:
-        void _nativeConstructor();
-        void _nativeDestructor() noexcept;
-        AssetHandle _nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags );
-        AssetDirectoryHandle _nativeOpenDirectory( std::string pDirectoryName );
-        bool _nativeCheckDirectoryExists( const std::string & pDirectoryName ) const;
+        virtual AssetHandle _nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags ) = 0;
+
+        virtual AssetDirectoryHandle _nativeOpenDirectory( std::string pDirectoryName ) = 0;
+
+        virtual bool _nativeCheckDirectoryExists( const std::string & pDirectoryName ) const = 0;
     };
 
     class AssetDirectory : public SysObject
     {
     public:
-        struct ObjectInternalData;
         AssetLoaderHandle const mAssetLoader;
-        std::unique_ptr<ObjectInternalData> const mInternal;
-        const AssetDirectoryNativeData * const mNativeData;
-        const std::string & mDirName;
 
     public:
         explicit AssetDirectory( AssetLoaderHandle pAssetLoader );
@@ -71,22 +58,31 @@ namespace ts3::system
 
         bool checkAssetExists( const std::string & pAssetName ) const;
 
+        const std::string & getDirName() const;
+
+    protected:
+        void addAsset( std::string pAssetName );
+
+        void setAssetList( AssetNameList pAssetList );
+
+        void setDirName( std::string pDirName );
+
     private:
-        void _nativeConstructor();
-        void _nativeDestructor() noexcept;
-        void _nativeRefreshAssetList();
-        AssetHandle _nativeOpenAsset( std::string pAssetName, Bitmask<EAssetOpenFlags> pFlags );
-        bool _nativeCheckAssetExists( const std::string & pAssetName ) const;
+        virtual void _nativeRefreshAssetList() = 0;
+
+        virtual AssetHandle _nativeOpenAsset( std::string pAssetName, Bitmask<EAssetOpenFlags> pFlags ) = 0;
+
+        virtual bool _nativeCheckAssetExists( const std::string & pAssetName ) const = 0;
+
+    private:
+        struct AssetDirectoryPrivateData;
+        std::unique_ptr<AssetDirectoryPrivateData> _privateData;
     };
 
     class Asset : public SysObject
     {
     public:
-        struct ObjectInternalData;
         AssetDirectoryHandle const mAssetDirectory;
-        std::unique_ptr<ObjectInternalData> const mInternal;
-        const AssetNativeData * const mNativeData;
-        const std::string & mName;
 
     public:
         explicit Asset( AssetLoaderHandle pAssetLoader );
@@ -137,12 +133,21 @@ namespace ts3::system
 
         void resetReadPointer();
 
+        const std::string & getName() const;
+
+    protected:
+        void setName( std::string pAssetName );
+
     private:
-        void _nativeConstructor();
-        void _nativeDestructor() noexcept;
-        file_size_t _nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize );
-        file_offset_t _nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos );
-        file_size_t _nativeGetSize() const;
+        virtual file_size_t _nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize ) = 0;
+
+        virtual file_offset_t _nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos ) = 0;
+
+        virtual file_size_t _nativeGetSize() const = 0;
+
+    private:
+        struct AssetPrivateData;
+        std::unique_ptr<AssetPrivateData> _privateData;
     };
 
 } // namespace ts3::system

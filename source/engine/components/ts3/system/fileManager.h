@@ -12,45 +12,11 @@ namespace ts3::system
     using FileList = std::vector<FileHandle>;
     using FileNameList = std::vector<std::string>;
 
-    class File : public SysObject
-    {
-    public:
-        struct ObjectInternalData;
-        FileManagerHandle mFileManager = nullptr;
-        std::unique_ptr<ObjectInternalData> const mInternal;
-        const file_str_t & mName;
-        const file_str_t & mFullPath;
-
-    public:
-        File( FileManagerHandle pFileManager );
-        ~File() noexcept;
-
-        file_size_t readData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize = CX_FILE_SIZE_MAX );
-        file_size_t readData( MemoryBuffer & pBuffer, file_size_t pReadSize = CX_FILE_SIZE_MAX );
-
-        file_offset_t setFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos = EFilePointerRefPos::FileBeginning );
-
-        file_size_t getSize() const;
-
-    private:
-        void _nativeConstructor();
-        void _nativeDestructor() noexcept;
-        file_size_t _nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize );
-        file_offset_t _nativeSetFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos );
-        file_size_t _nativeGetSize() const;
-    };
-
     class FileManager : public SysObject
     {
-        friend struct FileDeleter;
-
-    public:
-        struct ObjectInternalData;
-        std::unique_ptr<ObjectInternalData> const mInternal;
-
     public:
         explicit FileManager( SysContextHandle pSysContext );
-        ~FileManager() noexcept;
+        virtual ~FileManager() noexcept;
 
         FileHandle openFile( std::string pFilePath, EFileOpenMode pOpenMode );
 
@@ -60,25 +26,44 @@ namespace ts3::system
 
         FileList openDirectoryFiles( const std::string & pDirectory );
 
-        static FileNameList enumDirectoryFiles( const std::string & pDirectory );
+        FileNameList enumDirectoryFiles( const std::string & pDirectory );
 
-        static std::string generateTemporaryFileName();
+        std::string generateTemporaryFileName();
 
-        static bool checkDirectoryExists( const std::string & pDirPath );
+        bool checkDirectoryExists( const std::string & pDirPath );
 
-        static bool checkFileExists( const std::string & pFilePath );
+        bool checkFileExists( const std::string & pFilePath );
 
     private:
-        void _nativeConstructor();
-        void _nativeDestructor() noexcept;
+        virtual FileHandle _nativeOpenFile( std::string pFilePath, EFileOpenMode pOpenMode ) = 0;
+        virtual FileHandle _nativeCreateFile( std::string pFilePath ) = 0;
+        virtual FileHandle _nativeCreateTemporaryFile() = 0;
+        virtual FileNameList _nativeEnumDirectoryFileNameList( const std::string & pDirectory ) = 0;
+        virtual std::string _nativeGenerateTemporaryFileName() = 0;
+        virtual bool _nativeCheckDirectoryExists( const std::string & pDirPath ) = 0;
+        virtual bool _nativeCheckFileExists( const std::string & pFilePath ) = 0;
+    };
 
-        static void _nativeOpenFile( File & pFile, std::string pFilePath, EFileOpenMode pOpenMode );
-        static void _nativeCreateFile( File & pFile, std::string pFilePath );
-        static void _nativeCreateTemporaryFile( File & pFile );
-        static FileNameList _nativeEnumDirectoryFileNameList( const std::string & pDirectory );
-        static std::string _nativeGenerateTemporaryFileName();
-        static bool _nativeCheckDirectoryExists( const std::string & pDirPath );
-        static bool _nativeCheckFileExists( const std::string & pFilePath );
+    class File : public SysObject
+    {
+    public:
+        FileManagerHandle const mFileManager;
+
+    public:
+        explicit File( FileManagerHandle pFileManager );
+        virtual ~File() noexcept;
+
+        file_size_t readData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize = CX_FILE_SIZE_MAX );
+        file_size_t readData( MemoryBuffer & pBuffer, file_size_t pReadSize = CX_FILE_SIZE_MAX );
+
+        file_offset_t setFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos = EFilePointerRefPos::FileBeginning );
+
+        file_size_t getSize() const;
+
+    private:
+        virtual file_size_t _nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize ) = 0;
+        virtual file_offset_t _nativeSetFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos ) = 0;
+        virtual file_size_t _nativeGetSize() const = 0;
     };
 
 }

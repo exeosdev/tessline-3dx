@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_EVENT_DEFS_KEYBOARD_H__
-#define __TS3_SYSTEM_EVENT_DEFS_KEYBOARD_H__
+#ifndef __TS3_SYSTEM_EVENT_DEF_INPUT_KEYBOARD_H__
+#define __TS3_SYSTEM_EVENT_DEF_INPUT_KEYBOARD_H__
 
 #include "eventDefInput.h"
 
@@ -162,4 +162,4 @@ namespace ts3::system
 
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_EVENT_DEFS_KEYBOARD_H__
+#endif // __TS3_SYSTEM_EVENT_DEF_INPUT_KEYBOARD_H__

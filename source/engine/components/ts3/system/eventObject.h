@@ -17,7 +17,6 @@ namespace ts3::system
 		{
 			EEventCode                 code;
 			EvtBase                    commonData;
-			EvtApp<0>                  eApp;
 			EvtAppActivityDisplayInit  eAppActivityDisplayInit;
 			EvtAppActivityDisplayTerm  eAppActivityDisplayTerm;
 			EvtAppActivityFocusGained  eAppActivityFocusGained;
@@ -28,7 +27,6 @@ namespace ts3::system
 			EvtAppActivityStop         eAppActivityStop;
 			EvtAppActivityQuit         eAppActivityQuit;
 			EvtAppActivityTerminate    eAppActivityTerminate;
-			EvtInput<0>                eInput;
 			EvtInputGamepadAxis        eInputGamepadAxis;
 			EvtInputGamepadButton      eInputGamepadButton;
 			EvtInputGamepadState       eInputGamepadState;
@@ -39,7 +37,6 @@ namespace ts3::system
 			EvtInputTouchDown          eInputTouchDown;
 			EvtInputTouchMove          eInputTouchMove;
 			EvtInputTouchUp            eInputTouchUp;
-			EvtWindow<0>               eWindow;
 			EvtWindowUpdateClose       eWindowUpdateClose;
 			EvtWindowUpdateFullscreen  eWindowUpdateFullscreen;
 			EvtWindowUpdateResize      eWindowUpdateResize;
@@ -62,7 +59,7 @@ namespace ts3::system
 		{
 		    return ( code != E_EVENT_CODE_UNDEFINED ) && ecValidateEventCode( code );
 		}
-	};
+    };
 
 } // namespace ts3::system
 
