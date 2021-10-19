@@ -9,6 +9,7 @@ namespace ts3::system
 {
 
     ts3DeclareClassHandle( DisplayManager );
+    ts3DeclareClassHandle( Window );
     ts3DeclareClassHandle( WindowManager );
 
     struct WindowCreateInfo : public WindowProperties

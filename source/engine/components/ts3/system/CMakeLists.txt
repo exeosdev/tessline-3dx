@@ -69,6 +69,8 @@ endif()
 if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_POSIX} )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
+            "internal/platform/shared/posix/posixCommon.h"
+            "internal/platform/shared/posix/posixCommon.cpp"
             "internal/platform/shared/posix/posixPerfCounter.h"
             "internal/platform/shared/posix/posixPerfCounter.cpp"
             "internal/platform/shared/posix/posixFileManager.h"
@@ -142,17 +144,17 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/osapi/x11/x11Common.h"
             "internal/platform/osapi/x11/x11Common.cpp"
-            "internal/platform/osapi/x11/x11Display.h"
-            "internal/platform/osapi/x11/x11Display.cpp"
-            "internal/platform/osapi/x11/x11EventSystem.h"
-            "internal/platform/osapi/x11/x11EventSystem.cpp"
+            "internal/platform/osapi/x11/x11DisplaySystem.h"
+            "internal/platform/osapi/x11/x11DisplaySystem.cpp"
+            "internal/platform/osapi/x11/x11EventCore.h"
+            "internal/platform/osapi/x11/x11EventCore.cpp"
             "internal/platform/osapi/x11/x11FileManager.h"
-            "internal/platform/osapi/x11/x11OpenGL.h"
-            "internal/platform/osapi/x11/x11OpenGL.cpp"
+            "internal/platform/osapi/x11/x11OpenGLDriver.h"
+            "internal/platform/osapi/x11/x11OpenGLDriver.cpp"
             "internal/platform/osapi/x11/x11SysContext.h"
             "internal/platform/osapi/x11/x11SysContext.cpp"
-            "internal/platform/osapi/x11/x11Window.h"
-            "internal/platform/osapi/x11/x11Window.cpp"
+            "internal/platform/osapi/x11/x11WindowSystem.h"
+            "internal/platform/osapi/x11/x11WindowSystem.cpp"
             )
 endif()
 

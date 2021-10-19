@@ -10,7 +10,7 @@
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
 #  include "internal/platform/osapi/win32/win32OpenGLDriver.h"
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
-#  include "internal/platform/osapi/x11/x11OpenGL.h"
+#  include "internal/platform/osapi/x11/x11OpenGLDriver.h"
 #endif
 
 namespace ts3::system

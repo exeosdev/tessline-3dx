@@ -149,66 +149,44 @@ namespace ts3::system
 
     void OpenGLSystemDriver::onDisplaySurfaceDestroy( OpenGLDisplaySurface & pDisplaySurface ) noexcept
     {
-//        try
-//        {
-//            if( pDisplaySurface.mInternal->internalOwnershipFlag && _nativeIsDisplaySurfaceValid( pDisplaySurface ) )
-//            {
-//                _nativeDestroyDisplaySurface( pDisplaySurface );
-//                pDisplaySurface.mInternal->internalOwnershipFlag = false;
-//            }
-//
-//            auto surfaceIter = mInternal->internalDisplaySurfaceList.begin();
-//            while( surfaceIter != mInternal->internalDisplaySurfaceList.end() )
-//            {
-//                if( *surfaceIter == &pDisplaySurface )
-//                {
-//                    mInternal->internalDisplaySurfaceList.erase( surfaceIter );
-//                    break;
-//                }
-//                ++surfaceIter;
-//            }
-//        }
-//        catch( const Exception & pException )
-//        {
-//            ( pException );
-//            ts3DebugInterrupt();
-//        }
-//        catch( ... )
-//        {
-//            ts3DebugInterrupt();
-//        }
+        try
+        {
+            if( pDisplaySurface.hasInternalOwnershipFlag() && pDisplaySurface.isValid() )
+            {
+                _nativeDestroyDisplaySurface( pDisplaySurface );
+                pDisplaySurface.setInternalOwnershipFlag( false );
+            }
+        }
+        catch( const Exception & pException )
+        {
+            ( pException );
+            ts3DebugInterrupt();
+        }
+        catch( ... )
+        {
+            ts3DebugInterrupt();
+        }
     }
 
     void OpenGLSystemDriver::onRenderContextDestroy( OpenGLRenderContext & pRenderContext ) noexcept
     {
-//        try
-//        {
-//            if( pRenderContext.mInternal->internalOwnershipFlag && _nativeIsRenderContextValid( pRenderContext ) )
-//            {
-//                _nativeDestroyRenderContext( pRenderContext );
-//                pRenderContext.mInternal->internalOwnershipFlag = false;
-//            }
-//
-//            auto contextIter = mInternal->internalRenderContextList.begin();
-//            while( contextIter != mInternal->internalRenderContextList.end() )
-//            {
-//                if( *contextIter == &pRenderContext )
-//                {
-//                    mInternal->internalRenderContextList.erase( contextIter );
-//                    break;
-//                }
-//                ++contextIter;
-//            }
-//        }
-//        catch( const Exception & pException )
-//        {
-//            ( pException );
-//            ts3DebugInterrupt();
-//        }
-//        catch( ... )
-//        {
-//            ts3DebugInterrupt();
-//        }
+        try
+        {
+            if( pRenderContext.hasInternalOwnershipFlag() && pRenderContext.isValid() )
+            {
+                _nativeDestroyRenderContext( pRenderContext );
+                pRenderContext.setInternalOwnershipFlag( false );
+            }
+        }
+        catch( const Exception & pException )
+        {
+            ( pException );
+            ts3DebugInterrupt();
+        }
+        catch( ... )
+        {
+            ts3DebugInterrupt();
+        }
     }
 
 
@@ -223,6 +201,8 @@ namespace ts3::system
     OpenGLDisplaySurface::~OpenGLDisplaySurface() noexcept
     {
         resetEventSourceNativeData();
+
+        mGLSystemDriver->onDisplaySurfaceDestroy( *this );
     }
 
     void OpenGLDisplaySurface::swapBuffers()
@@ -302,6 +282,11 @@ namespace ts3::system
         _privateData->internalOwnershipFlag = pOwnershipFlag;
     }
 
+    bool OpenGLDisplaySurface::hasInternalOwnershipFlag() const
+    {
+        return _privateData->internalOwnershipFlag;
+    }
+
 
     OpenGLRenderContext::OpenGLRenderContext( OpenGLSystemDriverHandle pDriver )
     : SysObject( pDriver->mSysContext )
@@ -309,7 +294,10 @@ namespace ts3::system
     , _privateData( std::make_unique<OpenGLRenderContextPrivateData>() )
     {}
 
-    OpenGLRenderContext::~OpenGLRenderContext() noexcept = default;
+    OpenGLRenderContext::~OpenGLRenderContext() noexcept
+    {
+        mGLSystemDriver->onRenderContextDestroy( *this );
+    }
 
     void OpenGLRenderContext::bindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface )
     {
@@ -361,6 +349,11 @@ namespace ts3::system
     void OpenGLRenderContext::setInternalOwnershipFlag( bool pOwnershipFlag )
     {
         _privateData->internalOwnershipFlag = pOwnershipFlag;
+    }
+
+    bool OpenGLRenderContext::hasInternalOwnershipFlag() const
+    {
+        return _privateData->internalOwnershipFlag;
     }
 
 } // namespace ts3::system
