@@ -18,11 +18,10 @@ namespace ts3::system
     
     
     Win32FileManager::Win32FileManager( SysContextHandle pSysContext )
-    : FileManager( std::move( pSysContext ) )
+    : Win32NativeObject( std::move( pSysContext ) )
     {}
 
-    Win32FileManager::~Win32FileManager() noexcept
-    {}
+    Win32FileManager::~Win32FileManager() noexcept = default;
 
     FileHandle Win32FileManager::_nativeOpenFile( std::string pFilePath, EFileOpenMode pOpenMode )
     {
@@ -31,7 +30,7 @@ namespace ts3::system
 
         auto fileHandle = platform::_win32OpenFileGeneric( pFilePath.c_str(), fileAccess, creationDisposition, FILE_ATTRIBUTE_NORMAL );
         auto fileObject = createSysObject<Win32File>( getHandle<Win32FileManager>() );
-        fileObject->setInternalFileHandle( fileHandle );
+        fileObject->setInternalWin32FileHandle( fileHandle );
 
         return fileObject;
     }
@@ -43,7 +42,7 @@ namespace ts3::system
 
         auto fileHandle = platform::_win32OpenFileGeneric( pFilePath.c_str(), fileAccess, creationDisposition, FILE_ATTRIBUTE_NORMAL );
         auto fileObject = createSysObject<Win32File>( getHandle<Win32FileManager>() );
-        fileObject->setInternalFileHandle( fileHandle );
+        fileObject->setInternalWin32FileHandle( fileHandle );
 
         return fileObject;
     }
@@ -57,7 +56,7 @@ namespace ts3::system
 
         auto fileHandle = platform::_win32OpenFileGeneric( tempFilePath.c_str(), fileAccess, creationDisposition, FILE_ATTRIBUTE_TEMPORARY );
         auto fileObject = createSysObject<Win32File>( getHandle<Win32FileManager>() );
-        fileObject->setInternalFileHandle( fileHandle );
+        fileObject->setInternalWin32FileHandle( fileHandle );
 
         return fileObject;
     }
@@ -130,7 +129,7 @@ namespace ts3::system
     
     
     Win32File::Win32File( FileManagerHandle pFileManager )
-    : File( std::move( pFileManager ) )
+    : Win32NativeObject( std::move( pFileManager ) )
     {}
 
     Win32File::~Win32File() noexcept
@@ -138,7 +137,7 @@ namespace ts3::system
         _releaseWin32FileHandle();
     }
 
-    void Win32File::setInternalFileHandle( HANDLE pFileHandle )
+    void Win32File::setInternalWin32FileHandle( HANDLE pFileHandle )
     {
         ts3DebugAssert( !mNativeData.fileHandle );
         mNativeData.fileHandle = pFileHandle;

@@ -134,10 +134,14 @@ namespace ts3::system
 
         virtual OpenGLDisplaySurfaceHandle _nativeCreateDisplaySurfaceForCurrentThread() = 0;
 
+        virtual void _nativeDestroyDisplaySurface( OpenGLDisplaySurface & pDisplaySurface ) = 0;
+
         virtual OpenGLRenderContextHandle _nativeCreateRenderContext( OpenGLDisplaySurface & pSurface,
                                                                       const GLRenderContextCreateInfo & pCreateInfo ) = 0;
 
         virtual OpenGLRenderContextHandle _nativeCreateRenderContextForCurrentThread() = 0;
+
+        virtual void _nativeDestroyRenderContext( OpenGLRenderContext & pRenderContext ) = 0;
 
         virtual void _nativeResetContextBinding() = 0;
 

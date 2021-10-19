@@ -47,15 +47,15 @@ namespace ts3::system
     
     
     Win32OpenGLSystemDriver::Win32OpenGLSystemDriver( DisplayManagerHandle pDisplayManager )
-    : OpenGLSystemDriver( std::move( pDisplayManager ) )
+    : Win32NativeObject( std::move( pDisplayManager ) )
     {}
 
     Win32OpenGLSystemDriver::~Win32OpenGLSystemDriver() noexcept
     {
-        _release();
+        _releaseWin32DriverState();
     }
 
-    void Win32OpenGLSystemDriver::_release()
+    void Win32OpenGLSystemDriver::_releaseWin32DriverState()
     {
         _nativeReleaseInitState();
     }
@@ -193,6 +193,10 @@ namespace ts3::system
         return displaySurface;
     }
 
+    void Win32OpenGLSystemDriver::_nativeDestroyDisplaySurface( OpenGLDisplaySurface & pDisplaySurface )
+    {
+    }
+
     OpenGLRenderContextHandle Win32OpenGLSystemDriver::_nativeCreateRenderContext( OpenGLDisplaySurface & pDisplaySurface,
                                                                                    const GLRenderContextCreateInfo & pCreateInfo )
     {
@@ -275,6 +279,10 @@ namespace ts3::system
         return renderContext;
     }
 
+    void Win32OpenGLSystemDriver::_nativeDestroyRenderContext( OpenGLRenderContext & pRenderContext )
+    {
+    }
+
     void Win32OpenGLSystemDriver::_nativeResetContextBinding()
     {
         ::wglMakeCurrent( nullptr, nullptr );
@@ -308,7 +316,7 @@ namespace ts3::system
     
     
     Win32OpenGLDisplaySurface::Win32OpenGLDisplaySurface( Win32OpenGLSystemDriverHandle pGLSystemDriver )
-    : OpenGLDisplaySurface( std::move( pGLSystemDriver ), &mNativeData )
+    : Win32NativeObject( std::move( pGLSystemDriver ), &mNativeData )
     {}
     
     Win32OpenGLDisplaySurface::~Win32OpenGLDisplaySurface() noexcept
@@ -361,7 +369,7 @@ namespace ts3::system
 
 
     Win32OpenGLRenderContext::Win32OpenGLRenderContext( Win32OpenGLSystemDriverHandle pGLSystemDriver )
-    : OpenGLRenderContext( std::move( pGLSystemDriver ) )
+    : Win32NativeObject( std::move( pGLSystemDriver ) )
     {}
 
     Win32OpenGLRenderContext::~Win32OpenGLRenderContext() noexcept

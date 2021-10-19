@@ -56,7 +56,7 @@ namespace ts3::gpuapi
 
 	// Same for all drivers in terms of functionality: enumerating adapters and outputs,
 	// querying display topology and supported modes. Implemented with different APIs:
-	// OpenGL: ts3::DisplayDriverGeneric (Win32 API/X11+XRandR/etc.)
+	// OpenGL: ts3::DisplayDriver (Win32 API/X11+XRandR/etc.)
 	// GLES: --//--
 	// DX11&12: ts3::DisplayDriverDXGI (native data access)
 	// Vulkan: ts3::DisplayDriverVulkan

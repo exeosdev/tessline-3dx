@@ -2,9 +2,9 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_EVENT_CORE_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_WIN32_EVENT_CORE_H__
 
+#include "win32Common.h"
 #include <ts3/system/eventCore.h>
 #include <ts3/system/eventObject.h>
-#include "win32Common.h"
 #include <windowsx.h> // For GET_X_LPARAM/GET_Y_LPARAM
 
 namespace ts3::system
@@ -12,9 +12,6 @@ namespace ts3::system
 
     namespace platform
     {
-
-        struct NativeEvent : public MSG
-        {};
 
         struct Win32EventSourceNativeData
         {
@@ -37,11 +34,16 @@ namespace ts3::system
             }
         };
 
+        struct NativeEventType : public MSG
+        {};
+
+        using Win32NativeEvent = NativeEventType;
+
         bool win32TranslateEvent( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
 
     }
 
-    class Win32EventController : public EventController
+    class Win32EventController : public Win32NativeObject<EventController, void>
     {
     public:
         Win32EventController( SysContextHandle pSysContext );
@@ -52,7 +54,7 @@ namespace ts3::system
 
     private:
         /// @override EventController::_nativeRegisterEventSource
-        virtual std::shared_ptr<void> _nativeRegisterEventSource( EventSource & pEventSource ) override final;
+        virtual void _nativeRegisterEventSource( EventSource & pEventSource ) override final;
 
         /// @override EventController::_nativeUnregisterEventSource
         virtual void _nativeUnregisterEventSource( EventSource & pEventSource ) override final;

@@ -35,7 +35,7 @@ namespace ts3::system
     ts3EnableExceptionSupport();
 
 	template <typename TpObject>
-	using Handle = SharedHandle<TpObject>;
+	using Handle = ::ts3::SharedHandle<TpObject>;
 
 	/// @brief Declares the handle type for a given system class.
 	/// The handle's type name is created by appending 'Handle' suffix to a given class name.
@@ -65,7 +65,14 @@ namespace ts3::system
 
     public:
         NativeObject() = default;
+        virtual ~NativeObject() = default;
+    };
 
+    template <>
+    class NativeObject<void>
+    {
+    public:
+        NativeObject() = default;
         virtual ~NativeObject() = default;
     };
 

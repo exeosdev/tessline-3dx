@@ -145,7 +145,7 @@ namespace ts3::system
 
         // The main data. Stores a ColorFormatData strut for each EColorFormat supported/enumerated.
         // This map should  not be used directly - instead there are dedicated functions provided below.
-        std::unordered_map<EColorFormat, ColorFormatData> colorFormatMap;
+        std::map<EColorFormat, ColorFormatData> colorFormatMap;
 
         //
         std::vector<EColorFormat> supportedColorFormatList;
@@ -155,47 +155,6 @@ namespace ts3::system
     struct DisplayVideoMode::DisplayVideoModePrivateData
     {
         DisplayVideoModeDesc modeDesc;
-    };
-
-    template <typename TpNativeData>
-    class NativeDisplayAdapter : public DisplayAdapter, public NativeObject<TpNativeData>
-    {
-    public:
-        explicit NativeDisplayAdapter( DisplayDriver & pDisplayDriver )
-        : DisplayAdapter( pDisplayDriver )
-        {}
-
-        virtual ~NativeDisplayAdapter() = default;
-
-        using DisplayAdapter::createOutput;
-        using DisplayAdapter::getAdapterDescInternal;
-    };
-
-    template <typename TpNativeData>
-    class NativeDisplayOutput : public DisplayOutput, public NativeObject<TpNativeData>
-    {
-    public:
-        explicit NativeDisplayOutput( DisplayAdapter & pDisplayAdapter )
-        : DisplayOutput( pDisplayAdapter )
-        {}
-
-        virtual ~NativeDisplayOutput() = default;
-
-        using DisplayOutput::createVideoMode;
-        using DisplayOutput::getOutputDescInternal;
-    };
-
-    template <typename TpNativeData>
-    class NativeDisplayVideoMode : public DisplayVideoMode, public NativeObject<TpNativeData>
-    {
-    public:
-        explicit NativeDisplayVideoMode( DisplayOutput & pDisplayOutput )
-        : DisplayVideoMode( pDisplayOutput )
-        {}
-
-        virtual ~NativeDisplayVideoMode() = default;
-
-        using DisplayVideoMode::getModeDescInternal;
     };
 
 } // namespace ts3::system

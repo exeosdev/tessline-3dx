@@ -80,7 +80,7 @@ namespace ts3::system
 
 	private:
 	    ///
-	    virtual std::shared_ptr<void> _nativeRegisterEventSource( EventSource & pEventSource ) = 0;
+	    virtual void _nativeRegisterEventSource( EventSource & pEventSource ) = 0;
 
 	    ///
 	    virtual void _nativeUnregisterEventSource( EventSource & pEventSource ) = 0;

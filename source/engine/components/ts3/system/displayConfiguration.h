@@ -13,15 +13,6 @@ namespace ts3::system
     ts3SysDeclareHandle( DisplayOutput );
     ts3SysDeclareHandle( DisplayVideoMode );
 
-    template <typename TpNativeData>
-    class NativeDisplayAdapter;
-
-    template <typename TpNativeData>
-    class NativeDisplayOutput;
-
-    template <typename TpNativeData>
-    class NativeDisplayVideoMode;
-
     /// @brief
     class DisplayAdapter : public SysObject
     {
@@ -55,10 +46,10 @@ namespace ts3::system
 
         DisplayAdapterDesc & getAdapterDescInternal();
 
-        template <typename TpOutput>
-        Handle<TpOutput> createOutput()
+        template <typename TpOutput, typename TpAdapter>
+        Handle<TpOutput> createOutput( TpAdapter & pAdapter )
         {
-            auto outputObject = createSysObject<TpOutput>( *this );
+            auto outputObject = createSysObject<TpOutput>( pAdapter );
             _registerOutput( outputObject );
             return outputObject;
         }
@@ -108,10 +99,10 @@ namespace ts3::system
 
         DisplayOutputDesc & getOutputDescInternal();
 
-        template <typename TpVideoMode>
-        Handle<TpVideoMode> createVideoMode( EColorFormat pColorFormat )
+        template <typename TpVideoMode, typename TpOutput>
+        Handle<TpVideoMode> createVideoMode( TpOutput & pOutput, EColorFormat pColorFormat )
         {
-            auto videoModeObject = createSysObject<TpVideoMode>( *this );
+            auto videoModeObject = createSysObject<TpVideoMode>( pOutput );
             _registerVideoMode( pColorFormat, videoModeObject );
             return videoModeObject;
         }

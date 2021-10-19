@@ -16,8 +16,29 @@ namespace ts3::system
     }
 
 
+    DisplayAdapterDXGI::DisplayAdapterDXGI( DisplayDriverDXGI & pDisplayDriver )
+    : DisplayAdapter( pDisplayDriver )
+    {}
+
+    DisplayAdapterDXGI::~DisplayAdapterDXGI() noexcept = default;
+
+
+    DisplayOutputDXGI::DisplayOutputDXGI( DisplayAdapterDXGI & pDisplayAdapter )
+    : DisplayOutput( pDisplayAdapter )
+    {}
+
+    DisplayOutputDXGI::~DisplayOutputDXGI() noexcept = default;
+
+
+    DisplayVideoModeDXGI::DisplayVideoModeDXGI( DisplayOutputDXGI & pDisplayOutput )
+    : DisplayVideoMode( pDisplayOutput )
+    {}
+
+    DisplayVideoModeDXGI::~DisplayVideoModeDXGI() noexcept = default;
+
+
 	DisplayDriverDXGI::DisplayDriverDXGI( DisplayManagerHandle pDisplayManager )
-	: NativeDisplayDriver( pDisplayManager, EDisplayDriverType::DXGI )
+	: DisplayDriver( pDisplayManager, EDisplayDriverType::DXGI )
 	{
 	    _initializeDXGIDriverState();
 	}
@@ -103,7 +124,7 @@ namespace ts3::system
                 ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
             }
 
-            auto outputObject = adapterDXGI->createOutput<DisplayOutputDXGI>();
+            auto outputObject = adapterDXGI->createOutput<DisplayOutputDXGI>( *adapterDXGI );
             outputObject->mNativeData.dxgiOutput = dxgiOutput1;
             outputObject->mNativeData.dxgiOutputDesc = dxgiOutputDesc;
             
@@ -121,7 +142,7 @@ namespace ts3::system
 
             if( dxgiOutputDesc.Monitor )
             {
-                // It is almost crazy we need to rely on the old Win32 API within a DXGI realm... but it seems
+                // It is almost crazy we need to rely on the old  API within a DXGI realm... but it seems
                 // DXGI API does not expose the concept of a "primary (or default) output". Some apps rely on
                 // the existence of a default output, so we make sure DXGI has it too.
                 MONITORINFOEXA gdiMonitorInfo;
@@ -172,7 +193,7 @@ namespace ts3::system
 	            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
 	        }
 
-	        auto adapterObject = createAdapter<DisplayAdapterDXGI>();
+	        auto adapterObject = createAdapter<DisplayAdapterDXGI>( *this );
 	        adapterObject->mNativeData.dxgiAdapter = dxgiAdapter;
 	        adapterObject->mNativeData.dxgiAdapterDesc = dxgiAdapterDesc;
 	        
@@ -269,7 +290,7 @@ namespace ts3::system
 	            continue;
 	        }
 
-	        auto videoModeObject = outputDXGI->createVideoMode<DisplayVideoModeDXGI>( pColorFormat );
+	        auto videoModeObject = outputDXGI->createVideoMode<DisplayVideoModeDXGI>( *outputDXGI, pColorFormat );
 	        videoModeObject->mNativeData.dxgiModeDesc = dxgiDisplayModeDesc;
 	        
 	        auto & videoModeDesc = videoModeObject->getModeDescInternal();

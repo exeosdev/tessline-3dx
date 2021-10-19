@@ -1,6 +1,6 @@
 
-#ifndef __TS3_SYSTEM_INTERNAL_EVENT_SYSTEM_PRIVATE_H__
-#define __TS3_SYSTEM_INTERNAL_EVENT_SYSTEM_PRIVATE_H__
+#ifndef __TS3_SYSTEM_INTERNAL_OPENGL_PRIVATE_H__
+#define __TS3_SYSTEM_INTERNAL_OPENGL_PRIVATE_H__
 
 #include <ts3/system/openGLDriver.h>
 
@@ -24,4 +24,4 @@ namespace ts3::system
 
 } // namespace ts3::system
 
-#endif // __TS3_SYSTEM_INTERNAL_EVENT_SYSTEM_PRIVATE_H__
+#endif // __TS3_SYSTEM_INTERNAL_OPENGL_PRIVATE_H__

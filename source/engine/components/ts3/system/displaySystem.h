@@ -23,7 +23,7 @@ namespace ts3::system
 
         TS3_FUNC_NO_DISCARD DisplayDriverHandle createDisplayDriver( EDisplayDriverType pDriverID );
 
-        TS3_FUNC_NO_DISCARD DisplayDriverHandle createDisplayDriverGeneric();
+        TS3_FUNC_NO_DISCARD DisplayDriverHandle createDisplayDriver();
 
         TS3_FUNC_NO_DISCARD bool checkDriverSupport( EDisplayDriverType pDriverID ) const;
 
@@ -38,7 +38,7 @@ namespace ts3::system
         TS3_FUNC_NO_DISCARD FrameGeometry validateFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
 
     private:
-        virtual DisplayDriverHandle _nativeCreateDisplayDriverGeneric() = 0;
+        virtual DisplayDriverHandle _nativeCreateDisplayDriver() = 0;
 
         virtual void _nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const = 0;
 
@@ -89,10 +89,10 @@ namespace ts3::system
     protected:
         DisplayDriver( DisplayManagerHandle pDisplayManager, EDisplayDriverType pDriverType );
 
-        template <typename TpAdapter>
-        Handle<TpAdapter> createAdapter()
+        template <typename TpAdapter, typename TpDriver>
+        Handle<TpAdapter> createAdapter( TpDriver & pDriver)
         {
-            auto adapterObject = createSysObject<TpAdapter>( *this );
+            auto adapterObject = createSysObject<TpAdapter>( pDriver );
             _registerAdapter( adapterObject );
             return adapterObject;
         }
@@ -117,18 +117,6 @@ namespace ts3::system
     protected:
         struct DisplayDriverPrivateData;
         std::unique_ptr<DisplayDriverPrivateData> _privateData;
-    };
-
-    /// @brief
-    template <typename TpNativeData>
-    class NativeDisplayDriver : public DisplayDriver, public NativeObject<TpNativeData>
-    {
-    public:
-        NativeDisplayDriver( DisplayManagerHandle pDisplayManager, EDisplayDriverType pDriverType )
-        : DisplayDriver( pDisplayManager, pDriverType )
-        {}
-
-        virtual ~NativeDisplayDriver() = default;
     };
 
 } // namespace ts3::system

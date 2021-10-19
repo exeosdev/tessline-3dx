@@ -35,7 +35,7 @@ namespace ts3::system
 
         void win32UpdateFrameGeometry( HWND pHWND, const FrameGeometry & pFrameGeometry, Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags );
 
-        FrameSize win32GetFrameSize( HWND pHWND, EFrameSizeMode pSizeMode );
+        TS3_SYSTEM_API_NODISCARD FrameSize win32GetFrameSize( HWND pHWND, EFrameSizeMode pSizeMode );
 
     }
 

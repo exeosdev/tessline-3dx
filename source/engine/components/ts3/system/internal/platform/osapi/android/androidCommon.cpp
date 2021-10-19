@@ -1,19 +1,19 @@
 
-#include <ts3/system/sysContextNative.h>
+#include "androidSysContext.h"
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 namespace ts3::system
 {
 
-    ASessionData & nativeAndroidGetASessionData( SysContext & pSysContext )
+    namespace platform
     {
-        return pSysContext.mInternal->nativeDataPriv.aSessionData;
-    }
 
-    ASessionData & nativeAndroidGetASessionData( const AndroidNativeDataCommon & pNativeData )
-    {
-        ts3DebugAssert( pNativeData.aSessionDataPtr );
-        return *( pNativeData.aSessionDataPtr );
+        ASessionData & androidGetASessionData( SysContext & pSysContext )
+        {
+            auto * androidSysContext = pSysContext.queryInterface<AndroidSysContext>();
+            return androidSysContext->mNativeData.aSessionData;
+        }
+
     }
 
 } // namespace ts3::system

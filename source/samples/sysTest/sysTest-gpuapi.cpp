@@ -78,12 +78,10 @@ int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 
     SysContextCreateInfo sysContextCreateInfo {};
     sysContextCreateInfo.nativeParams.aCommonAppState = pAppState;
-    sysContextCreateInfo.flags = 0;
-    auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+    auto sysContext = createSysContext( sysContextCreateInfo );
 
     AssetLoaderCreateInfo aslCreateInfo;
-    aslCreateInfo.sysContext = sysContext;
-    auto assetLoader = createAssetLoader( aslCreateInfo );
+    auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
 
     GraphicsDriverState gxDriverState;
     gxDriverState.driverID = "GLES3";
@@ -226,8 +224,13 @@ int main( int pArgc, const char ** pArgv )
         evtController->registerEventSource( *eventSource );
     }
 
-    auto vertexShader = utils::createShaderFromSource( *(gxDriverState.device), EShaderType::VertexShader, appResources.fxSrcPassThroughVs );
-    auto pixelShader = utils::createShaderFromSource( *(gxDriverState.device), EShaderType::PixelShader, appResources.fxSrcPassThroughPs );
+    auto vertexShader = utils::createShaderFromSource( *(gxDriverState.device),
+                                                       EShaderType::VertexShader,
+                                                       appResources.fxSrcPassThroughVs );
+
+    auto pixelShader = utils::createShaderFromSource( *(gxDriverState.device),
+                                                      EShaderType::PixelShader,
+                                                      appResources.fxSrcPassThroughPs );
 
     ts3::gpuapi::GPUBufferHandle cbuffer0;
     {
@@ -507,8 +510,10 @@ int main( int pArgc, const char ** pArgv )
             {
                 gxDriverState.cmdContext->setRenderTargetStateObject( *renderTargetSO );
                 gxDriverState.cmdContext->setViewport( vpDescTexture );
-                gxDriverState.cmdContext->setColorBufferClearValue( ts3::math::RGBAColorU8 { 0x8F, 0x0F, 0x1F, 0xFF } );
-                gxDriverState.cmdContext->setColorBufferClearValue( ts3::math::RGBAColorU8 { 0xFF, 0xFF, 0xFF, 0xFF } );
+                gxDriverState.cmdContext->setColorBufferClearValue(
+                        ts3::math::RGBAColorU8 { 0x8F, 0x0F, 0x1F, 0xFF } );
+                gxDriverState.cmdContext->setColorBufferClearValue(
+                        ts3::math::RGBAColorU8 { 0xFF, 0xFF, 0xFF, 0xFF } );
                 gxDriverState.cmdContext->clearRenderTarget( ts3::gpuapi::E_RENDER_TARGET_ATTACHMENT_FLAGS_DEFAULT_C0DS );
 
                 ts3::gpuapi::GPUBufferDataUploadDesc cb0DataUploadDesc;
@@ -551,8 +556,7 @@ int main( int pArgc, const char ** pArgv )
                             cameraController.getPerspectiveFOVAngle(), ( float )rtSize.x / ( float )rtSize.y, 0.1f, 1000.0f );
                     cb0Data.viewMatrix = ts3ViewScreen;
                     cb0Data.modelMatrix = math::mul(
-                            math::translation<float>( -3, 0, 6.0f ),
-                            math::rotationAxisY( -1.0f ) );
+                            math::translation<float>( -3, 0, 6.0f ), math::rotationAxisY( -1.0f ) );
                     gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0DataUploadDesc );
                 }
                 gxDriverState.cmdContext->drawDirectIndexed( 6, 36 );
@@ -603,6 +607,4 @@ void initializeGraphicsDriver( SysContextHandle pSysContext, GraphicsDriverState
 
     pGxDriverState.device->setPresentationLayer( pGxDriverState.presentationLayer );
     pGxDriverState.cmdContext = pGxDriverState.device->getCommandSystem()->acquireCommandContext<CommandContextDirectGraphics>();
-
-    return;
 }

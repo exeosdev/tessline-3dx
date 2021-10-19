@@ -10,7 +10,7 @@ namespace ts3::system
     namespace platform
     {
 
-        enum class EAndroidScreenOrientation : int
+        enum EAndroidScreenOrientation : int
         {
             E_ANDROID_SCREEN_ORIENTATION_LANDSCAPE         = 0,
             E_ANDROID_SCREEN_ORIENTATION_LOCKED            = 0x0000000E,

@@ -9,9 +9,6 @@
 namespace ts3::system
 {
 
-    using FileList = std::vector<FileHandle>;
-    using FileNameList = std::vector<std::string>;
-
     class FileManager : public SysObject
     {
     public:
