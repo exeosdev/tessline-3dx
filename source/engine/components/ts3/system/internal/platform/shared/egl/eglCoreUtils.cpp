@@ -1,6 +1,8 @@
 
 #include "eglCoreUtils.h"
 #include <ts3/stdext/mapUtils.h>
+#include <ts3/stdext/stringExt.h>
+#include <ts3/stdext/stringUtils.h>
 #include <unordered_map>
 
 namespace ts3::system
@@ -8,15 +10,19 @@ namespace ts3::system
 
     Version EGLCoreAPI::queryRuntimeVersion()
     {
+        EGLDisplay eDisplay = ::eglGetCurrentDisplay();
+        std::string versionString = ::eglQueryString( eDisplay, EGL_VERSION );
+
+        auto dotPos = versionString.find_first_of( '.' );
+        auto endPos = versionString.find_first_not_of( "0123456789", dotPos );
+
         Version resultVersion;
 
-        int majorVersion = 0;
-        glGetIntegerv( GL_MAJOR_VERSION, &majorVersion );
-        resultVersion.major = static_cast<uint16>( majorVersion );
+        auto majorVersion = fromString<int32>( versionString.substr( 0, dotPos ) );
+        resultVersion.major = static_cast<uint16>( majorVersion.first );
 
-        int minorVersion = 0;
-        glGetIntegerv( GL_MINOR_VERSION, &minorVersion );
-        resultVersion.minor = static_cast<uint16>( minorVersion );
+        auto minorVersion = fromString<int32>( versionString.substr( dotPos + 1, endPos ) );
+        resultVersion.minor = static_cast<uint16>( minorVersion.first );
 
         return resultVersion;
     }

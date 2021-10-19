@@ -254,9 +254,18 @@ namespace ts3::system
                                                           shareContextHandle,
                                                           &( contextAttributes[0] ) );
 
-        if ( contextHandle == nullptr )
+        if ( !contextHandle )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			if( shareContextHandle && pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARING_OPTIONAL_BIT ) )
+			{
+                contextHandle = wglCreateContextAttribsARB( win32DisplaySurface->mNativeData.hdc,
+                                                            nullptr,
+                                                            &( contextAttributes[0] ) );
+			}
+			if ( !contextHandle )
+			{
+				ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			}
         }
 
         auto renderContext = createSysObject<Win32OpenGLRenderContext>( getHandle<Win32OpenGLSystemDriver>() );
@@ -326,7 +335,7 @@ namespace ts3::system
 
     void Win32OpenGLDisplaySurface::_releaseWin32SurfaceState()
     {
-        _win32DestroyGLSurface( mNativeData );
+        platform::_win32DestroyGLSurface( mNativeData );
         platform::win32DestroyWindow( mNativeData );
     }
 
@@ -374,7 +383,7 @@ namespace ts3::system
 
     Win32OpenGLRenderContext::~Win32OpenGLRenderContext() noexcept
     {
-        _release();
+        _releaseWin32ContextState();
     }
     
     void Win32OpenGLRenderContext::_nativeBindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface )
@@ -394,7 +403,7 @@ namespace ts3::system
         return mNativeData.contextHandle != nullptr;
     }
 
-    void Win32OpenGLRenderContext::_release()
+    void Win32OpenGLRenderContext::_releaseWin32ContextState()
     {
         platform::_win32DestroyGLContext( mNativeData );
     }

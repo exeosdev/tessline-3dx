@@ -12,6 +12,12 @@ namespace ts3::system
 
         void _win32CloseFile( HANDLE pFileHandle );
 
+        DWORD _win32TranslateFileOpenModeToWin32Access( EFileOpenMode pOpenMode );
+
+        DWORD _win32TranslateFileOpenModeToWin32CreationDisposition( EFileOpenMode pOpenMode );
+
+        DWORD _win32TranslateFilePointerRefPos( EFilePointerRefPos pFileRefPos );
+
         std::string _win32GenerateTempFileName();
 
     }
@@ -218,7 +224,6 @@ namespace ts3::system
             {
                 auto lastErrorCode = ::GetLastError();
                 auto errorMessage = platform::mseQuerySystemErrorMessage( lastErrorCode );
-
                 ts3ThrowDesc( E_EXC_SYSTEM_FILE_OPEN_ERROR, std::move( errorMessage ) );
             }
 
@@ -235,6 +240,76 @@ namespace ts3::system
                 auto errorMessage = platform::mseQuerySystemErrorMessage( lastErrorCode );
                 ts3DebugInterrupt();
             }
+        }
+
+        DWORD _win32TranslateFileOpenModeToWin32Access( EFileOpenMode pOpenMode )
+        {
+            switch( pOpenMode )
+            {
+            case EFileOpenMode::ReadOnly:
+                return GENERIC_READ;
+
+            case EFileOpenMode::ReadWrite:
+                return GENERIC_READ | GENERIC_WRITE;
+
+            case EFileOpenMode::WriteAppend:
+                return GENERIC_WRITE;
+
+            case EFileOpenMode::WriteOverwrite:
+                return GENERIC_READ | GENERIC_WRITE;
+
+            default:
+                break;
+            }
+            return GENERIC_READ | GENERIC_WRITE;
+        }
+
+        DWORD _win32TranslateFileOpenModeToWin32CreationDisposition( EFileOpenMode pOpenMode )
+        {
+            switch( pOpenMode )
+            {
+            case EFileOpenMode::ReadOnly:
+                return OPEN_EXISTING;
+
+            case EFileOpenMode::ReadWrite:
+                return OPEN_ALWAYS;
+
+            case EFileOpenMode::WriteAppend:
+                return OPEN_ALWAYS;
+
+            case EFileOpenMode::WriteOverwrite:
+                return CREATE_ALWAYS;
+
+            default:
+                break;
+            }
+            return OPEN_ALWAYS;
+        }
+
+        DWORD _win32TranslateFilePointerRefPos( EFilePointerRefPos pFileRefPos )
+        {
+            DWORD win32FPMoveMode = 0;
+
+            switch( pFileRefPos )
+            {
+                case EFilePointerRefPos::FileBeginning:
+                {
+                    win32FPMoveMode = FILE_BEGIN;
+                    break;
+                }
+                case EFilePointerRefPos::FileEnd:
+                {
+                    win32FPMoveMode = FILE_END;
+                    break;
+                }
+                case EFilePointerRefPos::PtrCurrent:
+                {
+                    win32FPMoveMode = FILE_CURRENT;
+                    break;
+                }
+            }
+
+            return win32FPMoveMode;
         }
 
         std::string _win32GenerateTempFileName()

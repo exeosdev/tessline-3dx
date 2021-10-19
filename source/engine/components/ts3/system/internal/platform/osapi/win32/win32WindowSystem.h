@@ -8,6 +8,7 @@
 namespace ts3::system
 {
 
+    ts3SysDeclareHandle( Win32DisplayManager );
     ts3SysDeclareHandle( Win32Window );
     ts3SysDeclareHandle( Win32WindowManager );
 
@@ -42,7 +43,7 @@ namespace ts3::system
     class Win32WindowManager : public WindowManager
     {
     public:
-        explicit Win32WindowManager( DisplayManagerHandle pDisplayManager );
+        explicit Win32WindowManager( Win32DisplayManagerHandle pDisplayManager );
         virtual ~Win32WindowManager() noexcept;
 
     private:

@@ -70,7 +70,7 @@ namespace ts3::gpuapi
 	void CommandContextDirect::submit()
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDirect ) );
-		mCommandSystem->submitContext( *this, cvCommandContextSubmitDefault );
+		mCommandSystem->submitContext( *this, CX_COMMAND_CONTEXT_SUBMIT_DEFAULT );
 	}
 
 	CommandSync CommandContextDirect::submit( const CommandContextSubmitInfo & pSubmitInfo )

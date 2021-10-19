@@ -58,6 +58,8 @@ namespace ts3::system
 				ts3EGLThrowLastError();
 			}
 
+			auto eglQueriedVersion = EGLCoreAPI::queryRuntimeVersion();
+
 			pEGLDriverNativeData.eDisplay = eglDisplay;
 			pEGLDriverNativeData.eglVersion.major = eglVersionMajor;
 			pEGLDriverNativeData.eglVersion.minor = eglVersionMinor;
@@ -257,11 +259,11 @@ namespace ts3::system
 		{
 			std::vector<EGLConfig> result;
 
-			int eglConfigAttribArray[cvEGLMaxEGLConfigAttributesNum];
+			int eglConfigAttribArray[CX_EGL_MAX_EGL_CONFIG_ATTRIBUTES_NUM];
 			_eglGetAttribArrayForVisualConfig( pVisualConfig, pTargetAPIVersion, eglConfigAttribArray );
 
 			// Output array where system will store IDs of enumerated pixel formats.
-			EGLConfig eglConfigArray[cvEGLMaxEGLConfigsNum];
+			EGLConfig eglConfigArray[CX_EGL_MAX_EGL_CONFIGS_NUM];
 			// Number of pixel formats returned by the system.
 			EGLint returnedEGLConfigsNum = 0U;
 
@@ -269,7 +271,7 @@ namespace ts3::system
 			EGLBoolean enumResult = ::eglChooseConfig( pDisplay,
 													   eglConfigAttribArray,
 													   eglConfigArray,
-													   cvEGLMaxEGLConfigsNum,
+													   CX_EGL_MAX_EGL_CONFIGS_NUM,
 													   &returnedEGLConfigsNum );
 			if ( enumResult == EGL_FALSE )
 			{

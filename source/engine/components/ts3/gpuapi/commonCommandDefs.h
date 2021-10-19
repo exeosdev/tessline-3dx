@@ -27,10 +27,14 @@ namespace ts3::gpuapi
 
 	using gpu_cmd_device_queue_id_t = native_uint;
 
-	enum CmdConstantsNT : native_uint
-	{
-		cxCmdDeviceQueueIDInvalid = ts3::Limits<gpu_cmd_device_queue_id_t>::maxValue
-	};
+    enum : gpu_cmd_device_queue_id_t
+    {
+        E_DEVICE_COMMAND_QUEUE_ID_DEFAULT_GRAPHICS = 0u,
+        E_DEVICE_COMMAND_QUEUE_ID_DEFAULT_COMPUTE = 1u,
+        E_DEVICE_COMMAND_QUEUE_ID_DEFAULT_TRANSFER = 2u,
+        E_DEVICE_COMMAND_QUEUE_ID_PRESENT = 3u,
+        E_DEVICE_COMMAND_QUEUE_ID_UNKNOWN = ts3::Limits<gpu_cmd_device_queue_id_t>::maxValue,
+    };
 
 	enum ECommandListFlags : uint32
 	{
@@ -82,7 +86,7 @@ namespace ts3::gpuapi
 	enum class ECommandSubmitStateOp : enum_default_value_t
 	{
 		// Context is a temporary, "fire-and-forget" context. After its submission,
-		// its internal state is invalidated and it may no longer be used for command
+		// its internal state is invalidated, and it may no longer be used for command
 		// submission. User must acquire a new context to do so.
 		Discard,
 		// Context is used multiple times or stored in a permanent manner. After the
@@ -107,14 +111,6 @@ namespace ts3::gpuapi
 		None
 	};
 
-	enum : gpu_cmd_device_queue_id_t
-	{
-		E_DEVICE_COMMAND_QUEUE_ID_DEFAULT_GRAPHICS,
-		E_DEVICE_COMMAND_QUEUE_ID_DEFAULT_COMPUTE,
-		E_DEVICE_COMMAND_QUEUE_ID_DEFAULT_TRANSFER,
-		E_DEVICE_COMMAND_QUEUE_ID_PRESENT,
-	};
-
 	struct CommandContextSubmitInfo
 	{
 		ECommandQueueType queuePreference = ECommandQueueType::Default;
@@ -122,7 +118,7 @@ namespace ts3::gpuapi
 		ECommandSubmitSyncMode syncMode = ECommandSubmitSyncMode::None;
 	};
 
-	constexpr CommandContextSubmitInfo cvCommandContextSubmitDefault {};
+	inline constexpr CommandContextSubmitInfo CX_COMMAND_CONTEXT_SUBMIT_DEFAULT {};
 
 	struct CommandSync
 	{

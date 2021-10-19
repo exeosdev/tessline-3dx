@@ -38,7 +38,6 @@ namespace ts3::system
 	            Win32OpenGLDisplaySurfaceNativeData surfaceData;
 	            Win32OpenGLRenderContextNativeData contextData;
             };
-
 	        std::unique_ptr<InitState> initState = nullptr;
         };
 
@@ -140,7 +139,7 @@ namespace ts3::system
         virtual ~Win32OpenGLRenderContext() noexcept;
 
     private:
-        void _release();
+        void _releaseWin32ContextState();
 
         /// @override OpenGLRenderContext::_nativeBindForCurrentThread
         virtual void _nativeBindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface ) override final;

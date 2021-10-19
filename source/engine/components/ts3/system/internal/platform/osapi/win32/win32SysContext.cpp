@@ -60,7 +60,7 @@ namespace ts3::system
             pDisplayManager = createDisplayManager();
         }
 
-        return createSysObject<Win32OpenGLSystemDriver>( pDisplayManager );
+        return createSysObject<Win32OpenGLSystemDriver>( pDisplayManager->getHandle<Win32DisplayManager>() );
     }
 
     WindowManagerHandle Win32SysContext::createWindowManager( DisplayManagerHandle pDisplayManager )
@@ -70,7 +70,7 @@ namespace ts3::system
             pDisplayManager = createDisplayManager();
         }
 
-        return createSysObject<Win32WindowManager>( pDisplayManager );
+        return createSysObject<Win32WindowManager>( pDisplayManager->getHandle<Win32DisplayManager>() );
     }
 
     std::string Win32SysContext::queryCurrentProcessExecutableFilePath() const
@@ -79,12 +79,12 @@ namespace ts3::system
 
         DWORD validProcessID = 0;
         DWORD currentProcessID = getpid();
-        HANDLE moduleSnapshotHandle = CreateToolhelp32Snapshot( TH32CS_SNAPMODULE, currentProcessID );
+        HANDLE moduleSnapshotHandle = ::CreateToolhelp32Snapshot( TH32CS_SNAPMODULE, currentProcessID );
 
         MODULEENTRY32 moduleEntryInfo;
         moduleEntryInfo.dwSize = sizeof( MODULEENTRY32 );
 
-        if( Module32First( moduleSnapshotHandle, &moduleEntryInfo ) )
+        if( ::Module32First( moduleSnapshotHandle, &moduleEntryInfo ) )
         {
             do
             {
@@ -94,10 +94,10 @@ namespace ts3::system
                     break;
                 }
             }
-            while( Module32Next( moduleSnapshotHandle, &moduleEntryInfo ) );
+            while( ::Module32Next( moduleSnapshotHandle, &moduleEntryInfo ) );
         }
 
-        CloseHandle( moduleSnapshotHandle );
+        ::CloseHandle( moduleSnapshotHandle );
 
         if( validProcessID != 0 )
         {
