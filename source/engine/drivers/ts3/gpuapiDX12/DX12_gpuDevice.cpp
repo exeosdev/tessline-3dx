@@ -61,7 +61,6 @@ namespace ts3::gpuapi
 
 	void DX12GPUDevice::initializeDefaultPresentDeviceQueue()
 	{
-		auto * dx12CmdManager = _cmdManager->queryInterface<DX12GPUCmdManager>();
 		if( !_cmdManager->isQueueAvailable( E_DEVICE_COMMAND_QUEUE_ID_PRESENT ) )
 		{
 			ts3DebugAssert( _cmdManager->isQueueAvailable( E_DEVICE_COMMAND_QUEUE_ID_DEFAULT_GRAPHICS ) );

@@ -1,5 +1,6 @@
 
 #include "win32WindowSystem.h"
+#include "win32DisplaySystem.h"
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
 namespace ts3::system
@@ -29,7 +30,7 @@ namespace ts3::system
     }
 
 
-    Win32WindowManager::Win32WindowManager( DisplayManagerHandle pDisplayManager )
+    Win32WindowManager::Win32WindowManager( Win32DisplayManagerHandle pDisplayManager )
     : WindowManager( std::move( pDisplayManager ) )
     {}
 

@@ -3,6 +3,7 @@
 #define __TS3_SYSTEM_PLATFORM_OSAPI_ANDROID_COMMON_H__
 
 #include <ts3/platform/android/androidNativeAppProxy.h>
+#include <ts3/system/prerequisites.h>
 #include <ts3/system/internal/platform/shared/java/javaCommon.h>
 #include <ts3/math/vector.h>
 

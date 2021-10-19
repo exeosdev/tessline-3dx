@@ -116,13 +116,11 @@ int main( int pArgc, const char ** pArgv )
     const std::string sGxDriverName = "GL4";
 
     SysContextCreateInfo sysContextCreateInfo;
-    sysContextCreateInfo.flags = 0;
-    auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+    auto sysContext = createSysContext( sysContextCreateInfo );
 
-    AssetLoaderCreateInfo aslCreateInfo;
-    aslCreateInfo.sysContext = sysContext;
+    AssetLoaderCreateInfo aslCreateInfo;\
     aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
-    auto assetLoader = createAssetLoader( aslCreateInfo );
+    auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
 
     GraphicsDriverState gxDriverState;
     gxDriverState.driverID = "GL4";
@@ -138,7 +136,7 @@ int main( int pArgc, const char ** pArgv )
     auto evtDispatcher = evtController->createEventDispatcher();
     evtController->setActiveEventDispatcher( *evtDispatcher );
 
-#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_OS_ANDROID )
+#if( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_ANDROID )
     bool waitForDisplay = true;
 
     evtDispatcher->setEventHandler(

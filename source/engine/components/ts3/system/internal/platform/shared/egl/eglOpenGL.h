@@ -13,9 +13,9 @@ namespace ts3::system
     namespace platform
     {
 
-        constexpr EGLConfig cvEGLInvalidConfigID = nullptr;
-        constexpr size_t cvEGLMaxEGLConfigsNum = 256u;
-        constexpr size_t cvEGLMaxEGLConfigAttributesNum = 64u;
+        inline constexpr size_t CX_EGL_MAX_EGL_CONFIGS_NUM = 256u;
+
+        inline constexpr size_t CX_EGL_MAX_EGL_CONFIG_ATTRIBUTES_NUM = 64u;
 
         struct EGLDisplaySurfaceNativeData
         {

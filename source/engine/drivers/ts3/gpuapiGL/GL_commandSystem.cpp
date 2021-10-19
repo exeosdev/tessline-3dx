@@ -68,7 +68,7 @@ namespace ts3::gpuapi
 	{
 		// Surface is required to create a GL context. Since CommandSystem is bound to a device
 		// and PresentationLayer is created when device is already available, there is no way
-		// we can know the surface in advance. Hence, we set it manually (eh...) and use to
+		// we can know the surface in advance. Hence, we set it manually (eh...) and use it to
 		// create a GL context when a new CommandList is instantiated.
 		_targetSysGLSurface = pSysGLDisplaySurface;
 	}

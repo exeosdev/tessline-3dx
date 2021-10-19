@@ -14,7 +14,7 @@ namespace ts3::gpuapi
 
 	bool CommandSystem::setQueueAlias( gpu_cmd_device_queue_id_t pAliasID, gpu_cmd_device_queue_id_t pMappedID )
 	{
-		if( ( pAliasID == cxCmdDeviceQueueIDInvalid ) || ( pMappedID == cxCmdDeviceQueueIDInvalid ) )
+		if( ( pAliasID == E_DEVICE_COMMAND_QUEUE_ID_UNKNOWN ) || ( pMappedID == E_DEVICE_COMMAND_QUEUE_ID_UNKNOWN ) )
 		{
 			return false;
 		}
@@ -46,8 +46,8 @@ namespace ts3::gpuapi
 	gpu_cmd_device_queue_id_t CommandSystem::resolveQueueID( gpu_cmd_device_queue_id_t pQueueID ) const
 	{
 		// Check if the specified ID is an alias. If so, the actual queue ID is the resolved name.
-		auto resolvedID = ts3::getMapValueOrDefault( _deviceQueueAliasMap, pQueueID, cxCmdDeviceQueueIDInvalid );
-		if( resolvedID == cxCmdDeviceQueueIDInvalid )
+		auto resolvedID = ts3::getMapValueOrDefault( _deviceQueueAliasMap, pQueueID, E_DEVICE_COMMAND_QUEUE_ID_UNKNOWN );
+		if( resolvedID == E_DEVICE_COMMAND_QUEUE_ID_UNKNOWN )
 		{
 			// If no such alias could be found, we assume this is a direct ID of a queue.
 			resolvedID = pQueueID;
