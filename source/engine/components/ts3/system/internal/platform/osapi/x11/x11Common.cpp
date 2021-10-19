@@ -1,19 +1,19 @@
 
-#include <ts3/system/sysContextNative.h>
+#include "x11SysContext.h"
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
 namespace ts3::system
 {
 
-    X11SessionData & nativeX11GetXSessionData( SysContext & pSysContext )
+    namespace platform
     {
-        return pSysContext.mInternal->nativeDataPriv.xSessionData;
-    }
 
-    X11SessionData & nativeX11GetXSessionData( const X11NativeDataCommon & pNativeData )
-    {
-        ts3DebugAssert( pNativeData.xSessionDataPtr );
-        return *( pNativeData.xSessionDataPtr );
+        X11SessionData & x11GetXSessionData( SysContext & pSysContext )
+        {
+            auto * x11SysContext = pSysContext.queryInterface<X11SysContext>();
+            return x11SysContext->mNativeData.xSessionData;
+        }
+
     }
 
 } // namespace ts3::system

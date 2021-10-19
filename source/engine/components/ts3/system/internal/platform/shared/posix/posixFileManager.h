@@ -2,6 +2,7 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_POSIX_FILE_MANAGER_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_POSIX_FILE_MANAGER_H__
 
+#include "posixCommon.h"
 #include <ts3/system/fileManager.h>
 #include <cstdio>
 #include <cstring>
@@ -14,7 +15,7 @@ namespace ts3::system
 
         struct PosixFileNativeData
         {
-            FILE * filePtr;
+            FILE * filePtr = nullptr;
         };
 
     }

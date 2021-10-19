@@ -41,7 +41,7 @@ namespace ts3::system
 	/// The handle's type name is created by appending 'Handle' suffix to a given class name.
 	/// For example: ts3SysDeclareHandle( MyType ) will produce a declaration for 'MyTypeHandle'.
     #define ts3SysDeclareHandle( pType ) \
-        using pType##Handle = Handle<class pType>
+        class pType; using pType##Handle = Handle<::ts3::system::pType>
 
     // These two types need to be visible everywhere.
     ts3SysDeclareHandle( SysContext );

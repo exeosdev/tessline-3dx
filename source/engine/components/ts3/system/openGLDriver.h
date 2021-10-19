@@ -8,8 +8,8 @@ namespace ts3::system
 {
 
     ts3SysDeclareHandle( DisplayManager );
-    ts3SysDeclareHandle( OpenGLRenderContext );
     ts3SysDeclareHandle( OpenGLDisplaySurface );
+    ts3SysDeclareHandle( OpenGLRenderContext );
 
     struct GLRuntimeVersionDesc
     {
@@ -49,6 +49,9 @@ namespace ts3::system
     /// @brief
     class OpenGLSystemDriver : public SysObject
     {
+        friend class OpenGLDisplaySurface;
+        friend class OpenGLRenderContext;
+
     public:
         DisplayManagerHandle const mDisplayManager;
 
@@ -209,6 +212,8 @@ namespace ts3::system
 
         void setInternalOwnershipFlag( bool pOwnershipFlag );
 
+        bool hasInternalOwnershipFlag() const;
+
     private:
         virtual void _nativeSwapBuffers() = 0;
 
@@ -259,6 +264,8 @@ namespace ts3::system
         explicit OpenGLRenderContext( OpenGLSystemDriverHandle pGLSystemDriver );
 
         void setInternalOwnershipFlag( bool pOwnershipFlag );
+
+        bool hasInternalOwnershipFlag() const;
 
     private:
         virtual void _nativeBindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface ) = 0;

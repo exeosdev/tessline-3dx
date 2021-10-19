@@ -291,8 +291,8 @@ namespace ts3::system
 
     EventDispatcher::EventDispatcher( EventControllerHandle pEventController )
     : SysObject( pEventController->mSysContext )
-    , _privateData( std::make_unique<EventDispatcherPrivateData>() )
     , _eventControllerActiveRef( std::move( pEventController ) )
+    , _privateData( std::make_unique<EventDispatcherPrivateData>() )
     {}
 
     EventDispatcher::~EventDispatcher() noexcept

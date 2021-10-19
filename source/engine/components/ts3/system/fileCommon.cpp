@@ -59,6 +59,11 @@ namespace ts3::system
         std::string result;
         result.reserve( resultLength );
 
+        if( localPathString[0] == TS3_PCL_ENV_DEFAULT_PATH_DELIMITER )
+        {
+            result.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
+        }
+
         for( size_t pathComponentIndex = 0; pathComponentIndex < pathComponents.size(); ++pathComponentIndex )
         {
             if( pathComponentIndex > 0 )
