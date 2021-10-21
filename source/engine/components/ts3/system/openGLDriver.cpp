@@ -201,8 +201,6 @@ namespace ts3::system
     OpenGLDisplaySurface::~OpenGLDisplaySurface() noexcept
     {
         resetEventSourceNativeData();
-
-        mGLSystemDriver->onDisplaySurfaceDestroy( *this );
     }
 
     void OpenGLDisplaySurface::swapBuffers()
@@ -296,7 +294,6 @@ namespace ts3::system
 
     OpenGLRenderContext::~OpenGLRenderContext() noexcept
     {
-        mGLSystemDriver->onRenderContextDestroy( *this );
     }
 
     void OpenGLRenderContext::bindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface )

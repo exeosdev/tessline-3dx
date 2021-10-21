@@ -52,34 +52,6 @@ namespace ts3::gpuapi
 		return dx11GPUDevice;
 	}
 
-	GPUBufferHandle DX11GPUDevice::createGPUBuffer( const GPUBufferCreateInfo & pCreateInfo )
-	{
-		auto dx11Buffer = DX11GPUBuffer::create( *this, pCreateInfo );
-		ts3DebugAssert( dx11Buffer );
-		return dx11Buffer;
-	}
-
-	SamplerHandle DX11GPUDevice::createSampler( const SamplerCreateInfo & pCreateInfo )
-	{
-		auto dx11Sampler = DX11Sampler::create( *this, pCreateInfo );
-		ts3DebugAssert( dx11Sampler );
-		return dx11Sampler;
-	}
-
-	ShaderHandle DX11GPUDevice::createShader( const ShaderCreateInfo & pCreateInfo )
-	{
-		auto dx11Shader = DX11Shader::create( *this, pCreateInfo );
-		ts3DebugAssert( dx11Shader );
-		return dx11Shader;
-	}
-
-	TextureHandle DX11GPUDevice::createTexture( const TextureCreateInfo & pCreateInfo )
-	{
-		auto dx11Texture = DX11Texture::create( *this, pCreateInfo );
-		ts3DebugAssert( dx11Texture );
-		return dx11Texture;
-	}
-
 	GraphicsPipelineStateObjectHandle DX11GPUDevice::createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
 	{
 		auto graphicsPipelineStateObject = DX11GraphicsPipelineStateObject::create( *this, pCreateInfo );
@@ -119,12 +91,6 @@ namespace ts3::gpuapi
 			releaseDX11CommandSyncData( pCommandSync.syncData );
 			pCommandSync.syncData = nullptr;
 		}
-	}
-
-	void DX11GPUDevice::initializeCommandSystem()
-	{
-		ts3DebugAssert( !_commandSystem );
-		_commandSystem = createGPUAPIObject<DX11CommandSystem>( *this );
 	}
 
 	const DX11BlendStateDescriptor & DX11GPUDevice::getBlendDescriptor( pipeline_state_descriptor_id_t pDescriptorID ) const
@@ -170,6 +136,40 @@ namespace ts3::gpuapi
 	DX11GraphicsPipelineStateDescriptorCache & DX11GPUDevice::getDescriptorCache()
 	{
 		return _descriptorCache;
+	}
+
+	void DX11GPUDevice::initializeCommandSystem()
+	{
+	    ts3DebugAssert( !_commandSystem );
+	    _commandSystem = createGPUAPIObject<DX11CommandSystem>( *this );
+	}
+
+	GPUBufferHandle DX11GPUDevice::_drvCreateGPUBuffer( const GPUBufferCreateInfo & pCreateInfo )
+	{
+	    auto dx11Buffer = DX11GPUBuffer::create( *this, pCreateInfo );
+	    ts3DebugAssert( dx11Buffer );
+	    return dx11Buffer;
+	}
+
+	SamplerHandle DX11GPUDevice::_drvCreateSampler( const SamplerCreateInfo & pCreateInfo )
+	{
+	    auto dx11Sampler = DX11Sampler::create( *this, pCreateInfo );
+	    ts3DebugAssert( dx11Sampler );
+	    return dx11Sampler;
+	}
+
+	ShaderHandle DX11GPUDevice::_drvCreateShader( const ShaderCreateInfo & pCreateInfo )
+	{
+	    auto dx11Shader = DX11Shader::create( *this, pCreateInfo );
+	    ts3DebugAssert( dx11Shader );
+	    return dx11Shader;
+	}
+
+	TextureHandle DX11GPUDevice::_drvCreateTexture( const TextureCreateInfo & pCreateInfo )
+	{
+	    auto dx11Texture = DX11Texture::create( *this, pCreateInfo );
+	    ts3DebugAssert( dx11Texture );
+	    return dx11Texture;
 	}
 
 }

@@ -45,8 +45,8 @@ namespace ts3::gpuapi
 
 		ComPtr<IDXGIFactory2> queryDXGIFactoryForD3D11Device( const ComPtr<ID3D11Device1> & pD3D11Device1 );
 
-		ComPtr<IDXGISwapChain1> createD3D11SwapChainForExfWindow( DX11GPUDevice & pDX11GPUDevice,
-		                                                          void * pExfSysWindow /* It must be an system::Window */ );
+		ComPtr<IDXGISwapChain1> createD3D11SwapChainForSystemWindow( DX11GPUDevice & pDX11GPUDevice,
+		                                                          void * pSysWindow /* It must be a ts3::system::Window */ );
 
 		UINT translateDX11GPUDeviceCreateFlags( Bitmask<GPUDriverConfigFlags> pDriverConfigFlags );
 

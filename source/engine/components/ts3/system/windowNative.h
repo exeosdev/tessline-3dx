@@ -16,26 +16,7 @@
 namespace ts3::system
 {
 
-    class EventController;
 
-    enum EWindowStateFlags : uint32
-    {
-        E_WINDOW_STATE_FLAG_FULLSCREEN_BIT = 0x8000
-    };
-
-    struct WindowManager::ObjectInternalData
-    {
-        WindowManagerNativeData nativeDataPriv;
-    };
-
-    struct Window::ObjectInternalData
-    {
-        WindowNativeData nativeDataPriv;
-        Bitmask<EWindowStateFlags> stateFlags = 0;
-        WindowSize preFullscreenSavedSize;
-    };
-
-    TS3_SYSTEM_API void nativeBindEventSource( EventController & pEventController, Window & pWindow );
 
 } // namespace ts3::system
 

@@ -5,6 +5,7 @@
 #define __TS3_GPUAPI_GPU_DRIVER_API_H__
 
 #include "prerequisites.h"
+#include <functional>
 
 namespace ts3::gpuapi
 {

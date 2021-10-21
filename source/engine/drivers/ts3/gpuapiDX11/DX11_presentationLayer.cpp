@@ -8,7 +8,9 @@
 namespace ts3::gpuapi
 {
 
-	DX11ScreenPresentationLayer::DX11ScreenPresentationLayer( DX11GPUDevice & pDevice, SysWindowHandle pSysWindow, ComPtr<IDXGISwapChain1> pDXGISwapChain1 )
+	DX11ScreenPresentationLayer::DX11ScreenPresentationLayer( DX11GPUDevice & pDevice,
+                                                              system::WindowHandle pSysWindow,
+                                                              ComPtr<IDXGISwapChain1> pDXGISwapChain1 )
 	: DXScreenPresentationLayer( pDevice, pSysWindow, std::move( pDXGISwapChain1 ) )
 	, mD3D11Device1( pDevice.mD3D11Device1 )
 	{}
@@ -20,7 +22,7 @@ namespace ts3::gpuapi
 		auto sysWindow = createSysWindow( pDevice, pCreateInfo );
 		ts3DebugAssert( sysWindow );
 
-		auto dxgiSwapChain = DX11CoreAPIProxy::createD3D11SwapChainForExfWindow( pDevice, sysWindow.get() );
+		auto dxgiSwapChain = DX11CoreAPIProxy::createD3D11SwapChainForSystemWindow( pDevice, sysWindow.get() );
 		ts3DebugAssert( dxgiSwapChain );
 
 		auto presentationLayer = createGPUAPIObject<DX11ScreenPresentationLayer>( pDevice, sysWindow, std::move( dxgiSwapChain ) );

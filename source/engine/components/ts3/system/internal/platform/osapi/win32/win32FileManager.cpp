@@ -31,8 +31,8 @@ namespace ts3::system
 
     FileHandle Win32FileManager::_nativeOpenFile( std::string pFilePath, EFileOpenMode pOpenMode )
     {
-        const auto fileAccess = platform::win32TranslateFileOpenModeToWin32Access( pOpenMode );
-        const auto creationDisposition = platform::win32TranslateFileOpenModeToWin32CreationDisposition( pOpenMode );
+        const auto fileAccess = platform::_win32TranslateFileOpenModeToWin32Access( pOpenMode );
+        const auto creationDisposition = platform::_win32TranslateFileOpenModeToWin32CreationDisposition( pOpenMode );
 
         auto fileHandle = platform::_win32OpenFileGeneric( pFilePath.c_str(), fileAccess, creationDisposition, FILE_ATTRIBUTE_NORMAL );
         auto fileObject = createSysObject<Win32File>( getHandle<Win32FileManager>() );
@@ -178,7 +178,7 @@ namespace ts3::system
         LARGE_INTEGER u64FileOffset;
         u64FileOffset.QuadPart = static_cast<decltype( u64FileOffset.QuadPart )>( pOffset );
 
-        auto win32FPMoveMode = platform::win32TranslateFilePointerRefPos( pRefPos );
+        auto win32FPMoveMode = platform::_win32TranslateFilePointerRefPos( pRefPos );
 
         u64FileOffset.LowPart = ::SetFilePointer( mNativeData.fileHandle,
                                                   u64FileOffset.LowPart,

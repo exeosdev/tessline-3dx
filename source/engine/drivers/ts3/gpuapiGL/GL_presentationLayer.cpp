@@ -7,7 +7,7 @@ namespace ts3::gpuapi
 {
 
 	static system::OpenGLDisplaySurfaceHandle createSysGLSurface( system::OpenGLSystemDriverHandle pSysGLDriver,
-                                                              const GLPresentationLayerCreateInfo & pPLCreateInfo )
+                                                                  const GLPresentationLayerCreateInfo & pPLCreateInfo )
 	{
 		try
 		{

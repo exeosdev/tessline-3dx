@@ -60,7 +60,10 @@ namespace ts3::gpuapi
 			ts3DebugInterrupt();
 		}
 
-		glMapBufferRange( bufferBindTarget, pOffset, pLength, pFlags );
+		glMapBufferRange( bufferBindTarget,
+                          trunc_numeric_cast<GLintptr>( pOffset ),
+                          trunc_numeric_cast<GLsizeiptr>( pLength ),
+                          pFlags );
 		ts3GLHandleLastError();
 
 		return queryIsMapped();
@@ -98,7 +101,9 @@ namespace ts3::gpuapi
 
 		ts3DebugAssert( mapPointer );
 
-		glFlushMappedBufferRange( bufferBindTarget, pOffset, pLength );
+		glFlushMappedBufferRange( bufferBindTarget,
+                                  trunc_numeric_cast<GLintptr>( pOffset ),
+                                  trunc_numeric_cast<GLsizeiptr>( pLength ) );
 		ts3GLHandleLastError();
 	}
 
@@ -110,7 +115,9 @@ namespace ts3::gpuapi
 		glBufferSubData( bufferBindTarget, pOffset, pLength, nullptr );
 		ts3GLHandleLastError();
 	#else
-		glInvalidateBufferSubData( mGLHandle, pOffset, pLength );
+		glInvalidateBufferSubData( mGLHandle,
+                                   trunc_numeric_cast<GLintptr>( pOffset ),
+                                   trunc_numeric_cast<GLsizeiptr>( pLength ) );
 		ts3GLHandleLastError();
 	#endif
 	}
@@ -128,7 +135,7 @@ namespace ts3::gpuapi
 			glGetBufferParameteriv( bufferBindTarget, GL_BUFFER_USAGE, &bufferUsage );
 			ts3GLHandleLastError();
 
-			glBufferData( bufferBindTarget, mSize, nullptr, bufferUsage );
+			glBufferData( bufferBindTarget, trunc_numeric_cast<GLsizeiptr>( mSize ), nullptr, bufferUsage );
 			ts3GLHandleLastError();
 		#else
 			glInvalidateBufferData( mGLHandle );
@@ -141,9 +148,9 @@ namespace ts3::gpuapi
 
 		glCopyBufferSubData( GL_COPY_READ_BUFFER,
 		                     bufferBindTarget,
-		                     pCopyDesc.sourceBufferRegion.offset,
-		                     pCopyDesc.targetBufferOffset,
-		                     pCopyDesc.sourceBufferRegion.size );
+		                     trunc_numeric_cast<GLintptr>( pCopyDesc.sourceBufferRegion.offset ),
+		                     trunc_numeric_cast<GLintptr>( pCopyDesc.targetBufferOffset ),
+		                     trunc_numeric_cast<GLsizeiptr>( pCopyDesc.sourceBufferRegion.size ) );
 		ts3GLHandleLastError();
 	}
 
@@ -167,8 +174,8 @@ namespace ts3::gpuapi
 		}
 
 		glBufferSubData( bufferBindTarget,
-		                 pUploadDesc.bufferRegion.offset,
-		                 pUploadDesc.bufferRegion.size,
+                         trunc_numeric_cast<GLintptr>( pUploadDesc.bufferRegion.offset ),
+                         trunc_numeric_cast<GLsizeiptr>( pUploadDesc.bufferRegion.size ),
 		                 pUploadDesc.inputDataDesc.pointer );
 		ts3GLHandleLastError();
 	}
@@ -233,17 +240,26 @@ namespace ts3::gpuapi
 		const void * initDataPtr = copyDataOnInit ? pGLCreateInfo.initDataDesc.pointer : nullptr;
 
 	#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
-		glBufferData( pGLCreateInfo.bindTarget, pGLCreateInfo.size, initDataPtr, pGLCreateInfo.initFlags );
+		glBufferData( pGLCreateInfo.bindTarget,
+                      trunc_numeric_cast<GLsizeiptr>( pGLCreateInfo.size ),
+                      initDataPtr,
+                      pGLCreateInfo.initFlags );
 		ts3GLHandleLastError();
 	#else
-		glBufferStorage( pGLCreateInfo.bindTarget, pGLCreateInfo.size, initDataPtr, pGLCreateInfo.initFlags );
+		glBufferStorage( pGLCreateInfo.bindTarget,
+                         trunc_numeric_cast<GLsizeiptr>( pGLCreateInfo.size ),
+                         initDataPtr,
+                         pGLCreateInfo.initFlags );
 		ts3GLHandleLastError();
 	#endif
 
 		if( !copyDataOnInit && nonEmptyInitData )
 		{
 			auto initDataSize = getMinOf( pGLCreateInfo.size, pGLCreateInfo.initDataDesc.size );
-			glBufferSubData( pGLCreateInfo.bindTarget, 0, initDataSize, pGLCreateInfo.initDataDesc.pointer );
+			glBufferSubData( pGLCreateInfo.bindTarget,
+                             0,
+                             trunc_numeric_cast<GLsizeiptr>( initDataSize ),
+                             pGLCreateInfo.initDataDesc.pointer );
 			ts3GLHandleLastError();
 		}
 

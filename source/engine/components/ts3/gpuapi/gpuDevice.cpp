@@ -27,6 +27,26 @@ namespace ts3::gpuapi
 
 	GPUDevice::~GPUDevice() = default;
 
+	GPUBufferHandle GPUDevice::createGPUBuffer( const GPUBufferCreateInfo & pCreateInfo )
+	{
+	    return _drvCreateGPUBuffer( pCreateInfo );
+	}
+
+	SamplerHandle GPUDevice::createSampler( const SamplerCreateInfo & pCreateInfo )
+	{
+	    return _drvCreateSampler( pCreateInfo );
+	}
+
+	ShaderHandle GPUDevice::createShader( const ShaderCreateInfo & pCreateInfo )
+	{
+	    return _drvCreateShader( pCreateInfo );
+	}
+
+	TextureHandle GPUDevice::createTexture( const TextureCreateInfo & pCreateInfo )
+	{
+	    return _drvCreateTexture( pCreateInfo );
+	}
+
 	const math::RGBAColorU8 & GPUDevice::getDefaultClearColor() const
 	{
 		switch( mGPUDriverID )
@@ -65,7 +85,7 @@ namespace ts3::gpuapi
 
 	void GPUDevice::setPresentationLayer( PresentationLayerHandle pPresentationLayer )
 	{
-		if( !onSetPresentationLayer( pPresentationLayer ) )
+		if( !_onSetPresentationLayer( pPresentationLayer ) )
 		{
 			return;
 		}
@@ -87,7 +107,7 @@ namespace ts3::gpuapi
 		return _internalStateFlags.isSet( E_INTERNAL_STATE_FLAG_DEBUG_DEVICE_BIT );
 	}
 
-	bool GPUDevice::onSetPresentationLayer( PresentationLayerHandle pPresentationLayer )
+	bool GPUDevice::_onSetPresentationLayer( PresentationLayerHandle pPresentationLayer )
 	{
 		return true;
 	}

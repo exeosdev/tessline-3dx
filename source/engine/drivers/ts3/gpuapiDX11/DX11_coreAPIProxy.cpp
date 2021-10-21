@@ -5,7 +5,7 @@
 #include <ts3/gpuapi/resources/samplerCommon.h>
 #include <ts3/gpuapi/resources/shaderCommon.h>
 #include <ts3/gpuapi/resources/textureCommon.h>
-#include <ts3/system/windowSystem.h>
+#include <ts3/system/windowNative.h>
 #include <ts3/stdext/mapUtils.h>
 
 namespace ts3::gpuapi
@@ -146,9 +146,9 @@ namespace ts3::gpuapi
 		return dxgiFactory2;
 	}
 
-	ComPtr<IDXGISwapChain1> DX11CoreAPIProxy::createD3D11SwapChainForExfWindow( DX11GPUDevice & pDX11GPUDevice, void * pSysWindow )
+	ComPtr<IDXGISwapChain1> DX11CoreAPIProxy::createD3D11SwapChainForSystemWindow( DX11GPUDevice & pDX11GPUDevice, void * pSysWindow )
 	{
-		auto * sysWindowPtr = static_cast<SysWindow *>( pSysWindow );
+	    auto * sysWindowPtr = static_cast<system::Window *>( pSysWindow )->queryInterface<system::Win32Window>();
 		auto presentationLayerSize = sysWindowPtr->getClientAreaSize();
 
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc;

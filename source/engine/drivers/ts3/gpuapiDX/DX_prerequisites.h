@@ -4,7 +4,7 @@
 #ifndef __TS3DRIVER_GPUAPI_DXCOMMON_PREREQUISITES_H__
 #define __TS3DRIVER_GPUAPI_DXCOMMON_PREREQUISITES_H__
 
-#include <ts3/gpuapi/memory/commonMemoryDefs.h>
+#include <ts3/gpuapi/memory/commonGPUMemoryDefs.h>
 
 #include <dxgi.h>
 #include <dxgi1_2.h>

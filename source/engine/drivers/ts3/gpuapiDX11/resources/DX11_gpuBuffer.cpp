@@ -93,7 +93,7 @@ namespace ts3::gpuapi
 		return dx11Buffer;
 	}
 
-	bool DX11GPUBuffer::mapRegion( void * pCommandObject, const MemoryRegion & pRegion, EGPUMemoryMapMode pMapMode )
+	bool DX11GPUBuffer::mapRegion( void * pCommandObject, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode )
 	{
 		auto * d3d11DeviceContext1 = getD3D11DeviceContext( pCommandObject );
 
@@ -129,7 +129,7 @@ namespace ts3::gpuapi
 		resetMappedMemory();
 	}
 
-	void DX11GPUBuffer::flushMappedRegion( void * pCommandObject, const MemoryRegion & pRegion )
+	void DX11GPUBuffer::flushMappedRegion( void * pCommandObject, const GPUMemoryRegion & pRegion )
 	{
 		auto * d3d11DeviceContext1 = getD3D11DeviceContext( pCommandObject );
 
@@ -142,7 +142,7 @@ namespace ts3::gpuapi
 		}
 	}
 
-	void DX11GPUBuffer::invalidateRegion( void * pCommandObject, const MemoryRegion & pRegion )
+	void DX11GPUBuffer::invalidateRegion( void * pCommandObject, const GPUMemoryRegion & pRegion )
 	{
 		if( pRegion.size == mBufferProperties.byteSize )
 		{
@@ -204,7 +204,7 @@ namespace ts3::gpuapi
         }
 	}
 
-	bool DX11GPUBuffer::validateMapRequest( const MemoryRegion & pRegion, const EGPUMemoryMapMode & pMapMode )
+	bool DX11GPUBuffer::validateMapRequest( const GPUMemoryRegion & pRegion, const EGPUMemoryMapMode & pMapMode )
 	{
 		return GPUBuffer::validateMapRequest( pRegion, pMapMode );
 	}

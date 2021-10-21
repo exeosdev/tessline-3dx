@@ -11,8 +11,8 @@ namespace ts3::gpuapi
 
 	enum EGPUDeviceFeatureFlags : uint32
 	{
-		E_GRAPHICS_DEVICE_FEATURE_FLAG_MULTITHREADED_COMMAND_EXECUTION_BIT = 0x1,
-		E_GRAPHICS_DEVICE_FEATURE_FLAG_MULTITHREADED_RESOURCE_CREATION_BIT = 0x2,
+		E_GRAPHICS_DEVICE_FEATURE_FLAG_MULTI_THREADED_COMMAND_EXECUTION_BIT = 0x1,
+		E_GRAPHICS_DEVICE_FEATURE_FLAG_MULTI_THREADED_RESOURCE_CREATION_BIT = 0x2,
 		E_GRAPHICS_DEVICE_FEATURE_FLAG_RESOURCE_GPU_MEMORY_SPARSE_BINDING_BIT  = 0x4,
 		E_GRAPHICS_DEVICE_FEATURE_FLAG_SHADER_GEOMETRY_STAGE_BIT           = 0x10,
 		E_GRAPHICS_DEVICE_FEATURE_FLAG_SHADER_TESSELATION_STAGE_BIT        = 0x20,
@@ -22,8 +22,8 @@ namespace ts3::gpuapi
 
 	enum class EGraphicsCapFeatureID : std::underlying_type_t<EGPUDeviceFeatureFlags>
 	{
-		MultithreadedCommandExecution,
-		MultithreadedResourceCeation,
+		MultiThreadedCommandExecution,
+		MultiThreadedResourceCreation,
 		ResourceMemorySparseBinding,
 		ShaderGeometryStage,
 		ShaderTesselationStage,

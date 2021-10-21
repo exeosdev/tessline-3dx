@@ -14,7 +14,8 @@ namespace ts3::gpuapi
 
 	struct PresentationLayerCreateInfo
 	{
-		system::DisplayManagerHandle sysDisplayManager = nullptr;
+	    system::SysContextHandle sysContext = nullptr;
+	    system::DisplayManagerHandle sysDisplayManager = nullptr;
 		system::WindowManagerHandle sysWindowManager = nullptr;
 		system::VisualConfig visualConfig = system::vsxGetDefaultVisualConfigForSysWindow();
 		ScreenRect screenRect;

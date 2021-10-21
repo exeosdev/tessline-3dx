@@ -22,7 +22,9 @@ namespace ts3::gpuapi
 	public:
 		ComPtr<ID3D11Device1> const mD3D11Device1 = nullptr;
 
-		DX11ScreenPresentationLayer( DX11GPUDevice & pDevice, SysWindowHandle pSysWindow, ComPtr<IDXGISwapChain1> pDXGISwapChain );
+		DX11ScreenPresentationLayer( DX11GPUDevice & pDevice,
+                                     system::WindowHandle pSysWindow,
+                                     ComPtr<IDXGISwapChain1> pDXGISwapChain );
 		virtual ~DX11ScreenPresentationLayer();
 
 		virtual void bindRenderTarget( CommandContext * pCmdContext ) override;

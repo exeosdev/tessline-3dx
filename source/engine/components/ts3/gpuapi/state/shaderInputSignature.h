@@ -199,7 +199,7 @@ namespace ts3::gpuapi
 		ShaderInputSignature() = default;
 
 		ShaderInputSignature( const tag_init_empty_t & )
-				: dwordSize( 0 )
+        : dwordSize( 0 )
 		{}
 
 		explicit operator bool() const
