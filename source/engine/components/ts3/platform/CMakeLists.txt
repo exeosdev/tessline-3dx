@@ -19,13 +19,15 @@ set( TS3_PLATFORM_SRC_FILES
 		"_internal/environment/os/osx.h"
 		"_internal/environment/os/windesktop.h"
 		"_internal/environment/os/winuwp.h"
-		
+
+		"platform.h"
+		"platform.cpp"
 		"debug.h"
 		"debug.cpp"
 		"fileLocationInfo.h"
 		"fileLocationInfo.cpp"
-		"platform.h"
-		"platform.cpp"
+		"syncCommon.h"
+		"syncCommon.cpp"
 		)
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Android" )

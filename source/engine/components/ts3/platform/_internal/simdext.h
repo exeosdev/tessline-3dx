@@ -19,6 +19,24 @@
 #  pragma GCC diagnostic ignored "-Wpsabi"
 #endif
 
+#if( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_NEON )
+// A replacement of Intel's _mm_pause() for NEON. Pauses the processor.
+// Note, that we deliberately chose 'isb' over 'yield' instruction, as the latter
+// is usually a no-op on most ARM core. The former is a good approximation, though.
+inline void _mm_pause()
+{
+    __asm__ __volatile__( "isb\n" );
+}
+
+// A replacement of Intel's _mm_sfence() for NEON. Ensures, that all stores executed before this fence
+// are globally visible after this fence is executed. Prevents from compiler-level re-ordering and emits
+// an appropriate CPU barrier if necessary.
+inline void _mm_sfence()
+{
+    __sync_synchronize();
+}
+#endif
+
 #if( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_SSE )
 // Computes dot product of two 4-component vectors of single-precision floating point numbers.
 inline __m128 _mm128f_dp_ps0( const __m128 & m1, const __m128 & m2 )

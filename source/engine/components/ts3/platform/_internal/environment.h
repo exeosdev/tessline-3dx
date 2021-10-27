@@ -539,6 +539,14 @@
 #  include <intrin.h>
 #endif
 
+#if( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_NEON )
+#  define TS3_PCL_EIS_SUPPORT_HAS_MM_PAUSE 1
+#endif
+
+#if( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_SSE )
+#  define TS3_PCL_EIS_SUPPORT_HAS_MM_PAUSE 1
+#endif
+
 #if ( TS3_PCL_TARGET_ARCHITECTURE == TS3_PCL_TARGET_ARCHITECTURE_X86 )
 #  include "environment/arch/x86.h"
 #elif ( TS3_PCL_TARGET_ARCHITECTURE == TS3_PCL_TARGET_ARCHITECTURE_X86_64 )
@@ -593,8 +601,8 @@
 #  define TS3_PCL_FILL_MEMORY( memPtr, size, value ) memset( (memPtr), (value), (size) )
 #endif
 
-#if !defined( TS3_PCL_MOVE_GPU_MEMORY )
-#  define TS3_PCL_MOVE_GPU_MEMORY( destPtr, srcPtr, size ) memmove( (destPtr), (srcPtr), (size) )
+#if !defined( TS3_PCL_MOVE_MEMORY )
+#  define TS3_PCL_MOVE_MEMORY( destPtr, srcPtr, size ) memmove( (destPtr), (srcPtr), (size) )
 #endif
 
 #if !defined( TS3_PCL_ZERO_MEMORY )

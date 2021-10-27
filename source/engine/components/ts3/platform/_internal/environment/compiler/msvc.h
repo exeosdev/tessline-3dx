@@ -47,7 +47,7 @@
 
 #define TS3_PCL_COPY_MEMORY( destPtr, srcPtr, size ) CopyMemory( (destPtr), (srcPtr), (size) )
 #define TS3_PCL_FILL_MEMORY( memPtr, size, value )   FillMemory( (memPtr), (size), (value) )
-#define TS3_PCL_MOVE_GPU_MEMORY( destPtr, srcPtr, size ) MoveMemory( (destPtr), (srcPtr), (size) )
+#define TS3_PCL_MOVE_MEMORY( destPtr, srcPtr, size ) MoveMemory( (destPtr), (srcPtr), (size) )
 #define TS3_PCL_ZERO_MEMORY( memPtr, size )          ZeroMemory( (memPtr), (size) )
 
 #if(  TS3_PCL_FEATURE_INTRINSICS )
