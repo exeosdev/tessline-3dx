@@ -7,7 +7,9 @@
 #include "GL_pipelineStateDesc.h"
 #include <ts3/gpuapi/state/renderTargetStateObject.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3GLDeclareOpenGLObjectHandle( GLFramebufferObject );
@@ -30,6 +32,7 @@ namespace ts3::gpuapi
 		                                                 const RenderTargetStateObjectCreateInfo & pCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_RENDER_TARGET_STATE_OBJECT_H__

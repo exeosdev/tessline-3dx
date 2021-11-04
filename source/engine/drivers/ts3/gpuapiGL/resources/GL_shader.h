@@ -9,7 +9,9 @@
 #include "../objects/GL_shaderProgramObject.h"
 #include <ts3/gpuapi/resources/shader.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( GLShader );
@@ -29,6 +31,7 @@ namespace ts3::gpuapi
 		static GLShaderHandle createSeparableStage( GLGPUDevice & pGLGPUDevice, const ShaderCreateInfo & pCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_SHADER_INTERFACE_H__

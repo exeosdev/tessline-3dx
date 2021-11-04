@@ -8,7 +8,9 @@
 #include <ts3/gpuapiDX/DX_gpuDriver.h>
 
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	struct DX12GPUDriverCreateInfo : public GPUDriverCreateInfo
@@ -28,6 +30,7 @@ namespace ts3::gpuapi
 		static DX12GPUDriverHandle create( const DX12GPUDriverCreateInfo & pCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DX12_GPU_DRIVER__

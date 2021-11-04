@@ -7,7 +7,9 @@
 #include "commonGPUStateDefs.h"
 #include "../resources/shaderCommon.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	struct GraphicsShaderBindingDesc
@@ -66,6 +68,7 @@ namespace ts3::gpuapi
 
 	TS3_GPUAPI_API GraphicsShaderBinding createGraphicsShaderBinding( const GraphicsShaderBindingDesc & pBindingDesc );
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_SHADER_BINDING_H__

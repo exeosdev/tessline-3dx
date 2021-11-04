@@ -8,7 +8,9 @@
 #include <ts3/gpuapiGL/GL_gpuDevice.h>
 #include <ts3/gpuapiGL/state/GL_pipelineStateObject.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	struct GLES3GPUDeviceCreateInfo : public GPUDeviceCreateInfo
@@ -24,6 +26,7 @@ namespace ts3::gpuapi
 		static GLES3GPUDeviceHandle create( GLES3GPUDriver & pDriver, const GLES3GPUDeviceCreateInfo & pCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DEVICE_GRAPHICS_GLES3_GRAPHICS_DEVICE_H__

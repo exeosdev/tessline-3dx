@@ -2,7 +2,9 @@
 #include "pipelineStateObject.h"
 #include <ts3/gpuapi/state/renderTargetCommon.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	PipelineStateObject::PipelineStateObject( GPUDevice & pGPUDevice )
@@ -80,4 +82,5 @@ namespace ts3::gpuapi
 
 	SeparableGraphicsPipelineStateObject::~SeparableGraphicsPipelineStateObject() = default;
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

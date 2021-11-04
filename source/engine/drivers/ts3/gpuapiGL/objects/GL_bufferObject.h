@@ -7,7 +7,9 @@
 #include "../GL_prerequisites.h"
 #include <ts3/gpuapi/resources/gpuBufferCommon.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3GLDeclareOpenGLObjectHandle( GLBufferObject );
@@ -62,6 +64,7 @@ namespace ts3::gpuapi
 		GLenum checkActiveBindTarget( GLenum pBindTarget ) const;
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_BUFFER_OBJECT_H__

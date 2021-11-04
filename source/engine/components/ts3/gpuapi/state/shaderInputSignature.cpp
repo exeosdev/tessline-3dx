@@ -2,7 +2,9 @@
 #include "shaderInputSignature.h"
 #include "../resources/shader.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	struct InputConstantLayoutInfo
@@ -286,4 +288,5 @@ namespace ts3::gpuapi
 		return ( dwordSizeMod == 0 ) ? trunc_numeric_cast<uint32>( dwordSize ) : trunc_numeric_cast<uint32>( dwordSize + 1 );
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

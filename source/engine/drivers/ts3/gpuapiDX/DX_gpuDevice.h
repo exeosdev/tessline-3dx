@@ -7,7 +7,9 @@
 #include "DX_prerequisites.h"
 #include <ts3/gpuapi/gpuDevice.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	class DXGPUDevice : public GPUDevice
@@ -21,6 +23,7 @@ namespace ts3::gpuapi
 		virtual ~DXGPUDevice();
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DXCOMMON_GPU_DEVICE_H__

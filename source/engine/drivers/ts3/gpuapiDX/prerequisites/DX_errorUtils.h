@@ -6,7 +6,9 @@
 
 #include <ts3/core/exception.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	class HresultErrorException : public ts3::ExternalException
@@ -19,6 +21,7 @@ namespace ts3::gpuapi
 		{}
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DXCOMMON_ERROR_UTILS_H__

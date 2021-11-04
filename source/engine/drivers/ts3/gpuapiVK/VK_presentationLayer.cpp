@@ -4,7 +4,9 @@
 #include <ts3/gpuapiVK/VK_commandList.h>
 #include <ts3/gpuapiVK/VK_commandSystem.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	VKPresentationLayer::VKPresentationLayer( GPUDevice & pDevice )
@@ -45,4 +47,5 @@ namespace ts3::gpuapi
 		return {};
 	}
 	
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

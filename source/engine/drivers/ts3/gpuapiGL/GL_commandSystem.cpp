@@ -4,7 +4,9 @@
 #include "GL_gpuDevice.h"
 #include <ts3/gpuapi/commandContext.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GLCommandSystem::GLCommandSystem( GLGPUDevice & pGLGPUDevice )
@@ -157,4 +159,5 @@ namespace ts3::gpuapi
 		}
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

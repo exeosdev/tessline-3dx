@@ -1,7 +1,9 @@
 
 #include "shader.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	Shader::Shader( GPUDevice & pGPUDevice, EShaderType pShaderType )
@@ -18,4 +20,5 @@ namespace ts3::gpuapi
 
 	Shader::~Shader() = default;
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

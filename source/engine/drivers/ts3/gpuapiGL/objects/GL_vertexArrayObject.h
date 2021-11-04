@@ -6,7 +6,9 @@
 
 #include "../GL_prerequisites.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3GLDeclareOpenGLObjectHandle( GLVertexArrayObject );
@@ -23,6 +25,7 @@ namespace ts3::gpuapi
 		static GLVertexArrayObjectHandle create();
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_VERTEX_ARRAY_OBJECT_H__

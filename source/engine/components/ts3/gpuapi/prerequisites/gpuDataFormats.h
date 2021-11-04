@@ -4,7 +4,9 @@
 #ifndef __TS3_GPUAPI_GPU_DATA_FORMATS_H__
 #define __TS3_GPUAPI_GPU_DATA_FORMATS_H__
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	using base_data_type_value_t = uint8;
@@ -240,6 +242,7 @@ namespace ts3::gpuapi
 		return ecGetBaseDataTypeByteSize( ecGetVertexAttribFormatBaseDataType( pFormat ) ) * ecGetVertexAttribFormatLength( pFormat );
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_GPU_DATA_FORMATS_H__

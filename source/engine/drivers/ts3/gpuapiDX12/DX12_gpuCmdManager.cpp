@@ -4,7 +4,9 @@
 #include "DX12_gpuDevice.h"
 #include "DX12_coreAPIProxy.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	DX12GPUCmdManager::DX12GPUCmdManager( DX12GPUDevice & pGPUDevice )
@@ -154,4 +156,5 @@ namespace ts3::gpuapi
 		return cmdContextPtr;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

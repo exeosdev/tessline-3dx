@@ -7,7 +7,9 @@
 #include "gpuStateObject.h"
 #include "vertexDataSourceDesc.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( VertexStreamStateObject );
@@ -44,6 +46,7 @@ namespace ts3::gpuapi
 		static CommonVertexStreamStateObjectHandle create( GPUDevice & pGPUDevice, const VertexStreamStateObjectCreateInfo & pCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_VERTEX_STREAM_STATE_OBJECT_H__

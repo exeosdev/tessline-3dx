@@ -1,7 +1,9 @@
 
 #include "sampler.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	Sampler::Sampler( GPUDevice & pGPUDevice, const SamplerDesc & pSamplerDesc )
@@ -11,4 +13,5 @@ namespace ts3::gpuapi
 
 	Sampler::~Sampler() = default;
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

@@ -6,7 +6,9 @@
 
 #include "../prerequisites.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( Shader );
@@ -166,6 +168,7 @@ namespace ts3::gpuapi
 		return getGraphicsShaderStageFlag( static_cast<uint32>( pShaderType ) );
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_SHADER_COMMON_H__

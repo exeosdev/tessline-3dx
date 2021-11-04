@@ -6,7 +6,9 @@
 
 #include "../GL_prerequisites.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3GLDeclareOpenGLObjectHandle( GLSamplerObject );
@@ -39,6 +41,7 @@ namespace ts3::gpuapi
 		static GLSamplerObjectHandle create( const GLSamplerState & pSamplerState );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_SAMPLER_OBJECT_H__

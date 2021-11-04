@@ -1,7 +1,9 @@
 
 #include "vertexDataSourceDesc.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	VertexDataSourceBinding createVertexDataSourceBinding( const VertexDataSourceBindingDesc & pBindingDesc )
@@ -87,4 +89,5 @@ namespace ts3::gpuapi
 		return dataSourceBinding;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

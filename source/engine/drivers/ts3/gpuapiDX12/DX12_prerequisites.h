@@ -31,7 +31,9 @@
 
 #include "prerequisites/DX12_coreDefs.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( DX12CommandContext );
@@ -40,6 +42,7 @@ namespace ts3::gpuapi
 	ts3DeclareClassHandle( DX12GPUDriver );
 	ts3DeclareClassHandle( DX12PresentationLayer );
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DX12_PREREQUISITES_H__

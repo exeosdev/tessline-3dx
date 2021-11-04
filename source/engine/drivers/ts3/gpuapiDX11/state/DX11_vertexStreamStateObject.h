@@ -8,7 +8,9 @@
 #include "../state/DX11_pipelineStateDesc.h"
 #include <ts3/gpuapi/state/vertexStreamStateObject.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	class DX11VertexStreamStateObject : public VertexStreamStateObject
@@ -24,6 +26,7 @@ namespace ts3::gpuapi
 		                                                   const VertexStreamStateObjectCreateInfo & pCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DX11_VERTEX_STREAM_STATE_OBJECT_H__

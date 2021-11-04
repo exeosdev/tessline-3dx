@@ -7,7 +7,9 @@
 #include "../GL_prerequisites.h"
 #include <ts3/stdext/memoryBuffer.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3GLDeclareOpenGLObjectHandle( GLShaderObject );
@@ -48,6 +50,7 @@ namespace ts3::gpuapi
 		static GLShaderObjectHandle createWithSource( GLenum pGLEShaderType, const void * pSource, size_t pSourceLength );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_SHADER_OBJECT_H__

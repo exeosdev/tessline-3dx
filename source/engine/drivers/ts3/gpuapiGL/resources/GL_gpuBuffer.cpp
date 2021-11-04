@@ -3,7 +3,9 @@
 #include "../GL_coreAPIProxy.h"
 #include "../GL_gpuDevice.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 #if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
@@ -173,4 +175,5 @@ namespace ts3::gpuapi
 		return true;
 	}
 	
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

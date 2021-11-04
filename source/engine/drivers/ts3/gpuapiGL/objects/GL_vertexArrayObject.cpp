@@ -1,7 +1,9 @@
 
 #include "GL_vertexArrayObject.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GLVertexArrayObject::GLVertexArrayObject( GLuint pHandle )
@@ -38,4 +40,5 @@ namespace ts3::gpuapi
 		return isProgram != GL_FALSE;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

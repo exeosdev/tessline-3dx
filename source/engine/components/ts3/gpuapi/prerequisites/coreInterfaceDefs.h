@@ -4,7 +4,9 @@
 #ifndef __TS3_GPUAPI_CORE_INTERFACE_DEFS_H__
 #define __TS3_GPUAPI_CORE_INTERFACE_DEFS_H__
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	class GPUDriver;
@@ -39,6 +41,7 @@ namespace ts3::gpuapi
 		return createDynamicInterfaceObject<TpClass>( std::forward<TpArgs>( pArgs )... );
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_CORE_INTERFACE_DEFS_H__

@@ -4,7 +4,9 @@
 #ifndef __TS3_GPUAPI_COMMON_DEFS_H__
 #define __TS3_GPUAPI_COMMON_DEFS_H__
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	using gpu_resource_id_t = uint64;
@@ -38,6 +40,7 @@ namespace ts3::gpuapi
 		GPU_DRIVER_CONFIG_FLAGS_DEFAULT                         = 0
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_COMMON_DEFS_H__

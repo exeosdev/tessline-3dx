@@ -7,7 +7,9 @@
 #include "VK_prerequisites.h"
 #include <ts3/gpuapi/gpuDriver.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	struct VKGPUDriverCreateInfo : public GPUDriverCreateInfo
@@ -27,6 +29,7 @@ namespace ts3::gpuapi
 		static VKGPUDriverHandle create( const VKGPUDriverCreateInfo & pCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_VKCOMMON_GPU_DRIVER__

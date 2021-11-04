@@ -8,7 +8,9 @@
 #include "../resources/shaderCommon.h"
 #include <unordered_map>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	enum EShaderConstantAccessClass : uint32
@@ -222,6 +224,7 @@ namespace ts3::gpuapi
 
 	TS3_GPUAPI_API ShaderInputSignature createShaderInputSignature( const ShaderInputSignatureDesc & pSignatureDesc );
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_IS_H__

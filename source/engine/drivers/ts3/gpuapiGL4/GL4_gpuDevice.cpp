@@ -4,7 +4,9 @@
 #include "GL4_gpuCmdCore.h"
 #include <ts3/gpuapiGL/GL_presentationLayer.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GL4GPUDevice::GL4GPUDevice( GL4GPUDriver & pDriver )
@@ -28,4 +30,5 @@ namespace ts3::gpuapi
 		return gl4GPUDevice;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

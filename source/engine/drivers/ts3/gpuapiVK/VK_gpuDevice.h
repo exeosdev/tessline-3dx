@@ -7,7 +7,9 @@
 #include "VK_prerequisites.h"
 #include <ts3/gpuapi/gpuDevice.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	struct VKGPUDeviceCreateInfo : public GPUDeviceCreateInfo
@@ -30,6 +32,7 @@ namespace ts3::gpuapi
 
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_VKCOMMON_GPU_DEVICE_H__

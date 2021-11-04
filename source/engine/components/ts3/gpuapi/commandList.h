@@ -8,7 +8,9 @@
 #include "resources/gpuBufferCommon.h"
 #include "resources/samplerCommon.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	class TS3_GPUAPI_CLASS CommandList : public GPUDeviceChildObject
@@ -79,6 +81,7 @@ namespace ts3::gpuapi
 		std::atomic<ListStatus> _listStatusFlag = ATOMIC_VAR_INIT( ListStatus::Available );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_COMMAND_LIST_H__

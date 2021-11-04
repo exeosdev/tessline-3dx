@@ -6,7 +6,9 @@
 
 #include "../GL_prerequisites.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3GLDeclareOpenGLObjectHandle( GLShaderPipelineObject );
@@ -32,6 +34,7 @@ namespace ts3::gpuapi
 		static GLShaderPipelineObjectHandle create();
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_SHADER_PIPELINE_OBJECT_H__

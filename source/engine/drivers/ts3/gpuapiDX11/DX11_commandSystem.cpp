@@ -4,7 +4,9 @@
 #include "DX11_gpuDevice.h"
 #include <ts3/gpuapi/commandContext.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	DX11CommandSystem::DX11CommandSystem( DX11GPUDevice & pDX11GPUDevice )
@@ -127,4 +129,5 @@ namespace ts3::gpuapi
 		}
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

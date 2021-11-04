@@ -7,7 +7,9 @@
 #include "DX11_prerequisites.h"
 #include <ts3/gpuapiDX/DX_gpuDriver.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	struct DX11GPUDriverCreateInfo : public GPUDriverCreateInfo
@@ -29,6 +31,7 @@ namespace ts3::gpuapi
 		static DX11GPUDriverHandle create( const DX11GPUDriverCreateInfo & pCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DX11_GPU_DRIVER__

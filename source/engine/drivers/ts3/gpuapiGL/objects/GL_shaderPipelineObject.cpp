@@ -2,7 +2,9 @@
 #include "GL_shaderPipelineObject.h"
 #include "GL_shaderProgramObject.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GLShaderPipelineObject::GLShaderPipelineObject( GLuint pHandle )
@@ -81,4 +83,5 @@ namespace ts3::gpuapi
 		ts3GLHandleLastError();
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

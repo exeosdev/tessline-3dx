@@ -6,7 +6,9 @@
 
 #include "commonGPUStateDefs.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	class TS3_GPUAPI_CLASS GPUStateObject : public GPUBaseObject
@@ -16,6 +18,7 @@ namespace ts3::gpuapi
 		virtual ~GPUStateObject();
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_GPU_STATE_OBJECT__

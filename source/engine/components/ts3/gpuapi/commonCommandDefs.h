@@ -8,7 +8,9 @@
 #include "state/renderTargetCommon.h"
 #include <atomic>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	class CommandContext;
@@ -166,6 +168,7 @@ namespace ts3::gpuapi
 		}
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_COMMON_COMMAND_DEFS_H__

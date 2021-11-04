@@ -7,7 +7,9 @@
 #include "../GL_prerequisites.h"
 #include <ts3/stdext/memoryBuffer.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3GLDeclareOpenGLObjectHandle( GLShaderObject );
@@ -65,6 +67,7 @@ namespace ts3::gpuapi
 		GLbitfield _linkedShadersStageMask;
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_SHADER_PROGRAM_OBJECT_H__

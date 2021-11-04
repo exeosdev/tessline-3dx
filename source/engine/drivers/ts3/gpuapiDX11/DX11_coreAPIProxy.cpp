@@ -8,7 +8,9 @@
 #include <ts3/system/windowNative.h>
 #include <ts3/stdext/mapUtils.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ComPtr<ID3D11Device1> DX11CoreAPIProxy::createD3D11Device( D3D_DRIVER_TYPE pDeviceType, Bitmask<UINT> pCreateFlags )
@@ -431,4 +433,5 @@ namespace ts3::gpuapi
 		return D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

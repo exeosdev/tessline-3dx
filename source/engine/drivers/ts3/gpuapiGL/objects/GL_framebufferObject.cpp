@@ -3,7 +3,9 @@
 #include "GL_renderbufferObject.h"
 #include "GL_textureObject.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GLFramebufferObject::GLFramebufferObject( GLuint pHandle )
@@ -251,4 +253,5 @@ namespace ts3::gpuapi
 		return pBindTarget;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

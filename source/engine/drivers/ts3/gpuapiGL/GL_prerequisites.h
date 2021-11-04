@@ -94,7 +94,9 @@
 #include "prerequisites/GL_debugOutput.h"
 #include "prerequisites/GL_object.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( GLCommandList );
@@ -109,6 +111,7 @@ namespace ts3::gpuapi
 		system::EGLAPIProfile targetProfile;
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_PREREQUISITES_H__

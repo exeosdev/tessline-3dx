@@ -5,7 +5,9 @@
 #include <ts3/system/windowSystem.h>
 #include <ts3/system/windowNative.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	DXPresentationLayer::DXPresentationLayer( GPUDevice & pDevice )
@@ -94,4 +96,5 @@ namespace ts3::gpuapi
 		return nullptr;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

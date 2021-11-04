@@ -4,7 +4,9 @@
 #include <ts3/gpuapiDX11/DX11_gpuDevice.h>
 #include <ts3/gpuapiDX11/resources/DX11_texture.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	DX11RenderBuffer::DX11RenderBuffer( DX11GPUDevice & pDX11GPUDevice,
@@ -61,4 +63,5 @@ namespace ts3::gpuapi
 		return renderBuffer;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
