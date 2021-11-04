@@ -1,10 +1,8 @@
 
-#ifndef __TS3_STDEXT_SHARED_LOCK_H__
-#define __TS3_STDEXT_SHARED_LOCK_H__
+#ifndef __TS3_PLATFORM_SYNC_COMMON_H__
+#define __TS3_PLATFORM_SYNC_COMMON_H__
 
-#include "prerequisites.h"
-#include <atomic>
-#include <shared_mutex>
+#include "platform.h"
 
 namespace ts3
 {
@@ -26,4 +24,4 @@ namespace ts3
 
 }
 
-#endif /* __TS3_STDEXT_SHARED_LOCK_H__ */
+#endif /* __TS3_PLATFORM_SYNC_COMMON_H__ */

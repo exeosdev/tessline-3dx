@@ -21,7 +21,17 @@ set( TS3_CORE_SRC_FILES
 
 		"graphics/rectAllocator.h"
 		"graphics/rectAllocator.cpp"
-        memory/commonMemoryDefs.h)
+
+        "memory/commonMemoryDefs.h"
+
+		"sync/atomicRWLock.h"
+		"sync/commonSyncDefs.h"
+		"sync/lockable.h"
+		"sync/mutexCommon.h"
+		"sync/mutexLockTypes.h"
+		"sync/spinLock.h"
+		"sync/syncInterface.h"
+		)
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
     add_library( ts3-core STATIC ${TS3_CORE_SRC_FILES} )
