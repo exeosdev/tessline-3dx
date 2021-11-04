@@ -18,7 +18,7 @@ namespace ts3
 			allocationProxy.apiRealloc = []( void * pMemory, size_t pNewSize ) -> void * {
 				return std::realloc( pMemory, pNewSize );
 			};
-			allocationProxy.memoryAlignment = cvDefaultMemoryAlignment;
+			allocationProxy.memoryAlignment = CX_MEMORY_DEFAULT_ALIGNMENT;
 		}
 		catch( ... )
 		{

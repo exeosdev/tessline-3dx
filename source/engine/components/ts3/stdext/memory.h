@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "range.h"
 #include "utilities.h"
 #include <functional>
 
@@ -9,7 +10,7 @@
 namespace ts3
 {
 
-	inline constexpr uint32 cvDefaultMemoryAlignment = TS3_PCL_MEMORY_BASE_ALIGNMENT;
+	inline constexpr uint32 CX_MEMORY_DEFAULT_ALIGNMENT = TS3_PCL_MEMORY_BASE_ALIGNMENT;
 
 	using MemoryAllocCallback = std::function<void *( size_t )>;
 	using MemoryFreeCallback = std::function<void( void * )>;
@@ -21,7 +22,7 @@ namespace ts3
 		MemoryAllocCallback apiAlloc;
 		MemoryFreeCallback apiFree;
 		MemoryReallocCallback apiRealloc;
-		uint32 memoryAlignment = cvDefaultMemoryAlignment;
+		uint32 memoryAlignment = CX_MEMORY_DEFAULT_ALIGNMENT;
 
 	public:
 		explicit operator bool() const
@@ -57,11 +58,18 @@ namespace ts3
 		static constexpr size_t size = 1;
 	};
 
+	template <typename TpSize, typename TpOffset = TpSize>
+    struct AlignedMemoryAllocInfo
+    {
+        Region<TpSize, TpOffset> accessibleRegion;
+        Region<TpSize, TpOffset> reservedRegion;
+    };
+
 	///
-	/// \tparam TpValue
-	/// \param pValue
-	/// \param pAlignment
-	/// \return
+	/// @tparam TpValue
+	/// @param pValue
+	/// @param pAlignment
+	/// @return
 	template <typename TpValue>
 	inline constexpr TpValue getAlignedPowerOf2( TpValue pValue, uint32 pAlignment )
 	{
@@ -69,10 +77,10 @@ namespace ts3
 	}
 
 	///
-	/// \tparam TpValue
-	/// \param pValue
-	/// \param pAlignment
-	/// \return
+	/// @tparam TpValue
+	/// @param pValue
+	/// @param pAlignment
+	/// @return
 	template <typename TpValue>
 	inline TpValue getAlignedValue( TpValue pValue, uint32 pAlignment )
 	{
@@ -80,26 +88,40 @@ namespace ts3
 		return ( valueAlignmentMod != 0 ) ? ( pValue + pAlignment - valueAlignmentMod ) : pValue;
 	}
 
+	template <typename TpSize, typename TpOffset = TpSize, typename std::enable_if<std::is_integral<TpSize>::value, int>::type = 0>
+    inline AlignedMemoryAllocInfo<TpSize, TpOffset> computeAlignedAllocationInfo( TpOffset pBaseAddress, TpSize pAllocationSize, uint32 pAlignment )
+    {
+        const auto alignedOffset = getAlignedValue( pBaseAddress, pAlignment );
+
+        AlignedMemoryAllocInfo<TpSize, TpOffset> allocInfo;
+        allocInfo.accessibleRegion.offset = alignedOffset;
+        allocInfo.accessibleRegion.size = pAllocationSize;
+        allocInfo.reservedRegion.offset = pBaseAddress;
+        allocInfo.reservedRegion.size = ( alignedOffset - pBaseAddress ) + pAllocationSize;
+
+        return allocInfo;
+    }
+
 	///
-	/// \param pMemory1
-	/// \param pSize1
-	/// \param pMemory2
-	/// \param pSize2
-	/// \return
+	/// @param pMemory1
+	/// @param pSize1
+	/// @param pMemory2
+	/// @param pSize2
+	/// @return
 	bool checkMemoryOverlap( const void * pMemory1, size_t pSize1, const void * pMemory2, size_t pSize2 );
 
 	///
-	/// \param pDst
-	/// \param pDstSize
-	/// \param pSrc
-	/// \param pCopySize
+	/// @param pDst
+	/// @param pDstSize
+	/// @param pSrc
+	/// @param pCopySize
 	void memCopyChecked( void * pDst, size_t pDstSize, const void * pSrc, size_t pCopySize );
 
 	///
-	/// \param pDst
-	/// \param pDstSize
-	/// \param pSrc
-	/// \param pCopySize
+	/// @param pDst
+	/// @param pDstSize
+	/// @param pSrc
+	/// @param pCopySize
 	void memCopyUnchecked( void * pDst, size_t pDstSize, const void * pSrc, size_t pCopySize );
 
 	/// @brief
