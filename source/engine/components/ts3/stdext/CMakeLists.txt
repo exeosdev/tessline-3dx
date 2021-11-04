@@ -14,8 +14,6 @@ set( TS3_STDEXT_SRC_FILES
         "staticLimits.h"
         "stringExt.h"
         "stringUtils.h"
-        "syncCommon.h"
-        "syncCommon.cpp"
         "typeTraits.h"
         "utilities.h"
         )

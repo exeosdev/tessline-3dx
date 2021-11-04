@@ -157,9 +157,9 @@ namespace ts3::gpuapi
 
 			for( uint32 mipLevelIndex = 0; mipLevelIndex < pMipLevel; ++mipLevelIndex )
 			{
-				result.width = getMaxOf( 1, result.width  / 2 );
-				result.height= getMaxOf( 1, result.height / 2 );
-				result.depth = getMaxOf( 1, result.depth  / 2 );
+				result.width = getMaxOf( 1u, result.width  / 2 );
+				result.height= getMaxOf( 1u, result.height / 2 );
+				result.depth = getMaxOf( 1u, result.depth  / 2 );
 			}
 		}
 

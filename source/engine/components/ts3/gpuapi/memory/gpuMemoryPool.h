@@ -5,7 +5,7 @@
 #define __TS3_GPUAPI_GPU_MEMORY_POOL_H__
 
 #include "commonGPUMemoryDefs.h"
-#include <ts3/stdext/syncCommon.h>
+#include <ts3/core/sync/spinLock.h>
 
 namespace ts3::gpuapi
 {
@@ -20,7 +20,7 @@ namespace ts3::gpuapi
 		friend class GPUMemoryRef;
 
 	public:
-		using MemoryLock = SharedSpinLock;
+		using MemoryLock = sync::SharedSpinLock;
 
 		gpu_memory_pool_id_t const mPoolID;
 		gpu_memory_size_t const mPoolSize;

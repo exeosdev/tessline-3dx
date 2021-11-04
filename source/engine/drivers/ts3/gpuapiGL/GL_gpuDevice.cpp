@@ -24,34 +24,6 @@ namespace ts3::gpuapi
 
 	GLGPUDevice::~GLGPUDevice() = default;
 
-	GPUBufferHandle GLGPUDevice::createGPUBuffer( const GPUBufferCreateInfo & pCreateInfo )
-	{
-		auto openglBuffer = GLGPUBuffer::create( *this, pCreateInfo );
-		ts3DebugAssert( openglBuffer );
-		return openglBuffer;
-	}
-
-	SamplerHandle GLGPUDevice::createSampler( const SamplerCreateInfo & pCreateInfo )
-	{
-		auto sampler = GLSampler::createSampler( *this, pCreateInfo );
-		ts3DebugAssert( sampler );
-		return sampler;
-	}
-
-	ShaderHandle GLGPUDevice::createShader( const ShaderCreateInfo & pCreateInfo )
-	{
-		auto openglShader = GLShader::createSeparableStage( *this, pCreateInfo );
-		ts3DebugAssert( openglShader );
-		return openglShader;
-	}
-
-	TextureHandle GLGPUDevice::createTexture( const TextureCreateInfo & pCreateInfo )
-	{
-		auto openglTexture = GLTexture::create( *this, pCreateInfo );
-		ts3DebugAssert( openglTexture );
-		return openglTexture;
-	}
-
 	GraphicsPipelineStateObjectHandle GLGPUDevice::createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
 	{
 		auto graphicsPipelineStateObject = GLGraphicsPipelineStateObject::create( *this, pCreateInfo );
@@ -91,20 +63,6 @@ namespace ts3::gpuapi
 	{
 		ts3DebugAssert( !_commandSystem );
 		_commandSystem = createGPUAPIObject<GLCommandSystem>( *this );
-	}
-
-	bool GLGPUDevice::onSetPresentationLayer( PresentationLayerHandle pPresentationLayer )
-	{
-		auto * openglPresentationLayer = pPresentationLayer->queryInterface<GLPresentationLayer>();
-		if ( !openglPresentationLayer->mSysGLDisplaySurface )
-		{
-			return false;
-		}
-
-		auto * openglCommandSystem = _commandSystem->queryInterface<GLCommandSystem>();
-		openglCommandSystem->setTargetGLSurface( openglPresentationLayer->mSysGLDisplaySurface );
-
-		return true;
 	}
 
 	bool GLGPUDevice::initializeGLDebugOutput()
@@ -168,6 +126,48 @@ namespace ts3::gpuapi
 	GLGraphicsPipelineStateDescriptorCache & GLGPUDevice::getDescriptorCache()
 	{
 		return _descriptorCache;
+	}
+
+	bool GLGPUDevice::_drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer )
+	{
+	    auto * openglPresentationLayer = pPresentationLayer->queryInterface<GLPresentationLayer>();
+	    if ( !openglPresentationLayer->mSysGLDisplaySurface )
+	    {
+	        return false;
+	    }
+
+	    auto * openglCommandSystem = _commandSystem->queryInterface<GLCommandSystem>();
+	    openglCommandSystem->setTargetGLSurface( openglPresentationLayer->mSysGLDisplaySurface );
+
+	    return true;
+	}
+
+	GPUBufferHandle GLGPUDevice::_drvCreateGPUBuffer( const GPUBufferCreateInfo & pCreateInfo )
+	{
+	    auto openglBuffer = GLGPUBuffer::create( *this, pCreateInfo );
+	    ts3DebugAssert( openglBuffer );
+	    return openglBuffer;
+	}
+
+	SamplerHandle GLGPUDevice::_drvCreateSampler( const SamplerCreateInfo & pCreateInfo )
+	{
+	    auto sampler = GLSampler::createSampler( *this, pCreateInfo );
+	    ts3DebugAssert( sampler );
+	    return sampler;
+	}
+
+	ShaderHandle GLGPUDevice::_drvCreateShader( const ShaderCreateInfo & pCreateInfo )
+	{
+	    auto openglShader = GLShader::createSeparableStage( *this, pCreateInfo );
+	    ts3DebugAssert( openglShader );
+	    return openglShader;
+	}
+
+	TextureHandle GLGPUDevice::_drvCreateTexture( const TextureCreateInfo & pCreateInfo )
+	{
+	    auto openglTexture = GLTexture::create( *this, pCreateInfo );
+	    ts3DebugAssert( openglTexture );
+	    return openglTexture;
 	}
 
 }

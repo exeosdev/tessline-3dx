@@ -39,7 +39,7 @@ namespace ts3::gpuapi
 
             inputFile.seekg( 0, std::ios::end );
 
-            size_t fileSize = inputFile.tellg();
+            auto fileSize = static_cast<size_t>( inputFile.tellg() );
             if( fileSize == static_cast<std::ifstream::pos_type>( -1 ) )
             {
                 return nullptr;

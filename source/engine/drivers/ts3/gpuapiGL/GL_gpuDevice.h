@@ -31,11 +31,6 @@ namespace ts3::gpuapi
 		explicit GLGPUDevice( GLGPUDriver & pGLGPUDriver );
 		virtual ~GLGPUDevice();
 
-		virtual GPUBufferHandle createGPUBuffer( const GPUBufferCreateInfo & pCreateInfo ) override;
-		virtual SamplerHandle createSampler( const SamplerCreateInfo & pCreateInfo ) override;
-		virtual ShaderHandle createShader( const ShaderCreateInfo & pCreateInfo ) override;
-		virtual TextureHandle createTexture( const TextureCreateInfo & pCreateInfo ) override;
-
 		virtual GraphicsPipelineStateObjectHandle createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) override;
 		virtual VertexStreamStateObjectHandle createVertexStreamStateObject( const VertexStreamStateObjectCreateInfo & pCreateInfo ) override;
 		virtual RenderTargetStateObjectHandle createRenderTargetStateObject( const RenderTargetStateObjectCreateInfo & pCreateInfo ) override;
@@ -53,7 +48,6 @@ namespace ts3::gpuapi
 
 	protected:
 		virtual void initializeCommandSystem() override;
-		virtual bool onSetPresentationLayer( PresentationLayerHandle pPresentationLayer ) override;
 
 	friendapi:
 		pipeline_state_descriptor_id_t createBlendDescriptor( const BlendConfigDesc & pConfigDesc );
@@ -62,6 +56,14 @@ namespace ts3::gpuapi
 		pipeline_state_descriptor_id_t createVertexInputFormatDescriptor( const VertexInputFormatDesc & pInputFormatDesc );
 
 		GLGraphicsPipelineStateDescriptorCache & getDescriptorCache();
+
+	private:
+	    virtual bool _drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer ) override;
+
+	    virtual GPUBufferHandle _drvCreateGPUBuffer( const GPUBufferCreateInfo & pCreateInfo ) override final;
+	    virtual SamplerHandle _drvCreateSampler( const SamplerCreateInfo & pCreateInfo ) override final;
+	    virtual ShaderHandle _drvCreateShader( const ShaderCreateInfo & pCreateInfo ) override final;
+	    virtual TextureHandle _drvCreateTexture( const TextureCreateInfo & pCreateInfo ) override final;
 
 	private:
 		GLGraphicsPipelineStateDescriptorCache _descriptorCache;

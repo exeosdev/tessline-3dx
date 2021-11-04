@@ -34,11 +34,6 @@ namespace ts3::gpuapi
 
 		virtual ~DX11GPUDevice();
 
-		virtual GPUBufferHandle createGPUBuffer( const GPUBufferCreateInfo & pCreateInfo ) override;
-		virtual SamplerHandle createSampler( const SamplerCreateInfo & pCreateInfo ) override;
-		virtual ShaderHandle createShader( const ShaderCreateInfo & pCreateInfo ) override;
-		virtual TextureHandle createTexture( const TextureCreateInfo & pCreateInfo ) override;
-
 		virtual GraphicsPipelineStateObjectHandle createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) override;
 		virtual VertexStreamStateObjectHandle createVertexStreamStateObject( const VertexStreamStateObjectCreateInfo & pCreateInfo ) override;
 		virtual RenderTargetStateObjectHandle createRenderTargetStateObject( const RenderTargetStateObjectCreateInfo & pCreateInfo ) override;
@@ -62,6 +57,11 @@ namespace ts3::gpuapi
 
 	private:
 		virtual void initializeCommandSystem() override;
+
+		virtual GPUBufferHandle _drvCreateGPUBuffer( const GPUBufferCreateInfo & pCreateInfo ) override final;
+		virtual SamplerHandle _drvCreateSampler( const SamplerCreateInfo & pCreateInfo ) override final;
+		virtual ShaderHandle _drvCreateShader( const ShaderCreateInfo & pCreateInfo ) override final;
+		virtual TextureHandle _drvCreateTexture( const TextureCreateInfo & pCreateInfo ) override final;
 
 	private:
 		DX11GraphicsPipelineStateDescriptorCache _descriptorCache;

@@ -36,14 +36,13 @@ namespace ts3::gpuapi
 		explicit GPUDevice( GPUDriver & pDriver );
 		virtual ~GPUDevice();
 
-		virtual GPUBufferHandle createGPUBuffer( const GPUBufferCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
-		virtual SamplerHandle createSampler( const SamplerCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
-		virtual ShaderHandle createShader( const ShaderCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
-		virtual TextureHandle createTexture( const TextureCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
+		GPUBufferHandle createGPUBuffer( const GPUBufferCreateInfo & pCreateInfo );
+		SamplerHandle createSampler( const SamplerCreateInfo & pCreateInfo );
+		ShaderHandle createShader( const ShaderCreateInfo & pCreateInfo );
+		TextureHandle createTexture( const TextureCreateInfo & pCreateInfo );
 
 		virtual GraphicsPipelineStateObjectHandle createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
 		virtual VertexStreamStateObjectHandle createVertexStreamStateObject( const VertexStreamStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
-
 		virtual RenderTargetStateObjectHandle createRenderTargetStateObject( const RenderTargetStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
 
 		virtual void waitForCommandSync( CommandSync & pCommandSync ) = 0;
@@ -60,9 +59,16 @@ namespace ts3::gpuapi
 		bool isDebugDevice() const;
 
 	protected:
+        /// @brief Initializes a driver-specific command system for
 		virtual void initializeCommandSystem() = 0;
 
-		virtual bool onSetPresentationLayer( PresentationLayerHandle pPresentationLayer );
+    private:
+		virtual bool _drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer );
+
+		virtual GPUBufferHandle _drvCreateGPUBuffer( const GPUBufferCreateInfo & pCreateInfo ) { return nullptr; }
+		virtual SamplerHandle _drvCreateSampler( const SamplerCreateInfo & pCreateInfo ) { return nullptr; }
+		virtual ShaderHandle _drvCreateShader( const ShaderCreateInfo & pCreateInfo ) { return nullptr; }
+		virtual TextureHandle _drvCreateTexture( const TextureCreateInfo & pCreateInfo ) { return nullptr; }
 
 	protected:
 		enum InternalStateFlags : uint32

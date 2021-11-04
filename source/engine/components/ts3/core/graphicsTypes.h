@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef __TS3_CORE_CORE_GRAPHICS_TYPES_H__
-#define __TS3_CORE_CORE_GRAPHICS_TYPES_H__
+#ifndef __TS3_CORE_GRAPHICS_TYPES_H__
+#define __TS3_CORE_GRAPHICS_TYPES_H__
 
 #include "prerequisites.h"
 
@@ -36,4 +36,4 @@ namespace ts3
 
 }
 
-#endif // __TS3_CORE_CORE_GRAPHICS_TYPES_H__
+#endif // __TS3_CORE_GRAPHICS_TYPES_H__

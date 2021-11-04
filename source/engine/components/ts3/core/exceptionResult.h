@@ -14,7 +14,7 @@ namespace ts3
     {
     public:
         //
-        Result result;
+        ResultCode resultCode;
         //
         std::exception_ptr exception;
 
@@ -26,9 +26,9 @@ namespace ts3
             return !isError();
         }
 
-        void setResult( Result pResult )
+        void setResult( ResultCode pResultCode )
         {
-            result = pResult;
+            resultCode = pResultCode;
         }
 
         void setException( std::exception_ptr pExceptionPtr )
@@ -55,12 +55,12 @@ namespace ts3
 
         TS3_PCL_ATTR_NO_DISCARD bool hasResult() const
         {
-            return !result.empty();
+            return !resultCode.empty();
         }
 
         TS3_PCL_ATTR_NO_DISCARD bool isError() const
         {
-            return !result || exception;
+            return !resultCode || exception;
         }
     };
 

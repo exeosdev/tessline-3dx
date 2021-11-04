@@ -5,7 +5,8 @@
 #define __TS3_GPUAPI_GPU_MEMORY_POOL_H__
 
 #include "commonGPUMemoryDefs.h"
-#include <ts3/stdext/syncCommon.h>
+#include <ts3/core/sync/spinLock.h>
+#include <ts3/core/sync/syncInterface.h>
 
 namespace ts3::gpuapi
 {
@@ -30,7 +31,7 @@ namespace ts3::gpuapi
 
 	private:
 		GPUMemoryRegion _poolSubRegion;
-		std::shared_lock<SharedSpinLock> _poolMemoryLock;
+		sync::AutoSharedLock<sync::SharedSpinLock> _poolMemoryLock;
 		std::atomic<uint32_t> _poolMemoryLockStatus;
 	};
 

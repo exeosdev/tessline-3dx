@@ -3,6 +3,7 @@
 #define __TS3_STDEXT_SORTED_ARRAY__H__
 
 #include "staticLimits.h"
+#include <stdexcept>
 
 namespace ts3
 {

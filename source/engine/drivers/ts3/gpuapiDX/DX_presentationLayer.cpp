@@ -3,6 +3,7 @@
 #include "DX_gpuDevice.h"
 #include <ts3/system/displaySystem.h>
 #include <ts3/system/windowSystem.h>
+#include <ts3/system/windowNative.h>
 
 namespace ts3::gpuapi
 {
@@ -14,7 +15,7 @@ namespace ts3::gpuapi
 	DXPresentationLayer::~DXPresentationLayer() = default;
 
 
-	DXScreenPresentationLayer::DXScreenPresentationLayer( GPUDevice & pDevice, SysWindowHandle pSysWindow, ComPtr<IDXGISwapChain1> pDXGISwapChain1 ) noexcept
+	DXScreenPresentationLayer::DXScreenPresentationLayer( GPUDevice & pDevice, system::WindowHandle pSysWindow, ComPtr<IDXGISwapChain1> pDXGISwapChain1 ) noexcept
 	: DXPresentationLayer( pDevice )
 	, mSysWindow( pSysWindow )
 	, mDXGISwapChain1( std::move( pDXGISwapChain1 ) )
@@ -22,7 +23,7 @@ namespace ts3::gpuapi
 
 	DXScreenPresentationLayer::~DXScreenPresentationLayer() noexcept = default;
 
-	SysEventSource * DXScreenPresentationLayer::querySysEventSourceObject() const noexcept
+	system::EventSource * DXScreenPresentationLayer::getInternalSystemEventSource() const noexcept
 	{
 		return mSysWindow.get();
 	}
@@ -40,46 +41,48 @@ namespace ts3::gpuapi
 		return mSysWindow->getClientAreaSize();
 	}
 
-	SysWindowHandle DXScreenPresentationLayer::createSysWindow( DXGPUDevice & pDevice, const PresentationLayerCreateInfo & pCreateInfo )
+	system::WindowHandle DXScreenPresentationLayer::createSysWindow( DXGPUDevice & pDevice, const PresentationLayerCreateInfo & pCreateInfo )
 	{
 		try
 		{
-			auto sysContext = pDevice.mSysContext;
 			auto sysWindowManager = pCreateInfo.sysWindowManager;
-
 			if( !sysWindowManager )
 			{
-				auto sysDisplayManager = pCreateInfo.sysDisplayManager;
-				if( !sysDisplayManager )
-				{
-					sysDisplayManager = SysDisplayManager::create( sysContext );
-				}
-
-				sysWindowManager = SysWindowManager::create( sysDisplayManager );
+			    auto sysDisplayManager = pCreateInfo.sysDisplayManager;
+			    if( !sysDisplayManager )
+			    {
+			        ts3DebugAssert( pDevice.mSysContext );
+			        sysDisplayManager = pDevice.mSysContext->createDisplayManager();
+			    }
+			    ts3DebugAssert( pDevice.mSysContext );
+			    sysWindowManager = pDevice.mSysContext->createWindowManager( sysDisplayManager );
 			}
 
 			system::WindowCreateInfo windowCreateInfo;
-			windowCreateInfo.properties.title = "DXWindow";
+			windowCreateInfo.title = "DXWindow";
 
 			if( pCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT ) )
 			{
-				windowCreateInfo.properties.geometry.size = ts3::cvSysWindowSizeMax;
-				windowCreateInfo.properties.geometry.frameStyle = system::EFrameStyle::Overlay;
+				windowCreateInfo.frameGeometry.size = system::CX_FRAME_SIZE_MAX;
+				windowCreateInfo.frameGeometry.style = system::EFrameStyle::Overlay;
 			}
 			else
 			{
-				windowCreateInfo.properties.geometry.position = pCreateInfo.screenRect.offset;
-				windowCreateInfo.properties.geometry.size = pCreateInfo.screenRect.size;
-				windowCreateInfo.properties.geometry.frameStyle = system::EFrameStyle::Fixed;
+				windowCreateInfo.frameGeometry.position = pCreateInfo.screenRect.offset;
+				windowCreateInfo.frameGeometry.size = pCreateInfo.screenRect.size;
+				windowCreateInfo.frameGeometry.style = system::EFrameStyle::Fixed;
 			}
 
 			auto sysWindow = sysWindowManager->createWindow( windowCreateInfo );
 
+        #if( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_WINDESKTOP )
 			if( pCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT ) )
 			{
-				::SetCapture( sysWindow->mNativeData.hwnd );
+			    auto * win32Window = sysWindow->queryInterface<system::Win32Window>();
+			    ::SetCapture( win32Window->mNativeData.hwnd );
 				::ShowCursor( FALSE );
 			}
+        #endif
 
 			return sysWindow;
 		}

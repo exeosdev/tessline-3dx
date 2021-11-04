@@ -9,6 +9,9 @@
 namespace ts3::system
 {
 
+    ts3SysDeclareHandle( Win32DisplayManager );
+    ts3SysDeclareHandle( Win32DisplayDriver );
+
     namespace platform
     {
 

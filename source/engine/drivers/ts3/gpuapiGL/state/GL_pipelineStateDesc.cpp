@@ -22,7 +22,7 @@ namespace ts3::gpuapi
 			auto openglIBElementByteSize = ecGetBaseDataTypeByteSize( static_cast<EBaseDataType>( pCommonBinding.indexBufferBinding.format ) );
 			openglVertexDataSourceBinding.indexBufferBinding.active = GL_TRUE;
 			openglVertexDataSourceBinding.indexBufferBinding.buffer = openglIndexBuffer->mGLBufferObject->mGLHandle;
-			openglVertexDataSourceBinding.indexBufferBinding.offset = pCommonBinding.indexBufferBinding.dataOffset;
+			openglVertexDataSourceBinding.indexBufferBinding.offset = trunc_numeric_cast<GLintptr>( pCommonBinding.indexBufferBinding.dataOffset );
 			openglVertexDataSourceBinding.indexBufferBinding.format = openglIBDataFormat;
 			openglVertexDataSourceBinding.indexBufferBinding.elementByteSize = openglIBElementByteSize;
 		}
@@ -42,8 +42,8 @@ namespace ts3::gpuapi
 			#else
 				openglVertexDataSourceBinding.vertexBufferBinding.activeArray[vertexInputStreamIndex] = GL_TRUE;
 				openglVertexDataSourceBinding.vertexBufferBinding.bufferArray[vertexInputStreamIndex] = openglVertexBuffer->mGLBufferObject->mGLHandle;
-				openglVertexDataSourceBinding.vertexBufferBinding.offsetArray[vertexInputStreamIndex] = vbBindingDesc.dataOffset;
-				openglVertexDataSourceBinding.vertexBufferBinding.strideArray[vertexInputStreamIndex] = static_cast<GLsizei>( vbBindingDesc.dataStride );
+				openglVertexDataSourceBinding.vertexBufferBinding.offsetArray[vertexInputStreamIndex] = trunc_numeric_cast<GLintptr>( vbBindingDesc.dataOffset );
+				openglVertexDataSourceBinding.vertexBufferBinding.strideArray[vertexInputStreamIndex] = trunc_numeric_cast<GLsizei>( vbBindingDesc.dataStride );
 				openglVertexDataSourceBinding.vertexBufferActiveBindingsNum += 1;
 			#endif
 			}

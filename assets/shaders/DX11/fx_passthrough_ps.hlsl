@@ -10,5 +10,5 @@ struct VSOutputData
 
 float4 main( VSOutputData pPSInput ) : SV_TARGET
 {
-	return tx0Default.Sample( smDefault0, pPSInput.psTexCoord0 );
+	return tx0Default.Sample( smDefault0, float2( pPSInput.psTexCoord0.x, 1.0f - pPSInput.psTexCoord0.y ) );
 }

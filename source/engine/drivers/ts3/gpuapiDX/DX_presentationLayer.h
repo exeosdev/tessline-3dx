@@ -23,13 +23,13 @@ namespace ts3::gpuapi
 	class TS3GX_DXCOMMON_CLASS DXScreenPresentationLayer : public DXPresentationLayer
 	{
 	public:
-		SysWindowHandle const mSysWindow;
+		system::WindowHandle const mSysWindow;
 		ComPtr<IDXGISwapChain1> const mDXGISwapChain1;
 
-		DXScreenPresentationLayer( GPUDevice & pDevice, SysWindowHandle pSysWindow, ComPtr<IDXGISwapChain1> pDXGISwapChain1 ) noexcept;
+		DXScreenPresentationLayer( GPUDevice & pDevice, system::WindowHandle pSysWindow, ComPtr<IDXGISwapChain1> pDXGISwapChain1 ) noexcept;
 		virtual ~DXScreenPresentationLayer() noexcept;
 
-		virtual SysEventSource * querySysEventSourceObject() const noexcept override;
+		virtual system::EventSource * getInternalSystemEventSource() const noexcept override;
 
 		virtual void resize( uint32 pWidth, uint32 pHeight ) override final;
 
@@ -38,7 +38,7 @@ namespace ts3::gpuapi
 		virtual ts3::math::Vec2u32 queryRenderTargetSize() const override;
 
 	protected:
-		static SysWindowHandle createSysWindow( DXGPUDevice & pDevice, const PresentationLayerCreateInfo & pCreateInfo );
+	    static system::WindowHandle createSysWindow( DXGPUDevice & pDevice, const PresentationLayerCreateInfo & pCreateInfo );
 	};
 
 }

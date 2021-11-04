@@ -5,6 +5,7 @@
 #define __TS3_COMMON_MEMORY_DEFS_H__
 
 #include "../prerequisites.h"
+#include <ts3/stdext/memory.h>
 #include <ts3/stdext/range.h>
 
 namespace ts3
@@ -17,11 +18,9 @@ namespace ts3
     using MemoryRegion = Region<memory_size_t>;
     using MemoryRange = MemoryRegion::Range;
 
-    constexpr memory_align_t cxMemoryDefaultAlignment = 0;
+    constexpr memory_size_t CX_MEMORY_OFFSET_INVALID = ts3::Limits<memory_size_t>::maxValue;
 
-    constexpr memory_size_t cxMemoryOffsetInvalid = ts3::Limits<memory_size_t>::maxValue;
-
-    constexpr memory_size_t cxMemorySizeMax = ts3::Limits<memory_size_t>::maxValue;
+    constexpr memory_size_t CX_MEMORY_SIZE_MAX = ts3::Limits<memory_size_t>::maxValue;
 
 }
 
