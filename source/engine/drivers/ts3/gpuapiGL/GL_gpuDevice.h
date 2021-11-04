@@ -58,7 +58,7 @@ namespace ts3::gpuapi
 		GLGraphicsPipelineStateDescriptorCache & getDescriptorCache();
 
 	private:
-	    virtual bool _onSetPresentationLayer( PresentationLayerHandle pPresentationLayer ) override;
+	    virtual bool _drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer ) override;
 
 	    virtual GPUBufferHandle _drvCreateGPUBuffer( const GPUBufferCreateInfo & pCreateInfo ) override final;
 	    virtual SamplerHandle _drvCreateSampler( const SamplerCreateInfo & pCreateInfo ) override final;

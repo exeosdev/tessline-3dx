@@ -261,7 +261,7 @@ namespace ts3::gpuapi
 			DXGI_FORMAT_D24_UNORM_S8_UINT,
 		};
 		auto baseDataTypeIndex = ecGetBaseDataTypeIndex( pBaseDataType );
-		return ts3::staticArrayElement( baseDataTypeArray, baseDataTypeIndex );
+		return staticArrayElement( baseDataTypeArray, baseDataTypeIndex );
 	}
 
 	DXGI_FORMAT DXCoreAPIProxy::translateDXTextureFormat( ETextureFormat pTextureFormat )

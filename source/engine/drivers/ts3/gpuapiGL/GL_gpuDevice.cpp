@@ -128,7 +128,7 @@ namespace ts3::gpuapi
 		return _descriptorCache;
 	}
 
-	bool GLGPUDevice::_onSetPresentationLayer( PresentationLayerHandle pPresentationLayer )
+	bool GLGPUDevice::_drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer )
 	{
 	    auto * openglPresentationLayer = pPresentationLayer->queryInterface<GLPresentationLayer>();
 	    if ( !openglPresentationLayer->mSysGLDisplaySurface )

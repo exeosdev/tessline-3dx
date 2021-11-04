@@ -47,7 +47,7 @@ namespace ts3::gpuapi
 		return isBuffer != GL_FALSE;
 	}
 
-	bool GLBufferObject::map( gpu_memory_size_t pOffset, memory_size_t pLength, GLenum pFlags, GLenum pActiveBindTarget )
+	bool GLBufferObject::map( gpu_memory_size_t pOffset, gpu_memory_size_t pLength, GLenum pFlags, GLenum pActiveBindTarget )
 	{
 		auto bufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
@@ -91,7 +91,7 @@ namespace ts3::gpuapi
 		ts3GLHandleLastError();
 	}
 
-	void GLBufferObject::flushMappedRegion( gpu_memory_size_t pOffset, memory_size_t pLength, GLenum pActiveBindTarget )
+	void GLBufferObject::flushMappedRegion( gpu_memory_size_t pOffset, gpu_memory_size_t pLength, GLenum pActiveBindTarget )
 	{
 		auto bufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
@@ -107,7 +107,7 @@ namespace ts3::gpuapi
 		ts3GLHandleLastError();
 	}
 
-	void GLBufferObject::invalidateRegion( gpu_memory_size_t pOffset, memory_size_t pLength, GLenum pActiveBindTarget )
+	void GLBufferObject::invalidateRegion( gpu_memory_size_t pOffset, gpu_memory_size_t pLength, GLenum pActiveBindTarget )
 	{
 	#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
 		auto bufferBindTarget = checkActiveBindTarget( pActiveBindTarget );

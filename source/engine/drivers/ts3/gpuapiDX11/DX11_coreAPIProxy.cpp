@@ -213,7 +213,7 @@ namespace ts3::gpuapi
 			D3D11_BLEND_INV_DEST_COLOR,
 			D3D11_BLEND_INV_DEST_ALPHA,
 		};
-		return ts3::staticArrayElement( blendFactorArray, pBlendFactor );
+		return staticArrayElement( blendFactorArray, pBlendFactor );
 	}
 
 	D3D11_BLEND_OP DX11CoreAPIProxy::translateDX11BlendOp( EBlendOp pBlendOp )
@@ -226,7 +226,7 @@ namespace ts3::gpuapi
 			D3D11_BLEND_OP_SUBTRACT,
 			D3D11_BLEND_OP_REV_SUBTRACT
 		};
-		return ts3::staticArrayElement( blendOpArray, pBlendOp );
+		return staticArrayElement( blendOpArray, pBlendOp );
 	}
 
 	UINT8 DX11CoreAPIProxy::translateDX11BlendRenderTargetWriteMask( EBlendRenderTargetWriteMask pRenderTargetWriteMask )
@@ -295,7 +295,7 @@ namespace ts3::gpuapi
 			{ EGPUMemoryMapMode::WriteInvalidate , D3D11_MAP_WRITE_DISCARD      },
 			{ EGPUMemoryMapMode::WriteAppend     , D3D11_MAP_WRITE_NO_OVERWRITE },
 		};
-		return ts3::getMapValueOrDefault( mapModeMap, pMapMode, static_cast<D3D11_MAP>( 0 ) );
+		return getMapValueOrDefault( mapModeMap, pMapMode, static_cast<D3D11_MAP>( 0 ) );
 	}
 
 	D3D11_COMPARISON_FUNC DX11CoreAPIProxy::translateDX11CompFunc( ECompFunc pCompFunc )
@@ -311,7 +311,7 @@ namespace ts3::gpuapi
 			D3D11_COMPARISON_LESS,
 			D3D11_COMPARISON_LESS_EQUAL,
 		};
-		return ts3::staticArrayElement( compFuncArray, pCompFunc );
+		return staticArrayElement( compFuncArray, pCompFunc );
 	}
 
 	D3D11_CULL_MODE DX11CoreAPIProxy::translateDX11CullMode( ECullMode pCullMode )
@@ -322,7 +322,7 @@ namespace ts3::gpuapi
 			D3D11_CULL_BACK,
 			D3D11_CULL_FRONT,
 		};
-		return ts3::staticArrayElement( cullModeArray, pCullMode );
+		return staticArrayElement( cullModeArray, pCullMode );
 	}
 
 	D3D11_DEPTH_WRITE_MASK DX11CoreAPIProxy::translateDX11DepthWriteMask( EDepthWriteMask pDepthWriteMask )
@@ -344,7 +344,7 @@ namespace ts3::gpuapi
 			D3D11_FILL_SOLID,
 			D3D11_FILL_WIREFRAME,
 		};
-		return ts3::staticArrayElement( fillModeArray, pFillMode );
+		return staticArrayElement( fillModeArray, pFillMode );
 	}
 
 	D3D11_PRIMITIVE_TOPOLOGY DX11CoreAPIProxy::translateDX11PrimitiveTopology( EPrimitiveTopology pTopology )
@@ -362,7 +362,7 @@ namespace ts3::gpuapi
 			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ,
 			D3D11_PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST
 		};
-		return ts3::staticArrayElement( primitiveTopologyArray, pTopology );
+		return staticArrayElement( primitiveTopologyArray, pTopology );
 	}
 
 	D3D11_SHADER_TYPE DX11CoreAPIProxy::translateDX11EShaderType( EShaderType pShaderType )
@@ -376,7 +376,7 @@ namespace ts3::gpuapi
 			D3D11_PIXEL_SHADER,
 			D3D11_COMPUTE_SHADER,
 		};
-		return ts3::staticArrayElement( shaderTypeArray, pShaderType );
+		return staticArrayElement( shaderTypeArray, pShaderType );
 	}
 
 	D3D11_STENCIL_OP DX11CoreAPIProxy::translateDX11StencilOp( EStencilOp pStencilOp )
@@ -392,7 +392,7 @@ namespace ts3::gpuapi
 			D3D11_STENCIL_OP_DECR_SAT,
 			D3D11_STENCIL_OP_INVERT,
 		};
-		return ts3::staticArrayElement( stencilOpArray, pStencilOp );
+		return staticArrayElement( stencilOpArray, pStencilOp );
 	}
 
 	D3D11_TEXTURE_ADDRESS_MODE DX11CoreAPIProxy::translateDX11ETextureAddressMode( ETextureAddressMode pAddressMode )
@@ -405,7 +405,7 @@ namespace ts3::gpuapi
 			D3D11_TEXTURE_ADDRESS_MIRROR_ONCE,
 			D3D11_TEXTURE_ADDRESS_WRAP,
 		};
-		return ts3::staticArrayElement( textureAddressModeArray, pAddressMode );
+		return staticArrayElement( textureAddressModeArray, pAddressMode );
 	}
 
 	UINT DX11CoreAPIProxy::translateDX11ETextureBindFlags( Bitmask<resource_flags_value_t> pTextureFlags )
