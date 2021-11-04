@@ -85,7 +85,7 @@ namespace ts3::gpuapi
 
 	void GPUDevice::setPresentationLayer( PresentationLayerHandle pPresentationLayer )
 	{
-		if( !_onSetPresentationLayer( pPresentationLayer ) )
+		if( !_drvOnSetPresentationLayer( pPresentationLayer ) )
 		{
 			return;
 		}
@@ -107,7 +107,7 @@ namespace ts3::gpuapi
 		return _internalStateFlags.isSet( E_INTERNAL_STATE_FLAG_DEBUG_DEVICE_BIT );
 	}
 
-	bool GPUDevice::_onSetPresentationLayer( PresentationLayerHandle pPresentationLayer )
+	bool GPUDevice::_drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer )
 	{
 		return true;
 	}

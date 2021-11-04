@@ -23,9 +23,9 @@ namespace ts3::gpuapi
     using GPUMemoryRegion = Region<gpu_memory_size_t>;
     using GPUMemoryRange = GPUMemoryRegion::Range;
 
-    constexpr gpu_memory_size_t cxGPUMemoryOffsetInvalid = ts3::Limits<gpu_memory_size_t>::maxValue;
+    inline constexpr gpu_memory_size_t CX_GPU_MEMORY_OFFSET_INVALID = ts3::Limits<gpu_memory_size_t>::maxValue;
 
-    constexpr gpu_memory_size_t cxGPUMemorySizeMax = ts3::Limits<gpu_memory_size_t>::maxValue;
+    inline constexpr gpu_memory_size_t CX_GPU_MEMORY_SIZE_MAX = ts3::Limits<gpu_memory_size_t>::maxValue;
 
 	/// @brief Flags representing various properties of host/device memory pools like access and heap properties.
 	enum EGPUMemoryFlags : gpu_memory_flags_value_t
@@ -80,7 +80,7 @@ namespace ts3::gpuapi
 		E_GPU_MEMORY_HEAP_PROPERTY_MASK_ALL                = 0x00F0,
 	};
 
-	/// @brief Valid flags
+	/// @brief
 	enum EGPUMemoryMapFlags : gpu_memory_flags_value_t
 	{
 		// Memory is mapped with read-only permission.
@@ -104,21 +104,22 @@ namespace ts3::gpuapi
 		E_GPU_MEMORY_MAP_FLAG_WRITE_INVALIDATE_BIT  = 0x2000 | E_GPU_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT,
 	};
 
+	/// @brief
 	enum class EGPUMemoryMapMode : uint32
 	{
-		// @See E_GPU_MEMORY_MAP_FLAG_ACCESS_READ_BIT
+	    /// @see EGPUMemoryMapFlags::E_GPU_MEMORY_MAP_FLAG_ACCESS_READ_BIT
 		ReadOnly = E_GPU_MEMORY_MAP_FLAG_ACCESS_READ_BIT,
 
-		// @See E_GPU_MEMORY_MAP_FLAG_ACCESS_READ_WRITE_BIT
+		/// @see EGPUMemoryMapFlags::E_GPU_MEMORY_MAP_FLAG_ACCESS_READ_WRITE_BIT
 		ReadWrite = E_GPU_MEMORY_MAP_FLAG_ACCESS_READ_WRITE_BIT,
 
-		// @See E_GPU_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT
+		/// @see EGPUMemoryMapFlags::E_GPU_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT
 		WriteDefault = E_GPU_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT,
 
-		// @See E_GPU_MEMORY_MAP_FLAG_WRITE_APPEND_BIT
+		/// @see EGPUMemoryMapFlags::E_GPU_MEMORY_MAP_FLAG_WRITE_APPEND_BIT
 		WriteAppend = E_GPU_MEMORY_MAP_FLAG_WRITE_APPEND_BIT,
 
-		// @See E_GPU_MEMORY_MAP_FLAG_WRITE_INVALIDATE_BIT
+		/// @see EGPUMemoryMapFlags::E_GPU_MEMORY_MAP_FLAG_WRITE_INVALIDATE_BIT
 		WriteInvalidate = E_GPU_MEMORY_MAP_FLAG_WRITE_INVALIDATE_BIT,
 	};
 

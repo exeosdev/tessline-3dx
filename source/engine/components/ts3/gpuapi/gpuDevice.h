@@ -63,7 +63,7 @@ namespace ts3::gpuapi
 		virtual void initializeCommandSystem() = 0;
 
     private:
-		virtual bool _onSetPresentationLayer( PresentationLayerHandle pPresentationLayer );
+		virtual bool _drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer );
 
 		virtual GPUBufferHandle _drvCreateGPUBuffer( const GPUBufferCreateInfo & pCreateInfo ) { return nullptr; }
 		virtual SamplerHandle _drvCreateSampler( const SamplerCreateInfo & pCreateInfo ) { return nullptr; }
