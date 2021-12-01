@@ -36,7 +36,7 @@ namespace ts3
 		/// @brief Precision of the decimal part used for 'long double' (de)serialization.
 		inline constexpr uint64 CX_SERIALIZE_FLT80_DECIMAL_PRECISION = 1000000000000u;
 
-		/// @brief Helper trait type. Provides static boolean 'sValue' indicating whether a type can be serialized using byte-wise copy.
+		/// @brief Helper trait with a static bool 'sValue' indicating whether a type can be serialized using byte-wise copy.
 		template <typename Tp>
 		struct IsTriviallySerializable
 		{
@@ -44,7 +44,7 @@ namespace ts3
 				std::is_union<Tp>::value || ( std::is_class<Tp>::value && std::is_standard_layout<Tp>::value && std::is_trivial<Tp>::value );
 		};
 
-		/// @brief Helper trait type. Provides static boolean 'sValue' indicating whether a type can be serialized using byte-wise copy.
+		/// @brief Helper trait with a static bool 'sValue' indicating whether a type is a character (does not include wchar_t).
 		template <typename Tp>
 		struct IsCharType
 		{
@@ -52,14 +52,15 @@ namespace ts3
 				std::is_same<Tp, char>::value || std::is_same<Tp, signed char>::value || std::is_same<Tp, unsigned char>::value;
 		};
 
-		/// @brief
+		/// @brief Helper trait with a static bool 'sValue' which yields true only for wchar_t.
 		template <typename Tp>
 		struct IsWideChar
 		{
 			static inline constexpr bool sValue = std::is_same<Tp, wchar_t>::value;
 		};
 
-		/// @brief
+		/// @brief Helper trait with a static bool 'sValue' indicating whether a type is an arithmetic type.
+		/// In contrast to std::is_arithmetic, this trait does not concern character types to be arithmetic.
 		template <typename Tp>
 		struct IsArithmetic
 		{
@@ -77,7 +78,7 @@ namespace ts3
 		template <>
 		struct ArithmeticTypeSerializedSize<wchar_t>
 		{
-			// wchar_t is always 4 bytes
+			// wchar_t is always serialized using 4 bytes
 			static inline constexpr gds_size_t sValue = sizeof( uint32 );
 		};
 
@@ -102,26 +103,49 @@ namespace ts3
 			static inline constexpr gds_size_t sValue = sizeof( int64 ) + sizeof( uint32 );
 		};
 
-		/// @brief Helper utility type. Implements
+		/// @brief Helper utility type. Implements serialization/deserialization of an integral type of given size.
+		/// @tparam tpTypeSize The size of the integral type, in bytes.
 		template <size_t tpTypeSize>
-		struct IntegralTypeSerializeProxy;
+		struct IntegralTypeSerializeProxy
+		{
+			/// @brief Serializes the specified integral value into byte representation using requested ByteOrder.
+			///
+			/// @tparam Tp Type of the input value, deduced automatically from the parameter.
+			///
+			/// @param pOutputBuffer Pointer to the beginning of the buffer for serialized data.
+			/// @param pByteOrder    Byte order which should be used for types larger than 1 byte.
+			/// @param pValue        Integral value to serialize.
+			template <typename Tp>
+			static void serializeIntegral( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp pValue );
 
+			/// @brief Deserializes the byte representation of an integral, stored in a given ByteOrder, and returns it.
+			///
+			/// @tparam Tp Type of the output value.
+			///
+			/// @param pInputData Pointer to the beginning of the serialized data.
+			/// @param pByteOrder Byte order in which the input data has been serialized.
+			template <typename Tp>
+			static Tp deserializeIntegral( const byte * pInputData, EByteOrder pByteOrder );
+		};
+
+		/// @brief Specialization of IntegralTypeSerializeProxy for 1-byte integral types.
 		template <>
 		struct IntegralTypeSerializeProxy<1>
 		{
 			template <typename Tp>
-			static inline void serializeIntegral( byte * pOutputBuffer, EByteOrder, const Tp pValue )
+			static inline void serializeIntegral( byte * pOutputBuffer, EByteOrder /* pByteOrder */, const Tp pValue )
 			{
 				*( reinterpret_cast<Tp *>( pOutputBuffer ) ) = pValue;
 			}
 
 			template <typename Tp>
-			static inline Tp deserializeIntegral( const byte * pInputData, EByteOrder )
+			static inline Tp deserializeIntegral( const byte * pInputData, EByteOrder /* pByteOrder */ )
 			{
 				return *( reinterpret_cast<const Tp *>( pInputData ) );
 			}
 		};
 
+		/// @brief Specialization of IntegralTypeSerializeProxy for 2-byte integral types.
 		template <>
 		struct IntegralTypeSerializeProxy<2>
 		{
@@ -138,6 +162,7 @@ namespace ts3
 				}
 			}
 
+			/// @brief Specialization of IntegralTypeSerializeProxy for 4-byte integral types.
 			template <typename Tp>
 			static inline Tp deserializeIntegral( const byte * pInputData, EByteOrder pByteOrder )
 			{
@@ -152,6 +177,7 @@ namespace ts3
 			}
 		};
 
+		/// @brief Specialization of IntegralTypeSerializeProxy for 4-byte integral types.
 		template <>
 		struct IntegralTypeSerializeProxy<4>
 		{
@@ -182,6 +208,7 @@ namespace ts3
 			}
 		};
 
+		/// @brief Specialization of IntegralTypeSerializeProxy for 8-byte integral types.
 		template <>
 		struct IntegralTypeSerializeProxy<8>
 		{
@@ -284,159 +311,120 @@ namespace ts3
 			return ldexpl( static_cast<long double>( intBase ) / CX_SERIALIZE_FLT80_DECIMAL_PRECISION, exponent );
 		}
 
-		template <typename TpVal, typename TpSrc>
-		struct ValueProxy
+		template <typename TpRef, typename TpInternal>
+		struct ValueRef
 		{
-			using ValueType = TpVal;
+			using RefType = TpRef;
+			using InternalType = TpInternal;
 
-			TpVal value;
+			std::reference_wrapper<TpRef> value;
 
-			ValueProxy() = default;
-
-			constexpr ValueProxy( const TpSrc pValue )
-			: value( static_cast<TpVal>( pValue ) )
+			ValueRef( TpRef & pRef )
+			: value( pRef )
 			{}
 
-			ValueProxy( ValueProxy && ) = default;
-			ValueProxy & operator=( ValueProxy && ) = default;
-
-			TpVal get() const
+			void set( TpInternal pValue ) const
 			{
-				return value;
+				value.get() = static_cast<TpRef>( pValue );
+			}
+
+			TpInternal get() const
+			{
+				return static_cast<TpInternal>( value.get() );
 			}
 		};
 
-		template <typename TpVal, typename TpTgt>
-		struct RefProxy
+		template <typename TpCast>
+		struct TypeCastTag
+		{};
+
+		using TypeCastNoneTag = TypeCastTag<void>;
+
+		inline constexpr TypeCastNoneTag cvTypeCastNone {};
+
+		template <typename TpRef, typename TpCast>
+		struct TypeCastInfo
 		{
-			using ValueType = TpVal;
+			std::reference_wrapper<TpRef> refWrapper;
+			TypeCastTag<TpCast> castTag;
 
-			TpTgt * targetPtr = nullptr;
-
-			constexpr RefProxy( TpTgt & pTarget )
-			: targetPtr( &pTarget )
+			TypeCastInfo( TpRef & pRef )
+			: refWrapper( pRef )
 			{}
-
-			RefProxy( RefProxy && ) = default;
-			RefProxy & operator=( RefProxy && ) = default;
-
-			explicit operator bool() const
-			{
-				return targetPtr != nullptr;
-			}
-
-			void set( const TpVal & pValue ) const
-			{
-				*targetPtr = static_cast<TpTgt>( pValue );
-			}
-
-			const TpVal & get() const
-			{
-				return *targetPtr;
-			}
 		};
 
-		template <typename TpSrc = uint32>
-		using UI32ValueProxy = ValueProxy<uint32, TpSrc>;
-
-		template <typename TpSrc = uint64>
-		using UI64ValueProxy = ValueProxy<uint64, TpSrc>;
-
-		template <typename TpTgt = uint32>
-		using UI32RefProxy = RefProxy<uint32, TpTgt>;
-
-		template <typename TpTgt = uint64>
-		using UI64RefProxy = RefProxy<uint64, TpTgt>;
-
-		template <typename TpVal, typename TpSrc>
-		struct ValueCast
+		template <typename TpCast, typename Tp>
+		inline constexpr TypeCastInfo<const Tp, TpCast> typeCast( const Tp & pValue )
 		{
-			using ValueType = TpVal;
-			std::reference_wrapper<const TpSrc> srcRef;
-		};
-
-		template <>
-		struct ValueCast<void, void>
-		{};
-
-		inline constexpr ValueCast<void, void> cvValueCastNone {};
-
-		template <typename TpVal, typename TpTgt>
-		struct RefCast
-		{
-			using ValueType = TpVal;
-			std::reference_wrapper<TpTgt> targetRef;
-		};
-
-		template <>
-		struct RefCast<void, void>
-		{};
-
-		inline constexpr RefCast<void, void> cvRefCastNone {};
-
-		template <typename TpCast, typename TpSrc>
-		inline ValueCast<TpCast, TpSrc> valueTypeCast( const TpSrc & pSrcValue )
-		{
-			return { pSrcValue };
+			return { pValue };
 		}
 
-		template <typename TpCast, typename TpTgt, std::enable_if_t<!std::is_const<TpTgt>::value, int> = 0>
-		inline RefCast<TpCast, TpTgt> refTypeCast( TpTgt & pTargetRef )
+		template <typename TpCast, typename Tp>
+		inline constexpr TypeCastInfo<Tp, TpCast> typeCast( Tp & pValue )
 		{
-			return { pTargetRef };
+			return { pValue };
 		}
 
+		template <typename TpRef = uint64>
+		using NativeIntRef = ValueRef<TpRef, uint64>;
+
+		template <typename TpRef = uint64>
+		using SizeTypeRef = ValueRef<TpRef, uint64>;
+
+		template <typename TpRef = uint32>
+		using TypeIDRef = ValueRef<TpRef, uint32>;
 
 		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value, int> = 0>
-		constexpr inline UI64ValueProxy<Tp> asNativeIntValue( const Tp pValue )
+		inline NativeIntRef<const Tp> asNativeInt( const Tp & pValue )
 		{
 			return { pValue };
 		}
 
 		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value, int> = 0>
-		constexpr inline UI64ValueProxy<Tp> asSizeTypeValue( const Tp pValue )
+		inline SizeTypeRef<const Tp> asSizeType( const Tp & pValue )
 		{
 			return { pValue };
 		}
 
 		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value || std::is_enum<Tp>::value, int> = 0>
-		constexpr inline UI64ValueProxy<Tp> asTypeIDValue( const Tp pValue )
-		{
-			return { pValue };
-		}
-
-		constexpr inline UI64ValueProxy<> emptyNativeIntValue()
-		{
-			return {};
-		}
-
-		constexpr inline UI64ValueProxy<> emptySizeTypeValue()
-		{
-			return {};
-		}
-
-		constexpr inline UI64ValueProxy<> emptyTypeIDValue()
-		{
-			return {};
-		}
-
-		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value, int> = 0>
-		inline UI64RefProxy<Tp> asNativeIntRef( Tp & pValue )
+		inline TypeIDRef<const Tp> asTypeID( const Tp & pValue )
 		{
 			return { pValue };
 		}
 
 		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value, int> = 0>
-		inline UI64RefProxy<Tp> asSizeTypeRef( Tp & pValue )
+		inline NativeIntRef<Tp> asNativeInt( Tp & pValue )
+		{
+			return { pValue };
+		}
+
+		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value, int> = 0>
+		inline SizeTypeRef<Tp> asSizeType( Tp & pValue )
 		{
 			return { pValue };
 		}
 
 		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value || std::is_enum<Tp>::value, int> = 0>
-		inline UI64RefProxy<Tp> asTypeIDRef( Tp & pValue )
+		inline TypeIDRef<Tp> asTypeID( Tp & pValue )
 		{
 			return { pValue };
 		}
+
+		inline NativeIntRef<const NativeIntRef<>::RefType> emptyNativeInt()
+		{
+			return { NativeIntRef<>::RefType{} };
+		}
+
+		inline SizeTypeRef<const SizeTypeRef<>::RefType> emptySizeType()
+		{
+			return { SizeTypeRef<>::RefType{} };
+		}
+
+		inline TypeIDRef<const TypeIDRef<>::RefType> emptyTypeID()
+		{
+			return { TypeIDRef<>::RefType{} };
+		}
+
 
 
 		template <typename Tp, std::enable_if_t<IsTriviallySerializable<Tp>::sValue, int> = 0>
@@ -460,41 +448,29 @@ namespace ts3
 			return ArithmeticTypeSerializedSize<typename std::underlying_type<Tp>::type>::sValue;
 		}
 
-//		template <typename TpCast, typename TpSrc>
-//		inline ValueCast<TpCast, TpSrc> valueTypeCast( const TpSrc & pSrcValue )
-//		{
-//			return { pSrcValue };
-//		}
-//
-//		template <typename TpCast, typename TpTgt, std::enable_if_t<!std::is_const<TpTgt>::value, int> = 0>
-//				inline RefCast<TpCast, TpTgt> refTypeCast( TpTgt & pTargetRef )
-//				{
-//					return { pTargetRef };
-//				}
-
-		template <typename TpVal, typename TpSrc>
-		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const ValueProxy<TpVal, TpSrc> & pValueProxy )
+		template <typename TpRef, typename TpInternal>
+		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const ValueRef<TpRef, TpInternal> & pValueRef )
 		{
-			serializePrimitive( pOutputBuffer, pByteOrder, pValueProxy.get() );
-			return ArithmeticTypeSerializedSize<typename ValueProxy<TpVal, TpSrc>::ValueType>::sValue;
+			serializePrimitive( pOutputBuffer, pByteOrder, pValueRef.get() );
+			return ArithmeticTypeSerializedSize<typename ValueRef<TpRef, TpInternal>::InternalType>::sValue;
 		}
 
-		template <typename TpVal>
-		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const TpVal & pValue, const ValueCast<void, void> & )
+		template <typename Tp, typename TpInternal, std::enable_if_t<std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp & pValue, const TypeCastTag<TpInternal> & )
 		{
 			return serialize( pOutputBuffer, pByteOrder, pValue );
 		}
 
-		template <typename TpVal, typename TpSrc>
-		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const TpVal & pValue, const ValueCast<TpVal, TpSrc> & )
+		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp & pValue, const TypeCastTag<TpInternal> & )
 		{
-			return serialize( pOutputBuffer, pByteOrder, ValueProxy<TpVal, TpSrc>{ pValue } );
+			return serialize( pOutputBuffer, pByteOrder, ValueRef<Tp, TpInternal>{ pValue } );
 		}
 
-		template <typename TpVal, typename TpSrc, std::enable_if_t<!std::is_void<TpVal>::value && !std::is_void<TpSrc>::value, int> = 0>
-		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const ValueCast<TpVal, TpSrc> & pValueCast )
+		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const TypeCastInfo<Tp, TpInternal> & pCastInfo )
 		{
-			return serialize( pOutputBuffer, pByteOrder, pValueCast.srcRef, pValueCast );
+			return serialize( pOutputBuffer, pByteOrder, pCastInfo.refWrapper.get(), pCastInfo.castTag );
 		}
 
 		template <typename Tp>
@@ -534,30 +510,29 @@ namespace ts3
 			return ArithmeticTypeSerializedSize<typename std::underlying_type<Tp>::type>::sValue;
 		}
 
-		template <typename TpVal, typename TpTgt>
-		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, const RefProxy<TpVal, TpTgt> & pRefProxy )
+		template <typename TpRef, typename TpInternal>
+		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, const ValueRef<TpRef, TpInternal> & pValueRef )
 		{
-			using ValueType = typename RefProxy<TpVal, TpTgt>::ValueType;
-			pRefProxy.set( deserializePrimitive<ValueType>( pInputData, pByteOrder ) );
-			return ArithmeticTypeSerializedSize<typename RefProxy<TpVal, TpTgt>::ValueType>::sValue;
+			pValueRef.set( deserializePrimitive<TpInternal>( pInputData, pByteOrder ) );
+			return ArithmeticTypeSerializedSize<TpInternal>::sValue;
 		}
 
-		template <typename TpVal>
-		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, TpVal & pRef, const RefCast<void, void> & )
+		template <typename Tp, typename TpInternal, std::enable_if_t<std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, Tp & pRef, const TypeCastTag<TpInternal> & )
 		{
 			return deserialize( pInputData, pByteOrder, pRef );
 		}
 
-		template <typename TpVal, typename TpTgt>
-		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, TpVal & pRef, const RefCast<TpVal, TpTgt> & )
+		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, Tp & pRef, const TypeCastTag<TpInternal> & )
 		{
-			return deserialize( pInputData, pByteOrder, RefProxy<TpVal, TpTgt>{ pRef } );
+			return deserialize( pInputData, pByteOrder, ValueRef<Tp, TpInternal>{ pRef } );
 		}
 
-		template <typename TpVal, typename TpTgt, std::enable_if_t<!std::is_void<TpVal>::value && !std::is_void<TpTgt>::value, int> = 0>
-		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, const RefCast<TpVal, TpTgt> & pRefCast )
+		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, const TypeCastInfo<Tp, TpInternal> & pCastInfo )
 		{
-			return deserialize( pInputData, pByteOrder, pRefCast.targetRef.get(), pRefCast );
+			return deserialize( pInputData, pByteOrder, pCastInfo.refWrapper.get(), pCastInfo.castTag );
 		}
 
 		template <typename Tp>
@@ -593,65 +568,29 @@ namespace ts3
 			return ArithmeticTypeSerializedSize<typename std::underlying_type<Tp>::type>::sValue;
 		}
 
-		template <typename TpVal, typename TpSrc>
-		inline gds_size_t evalByteSize( const ValueProxy<TpVal, TpSrc> & pValueProxy )
+		template <typename TpRef, typename TpInternal>
+		inline gds_size_t evalByteSize( const ValueRef<TpRef, TpInternal> & pValueRef )
 		{
-			return evalByteSize( pValueProxy.get() );
+			return evalByteSize( pValueRef.get() );
 		}
 
-		template <typename TpVal, typename TpSrc>
-		inline gds_size_t evalByteSize( const TpVal & pValue, const ValueCast<void, void> & )
+		template <typename Tp, typename TpInternal, std::enable_if_t<std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t evalByteSize( const Tp & pValue, const TypeCastTag<TpInternal> & )
 		{
 			return evalByteSize( pValue );
 		}
 
-		template <typename TpVal, typename TpSrc>
-		inline gds_size_t evalByteSize( const TpVal & pValue, const ValueCast<TpVal, TpSrc> & )
+		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t evalByteSize( const Tp & pValue, const TypeCastTag<TpInternal> & )
 		{
-			return evalByteSize( ValueProxy<TpVal, TpSrc>{ pValue } );
+			return evalByteSize( ValueRef<const Tp, TpInternal>{ pValue } );
 		}
 
-		template <typename TpVal, typename TpSrc, std::enable_if_t<!std::is_void<TpVal>::value && !std::is_void<TpSrc>::value, int> = 0>
-		inline gds_size_t evalByteSize( const ValueCast<TpVal, TpSrc> & pValueCast )
+		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t evalByteSize( const TypeCastInfo<Tp, TpInternal> & pCastInfo )
 		{
-			return evalByteSize( pValueCast.srcRef, pValueCast );
+			return evalByteSize( pCastInfo.refWrapper.get(), pCastInfo.castTag );
 		}
-
-//		template <typename Tp>
-//		inline constexpr gds_size_t evalByteSize( const InputValueWrapper<Tp> & pValue )
-//		{
-//			return ArithmeticTypeSerializedSize<typename InputValueWrapper<Tp>::ValueType>::sValue;
-//		}
-//
-//		template <typename Tp>
-//		inline constexpr gds_size_t evalByteSize( const Tp & pValue, const TypeCastIgnoreTag & )
-//		{
-//			return evalByteSize( pValue );
-//		}
-//
-//		template <typename Tp>
-//		inline constexpr gds_size_t evalByteSize( const Tp & pValue, const TypeCastNativeIntTag & )
-//		{
-//			return evalByteSize( asNativeIntValue( pValue ) );
-//		}
-//
-//		template <typename Tp>
-//		inline constexpr gds_size_t evalByteSize( const Tp & pValue, const TypeCastSizeTypeTag & )
-//		{
-//			return evalByteSize( asSizeTypeValue( pValue ) );
-//		}
-//
-//		template <typename Tp>
-//		inline constexpr gds_size_t evalByteSize( const Tp & pValue, const TypeCastTypeIDTag & )
-//		{
-//			return evalByteSize( asTypeIDValue( pValue ) );
-//		}
-//
-//		template <typename Tp, typename TpCast>
-//		inline constexpr gds_size_t evalByteSize( const TypeCastProxy<Tp, TpCast> & pCastProxy )
-//		{
-//			return evalByteSize( pCastProxy.first.get(), pCastProxy.second.get() );
-//		}
 
 		template <typename Tp>
 		gds_size_t evalByteSizeAll( const Tp & pValue )
@@ -686,92 +625,29 @@ namespace ts3
 			return ArithmeticTypeSerializedSize<typename std::underlying_type<Tp>::type>::sValue;
 		}
 
-
-
-		template <typename TpVal, typename TpSrc>
-		inline gds_size_t queryMinByteSize( const ValueProxy<TpVal, TpSrc> & pValueProxy )
+		template <typename TpRef, typename TpInternal>
+		inline gds_size_t queryMinByteSize( const ValueRef<TpRef, TpInternal> & pValueRef )
 		{
-			return queryMinByteSize( pValueProxy.get() );
+			return queryMinByteSize( pValueRef.get() );
 		}
 
-		template <typename TpVal, typename TpSrc>
-		inline gds_size_t queryMinByteSize( const TpVal & pValue, const ValueCast<void, void> & )
+		template <typename Tp, typename TpInternal, std::enable_if_t<std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t queryMinByteSize( const Tp & pValue, const TypeCastTag<TpInternal> & )
 		{
 			return queryMinByteSize( pValue );
 		}
 
-		template <typename TpVal, typename TpSrc>
-		inline gds_size_t queryMinByteSize( const TpVal & pValue, const ValueCast<TpVal, TpSrc> & )
+		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t queryMinByteSize( const Tp & pValue, const TypeCastTag<TpInternal> & )
 		{
-			return queryMinByteSize( ValueProxy<TpVal, TpSrc>{ pValue } );
+			return queryMinByteSize( ValueRef<const Tp, TpInternal>{ pValue } );
 		}
 
-		template <typename TpVal, typename TpSrc, std::enable_if_t<!std::is_void<TpVal>::value && !std::is_void<TpSrc>::value, int> = 0>
-		inline gds_size_t queryMinByteSize( const ValueCast<TpVal, TpSrc> & pValueCast )
+		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t queryMinByteSize( const TypeCastInfo<Tp, TpInternal> & pCastInfo )
 		{
-			return queryMinByteSize( pValueCast.srcRef, pValueCast );
+			return queryMinByteSize( pCastInfo.refWrapper.get(), pCastInfo.castTag );
 		}
-
-
-		template <typename TpVal, typename TpTgt>
-		inline gds_size_t queryMinByteSize( const RefProxy<TpVal, TpTgt> & pRefProxy )
-		{
-			return queryMinByteSize( pRefProxy.get() );
-		}
-
-		template <typename TpVal, typename TpTgt>
-		inline gds_size_t queryMinByteSize( TpVal & pRef, const RefCast<void, void> & )
-		{
-			return queryMinByteSize( pRef );
-		}
-
-		template <typename TpVal, typename TpTgt>
-		inline gds_size_t queryMinByteSize( TpVal & pRef, const RefCast<TpVal, TpTgt> & )
-		{
-			return queryMinByteSize( RefProxy<TpVal, TpTgt>{ pRef } );
-		}
-
-		template <typename TpVal, typename TpTgt, std::enable_if_t<!std::is_void<TpVal>::value && !std::is_void<TpTgt>::value, int> = 0>
-		inline gds_size_t queryMinByteSize( const RefCast<TpVal, TpTgt> & pRefCast )
-		{
-			return queryMinByteSize( pRefCast.targetRef.get(), pRefCast );
-		}
-
-//		template <typename TpVal, typename TpTgt>
-//		inline constexpr gds_size_t queryMinByteSize( const OutputRefWrapper<TpVal, TpTgt> & pRef )
-//		{
-//			return ArithmeticTypeSerializedSize<typename OutputRefWrapper<TpVal, TpTgt>::ValueType>::sValue;
-//		}
-//
-//		template <typename Tp>
-//		inline constexpr gds_size_t queryMinByteSize( const Tp & pRef, const TypeCastIgnoreTag & )
-//		{
-//			return queryMinByteSize( pRef );
-//		}
-//
-//		template <typename Tp>
-//		inline constexpr gds_size_t queryMinByteSize( const Tp &, const TypeCastNativeIntTag & )
-//		{
-//			return queryMinByteSize( emptyNativeIntRef() );
-//		}
-//
-//		template <typename Tp>
-//		inline constexpr gds_size_t queryMinByteSize( const Tp &, const TypeCastSizeTypeTag & )
-//		{
-//			return queryMinByteSize( emptySizeTypeRef() );
-//		}
-//
-//		template <typename Tp>
-//		inline constexpr gds_size_t queryMinByteSize( const Tp &, const TypeCastTypeIDTag & )
-//		{
-//			return queryMinByteSize( emptyTypeIDRef() );
-//		}
-//
-//		template <typename Tp, typename TpCast>
-//		inline constexpr gds_size_t queryMinByteSize( const TypeCastProxy<Tp, TpCast> & pCastProxy )
-//		{
-//			return queryMinByteSize( pCastProxy.first.get(), pCastProxy.second.get() );
-//		}
 
 		template <typename Tp>
 		gds_size_t queryMinByteSizeAll( const Tp & pValue )
