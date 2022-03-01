@@ -3,11 +3,13 @@
 #define __TS3_PLATFORM_GDS_H__
 
 #include "platform.h"
+#include <typeinfo>
 
 namespace ts3
 {
 
 	using gds_size_t = uint64;
+	using gds_size_marker_t = uint32;
 	using gds_type_id_t = uint64;
 	
 	enum class EByteOrder : uint32
@@ -26,6 +28,8 @@ namespace ts3
 	
 	namespace gds
 	{
+
+		inline constexpr auto CX_SIZE_MARKER_SIZE = static_cast<gds_size_t>( sizeof( gds_size_marker_t ) );
 
 		/// @brief Precision of the decimal part used for 'float' (de)serialization.
 		inline constexpr uint32 CX_SERIALIZE_FLT32_DECIMAL_PRECISION = 10000u;
@@ -116,7 +120,7 @@ namespace ts3
 			/// @param pByteOrder    Byte order which should be used for types larger than 1 byte.
 			/// @param pValue        Integral value to serialize.
 			template <typename Tp>
-			static void serializeIntegral( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp pValue );
+			static void serializeIntegral( EByteOrder pByteOrder, byte * pOutputBuffer, const Tp pValue );
 
 			/// @brief Deserializes the byte representation of an integral, stored in a given ByteOrder, and returns it.
 			///
@@ -125,7 +129,7 @@ namespace ts3
 			/// @param pInputData Pointer to the beginning of the serialized data.
 			/// @param pByteOrder Byte order in which the input data has been serialized.
 			template <typename Tp>
-			static Tp deserializeIntegral( const byte * pInputData, EByteOrder pByteOrder );
+			static Tp deserializeIntegral( EByteOrder pByteOrder, const byte * pInputData );
 		};
 
 		/// @brief Specialization of IntegralTypeSerializeProxy for 1-byte integral types.
@@ -133,13 +137,13 @@ namespace ts3
 		struct IntegralTypeSerializeProxy<1>
 		{
 			template <typename Tp>
-			static inline void serializeIntegral( byte * pOutputBuffer, EByteOrder /* pByteOrder */, const Tp pValue )
+			static inline void serializeIntegral( EByteOrder /* pByteOrder */, byte * pOutputBuffer, const Tp pValue )
 			{
 				*( reinterpret_cast<Tp *>( pOutputBuffer ) ) = pValue;
 			}
 
 			template <typename Tp>
-			static inline Tp deserializeIntegral( const byte * pInputData, EByteOrder /* pByteOrder */ )
+			static inline Tp deserializeIntegral( EByteOrder /* pByteOrder */, const byte * pInputData )
 			{
 				return *( reinterpret_cast<const Tp *>( pInputData ) );
 			}
@@ -150,7 +154,7 @@ namespace ts3
 		struct IntegralTypeSerializeProxy<2>
 		{
 			template <typename Tp>
-			static inline void serializeIntegral( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp pValue )
+			static inline void serializeIntegral( EByteOrder pByteOrder, byte * pOutputBuffer, const Tp pValue )
 			{
 				if( pByteOrder == EByteOrder::Native )
 				{
@@ -164,7 +168,7 @@ namespace ts3
 
 			/// @brief Specialization of IntegralTypeSerializeProxy for 4-byte integral types.
 			template <typename Tp>
-			static inline Tp deserializeIntegral( const byte * pInputData, EByteOrder pByteOrder )
+			static inline Tp deserializeIntegral( EByteOrder pByteOrder, const byte * pInputData )
 			{
 				if( pByteOrder == EByteOrder::Native )
 				{
@@ -182,7 +186,7 @@ namespace ts3
 		struct IntegralTypeSerializeProxy<4>
 		{
 			template <typename Tp>
-			static inline void serializeIntegral( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp pValue )
+			static inline void serializeIntegral( EByteOrder pByteOrder, byte * pOutputBuffer, const Tp pValue )
 			{
 				if( pByteOrder == EByteOrder::Native )
 				{
@@ -195,7 +199,7 @@ namespace ts3
 			}
 
 			template <typename Tp>
-			static inline Tp deserializeIntegral( const byte * pInputData, EByteOrder pByteOrder )
+			static inline Tp deserializeIntegral( EByteOrder pByteOrder, const byte * pInputData )
 			{
 				if( pByteOrder == EByteOrder::Native )
 				{
@@ -213,7 +217,7 @@ namespace ts3
 		struct IntegralTypeSerializeProxy<8>
 		{
 			template <typename Tp>
-			static inline void serializeIntegral( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp pValue )
+			static inline void serializeIntegral( EByteOrder pByteOrder, byte * pOutputBuffer, const Tp pValue )
 			{
 				if( pByteOrder == EByteOrder::Native )
 				{
@@ -226,7 +230,7 @@ namespace ts3
 			}
 
 			template <typename Tp>
-			static inline Tp deserializeIntegral( const byte * pInputData, EByteOrder pByteOrder )
+			static inline Tp deserializeIntegral( EByteOrder pByteOrder, const byte * pInputData )
 			{
 				if( pByteOrder == EByteOrder::Native )
 				{
@@ -240,74 +244,74 @@ namespace ts3
 		};
 
 		template <typename Tp, std::enable_if_t<IsCharType<Tp>::sValue || IsArithmetic<Tp>::sValue, int> = 0>
-		inline void serializePrimitive( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp pValue )
+		inline void serializePrimitive( EByteOrder pByteOrder, byte * pOutputBuffer, const Tp pValue )
 		{
-			IntegralTypeSerializeProxy<sizeof( Tp )>::template serializeIntegral( pOutputBuffer, pByteOrder, pValue );
+			IntegralTypeSerializeProxy<sizeof( Tp )>::template serializeIntegral( pByteOrder, pOutputBuffer, pValue );
 		}
 
 		template <typename Tp, std::enable_if_t<IsWideChar<Tp>::sValue, int> = 0>
-		inline void serializePrimitive( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp pValue )
+		inline void serializePrimitive( EByteOrder pByteOrder, byte * pOutputBuffer, const Tp pValue )
 		{
-			serializePrimitive<uint32>( pOutputBuffer, pByteOrder, static_cast<uint32>( pValue ) );
+			serializePrimitive<uint32>( pByteOrder, pOutputBuffer, static_cast<uint32>( pValue ) );
 		}
 
 		template <>
-		inline void serializePrimitive<float>( byte * pOutputBuffer, EByteOrder pByteOrder, const float pValue )
+		inline void serializePrimitive<float>( EByteOrder pByteOrder, byte * pOutputBuffer, const float pValue )
 		{
 			int exponent; auto base = frexpf( pValue, &exponent ) * CX_SERIALIZE_FLT32_DECIMAL_PRECISION;
-			serializePrimitive<uint32>( pOutputBuffer, pByteOrder, static_cast<uint32>( base ) );
-			serializePrimitive<uint32>( pOutputBuffer + sizeof( uint32 ), pByteOrder, static_cast<uint32>( exponent ) );
+			serializePrimitive<uint32>( pByteOrder, pOutputBuffer, static_cast<uint32>( base ) );
+			serializePrimitive<uint32>( pByteOrder, pOutputBuffer + sizeof( uint32 ), static_cast<uint32>( exponent ) );
 		}
 
 		template <>
-		inline void serializePrimitive<double>( byte * pOutputBuffer, EByteOrder pByteOrder, const double pValue )
+		inline void serializePrimitive<double>( EByteOrder pByteOrder, byte * pOutputBuffer, const double pValue )
 		{
 			int exponent; auto base = frexp( pValue, &exponent ) * CX_SERIALIZE_FLT64_DECIMAL_PRECISION;
-			serializePrimitive<uint32>( pOutputBuffer, pByteOrder, static_cast<uint32>( base ) );
-			serializePrimitive<uint32>( pOutputBuffer + sizeof( uint32 ), pByteOrder, static_cast<uint32>( exponent ) );
+			serializePrimitive<uint32>( pByteOrder, pOutputBuffer, static_cast<uint32>( base ) );
+			serializePrimitive<uint32>( pByteOrder, pOutputBuffer + sizeof( uint32 ), static_cast<uint32>( exponent ) );
 		}
 
 		template <>
-		inline void serializePrimitive<long double>( byte * pOutputBuffer, EByteOrder pByteOrder, const long double pValue )
+		inline void serializePrimitive<long double>( EByteOrder pByteOrder, byte * pOutputBuffer, const long double pValue )
 		{
 			int exponent; auto base = frexpl( pValue, &exponent ) * CX_SERIALIZE_FLT80_DECIMAL_PRECISION;
-			serializePrimitive<uint64>( pOutputBuffer, pByteOrder, static_cast<uint64>( base ) );
-			serializePrimitive<uint32>( pOutputBuffer + sizeof( uint32 ), pByteOrder, static_cast<uint32>( exponent ) );
+			serializePrimitive<uint64>( pByteOrder, pOutputBuffer, static_cast<uint64>( base ) );
+			serializePrimitive<uint32>( pByteOrder, pOutputBuffer + sizeof( uint32 ), static_cast<uint32>( exponent ) );
 		}
 
 		template <typename Tp, std::enable_if_t<IsCharType<Tp>::sValue || IsArithmetic<Tp>::sValue, int> = 0>
-		inline Tp deserializePrimitive( const byte * pInputData, EByteOrder pByteOrder )
+		inline Tp deserializePrimitive( EByteOrder pByteOrder, const byte * pInputData )
 		{
-			return IntegralTypeSerializeProxy<sizeof( Tp )>::template deserializeIntegral<Tp>( pInputData, pByteOrder );
+			return IntegralTypeSerializeProxy<sizeof( Tp )>::template deserializeIntegral<Tp>( pByteOrder, pInputData );
 		}
 
 		template <typename Tp, std::enable_if_t<IsWideChar<Tp>::sValue, int> = 0>
-		inline Tp deserializePrimitive( const byte * pInputData, EByteOrder pByteOrder )
+		inline Tp deserializePrimitive( EByteOrder pByteOrder, const byte * pInputData )
 		{
-			return static_cast<Tp>( deserializePrimitive<uint32>( pInputData, pByteOrder ) );
+			return static_cast<Tp>( deserializePrimitive<uint32>( pByteOrder, pInputData ) );
 		}
 
 		template <>
-		inline float deserializePrimitive<float>( const byte * pInputData, EByteOrder pByteOrder )
+		inline float deserializePrimitive<float>( EByteOrder pByteOrder, const byte * pInputData )
 		{
-			auto intBase = deserializePrimitive<uint32>( pInputData, pByteOrder );
-			auto exponent = deserializePrimitive<uint32>( pInputData + sizeof( intBase ), pByteOrder );
+			auto intBase = deserializePrimitive<uint32>( pByteOrder, pInputData );
+			auto exponent = deserializePrimitive<uint32>( pByteOrder, pInputData + sizeof( intBase ) );
 			return ldexpf( static_cast<float>( intBase ) / CX_SERIALIZE_FLT32_DECIMAL_PRECISION, exponent );
 		}
 
 		template <>
-		inline double deserializePrimitive<double>( const byte * pInputData, EByteOrder pByteOrder )
+		inline double deserializePrimitive<double>( EByteOrder pByteOrder, const byte * pInputData )
 		{
-			auto intBase = deserializePrimitive<uint32>( pInputData, pByteOrder );
-			auto exponent = deserializePrimitive<uint32>( pInputData + sizeof( intBase ), pByteOrder );
+			auto intBase = deserializePrimitive<uint32>( pByteOrder, pInputData );
+			auto exponent = deserializePrimitive<uint32>( pByteOrder, pInputData + sizeof( intBase ) );
 			return ldexp( static_cast<double>( intBase ) / CX_SERIALIZE_FLT64_DECIMAL_PRECISION, exponent );
 		}
 
 		template <>
-		inline long double deserializePrimitive<long double>( const byte * pInputData, EByteOrder pByteOrder )
+		inline long double deserializePrimitive<long double>( EByteOrder pByteOrder, const byte * pInputData )
 		{
-			auto intBase = deserializePrimitive<uint64>( pInputData, pByteOrder );
-			auto exponent = deserializePrimitive<uint32>( pInputData + sizeof( intBase ), pByteOrder );
+			auto intBase = deserializePrimitive<uint64>( pByteOrder, pInputData );
+			auto exponent = deserializePrimitive<uint32>( pByteOrder, pInputData + sizeof( intBase ) );
 			return ldexpl( static_cast<long double>( intBase ) / CX_SERIALIZE_FLT80_DECIMAL_PRECISION, exponent );
 		}
 
@@ -426,126 +430,138 @@ namespace ts3
 		}
 
 
+		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value, int> = 0>
+		inline constexpr gds_size_marker_t sizeMarker( const Tp pSizeMarker )
+		{
+			return static_cast<gds_size_marker_t>( pSizeMarker );
+		}
+
+
 
 		template <typename Tp, std::enable_if_t<IsTriviallySerializable<Tp>::sValue, int> = 0>
-		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder /* pByteOrder */, const Tp & pValue )
+		inline gds_size_t serialize( byte * pOutputBuffer, const Tp & pValue )
 		{
-			std::memcpy( pOutputBuffer, &pValue, sizeof( Tp ) );
-			return sizeof( Tp );
+			serializePrimitive( EByteOrder::BigEndian, pOutputBuffer, sizeMarker( sizeof( Tp ) ) );
+			std::memcpy( pOutputBuffer + CX_SIZE_MARKER_SIZE, &pValue, sizeof( Tp ) );
+			return sizeof( Tp ) + CX_SIZE_MARKER_SIZE;
 		}
 
 		template <typename Tp, std::enable_if_t<IsArithmetic<Tp>::sValue || IsCharType<Tp>::sValue || IsWideChar<Tp>::sValue, int> = 0>
-		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp pValue )
+		inline gds_size_t serialize( byte * pOutputBuffer, const Tp pValue )
 		{
-			serializePrimitive( pOutputBuffer, pByteOrder, pValue );
+			serializePrimitive( EByteOrder::BigEndian, pOutputBuffer, pValue );
 			return ArithmeticTypeSerializedSize<Tp>::sValue;
 		}
 
 		template <typename Tp, std::enable_if_t<std::is_enum<Tp>::value, int> = 0>
-		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp pValue )
+		inline gds_size_t serialize( byte * pOutputBuffer, const Tp pValue )
 		{
-			serializePrimitive( pOutputBuffer, pByteOrder, static_cast<typename std::underlying_type<Tp>::type>( pValue ) );
+			serializePrimitive( EByteOrder::BigEndian, pOutputBuffer, static_cast<typename std::underlying_type<Tp>::type>( pValue ) );
 			return ArithmeticTypeSerializedSize<typename std::underlying_type<Tp>::type>::sValue;
 		}
 
 		template <typename TpRef, typename TpInternal>
-		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const ValueRef<TpRef, TpInternal> & pValueRef )
+		inline gds_size_t serialize( byte * pOutputBuffer, const ValueRef<TpRef, TpInternal> & pValueRef )
 		{
-			serializePrimitive( pOutputBuffer, pByteOrder, pValueRef.get() );
+			// ValueRef::get() returns the original value (of TpRef type) cast to TpInternal type.
+			// Hence, it will trigger serialization as a different type than the original one.
+			serializePrimitive( EByteOrder::BigEndian, pOutputBuffer, pValueRef.get() );
 			return ArithmeticTypeSerializedSize<typename ValueRef<TpRef, TpInternal>::InternalType>::sValue;
 		}
 
 		template <typename Tp, typename TpInternal, std::enable_if_t<std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp & pValue, const TypeCastTag<TpInternal> & )
+		inline gds_size_t serialize( byte * pOutputBuffer, const Tp & pValue, const TypeCastTag<TpInternal> & )
 		{
-			return serialize( pOutputBuffer, pByteOrder, pValue );
+			return serialize( pOutputBuffer, pValue );
 		}
 
 		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp & pValue, const TypeCastTag<TpInternal> & )
+		inline gds_size_t serialize( byte * pOutputBuffer, const Tp & pValue, const TypeCastTag<TpInternal> & )
 		{
-			return serialize( pOutputBuffer, pByteOrder, ValueRef<Tp, TpInternal>{ pValue } );
+			return serialize( pOutputBuffer, ValueRef<Tp, TpInternal>{ pValue } );
 		}
 
 		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t serialize( byte * pOutputBuffer, EByteOrder pByteOrder, const TypeCastInfo<Tp, TpInternal> & pCastInfo )
+		inline gds_size_t serialize( byte * pOutputBuffer, const TypeCastInfo<Tp, TpInternal> & pCastInfo )
 		{
-			return serialize( pOutputBuffer, pByteOrder, pCastInfo.refWrapper.get(), pCastInfo.castTag );
+			return serialize( pOutputBuffer, pCastInfo.refWrapper.get(), pCastInfo.castTag );
 		}
 
 		template <typename Tp>
-		gds_size_t serializeAll( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp & pValue )
+		gds_size_t serializeAll( byte * pOutputBuffer, const Tp & pValue )
 		{
-			return serialize( pOutputBuffer, pByteOrder, pValue );
+			return serialize( pOutputBuffer, pValue );
 		}
 
 		template <typename Tp, typename... TpRest>
-		gds_size_t serializeAll( byte * pOutputBuffer, EByteOrder pByteOrder, const Tp & pValue, TpRest && ...pRest )
+		gds_size_t serializeAll( byte * pOutputBuffer, const Tp & pValue, TpRest && ...pRest )
 		{
-			gds_size_t byteSize = serialize( pOutputBuffer, pByteOrder, pValue );
-			byteSize += serializeAll( pOutputBuffer + byteSize, pByteOrder, std::forward<TpRest>( pRest )... );
+			gds_size_t byteSize = serialize( pOutputBuffer, pValue );
+			byteSize += serializeAll( pOutputBuffer + byteSize, std::forward<TpRest>( pRest )... );
 			return byteSize;
 		}
 
 
 
 		template <typename Tp, std::enable_if_t<IsTriviallySerializable<Tp>::sValue, int> = 0>
-		inline gds_size_t deserialize( const byte * pInputData, EByteOrder /* pByteOrder */, Tp & pValue )
+		inline gds_size_t deserialize( const byte * pInputData, Tp & pValue )
 		{
-			std::memcpy( &pValue, pInputData, sizeof( Tp ) );
-			return sizeof( Tp );
+			const auto sizeMarker = deserializePrimitive<gds_size_marker_t>( EByteOrder::BigEndian, pInputData );
+			ts3DebugAssert( sizeMarker == sizeof( Tp ) );
+			std::memcpy( &pValue, pInputData + CX_SIZE_MARKER_SIZE, sizeof( Tp ) );
+			return sizeof( Tp ) + CX_SIZE_MARKER_SIZE;
 		}
 
 		template <typename Tp, std::enable_if_t<IsArithmetic<Tp>::sValue || IsCharType<Tp>::sValue || IsWideChar<Tp>::sValue, int> = 0>
-		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, Tp & pValue )
+		inline gds_size_t deserialize( const byte * pInputData, Tp & pValue )
 		{
-			pValue = deserializePrimitive<Tp>( pInputData, pByteOrder );
+			pValue = deserializePrimitive<Tp>( EByteOrder::BigEndian, pInputData );
 			return ArithmeticTypeSerializedSize<Tp>::sValue;
 		}
 
 		template <typename Tp, std::enable_if_t<std::is_enum<Tp>::value, int> = 0>
-		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, Tp & pValue )
+		inline gds_size_t deserialize( const byte * pInputData, Tp & pValue )
 		{
-			pValue = static_cast<Tp>( deserializePrimitive<typename std::underlying_type<Tp>::type>( pInputData, pByteOrder ) );
+			pValue = static_cast<Tp>( deserializePrimitive<typename std::underlying_type<Tp>::type>( EByteOrder::BigEndian, pInputData ) );
 			return ArithmeticTypeSerializedSize<typename std::underlying_type<Tp>::type>::sValue;
 		}
 
 		template <typename TpRef, typename TpInternal>
-		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, const ValueRef<TpRef, TpInternal> & pValueRef )
+		inline gds_size_t deserialize( const byte * pInputData, const ValueRef<TpRef, TpInternal> & pValueRef )
 		{
-			pValueRef.set( deserializePrimitive<TpInternal>( pInputData, pByteOrder ) );
+			pValueRef.set( deserializePrimitive<TpInternal>( EByteOrder::BigEndian, pInputData ) );
 			return ArithmeticTypeSerializedSize<TpInternal>::sValue;
 		}
 
 		template <typename Tp, typename TpInternal, std::enable_if_t<std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, Tp & pRef, const TypeCastTag<TpInternal> & )
+		inline gds_size_t deserialize( const byte * pInputData, Tp & pRef, const TypeCastTag<TpInternal> & )
 		{
-			return deserialize( pInputData, pByteOrder, pRef );
+			return deserialize( pInputData, pRef );
 		}
 
 		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, Tp & pRef, const TypeCastTag<TpInternal> & )
+		inline gds_size_t deserialize( const byte * pInputData, Tp & pRef, const TypeCastTag<TpInternal> & )
 		{
-			return deserialize( pInputData, pByteOrder, ValueRef<Tp, TpInternal>{ pRef } );
+			return deserialize( pInputData, ValueRef<Tp, TpInternal>{ pRef } );
 		}
 
 		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t deserialize( const byte * pInputData, EByteOrder pByteOrder, const TypeCastInfo<Tp, TpInternal> & pCastInfo )
+		inline gds_size_t deserialize( const byte * pInputData, const TypeCastInfo<Tp, TpInternal> & pCastInfo )
 		{
-			return deserialize( pInputData, pByteOrder, pCastInfo.refWrapper.get(), pCastInfo.castTag );
+			return deserialize( pInputData, pCastInfo.refWrapper.get(), pCastInfo.castTag );
 		}
 
 		template <typename Tp>
-		gds_size_t deserializeAll( const byte * pInputData, EByteOrder pByteOrder, Tp & pValue )
+		gds_size_t deserializeAll( const byte * pInputData, Tp & pValue )
 		{
-			return deserialize( pInputData, pByteOrder, pValue );
+			return deserialize( pInputData, pValue );
 		}
 
 		template <typename Tp, typename... TpRest>
-		gds_size_t deserializeAll( const byte * pInputData, EByteOrder pByteOrder, Tp & pValue, TpRest && ...pRest )
+		gds_size_t deserializeAll( const byte * pInputData, Tp & pValue, TpRest && ...pRest )
 		{
-			gds_size_t byteSize = deserialize( pInputData, pByteOrder, pValue );
-			byteSize += deserializeAll( pInputData + byteSize, pByteOrder, std::forward<TpRest>( pRest )... );
+			gds_size_t byteSize = deserialize( pInputData, pValue );
+			byteSize += deserializeAll( pInputData + byteSize, std::forward<TpRest>( pRest )... );
 			return byteSize;
 		}
 
@@ -607,60 +623,92 @@ namespace ts3
 		}
 
 
-		template <typename Tp, std::enable_if_t<IsTriviallySerializable<Tp>::sValue, int> = 0>
-		inline constexpr gds_size_t queryMinByteSize( const Tp & )
+		inline constexpr uint32 CX_GDS_VALUE_META_INFO_CONTROL_KEY = 0x7CCC7333;
+
+		struct ValueMetaInfo
 		{
-			return sizeof( Tp );
+			uint32 controlKey;
+			uint64 dataSize;
+
+			static constexpr gds_size_t sByteSize = sizeof( controlKey ) + sizeof( dataSize );
+
+			constexpr explicit operator bool() const
+			{
+				return controlKey == CX_GDS_VALUE_META_INFO_CONTROL_KEY;
+			}
+		};
+
+		inline gds_size_t serialize( EByteOrder pByteOrder, byte * pOutputBuffer, const ValueMetaInfo & pValue )
+		{
+			gds_size_t byteSize = 0;
+			byteSize += serialize( pOutputBuffer, pValue.controlKey );
+			byteSize += serialize( pOutputBuffer + byteSize, pValue.dataSize );
+			return byteSize;
 		}
 
-		template <typename Tp, std::enable_if_t<IsArithmetic<Tp>::sValue || IsCharType<Tp>::sValue || IsWideChar<Tp>::sValue, int> = 0>
-		inline constexpr gds_size_t queryMinByteSize( Tp )
+		inline gds_size_t deserialize( EByteOrder pByteOrder, const byte * pInputData, ValueMetaInfo & pValue )
 		{
-			return ArithmeticTypeSerializedSize<Tp>::sValue;
+			gds_size_t byteSize = 0;
+			byteSize += deserialize( pInputData, pValue.controlKey );
+			byteSize += deserialize( pInputData + byteSize, pValue.dataSize );
+			return byteSize;
 		}
 
-		template <typename Tp, std::enable_if_t<std::is_enum<Tp>::value, int> = 0>
-		inline constexpr gds_size_t queryMinByteSize( Tp )
+		inline constexpr gds_size_t evalByteSize( const ValueMetaInfo & pValue )
 		{
-			return ArithmeticTypeSerializedSize<typename std::underlying_type<Tp>::type>::sValue;
+			return ValueMetaInfo::sByteSize;
 		}
 
-		template <typename TpRef, typename TpInternal>
-		inline gds_size_t queryMinByteSize( const ValueRef<TpRef, TpInternal> & pValueRef )
+		inline constexpr gds_size_t getValueMetaInfoSize()
 		{
-			return queryMinByteSize( pValueRef.get() );
-		}
-
-		template <typename Tp, typename TpInternal, std::enable_if_t<std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t queryMinByteSize( const Tp & pValue, const TypeCastTag<TpInternal> & )
-		{
-			return queryMinByteSize( pValue );
-		}
-
-		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t queryMinByteSize( const Tp & pValue, const TypeCastTag<TpInternal> & )
-		{
-			return queryMinByteSize( ValueRef<const Tp, TpInternal>{ pValue } );
-		}
-
-		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t queryMinByteSize( const TypeCastInfo<Tp, TpInternal> & pCastInfo )
-		{
-			return queryMinByteSize( pCastInfo.refWrapper.get(), pCastInfo.castTag );
+			return ValueMetaInfo::sByteSize;
 		}
 
 		template <typename Tp>
-		gds_size_t queryMinByteSizeAll( const Tp & pValue )
+		inline gds_size_t serializeWithMetaInfo( byte * pOutputBuffer, const Tp & pValue )
 		{
-			return queryMinByteSize( pValue );
+			const auto metaInfoSize = getValueMetaInfoSize();
+
+			const auto byteSize = serialize( pOutputBuffer + metaInfoSize, pValue );
+
+			ValueMetaInfo metaInfo;
+			metaInfo.dataSize = byteSize;
+
+			serialize( pOutputBuffer, metaInfo );
+
+			return metaInfoSize + byteSize;
 		}
 
-		template <typename Tp, typename... TpRest>
-		gds_size_t queryMinByteSizeAll( const Tp & pValue, TpRest && ...pRest )
+		template <typename Tp>
+		inline gds_size_t deserializeWithMetaInfo( const byte * pInputData, Tp & pValue )
 		{
-			gds_size_t byteSize = queryMinByteSize( pValue );
-			byteSize += queryMinByteSizeAll( std::forward<TpRest>( pRest )... );
-			return byteSize;
+			ValueMetaInfo valueMetaInfo;
+			const auto valueDataOffset = deserialize( pInputData, valueMetaInfo );
+
+			const auto byteSize = deserialize( pInputData + valueDataOffset, pValue );
+
+			return valueDataOffset + byteSize;
+		}
+
+		template <typename Tp>
+		inline gds_size_t evalByteSizeWithMetaInfo( const Tp & pValue )
+		{
+			const auto metaInfoSize = getValueMetaInfoSize();
+			const auto valueByteSize = evalByteSize( pValue );
+
+			if( valueByteSize == 0 )
+			{
+				return 0;
+			}
+
+			return metaInfoSize + valueByteSize;
+		}
+
+		inline ValueMetaInfo readValueMetaInfo( const byte * pInputData )
+		{
+			ValueMetaInfo valueMetaInfo;
+			deserialize( pInputData, valueMetaInfo );
+			return valueMetaInfo;
 		}
 
 	}

@@ -29,8 +29,8 @@ namespace ts3
 
 		template <typename _Ch, typename _Tr, typename _Alloc, typename _Cast = void>
 		inline gds_size_t evalByteSize(
-				const std::basic_string<_Ch, _Tr, _Alloc> & pString,
-				const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
+			const std::basic_string<_Ch, _Tr, _Alloc> & pString,
+			const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
 		{
 			gds_size_t byteSize = 0;
 			// The first member is the length of the specified string.
@@ -42,30 +42,18 @@ namespace ts3
 		}
 
 		template <typename _Ch, typename _Tr, typename _Alloc, typename _Cast = void>
-		inline gds_size_t queryMinByteSize(
-				const std::basic_string<_Ch, _Tr, _Alloc> & pString,
-				const TypeCastTag<_Cast> & = cvTypeCastNone )
-		{
-			gds_size_t byteSize = 0;
-			// The length of a string is always there, expressed as a size_type. Empty string contains just this.
-			byteSize += evalByteSize( emptySizeType() );
-			return byteSize;
-		}
-
-		template <typename _Ch, typename _Tr, typename _Alloc, typename _Cast = void>
 		inline gds_size_t serialize(
-				byte * pOutputBuffer,
-				EByteOrder pByteOrder,
-				const std::basic_string<_Ch, _Tr, _Alloc> & pString,
-				const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
+			byte * pOutputBuffer,
+			const std::basic_string<_Ch, _Tr, _Alloc> & pString,
+			const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
 		{
 			const auto strLength = pString.length();
 
-			gds_size_t byteSize = serialize( pOutputBuffer, pByteOrder, asSizeType( strLength ) );
+			gds_size_t byteSize = serialize( pOutputBuffer, asSizeType( strLength ) );
 
 			for( size_t charIndex = 0; charIndex < strLength; ++charIndex )
 			{
-				byteSize += serialize( pOutputBuffer + byteSize, pByteOrder, pString[charIndex], pCastTag );
+				byteSize += serialize( pOutputBuffer + byteSize, pString[charIndex], pCastTag );
 			}
 
 			return byteSize;
@@ -74,19 +62,18 @@ namespace ts3
 		template <typename _Ch, typename _Tr, typename _Alloc, typename _Cast = void>
 		inline gds_size_t deserialize(
 				const byte * pInputData,
-				EByteOrder pByteOrder,
 				std::basic_string<_Ch, _Tr, _Alloc> & pString,
 				const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
 		{
 			size_t strLength = 0;
 
-			gds_size_t byteSize = deserialize( pInputData, pByteOrder, asSizeType( strLength ) );
+			gds_size_t byteSize = deserialize( pInputData, asSizeType( strLength ) );
 
 			pString.resize( strLength );
 
 			for( size_t charIndex = 0; charIndex < strLength; ++charIndex )
 			{
-				byteSize += deserialize( pInputData + byteSize, pByteOrder, pString[charIndex], pCastTag );
+				byteSize += deserialize( pInputData + byteSize, pString[charIndex], pCastTag );
 			}
 
 			return byteSize;
@@ -108,39 +95,26 @@ namespace ts3
 		}
 
 		template <typename _Ty1, typename _Ty2, typename _Cast = void>
-		inline gds_size_t queryMinByteSize(
-			const std::pair<_Ty1, _Ty2> & pPair,
-			const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
-		{
-			gds_size_t byteSize = 0;
-			byteSize += queryMinByteSize( pPair.first, pCastTag );
-			byteSize += queryMinByteSize( pPair.second, pCastTag );
-			return byteSize;
-		}
-
-		template <typename _Ty1, typename _Ty2, typename _Cast = void>
 		inline gds_size_t serialize(
 			byte * pOutputBuffer,
-			EByteOrder pByteOrder,
 			const std::pair<_Ty1, _Ty2> & pPair,
 			const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
 		{
 			gds_size_t byteSize = 0;
-			byteSize += serialize( pOutputBuffer, pByteOrder, pPair.first, pCastTag );
-			byteSize += serialize( pOutputBuffer, pByteOrder, pPair.second, pCastTag );
+			byteSize += serialize( pOutputBuffer, pPair.first, pCastTag );
+			byteSize += serialize( pOutputBuffer, pPair.second, pCastTag );
 			return byteSize;
 		}
 
 		template <typename _Ty1, typename _Ty2, typename _Cast = void>
 		inline gds_size_t deserialize(
 			const byte * pInputData,
-			EByteOrder pByteOrder,
 			std::pair<_Ty1, _Ty2> & pPair,
 			const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
 		{
 			gds_size_t byteSize = 0;
-			byteSize += deserialize( pInputData, pByteOrder, pPair.first, pCastTag );
-			byteSize += deserialize( pInputData, pByteOrder, pPair.second, pCastTag );
+			byteSize += deserialize( pInputData, pPair.first, pCastTag );
+			byteSize += deserialize( pInputData, pPair.second, pCastTag );
 			return byteSize;
 		}
 
