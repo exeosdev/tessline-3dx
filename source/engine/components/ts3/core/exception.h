@@ -12,21 +12,41 @@ namespace ts3
 
     enum : exception_category_value_t
     {
-        E_EXCEPTION_CATEGORY_DEBUG              = ecDeclareExceptionCategory( ExceptionBaseType::Debug, 0 ),
-        E_EXCEPTION_CATEGORY_EXTERNAL           = ecDeclareExceptionCategory( ExceptionBaseType::External, 0 ),
-        E_EXCEPTION_CATEGORY_FRAMEWORK_CORE     = ecDeclareExceptionCategory( ExceptionBaseType::FrameworkCore, 0 ),
-        E_EXCEPTION_CATEGORY_FRAMEWORK_INTERNAL = ecDeclareExceptionCategory( ExceptionBaseType::FrameworkInternal, 0 ),
-        E_EXCEPTION_CATEGORY_INTERRUPT          = ecDeclareExceptionCategory( ExceptionBaseType::Interrupt, 0 ),
-        E_EXCEPTION_CATEGORY_MATH               = ecDeclareExceptionCategory( ExceptionBaseType::Math, 0 ),
-        E_EXCEPTION_CATEGORY_RESULT_PROXY       = ecDeclareExceptionCategory( ExceptionBaseType::ResultProxy, 0 ),
-        E_EXCEPTION_CATEGORY_SYSTEM             = ecDeclareExceptionCategory( ExceptionBaseType::System, 0 ),
-    };
+        E_EXCEPTION_CATEGORY_DEBUG =
+            ecDeclareExceptionCategory( ExceptionBaseType::Debug, ts3ExcCategoryIID( 0 ) ),
 
+        E_EXCEPTION_CATEGORY_ENGINE_SUBMODULE =
+            ecDeclareExceptionCategory( ExceptionBaseType::EngineSubModule, ts3ExcCategoryIID( 0 ) ),
+
+        E_EXCEPTION_CATEGORY_FRAMEWORK_CORE =
+            ecDeclareExceptionCategory( ExceptionBaseType::FrameworkCore, ts3ExcCategoryIID( 0 ) ),
+
+        E_EXCEPTION_CATEGORY_INTERNAL =
+            ecDeclareExceptionCategory( ExceptionBaseType::Internal, ts3ExcCategoryIID( 0 ) ),
+
+        E_EXCEPTION_CATEGORY_INTERRUPT =
+            ecDeclareExceptionCategory( ExceptionBaseType::Interrupt, ts3ExcCategoryIID( 0 ) ),
+
+        E_EXCEPTION_CATEGORY_MATH =
+            ecDeclareExceptionCategory( ExceptionBaseType::Math, ts3ExcCategoryIID( 0 ) ),
+
+        E_EXCEPTION_CATEGORY_RESULT_PROXY =
+            ecDeclareExceptionCategory( ExceptionBaseType::ResultProxy, ts3ExcCategoryIID( 0 ) ),
+
+        E_EXCEPTION_CATEGORY_SYSTEM =
+            ecDeclareExceptionCategory( ExceptionBaseType::System, ts3ExcCategoryIID( 0 ) ),
+
+        E_EXCEPTION_CATEGORY_USER_EXTERNAL =
+            ecDeclareExceptionCategory( ExceptionBaseType::UserExternal, ts3ExcCategoryIID( 0 ) ),
+    };
 
     enum : exception_code_value_t
     {
-        E_EXCEPTION_CODE_DEBUG_PLACEHOLDER = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_DEBUG, 0x01 ),
-        E_EXCEPTION_CODE_RESULT_CODE_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_RESULT_PROXY, 0x01 ),
+        E_EXCEPTION_CODE_DEBUG_PLACEHOLDER =
+            ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_DEBUG, ts3ExcCodeIID( 0x01 ) ),
+
+        E_EXCEPTION_CODE_RESULT_CODE_ERROR =
+            ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_RESULT_PROXY, ts3ExcCodeIID( 0x01 ) ),
     };
 
 	/// @brief
@@ -123,14 +143,14 @@ namespace ts3
 	/// @brief Default base class for ExceptionBaseType::Debug.
 	using DebugException = ExceptionClass<ExceptionBaseType::Debug>;
 
-	/// @brief Default base class for ExceptionBaseType::External.
-	using ExternalException = ExceptionClass<ExceptionBaseType::External>;
+	/// @brief Default base class for ExceptionBaseType::EngineSubModule.
+	using EngineSubModuleException = ExceptionClass<ExceptionBaseType::EngineSubModule>;
 
-	/// @brief Default base class for ExceptionBaseType::FrameworkInternal.
-	using FrameworkCoreException = ExceptionClass<ExceptionBaseType::FrameworkInternal>;
+	/// @brief Default base class for ExceptionBaseType::FrameworkCore.
+	using FrameworkCoreException = ExceptionClass<ExceptionBaseType::FrameworkCore>;
 
-	/// @brief Default base class for ExceptionBaseType::FrameworkInternal.
-	using FrameworkInternalException = ExceptionClass<ExceptionBaseType::FrameworkInternal>;
+	/// @brief Default base class for ExceptionBaseType::Internal.
+	using InternalException = ExceptionClass<ExceptionBaseType::Internal>;
 
 	/// @brief Default base class for ExceptionBaseType::Interrupt.
 	using InterruptException = ExceptionClass<ExceptionBaseType::Interrupt>;
@@ -140,6 +160,9 @@ namespace ts3
 
 	/// @brief Default base class for ExceptionBaseType::System.
 	using SystemException = ExceptionClass<ExceptionBaseType::System>;
+
+	/// @brief Default base class for ExceptionBaseType::UserExternal.
+	using UserExternalException = ExceptionClass<ExceptionBaseType::UserExternal>;
 
 	/// @brief Specialized class for ResultWrapper exceptions. Adds ResultProxy object.
 	template <typename TpValue, typename TpErrorPredicate>
