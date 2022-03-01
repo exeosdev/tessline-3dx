@@ -48,8 +48,8 @@ namespace ts3
 		TS3_PCL_ATTR_NO_DISCARD std::string toString() const;
 	};
 
-	constexpr Version cvVersionInvalid{ CX_UINT16_MAX, CX_UINT16_MAX };
-	constexpr Version cvVersionUnknown{ 0, 0 };
+	inline constexpr Version CX_VERSION_INVALID{ CX_UINT16_MAX, CX_UINT16_MAX };
+	inline constexpr Version CX_VERSION_UNKNOWN{ 0, 0 };
 
 	inline bool operator==( const Version & pLhs, const Version & pRhs )
 	{

@@ -7,8 +7,9 @@
 
 namespace ts3
 {
+
 	template <typename TpUint, size_t tShift, typename TpInput>
-	static inline constexpr TpUint bshLeft( TpInput pValue )
+	inline constexpr TpUint bshLeft( TpInput pValue )
 	{
 		static_assert( sizeof( TpUint ) >= sizeof( TpInput ), "Target uint type has smaller size than the input, explicit cast required" );
 		static_assert( tShift <= sizeof( TpUint ) * CHAR_BIT, "Bit shift outside the integer range is an Undefined Behaviour" );
@@ -16,7 +17,7 @@ namespace ts3
 	}
 
 	template <typename TpUint, size_t tShift, typename TpInput>
-	static inline constexpr TpUint bshRight( TpInput pValue )
+	inline constexpr TpUint bshRight( TpInput pValue )
 	{
 		static_assert( sizeof( TpUint ) >= sizeof( TpInput ), "Target uint type has smaller size than the input, explicit cast required" );
 		static_assert( tShift <= sizeof( TpUint ) * CHAR_BIT, "Bit shift outside the integer range is an Undefined Behaviour" );

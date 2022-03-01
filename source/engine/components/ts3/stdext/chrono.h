@@ -65,16 +65,16 @@ namespace ts3
 	using Milliseconds = Duration<EDurationPeriod::Millisecond>;
 	using Seconds = Duration<EDurationPeriod::Second>;
 
-		/// @brief Infinite timeout expressed as Nanoseconds value.
-	constexpr Nanoseconds cvTimeoutInfiniteNs { CX_INT64_MAX };
+	/// @brief Infinite timeout expressed as Nanoseconds value.
+	inline constexpr Nanoseconds cvTimeoutInfiniteNs { CX_INT64_MAX };
 
 	/// @brief Infinite timeout expressed as Microseconds value.
-	constexpr Microseconds cvTimeoutInfiniteUs { CX_INT64_MAX };
+	inline constexpr Microseconds cvTimeoutInfiniteUs { CX_INT64_MAX };
 
 	/// @brief Infinite timeout expressed as Milliseconds value.
-	constexpr Milliseconds cvTimeoutInfiniteMs { CX_INT64_MAX };
+	inline constexpr Milliseconds cvTimeoutInfiniteMs { CX_INT64_MAX };
 
 	/// @brief Infinite timeout expressed as Seconds value.
-	constexpr Seconds cvTimeoutInfiniteSec { CX_INT64_MAX };
+	inline constexpr Seconds cvTimeoutInfiniteSec { CX_INT64_MAX };
 
 }

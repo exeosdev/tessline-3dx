@@ -3,6 +3,7 @@
 #define __TS3_STDEXT_BITMASK_H__
 
 #include "typeTraits.h"
+#include <ts3/platform/gds.h>
 
 namespace ts3
 {
