@@ -1,6 +1,6 @@
 
-#ifndef __TS3_STDEXT_STATIC_ALGO_H__
-#define __TS3_STDEXT_STATIC_ALGO_H__
+#ifndef __TS3_STDEXT_STATIC_LIMITS_H__
+#define __TS3_STDEXT_STATIC_LIMITS_H__
 
 #include "prerequisites.h"
 #include <cfloat>
@@ -205,4 +205,4 @@ namespace ts3
 
 }
 
-#endif /* __TS3_STDEXT_STATIC_ALGO_H__ */
+#endif /* __TS3_STDEXT_STATIC_LIMITS_H__ */

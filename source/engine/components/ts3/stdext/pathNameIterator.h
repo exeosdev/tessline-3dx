@@ -54,6 +54,11 @@ namespace ts3
 			return _currentPathComponent.empty();
 		}
 
+		bool hasNext() const
+		{
+			return !_remainingPath.empty();
+		}
+
 	private:
 		void _moveFwd()
 		{
