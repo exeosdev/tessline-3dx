@@ -1,9 +1,8 @@
 
-#ifndef __TS3_STDEXT_GDS_STD_CORE_H__
-#define __TS3_STDEXT_GDS_STD_CORE_H__
+#ifndef __TS3_CORE_GDS_TYPE_SUPPORT_STD_CORE_H__
+#define __TS3_CORE_GDS_TYPE_SUPPORT_STD_CORE_H__
 
-#include "prerequisites.h"
-#include <ts3/platform/gds.h>
+#include "gdsTypeSupportCommon.h"
 
 namespace std
 {
@@ -28,13 +27,14 @@ namespace ts3
 		/***********************************************************************************************************/
 
 		template <typename _Ch, typename _Tr, typename _Alloc, typename _Cast = void>
-		inline gds_size_t evalByteSize(
-			const std::basic_string<_Ch, _Tr, _Alloc> & pString,
-			const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
+		inline gds_size_t evalByteSize( const std::basic_string<_Ch, _Tr, _Alloc> & pString,
+                                        const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
 		{
 			gds_size_t byteSize = 0;
+
 			// The first member is the length of the specified string.
 			byteSize += evalByteSize( emptySizeType() );
+
 			// Then we have the characters (potentially cast).
 			byteSize += pString.length() * evalByteSize( _Ch{}, pCastTag );
 
@@ -42,10 +42,9 @@ namespace ts3
 		}
 
 		template <typename _Ch, typename _Tr, typename _Alloc, typename _Cast = void>
-		inline gds_size_t serialize(
-			byte * pOutputBuffer,
-			const std::basic_string<_Ch, _Tr, _Alloc> & pString,
-			const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
+		inline gds_size_t serialize( byte * pOutputBuffer,
+                                     const std::basic_string<_Ch, _Tr, _Alloc> & pString,
+                                     const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
 		{
 			const auto strLength = pString.length();
 
@@ -60,13 +59,11 @@ namespace ts3
 		}
 
 		template <typename _Ch, typename _Tr, typename _Alloc, typename _Cast = void>
-		inline gds_size_t deserialize(
-				const byte * pInputData,
-				std::basic_string<_Ch, _Tr, _Alloc> & pString,
-				const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
+		inline gds_size_t deserialize( const byte * pInputData,
+                                       std::basic_string<_Ch, _Tr, _Alloc> & pString,
+                                       const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
 		{
 			size_t strLength = 0;
-
 			gds_size_t byteSize = deserialize( pInputData, asSizeType( strLength ) );
 
 			pString.resize( strLength );
@@ -84,37 +81,29 @@ namespace ts3
 		/***********************************************************************************************************/
 
 		template <typename _Ty1, typename _Ty2, typename _Cast = void>
-		inline gds_size_t evalByteSize(
-			const std::pair<_Ty1, _Ty2> & pPair,
-			const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
+		inline gds_size_t evalByteSize( const std::pair<_Ty1, _Ty2> & pPair )
 		{
 			gds_size_t byteSize = 0;
-			byteSize += evalByteSize( pPair.first, pCastTag );
-			byteSize += evalByteSize( pPair.second, pCastTag );
+			byteSize += evalByteSize( pPair.first );
+			byteSize += evalByteSize( pPair.second );
 			return byteSize;
 		}
 
 		template <typename _Ty1, typename _Ty2, typename _Cast = void>
-		inline gds_size_t serialize(
-			byte * pOutputBuffer,
-			const std::pair<_Ty1, _Ty2> & pPair,
-			const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
+		inline gds_size_t serialize( byte * pOutputBuffer, const std::pair<_Ty1, _Ty2> & pPair )
 		{
 			gds_size_t byteSize = 0;
-			byteSize += serialize( pOutputBuffer, pPair.first, pCastTag );
-			byteSize += serialize( pOutputBuffer, pPair.second, pCastTag );
+			byteSize += serialize( pOutputBuffer, pPair.first );
+			byteSize += serialize( pOutputBuffer, pPair.second );
 			return byteSize;
 		}
 
 		template <typename _Ty1, typename _Ty2, typename _Cast = void>
-		inline gds_size_t deserialize(
-			const byte * pInputData,
-			std::pair<_Ty1, _Ty2> & pPair,
-			const TypeCastTag<_Cast> & pCastTag = cvTypeCastNone )
+		inline gds_size_t deserialize( const byte * pInputData, std::pair<_Ty1, _Ty2> & pPair )
 		{
 			gds_size_t byteSize = 0;
-			byteSize += deserialize( pInputData, pPair.first, pCastTag );
-			byteSize += deserialize( pInputData, pPair.second, pCastTag );
+			byteSize += deserialize( pInputData, pPair.first );
+			byteSize += deserialize( pInputData, pPair.second );
 			return byteSize;
 		}
 
@@ -122,4 +111,4 @@ namespace ts3
 
 }
 
-#endif // __TS3_STDEXT_GDS_STD_CORE_H__
+#endif // __TS3_CORE_GDS_TYPE_SUPPORT_STD_CORE_H__

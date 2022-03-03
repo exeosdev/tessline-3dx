@@ -33,6 +33,12 @@ set( TS3_CORE_SRC_FILES
 		"sync/syncInterface.h"
 
 		"utility/dataProvider.h"
+		"utility/gdsCoreAPI.h"
+		"utility/gdsCoreAPI.cpp"
+		"utility/gdsTypeSupportCommon.h"
+		"utility/gdsTypeSupportInternalStdext.h"
+		"utility/gdsTypeSupportStdCore.h"
+		"utility/gdsTypeSupportStdSTL.h"
 		)
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
