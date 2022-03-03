@@ -167,6 +167,7 @@ namespace ts3
 		virtualFolder.name = std::move( pFolderName );
 		virtualFolder.uid = std::move( pUID );
 		virtualFolder.path = std::move( newFolderPath );
+		virtualFolder.treeSubLevel = parentFolder->treeSubLevel + 1;
 
 		// Add the folder to the sub-folder list of its parent.
 		auto newFolderIter = parentFolder->subFolderList.insert( std::move( virtualFolder ) );
@@ -225,6 +226,7 @@ namespace ts3
 		resource.name = std::move( pResourceName );
 		resource.uid = std::move( pUID );
 		resource.path = std::move( newResourcePath );
+		resource.treeSubLevel = parentFolder->treeSubLevel + 1;
 		resource.dataSource = std::move( pDataSource );
 
 		// Add the folder to the resource list of its parent.

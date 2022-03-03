@@ -50,37 +50,28 @@ namespace ts3
 
 		ByteBuffer storageBuffer;
 
-		SCFIOVirtualFolderDesc scfRootFolderDesc {};
-		gds::deserializeExternal( scfRootFolderDesc, fileReadCallback, storageBuffer );
+		SCFVirtualFolderInfo scfRootFolderInfo {};
+		gds::deserializeExternal( scfRootFolderInfo, fileReadCallback, storageBuffer );
 
-		SCFVirtualFolderInfo folderInfo;
-		folderInfo.entryType = ESCFEntryType::VirtualFolder;
-		folderInfo.name = std::move( scfRootFolderDesc.name );
-		folderInfo.uid = std::move( scfRootFolderDesc.uid );
-		folderInfo.resourcesNum = scfRootFolderDesc.resourcesNum;
-		folderInfo.subFoldersNum = scfRootFolderDesc.subFoldersNum;
-
-		auto & rootFolder = pIndex.initRootFolder(std::move( folderInfo ) );
+		auto & rootFolder = pIndex.initRootFolder(std::move( scfRootFolderInfo ) );
 
 		readFolder( file, rootFolder, storageBuffer, fileReadCallback );
 	}
-
-	static int cc = 1;
-    static ByteBuffer bb {};
 
     void SCFIOProxy::writeFolderData( system::FileHandle pSysFile,
                                       const SCFVirtualFolderTemplate & pFolder,
                                       ByteBuffer & pStorageBuffer,
                                       const FileWriteCallback & pFileWriteCallback )
 	{
-		SCFIOVirtualFolderDesc scfVirtualFolderDesc;
-		scfVirtualFolderDesc.entryType = ESCFEntryType::VirtualFolder;
-		scfVirtualFolderDesc.name = pFolder.name;
-		scfVirtualFolderDesc.uid = pFolder.uid;
-		scfVirtualFolderDesc.resourcesNum = static_cast<uint32>( pFolder.resourceList.size() );
-		scfVirtualFolderDesc.subFoldersNum = static_cast<uint32>( pFolder.subFolderList.size() );
+        SCFVirtualFolderInfo scfFolderInfo;
+		scfFolderInfo.entryType = ESCFEntryType::VirtualFolder;
+		scfFolderInfo.name = pFolder.name;
+		scfFolderInfo.uid = pFolder.uid;
+		scfFolderInfo.treeSubLevel = pFolder.treeSubLevel;
+		scfFolderInfo.resourcesNum = static_cast<uint32>( pFolder.resourceList.size() );
+		scfFolderInfo.subFoldersNum = static_cast<uint32>( pFolder.subFolderList.size() );
 
-		gds::serializeExternal( pStorageBuffer, scfVirtualFolderDesc, pFileWriteCallback );
+		gds::serializeExternal( pStorageBuffer, scfFolderInfo, pFileWriteCallback );
 
 		for( const auto & resource : pFolder.resourceList )
 		{
@@ -98,22 +89,23 @@ namespace ts3
                                         ByteBuffer & pStorageBuffer,
                                         const FileWriteCallback & pFileWriteCallback )
 	{
-		SCFIOResourceDesc scfResourceDesc;
-		scfResourceDesc.entryType = ESCFEntryType::VirtualFolder;
-		scfResourceDesc.name = pResource.name;
-		scfResourceDesc.uid = pResource.uid;
+        SCFResourceInfo scfResourceInfo;
+		scfResourceInfo.entryType = ESCFEntryType::VirtualFolder;
+		scfResourceInfo.name = pResource.name;
+		scfResourceInfo.uid = pResource.uid;
+		scfResourceInfo.treeSubLevel = pResource.treeSubLevel;
 
 		const auto currentFilePtrOffset = pSysFile->getFilePointer();
-		const auto resourceEntrySize = gds::evalByteSizeWithMetaData( scfResourceDesc );
+		const auto resourceEntrySize = gds::evalByteSizeWithMetaData( scfResourceInfo );
 
-		scfResourceDesc.dataOffset = currentFilePtrOffset + resourceEntrySize;
-		scfResourceDesc.dataSize = pResource.dataSource.byteSize;
+		scfResourceInfo.dataOffset = currentFilePtrOffset + resourceEntrySize;
+		scfResourceInfo.dataSize = pResource.dataSource.byteSize;
 
-		gds::serializeExternal( pStorageBuffer, scfResourceDesc, pFileWriteCallback );
+		gds::serializeExternal( pStorageBuffer, scfResourceInfo, pFileWriteCallback );
 
 		const auto sMaxSingleDataWriteSize = 2048;
 		
-		for( uint64 currentReadPtr = 0; currentReadPtr < scfResourceDesc.dataSize; )
+		for( uint64 currentReadPtr = 0; currentReadPtr < scfResourceInfo.dataSize; )
 		{
 		    const auto readSize = pResource.dataSource.readCallback( currentReadPtr, sMaxSingleDataWriteSize, pStorageBuffer );
 		    ts3DebugAssert( readSize > 0 );
@@ -131,39 +123,107 @@ namespace ts3
 	{
 		for( uint32 resourceIndex = 0; resourceIndex < pFolder.mFolderInfo.resourcesNum; ++resourceIndex )
 		{
-			SCFIOResourceDesc scfResourceDesc;
-			gds::deserializeExternal( scfResourceDesc, pFileReadCallback, pStorageBuffer );
+		    SCFResourceInfo scfResourceInfo;
+		    gds::deserializeExternal( scfResourceInfo, pFileReadCallback, pStorageBuffer );
 
-			SCFResourceInfo scfResourceInfo;
-			scfResourceInfo.entryType = ESCFEntryType::Resource;
-			scfResourceInfo.name = std::move( scfResourceDesc.name );
-			scfResourceInfo.uid = std::move( scfResourceDesc.uid );
-			scfResourceInfo.path = pFolder.mFolderInfo.path + "/" + scfResourceInfo.name;
-			scfResourceInfo.dataOffset = scfResourceDesc.dataOffset;
-			scfResourceInfo.dataSize = scfResourceDesc.dataSize;
+		    // The resource path is not serialized, don't forget this line.
+		    scfResourceInfo.path = pFolder.mFolderInfo.path + "/" + scfResourceInfo.name;
 
 			auto & scfResource = pFolder.addResource( std::move( scfResourceInfo ) );
 
-			pSysFile->setFilePointer( static_cast<system::file_offset_t>( scfResource.mResourceInfo.dataOffset + scfResource.mResourceInfo.dataSize ) );
+			const auto skipResourceDataOffset = scfResource.mResourceInfo.dataOffset + scfResource.mResourceInfo.dataSize;
+			pSysFile->setFilePointer( static_cast<system::file_offset_t>( skipResourceDataOffset ) );
 		}
 
 		for( uint32 subFolderIndex = 0; subFolderIndex < pFolder.mFolderInfo.subFoldersNum; ++subFolderIndex )
 		{
-			SCFIOVirtualFolderDesc scfFolderDesc {};
-			gds::deserializeExternal( scfFolderDesc, pFileReadCallback, pStorageBuffer );
+		    SCFVirtualFolderInfo scfFolderInfo {};
+			gds::deserializeExternal( scfFolderInfo, pFileReadCallback, pStorageBuffer );
 
-			SCFVirtualFolderInfo scfFolderInfo;
-			scfFolderInfo.entryType = ESCFEntryType::VirtualFolder;
-			scfFolderInfo.name = std::move( scfFolderDesc.name );
-			scfFolderInfo.uid = std::move( scfFolderDesc.uid );
+			// The folder path is not serialized, don't forget this line.
 			scfFolderInfo.path = pFolder.mFolderInfo.path + "/" + scfFolderInfo.name;
-			scfFolderInfo.resourcesNum = scfFolderDesc.resourcesNum;
-			scfFolderInfo.subFoldersNum = scfFolderDesc.subFoldersNum;
 
 			auto & scfFolder = pFolder.addSubFolder( std::move( scfFolderInfo ) );
 
 			readFolder( pSysFile, scfFolder, pStorageBuffer, pFileReadCallback );
 		}
+	}
+
+	namespace gds
+	{
+
+        gds_size_t serialize( byte * pOutputBuffer, const SCFEntryInfo & pValue )
+        {
+            return serializeAll( pOutputBuffer,
+                                 pValue.entryType,
+                                 pValue.name,
+                                 pValue.uid,
+                                 pValue.treeSubLevel );
+        }
+
+        gds_size_t deserialize( const byte * pInputData, SCFEntryInfo & pValue )
+        {
+            return deserializeAll( pInputData,
+                                   pValue.entryType,
+                                   pValue.name,
+                                   pValue.uid,
+                                   pValue.treeSubLevel );
+        }
+
+        gds_size_t evalByteSize( const SCFEntryInfo & pValue )
+        {
+            return evalByteSizeAll( pValue.entryType,
+                                    pValue.name,
+                                    pValue.uid,
+                                    pValue.treeSubLevel );
+        }
+
+        gds_size_t serialize( byte * pOutputBuffer, const SCFResourceInfo & pValue )
+        {
+            return serializeAll( pOutputBuffer,
+                                 static_cast<const SCFEntryInfo &>( pValue ),
+                                 pValue.dataOffset,
+                                 pValue.dataSize );
+        }
+
+        gds_size_t deserialize( const byte * pInputData, SCFResourceInfo & pValue )
+        {
+            return deserializeAll( pInputData,
+                                   static_cast<SCFEntryInfo &>( pValue ),
+                                   pValue.dataOffset,
+                                   pValue.dataSize );
+        }
+
+        gds_size_t evalByteSize( const SCFResourceInfo & pValue )
+        {
+            return evalByteSizeAll( static_cast<const SCFEntryInfo &>( pValue ),
+                                    pValue.dataOffset,
+                                    pValue.dataSize );
+        }
+
+        gds_size_t serialize( byte * pOutputBuffer, const SCFVirtualFolderInfo & pValue )
+        {
+            return serializeAll( pOutputBuffer,
+                                 static_cast<const SCFEntryInfo &>( pValue ),
+                                 pValue.resourcesNum,
+                                 pValue.subFoldersNum );
+        }
+
+        gds_size_t deserialize( const byte * pInputData, SCFVirtualFolderInfo & pValue )
+        {
+            return deserializeAll( pInputData,
+                                   static_cast<SCFEntryInfo &>( pValue ),
+                                   pValue.resourcesNum,
+                                   pValue.subFoldersNum );
+        }
+
+        gds_size_t evalByteSize( const SCFVirtualFolderInfo & pValue )
+        {
+            return evalByteSizeAll( static_cast<const SCFEntryInfo &>( pValue ),
+                                    pValue.resourcesNum,
+                                    pValue.subFoldersNum );
+        }
+
 	}
 
 }

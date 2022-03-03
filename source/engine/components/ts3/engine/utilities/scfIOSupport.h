@@ -4,15 +4,13 @@
 #ifndef __TS3_ENGINE_SCF_IO_SUPPORT_H__
 #define __TS3_ENGINE_SCF_IO_SUPPORT_H__
 
-#include "scfIODefs.h"
+#include "scfCommon.h"
 #include <ts3/stdext/byteBuffer.h>
 #include <ts3/system/fileCommon.h>
 
 namespace ts3
 {
 
-	struct SCFIOResourceDesc;
-	struct SCFIOVirtualFolderDesc;
 	struct SCFResourceTemplate;
 	struct SCFVirtualFolderTemplate;
 
@@ -50,6 +48,23 @@ namespace ts3
 	private:
 		system::FileManagerHandle _sysFileManager;
 	};
+
+	namespace gds
+	{
+
+	    gds_size_t serialize( byte * pOutputBuffer, const SCFEntryInfo & pValue );
+	    gds_size_t deserialize( const byte * pInputDesc, SCFEntryInfo & pValue );
+	    gds_size_t evalByteSize( const SCFEntryInfo & pValue );
+
+	    gds_size_t serialize( byte * pOutputBuffer, const SCFResourceInfo & pValue );
+	    gds_size_t deserialize( const byte * pInputDesc, SCFResourceInfo & pValue );
+	    gds_size_t evalByteSize( const SCFResourceInfo & pValue );
+
+	    gds_size_t serialize( byte * pOutputBuffer, const SCFVirtualFolderInfo & pValue );
+	    gds_size_t deserialize( const byte * pInputDesc, SCFVirtualFolderInfo & pValue );
+	    gds_size_t evalByteSize( const SCFVirtualFolderInfo & pValue );
+
+	}
 
 }
 

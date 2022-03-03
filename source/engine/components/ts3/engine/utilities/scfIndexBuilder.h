@@ -37,6 +37,7 @@ namespace ts3
 		std::string name;
 		std::string path;
 		std::string uid;
+		uint32 treeSubLevel = 0;
 	};
 
 	struct SCFResourceTemplate : public SCFEntryTemplate
