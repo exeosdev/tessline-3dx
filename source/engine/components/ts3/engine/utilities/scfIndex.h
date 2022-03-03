@@ -11,7 +11,6 @@ namespace ts3
 
 	class SCFIndex
 	{
-		friend class SCFIndexBuilder;
 		friend class SCFIOProxy;
 		friend class SCFVirtualFolder;
 
@@ -22,7 +21,21 @@ namespace ts3
 		SCFIndex();
 		~SCFIndex();
 
-		uint64 readResourceData( void * pTarget, uint64 pSize, uint64 pOffset = 0 ) const;
+		SCFEntry * findEntryByPath( const std::string & pEntryPath ) const noexcept;
+
+		SCFEntry & getEntryByPath( const std::string & pEntryPath ) const;
+
+		SCFEntry * findEntryByUUID( const std::string & pUUID ) const noexcept;
+
+		SCFEntry & getEntryByUUID( const std::string & pUUID ) const;
+
+		bool enumerateEntries( SCFEntryList & pList, bool pClearList = false ) const;
+
+		bool enumerateEntries( SCFEntryList & pList, const SCFEntryPredicate & pPredicate, bool pClearList = false ) const;
+
+		SCFEntryList enumerateEntries() const;
+
+		SCFEntryList enumerateEntries( const SCFEntryPredicate & pPredicate ) const;
 
 		SCFVirtualFolder & rootFolder() const;
 
@@ -31,11 +44,14 @@ namespace ts3
 
 		void addEntry( SCFEntry & pEntry );
 
-		void resetIndex();
+		void setResourceDataReadCallback( ResourceDataReadCallback pCallback );
+
+		uint64 readResourceData( void * pTarget, uint64 pSize, uint64 pBaseOffset = 0 ) const;
 
 	private:
 		ResourceDataReadCallback _rdReadCallback;
 		std::unique_ptr<SCFVirtualFolder> _rootFolder;
+		std::unordered_map<std::string, SCFEntry *> _entryByUIDMap;
 	};
 
 }

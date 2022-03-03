@@ -67,12 +67,12 @@ namespace ts3
 
 	SCFEntry * SCFVirtualFolder::operator[]( const std::string & pEntryPath ) const noexcept
 	{
-		return findEntry( pEntryPath, ESCFFindMode::Default );
+		return findEntry( pEntryPath, ESCFFindMode::Direct );
 	}
 
 	SCFEntry & SCFVirtualFolder::at( const std::string & pEntryPath ) const
 	{
-		return getEntry( pEntryPath, ESCFFindMode::Default );
+		return getEntry( pEntryPath, ESCFFindMode::Direct );
 	}
 
 	SCFEntry * SCFVirtualFolder::findEntry( const std::string & pEntryPath, ESCFFindMode pFindMode ) const noexcept
@@ -143,7 +143,7 @@ namespace ts3
 		return entryPtr->asResource();
 	}
 
-	bool SCFVirtualFolder::enumerateEntries( EntryList & pList, bool pClearList ) const
+	bool SCFVirtualFolder::enumerateEntries( SCFEntryList & pList, ESCFFindMode pFindMode, bool pClearList ) const
 	{
 		if( pClearList )
 		{
@@ -157,17 +157,20 @@ namespace ts3
 			pList.push_back( resourcePtr.get() );
 		}
 
-		for( const auto & subFolderPtr : _subFolderList )
+		if( pFindMode == ESCFFindMode::Recursive )
 		{
-			pList.push_back( subFolderPtr.get() );
+		    for( const auto & subFolderPtr : _subFolderList )
+		    {
+		        pList.push_back( subFolderPtr.get() );
 
-			subFolderPtr->enumerateEntries( pList );
+		        subFolderPtr->enumerateEntries( pList, pFindMode );
+		    }
 		}
 
 		return pList.size() > inputSize;
 	}
 
-	bool SCFVirtualFolder::enumerateEntries( EntryList & pList, const EntryPredicate & pPredicate, bool pClearList ) const
+	bool SCFVirtualFolder::enumerateEntries( SCFEntryList & pList, ESCFFindMode pFindMode, const SCFEntryPredicate & pPredicate, bool pClearList ) const
 	{
 		if( pClearList )
 		{
@@ -184,29 +187,32 @@ namespace ts3
 			}
 		}
 
-		for( const auto & subFolderPtr : _subFolderList )
+		if( pFindMode == ESCFFindMode::Recursive )
 		{
-			if( pPredicate( *subFolderPtr ) )
-			{
-				pList.push_back( subFolderPtr.get() );
-			}
-			subFolderPtr->enumerateEntries( pList, pPredicate );
+		    for( const auto & subFolderPtr : _subFolderList )
+		    {
+		        if( pPredicate( *subFolderPtr ) )
+		        {
+		            pList.push_back( subFolderPtr.get() );
+		        }
+		        subFolderPtr->enumerateEntries( pList, pFindMode, pPredicate );
+		    }
 		}
 
 		return pList.size() > inputSize;
 	}
 
-	SCFVirtualFolder::EntryList SCFVirtualFolder::enumerateEntries() const
+	SCFEntryList SCFVirtualFolder::enumerateEntries( ESCFFindMode pFindMode ) const
 	{
-		EntryList result{};
-		enumerateEntries( result );
+	    SCFEntryList result{};
+	    enumerateEntries( result, pFindMode );
 		return result;
 	}
 
-	SCFVirtualFolder::EntryList SCFVirtualFolder::enumerateEntries( const EntryPredicate & pPredicate ) const
+	SCFEntryList SCFVirtualFolder::enumerateEntries( ESCFFindMode pFindMode, const SCFEntryPredicate & pPredicate ) const
 	{
-		EntryList result{};
-		enumerateEntries( result, pPredicate );
+	    SCFEntryList result{};
+	    enumerateEntries( result, pFindMode, pPredicate );
 		return result;
 	}
 

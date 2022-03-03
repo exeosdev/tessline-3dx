@@ -10,6 +10,9 @@
 namespace ts3
 {
 
+    using SCFEntryPredicate = std::function<bool( const SCFEntry & )>;
+    using SCFEntryList = std::vector<SCFEntry *>;
+
 	enum class ESCFFindMode : uint32
 	{
 		Direct,
@@ -77,10 +80,6 @@ namespace ts3
 		friend class SCFIOProxy;
 
 	public:
-		using EntryPredicate = std::function<bool( const SCFEntry & )>;
-		using EntryList = std::vector<SCFEntry *>;
-
-	public:
 		SCFVirtualFolderInfo const mFolderInfo;
 
 	public:
@@ -90,24 +89,28 @@ namespace ts3
 		SCFVirtualFolder( SCFVirtualFolder * pParentFolder, SCFVirtualFolderInfo pInfo );
 
 		SCFEntry * operator[]( const std::string & pEntryPath ) const noexcept;
+
 		SCFEntry & at( const std::string & pEntryPath ) const;
 
 		SCFEntry * findEntry( const std::string & pEntryPath, ESCFFindMode pFindMode ) const noexcept;
+
 		SCFEntry & getEntry( const std::string & pEntryPath, ESCFFindMode pFindMode ) const;
 
 		SCFVirtualFolder * findVirtualFolder( const std::string & pFolderPath, ESCFFindMode pFindMode ) const noexcept;
+
 		SCFVirtualFolder & getVirtualFolder( const std::string & pFolderPath, ESCFFindMode pFindMode ) const;
 
 		SCFResource * findResource( const std::string & pResourcePath, ESCFFindMode pFindMode ) const noexcept;
+
 		SCFResource & getResource( const std::string & pResourcePath, ESCFFindMode pFindMode ) const;
 
-		bool enumerateEntries( EntryList & pList, bool pClearList = false ) const;
+		bool enumerateEntries( SCFEntryList & pList, ESCFFindMode pFindMode, bool pClearList = false ) const;
 
-		bool enumerateEntries( EntryList & pList, const EntryPredicate & pPredicate, bool pClearList = false ) const;
+		bool enumerateEntries( SCFEntryList & pList, ESCFFindMode pFindMode, const SCFEntryPredicate & pPredicate, bool pClearList = false ) const;
 
-		EntryList enumerateEntries() const;
+		SCFEntryList enumerateEntries( ESCFFindMode  ) const;
 
-		EntryList enumerateEntries( const EntryPredicate & pPredicate ) const;
+		SCFEntryList enumerateEntries( ESCFFindMode pFindMode, const SCFEntryPredicate & pPredicate ) const;
 
 	private:
 		SCFResource & addResource( SCFResourceInfo pResourceInfo );
