@@ -9,14 +9,33 @@
 namespace ts3
 {
 
-	class SCFIndex : public SCFVirtualFolder
+	class SCFIndex
 	{
 		friend class SCFIndexBuilder;
+		friend class SCFIOProxy;
+		friend class SCFVirtualFolder;
 
 	public:
-		SCFIndex() = default;
-		~SCFIndex() = default;
+		using ResourceDataReadCallback = std::function<uint64( void *, uint64, uint64 )>;
 
+	public:
+		SCFIndex();
+		~SCFIndex();
+
+		uint64 readResourceData( void * pTarget, uint64 pSize, uint64 pOffset = 0 ) const;
+
+		SCFVirtualFolder & rootFolder() const;
+
+	private:
+		SCFVirtualFolder & initRootFolder( SCFVirtualFolderInfo pFolderInfo );
+
+		void addEntry( SCFEntry & pEntry );
+
+		void resetIndex();
+
+	private:
+		ResourceDataReadCallback _rdReadCallback;
+		std::unique_ptr<SCFVirtualFolder> _rootFolder;
 	};
 
 }

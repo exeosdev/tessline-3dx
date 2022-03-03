@@ -3,50 +3,114 @@
 #include <ts3/engine/exception.h>
 #include <ts3/stdext/pathNameIterator.h>
 #include <ts3/stdext/sortedArray.h>
+#include <ts3/system/fileManager.h>
+
 #include <unordered_map>
 #include <unordered_set>
 
 namespace ts3
 {
 
-	bool operator==( const SCFResourceTemplate & pLhs, const SCFResourceTemplate & pRhs )
+	bool operator==( const SCFResourceTemplate & pLhs, const SCFResourceTemplate & pRhs );
+	bool operator==( const SCFResourceTemplate & pLhs, const std::string & pRhs );
+
+	bool operator<( const SCFResourceTemplate & pLhs, const SCFResourceTemplate & pRhs );
+	bool operator<( const SCFResourceTemplate & pLhs, const std::string & pRhs );
+
+	bool operator==( const SCFVirtualFolderTemplate & pLhs, const SCFVirtualFolderTemplate & pRhs );
+	bool operator==( const SCFVirtualFolderTemplate & pLhs, const std::string & pRhs );
+
+	bool operator<( const SCFVirtualFolderTemplate & pLhs, const SCFVirtualFolderTemplate & pRhs );
+	bool operator<( const SCFVirtualFolderTemplate & pLhs, const std::string & pRhs );
+
+
+	SCFInputDataSource SCFInputDataSource::asPlaceholder( uint64 pDataSize )
 	{
-		return pLhs.name == pRhs.name;
+	    if( pDataSize == 0 )
+	    {
+	        return {};
+	    }
+
+	    SCFInputDataSource dataSource;
+	    dataSource.byteSize = pDataSize;
+	    dataSource.readCallback =
+	        [pDataSize]( uint64 pOffset, uint64 pReadSize, ByteBuffer & pBuffer ) -> uint64 {
+                const auto readSize = memCheckRequestedCopySize( pDataSize, pReadSize, pOffset );
+                if( readSize > 0 )
+                {
+                    pBuffer.resize( trunc_numeric_cast<size_t>( readSize ) );
+                    pBuffer.fill( 0x7 );
+                    return readSize;
+                }
+                return 0;
+            };
+
+	    return dataSource;
 	}
-	
-	bool operator==( const SCFResourceTemplate & pLhs, const std::string & pRhs )
+
+	SCFInputDataSource SCFInputDataSource::fromFile( system::FileManagerHandle pSysFileManager, const std::string & pFilename )
 	{
-		return pLhs.name == pRhs;
+	    if( !pSysFileManager || pFilename.empty() )
+	    {
+	        return {};
+	    }
+
+	    auto sourceFile = pSysFileManager->openFile( pFilename, system::EFileOpenMode::ReadOnly );
+	    if( !sourceFile )
+	    {
+	        return {};
+	    }
+
+	    const auto fileSize = sourceFile->getSize();
+
+	    SCFInputDataSource dataSource;
+	    dataSource.byteSize = fileSize;
+	    dataSource.readCallback =
+	        [pSysFileManager, pFilename, fileSize]( uint64 pOffset, uint64 pReadSize, ByteBuffer & pBuffer ) -> uint64 {
+	            const auto readSize = memCheckRequestedCopySize( fileSize, pReadSize, pOffset );
+	            if( readSize > 0 )
+	            {
+	                if( auto sourceFile = pSysFileManager->openFile( pFilename, system::EFileOpenMode::ReadOnly ) )
+	                {
+	                    pBuffer.resize( trunc_numeric_cast<size_t>( readSize ) );
+	                    sourceFile->setFilePointer( trunc_numeric_cast<system::file_offset_t>( pOffset ) );
+	                    const auto readBytesNum = sourceFile->readData( pBuffer, trunc_numeric_cast<system::file_size_t>( readSize ) );
+	                    return readBytesNum;
+	                }
+	            }
+                return 0;
+            };
+
+	    return dataSource;
 	}
-	
-	bool operator<( const SCFResourceTemplate & pLhs, const SCFResourceTemplate & pRhs )
+
+	SCFInputDataSource SCFInputDataSource::fromMemory( ArrayView<byte> pMemoryView )
 	{
-		return pLhs.name < pRhs.name;
-	}
-	
-	bool operator<( const SCFResourceTemplate & pLhs, const std::string & pRhs )
-	{
-		return pLhs.name < pRhs;
-	}
-	
-	bool operator==( const SCFVirtualFolderTemplate & pLhs, const SCFVirtualFolderTemplate & pRhs )
-	{
-		return pLhs.name == pRhs.name;
-	}
-	
-	bool operator==( const SCFVirtualFolderTemplate & pLhs, const std::string & pRhs )
-	{
-		return pLhs.name == pRhs;
-	}
-	
-	bool operator<( const SCFVirtualFolderTemplate & pLhs, const SCFVirtualFolderTemplate & pRhs )
-	{
-		return pLhs.name < pRhs.name;
-	}
-	
-	bool operator<( const SCFVirtualFolderTemplate & pLhs, const std::string & pRhs )
-	{
-		return pLhs.name < pRhs;
+	    if( !pMemoryView )
+	    {
+	        return {};
+	    }
+
+	    SCFInputDataSource dataSource;
+	    dataSource.byteSize = pMemoryView.size;
+	    dataSource.readCallback =
+	        [pMemoryView]( uint64 pOffset, uint64 pReadSize, ByteBuffer & pBuffer ) -> uint64 {
+                const auto readSize = memCheckRequestedCopySize( pMemoryView.size, pReadSize, pOffset );
+                if( readSize > 0 )
+                {
+                    pBuffer.resize( trunc_numeric_cast<size_t>( readSize ) );
+
+                    memCopyUnchecked( pBuffer.dataPtr(),
+                                      pBuffer.size(),
+                                      pMemoryView.beginPtr + pOffset,
+                                      trunc_numeric_cast<size_t>( readSize ) );
+
+                    return readSize;
+                }
+                return 0;
+            };
+
+	    return dataSource;
 	}
 
 
@@ -57,6 +121,12 @@ namespace ts3
 		std::unordered_set<std::string> globalUIDSet;
 	};
 
+
+	SCFIndexBuilder::SCFIndexBuilder()
+	: _privateWorkingData{ std::make_unique<PrivateWorkingData>() }
+	{}
+
+	SCFIndexBuilder::~SCFIndexBuilder() = default;
 
 	const SCFVirtualFolderTemplate * SCFIndexBuilder::addFolder( const SCFVirtualFolderTemplate * pParentFolder,
 																 std::string pFolderName,
@@ -116,6 +186,7 @@ namespace ts3
 
 	const SCFResourceTemplate * SCFIndexBuilder::addResource( const SCFVirtualFolderTemplate * pParentFolder,
 															  std::string pResourceName,
+															  SCFInputDataSource pDataSource,
 															  std::string pUID )
 	{
 		if( !pParentFolder )
@@ -123,20 +194,21 @@ namespace ts3
 			pParentFolder = &( _privateWorkingData->rootFolder );
 		}
 
-		return addResource( pParentFolder->path, std::move( pResourceName ), std::move( pUID ) );
+		return addResource( pParentFolder->path, std::move( pResourceName ), std::move( pDataSource ), std::move( pUID ) );
 	}
 
 	const SCFResourceTemplate * SCFIndexBuilder::addResource( const std::string & pParentLocation,
 															  std::string pResourceName,
+															  SCFInputDataSource pDataSource,
 															  std::string pUID )
 	{
+	    if( !pDataSource || !checkNameAndUID( pResourceName, pUID ) )
+	    {
+	        return nullptr;
+	    }
+
 		auto * parentFolder = _findFolderInternal( pParentLocation, nullptr );
 		if( !parentFolder )
-		{
-			return nullptr;
-		}
-
-		if( !checkNameAndUID( pResourceName, pUID ) )
 		{
 			return nullptr;
 		}
@@ -153,6 +225,7 @@ namespace ts3
 		resource.name = std::move( pResourceName );
 		resource.uid = std::move( pUID );
 		resource.path = std::move( newResourcePath );
+		resource.dataSource = std::move( pDataSource );
 
 		// Add the folder to the resource list of its parent.
 		auto resourceIter = parentFolder->resourceList.insert( std::move( resource ) );
@@ -171,65 +244,6 @@ namespace ts3
 
 	bool SCFIndexBuilder::removeEntry(  const std::string & pLocation )
 	{
-	}
-
-	bool SCFIndexBuilder::resetResourceInputData( const std::string & pResourceLocation )
-	{
-		auto * resourcePtr = _findResourceInternal( pResourceLocation );
-		if( !resourcePtr )
-		{
-			return false;
-		}
-
-		resourcePtr->inputData = SCFResourceInputData{};
-
-		return true;
-	}
-
-	bool SCFIndexBuilder::setResourceDataPlaceholderSize( const SCFResourceTemplate * pResource, uint64 pDataSize )
-	{
-		if( pResource && ( pDataSize > 0 ) )
-		{
-			SCFResourceInputData resInputData;
-			resInputData.placeholderSize = pDataSize;
-			resInputData.dataType = SCFResourceInputDataType::EmptyPlaceholder;
-
-			return _setResourceInputData( pResource, std::move( resInputData ) );
-		}
-
-		return false;
-	}
-
-	bool SCFIndexBuilder::setResourceDataProvider( const SCFResourceTemplate * pResource,
-												   SCFResourceInputData::DataProvider pDataProvider )
-	{
-		if( pResource && pDataProvider.readCallback && pDataProvider.sizeInfoCallback )
-		{
-			if( pDataProvider.sizeInfoCallback() > 0 )
-			{
-				SCFResourceInputData resInputData;
-				resInputData.provider = std::move( pDataProvider );
-				resInputData.dataType = SCFResourceInputDataType::DataProvider;
-
-				return _setResourceInputData( pResource, std::move( resInputData ) );
-			}
-		}
-
-		return false;
-	}
-
-	bool SCFIndexBuilder::setResourceDataSource( const SCFResourceTemplate * pResource,
-												 SCFResourceInputData::DataSource pDataSource )
-	{
-		if( pResource && pDataSource.dataPtr && ( pDataSource.dataSize > 0 ) )
-		{
-			SCFResourceInputData resInputData;
-			resInputData.source = std::move( pDataSource );
-			resInputData.dataType = SCFResourceInputDataType::DataSource;
-
-			return _setResourceInputData( pResource, std::move( resInputData ) );
-		}
-
 		return false;
 	}
 
@@ -238,7 +252,7 @@ namespace ts3
 		return _privateWorkingData->rootFolder;
 	}
 
-	bool SCFIndexBuilder::checkNameAndUID( const std::string & pName, const std::string & pUID )
+	bool SCFIndexBuilder::checkNameAndUID( const std::string & pName, const std::string & pUID ) const
 	{
 		if( pName.empty() )
 		{
@@ -339,43 +353,46 @@ namespace ts3
 		return resourcePtr;
 	}
 
-	bool SCFIndexBuilder::_setResourceInputData( const SCFResourceTemplate * pResource, SCFResourceInputData pInputData )
+
+
+	bool operator==( const SCFResourceTemplate & pLhs, const SCFResourceTemplate & pRhs )
 	{
-		if( !pResource || !pInputData )
-		{
-			return false;
-		}
-
-		auto * resourcePtr = _findResourceInternal( pResource->path );
-		if( !resourcePtr )
-		{
-			return false;
-		}
-
-		resourcePtr->inputData = std::move( pInputData );
-
-		return true;
+	    return pLhs.name == pRhs.name;
 	}
 
-	void SCFIndexBuilder::processLocationString( std::string & pLocationString )
+	bool operator==( const SCFResourceTemplate & pLhs, const std::string & pRhs )
 	{
-		if( pLocationString.empty() )
-		{
-			return;
-		}
+	    return pLhs.name == pRhs;
+	}
 
-		auto pathNameIterator = PathNameIterator( std::move( pLocationString ) );
+	bool operator<( const SCFResourceTemplate & pLhs, const SCFResourceTemplate & pRhs )
+	{
+	    return pLhs.name < pRhs.name;
+	}
 
-		pLocationString = std::string{};
+	bool operator<( const SCFResourceTemplate & pLhs, const std::string & pRhs )
+	{
+	    return pLhs.name < pRhs;
+	}
 
-		while( !pathNameIterator.empty() )
-		{
-			if( !pLocationString.empty() )
-			{
-				pLocationString += "/";
-			}
-			pLocationString += pathNameIterator.name();
-		}
+	bool operator==( const SCFVirtualFolderTemplate & pLhs, const SCFVirtualFolderTemplate & pRhs )
+	{
+	    return pLhs.name == pRhs.name;
+	}
+
+	bool operator==( const SCFVirtualFolderTemplate & pLhs, const std::string & pRhs )
+	{
+	    return pLhs.name == pRhs;
+	}
+
+	bool operator<( const SCFVirtualFolderTemplate & pLhs, const SCFVirtualFolderTemplate & pRhs )
+	{
+	    return pLhs.name < pRhs.name;
+	}
+
+	bool operator<( const SCFVirtualFolderTemplate & pLhs, const std::string & pRhs )
+	{
+	    return pLhs.name < pRhs;
 	}
 
 }

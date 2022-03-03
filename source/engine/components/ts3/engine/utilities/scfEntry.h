@@ -20,11 +20,16 @@ namespace ts3
 	class SCFEntry
 	{
 	public:
-		const SCFEntryInfo * const mInfo;
 		SCFVirtualFolder * const mParentFolder;
 
+		const SCFEntryInfo * const mInfo;
+
 	public:
-		SCFEntry( const SCFEntryInfo & pInfo, SCFVirtualFolder * pParentFolder );
+		SCFEntry( const SCFEntry & ) = delete;
+		SCFEntry & operator=( const SCFEntry & ) = delete;
+
+		SCFEntry( SCFVirtualFolder * pParentFolder, const SCFEntryInfo * pInfo );
+		virtual ~SCFEntry();
 
 		SCFVirtualFolder & asVirtualFolder();
 		const SCFVirtualFolder & asVirtualFolder() const;
@@ -38,8 +43,15 @@ namespace ts3
 		SCFResource * asResourcePtr() noexcept;
 		const SCFResource * asResourcePtr() const noexcept;
 
-		constexpr bool isVirtualFolder() const;
-		constexpr bool isResource() const;
+		constexpr bool isResource() const
+		{
+		    return mInfo->entryType == ESCFEntryType::Resource;
+		}
+
+		constexpr bool isVirtualFolder() const
+		{
+		    return mInfo->entryType == ESCFEntryType::VirtualFolder;
+		}
 	};
 
 	class SCFResource : public SCFEntry
@@ -48,6 +60,11 @@ namespace ts3
 		SCFResourceInfo const mResourceInfo;
 
 	public:
+		SCFResource( const SCFResource & ) = delete;
+		SCFResource & operator=( const SCFResource & ) = delete;
+
+		SCFResource( SCFVirtualFolder & pParentFolder, SCFResourceInfo pInfo );
+
 		uint64 readData( void * pTarget, uint64 pSize, uint64 pOffset = 0 ) const;
 
 		uint64 readData( MemoryBuffer & pTarget, uint64 pSize = CX_MAX_SIZE, uint64 pOffset = 0 ) const;
@@ -57,49 +74,58 @@ namespace ts3
 
 	class SCFVirtualFolder : public SCFEntry
 	{
-	public:
-		SCFVirtualFolderInfo const mVirtualFolderInfo;
+		friend class SCFIOProxy;
 
 	public:
 		using EntryPredicate = std::function<bool( const SCFEntry & )>;
-		using EntryList = std::vector<const SCFEntry *>;
+		using EntryList = std::vector<SCFEntry *>;
 
-		const SCFEntry * operator[]( const std::string & pEntryPath ) const noexcept;
+	public:
+		SCFVirtualFolderInfo const mFolderInfo;
 
-		const SCFEntry * findEntry( const std::string & pEntryPath, ESCFFindMode pFindMode = ESCFFindMode::Default ) const noexcept;
-		const SCFEntry & getEntry( const std::string & pEntryPath, ESCFFindMode pFindMode = ESCFFindMode::Default ) const;
+	public:
+		SCFVirtualFolder( const SCFVirtualFolder & ) = delete;
+		SCFVirtualFolder & operator=( const SCFVirtualFolder & ) = delete;
 
-		const SCFVirtualFolder * findVirtualFolder( const std::string & pVFPath, ESCFFindMode pFindMode = ESCFFindMode::Default ) const noexcept;
-		const SCFVirtualFolder & getVirtualFolder( const std::string & pVFPath, ESCFFindMode pFindMode = ESCFFindMode::Default ) const;
+		SCFVirtualFolder( SCFVirtualFolder * pParentFolder, SCFVirtualFolderInfo pInfo );
 
-		const SCFResource * findResource( const std::string & pResourcePath, ESCFFindMode pFindMode = ESCFFindMode::Default ) const noexcept;
-		const SCFResource & getResource( const std::string & pResourcePath, ESCFFindMode pFindMode = ESCFFindMode::Default ) const;
+		SCFEntry * operator[]( const std::string & pEntryPath ) const noexcept;
+		SCFEntry & at( const std::string & pEntryPath ) const;
 
-		bool enumerateEntries( EntryList & pList ) const;
+		SCFEntry * findEntry( const std::string & pEntryPath, ESCFFindMode pFindMode ) const noexcept;
+		SCFEntry & getEntry( const std::string & pEntryPath, ESCFFindMode pFindMode ) const;
 
-		bool enumerateEntries( EntryList & pList, const EntryPredicate & pPredicate ) const;
+		SCFVirtualFolder * findVirtualFolder( const std::string & pFolderPath, ESCFFindMode pFindMode ) const noexcept;
+		SCFVirtualFolder & getVirtualFolder( const std::string & pFolderPath, ESCFFindMode pFindMode ) const;
+
+		SCFResource * findResource( const std::string & pResourcePath, ESCFFindMode pFindMode ) const noexcept;
+		SCFResource & getResource( const std::string & pResourcePath, ESCFFindMode pFindMode ) const;
+
+		bool enumerateEntries( EntryList & pList, bool pClearList = false ) const;
+
+		bool enumerateEntries( EntryList & pList, const EntryPredicate & pPredicate, bool pClearList = false ) const;
 
 		EntryList enumerateEntries() const;
 
 		EntryList enumerateEntries( const EntryPredicate & pPredicate ) const;
 
-	protected:
-		//void addResource(  )
-
 	private:
+		SCFResource & addResource( SCFResourceInfo pResourceInfo );
+
+		SCFVirtualFolder & addSubFolder( SCFVirtualFolderInfo pFolderInfo );
+
 		SCFEntry * findEntryInternal( const std::string & pEntryPath, ESCFFindMode pFindMode ) const noexcept;
+
 		SCFEntry * findEntryInternalDirect( const std::string & pEntryPath ) const noexcept;
+
 		SCFEntry * findEntryInternalRecursive( const std::string & pEntryName ) const noexcept;
 
 	protected:
-		using ResourceList = std::vector<SCFResource>;
-		using SubVirtualFolderList = std::vector<SCFVirtualFolder>;
-		using EntryMap = std::map<std::string, SCFEntry *>;
-
-		ResourceList _resourceList;
-		SubVirtualFolderList _subVirtualFolderList;
-		EntryList _entryList;
-		EntryMap  _entryMap;
+		using ResourcePtr = std::unique_ptr<SCFResource>;
+		using VirtualFolderPtr = std::unique_ptr<SCFVirtualFolder>;
+		std::vector<ResourcePtr> _resourceList;
+		std::vector<VirtualFolderPtr> _subFolderList;
+		std::map<std::string, SCFEntry *>  _entryNameMap;
 	};
 
 }

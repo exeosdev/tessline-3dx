@@ -5,53 +5,31 @@
 #define __TS3_ENGINE_SCF_INDEX_BUILDER_H__
 
 #include "scfIndex.h"
+#include <ts3/stdext/byteBuffer.h>
 #include <ts3/stdext/sortedArray.h>
-#include <ts3/core/utility/dataProvider.h>
+#include <ts3/system/fileCommon.h>
 
 namespace ts3
 {
 
-	enum class SCFResourceInputDataType
+	struct SCFInputDataSource
 	{
-		Unknown,
-		DataProvider,
-		DataSource,
-		EmptyPlaceholder
-	};
+		using DataReadCallback = std::function<uint64( uint64 /* pOffset */, uint64 /* pReadSize */, ByteBuffer & /* pBuffer */ )>;
 
-	struct SCFResourceInputData
-	{
-		struct DataProvider
-		{
-			std::function<uint64()> sizeInfoCallback;
-			std::function<uint64(void *, uint64, uint64)> readCallback;
+		uint64 byteSize = 0;
 
-			explicit operator bool() const
-			{
-				return sizeInfoCallback && readCallback;
-			}
-		};
-
-		struct DataSource
-		{
-			const void * dataPtr = nullptr;
-			uint64 dataSize = 0;
-
-			explicit operator bool() const
-			{
-				return dataPtr && ( dataSize > 0 );
-			}
-		};
-
-		SCFResourceInputDataType dataType = SCFResourceInputDataType::Unknown;
-		uint64 placeholderSize = 0;
-		DataProvider provider;
-		DataSource source;
+		DataReadCallback readCallback;
 
 		explicit operator bool() const
 		{
-			return dataType != SCFResourceInputDataType::Unknown;
+			return ( byteSize > 0 ) && readCallback;
 		}
+
+		static SCFInputDataSource asPlaceholder( uint64 pDataSize );
+
+		static SCFInputDataSource fromFile( system::FileManagerHandle pSysFileManager, const std::string & pFilename );
+
+		static SCFInputDataSource fromMemory( ArrayView<byte> pMemoryView );
 	};
 
 	struct SCFEntryTemplate
@@ -63,8 +41,7 @@ namespace ts3
 
 	struct SCFResourceTemplate : public SCFEntryTemplate
 	{
-		uint64 size;
-		SCFResourceInputData inputData;
+		SCFInputDataSource dataSource;
 	};
 
 	struct SCFVirtualFolderTemplate : public SCFEntryTemplate
@@ -73,41 +50,33 @@ namespace ts3
 		SortedArray<SCFVirtualFolderTemplate> subFolderList;
 	};
 
+	inline const std::string cvSCFEntryUIDEmpty {};
+
 	class SCFIndexBuilder
 	{
-	public:
-
 	public:
 		SCFIndexBuilder();
 		~SCFIndexBuilder();
 
 		const SCFVirtualFolderTemplate * addFolder( const SCFVirtualFolderTemplate * pParentFolder,
 													std::string pFolderName,
-													std::string pUID );
+													std::string pUID = cvSCFEntryUIDEmpty );
 
 		const SCFVirtualFolderTemplate * addFolder( const std::string & pParentLocation,
 													std::string pFolderName,
-													std::string pUID );
+													std::string pUID = cvSCFEntryUIDEmpty );
 
 		const SCFResourceTemplate * addResource( const SCFVirtualFolderTemplate * pParentFolder,
 												 std::string pResourceName,
-												 std::string pUID );
+												 SCFInputDataSource pDataSource,
+												 std::string pUID = cvSCFEntryUIDEmpty );
 
 		const SCFResourceTemplate * addResource( const std::string & pParentLocation,
 												 std::string pResourceName,
-												 std::string pUID );
+												 SCFInputDataSource pDataSource,
+												 std::string pUID = cvSCFEntryUIDEmpty );
 
 		bool removeEntry(  const std::string & pLocation );
-
-		bool resetResourceInputData( const std::string & pResourceLocation );
-
-		bool setResourceDataPlaceholderSize( const SCFResourceTemplate * pResource, uint64 pDataSize );
-
-		bool setResourceDataProvider( const SCFResourceTemplate * pResource,
-									  SCFResourceInputData::DataProvider pDataProvider );
-
-		bool setResourceDataSource( const SCFResourceTemplate * pResource,
-									SCFResourceInputData::DataSource pDataSource );
 
 		const SCFVirtualFolderTemplate & getRootVirtualFolder() const;
 
@@ -119,12 +88,6 @@ namespace ts3
 
 		SCFResourceTemplate * _findResourceInternal( const std::string & pResourceLocation,
 													 SCFVirtualFolderTemplate * pRootFolder = nullptr );
-
-		bool _setResourceInputData( const SCFResourceTemplate * pResource, SCFResourceInputData pInputData );
-
-		bool checkNameAndUID( const std::string & pName, const std::string & pUID );
-
-		static void processLocationString( std::string & pLocationString );
 
 	private:
 		struct PrivateWorkingData;

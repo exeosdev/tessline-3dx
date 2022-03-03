@@ -10,6 +10,7 @@ namespace ts3
 {
 
 	class SCFIndex;
+	class SCFIOProxy;
 	class SCFEntry;
 	class SCFResource;
 	class SCFVirtualFolder;
@@ -29,6 +30,15 @@ namespace ts3
 		Resource,
 		VirtualFolder
 	};
+
+	inline const std::string & toString( ESCFEntryType pEntryType )
+	{
+	    static const std::unordered_map<ESCFEntryType, std::string> sMap = {
+	        { ESCFEntryType::Resource, "Resource" },
+	        { ESCFEntryType::VirtualFolder, "VirtualFolder" }
+	    };
+	    return sMap.at( pEntryType );
+	}
 
 	struct SCFEntryInfo
 	{
