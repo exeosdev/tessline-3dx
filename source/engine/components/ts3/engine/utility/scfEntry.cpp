@@ -1,14 +1,24 @@
 
 #include "scfEntry.h"
+#include "scfIndex.h"
 #include <ts3/engine/exception.h>
+#include <ts3/stdext/byteBuffer.h>
+#include <ts3/stdext/memoryBuffer.h>
 #include <ts3/stdext/pathNameIterator.h>
 
 namespace ts3
 {
 
-	SCFEntry::SCFEntry( SCFVirtualFolder * pParentFolder, const SCFEntryInfo * pInfo )
-	: mInfo( pInfo )
-	, mParentFolder( pParentFolder )
+    SCFEntry::SCFEntry( SCFIndex & pIndex, const SCFEntryInfo * pInfo )
+    : mIndex( &pIndex )
+    , mParentFolder( nullptr )
+    , mInfo( pInfo )
+	{}
+
+	SCFEntry::SCFEntry( SCFVirtualFolder & pParentFolder, const SCFEntryInfo * pInfo )
+	: mIndex( pParentFolder.mIndex )
+	, mParentFolder( &pParentFolder )
+	, mInfo( pInfo )
 	{}
 
 	SCFEntry::~SCFEntry() = default;
@@ -55,12 +65,91 @@ namespace ts3
 
 
 	SCFResource::SCFResource( SCFVirtualFolder & pParentFolder, SCFResourceInfo pInfo )
-	: SCFEntry( &pParentFolder, &mResourceInfo )
+	: SCFEntry( pParentFolder, &mResourceInfo )
 	, mResourceInfo( std::move( pInfo ) )
 	{}
 
+	uint64 SCFResource::readData( void * pTarget, uint64 pCapacity ) const
+	{
+	    if( !pTarget || ( pCapacity < mResourceInfo.dataSize ) )
+	    {
+	        return 0;
+	    }
+	    return mIndex->readResourceData( pTarget, mResourceInfo.dataSize, mResourceInfo.dataOffset );
+	}
 
-	SCFVirtualFolder::SCFVirtualFolder( SCFVirtualFolder * pParentFolder, SCFVirtualFolderInfo pInfo )
+	uint64 SCFResource::readData( ByteBuffer & pTarget ) const
+	{
+	    if( pTarget.size() < mResourceInfo.dataSize )
+	    {
+	        pTarget.resize( mResourceInfo.dataSize );
+	    }
+	    return readData( pTarget.dataPtr(), pTarget.size() );
+	}
+
+	uint64 SCFResource::readData( DynamicMemoryBuffer & pTarget ) const
+	{
+	    if( pTarget.size() < mResourceInfo.dataSize )
+	    {
+	        pTarget.resize( mResourceInfo.dataSize );
+	    }
+	    return readData( pTarget.dataPtr(), pTarget.size() );
+	}
+
+	uint64 SCFResource::readData( std::string & pTarget ) const
+	{
+	    if( pTarget.length() < mResourceInfo.dataSize )
+	    {
+	        pTarget.resize( mResourceInfo.dataSize );
+	    }
+	    return readData( pTarget.data(), pTarget.length() );
+	}
+
+	uint64 SCFResource::readData( std::vector<byte> & pTarget ) const
+	{
+	    if( pTarget.size() < mResourceInfo.dataSize )
+	    {
+	        pTarget.resize( mResourceInfo.dataSize );
+	    }
+	    return readData( pTarget.data(), pTarget.size() );
+	}
+
+	uint64 SCFResource::readSubData( void * pTarget, uint64 pCapacity, uint64 pReadSize, uint64 pResOffset ) const
+	{
+	    if( !pTarget || ( pCapacity == 0 ) || ( pReadSize == 0 ) || ( pResOffset >= mResourceInfo.dataSize ) )
+	    {
+	        return 0;
+	    }
+
+	    const auto maxDataSize = mResourceInfo.dataSize - pResOffset;
+	    const auto maxReadSize = getMinOf( pCapacity, maxDataSize );
+	    const auto readSize = getMinOf( pReadSize, maxDataSize );
+
+	    return mIndex->readResourceData( pTarget, readSize, mResourceInfo.dataOffset + pResOffset );
+	}
+
+	uint64 SCFResource::readSubData( ByteBuffer & pTarget, uint64 pReadSize, uint64 pResOffset ) const
+	{
+	    return readSubData( pTarget.dataPtr(), pTarget.size(), pReadSize, pResOffset );
+	}
+
+	uint64 SCFResource::readSubData( MemoryBuffer & pTarget, uint64 pReadSize, uint64 pResOffset ) const
+	{
+	    return readSubData( pTarget.dataPtr(), pTarget.size(), pReadSize, pResOffset );
+	}
+
+	uint64 SCFResource::readSubData( std::vector<byte> & pTarget, uint64 pReadSize, uint64 pResOffset ) const
+	{
+	    return readSubData( pTarget.data(), pTarget.size(), pReadSize, pResOffset );
+	}
+
+
+	SCFVirtualFolder::SCFVirtualFolder( SCFIndex & pIndex, SCFVirtualFolderInfo pInfo )
+	: SCFEntry( pIndex, &mFolderInfo )
+	, mFolderInfo( std::move( pInfo ) )
+	{}
+
+	SCFVirtualFolder::SCFVirtualFolder( SCFVirtualFolder & pParentFolder, SCFVirtualFolderInfo pInfo )
 	: SCFEntry( pParentFolder, &mFolderInfo )
 	, mFolderInfo( std::move( pInfo ) )
 	{}
@@ -230,7 +319,7 @@ namespace ts3
 
 	SCFVirtualFolder & SCFVirtualFolder::addSubFolder( SCFVirtualFolderInfo pFolderInfo )
 	{
-		auto newFolderPtr = std::make_unique<SCFVirtualFolder>( this, std::move( pFolderInfo ) );
+		auto newFolderPtr = std::make_unique<SCFVirtualFolder>( *this, std::move( pFolderInfo ) );
 
 		auto & newFolder = *newFolderPtr;
 
@@ -314,6 +403,8 @@ namespace ts3
 
 				currentEntryPtr = nextEntryPtrIter->second;
 			}
+
+			++pathNameIterator;
 		}
 
 		return currentEntryPtr;

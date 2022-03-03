@@ -75,7 +75,7 @@ namespace ts3
 
     SCFVirtualFolder & SCFIndex::initRootFolder( SCFVirtualFolderInfo pFolderInfo )
     {
-        _rootFolder = std::make_unique<SCFVirtualFolder>( nullptr, std::move( pFolderInfo ) );
+        _rootFolder = std::make_unique<SCFVirtualFolder>( *this, std::move( pFolderInfo ) );
         return *_rootFolder;
     }
 

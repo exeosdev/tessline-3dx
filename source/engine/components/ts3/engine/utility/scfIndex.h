@@ -12,6 +12,7 @@ namespace ts3
 	class SCFIndex
 	{
 		friend class SCFIOProxy;
+		friend class SCFResource;
 		friend class SCFVirtualFolder;
 
 	public:
@@ -46,7 +47,7 @@ namespace ts3
 
 		void setResourceDataReadCallback( ResourceDataReadCallback pCallback );
 
-		uint64 readResourceData( void * pTarget, uint64 pSize, uint64 pBaseOffset = 0 ) const;
+		uint64 readResourceData( void * pTarget, uint64 pSize, uint64 pBaseOffset ) const;
 
 	private:
 		ResourceDataReadCallback _rdReadCallback;

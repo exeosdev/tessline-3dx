@@ -56,6 +56,15 @@ namespace ts3
 		auto & rootFolder = pIndex.initRootFolder(std::move( scfRootFolderInfo ) );
 
 		readFolder( file, rootFolder, storageBuffer, fileReadCallback );
+
+		SCFIndex::ResourceDataReadCallback resourceDataReadCallback =
+		    [file]( void * pOutputBuffer, uint64 pReadSize, uint64 pBaseOffset ) -> uint64 {
+                const auto readSize = trunc_numeric_cast<system::file_size_t>( pReadSize );
+                file->setFilePointer( trunc_numeric_cast<system::file_offset_t>( pBaseOffset ) );
+                return file->readData( pOutputBuffer, readSize, readSize );
+		};
+
+		pIndex.setResourceDataReadCallback( std::move( resourceDataReadCallback ) );
 	}
 
     void SCFIOProxy::writeFolderData( system::FileHandle pSysFile,
