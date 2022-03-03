@@ -1,6 +1,7 @@
 
 #include "scfIODefs.h"
-#include <ts3/stdext/gdsStdCore.h>
+#include <ts3/core/utility/gdsCoreAPI.h>
+#include <ts3/core/utility/gdsTypeSupportStdCore.h>
 
 namespace ts3
 {
@@ -34,9 +35,7 @@ namespace ts3
 		gds_size_t serialize( byte * pOutputBuffer, const SCFIOResourceDesc & pValue )
 		{
 			return serializeAll( pOutputBuffer,
-								 pValue.entryType,
-								 pValue.name,
-								 pValue.uid,
+                                 static_cast<const SCFIOEntryDesc &>( pValue ),
 								 pValue.dataOffset,
 								 pValue.dataSize );
 		}
@@ -44,18 +43,14 @@ namespace ts3
 		gds_size_t deserialize( const byte * pInputData, SCFIOResourceDesc & pValue )
 		{
 			return deserializeAll( pInputData,
-								   pValue.entryType,
-								   pValue.name,
-								   pValue.uid,
+                                   static_cast<SCFIOEntryDesc &>( pValue ),
 								   pValue.dataOffset,
 								   pValue.dataSize );
 		}
 
 		gds_size_t evalByteSize( const SCFIOResourceDesc & pValue )
 		{
-			return evalByteSizeAll( pValue.entryType,
-									pValue.name,
-									pValue.uid,
+			return evalByteSizeAll( static_cast<const SCFIOEntryDesc &>( pValue ),
 									pValue.dataOffset,
 									pValue.dataSize );
 		}
@@ -63,9 +58,7 @@ namespace ts3
 		gds_size_t serialize( byte * pOutputBuffer, const SCFIOVirtualFolderDesc & pValue )
 		{
 			return serializeAll( pOutputBuffer,
-								 pValue.entryType,
-								 pValue.name,
-								 pValue.uid,
+                                 static_cast<const SCFIOEntryDesc &>( pValue ),
 								 pValue.resourcesNum,
 								 pValue.subFoldersNum );
 		}
@@ -73,18 +66,14 @@ namespace ts3
 		gds_size_t deserialize( const byte * pInputData, SCFIOVirtualFolderDesc & pValue )
 		{
 			return deserializeAll( pInputData,
-								   pValue.entryType,
-								   pValue.name,
-								   pValue.uid,
+                                   static_cast<SCFIOEntryDesc &>( pValue ),
 								   pValue.resourcesNum,
 								   pValue.subFoldersNum );
 		}
 
 		gds_size_t evalByteSize( const SCFIOVirtualFolderDesc & pValue )
 		{
-			return evalByteSizeAll( pValue.entryType,
-									pValue.name,
-									pValue.uid,
+			return evalByteSizeAll( static_cast<const SCFIOEntryDesc &>( pValue ),
 									pValue.resourcesNum,
 									pValue.subFoldersNum );
 		}

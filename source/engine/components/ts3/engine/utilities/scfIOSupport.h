@@ -22,6 +22,9 @@ namespace ts3
 	class SCFIOProxy
 	{
 	public:
+	    using FileReadCallback = std::function<uint64( void *, uint64 )>;
+	    using FileWriteCallback = std::function<uint64( const void *, uint64 )>;
+
 	    SCFIOProxy( system::FileManagerHandle pSysFileManager );
 
 		void saveIndex( const std::string & pFilename, const SCFIndexBuilder & pBuilder );
@@ -29,14 +32,20 @@ namespace ts3
 		void loadIndex( const std::string & pFilename, SCFIndex & pIndex );
 
 	private:
-		void writeFolderData( system::FileHandle pSysFile, const SCFVirtualFolderTemplate & pFolder, ByteBuffer & pStorageBuffer );
+		void writeFolderData( system::FileHandle pSysFile,
+                              const SCFVirtualFolderTemplate & pFolder,
+                              ByteBuffer & pStorageBuffer,
+                              const FileWriteCallback & pFileWriteCallback );
 
-		void writeResourceData( system::FileHandle pSysFile, const SCFResourceTemplate & pResource, ByteBuffer & pStorageBuffer );
+		void writeResourceData( system::FileHandle pSysFile,
+                                const SCFResourceTemplate & pResource,
+                                ByteBuffer & pStorageBuffer,
+                                const FileWriteCallback & pFileWriteCallback );
 
-		void readFolder( system::FileHandle pSysFile, SCFVirtualFolder & pFolder, ByteBuffer & pStorageBuffer );
-
-		template <typename TpValue>
-		void readSerializedValueWithMetaInfo( system::FileHandle pSysFile, TpValue & pValue, ByteBuffer & pStorageBuffer );
+		void readFolder( system::FileHandle pSysFile,
+                         SCFVirtualFolder & pFolder,
+                         ByteBuffer & pStorageBuffer,
+                         const FileReadCallback & pFileReadCallback );
 
 	private:
 		system::FileManagerHandle _sysFileManager;
