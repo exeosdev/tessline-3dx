@@ -8,7 +8,9 @@
 #include <ts3/gpuapi/presentationLayer.h>
 #include <ts3/system/windowSystem.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( DXPresentationLayer );
@@ -41,6 +43,7 @@ namespace ts3::gpuapi
 	    static system::WindowHandle createSysWindow( DXGPUDevice & pDevice, const PresentationLayerCreateInfo & pCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DXCOMMON_SWAP_CHAIN_H__

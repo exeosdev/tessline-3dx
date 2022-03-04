@@ -5,7 +5,9 @@
 #include "DX11_gpuDevice.h"
 #include <ts3/gpuapi/commandContext.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	DX11ScreenPresentationLayer::DX11ScreenPresentationLayer( DX11GPUDevice & pDevice,
@@ -108,4 +110,5 @@ namespace ts3::gpuapi
 		return true;
 	}
 	
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

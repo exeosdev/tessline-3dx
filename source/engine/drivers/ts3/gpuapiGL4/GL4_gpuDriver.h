@@ -7,7 +7,9 @@
 #include "GL4_prerequisites.h"
 #include <ts3/gpuapiGL/GL_gpuDriver.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	struct GL4GPUDriverCreateInfo : public GLGPUDriverCreateInfo
@@ -29,6 +31,7 @@ namespace ts3::gpuapi
 		static GL4GPUDriverHandle create( const GL4GPUDriverCreateInfo & pCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GL4_GPU_DRIVER__

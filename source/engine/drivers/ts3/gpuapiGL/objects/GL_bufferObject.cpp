@@ -1,7 +1,9 @@
 
 #include "GL_bufferObject.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GLBufferObject::GLBufferObject( GLuint pHandle, const GLBufferCreateInfo & pGLCreateInfo )
@@ -279,4 +281,5 @@ namespace ts3::gpuapi
 		return pBindTarget;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

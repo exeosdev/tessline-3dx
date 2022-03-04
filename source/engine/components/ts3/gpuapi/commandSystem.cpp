@@ -3,7 +3,9 @@
 #include "gpuDevice.h"
 #include <ts3/stdext/mapUtils.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	CommandSystem::CommandSystem( GPUDevice & pGPUDevice )
@@ -55,4 +57,5 @@ namespace ts3::gpuapi
 		return resolvedID;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

@@ -8,6 +8,120 @@
 namespace ts3
 {
 
+	template <typename Tp1, typename Tp2 = Tp1>
+	struct CmpEqual
+	{
+		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		{
+			return pLhs == pRhs;
+		}
+	};
+
+	template <typename Tp1>
+	struct CmpEqualT
+	{
+		template <typename Tp2>
+		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		{
+			return pLhs == pRhs;
+		}
+	};
+
+	template <typename Tp1, typename Tp2 = Tp1>
+	struct CmpNotEqual
+	{
+		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		{
+			return pLhs != pRhs;
+		}
+	};
+
+	template <typename Tp1>
+	struct CmpNotEqualT
+	{
+		template <typename Tp2>
+		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		{
+			return pLhs != pRhs;
+		}
+	};
+
+	template <typename Tp1, typename Tp2 = Tp1>
+	struct CmpLess
+	{
+		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		{
+			return pLhs < pRhs;
+		}
+	};
+
+	template <typename Tp1>
+	struct CmpLessT
+	{
+		template <typename Tp2>
+		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		{
+			return pLhs < pRhs;
+		}
+	};
+
+	template <typename Tp1, typename Tp2 = Tp1>
+	struct CmpLessEqual
+	{
+		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		{
+			return pLhs <= pRhs;
+		}
+	};
+
+	template <typename Tp1>
+	struct CmpLessEqualT
+	{
+		template <typename Tp2>
+		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		{
+			return pLhs <= pRhs;
+		}
+	};
+
+	template <typename Tp1, typename Tp2 = Tp1>
+	struct CmpGreater
+	{
+		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		{
+			return pLhs > pRhs;
+		}
+	};
+
+	template <typename Tp1>
+	struct CmpGreaterT
+	{
+		template <typename Tp2>
+		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		{
+			return pLhs > pRhs;
+		}
+	};
+
+	template <typename Tp1, typename Tp2 = Tp1>
+	struct CmpGreaterEqual
+	{
+		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		{
+			return pLhs >= pRhs;
+		}
+	};
+
+	template <typename Tp1>
+	struct CmpGreaterEqualT
+	{
+		template <typename Tp2>
+		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		{
+			return pLhs >= pRhs;
+		}
+	};
+
 	template <intmax_t tValue>
 	struct StaticAbs
 	{

@@ -20,7 +20,6 @@ namespace ts3
 
 	public:
 		AtomicBitmask( const AtomicBitmask & ) = delete;
-
 		AtomicBitmask & operator=( const AtomicBitmask & ) = delete;
 
 		AtomicBitmask()  noexcept

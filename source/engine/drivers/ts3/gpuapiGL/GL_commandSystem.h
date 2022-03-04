@@ -7,7 +7,9 @@
 #include "GL_prerequisites.h"
 #include <ts3/gpuapi/commandSystem.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	struct GLCommandSyncData
@@ -47,6 +49,7 @@ namespace ts3::gpuapi
 		GLCommandListHandle _mainCommandList;
 	};
 	
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_GPU_CMD_MANAGER_H__

@@ -2,7 +2,9 @@
 #include "VK_gpuDriver.h"
 #include "VK_gpuDevice.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	VKGPUDriver::VKGPUDriver( system::temContext * pExfSystemContext )
@@ -25,4 +27,5 @@ namespace ts3::gpuapi
 		return VKGPUDevice::create( this, createInfo );
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

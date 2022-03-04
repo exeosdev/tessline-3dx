@@ -16,7 +16,9 @@
 #include <ts3/gpuapi/resources/shader.h>
 #include <ts3/gpuapi/resources/texture.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GLCommandList::GLCommandList( GLCommandSystem & pGLCommandSystem, ECommandListType pListType, system::OpenGLRenderContextHandle pSysGLRenderContext )
@@ -342,4 +344,5 @@ namespace ts3::gpuapi
 		}
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

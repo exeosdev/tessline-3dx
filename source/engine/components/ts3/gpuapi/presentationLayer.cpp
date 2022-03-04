@@ -2,7 +2,9 @@
 #include "presentationLayer.h"
 #include "gpuDevice.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	PresentationLayer::PresentationLayer( GPUDevice & pGPUDevice )
@@ -17,4 +19,5 @@ namespace ts3::gpuapi
 		return nullptr;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

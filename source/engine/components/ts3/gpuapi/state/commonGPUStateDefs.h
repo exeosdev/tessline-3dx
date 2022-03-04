@@ -8,7 +8,9 @@
 #include <ts3/stdext/hash.h>
 #include <list>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( GPUStateObject );
@@ -185,6 +187,7 @@ namespace ts3::gpuapi
 		uint8 stencilClearValue;
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_COMMON_STATE_DEFS_H__

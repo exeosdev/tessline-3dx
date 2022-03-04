@@ -36,13 +36,16 @@
 #include "prerequisites/DX_commonShaderDefs.h"
 #include "prerequisites/DX_errorUtils.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( DXGPUDevice );
 	ts3DeclareClassHandle( DXGPUDriver );
 	ts3DeclareClassHandle( DXPresentationLayer );
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DXCOMMON_PREREQUISITES_H__

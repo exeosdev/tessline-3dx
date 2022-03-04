@@ -6,7 +6,9 @@
 
 #include "pipelineStateDesc.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	using graphics_state_update_mask_value_t = uint64;
@@ -104,6 +106,7 @@ namespace ts3::gpuapi
 		SeparableStateDescriptorSet _csSeparableStateDescriptorSet;
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_PIPELINE_STATE_CONTROLLER_H__

@@ -6,7 +6,9 @@
 
 #include "../GL_prerequisites.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3GLDeclareOpenGLObjectHandle( GLRenderbufferObject );
@@ -36,6 +38,7 @@ namespace ts3::gpuapi
 		bool initialize( const GLRenderbufferCreateInfo & pGLCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_RENDERBUFFER_OBJECT_H__

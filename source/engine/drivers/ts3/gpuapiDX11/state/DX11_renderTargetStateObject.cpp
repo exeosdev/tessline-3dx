@@ -6,7 +6,9 @@
 #include <ts3/gpuapiDX11/resources/DX11_texture.h>
 #include <ts3/stdext/memory.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	DX11RenderTargetStateObject::DX11RenderTargetStateObject( DX11GPUDevice & pGPUDevice,
@@ -294,4 +296,5 @@ namespace ts3::gpuapi
 		return d3d11TextureDSV;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

@@ -7,12 +7,31 @@
 namespace ts3
 {
 
+    template <bool tpIsDataConst>
+    struct ArrayViewByteType;
+
+    template <>
+    struct ArrayViewByteType<false>
+    {
+        using Type = byte;
+    };
+
+    template <>
+    struct ArrayViewByteType<true>
+    {
+        using Type = const byte;
+    };
+
 	/// @brief Simple struct used to wrap and reference continuous blocks of memory.
 	/// @tparam Tp Type of the data the view references.
 	template <typename Tp>
 	struct ArrayView
 	{
+	    static_assert( !std::is_void<Tp>::value, "Cannot create an ArrayView for void data. Use ArrayView<byte> for that." );
+
 	public:
+	    using ByteType = typename ArrayViewByteType<std::is_const<Tp>::value>::Type;
+	    
 		ArrayView()
 		: beginPtr( nullptr )
 		, endPtr( nullptr )
@@ -36,6 +55,11 @@ namespace ts3
 		explicit ArrayView( Tp( &pArray )[tSize] )
 		: ArrayView( &( pArray[0] ), tSize )
 		{}
+
+		ArrayView<ByteType> asByteView() const
+		{
+		    return ArrayView<ByteType>{ reinterpret_cast<ByteType *>( beginPtr ), size * sizeof( Tp ) };
+		}
 
 		void swap( ArrayView & pOther )
 		{

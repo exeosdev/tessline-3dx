@@ -2,7 +2,9 @@
 #include "VK_gpuDevice.h"
 #include "VK_gpuDriver.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	VKGPUDevice::VKGPUDevice( VKGPUDriver * pDriver, VkDevice pVkDevice )
@@ -21,4 +23,5 @@ namespace ts3::gpuapi
 	{
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

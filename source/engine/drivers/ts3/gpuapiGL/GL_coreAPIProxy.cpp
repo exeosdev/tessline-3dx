@@ -7,7 +7,9 @@
 #include <ts3/stdext/mapUtils.h>
 #include <unordered_map>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GLenum GLCoreAPIProxy::chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags )
@@ -719,4 +721,5 @@ namespace ts3::gpuapi
 		return "Unknown";
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

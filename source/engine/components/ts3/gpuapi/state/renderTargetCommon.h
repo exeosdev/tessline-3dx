@@ -7,7 +7,9 @@
 #include "commonGPUStateDefs.h"
 #include <ts3/gpuapi/resources/renderBuffer.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( RenderBuffer );
@@ -167,6 +169,7 @@ namespace ts3::gpuapi
 	TS3_GPUAPI_API bool checkRenderTargetLayoutCompatibility( const RenderTargetResourceBinding & pRTResourceBinding,
 	                                                          const RenderTargetLayout & pRTLayout );
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_RENDER_TARGET_COMMON_H__

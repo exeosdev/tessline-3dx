@@ -15,7 +15,9 @@
 #include <ts3/gpuapi/resources/shader.h>
 #include <ts3/gpuapi/resources/texture.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	DX11GPUDevice::DX11GPUDevice( DX11GPUDriver & pDriver,
@@ -172,4 +174,5 @@ namespace ts3::gpuapi
 	    return dx11Texture;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

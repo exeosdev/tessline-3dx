@@ -8,7 +8,9 @@
 #include <ts3/gpuapi/state/pipelineStateController.h>
 #include <ts3/gpuapiDX11/state/DX11_pipelineStateDesc.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	/// @brief
@@ -33,6 +35,7 @@ namespace ts3::gpuapi
 		DX11GraphicsPipelineStateDescriptorCache * _descriptorCache;
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DXCOMMON_PIPELINE_STATE_CONTROLLER_H__

@@ -7,7 +7,9 @@
 #include "gpuResource.h"
 #include "textureCommon.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	class TextureStorage;
@@ -35,6 +37,7 @@ namespace ts3::gpuapi
 		static bool validateTextureCreateInfo( TextureCreateInfo & pCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_TEXTURE_H__

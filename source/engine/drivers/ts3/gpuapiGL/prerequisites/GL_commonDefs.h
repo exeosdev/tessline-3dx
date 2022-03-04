@@ -21,13 +21,16 @@
 
 #define GL_TS3_ERR_INVALID_PARAM ( ( GLenum ) 0xFFFFFFFFu )
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	constexpr GLenum cvGLInvalidValue = ts3::Limits<GLenum>::maxValue;
 
 	constexpr GLuint cvGLInvalidProgramLocation = ts3::Limits<GLuint>::maxValue;
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_COMMON_DEFSH__

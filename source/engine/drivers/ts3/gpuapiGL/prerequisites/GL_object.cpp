@@ -1,7 +1,9 @@
 
 #include "../GL_prerequisites.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GLObject::GLObject( GLObjectBaseType pBaseType, GLuint pHandle )
@@ -27,4 +29,5 @@ namespace ts3::gpuapi
 		writableHandle = cxGLObjectHandleInvalid;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

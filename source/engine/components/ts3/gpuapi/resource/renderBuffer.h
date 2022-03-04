@@ -6,7 +6,9 @@
 
 #include "textureCommon.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	/// @brief
@@ -47,6 +49,7 @@ namespace ts3::gpuapi
 		static bool validateCreateInfo( const RenderBufferCreateInfo & pCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_RENDER_BUFFER_H__

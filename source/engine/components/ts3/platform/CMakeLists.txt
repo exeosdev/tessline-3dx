@@ -26,6 +26,7 @@ set( TS3_PLATFORM_SRC_FILES
 		"debug.cpp"
 		"fileLocationInfo.h"
 		"fileLocationInfo.cpp"
+		"gds.h"
 		"syncCommon.h"
 		"syncCommon.cpp"
 		)

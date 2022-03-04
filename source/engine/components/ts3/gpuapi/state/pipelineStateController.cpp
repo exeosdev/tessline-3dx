@@ -4,7 +4,9 @@
 #include "vertexStreamStateObject.h"
 #include <ts3/stdext/memory.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GraphicsPipelineStateController::GraphicsPipelineStateController()
@@ -141,4 +143,5 @@ namespace ts3::gpuapi
 		memZero( _csSeparableStateDescriptorSet );
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

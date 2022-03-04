@@ -4,7 +4,9 @@
 #include "../resources/DX11_shader.h"
 #include <ts3/gpuapi/resources/shader.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	DX11GraphicsPipelineStateObject::DX11GraphicsPipelineStateObject( DX11GPUDevice & pGPUDevice,
@@ -47,4 +49,5 @@ namespace ts3::gpuapi
 		return pipelineStateObject;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

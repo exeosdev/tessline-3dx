@@ -255,30 +255,18 @@
 #if _ECL_TARGET_CPU_X86_64 || defined( _M_AMD64 ) || defined( _M_X64 ) || defined( __x86_64__ )
 #
 #  define TS3_PCL_TARGET_ARCHITECTURE  TS3_PCL_TARGET_ARCHITECTURE_X86_64
-#  define TS3_PCL_ENDIANNESS           TS3_PCL_ENDIANNESS_LE
-#  define TS3_PCL_ENDIANNESS_SWAP      TS3_PCL_ENDIANNESS_BE
-#  define TS3_PCL_TARGET_64            1
 #
 #elif _ECL_TARGET_CPU_X86 || defined( _M_IX86 ) || defined( _X86_ ) || defined( __i386__ ) || defined( __IA32__ )
 #
 #  define TS3_PCL_TARGET_ARCHITECTURE  TS3_PCL_TARGET_ARCHITECTURE_X86
-#  define TS3_PCL_ENDIANNESS           TS3_PCL_ENDIANNESS_LE
-#  define TS3_PCL_ENDIANNESS_SWAP      TS3_PCL_ENDIANNESS_BE
-#  define TS3_PCL_TARGET_64            0
 #
 #elif _ECL_TARGET_CPU_ARM64 || defined( __ARM_ARCH_ISA_A64 ) || defined( __aarch64__ )
 #
 #  define TS3_PCL_TARGET_ARCHITECTURE  TS3_PCL_TARGET_ARCHITECTURE_ARM64
-#  define TS3_PCL_ENDIANNESS           TS3_PCL_ENDIANNESS_BE
-#  define TS3_PCL_ENDIANNESS_SWAP      TS3_PCL_ENDIANNESS_LE
-#  define TS3_PCL_TARGET_64            1
 #
 #elif _ECL_TARGET_CPU_ARM || defined( _M_ARM ) || defined( _M_ARMT ) || defined( _ARM ) || defined( __arm__ )
 #
 #  define TS3_PCL_TARGET_ARCHITECTURE  TS3_PCL_TARGET_ARCHITECTURE_ARM
-#  define TS3_PCL_ENDIANNESS           TS3_PCL_ENDIANNESS_BE
-#  define TS3_PCL_ENDIANNESS_SWAP      TS3_PCL_ENDIANNESS_LE
-#  define TS3_PCL_TARGET_64            0
 #
 #endif
 
@@ -609,5 +597,21 @@
 #  define TS3_PCL_ZERO_MEMORY( memPtr, size ) memset( (memPtr), 0, (size) )
 #endif
 
+
+#if( TS3_PCL_ENDIANNESS_NATIVE == TS3_PCL_ENDIANNESS_LE )
+#  define TS3_PCL_GET_U16_LE( pValue ) ( pValue )
+#  define TS3_PCL_GET_U32_LE( pValue ) ( pValue )
+#  define TS3_PCL_GET_U64_LE( pValue ) ( pValue )
+#  define TS3_PCL_GET_U16_BE( pValue ) TS3_PCL_BYTESWAP16( pValue )
+#  define TS3_PCL_GET_U32_BE( pValue ) TS3_PCL_BYTESWAP32( pValue )
+#  define TS3_PCL_GET_U64_BE( pValue ) TS3_PCL_BYTESWAP64( pValue )
+#else
+#  define TS3_PCL_GET_U16_LE( pValue ) TS3_PCL_BYTESWAP16( pValue )
+#  define TS3_PCL_GET_U32_LE( pValue ) TS3_PCL_BYTESWAP32( pValue )
+#  define TS3_PCL_GET_U64_LE( pValue ) TS3_PCL_BYTESWAP64( pValue )
+#  define TS3_PCL_GET_U16_BE( pValue ) ( pValue )
+#  define TS3_PCL_GET_U32_BE( pValue ) ( pValue )
+#  define TS3_PCL_GET_U64_BE( pValue ) ( pValue )
+#endif
 
 #endif /*  __TS3_PLATFORM_CONFIG_ENVIRONMENT_H__ */

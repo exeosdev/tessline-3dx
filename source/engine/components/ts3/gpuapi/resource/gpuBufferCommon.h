@@ -6,7 +6,9 @@
 
 #include "commonGPUResourceDefs.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( GPUBuffer );
@@ -138,6 +140,7 @@ namespace ts3::gpuapi
 		Bitmask<EGPUBufferDataCopyFlags> flags = E_GPU_BUFFER_DATA_COPY_FLAGS_DEFAULT;
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_GPU_BUFFER_COMMON_H__

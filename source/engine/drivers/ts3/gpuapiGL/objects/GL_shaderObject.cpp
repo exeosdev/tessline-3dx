@@ -2,7 +2,9 @@
 #include "GL_shaderObject.h"
 #include <ts3/stdext/mapUtils.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GLShaderObject::GLShaderObject( GLuint pHandle, GLenum pGLEShaderType, GLenum pGLShaderStageMaskBit )
@@ -218,4 +220,5 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

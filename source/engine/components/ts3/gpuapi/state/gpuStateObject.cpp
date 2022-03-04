@@ -1,7 +1,9 @@
 
 #include "gpuStateObject.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GPUStateObject::GPUStateObject( GPUDevice & pGPUDevice )
@@ -10,4 +12,5 @@ namespace ts3::gpuapi
 
 	GPUStateObject::~GPUStateObject() = default;
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

@@ -7,7 +7,9 @@
 #include "../DX11_prerequisites.h"
 #include <ts3/gpuapi/resources/renderBuffer.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	class TS3GX_DX11_CLASS DX11RenderBuffer : public RenderBuffer
@@ -31,6 +33,7 @@ namespace ts3::gpuapi
 		static Handle<DX11RenderBuffer> create( DX11GPUDevice & pDX11GPUDevice, const RenderBufferCreateInfo & pCreateInfo );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DX11_RENDER_BUFFER_H__

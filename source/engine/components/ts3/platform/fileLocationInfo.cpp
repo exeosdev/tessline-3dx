@@ -1,5 +1,5 @@
 
-#include <ts3/core/prerequisites.h>
+#include "fileLocationInfo.h"
 
 namespace ts3
 {

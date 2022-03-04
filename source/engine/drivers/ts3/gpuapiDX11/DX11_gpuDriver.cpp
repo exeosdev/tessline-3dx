@@ -2,7 +2,9 @@
 #include "DX11_gpuDriver.h"
 #include "DX11_gpuDevice.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	DX11GPUDriver::DX11GPUDriver( system::SysContextHandle pSysContext ) noexcept
@@ -42,4 +44,5 @@ namespace ts3::gpuapi
 		return EGPUDriverID::GDIDDX11;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

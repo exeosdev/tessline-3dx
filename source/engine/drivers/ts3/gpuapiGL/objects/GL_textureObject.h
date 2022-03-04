@@ -7,7 +7,9 @@
 #include "../GL_prerequisites.h"
 #include <ts3/gpuapi/resources/textureCommon.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3GLDeclareOpenGLObjectHandle( GLTextureObject );
@@ -88,6 +90,7 @@ namespace ts3::gpuapi
 		static GLuint computeInputPixelDataAlignment( GLenum pPixelDataLayout, GLenum pPixelDataType );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_TEXTURE_OBJECT_H__

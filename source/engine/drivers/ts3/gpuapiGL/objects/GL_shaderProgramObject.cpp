@@ -2,7 +2,9 @@
 #include "GL_shaderProgramObject.h"
 #include "GL_shaderObject.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GLShaderProgramObject::GLShaderProgramObject( GLuint pHandle, GLShaderProgramType pProgramType )
@@ -281,4 +283,5 @@ namespace ts3::gpuapi
 		return infoLogLength > 0;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

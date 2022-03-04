@@ -6,13 +6,16 @@
 
 #include "prerequisites.h"
 
+#define ts3ExcCategoryIID( pIID ) ( pIID )
+#define ts3ExcCodeIID( pIID ) ( pIID )
+
 namespace ts3
 {
 
     /// @brief Type used to represent exception codes.
     using exception_base_type_value_t = uint8;
 
-    /// @brief Type used to represent exception codes.
+    /// @brief Type used to represent exception categories.
     using exception_category_value_t = uint16;
 
     /// @brief Type used to represent exception codes.
@@ -26,24 +29,40 @@ namespace ts3
     /// Use a custom category (subtype) of an 'External' type for extending the system.
     enum class ExceptionBaseType : exception_base_type_value_t
     {
-        //
+        // Unknown type. Not used directly by any exception class.
         Unknown,
-        // For debug-specific errors and messages.
+
+        // For debug-specific errors and messages, debug-only assertions etc.
         Debug,
-        // All exceptions defined by the client libraries and frameworks.
-        External,
-        // For all normal, error-like exceptions. Defined primarily within the ::Core component.
+
+        // Dedicated exception type for top-level engine components (graphics, scripting, etc).
+        // Usually each component provides its own base class which derives from EngineSubModuleException class.
+        EngineSubModule,
+
+        // For all normal, error-like exceptions, intended to be used by lower-level components of the engine
+        // (hence the 'framework' keyword). Defined primarily in the common ::Core component of the project.
         FrameworkCore,
-        // Internal, implementation-details exception used by the framework.
-        FrameworkInternal,
+
+        // Internal, implementation-details exception used by the framework. Used primarily for signalling errors
+        // between parts of the framework, without exposing them to the user. Those exceptions should never leave
+        // the "implementation detail" level of the project.
+        Internal,
+
         // For exceptions used as an interrupts (for example in thread proc).
         Interrupt,
+
         // Defined primarily within the ::Math component.
         Math,
+
         // Dedicated type for exceptions carrying ResultProxy as an error indicator.
         ResultProxy,
-        // System-specific exceptions, extended in platform-specific manner. Defined primarily within the ::System component.
+
+        // System-specific exceptions, extended in platform-specific manner. Defined within the ::System component.
         System,
+
+        // All exceptions defined by the client libraries and frameworks.
+        UserExternal,
+
         //
         _Reserved
     };

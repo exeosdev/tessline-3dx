@@ -2,7 +2,9 @@
 #include "DX11_vertexStreamStateObject.h"
 #include "../DX11_gpuDevice.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	DX11VertexStreamStateObject::DX11VertexStreamStateObject( DX11GPUDevice & pGPUDevice,
@@ -32,4 +34,5 @@ namespace ts3::gpuapi
 		return vertexStreamStateObject;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

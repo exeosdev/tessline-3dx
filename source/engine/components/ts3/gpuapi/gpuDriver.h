@@ -7,7 +7,9 @@
 #include "prerequisites.h"
 #include <ts3/system/sysContextNative.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	struct GPUDeviceCreateInfo;
@@ -55,6 +57,7 @@ namespace ts3::gpuapi
 		return _configFlags.isSet( GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT );
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_GPU_DRIVER_H__

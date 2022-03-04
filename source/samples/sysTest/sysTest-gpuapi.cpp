@@ -94,7 +94,7 @@ int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 
 int main( int pArgc, const char ** pArgv )
 {
-    const std::string sGxDriverName = "DX11";
+    const std::string sGxDriverName = "GL4";
 
     SysContextCreateInfo sysContextCreateInfo;
     sysContextCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
@@ -106,7 +106,14 @@ int main( int pArgc, const char ** pArgv )
 
     GraphicsDriverState gxDriverState;
     gxDriverState.driverID = sGxDriverName;
-    gxDriverState.driverInterface = std::make_unique<DX11GPUDriverInterface>();
+    if( sGxDriverName == "DX11" )
+    {
+        gxDriverState.driverInterface = std::make_unique<DX11GPUDriverInterface>();
+    }
+    else if( sGxDriverName == "GL4" )
+    {
+        gxDriverState.driverInterface = std::make_unique<GL4GPUDriverInterface>();
+    }
 
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
 

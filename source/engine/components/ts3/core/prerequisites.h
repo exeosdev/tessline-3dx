@@ -3,6 +3,7 @@
 #define __TS3_CORE_PREREQUISITES_H__
 
 #include <ts3/platform/debug.h>
+#include <ts3/stdext/arrayView.h>
 #include <ts3/stdext/bitmask.h>
 #include <ts3/stdext/bitUtils.h>
 #include <ts3/stdext/staticLimits.h>

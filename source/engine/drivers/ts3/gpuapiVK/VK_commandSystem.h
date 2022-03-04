@@ -7,7 +7,9 @@
 #include "VK_prerequisites.h"
 #include <ts3/gpuapi/commandSystem.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	/// @brief
@@ -21,6 +23,7 @@ namespace ts3::gpuapi
 		virtual CommandSync submitContext( CommandContextDirect & pContext, const CommandContextSubmitInfo & pSubmitInfo ) override;
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_VKCOMMON_COMMAND_SYSTEM_H__

@@ -6,7 +6,9 @@
 
 #include "../memory/commonGPUMemoryDefs.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( GPUResource );
@@ -177,6 +179,7 @@ namespace ts3::gpuapi
 	template <typename TpData, uint64 tAccessMask>
 	using ResourceMapPtr = typename Internal::ResourceMapPtrTypeProxy<TpData, ( tAccessMask & E_GPU_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT ) != 0>;
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3_GPUAPI_COMMON_RESOURCE_DEFS_H__

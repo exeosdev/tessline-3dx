@@ -7,7 +7,9 @@
 #include "../DX11_prerequisites.h"
 #include <ts3/gpuapi/resources/gpuBuffer.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( DX11GPUBuffer );
@@ -66,6 +68,7 @@ namespace ts3::gpuapi
 		DX11BufferMapInfo _dx11MapInfo;
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DX11_GPU_BUFFER_H__

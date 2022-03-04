@@ -24,12 +24,15 @@
 
 #define TS3GX_GL4_USE_V1CORE_API 1
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( GL4GPUDevice );
 	ts3DeclareClassHandle( GL4GPUDriver );
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GL4_PREREQUISITES_H__

@@ -4,7 +4,9 @@
 #include "../objects/GL_shaderObject.h"
 #include "../objects/GL_shaderProgramObject.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GLShader::GLShader( GLGPUDevice & pGPUDevice, EShaderType pShaderType, GLShaderObjectHandle pGLShaderObject )
@@ -53,4 +55,5 @@ namespace ts3::gpuapi
 		return shaderInterface;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

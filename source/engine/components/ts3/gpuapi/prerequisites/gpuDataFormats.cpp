@@ -3,6 +3,8 @@
 
 namespace ts3
 {
+namespace gpuapi
+{
 
 //	TS3_EnumDefineTypeInfoGx( EBaseDataType )
 //	{
@@ -153,4 +155,5 @@ namespace ts3
 //		TS3_EnumTypeInfoRegisterClassConstant( EVertexAttribFormat::UNKNOWN );
 //	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

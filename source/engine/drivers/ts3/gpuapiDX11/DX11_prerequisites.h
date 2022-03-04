@@ -29,7 +29,9 @@
 #  endif
 #endif
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ts3DeclareClassHandle( DX11CommandList );
@@ -38,6 +40,7 @@ namespace ts3::gpuapi
 	ts3DeclareClassHandle( DX11GPUDriver );
 	ts3DeclareClassHandle( DX11PresentationLayer );
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DX11_PREREQUISITES_H__

@@ -7,7 +7,9 @@
 #include "DX11_pipelineStateDesc.h"
 #include <ts3/gpuapi/state/renderTargetStateObject.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	class DX11RenderBuffer;
@@ -50,6 +52,7 @@ namespace ts3::gpuapi
 		                                                           const RenderTargetAttachmentResourceBinding & pRTBinding );
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DX11_RENDER_TARGET_STATE_OBJECT_H__

@@ -7,7 +7,9 @@
 #include "DX11_prerequisites.h"
 #include <ts3/gpuapiDX/DX_coreAPIProxy.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	using resource_flags_value_t = uint32 ;
@@ -86,6 +88,7 @@ namespace ts3::gpuapi
 
 	};
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_DX11_CORE_LAYER_H__

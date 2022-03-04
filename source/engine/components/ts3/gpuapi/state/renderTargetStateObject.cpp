@@ -3,7 +3,9 @@
 #include <ts3/gpuapi/resources/renderBuffer.h>
 #include <ts3/gpuapi/resources/texture.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	RenderTargetStateObject::RenderTargetStateObject( GPUDevice & pGPUDevice,
@@ -16,4 +18,5 @@ namespace ts3::gpuapi
 
 	RenderTargetStateObject::~RenderTargetStateObject() = default;
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

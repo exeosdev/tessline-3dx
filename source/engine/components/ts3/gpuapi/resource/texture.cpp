@@ -1,7 +1,9 @@
 
 #include "texture.h"
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	ETextureTarget getETextureTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pTextureResourceFlags );
@@ -105,4 +107,5 @@ namespace ts3::gpuapi
 		return ETextureTarget::Unknown;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

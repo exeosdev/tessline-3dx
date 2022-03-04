@@ -5,7 +5,9 @@
 #include <ts3/stdext/mapUtils.h>
 #include <ts3/stdext/utilities.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	DXGIGetDebugInterfaceType DXCoreAPIProxy::loadDXGIDebugLegacyLoader()
@@ -383,4 +385,5 @@ namespace ts3::gpuapi
 	    return DXGI_FORMAT_UNKNOWN;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

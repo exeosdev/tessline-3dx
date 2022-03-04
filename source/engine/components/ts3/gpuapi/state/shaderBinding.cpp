@@ -3,7 +3,9 @@
 #include "../resources/shader.h"
 #include <ts3/stdext/memory.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	struct ShaderBindingInfo
@@ -76,4 +78,5 @@ namespace ts3::gpuapi
 		return true;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

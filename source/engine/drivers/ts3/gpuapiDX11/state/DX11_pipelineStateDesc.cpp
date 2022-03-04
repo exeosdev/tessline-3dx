@@ -6,7 +6,9 @@
 #include <ts3/gpuapiDX11/resources/DX11_shader.h>
 #include <ts3/stdext/memory.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	DX11VertexDataSourceBinding createDX11VertexDataSourceBinding( const VertexDataSourceBinding & pBinding )
@@ -205,4 +207,5 @@ namespace ts3::gpuapi
 		return dx11VIFDescriptor;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

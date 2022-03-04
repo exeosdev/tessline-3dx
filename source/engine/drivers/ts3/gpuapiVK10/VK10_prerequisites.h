@@ -22,7 +22,9 @@
 #  endif
 #endif
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	// ts3DeclareClassHandle( VK10CommandContext );
@@ -31,6 +33,7 @@ namespace ts3::gpuapi
 	// ts3DeclareClassHandle( VK10GPUDriver );
 	// ts3DeclareClassHandle( VK10PresentationLayer );
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_VK10_PREREQUISITES_H__

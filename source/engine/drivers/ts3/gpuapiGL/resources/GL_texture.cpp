@@ -3,7 +3,9 @@
 #include <ts3/gpuapiGL/GL_coreAPIProxy.h>
 #include <ts3/gpuapiGL/GL_gpuDevice.h>
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	GLTexture::GLTexture( GLGPUDevice & pGLGPUDevice,
@@ -67,4 +69,5 @@ namespace ts3::gpuapi
 		return openglTexture;
 	}
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */

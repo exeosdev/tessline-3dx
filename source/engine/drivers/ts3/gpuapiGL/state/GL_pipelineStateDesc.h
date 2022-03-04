@@ -11,7 +11,9 @@
 
 //#define TS3GX_GL_PLATFORM_TYPE  TS3GX_GL_PLATFORM_TYPE_ES
 
-namespace ts3::gpuapi
+namespace ts3
+{
+namespace gpuapi
 {
 
 	class GLBufferObject;
@@ -211,6 +213,7 @@ namespace ts3::gpuapi
 
 	using GLGraphicsPipelineStateDescriptorCache = GraphicsPipelineStateDescriptorCache<GLGraphicsPSDCacheTraits>;
 
-}
+} /* namespace ts3 */
+} /* namespace gpuapi */
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_PIPELINE_STATE_DESC_H__

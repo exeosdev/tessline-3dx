@@ -246,7 +246,7 @@ namespace ts3
 		MemoryAllocationProxy _allocationProxy;
 	};
 
-	template <size_t pSize>
+	template <size_t tpSize>
 	class FixedMemoryBuffer : public MemoryBuffer
 	{
 	public:
@@ -254,11 +254,11 @@ namespace ts3
 		FixedMemoryBuffer & operator=( const FixedMemoryBuffer & ) = delete;
 
 		FixedMemoryBuffer()
-		: MemoryBuffer( &( _storage[0] ), pSize )
+		: MemoryBuffer( &( _storage[0] ), tpSize )
 		{}
 
 	private:
-		byte _storage[pSize];
+		byte _storage[tpSize];
 	};
 
 }
