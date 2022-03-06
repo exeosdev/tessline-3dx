@@ -3,7 +3,7 @@ set( TS3_STDEXT_SRC_FILES
         "prerequisites.h"
         "bitmask.h"
         "bitmaskAtomic.h"
-        "byteBuffer.h"
+        "byteArray.h"
         "chrono.h"
         "fsUtils.h"
         "fsUtils.cpp"

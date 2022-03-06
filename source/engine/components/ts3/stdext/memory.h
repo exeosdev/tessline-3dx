@@ -65,13 +65,21 @@ namespace ts3
         Region<TpSize, TpOffset> reservedRegion;
     };
 
+	inline constexpr uint64 memCheckRequestedCopySize( uint64 pBufferSize, uint64 pCopySize, uint64 pCopyOffset )
+	{
+	    const auto copyOffset = getMinOf( pCopyOffset, pBufferSize );
+	    const auto maxCopySize = pBufferSize - copyOffset;
+	    const auto copySize = getMinOf( pCopySize, maxCopySize );
+	    return copySize;
+	}
+
 	///
 	/// @tparam TpValue
 	/// @param pValue
 	/// @param pAlignment
 	/// @return
 	template <typename TpValue>
-	inline constexpr TpValue getAlignedPowerOf2( TpValue pValue, uint32 pAlignment )
+	inline constexpr TpValue memGetAlignedPowerOf2( TpValue pValue, uint32 pAlignment )
 	{
 		return static_cast<TpValue>( ( static_cast<uint64>( pValue ) + pAlignment ) & ( ~( static_cast<uint64>( pAlignment ) - 1 ) ) );
 	}
@@ -82,16 +90,16 @@ namespace ts3
 	/// @param pAlignment
 	/// @return
 	template <typename TpValue>
-	inline TpValue getAlignedValue( TpValue pValue, uint32 pAlignment )
+	inline TpValue memGetAlignedValue( TpValue pValue, uint32 pAlignment )
 	{
 		const auto valueAlignmentMod = pValue % pAlignment;
 		return ( valueAlignmentMod != 0 ) ? ( pValue + pAlignment - valueAlignmentMod ) : pValue;
 	}
 
 	template <typename TpSize, typename TpOffset = TpSize, typename std::enable_if<std::is_integral<TpSize>::value, int>::type = 0>
-    inline AlignedMemoryAllocInfo<TpSize, TpOffset> computeAlignedAllocationInfo( TpOffset pBaseAddress, TpSize pAllocationSize, uint32 pAlignment )
+    inline AlignedMemoryAllocInfo<TpSize, TpOffset> memComputeAlignedAllocationInfo( TpOffset pBaseAddress, TpSize pAllocationSize, uint32 pAlignment )
     {
-        const auto alignedOffset = getAlignedValue( pBaseAddress, pAlignment );
+        const auto alignedOffset = memGetAlignedValue( pBaseAddress, pAlignment );
 
         AlignedMemoryAllocInfo<TpSize, TpOffset> allocInfo;
         allocInfo.accessibleRegion.offset = alignedOffset;
@@ -108,7 +116,7 @@ namespace ts3
 	/// @param pMemory2
 	/// @param pSize2
 	/// @return
-	bool checkMemoryOverlap( const void * pMemory1, size_t pSize1, const void * pMemory2, size_t pSize2 );
+	bool memCheckMemoryOverlap( const void * pMemory1, size_t pSize1, const void * pMemory2, size_t pSize2 );
 
 	///
 	/// @param pDst

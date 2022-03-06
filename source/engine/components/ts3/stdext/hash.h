@@ -42,23 +42,23 @@ namespace ts3
 	struct HashObject
 	{
 	public:
-		using value_t = typename HashTraits<tpHashAlgo>::hash_value_t;
+		using ValueType = typename HashTraits<tpHashAlgo>::hash_ValueType;
 
-		value_t hashValue;
+		ValueType hashValue;
 
 	public:
 		HashObject( const HashObject & ) = default;
 		HashObject & operator=( const HashObject & ) = default;
 		
 		constexpr HashObject() noexcept
-		: hashValue( static_cast<value_t>( 0 ) )
+		: hashValue( static_cast<ValueType>( 0 ) )
 		{}
 
-		constexpr explicit HashObject( value_t pValue ) noexcept
+		constexpr explicit HashObject( ValueType pValue ) noexcept
 		: hashValue( pValue )
 		{}
 
-		constexpr explicit operator value_t() const noexcept
+		constexpr explicit operator ValueType() const noexcept
 		{
 			return hashValue;
 		}
@@ -175,7 +175,7 @@ namespace ts3
 	template <typename TpHashValueType>
 	struct HashCommonTraits
 	{
-		using hash_value_t = TpHashValueType;
+		using hash_ValueType = TpHashValueType;
 		static constexpr size_t byteSize = sizeof( TpHashValueType );
 		static constexpr size_t hashHexLength = byteSize * 8 / 4;
 	};

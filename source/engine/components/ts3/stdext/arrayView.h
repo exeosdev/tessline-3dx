@@ -33,22 +33,19 @@ namespace ts3
 	    using ByteType = typename ArrayViewByteType<std::is_const<Tp>::value>::Type;
 	    
 		ArrayView()
-		: beginPtr( nullptr )
-		, endPtr( nullptr )
-		, size( 0 )
+		: _beginPtr( nullptr )
+		, _size( 0 )
 		{}
 
 		ArrayView( Tp * pMemory, size_t pSize )
-		: beginPtr( pMemory )
-		, endPtr( pMemory + pSize )
-		, size( pSize )
+		: _beginPtr( pMemory )
+		, _size( pSize )
 		{}
 
 		template <typename TpOther>
 		ArrayView( const ArrayView<TpOther> & pOther )
-		: beginPtr( pOther.beginPtr )
-		, endPtr( pOther.endPtr )
-		, size( pOther.size )
+		: _beginPtr( pOther._beginPtr )
+		, _size( pOther._size )
 		{}
 
 		template <size_t tSize>
@@ -56,25 +53,37 @@ namespace ts3
 		: ArrayView( &( pArray[0] ), tSize )
 		{}
 
+		explicit operator bool() const
+		{
+		    return _beginPtr && ( _size > 0 );
+		}
+
 		ArrayView<ByteType> asByteView() const
 		{
-		    return ArrayView<ByteType>{ reinterpret_cast<ByteType *>( beginPtr ), size * sizeof( Tp ) };
+		    return ArrayView<ByteType>{ reinterpret_cast<ByteType *>( _beginPtr ), _size * sizeof( Tp ) };
+		}
+
+		Tp * data() const
+		{
+		    return _beginPtr;
+		}
+
+		size_t size() const
+		{
+		    return _size;
 		}
 
 		void swap( ArrayView & pOther )
 		{
-			std::swap( beginPtr, pOther.begin );
-			std::swap( endPtr, pOther.end );
-			std::swap( size, pOther.size );
+			std::swap( _beginPtr, pOther.begin );
+			std::swap( _size, pOther._size );
 		}
 
-	public:
+	private:
 		// Pointer to the beginning of the data.
-		Tp * beginPtr;
-		// Pointer past end of the data.
-		Tp * endPtr;
+		Tp * _beginPtr;
 		// Size of the data, in number of elements of the underlying type (Tp).
-		size_t size;
+		size_t _size;
 	};
 
 	template <typename Tp>
@@ -86,13 +95,13 @@ namespace ts3
 	template <typename Tp>
 	inline Tp * begin( const ArrayView<Tp> & pArrayView )
 	{
-		return pArrayView.beginPtr;
+		return pArrayView.data();
 	}
 
 	template <typename Tp>
 	inline Tp * end( const ArrayView<Tp> & pArrayView )
 	{
-		return pArrayView.endPtr;
+		return pArrayView.data() + pArrayView.size();
 	}
 
 	/// @brief Creates ArrayView that wraps specified memory.
@@ -116,6 +125,21 @@ namespace ts3
 	{
 		return ArrayView<Tp>( pArray );
 	}
+
+	using ReadOnlyMemoryView = ArrayView<const byte>;
+	using ReadWriteMemoryView = ArrayView<byte>;
+
+	template <typename Tp, std::enable_if_t<std::is_const<Tp>::value, int> = 0>
+    inline ReadOnlyMemoryView bindMemoryView( Tp * pMemory, size_t pSize )
+	{
+        return ReadOnlyMemoryView( pMemory, pSize );
+	}
+
+	template <typename Tp, std::enable_if_t<!std::is_const<Tp>::value, int> = 0>
+    inline ReadWriteMemoryView bindMemoryView( Tp * pMemory, size_t pSize )
+    {
+        return ReadWriteMemoryView( pMemory, pSize );
+    }
 
 }
 
