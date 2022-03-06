@@ -29,7 +29,7 @@ namespace ts3
 
 	const MemoryAllocationProxy cvDefaultMemoryAllocationProxy = getDefaultAllocationProxy();
 
-	bool checkMemoryOverlap( const void * pMemory1, size_t pSize1, const void * pMemory2, size_t pSize2 )
+	bool memCheckMemoryOverlap( const void * pMemory1, size_t pSize1, const void * pMemory2, size_t pSize2 )
 	{
 		// For a two different regions with at least one being of size 0, there can be no overlap.
 		if( ( pSize1 == 0 ) || ( pSize2 == 0 ) )
@@ -73,7 +73,7 @@ namespace ts3
 			throw 0;
 		}
 		// For memory copying, regions may not overlap.
-		if( checkMemoryOverlap( pDst, pCopySize, pSrc, pCopySize ) )
+		if( memCheckMemoryOverlap( pDst, pCopySize, pSrc, pCopySize ) )
 		{
 			throw 0;
 		}
@@ -84,7 +84,7 @@ namespace ts3
 	{
 		ts3DebugAssert( ( pDst != nullptr ) && ( pDstSize > 0 ) );
 		ts3DebugAssert( pCopySize <= pDstSize );
-		ts3DebugAssert( !checkMemoryOverlap( pDst, pCopySize, pSrc, pCopySize ) );
+		ts3DebugAssert( !memCheckMemoryOverlap( pDst, pCopySize, pSrc, pCopySize ) );
 		TS3_PCL_COPY_MEMORY( pDst, pSrc, pCopySize );
 	}
 

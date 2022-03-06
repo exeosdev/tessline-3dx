@@ -2,6 +2,7 @@
 #ifndef __TS3_STDEXT_MEMORY_BUFFER_H__
 #define __TS3_STDEXT_MEMORY_BUFFER_H__
 
+#include "arrayView.h"
 #include "memory.h"
 
 namespace ts3
@@ -15,124 +16,56 @@ namespace ts3
 
 		MemoryBuffer() noexcept
 		: _bufferBasePtr( nullptr )
-		, _bufferEndPtr( nullptr )
 		, _bufferLength( 0u )
 		{}
 
 		MemoryBuffer( MemoryBuffer && pSource ) noexcept
 		: _bufferBasePtr( pSource._bufferBasePtr )
-		, _bufferEndPtr( pSource._bufferEndPtr )
 		, _bufferLength( pSource._bufferLength )
 		{
 			pSource._bufferBasePtr = nullptr;
-			pSource._bufferEndPtr = nullptr;
 			pSource._bufferLength = 0u;
 		}
 
 		MemoryBuffer( void * pMemory, size_t pMemorySize ) noexcept
 		: _bufferBasePtr( reinterpret_cast<byte *>( pMemory ) )
-		, _bufferEndPtr( _bufferBasePtr + pMemorySize )
 		, _bufferLength( pMemorySize )
 		{}
 
-		byte & operator[]( size_t pOffset ) noexcept
+		TS3_PCL_ATTR_NO_DISCARD byte & operator[]( size_t pOffset ) noexcept
 		{
 			ts3DebugAssert( pOffset < _bufferLength );
 			return _bufferBasePtr[pOffset];
 		}
 
-		const byte & operator[]( size_t pOffset ) const noexcept
+		TS3_PCL_ATTR_NO_DISCARD const byte & operator[]( size_t pOffset ) const noexcept
 		{
 			ts3DebugAssert( pOffset < _bufferLength );
 			return _bufferBasePtr[pOffset];
 		}
 
-		byte * dataPtr() noexcept
+		TS3_PCL_ATTR_NO_DISCARD byte * data() noexcept
 		{
 			ts3DebugAssert( _bufferLength > 0 );
 			return _bufferBasePtr;
 		}
 
-		const byte * dataPtr() const noexcept
+		TS3_PCL_ATTR_NO_DISCARD const byte * data() const noexcept
 		{
 			ts3DebugAssert( _bufferLength > 0 );
 			return _bufferBasePtr;
 		}
 
-		byte * dataPtr( size_t pOffset ) noexcept
+		TS3_PCL_ATTR_NO_DISCARD byte * data( size_t pOffset ) noexcept
 		{
 			ts3DebugAssert( ( _bufferLength > 0 ) && ( pOffset < _bufferLength ) );
 			return _bufferBasePtr + pOffset;
 		}
 
-		const byte * dataPtr( size_t pOffset ) const noexcept
+		TS3_PCL_ATTR_NO_DISCARD const byte * data( size_t pOffset ) const noexcept
 		{
 			ts3DebugAssert( ( _bufferLength > 0 ) && ( pOffset < _bufferLength ) );
 			return _bufferBasePtr + pOffset;
-		}
-
-		template <typename TpResult>
-		TpResult * dataPtrAs() noexcept
-		{
-			auto * bufferBytePtr = dataPtr();
-			return reinterpret_cast<TpResult *>( bufferBytePtr );
-		}
-
-		template <typename TpResult>
-		const TpResult * dataPtrAs() const noexcept
-		{
-			auto * bufferBytePtr = dataPtr();
-			return reinterpret_cast<TpResult *>( bufferBytePtr );
-		}
-
-		template <typename TpResult>
-		TpResult * dataPtrAs( size_t pOffset ) noexcept
-		{
-			auto * bufferBytePtr = dataPtr();
-			return reinterpret_cast<TpResult *>( bufferBytePtr );
-		}
-
-		template <typename TpResult>
-		const TpResult * dataPtrAs( size_t pOffset ) const noexcept
-		{
-			auto * bufferBytePtr = dataPtr();
-			return reinterpret_cast<TpResult *>( bufferBytePtr );
-		}
-
-		void fillBytes( byte pValue, size_t pFillCount = CX_MAX_SIZE, size_t pFillOffset = 0 )
-		{
-			if( pFillOffset >= _bufferLength )
-			{
-				return;
-			}
-
-			auto bufferCapacity = _bufferLength - pFillOffset;
-			pFillCount = getMinOf( pFillCount, bufferCapacity );
-			memFillChecked( _bufferBasePtr + pFillOffset, bufferCapacity, pValue, pFillCount );
-		}
-
-		void setData( const void * pData, size_t pDataSize, size_t pSetOffset = 0 )
-		{
-			if( ( pData == nullptr ) || ( pDataSize == 0 ) || ( pSetOffset >= _bufferLength ) )
-			{
-				return;
-			}
-
-			auto bufferCapacity = _bufferLength - pSetOffset;
-			pSetOffset = getMinOf( pSetOffset, bufferCapacity );
-			memCopyUnchecked( _bufferBasePtr + pSetOffset, bufferCapacity, pData, pDataSize );
-		}
-
-		void copy( void * pBuffer, size_t pBufferSize, size_t pCopySize, size_t pCopyOffset = 0 )
-		{
-			if( ( pBuffer == nullptr ) || ( pBufferSize == 0 ) || ( pCopyOffset >= _bufferLength ) )
-			{
-				return;
-			}
-
-			pCopySize = getMinOf( pCopySize, pBufferSize );
-			pCopySize = getMinOf( pCopySize, _bufferLength - pCopyOffset );
-			memCopyUnchecked( pBuffer, pBufferSize, _bufferBasePtr + pCopyOffset, pCopySize );
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD bool empty() const noexcept
@@ -147,9 +80,18 @@ namespace ts3
 
 	protected:
 		byte * _bufferBasePtr;
-		byte * _bufferEndPtr;
 		size_t _bufferLength;
 	};
+
+	inline ReadWriteMemoryView bindMemoryView( MemoryBuffer & pMemoryBuffer )
+	{
+	    return ReadWriteMemoryView( pMemoryBuffer.data(), pMemoryBuffer.size() );
+	}
+
+	inline ReadOnlyMemoryView bindMemoryView( const MemoryBuffer & pMemoryBuffer )
+	{
+	    return ReadOnlyMemoryView( pMemoryBuffer.data(), pMemoryBuffer.size() );
+	}
 
 	class DynamicMemoryBuffer : public MemoryBuffer
 	{
@@ -189,7 +131,7 @@ namespace ts3
 
 		size_t resize( size_t pNewSize )
 		{
-			pNewSize = getAlignedValue( pNewSize, _allocationProxy.memoryAlignment );
+			pNewSize = memGetAlignedValue( pNewSize, _allocationProxy.memoryAlignment );
 			if( pNewSize == _bufferLength )
 			{
 				return _bufferLength;
@@ -203,24 +145,9 @@ namespace ts3
 			{
 				auto * newMemoryPtr = _allocationProxy.apiRealloc( _bufferBasePtr, pNewSize );
 				_bufferBasePtr = reinterpret_cast<byte *>( newMemoryPtr );
-				_bufferEndPtr = _bufferBasePtr + pNewSize;
 				_bufferLength = pNewSize;
 				return _bufferLength;
 			}
-		}
-
-		size_t expand( size_t pMinSize = 0, float pFactor = 1.6f )
-		{
-			if( ( pMinSize > 0 ) && ( _bufferLength >= pMinSize ) )
-			{
-				return _bufferLength;
-			}
-
-			auto newSize = getMaxOf( pMinSize, static_cast<size_t>( _bufferLength * pFactor ) );
-			newSize = getAlignedValue( newSize, _allocationProxy.memoryAlignment );
-			resize( newSize );
-
-			return newSize;
 		}
 
 		void release()
@@ -229,7 +156,6 @@ namespace ts3
 			{
 				_allocationProxy.apiFree( _bufferBasePtr );
 				_bufferBasePtr = nullptr;
-				_bufferEndPtr = nullptr;
 				_bufferLength = 0;
 			}
 		}
@@ -237,7 +163,6 @@ namespace ts3
 		void swap( DynamicMemoryBuffer & pOther )
 		{
 			std::swap( _bufferBasePtr, pOther._bufferBasePtr );
-			std::swap( _bufferEndPtr, pOther._bufferEndPtr );
 			std::swap( _bufferLength, pOther._bufferLength );
 			ts3::swap( _allocationProxy, pOther._allocationProxy );
 		}
@@ -245,6 +170,11 @@ namespace ts3
 	private:
 		MemoryAllocationProxy _allocationProxy;
 	};
+
+	inline void swap( DynamicMemoryBuffer & pFirst, DynamicMemoryBuffer & pSecond )
+	{
+	    pFirst.swap( pSecond );
+	}
 
 	template <size_t tpSize>
 	class FixedMemoryBuffer : public MemoryBuffer
