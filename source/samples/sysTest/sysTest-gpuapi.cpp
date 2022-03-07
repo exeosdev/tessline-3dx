@@ -26,7 +26,7 @@
 #include <ts3/engine/camera/cameraController.h>
 #include <ts3/engine/gpuapi/vertexFormatDefs.h>
 #include <ts3/engine/gpuapi/hwBuffer.h>
-#include <ts3/engine/rcdata/font.h>
+#include <ts3/engine/resource/font.h>
 #include <ts3/engine/rcdata/fontManager.h>
 
 #include <ts3ext/rcsupport/fonts/fontTypeFTF.h>
@@ -92,6 +92,9 @@ int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 #include <ts3/gpuapiGL4/GL4_gpuDriverAPI.h>
 #include <ts3/gpuapiDX11/DX11_gpuDriverAPI.h>
 
+#include <ts3/stdext/gdsStdCore.h>
+#include <ts3/stdext/gdsStdSTL.h>
+
 int main( int pArgc, const char ** pArgv )
 {
     const std::string sGxDriverName = "GL4";
@@ -100,7 +103,7 @@ int main( int pArgc, const char ** pArgv )
     sysContextCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
     auto sysContext = createSysContext( sysContextCreateInfo );
 
-    AssetLoaderCreateInfo aslCreateInfo;\
+    AssetLoaderCreateInfo aslCreateInfo;
     aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
     auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
 
@@ -220,7 +223,7 @@ int main( int pArgc, const char ** pArgv )
 
         DynamicMemoryBuffer tmpBuffer;
         txROG512Asset->readAll( tmpBuffer );
-        appResources.txROG512Data = loadBitmapFromMemory( tmpBuffer.dataPtr(), tmpBuffer.size() );
+        appResources.txROG512Data = loadBitmapFromMemory( tmpBuffer.data(), tmpBuffer.size() );
     }
 
     initializeGraphicsDriver( sysContext, gxDriverState );
@@ -283,7 +286,7 @@ int main( int pArgc, const char ** pArgv )
         txci.pixelFormat = ts3::gpuapi::ETextureFormat::R8G8B8A8_UNORM;
         txci.initialTarget = ts3::gpuapi::ETextureTarget::ShaderInputSampledImage;
         txci.initDataDesc.initialize( txci.dimensions );
-        txci.initDataDesc.subTextureInitDataBasePtr[0].mipLevelInitDataArray[0].pointer = appResources.txROG512Data.pixelBuffer.dataPtr();
+        txci.initDataDesc.subTextureInitDataBasePtr[0].mipLevelInitDataArray[0].pointer = appResources.txROG512Data.pixelBuffer.data();
         txci.initDataDesc.subTextureInitDataBasePtr[0].mipLevelInitDataArray[0].size = appResources.txROG512Data.sizeInBytes;
         tex0 = gpuDevicePtr->createTexture( txci );
     }

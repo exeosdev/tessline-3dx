@@ -128,11 +128,11 @@ namespace gpuapi
 			ts3::DynamicMemoryBuffer infoLogBuffer;
 			infoLogBuffer.resize( infoLogLength );
 
-			glGetShaderInfoLog( mGLHandle, static_cast<GLsizei>( infoLogLength ), nullptr, infoLogBuffer.dataPtrAs<GLchar>() );
+			glGetShaderInfoLog( mGLHandle, static_cast<GLsizei>( infoLogLength ), nullptr, infoLogBuffer.dataAs<GLchar>() );
 			ts3GLHandleLastError();
 
 			// Note: length returned by the GL includes null terminator!
-			infoLog.assign( infoLogBuffer.dataPtrAs<GLchar>(), infoLogLength - 1 );
+			infoLog.assign( infoLogBuffer.dataAs<GLchar>(), infoLogLength - 1 );
 		}
 
 		return infoLog;
@@ -148,11 +148,11 @@ namespace gpuapi
 			ts3::DynamicMemoryBuffer sourceBuffer;
 			sourceBuffer.resize( sourceLength );
 
-			glGetShaderSource( mGLHandle, static_cast<GLsizei>( sourceLength ), nullptr, sourceBuffer.dataPtrAs<GLchar>() );
+			glGetShaderSource( mGLHandle, static_cast<GLsizei>( sourceLength ), nullptr, sourceBuffer.dataAs<GLchar>() );
 			ts3GLHandleLastError();
 
 			// Note: length returned by the GL includes null terminator!
-			source.assign( sourceBuffer.dataPtrAs<GLchar>(), sourceLength - 1 );
+			source.assign( sourceBuffer.dataAs<GLchar>(), sourceLength - 1 );
 		}
 
 		return source;

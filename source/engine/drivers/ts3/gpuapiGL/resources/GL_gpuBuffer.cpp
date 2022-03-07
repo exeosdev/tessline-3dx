@@ -15,10 +15,10 @@ namespace gpuapi
 #else
 	// Core supports full set of features, including immutable storage, persistent mapping and explicit flushes.
 	static constexpr uint32 sSupportedEGPUMemoryFlags = E_GPU_MEMORY_ACCESS_MASK_CPU_READ_WRITE |
-	                                                E_GPU_MEMORY_ACCESS_MASK_GPU_READ_WRITE |
-	                                                E_GPU_MEMORY_HEAP_PROPERTY_FLAG_CPU_COHERENT_BIT |
-	                                                E_GPU_MEMORY_HEAP_PROPERTY_FLAG_GPU_COHERENT_BIT |
-	                                                E_GPU_MEMORY_HEAP_PROPERTY_FLAG_PERSISTENT_MAP_BIT;
+	                                                    E_GPU_MEMORY_ACCESS_MASK_GPU_READ_WRITE |
+	                                                    E_GPU_MEMORY_HEAP_PROPERTY_FLAG_CPU_COHERENT_BIT |
+	                                                    E_GPU_MEMORY_HEAP_PROPERTY_FLAG_GPU_COHERENT_BIT |
+	                                                    E_GPU_MEMORY_HEAP_PROPERTY_FLAG_PERSISTENT_MAP_BIT;
 #endif
 
 	GLGPUBuffer::GLGPUBuffer( GLGPUDevice & pGLGPUDevice,

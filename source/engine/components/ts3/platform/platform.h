@@ -22,4 +22,18 @@
 #define TS3_FUNC_PURE_VIRTUAL_NO_DISCARD( pFunc ) \
     TS3_PCL_ATTR_NO_DISCARD virtual pFunc = 0
 
+namespace ts3
+{
+
+    enum class EByteOrder : uint32
+    {
+        BigEndian = TS3_PCL_ENDIANNESS_BE,
+        LittleEndian = TS3_PCL_ENDIANNESS_LE,
+        Native = TS3_PCL_ENDIANNESS_NATIVE,
+        NonNative = TS3_PCL_ENDIANNESS_NON_NATIVE,
+        Default = static_cast<uint32>( BigEndian )
+    };
+
+}
+
 #endif /* __TS3_PLATFORM_CONFIG_PLATFORM_H__ */

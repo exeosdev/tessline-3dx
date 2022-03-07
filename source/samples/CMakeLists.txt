@@ -25,7 +25,7 @@ endif()
 set( TS3_SAMPLE_LIST
         #"mathTest"
         "sysTest"
-        #"test1"
+        "test1"
         )
 
 
