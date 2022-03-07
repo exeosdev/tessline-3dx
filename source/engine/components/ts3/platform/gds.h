@@ -3,6 +3,7 @@
 #define __TS3_PLATFORM_GDS_H__
 
 #include "platform.h"
+#include <cmath>
 
 namespace ts3
 {
@@ -99,8 +100,8 @@ namespace ts3
 			/// @tparam Tp Type of the input value, deduced automatically from the parameter.
 			///
 			/// @param pOutputBuffer Pointer to the beginning of the buffer for serialized data.
-			/// @param pByteOrder    Byte order which should be used for types larger than 1 byte.
-			/// @param pValue        Integral value to serialize.
+			/// @param pByteOrder	Byte order which should be used for types larger than 1 byte.
+			/// @param pValue		Integral value to serialize.
 			template <typename Tp>
 			static void serializeIntegral( EByteOrder pByteOrder, byte * pOutputBuffer, const Tp pValue );
 
@@ -413,6 +414,49 @@ namespace ts3
 
 
 		template <typename Tp, std::enable_if_t<IsTriviallySerializable<Tp>::sValue, int> = 0>
+		inline constexpr gds_size_t evalByteSize( const Tp & )
+		{
+			return sizeof( Tp );
+		}
+
+		template <typename Tp, std::enable_if_t<IsArithmetic<Tp>::sValue || IsCharType<Tp>::sValue || IsWideChar<Tp>::sValue, int> = 0>
+		inline constexpr gds_size_t evalByteSize( Tp )
+		{
+			return ArithmeticTypeSerializedSize<Tp>::sValue;
+		}
+
+		template <typename Tp, std::enable_if_t<std::is_enum<Tp>::value, int> = 0>
+		inline constexpr gds_size_t evalByteSize( Tp )
+		{
+			return ArithmeticTypeSerializedSize<typename std::underlying_type<Tp>::type>::sValue;
+		}
+
+		template <typename TpRef, typename TpInternal>
+		inline gds_size_t evalByteSize( const ValueRef<TpRef, TpInternal> & pValueRef )
+		{
+			return evalByteSize( pValueRef.get() );
+		}
+
+		template <typename Tp, typename TpInternal, std::enable_if_t<std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t evalByteSize( const Tp & pValue, const TypeCastTag<TpInternal> & )
+		{
+			return evalByteSize( pValue );
+		}
+
+		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t evalByteSize( const Tp & pValue, const TypeCastTag<TpInternal> & )
+		{
+			return evalByteSize( ValueRef<const Tp, TpInternal>{ pValue } );
+		}
+
+		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
+		inline gds_size_t evalByteSize( const TypeCastInfo<Tp, TpInternal> & pCastInfo )
+		{
+			return evalByteSize( pCastInfo.refWrapper.get(), pCastInfo.castTag );
+		}
+
+
+		template <typename Tp, std::enable_if_t<IsTriviallySerializable<Tp>::sValue, int> = 0>
 		inline gds_size_t serialize( byte * pOutputBuffer, const Tp & pValue )
 		{
 			std::memcpy( pOutputBuffer, &pValue, sizeof( Tp ) );
@@ -458,20 +502,6 @@ namespace ts3
 		inline gds_size_t serialize( byte * pOutputBuffer, const TypeCastInfo<Tp, TpInternal> & pCastInfo )
 		{
 			return serialize( pOutputBuffer, pCastInfo.refWrapper.get(), pCastInfo.castTag );
-		}
-
-		template <typename Tp>
-		gds_size_t serializeAll( byte * pOutputBuffer, const Tp & pValue )
-		{
-			return serialize( pOutputBuffer, pValue );
-		}
-
-		template <typename Tp, typename... TpRest>
-		gds_size_t serializeAll( byte * pOutputBuffer, const Tp & pValue, TpRest && ...pRest )
-		{
-			gds_size_t byteSize = serialize( pOutputBuffer, pValue );
-			byteSize += serializeAll( pOutputBuffer + byteSize, std::forward<TpRest>( pRest )... );
-			return byteSize;
 		}
 
 
@@ -522,221 +552,7 @@ namespace ts3
 			return deserialize( pInputData, pCastInfo.refWrapper.get(), pCastInfo.castTag );
 		}
 
-		template <typename Tp>
-		gds_size_t deserializeAll( const byte * pInputData, Tp & pValue )
-		{
-			return deserialize( pInputData, pValue );
-		}
-
-		template <typename Tp, typename... TpRest>
-		gds_size_t deserializeAll( const byte * pInputData, Tp & pValue, TpRest && ...pRest )
-		{
-			gds_size_t byteSize = deserialize( pInputData, pValue );
-			byteSize += deserializeAll( pInputData + byteSize, std::forward<TpRest>( pRest )... );
-			return byteSize;
-		}
-
-
-		template <typename Tp, std::enable_if_t<IsTriviallySerializable<Tp>::sValue, int> = 0>
-		inline constexpr gds_size_t evalByteSize( const Tp & )
-		{
-			return sizeof( Tp );
-		}
-
-		template <typename Tp, std::enable_if_t<IsArithmetic<Tp>::sValue || IsCharType<Tp>::sValue || IsWideChar<Tp>::sValue, int> = 0>
-		inline constexpr gds_size_t evalByteSize( Tp )
-		{
-			return ArithmeticTypeSerializedSize<Tp>::sValue;
-		}
-
-		template <typename Tp, std::enable_if_t<std::is_enum<Tp>::value, int> = 0>
-		inline constexpr gds_size_t evalByteSize( Tp )
-		{
-			return ArithmeticTypeSerializedSize<typename std::underlying_type<Tp>::type>::sValue;
-		}
-
-		template <typename TpRef, typename TpInternal>
-		inline gds_size_t evalByteSize( const ValueRef<TpRef, TpInternal> & pValueRef )
-		{
-			return evalByteSize( pValueRef.get() );
-		}
-
-		template <typename Tp, typename TpInternal, std::enable_if_t<std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t evalByteSize( const Tp & pValue, const TypeCastTag<TpInternal> & )
-		{
-			return evalByteSize( pValue );
-		}
-
-		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t evalByteSize( const Tp & pValue, const TypeCastTag<TpInternal> & )
-		{
-			return evalByteSize( ValueRef<const Tp, TpInternal>{ pValue } );
-		}
-
-		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t evalByteSize( const TypeCastInfo<Tp, TpInternal> & pCastInfo )
-		{
-			return evalByteSize( pCastInfo.refWrapper.get(), pCastInfo.castTag );
-		}
-
-		template <typename Tp>
-		gds_size_t evalByteSizeAll( const Tp & pValue )
-		{
-			return evalByteSize( pValue );
-		}
-
-		template <typename Tp, typename... TpRest>
-		gds_size_t evalByteSizeAll( const Tp & pValue, TpRest && ...pRest )
-		{
-			gds_size_t byteSize = evalByteSize( pValue );
-			byteSize += evalByteSizeAll( std::forward<TpRest>( pRest )... );
-			return byteSize;
-		}
-
-
-		/// @brief Special value set for InstanceMetaData::controlKey to indicate its correctness.
-		inline constexpr uint32 CX_GDS_VALUE_META_DATA_CONTROL_KEY = 0x7CCC7333;
-
-		/// @brief Metadata with additional information about an object (or a collection of such) serialized with GDS.
-		///
-		/// Metadata serves as a solution for a problem with serializing/deserializing objects of dynamic size.
-		/// If serialized data is read from an external resource (file, pipe, network) and cannot be read at once,
-		/// the problem arises: portion of the loaded data may not contain whole data for a single instance:
-		///
-		/// char inputBuffer[256];
-		/// fread( serializedData.gds, 256, 1, inputBuffer );
-		/// SomeStruct S;
-		/// gds::deserialize( inputBuffer, S ); // -> crashes, this instance resulted in 670 bytes os serialized data
-		///
-		/// An object can be serialized with metadata using a dedicated function and then deserialized with its
-		/// counterpart. This allows for getting the actual info about the data size and, thus - space needed.
-		struct InstanceMetaData
-		{
-		    /// @brief Control key. Set automatically to CX_GDS_VALUE_META_DATA_CONTROL_KEY.
-			uint32 controlKey;
-
-			/// @brief Size, in bytes, of serialized data (excluding the size of the metadata).
-			uint64 objectDataSize = 0;
-
-			/// @brief Size, in bytes, of the whole output data (objectDataSize + size of the metadata itself).
-			uint64 outputBlockSize = 0;
-
-			/// @brief Size of this struct, in bytes.
-			static constexpr gds_size_t sByteSize = sizeof( controlKey ) + sizeof( objectDataSize ) + sizeof( outputBlockSize );
-
-			/// @brief Returns true if this metadata is valid: control key is correct and object data size is not zero.
-			constexpr explicit operator bool() const
-			{
-			    return ( controlKey == CX_GDS_VALUE_META_DATA_CONTROL_KEY ) && ( objectDataSize > 0 );
-			}
-
-			/// @brief Returns the size of this struct, in bytes.
-			constexpr size_t size() const
-			{
-			    return sByteSize;
-			}
-		};
-
-		/// @brief Usual serialize() method for InstanceMetaData struct.
-		inline gds_size_t serialize( byte * pOutputBuffer, const InstanceMetaData & pValue )
-		{
-			gds_size_t byteSize = 0;
-			byteSize += serialize( pOutputBuffer, pValue.controlKey );
-			byteSize += serialize( pOutputBuffer + byteSize, pValue.objectDataSize );
-			byteSize += serialize( pOutputBuffer + byteSize, pValue.outputBlockSize );
-			return byteSize;
-		}
-
-		/// @brief Usual deserialize() method for InstanceMetaData struct.
-		inline gds_size_t deserialize( const byte * pInputData, InstanceMetaData & pValue )
-		{
-			gds_size_t byteSize = 0;
-			byteSize += deserialize( pInputData, pValue.controlKey );
-			byteSize += deserialize( pInputData + byteSize, pValue.objectDataSize );
-			byteSize += deserialize( pInputData + byteSize, pValue.outputBlockSize );
-			return byteSize;
-		}
-
-		/// @brief Returns the size, in bytes, of the InstanceMetaData struct.
-		inline constexpr gds_size_t getInstanceMetaDataSize()
-		{
-			return InstanceMetaData::sByteSize;
-		}
-
-		/// @brief Serializes given object with additional metadata.
-		///
-		/// @note
-		/// This function does NOT implement the actual serialization for any type. Instead,
-		/// It dispatches the serialization to the usual serialize() method for the specified
-		/// type and prepends the result with the metadata, which is filled with the size info
-		/// received from the serialize() function.
-		/// Thus, a type for which this function is used needs the usual serialize() function.
-		/// Otherwise, it will be serialized with one of the default ones defined above.
-		template <typename Tp>
-		inline gds_size_t serializeWithMetaData( byte * pOutputBuffer, const Tp & pValue )
-		{
-		    // Size of the metadata, in bytes.
-			const auto metaDataSize = getInstanceMetaDataSize();
-
-			// The actual serialization. Skip 'metaDataSize' bytes needed for metadata
-			// and write after that. serialize() returns the number of bytes written.
-			const auto byteSize = serialize( pOutputBuffer + metaDataSize, pValue );
-
-			// MetaData for this instance.
-			InstanceMetaData metaData;
-			metaData.controlKey = CX_GDS_VALUE_META_DATA_CONTROL_KEY;
-			metaData.objectDataSize = byteSize; // Size of the serialized data of the OBJECT only.
-			metaData.outputBlockSize = metaDataSize + byteSize; // Size of the whole data block (including MetaData).
-
-			// Now, serialize the data itself.
-			serialize( pOutputBuffer, metaData );
-
-			return metaData.outputBlockSize;
-		}
-
-		/// @brief Performs deserialization of the specified data, written with serializeWithMetaData().
-		template <typename Tp>
-		inline gds_size_t deserializeWithMetaData( const byte * pInputData, Tp & pValue )
-		{
-		    // The metadata object to which we will deserialize.
-		    InstanceMetaData metaData;
-
-			// Deserialize the metadata first. It is always at the beginning of the data block.
-			const auto metaDataSize = deserialize( pInputData, metaData );
-
-			// deserialize() returns the number of bytes read from the buffer.
-			// This should match the byte size of the InstanceMetaData struct.
-			ts3DebugAssert( metaDataSize == getInstanceMetaDataSize() );
-
-			const auto byteSize = deserialize( pInputData + metaDataSize, pValue );
-
-			return metaDataSize + byteSize;
-		}
-
-		/// @brief Returns an evaluated byte size of the specified object which will be serialized using metadata.
-		template <typename Tp>
-		inline gds_size_t evalByteSizeWithMetaData( const Tp & pValue )
-		{
-			const auto metaDataSize = getInstanceMetaDataSize();
-			const auto valueByteSize = evalByteSize( pValue );
-
-			// Technically, user-defined evalByteSize() can be defined to return 0.
-			// We always skip empty entries, so in case of metadata let's do the same.
-			// If the object itself has no data, stick to that and report 0 size.
-
-			return ( valueByteSize > 0 ) ? ( metaDataSize + valueByteSize ) : 0u;
-		}
-
-		/// @brief Useful helper function to read InstanceMetaData from the specified serialized data block.
-		inline InstanceMetaData readInstanceMetaData( const byte * pInputData )
-		{
-			InstanceMetaData valueMetaData;
-			deserialize( pInputData, valueMetaData );
-			return valueMetaData;
-		}
-
-	}
-
+}
 }
 
 #endif // __TS3_PLATFORM_GDS_H__
