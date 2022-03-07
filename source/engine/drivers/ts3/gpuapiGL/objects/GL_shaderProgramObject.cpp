@@ -225,11 +225,11 @@ namespace gpuapi
 			DynamicMemoryBuffer infoLogBuffer;
 			infoLogBuffer.resize( infoLogLength );
 
-			glGetProgramInfoLog( mGLHandle, static_cast<GLsizei>( infoLogLength ), nullptr, infoLogBuffer.dataPtrAs<GLchar>() );
+			glGetProgramInfoLog( mGLHandle, static_cast<GLsizei>( infoLogLength ), nullptr, infoLogBuffer.dataAs<GLchar>() );
 			ts3GLHandleLastError();
 
 			// Note: length returned by the GL includes null terminator!
-			infoLog.assign( infoLogBuffer.dataPtrAs<GLchar>(), infoLogLength - 1 );
+			infoLog.assign( infoLogBuffer.dataAs<GLchar>(), infoLogLength - 1 );
 		}
 
 		return infoLog;

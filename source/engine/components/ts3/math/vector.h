@@ -412,6 +412,8 @@ namespace ts3::math
 	template <typename Tp>
 	using Vector4 = Vector<Tp, 4>;
 
+	using Vec2i16 = Vector2<int16>;
+	using Vec2u16 = Vector2<uint16>;
 	using Vec2i32 = Vector2<int32>;
 	using Vec2u32 = Vector2<uint32>;
 	using Vec2i64 = Vector2<int64>;
@@ -426,6 +428,8 @@ namespace ts3::math
 	using Vec3f   = Vector3<float>;
 	using Vec3d   = Vector3<double>;
 
+	using Vec4i16 = Vector4<int16>;
+	using Vec4u16 = Vector4<uint16>;
 	using Vec4i32 = Vector4<int32>;
 	using Vec4u32 = Vector4<uint32>;
 	using Vec4i64 = Vector4<int64>;

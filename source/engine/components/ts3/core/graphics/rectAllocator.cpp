@@ -18,7 +18,7 @@ namespace ts3
 	bool RectAllocator::addRect( const math::Vec2u32 & pRect, math::Vec2u32 * pOutPosition )
 	{
 		// Spacing also serves to ensure, that glyph images won't be located
-		// too close to the border itself. Hence we add it twice at this point.
+		// too close to the border itself. Hence, we add it twice at this point.
 		auto targetWidth = _config.horizontalLayout.hSpacing + pRect.x + _config.horizontalLayout.hSpacing;
 		auto targetHeight = _config.verticalLayout.vSpacing + pRect.y + _config.verticalLayout.vSpacing;
 

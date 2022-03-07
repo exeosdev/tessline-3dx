@@ -9,6 +9,7 @@
 #include <ts3/math/matrix.h>
 #include <ts3/math/matrixOps.h>
 #include <ts3/math/matrixUtils.h>
+#include <ts3/stdext/arrayView.h>
 
 #include <map>
 #include <set>
