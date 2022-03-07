@@ -17,6 +17,13 @@ namespace ts3
     /// @brief Represents and invalid position (e.g. in a container).
 	inline constexpr size_t CX_INVALID_POSITION = static_cast<size_t>( -1 );
 
+	template <typename TpResult, typename TpInput>
+	inline TpResult trunc_numeric_cast( TpInput pInput )
+	{
+	    ts3DebugAssert( pInput <= std::numeric_limits<TpResult>::max() );
+	    return static_cast<TpResult>( pInput );
+	}
+
 }
 
 #endif // __TS3_STDEXT_PREREQUISITES_H__
