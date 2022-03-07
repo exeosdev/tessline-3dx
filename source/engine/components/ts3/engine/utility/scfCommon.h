@@ -15,10 +15,6 @@ namespace ts3
 	class SCFResource;
 	class SCFVirtualFolder;
 
-	using scf_resource_type_tag_t = uint64;
-	using scf_version_value_t = uint64;
-	using SCFResourceUID = std::string;
-
 	enum ESCFFormatVersion : uint32
 	{
 		E_SCF_FORMAT_VERSION_V1 = 1,
@@ -30,15 +26,6 @@ namespace ts3
 		Resource,
 		VirtualFolder
 	};
-
-	inline const std::string & toString( ESCFEntryType pEntryType )
-	{
-	    static const std::unordered_map<ESCFEntryType, std::string> sMap = {
-	        { ESCFEntryType::Resource, "Resource" },
-	        { ESCFEntryType::VirtualFolder, "VirtualFolder" }
-	    };
-	    return sMap.at( pEntryType );
-	}
 
 	struct SCFEntryInfo
 	{

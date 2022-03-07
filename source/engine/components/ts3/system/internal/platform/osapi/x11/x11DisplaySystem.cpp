@@ -120,7 +120,7 @@ namespace ts3::system
     {
         auto & xSessionData = platform::x11GetXSessionData( *this );
 
-        if( mNativeData.xrrVersion == cvVersionUnknown )
+        if( mNativeData.xrrVersion == CX_VERSION_UNKNOWN )
         {
             int xrrVersionMajor = 0;
             int xrrVersionMinor = 0;

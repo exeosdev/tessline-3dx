@@ -1,9 +1,8 @@
 
-#ifndef __TS3_CORE_GDS_TYPE_SUPPORT_INTERNAL_STDEXT_H__
-#define __TS3_CORE_GDS_TYPE_SUPPORT_INTERNAL_STDEXT_H__
+#ifndef __TS3_CORE_GDS_TYPE_SUPPORT_INTERNAL_H__
+#define __TS3_CORE_GDS_TYPE_SUPPORT_INTERNAL_H__
 
 #include "gdsTypeSupportCommon.h"
-#include <ts3/platform/gds.h>
 
 namespace ts3
 {
@@ -48,7 +47,7 @@ namespace ts3
                                      const ArrayView<Tp> & pArrayView,
                                      const TypeCastTag<TpCast> & pCastTag = cvTypeCastNone )
 		{
-			gds_size_t byteSize = serialize( pOutputBuffer, asSizeType( pArrayView.size ) );
+			gds_size_t byteSize = serialize( pOutputBuffer, asSizeType( pArrayView.size() ) );
 
 			for( const auto & value : pArrayView )
 			{
@@ -191,4 +190,4 @@ namespace ts3
 
 }
 
-#endif // __TS3_CORE_GDS_TYPE_SUPPORT_INTERNAL_STDEXT_H__
+#endif // __TS3_CORE_GDS_TYPE_SUPPORT_INTERNAL_H__

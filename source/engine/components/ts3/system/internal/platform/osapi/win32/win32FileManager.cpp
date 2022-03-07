@@ -163,14 +163,41 @@ namespace ts3::system
         DWORD readBytesNum = 0u;
         auto readResult = ::ReadFile( mNativeData.fileHandle, pBuffer, pBufferSize, &readBytesNum, nullptr );
 
+        if( readResult && ( readBytesNum == 0 ) )
+        {
+            mNativeData.flags.set( platform::E_WIN32_FILE_FLAG_EOF_BIT );
+        }
+
         if( !readResult )
         {
             auto errorCode = ::GetLastError();
-            auto errorMessage = platform::mseQuerySystemErrorMessage( errorCode );
-            ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
+            if( errorCode == ERROR_HANDLE_EOF )
+            {
+                mNativeData.flags.set( platform::E_WIN32_FILE_FLAG_EOF_BIT );
+            }
+            else
+            {
+                auto errorMessage = platform::mseQuerySystemErrorMessage( errorCode );
+                ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
+            }
         }
 
         return trunc_numeric_cast<file_size_t>( readBytesNum );
+    }
+
+    file_size_t Win32File::_nativeWriteData( const void * pBuffer, file_size_t pBufferSize, file_size_t pWriteSize )
+    {
+    	DWORD writtenBytesNum = 0u;
+    	auto writeResult = ::WriteFile(  mNativeData.fileHandle, pBuffer, pWriteSize, &writtenBytesNum, nullptr );
+
+    	if( !writeResult )
+    	{
+    		auto errorCode = ::GetLastError();
+    		auto errorMessage = platform::mseQuerySystemErrorMessage( errorCode );
+    		ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
+    	}
+
+    	return trunc_numeric_cast<file_size_t>( writtenBytesNum );
     }
 
     file_offset_t Win32File::_nativeSetFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
@@ -198,12 +225,35 @@ namespace ts3::system
         return trunc_numeric_cast<file_offset_t>( u64FileOffset.QuadPart );
     }
 
+    file_offset_t Win32File::_nativeGetFilePointer() const
+    {
+    	LARGE_INTEGER u64FileOffset;
+    	u64FileOffset.QuadPart = 0u;
+
+    	LARGE_INTEGER u64FilePosition;
+    	u64FilePosition.QuadPart = 0u;
+
+    	::SetFilePointerEx( mNativeData.fileHandle, u64FileOffset, &u64FilePosition, SEEK_CUR );
+
+    	return trunc_numeric_cast<file_offset_t>( u64FilePosition.QuadPart );
+    }
+
     file_size_t Win32File::_nativeGetSize() const
     {
         ULARGE_INTEGER u64FileSize;
         u64FileSize.LowPart = ::GetFileSize( mNativeData.fileHandle, &( u64FileSize.HighPart ) );
 
         return trunc_numeric_cast<file_size_t>( u64FileSize.QuadPart );
+    }
+
+    bool Win32File::_nativeCheckEOF() const
+    {
+    	return mNativeData.flags.isSet( platform::E_WIN32_FILE_FLAG_EOF_BIT );
+    }
+
+    bool Win32File::_nativeIsGood() const
+    {
+    	return mNativeData.flags == 0;
     }
 
 
@@ -292,7 +342,7 @@ namespace ts3::system
 
             switch( pFileRefPos )
             {
-                case EFilePointerRefPos::FileBeginning:
+                case EFilePointerRefPos::FileBeg:
                 {
                     win32FPMoveMode = FILE_BEGIN;
                     break;

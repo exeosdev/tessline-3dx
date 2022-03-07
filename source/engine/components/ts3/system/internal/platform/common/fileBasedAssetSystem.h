@@ -53,7 +53,7 @@ namespace ts3::system
 
     private:
         /// @override AssetLoader::_nativeOpenSubAsset
-        virtual AssetHandle _nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo,
+        virtual AssetHandle _nativeOpenSubAsset( FSUtilityAPI::FilePathInfo pAssetPathInfo,
                                                  Bitmask<EAssetOpenFlags> pFlags ) override final;
 
         /// @override AssetLoader::_nativeOpenDirectory

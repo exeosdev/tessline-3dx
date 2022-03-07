@@ -13,28 +13,83 @@ namespace ts3::system
 
     file_size_t File::readData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
     {
-        if( !pBuffer || ( pBufferSize == 0 ) )
+        if( !pBuffer || ( pBufferSize == 0 ) || ( pReadSize == 0 ) )
         {
             return 0;
         }
 
-        return _nativeReadData( pBuffer, pBufferSize, getMinOf( pBufferSize, pReadSize ) );
+        const auto readSize = getMinOf( pBufferSize, pReadSize );
+
+        return _nativeReadData( pBuffer, pBufferSize, readSize );
     }
 
-    file_size_t File::readData( MemoryBuffer & pBuffer, file_size_t pReadSize )
+    file_size_t File::readData( const ReadWriteMemoryView & pBuffer, file_size_t pReadSize )
     {
-        if( pBuffer.empty() )
+    	if( pBuffer.empty() || ( pReadSize == 0 ) )
         {
             return 0;
         }
 
-        auto bufferSize = pBuffer.size();
-        return _nativeReadData( pBuffer.dataPtr(), bufferSize, getMinOf( bufferSize, pReadSize ) );
+        const auto bufferSize = pBuffer.size();
+    	const auto readSize = getMinOf( bufferSize, pReadSize );
+
+    	return _nativeReadData( pBuffer.data(), bufferSize, readSize );
+    }
+
+    file_size_t File::readData( DynamicByteArray & pBuffer, file_size_t pReadSize )
+    {
+        if( pReadSize == 0 )
+        {
+            return 0;
+        }
+
+        pBuffer.resize( pReadSize );
+
+        return _nativeReadData( pBuffer.data(), pReadSize, pReadSize );
+    }
+
+    file_size_t File::readData( std::vector<byte> & pBuffer, file_size_t pReadSize )
+    {
+    	if( pReadSize == 0 )
+    	{
+    		return 0;
+    	}
+
+    	pBuffer.resize( pReadSize );
+
+    	return _nativeReadData( pBuffer.data(), pReadSize, pReadSize );
+    }
+
+    file_size_t File::writeData( const void * pBuffer, file_size_t pBufferSize, file_size_t pWriteSize )
+    {
+        if( !pBuffer || ( pBufferSize == 0 ) || ( pWriteSize == 0 ) )
+        {
+            return 0;
+        }
+
+        const auto writeSize = getMinOf( pBufferSize, pWriteSize );
+
+        return _nativeWriteData( pBuffer, pBufferSize, writeSize );
     }
 
     file_offset_t File::setFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
     {
         return _nativeSetFilePointer( pOffset, pRefPos );
+    }
+
+    bool File::checkEOF() const
+    {
+        return _nativeCheckEOF();
+    }
+
+    bool File::isGood() const
+    {
+        return _nativeIsGood();
+    }
+
+    file_offset_t File::getFilePointer() const
+    {
+    	return _nativeGetFilePointer();
     }
 
     file_size_t File::getSize() const

@@ -2,6 +2,10 @@
 #ifndef __TS3_CORE_GDS_TYPE_SUPPORT_COMMON_H__
 #define __TS3_CORE_GDS_TYPE_SUPPORT_COMMON_H__
 
+#if defined( __TS3_CORE_GDS_API_CORE_H__ )
+#  error "gdsTypeSupport headers must be included before gdsCore due to template visibility requirements!"
+#endif
+
 #include "../prerequisites.h"
 #include <ts3/platform/gds.h>
 

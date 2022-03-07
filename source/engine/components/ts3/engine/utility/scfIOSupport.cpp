@@ -2,8 +2,9 @@
 #include "scfIOSupport.h"
 #include "scfIndexBuilder.h"
 #include <ts3/system/fileManager.h>
-#include <ts3/core/utility/gdsCoreAPI.h>
-#include <ts3/core/utility/gdsTypeSupportStdCore.h>
+#include <ts3/core/utility/gdsTypeSupportInternal.h>
+#include <ts3/core/utility/gdsTypeSupportStd.h>
+#include <ts3/core/utility/gdsCore.h>
 #include <vector>
 
 namespace ts3
@@ -27,11 +28,11 @@ namespace ts3
                 return file->writeData( pInputData, writeSize, writeSize );
             };
 
-		ByteBuffer storageBuffer;
+		DynamicByteArray sharedBuffer;
 
 		const auto & rootFolder = pBuilder.getRootVirtualFolder();
 
-		writeFolderData( file, rootFolder, storageBuffer, fileWriteCallback );
+		writeFolderData( file, rootFolder, sharedBuffer, fileWriteCallback );
 	}
 
 	void SCFIOProxy::loadIndex( const std::string & pFilename, SCFIndex & pIndex )
@@ -48,14 +49,14 @@ namespace ts3
                 return file->readData( pOutputBuffer, readSize, readSize );
 		    };
 
-		ByteBuffer storageBuffer;
+		DynamicByteArray sharedBuffer;
 
 		SCFVirtualFolderInfo scfRootFolderInfo {};
-		gds::deserializeExternal( scfRootFolderInfo, fileReadCallback, storageBuffer );
+		gds::deserializeExternal( scfRootFolderInfo, fileReadCallback, sharedBuffer );
 
 		auto & rootFolder = pIndex.initRootFolder(std::move( scfRootFolderInfo ) );
 
-		readFolder( file, rootFolder, storageBuffer, fileReadCallback );
+		readFolder( file, rootFolder, sharedBuffer, fileReadCallback );
 
 		SCFIndex::ResourceDataReadCallback resourceDataReadCallback =
 		    [file]( void * pOutputBuffer, uint64 pReadSize, uint64 pBaseOffset ) -> uint64 {
@@ -69,7 +70,7 @@ namespace ts3
 
     void SCFIOProxy::writeFolderData( system::FileHandle pSysFile,
                                       const SCFVirtualFolderTemplate & pFolder,
-                                      ByteBuffer & pStorageBuffer,
+                                      DynamicByteArray & pGdsCache,
                                       const FileWriteCallback & pFileWriteCallback )
 	{
         SCFVirtualFolderInfo scfFolderInfo;
@@ -80,22 +81,22 @@ namespace ts3
 		scfFolderInfo.resourcesNum = static_cast<uint32>( pFolder.resourceList.size() );
 		scfFolderInfo.subFoldersNum = static_cast<uint32>( pFolder.subFolderList.size() );
 
-		gds::serializeExternal( pStorageBuffer, scfFolderInfo, pFileWriteCallback );
+		gds::serializeExternal( scfFolderInfo, pFileWriteCallback, pGdsCache );
 
 		for( const auto & resource : pFolder.resourceList )
 		{
-		    writeResourceData( pSysFile, resource, pStorageBuffer, pFileWriteCallback );
+		    writeResourceData( pSysFile, resource, pGdsCache, pFileWriteCallback );
 		}
 
 		for( const auto & subFolder : pFolder.subFolderList )
 		{
-		    writeFolderData( pSysFile, subFolder, pStorageBuffer, pFileWriteCallback );
+		    writeFolderData( pSysFile, subFolder, pGdsCache, pFileWriteCallback );
 		}
 	}
 
 	void SCFIOProxy::writeResourceData( system::FileHandle pSysFile,
                                         const SCFResourceTemplate & pResource,
-                                        ByteBuffer & pStorageBuffer,
+                                        DynamicByteArray & pGdsCache,
                                         const FileWriteCallback & pFileWriteCallback )
 	{
         SCFResourceInfo scfResourceInfo;
@@ -110,16 +111,16 @@ namespace ts3
 		scfResourceInfo.dataOffset = currentFilePtrOffset + resourceEntrySize;
 		scfResourceInfo.dataSize = pResource.dataSource.byteSize;
 
-		gds::serializeExternal( pStorageBuffer, scfResourceInfo, pFileWriteCallback );
+		gds::serializeExternal( scfResourceInfo, pFileWriteCallback, pGdsCache );
 
 		const auto sMaxSingleDataWriteSize = 2048;
 		
 		for( uint64 currentReadPtr = 0; currentReadPtr < scfResourceInfo.dataSize; )
 		{
-		    const auto readSize = pResource.dataSource.readCallback( currentReadPtr, sMaxSingleDataWriteSize, pStorageBuffer );
+		    const auto readSize = pResource.dataSource.readCallback( currentReadPtr, sMaxSingleDataWriteSize, pGdsCache );
 		    ts3DebugAssert( readSize > 0 );
 
-		    pSysFile->writeData( pStorageBuffer.dataPtr(), pStorageBuffer.size() );
+		    pSysFile->writeData( pGdsCache.data(), pGdsCache.size() );
 
 		    currentReadPtr += readSize;
 		}
@@ -127,13 +128,13 @@ namespace ts3
 
 	void SCFIOProxy::readFolder( system::FileHandle pSysFile,
                                  SCFVirtualFolder & pFolder,
-                                 ByteBuffer & pStorageBuffer,
+                                 DynamicByteArray & pGdsCache,
                                  const FileReadCallback & pFileReadCallback )
 	{
 		for( uint32 resourceIndex = 0; resourceIndex < pFolder.mFolderInfo.resourcesNum; ++resourceIndex )
 		{
 		    SCFResourceInfo scfResourceInfo;
-		    gds::deserializeExternal( scfResourceInfo, pFileReadCallback, pStorageBuffer );
+		    gds::deserializeExternal( scfResourceInfo, pFileReadCallback, pGdsCache );
 
 		    // The resource path is not serialized, don't forget this line.
 		    scfResourceInfo.path = pFolder.mFolderInfo.path + "/" + scfResourceInfo.name;
@@ -147,14 +148,14 @@ namespace ts3
 		for( uint32 subFolderIndex = 0; subFolderIndex < pFolder.mFolderInfo.subFoldersNum; ++subFolderIndex )
 		{
 		    SCFVirtualFolderInfo scfFolderInfo {};
-			gds::deserializeExternal( scfFolderInfo, pFileReadCallback, pStorageBuffer );
+			gds::deserializeExternal( scfFolderInfo, pFileReadCallback, pGdsCache );
 
 			// The folder path is not serialized, don't forget this line.
 			scfFolderInfo.path = pFolder.mFolderInfo.path + "/" + scfFolderInfo.name;
 
 			auto & scfFolder = pFolder.addSubFolder( std::move( scfFolderInfo ) );
 
-			readFolder( pSysFile, scfFolder, pStorageBuffer, pFileReadCallback );
+			readFolder( pSysFile, scfFolder, pGdsCache, pFileReadCallback );
 		}
 	}
 

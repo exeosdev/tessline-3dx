@@ -13,7 +13,7 @@ namespace ts3::system
 
         AAsset * _androidResolveAsset( AAssetManager * pAAssetManager,
                                        AAssetDir * pAAssetDir,
-                                       FileUtilityAPI::FilePathInfo & pAssetPathInfo,
+                                       FSUtilityAPI::FilePathInfo & pAssetPathInfo,
                                        Bitmask<EAssetOpenFlags> pFlags );
 
     }
@@ -41,7 +41,7 @@ namespace ts3::system
         mNativeData.aAssetManager = nullptr;
     }
 
-    AssetHandle AndroidAssetLoader::_nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags )
+    AssetHandle AndroidAssetLoader::_nativeOpenSubAsset( FSUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags )
     {
         Handle<AndroidAsset> asset = nullptr;
 
@@ -135,7 +135,7 @@ namespace ts3::system
     {
         Handle<AndroidAsset> asset = nullptr;
 
-        FileUtilityAPI::FilePathInfo assetPathInfo;
+        FSUtilityAPI::FilePathInfo assetPathInfo;
         assetPathInfo.directory = getDirName();
         assetPathInfo.fileName = std::move( pAssetName );
 
@@ -215,7 +215,7 @@ namespace ts3::system
 
             switch( pFileRefPos )
             {
-                case EFilePointerRefPos::FileBeginning:
+                case EFilePointerRefPos::FileBeg:
                 {
                     seekOrigin = SEEK_SET;
                     break;
@@ -237,7 +237,7 @@ namespace ts3::system
 
         AAsset * _androidResolveAsset( AAssetManager * pAAssetManager,
                                        AAssetDir * pAAssetDir,
-                                       FileUtilityAPI::FilePathInfo & pAssetPathInfo,
+                                       FSUtilityAPI::FilePathInfo & pAssetPathInfo,
                                        Bitmask<EAssetOpenFlags> pFlags )
         {
             AAsset * aAsset = nullptr;

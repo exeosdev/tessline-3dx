@@ -200,7 +200,7 @@ namespace ts3::system
 
             switch( pFileRefPos )
             {
-                case EFilePointerRefPos::FileBeginning:
+                case EFilePointerRefPos::FileBeg:
                 {
                     fileSeekPos = SEEK_SET;
                     break;

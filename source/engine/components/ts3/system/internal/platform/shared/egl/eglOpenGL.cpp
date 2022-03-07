@@ -476,7 +476,7 @@ namespace ts3::system
 
 		void _eglValidateRequestedContextVersion( EGLAPIProfile pTargetAPIProfile, Version & pVersion )
 		{
-			auto validatedVersion = cvVersionInvalid;
+			auto validatedVersion = CX_VERSION_INVALID;
 
 			if( pTargetAPIProfile == EGLAPIProfile::OpenGLES )
 			{
@@ -534,7 +534,7 @@ namespace ts3::system
 				}
 			}
 
-			if( validatedVersion == cvVersionInvalid )
+			if( validatedVersion == CX_VERSION_INVALID )
 			{
 				validatedVersion = { 1, 0 };
 			}

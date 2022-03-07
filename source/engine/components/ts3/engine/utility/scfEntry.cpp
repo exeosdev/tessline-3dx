@@ -2,7 +2,7 @@
 #include "scfEntry.h"
 #include "scfIndex.h"
 #include <ts3/engine/exception.h>
-#include <ts3/stdext/byteBuffer.h>
+#include <ts3/stdext/byteArray.h>
 #include <ts3/stdext/memoryBuffer.h>
 #include <ts3/stdext/pathNameIterator.h>
 
@@ -78,13 +78,13 @@ namespace ts3
 	    return mIndex->readResourceData( pTarget, mResourceInfo.dataSize, mResourceInfo.dataOffset );
 	}
 
-	uint64 SCFResource::readData( ByteBuffer & pTarget ) const
+	uint64 SCFResource::readData( DynamicByteArray & pTarget ) const
 	{
 	    if( pTarget.size() < mResourceInfo.dataSize )
 	    {
 	        pTarget.resize( mResourceInfo.dataSize );
 	    }
-	    return readData( pTarget.dataPtr(), pTarget.size() );
+	    return readData( pTarget.data(), pTarget.size() );
 	}
 
 	uint64 SCFResource::readData( DynamicMemoryBuffer & pTarget ) const
@@ -93,7 +93,7 @@ namespace ts3
 	    {
 	        pTarget.resize( mResourceInfo.dataSize );
 	    }
-	    return readData( pTarget.dataPtr(), pTarget.size() );
+	    return readData( pTarget.data(), pTarget.size() );
 	}
 
 	uint64 SCFResource::readData( std::string & pTarget ) const
@@ -128,14 +128,9 @@ namespace ts3
 	    return mIndex->readResourceData( pTarget, readSize, mResourceInfo.dataOffset + pResOffset );
 	}
 
-	uint64 SCFResource::readSubData( ByteBuffer & pTarget, uint64 pReadSize, uint64 pResOffset ) const
+	uint64 SCFResource::readSubData( const ReadWriteMemoryView & pTarget, uint64 pReadSize, uint64 pResOffset ) const
 	{
-	    return readSubData( pTarget.dataPtr(), pTarget.size(), pReadSize, pResOffset );
-	}
-
-	uint64 SCFResource::readSubData( MemoryBuffer & pTarget, uint64 pReadSize, uint64 pResOffset ) const
-	{
-	    return readSubData( pTarget.dataPtr(), pTarget.size(), pReadSize, pResOffset );
+	    return readSubData( pTarget.data(), pTarget.size(), pReadSize, pResOffset );
 	}
 
 	uint64 SCFResource::readSubData( std::vector<byte> & pTarget, uint64 pReadSize, uint64 pResOffset ) const
