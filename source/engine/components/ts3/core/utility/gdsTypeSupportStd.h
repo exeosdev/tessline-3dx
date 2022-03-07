@@ -1,9 +1,8 @@
 
-#ifndef __TS3_CORE_GDS_TYPE_SUPPORT_STD_STL_H_H__
-#define __TS3_CORE_GDS_TYPE_SUPPORT_STD_STL_H_H__
+#ifndef __TS3_CORE_GDS_TYPE_SUPPORT_STD_H__
+#define __TS3_CORE_GDS_TYPE_SUPPORT_STD_H__
 
-#include "gdsTypeSupportStdCore.h"
-#include <string>
+#include "gdsTypeSupportCommon.h"
 
 namespace std
 {
@@ -435,4 +434,4 @@ namespace ts3
 
 }
 
-#endif // __TS3_CORE_GDS_TYPE_SUPPORT_STD_STL_H_H__
+#endif // __TS3_CORE_GDS_TYPE_SUPPORT_STD_H__
