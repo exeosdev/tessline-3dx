@@ -44,6 +44,16 @@ namespace ts3
 			return _bufferBasePtr[pOffset];
 		}
 
+		TS3_PCL_ATTR_NO_DISCARD ReadWriteMemoryView asMemoryView() noexcept
+		{
+		    return bindMemoryView( _bufferBasePtr, _bufferLength );
+		}
+
+		TS3_PCL_ATTR_NO_DISCARD ReadOnlyMemoryView asMemoryView() const noexcept
+		{
+		    return bindMemoryView( _bufferBasePtr, _bufferLength );
+		}
+
 		TS3_PCL_ATTR_NO_DISCARD byte * data() noexcept
 		{
 			ts3DebugAssert( _bufferLength > 0 );

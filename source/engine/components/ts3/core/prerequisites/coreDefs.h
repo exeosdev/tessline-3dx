@@ -58,13 +58,6 @@ namespace ts3
 		throw std::bad_cast();
 	}
 
-	template <typename TpResult, typename TpInput>
-	inline TpResult trunc_numeric_cast( TpInput pInput )
-	{
-		ts3DebugAssert( pInput <= Limits<TpResult>::maxValue );
-		return static_cast<TpResult>( pInput );
-	}
-
 }
 
 #endif // __TS3_CORE_CORE_DEFS_H__

@@ -44,8 +44,8 @@ namespace ts3
 
 		template <typename TpOther>
 		ArrayView( const ArrayView<TpOther> & pOther )
-		: _beginPtr( pOther._beginPtr )
-		, _size( pOther._size )
+		: _beginPtr( pOther.data() )
+		, _size( pOther.size() )
 		{}
 
 		template <size_t tSize>
@@ -55,22 +55,27 @@ namespace ts3
 
 		explicit operator bool() const
 		{
-		    return _beginPtr && ( _size > 0 );
+		    return !empty();
 		}
 
-		ArrayView<ByteType> asByteView() const
+		TS3_FUNC_NO_DISCARD ArrayView<ByteType> asByteView() const
 		{
 		    return ArrayView<ByteType>{ reinterpret_cast<ByteType *>( _beginPtr ), _size * sizeof( Tp ) };
 		}
 
-		Tp * data() const
+		TS3_FUNC_NO_DISCARD Tp * data() const
 		{
 		    return _beginPtr;
 		}
 
-		size_t size() const
+		TS3_FUNC_NO_DISCARD size_t size() const
 		{
 		    return _size;
+		}
+
+		TS3_FUNC_NO_DISCARD bool empty() const
+		{
+		    return _beginPtr && ( _size > 0 );
 		}
 
 		void swap( ArrayView & pOther )

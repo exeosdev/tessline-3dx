@@ -78,6 +78,16 @@ namespace ts3
 		    memCopyUnchecked( pBuffer, pBufferSize, _storageMemoryPtr + pCopyOffset, pCopySize );
 		}
 
+		TS3_PCL_ATTR_NO_DISCARD ReadWriteMemoryView asMemoryView() noexcept
+		{
+		    return bindMemoryView( _storageMemoryPtr, _dataSize );
+		}
+
+		TS3_PCL_ATTR_NO_DISCARD ReadOnlyMemoryView asMemoryView() const noexcept
+		{
+		    return bindMemoryView( _storageMemoryPtr, _dataSize );
+		}
+
 		TS3_PCL_ATTR_NO_DISCARD byte & operator[]( size_t pOffset ) noexcept
 		{
 		    ts3DebugAssert( pOffset < _dataSize );
@@ -100,44 +110,44 @@ namespace ts3
 		    return _storageMemoryPtr;
 		}
 
-		TS3_PCL_ATTR_NO_DISCARD byte * dataPtrOffset( size_t pOffset ) noexcept
+		TS3_PCL_ATTR_NO_DISCARD byte * dataOffset( size_t pOffset ) noexcept
 		{
 		    ts3DebugAssert( pOffset < _dataSize );
 		    return _storageMemoryPtr + pOffset;
 		}
 
-		TS3_PCL_ATTR_NO_DISCARD const byte * dataPtrOffset( size_t pOffset ) const noexcept
+		TS3_PCL_ATTR_NO_DISCARD const byte * dataOffset( size_t pOffset ) const noexcept
 		{
 		    ts3DebugAssert( pOffset < _dataSize );
 		    return _storageMemoryPtr + pOffset;
 		}
 
 		template <typename TpResult>
-		TS3_PCL_ATTR_NO_DISCARD TpResult * dataPtrAs() noexcept
+		TS3_PCL_ATTR_NO_DISCARD TpResult * dataAs() noexcept
 		{
 		    ts3DebugAssert( _dataSize % sizeof( TpResult ) == 0 );
 		    return reinterpret_cast<TpResult *>( data() );
 		}
 
 		template <typename TpResult>
-		TS3_PCL_ATTR_NO_DISCARD const TpResult * dataPtrAs() const noexcept
+		TS3_PCL_ATTR_NO_DISCARD const TpResult * dataAs() const noexcept
 		{
 		    ts3DebugAssert( _dataSize % sizeof( TpResult ) == 0 );
 		    return reinterpret_cast<TpResult *>( data() );
 		}
 
 		template <typename TpResult>
-		TS3_PCL_ATTR_NO_DISCARD TpResult * dataPtrOffsetAs( size_t pOffset ) noexcept
+		TS3_PCL_ATTR_NO_DISCARD TpResult * dataOffsetAs( size_t pOffset ) noexcept
 		{
 		    ts3DebugAssert( ( _dataSize - pOffset ) % sizeof( TpResult ) == 0 );
-		    return reinterpret_cast<TpResult *>( dataPtrOffset( pOffset ) );
+		    return reinterpret_cast<TpResult *>( dataOffset( pOffset ) );
 		}
 
 		template <typename TpResult>
-		TS3_PCL_ATTR_NO_DISCARD const TpResult * dataPtrOffsetAs( size_t pOffset ) const noexcept
+		TS3_PCL_ATTR_NO_DISCARD const TpResult * dataOffsetAs( size_t pOffset ) const noexcept
 		{
 		    ts3DebugAssert( ( _dataSize - pOffset ) % sizeof( TpResult ) == 0 );
-		    return reinterpret_cast<TpResult *>( dataPtrOffset( pOffset ) );
+		    return reinterpret_cast<TpResult *>( dataOffset( pOffset ) );
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD bool empty() const noexcept
