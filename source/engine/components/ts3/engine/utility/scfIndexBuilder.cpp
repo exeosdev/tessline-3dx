@@ -34,12 +34,12 @@ namespace ts3
 	    SCFInputDataSource dataSource;
 	    dataSource.byteSize = pDataSize;
 	    dataSource.readCallback =
-	        [pDataSize]( uint64 pOffset, uint64 pReadSize, ByteBuffer & pBuffer ) -> uint64 {
+	        [pDataSize]( uint64 pOffset, uint64 pReadSize, DynamicByteArray & pTarget ) -> uint64 {
                 const auto readSize = memCheckRequestedCopySize( pDataSize, pReadSize, pOffset );
                 if( readSize > 0 )
                 {
-                    pBuffer.resize( trunc_numeric_cast<size_t>( readSize ) );
-                    pBuffer.fill( 0x7 );
+                    pTarget.resize( trunc_numeric_cast<size_t>( readSize ) );
+                    pTarget.fill( 0x7 );
                     return readSize;
                 }
                 return 0;
@@ -66,15 +66,15 @@ namespace ts3
 	    SCFInputDataSource dataSource;
 	    dataSource.byteSize = fileSize;
 	    dataSource.readCallback =
-	        [pSysFileManager, pFilename, fileSize]( uint64 pOffset, uint64 pReadSize, ByteBuffer & pBuffer ) -> uint64 {
+	        [pSysFileManager, pFilename, fileSize]( uint64 pOffset, uint64 pReadSize, DynamicByteArray & pTarget ) -> uint64 {
 	            const auto readSize = memCheckRequestedCopySize( fileSize, pReadSize, pOffset );
 	            if( readSize > 0 )
 	            {
 	                if( auto sourceFile = pSysFileManager->openFile( pFilename, system::EFileOpenMode::ReadOnly ) )
 	                {
-	                    pBuffer.resize( trunc_numeric_cast<size_t>( readSize ) );
+	                    pTarget.resize( trunc_numeric_cast<size_t>( readSize ) );
 	                    sourceFile->setFilePointer( trunc_numeric_cast<system::file_offset_t>( pOffset ) );
-	                    const auto readBytesNum = sourceFile->readData( pBuffer, trunc_numeric_cast<system::file_size_t>( readSize ) );
+	                    const auto readBytesNum = sourceFile->readData( pTarget, trunc_numeric_cast<system::file_size_t>( readSize ) );
 	                    return readBytesNum;
 	                }
 	            }
@@ -84,7 +84,7 @@ namespace ts3
 	    return dataSource;
 	}
 
-	SCFInputDataSource SCFInputDataSource::fromMemory( ArrayView<byte> pMemoryView )
+	SCFInputDataSource SCFInputDataSource::fromMemory( ReadOnlyMemoryView pMemoryView )
 	{
 	    if( !pMemoryView )
 	    {
@@ -92,17 +92,17 @@ namespace ts3
 	    }
 
 	    SCFInputDataSource dataSource;
-	    dataSource.byteSize = pMemoryView.size;
+	    dataSource.byteSize = pMemoryView.size();
 	    dataSource.readCallback =
-	        [pMemoryView]( uint64 pOffset, uint64 pReadSize, ByteBuffer & pBuffer ) -> uint64 {
-                const auto readSize = memCheckRequestedCopySize( pMemoryView.size, pReadSize, pOffset );
+	        [pMemoryView]( uint64 pOffset, uint64 pReadSize, DynamicByteArray & pTarget ) -> uint64 {
+                const auto readSize = memCheckRequestedCopySize( pMemoryView.size(), pReadSize, pOffset );
                 if( readSize > 0 )
                 {
-                    pBuffer.resize( trunc_numeric_cast<size_t>( readSize ) );
+                    pTarget.resize( trunc_numeric_cast<size_t>( readSize ) );
 
-                    memCopyUnchecked( pBuffer.dataPtr(),
-                                      pBuffer.size(),
-                                      pMemoryView.beginPtr + pOffset,
+                    memCopyUnchecked( pTarget.data(),
+                                      pTarget.size(),
+                                      pMemoryView.data() + pOffset,
                                       trunc_numeric_cast<size_t>( readSize ) );
 
                     return readSize;

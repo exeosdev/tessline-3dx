@@ -5,7 +5,7 @@
 #define __TS3_ENGINE_SCF_INDEX_BUILDER_H__
 
 #include "scfIndex.h"
-#include <ts3/stdext/byteBuffer.h>
+#include <ts3/stdext/byteArray.h>
 #include <ts3/stdext/sortedArray.h>
 #include <ts3/system/fileCommon.h>
 
@@ -14,7 +14,7 @@ namespace ts3
 
 	struct SCFInputDataSource
 	{
-		using DataReadCallback = std::function<uint64( uint64 /* pOffset */, uint64 /* pReadSize */, ByteBuffer & /* pBuffer */ )>;
+	    using DataReadCallback = std::function<uint64( uint64 /* pOffset */, uint64 /* pReadSize */, DynamicByteArray & /* pBuffer */ )>;
 
 		uint64 byteSize = 0;
 
@@ -29,7 +29,7 @@ namespace ts3
 
 		static SCFInputDataSource fromFile( system::FileManagerHandle pSysFileManager, const std::string & pFilename );
 
-		static SCFInputDataSource fromMemory( ArrayView<byte> pMemoryView );
+		static SCFInputDataSource fromMemory( ReadOnlyMemoryView pMemoryView );
 	};
 
 	struct SCFEntryTemplate

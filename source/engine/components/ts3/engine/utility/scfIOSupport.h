@@ -5,7 +5,7 @@
 #define __TS3_ENGINE_SCF_IO_SUPPORT_H__
 
 #include "scfCommon.h"
-#include <ts3/stdext/byteBuffer.h>
+#include <ts3/stdext/byteArray.h>
 #include <ts3/system/fileCommon.h>
 
 namespace ts3
@@ -32,17 +32,17 @@ namespace ts3
 	private:
 		void writeFolderData( system::FileHandle pSysFile,
                               const SCFVirtualFolderTemplate & pFolder,
-                              ByteBuffer & pStorageBuffer,
+                              DynamicByteArray & pGdsCache,
                               const FileWriteCallback & pFileWriteCallback );
 
 		void writeResourceData( system::FileHandle pSysFile,
                                 const SCFResourceTemplate & pResource,
-                                ByteBuffer & pStorageBuffer,
+                                DynamicByteArray & pGdsCache,
                                 const FileWriteCallback & pFileWriteCallback );
 
 		void readFolder( system::FileHandle pSysFile,
                          SCFVirtualFolder & pFolder,
-                         ByteBuffer & pStorageBuffer,
+                         DynamicByteArray & pGdsCache,
                          const FileReadCallback & pFileReadCallback );
 
 	private:
