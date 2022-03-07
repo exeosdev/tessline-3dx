@@ -10,10 +10,15 @@ namespace ts3::system
 
     namespace platform
     {
+    	enum EWin32FileFlags : uint32
+        {
+    		E_WIN32_FILE_FLAG_EOF_BIT = 0xF0
+        };
 
         struct Win32FileNativeData
         {
             HANDLE fileHandle = nullptr;
+            Bitmask<EWin32FileFlags> flags = 0;
         };
 
     }
@@ -49,8 +54,12 @@ namespace ts3::system
         void _releaseWin32FileHandle();
 
         virtual file_size_t _nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize ) override final;
+        virtual file_size_t _nativeWriteData( const void * pBuffer, file_size_t pBufferSize, file_size_t pWriteSize ) override final;
         virtual file_offset_t _nativeSetFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos ) override final;
+        virtual file_offset_t _nativeGetFilePointer() const override final;
         virtual file_size_t _nativeGetSize() const override final;
+        virtual bool _nativeCheckEOF() const override final;
+        virtual bool _nativeIsGood() const override final;
     };
 
 } // namespace ts3::system

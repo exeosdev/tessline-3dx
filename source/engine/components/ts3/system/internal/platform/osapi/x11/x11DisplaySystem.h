@@ -26,7 +26,7 @@ namespace ts3::system
         struct X11DisplayDriverNativeData : public X11NativeDataCommon
         {
             uint32 screenDepth = 0;
-            Version xrrVersion = cvVersionUnknown;
+            Version xrrVersion = CX_VERSION_UNKNOWN;
             XRRScreenResources * xrrScreenResources = nullptr;
             XRRMonitorInfo * xrrMonitorList = nullptr;
             int xrrMonitorsNum = 0;

@@ -34,7 +34,7 @@ namespace ts3::system
         bool checkDirectoryExists( const std::string & pDirectoryName ) const;
 
     private:
-        virtual AssetHandle _nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags ) = 0;
+        virtual AssetHandle _nativeOpenSubAsset( FSUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags ) = 0;
 
         virtual AssetDirectoryHandle _nativeOpenDirectory( std::string pDirectoryName ) = 0;
 
@@ -108,7 +108,7 @@ namespace ts3::system
         {
             const auto assetSize = _nativeGetSize();
             pBuffer.resize( assetSize );
-            return readData( pBuffer.dataPtr(), assetSize, assetSize );
+            return readData( pBuffer.data(), assetSize, assetSize );
         }
 
         template <typename TpChar>
@@ -129,7 +129,7 @@ namespace ts3::system
             return readData( pVector.data(), pVector.size() * sizeof( TpValue ), vectorSize );
         }
 
-        file_offset_t setReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos = EFilePointerRefPos::FileBeginning );
+        file_offset_t setReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos = EFilePointerRefPos::FileBeg );
 
         void resetReadPointer();
 

@@ -11,7 +11,7 @@ namespace ts3::system
     {
 
         std::string _commonResolveFileName( FileManager & pFileManager,
-                                            FileUtilityAPI::FilePathInfo & pAssetPathInfo,
+                                            FSUtilityAPI::FilePathInfo & pAssetPathInfo,
                                             Bitmask<EAssetOpenFlags> pFlags );
 
     }
@@ -29,7 +29,7 @@ namespace ts3::system
         mNativeData.rootDir = std::move( pRootDir );
     }
 
-    AssetHandle FileAssetLoader::_nativeOpenSubAsset( FileUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags )
+    AssetHandle FileAssetLoader::_nativeOpenSubAsset( FSUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags )
     {
         Handle<FileAsset> asset = nullptr;
 
@@ -102,7 +102,7 @@ namespace ts3::system
     {
         Handle<FileAsset> asset = nullptr;
 
-        FileUtilityAPI::FilePathInfo assetPathInfo;
+        FSUtilityAPI::FilePathInfo assetPathInfo;
         assetPathInfo.directory = mNativeData.combinedDirPath;
         assetPathInfo.fileName = std::move( pAssetName );
 
@@ -173,7 +173,7 @@ namespace ts3::system
             auto assetDirectory = pSysContext->queryCurrentProcessExecutableDirectory();
             assetDirectory.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
             assetDirectory.append( pRootDirectory );
-            assetDirectory = FileUtilityAPI::normalizePath( assetDirectory );
+            assetDirectory = FSUtilityAPI::normalizePath( assetDirectory );
 
             auto assetLoader = createSysObject<FileAssetLoader>( pFileManager );
             assetLoader->setRootDir( std::move( assetDirectory ) );
@@ -183,7 +183,7 @@ namespace ts3::system
 
 
         std::string _commonResolveFileName( FileManager & pFileManager,
-                                            FileUtilityAPI::FilePathInfo & pAssetPathInfo,
+                                            FSUtilityAPI::FilePathInfo & pAssetPathInfo,
                                             Bitmask<EAssetOpenFlags> pFlags )
         {
             auto combinedFilePath = pAssetPathInfo.directory;

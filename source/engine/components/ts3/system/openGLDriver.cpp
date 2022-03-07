@@ -68,7 +68,7 @@ namespace ts3::system
     {
         GLRenderContextCreateInfo surfaceCreateInfo = pCreateInfo;
 
-        if( surfaceCreateInfo.runtimeVersionDesc.apiVersion == cvVersionUnknown  )
+        if( surfaceCreateInfo.runtimeVersionDesc.apiVersion == CX_VERSION_UNKNOWN  )
         {
             surfaceCreateInfo.runtimeVersionDesc.apiVersion = Version{ 1, 0 };
         }
