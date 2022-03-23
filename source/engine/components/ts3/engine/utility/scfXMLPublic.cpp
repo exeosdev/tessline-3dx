@@ -1,14 +1,20 @@
 
-#include "scfXMLReader.h"
+#include "scfXMLInterfaces.h"
 #include <ts3/system/fileManager.h>
 
 namespace ts3
 {
 
 	template <size_t tpNameLength>
-	static bool checkNodeName( SCFXMLNode::RxNode * pRxNode, const char ( &pName )[tpNameLength] )
+	static bool checkNodeNameEquals( SCFXMLNode::RxNode * pRxNode, const char ( &pName )[tpNameLength] )
 	{
 		return strncmp( pRxNode->name(), pName, getMinOf( pRxNode->name_size(), tpNameLength ) ) == 0;
+	}
+
+	template <size_t tpNameLength>
+	static bool checkNodeHasAttribute( SCFXMLNode::RxNode * pRxNode, const char ( &pAttribName )[tpNameLength] )
+	{
+		return pRxNode->first_node( pAttribName, tpNameLength, true ) != nullptr;
 	}
 
 
@@ -39,20 +45,20 @@ namespace ts3
 			rxDocument->parse<0>( pXMLContent.data() );
 
 			auto * rxSCFNode = rxDocument->first_node();
-			if( !checkNodeName( rxSCFNode, "scf" ) )
+			if( !checkNodeNameEquals( rxSCFNode, "scf" ) )
 			{
 				return nullptr;
 			}
 
 			auto * rxRootNode = rxSCFNode->first_node();
-			if( !checkNodeName( rxRootNode, "root" ) )
+			if( !checkNodeNameEquals( rxRootNode, "root" ) )
 			{
 				return nullptr;
 			}
 
 			SCFXMLRootNode rootNode{ std::move( pXMLContent ), std::move( rxDocument ), rxRootNode };
 
-			_readFolderEntryNodes( rootNode );
+			_readFolderSubNodes( rootNode );
 
 			return rootNode;
 		}
@@ -68,7 +74,7 @@ namespace ts3
 		return nullptr;
 	}
 
-	void SCFXMLReader::_readFolderEntryNodes( SCFXMLFolderNode & pFolderNode )
+	void SCFXMLReader::_readFolderSubNodes( SCFXMLFolderNode & pFolderNode )
 	{
 		auto * folderRxNode = pFolderNode.getRxNode();
 		auto & subFolderNodes = pFolderNode._folderNodes;
@@ -78,20 +84,17 @@ namespace ts3
 		{
 			if( childNode->type() == rapidxml::node_type::node_element )
 			{
-				if( checkNodeName( childNode, "folder" ) )
+				if( checkNodeNameEquals( childNode, "folder" ) )
 				{
-					auto * idAttribute = childNode->first_attribute( "id" );
-					if( idAttribute )
+					if( checkNodeHasAttribute( childNode, "id" ) )
 					{
 						subFolderNodes.push_back( SCFXMLFolderNode( &pFolderNode, childNode ) );
 						continue;
 					}
 				}
-				if( checkNodeName( childNode, "resource" ) )
+				if( checkNodeNameEquals( childNode, "resource" ) )
 				{
-					auto * idAttribute = childNode->first_attribute( "id" );
-					auto * typeAttribute = childNode->first_attribute( "type" );
-					if( idAttribute && typeAttribute )
+					if( checkNodeHasAttribute( childNode, "id" ) && checkNodeHasAttribute( childNode, "type" ) )
 					{
 						resourceNodes.push_back( SCFXMLResourceNode( &pFolderNode, childNode ) );
 						continue;
@@ -119,7 +122,7 @@ namespace ts3
 
 		for( auto & subFolderNode : subFolderNodes )
 		{
-			_readFolderEntryNodes( subFolderNode );
+			_readFolderSubNodes( subFolderNode );
 		}
 
 		for( auto & resourceNode : resourceNodes )
