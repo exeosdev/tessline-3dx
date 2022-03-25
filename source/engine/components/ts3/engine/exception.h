@@ -28,8 +28,8 @@ namespace ts3
 
 	enum : exception_code_value_t
 	{
-		E_EXCEPTION_CODE_ENGINE_SM_MAIN_SCF_ERROR =
-			ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_ENGINE_SUBMODULE_MAIN, ts3ExcCodeIID( 0x71 ) ),
+		E_EXC_ESM_MAIN_SCF_ERROR =
+			ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_ENGINE_SUBMODULE, ts3ExcCodeIID( 0x71 ) ),
 	};
 
 }
