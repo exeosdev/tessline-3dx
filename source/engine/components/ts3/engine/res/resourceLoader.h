@@ -9,21 +9,21 @@
 namespace ts3
 {
 
-    class ResourceLoader
-    {
-    protected:
-        gpuapi::CommandContext & getGPUCommandContext() const
-        {
-            if( !_gpuCommandContext )
-            {
-                throw 0;
-            }
-            return *_gpuCommandContext;
-        }
+	class ResourceLoader
+	{
+	protected:
+		gpuapi::CommandContext & getGPUCommandContext() const
+		{
+			if( !_gpuCommandContext )
+			{
+				throw 0;
+			}
+			return *_gpuCommandContext;
+		}
 
-    private:
-        gpuapi::CommandContext * _gpuCommandContext;
-    };
+	private:
+		gpuapi::CommandContext * _gpuCommandContext;
+	};
 
 }
 
