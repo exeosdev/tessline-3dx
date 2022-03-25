@@ -11,80 +11,78 @@ namespace ts3::system
 
     File::~File() noexcept = default;
 
-    file_size_t File::readData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
+    file_size_t File::read( void * pTargetBuffer, file_size_t pTargetBufferSize, file_size_t pReadSize )
     {
-        if( !pBuffer || ( pBufferSize == 0 ) || ( pReadSize == 0 ) )
+    	if( !pTargetBuffer || ( pTargetBufferSize == 0 ) || ( pReadSize == 0 ) )
         {
             return 0;
         }
 
-        const auto readSize = getMinOf( pBufferSize, pReadSize );
+    	const auto readSize = getMinOf( pTargetBufferSize, pReadSize );
 
-        return _nativeReadData( pBuffer, pBufferSize, readSize );
+    	return _nativeReadData( pTargetBuffer, readSize );
     }
 
-    file_size_t File::readData( const ReadWriteMemoryView & pBuffer, file_size_t pReadSize )
+    file_size_t File::read( const ReadWriteMemoryView & pTarget, file_size_t pReadSize )
     {
-    	if( pBuffer.empty() || ( pReadSize == 0 ) )
+    	return read( pTarget.data(), pTarget.size(), pReadSize );
+    }
+
+    file_size_t File::readAuto( DynamicMemoryBuffer & pTarget, file_size_t pReadSize )
+    {
+    	return _readAuto( pTarget, pReadSize );
+    }
+
+    file_size_t File::readAuto( DynamicByteArray & pTarget, file_size_t pReadSize )
+    {
+    	return _readAuto( pTarget, pReadSize );
+    }
+
+    file_size_t File::readAuto( std::vector<byte> & pTarget, file_size_t pReadSize )
+    {
+    	return _readAuto( pTarget, pReadSize );
+    }
+
+    file_size_t File::readAuto( std::string & pTarget, file_size_t pReadSize )
+    {
+    	return _readAuto( pTarget, pReadSize );
+    }
+
+    file_size_t File::write( const void * pData, file_size_t pDataSize, file_size_t pWriteSize )
+    {
+    	if( !pData || ( pDataSize == 0 ) || ( pWriteSize == 0 ) )
         {
             return 0;
         }
 
-        const auto bufferSize = pBuffer.size();
-    	const auto readSize = getMinOf( bufferSize, pReadSize );
+    	const auto writeSize = getMinOf( pDataSize, pWriteSize );
 
-    	return _nativeReadData( pBuffer.data(), bufferSize, readSize );
+    	return _nativeWriteData( pData, writeSize );
+    }
+    
+    file_size_t File::write( const MemoryBuffer & pSource, file_size_t pWriteSize )
+    {
+    	return _write( pSource, pWriteSize );
     }
 
-    file_size_t File::readData( DynamicByteArray & pBuffer, file_size_t pReadSize )
+    file_size_t File::write( const ByteArray & pSource, file_size_t pWriteSize )
     {
-        if( pReadSize == 0 )
-        {
-            return 0;
-        }
-
-        pBuffer.resize( pReadSize );
-
-        return _nativeReadData( pBuffer.data(), pReadSize, pReadSize );
+    	return _write( pSource, pWriteSize );
     }
 
-    file_size_t File::readData( std::vector<byte> & pBuffer, file_size_t pReadSize )
+    file_size_t File::write( const std::vector<byte> & pSource, file_size_t pWriteSize )
     {
-    	if( pReadSize == 0 )
-    	{
-    		return 0;
-    	}
-
-    	pBuffer.resize( pReadSize );
-
-    	return _nativeReadData( pBuffer.data(), pReadSize, pReadSize );
+    	return _write( pSource, pWriteSize );
     }
 
-    file_size_t File::writeData( const void * pBuffer, file_size_t pBufferSize, file_size_t pWriteSize )
+    file_size_t File::write( const std::string & pSource, file_size_t pWriteSize )
     {
-        if( !pBuffer || ( pBufferSize == 0 ) || ( pWriteSize == 0 ) )
-        {
-            return 0;
-        }
-
-        const auto writeSize = getMinOf( pBufferSize, pWriteSize );
-
-        return _nativeWriteData( pBuffer, pBufferSize, writeSize );
+    	return _write( pSource, pWriteSize );
     }
 
     file_offset_t File::setFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
     {
         return _nativeSetFilePointer( pOffset, pRefPos );
-    }
-
-    bool File::checkEOF() const
-    {
-        return _nativeCheckEOF();
-    }
-
-    bool File::isGood() const
-    {
-        return _nativeIsGood();
     }
 
     file_offset_t File::getFilePointer() const
@@ -97,6 +95,21 @@ namespace ts3::system
         return _nativeGetSize();
     }
 
+    file_size_t File::getRemainingBytes() const
+    {
+    	return _nativeGetRemainingBytes();
+    }
+
+    bool File::checkEOF() const
+    {
+    	return _nativeCheckEOF();
+    }
+
+    bool File::isGood() const
+    {
+    	return _nativeIsGood();
+    }
+
 
     FileManager::FileManager( SysContextHandle pSysContext )
     : SysObject( std::move( pSysContext ) )
@@ -107,7 +120,6 @@ namespace ts3::system
     FileHandle FileManager::openFile( std::string pFilePath, EFileOpenMode pOpenMode )
     {
         return _nativeOpenFile( std::move( pFilePath ), pOpenMode );
-
     }
 
     FileHandle FileManager::createFile( std::string pFilePath )
