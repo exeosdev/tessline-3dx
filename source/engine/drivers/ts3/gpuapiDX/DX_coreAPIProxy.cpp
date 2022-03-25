@@ -2,7 +2,7 @@
 #include "DX_coreAPIProxy.h"
 #include <ts3/gpuapi/resources/shaderCommon.h>
 #include <ts3/gpuapi/resources/textureCommon.h>
-#include <ts3/stdext/mapUtils.h>
+#include <ts3/stdext/stlHelperAlgo.h>
 #include <ts3/stdext/utilities.h>
 
 namespace ts3

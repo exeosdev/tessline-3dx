@@ -6,7 +6,7 @@
 #include <ts3/gpuapi/resources/shaderCommon.h>
 #include <ts3/gpuapi/resources/textureCommon.h>
 #include <ts3/system/windowNative.h>
-#include <ts3/stdext/mapUtils.h>
+#include <ts3/stdext/stlHelperAlgo.h>
 
 namespace ts3
 {
@@ -297,7 +297,7 @@ namespace gpuapi
 			{ EGPUMemoryMapMode::WriteInvalidate , D3D11_MAP_WRITE_DISCARD      },
 			{ EGPUMemoryMapMode::WriteAppend     , D3D11_MAP_WRITE_NO_OVERWRITE },
 		};
-		return getMapValueOrDefault( mapModeMap, pMapMode, static_cast<D3D11_MAP>( 0 ) );
+		return stdx::getMapValueRefOrDefault( mapModeMap, pMapMode, static_cast<D3D11_MAP>( 0 ) );
 	}
 
 	D3D11_COMPARISON_FUNC DX11CoreAPIProxy::translateDX11CompFunc( ECompFunc pCompFunc )
