@@ -19,6 +19,7 @@ set( TS3_STDEXT_SRC_FILES
         "staticLimits.h"
         "stringExt.h"
         "stringUtils.h"
+        "stringView.h"
         "typeTraits.h"
         "utilities.h"
         )
