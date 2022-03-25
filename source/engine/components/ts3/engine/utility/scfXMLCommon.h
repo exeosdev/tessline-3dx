@@ -10,10 +10,43 @@
 namespace ts3
 {
 
-	class SCFXMLResourceNode
+	class SCFXMLNode;
+
+	using SCFXMLNodeList = std::vector<const SCFXMLNode *>;
+
+	enum class ESCFXMLNodeType : enum_default_value_t
+	{
+		Unknown,
+		Resource,
+		Folder
+	};
+
+	class SCFXMLNode
 	{
 	public:
-		using PropertyNodeList = std::vector<XMLNode>;
+
+	public:
+		SCFXMLNode( std::nullptr_t = nullptr );
+
+		ESCFXMLNodeType nodeType() const;
+
+		const std::string & nodeName() const;
+
+		const std::string & nodeTextValue() const;
+
+		bool empty() const;
+
+	protected:
+		XMLNode _xmlNode;
+		ESCFXMLNodeType _nodeType;
+		std::string _nodeName;
+		std::string _nodeTextValue;
+	};
+
+	class SCFXMLResourceNode : public SCFXMLNode
+	{
+	public:
+		using DataNodeList = std::vector<XMLNode>;
 
 		SCFXMLResourceNode( std::nullptr_t = nullptr );
 
@@ -21,30 +54,22 @@ namespace ts3
 
 		const std::string & resourceType() const;
 
-		const XMLNode * property( const StringView<char> & pPropertyName ) const;
+		XMLAttribute attribute( const StringView<char> & pAttribName ) const;
 
-		const PropertyNodeList & getPropertyNodes() const;
+		XMLNode dataNode( const StringView<char> & pNodeName ) const;
 
-		bool hasProperty( const StringView<char> & pPropertyName ) const;
+		bool hasDataNode( const StringView<char> & pNodeName ) const;
 
 		static SCFXMLResourceNode initFromXMLNode( XMLNode pXMLNode );
 
-	private:
-		using PropertyNodeMap = std::map<std::string, XMLNode *, StringViewCmpLess<char>>;
-
-		static PropertyNodeList _readProperties( const XMLNode & pXMLNode, size_t pPropertyNodesNum );
-
-		static PropertyNodeMap _buildPropertyNodeMap( PropertyNodeList & pPropertyNodes );
+		static void initFromXMLNode( XMLNode pXMLNode, SCFXMLResourceNode & pInitNode );
 
 	private:
-		XMLNode _xmlNode;
 		std::string _id;
 		std::string _type;
-		PropertyNodeList _propertyNodeList;
-		PropertyNodeMap _propertyNodeMap;
 	};
 
-	class SCFXMLFolderNode
+	class SCFXMLFolderNode : public SCFXMLNode
 	{
 	public:
 		using ResourceNodeList = std::vector<SCFXMLResourceNode>;
@@ -58,6 +83,14 @@ namespace ts3
 
 		const SCFXMLFolderNode * subFolder( const StringView<char> & pSubFolderName ) const;
 
+		SCFXMLNodeList getNodeList() const;
+
+		SCFXMLNodeList & getNodeList( SCFXMLNodeList & pOutputList ) const;
+
+		SCFXMLNodeList getNodeList( bool pRecursive = false ) const;
+
+		SCFXMLNodeList & getNodeList( SCFXMLNodeList & pOutputList, bool pRecursive = false ) const;
+
 		const ResourceNodeList & getResourceNodes() const;
 
 		const SubFolderNodeList & getSubFolderNodes() const;
@@ -68,9 +101,13 @@ namespace ts3
 
 		static SCFXMLFolderNode initFromXMLNode( XMLNode pXMLNode );
 
-	private:
+		static void initFromXMLNode( XMLNode pXMLNode, SCFXMLFolderNode & pInitNode );
+
+	protected:
 		using ResourceNodeMap = std::map<std::string, SCFXMLResourceNode *, StringViewCmpLess<char>>;
 		using SubFolderNodeMap = std::map<std::string, SCFXMLFolderNode *, StringViewCmpLess<char>>;
+
+		static void _initContent( const XMLNode & pXMLNode, SCFXMLFolderNode & pInitNode );
 
 		static ResourceNodeList _readResources( const XMLNode & pXMLNode, size_t pResourceNodesNum );
 
@@ -80,13 +117,27 @@ namespace ts3
 
 		static SubFolderNodeMap _buildSubFolderNodeMap( SubFolderNodeList & pSubFolderNodes );
 
+	protected:
+		std::string _folderName;
+
 	private:
-		XMLNode _xmlNode;
-		std::string _name;
 		ResourceNodeList _resourceNodeList;
 		ResourceNodeMap _resourceNodeMap;
 		SubFolderNodeList _subFolderNodeList;
 		SubFolderNodeMap _subFolderNodeMap;
+	};
+
+	class SCFXMLRootNode : public SCFXMLFolderNode
+	{
+	public:
+		SCFXMLRootNode( std::nullptr_t = nullptr );
+
+		static SCFXMLRootNode initFromXMLTree( XMLTree pXMLTree );
+
+		static void initFromXMLTree( XMLTree pXMLTree, SCFXMLRootNode & pInitNode );
+
+	private:
+		XMLTree _xmlTree;
 	};
 
 }
