@@ -1,6 +1,6 @@
 
 #include "font.h"
-#include <ts3/stdext/mapUtils.h>
+#include <ts3/stdext/stlHelperAlgo.h>
 
 namespace ts3
 {

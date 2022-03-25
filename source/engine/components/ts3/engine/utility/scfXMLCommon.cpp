@@ -1,6 +1,6 @@
 
 #include "scfXMLCommon.h"
-#include <ts3/stdext/mapUtils.h>
+#include <ts3/stdext/stlHelperAlgo.h>
 #include <ts3/core/exception.h>
 #include <ts3/engine/exception.h>
 

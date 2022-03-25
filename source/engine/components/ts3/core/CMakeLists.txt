@@ -37,7 +37,6 @@ set( TS3_CORE_SRC_FILES
 
 		"typeinfo/tpiCoreEnum.cpp"
 
-		"utility/dataProvider.h"
         "utility/gdsCore.h"
 		"utility/gdsImplCommon.inl"
 		"utility/gdsImplFuncAutoVariadic.inl"
