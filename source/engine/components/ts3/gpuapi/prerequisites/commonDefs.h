@@ -4,10 +4,14 @@
 #ifndef __TS3_GPUAPI_COMMON_DEFS_H__
 #define __TS3_GPUAPI_COMMON_DEFS_H__
 
+#include <ts3/core/prerequisites/enumCommon.h>
+
 namespace ts3
 {
 namespace gpuapi
 {
+
+	ts3TypeInfoEnableEnumSupport();
 
 	using gpu_resource_id_t = uint64;
 

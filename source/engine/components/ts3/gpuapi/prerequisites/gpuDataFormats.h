@@ -172,6 +172,11 @@ namespace gpuapi
 		VEC4_UINT16_NORM = ecDeclareVertexAttribFormat( 38, EBaseDataType::Uint16,  4, E_GPU_DATA_FORMAT_FLAG_UNORM ),
 		UNKNOWN          = 0
 	};
+	
+	ts3TypeInfoEnumDeclare( EBaseDataType );
+	ts3TypeInfoEnumDeclare( EIndexDataFormat );
+	ts3TypeInfoEnumDeclare( ETextureFormat );
+	ts3TypeInfoEnumDeclare( EVertexAttribFormat );
 
 	using ShaderInputConstantFormat = EVertexAttribFormat;
 

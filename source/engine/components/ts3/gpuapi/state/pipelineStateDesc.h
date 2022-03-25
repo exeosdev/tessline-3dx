@@ -24,10 +24,10 @@ namespace gpuapi
 	ts3DeclareClassHandle( Sampler );
 	ts3DeclareClassHandle( Shader );
 
-	using pipeline_input_desc_hash_t = ts3::HashObject<ts3::HashAlgo::FNV1A>;
-	using pipeline_state_descriptor_id_t = ts3::HashObject<ts3::HashAlgo::FNV1A>;
+	using pipeline_input_desc_hash_t = ts3::HashObject<ts3::HashAlgo::DJB2>;
+	using pipeline_state_descriptor_id_t = ts3::HashObject<ts3::HashAlgo::DJB2>;
 
-	inline constexpr pipeline_state_descriptor_id_t cxInvalidPipelineStateDescriptorID = ts3::cvEmptyHash<ts3::HashAlgo::FNV1A>;
+	inline constexpr pipeline_state_descriptor_id_t cxInvalidPipelineStateDescriptorID = ts3::cvEmptyHash<ts3::HashAlgo::DJB2>;
 
 	inline constexpr gpu_memory_size_t cxVertexAttributeOffsetPackedAppend = ts3::Limits<gpu_memory_size_t>::maxValue;
 
@@ -125,13 +125,13 @@ namespace gpuapi
 	template <typename TpInputDescData>
 	inline pipeline_input_desc_hash_t computePipelineInputDescHash( const TpInputDescData & pInputDescData )
 	{
-		return ts3::HashGen::compute<ts3::HashAlgo::FNV1A>( pInputDescData );
+		return ts3::HashGen::compute<ts3::HashAlgo::DJB2>( pInputDescData );
 	}
 
 	template <typename TpStateDescriptorData>
 	inline pipeline_state_descriptor_id_t computePipelineStateDescriptorID( const TpStateDescriptorData & pStateDescriptorData )
 	{
-		return ts3::HashGen::compute<ts3::HashAlgo::FNV1A>( pStateDescriptorData );
+		return ts3::HashGen::compute<ts3::HashAlgo::DJB2>( pStateDescriptorData );
 	}
 
 } /* namespace ts3 */

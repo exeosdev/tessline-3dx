@@ -10,6 +10,8 @@ namespace ts3
 
 	using gpuapi_buffer_ref_id_t = uint64;
 
+	inline constexpr auto CX_GPUAPI_BUFFER_REF_ID_AUTO = Limits<gpuapi_buffer_ref_id_t>::maxValue;
+
 	struct HWBufferCreateInfo
 	{
 		union Metrics
@@ -19,6 +21,7 @@ namespace ts3
 			HWIndexBufferMetrics uIndexBuffer;
 		};
 
+		// Primary type of the buffer
 		EHWBufferType baseType = EHWBufferType::HBTUnknown;
 		Bitmask<hardware_buffer_flags_value_t> flags = 0;
 		Metrics metrics;

@@ -12,4 +12,11 @@ namespace ts3
 
 	HWBuffer::~HWBuffer() = default;
 
+	void HWBuffer::setGPUBufferRef( GPUBufferRef pBufferRef )
+	{
+		_eventProxy.eGPURefUpdate.emit( _gpuBufferRef, pBufferRef );
+
+		_gpuBufferRef = pBufferRef;
+	}
+
 }

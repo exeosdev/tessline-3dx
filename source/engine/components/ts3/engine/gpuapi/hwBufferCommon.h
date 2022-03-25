@@ -4,11 +4,13 @@
 
 #include "commonGPUDefs.h"
 #include <ts3/core/signals/signalCommon.h>
+#include <type_traits>
 
 namespace ts3
 {
 
-	ts3DeclareClassHandle( HWBuffer );
+    ts3DeclareClassHandle( HWBuffer );
+    ts3DeclareClassHandle( HWBufferManager );
 	ts3DeclareClassHandle( HWGeometryBuffer );
 	ts3DeclareClassHandle( HWVertexBuffer );
 	ts3DeclareClassHandle( HWIndexBuffer );
@@ -18,12 +20,13 @@ namespace ts3
 	enum EEventHWBCodes : event_code_value_t
 	{
 		E_EVT_HWB_BASE_ID = 0x7F,
-		E_EVT_HWB_GPU_BUFFER_REF_UPDATED,
-		E_EVT_HWB_LOCKED,
-		E_EVT_HWB_UNLOCKED,
+		E_EVT_HWB_COMMON_GPU_REF_UPDATE_BEGIN,
+		E_EVT_HWB_COMMON_GPU_REF_UPDATE_END,
+		E_EVT_HWB_COMMON_LOCKED,
+		E_EVT_HWB_COMMON_UNLOCKED,
 	};
-
-	enum class EHWBufferType : uint32
+ 
+	enum class EHWBufferType : std::underlying_type<gpuapi::EGPUBufferTarget>::type
 	{
 		HBTConstantBuffer         = static_cast<uint32>( gpuapi::EGPUBufferTarget::ConstantBuffer ),
 		HBTVertexBuffer           = static_cast<uint32>( gpuapi::EGPUBufferTarget::VertexBuffer ),
@@ -98,6 +101,25 @@ namespace ts3
 	{
 		return static_cast<gpuapi::resource_flags_value_t>( ( ( hardware_buffer_flags_value_t ) pBufferUsage ) & Limits<uint32>::maxValue );
 	}
+
+	struct HWBufferMemoryRef
+	{
+		HWBuffer * buffer = nullptr;
+
+		gpuapi::GPUMemoryRegion bufferSubRegion;
+
+		HWBufferMemoryRef() = default;
+
+		HWBufferMemoryRef( std::nullptr_t )
+		: buffer{ nullptr }
+		, bufferSubRegion{ 0, gpuapi::CX_GPU_MEMORY_SIZE_MAX }
+		{}
+
+		explicit operator bool() const
+		{
+			return buffer && !bufferSubRegion.empty();
+		}
+	};
 
 }
 

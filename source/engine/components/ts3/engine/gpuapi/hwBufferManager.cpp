@@ -9,51 +9,61 @@ namespace ts3
 	ResultCode HWBufferManager::allocateGPUBufferExplicit( gpuapi_buffer_ref_id_t pGPUBufferRefID,
 														   const gpuapi::GPUBufferCreateInfo & pGBCreateInfo )
 	{
-	    return {};
+		return {};
 	}
 
 	HWVertexBufferHandle HWBufferManager::createVertexBuffer( const HWBufferCreateInfo & pHWBCreateInfo )
 	{
-		auto hwBufferCreateInfo = pHWBCreateInfo;
-		_validateBufferCreateInfo( EHWBufferType::HBTVertexBuffer, hwBufferCreateInfo );
+		auto validatedHWBCreateInfo = pHWBCreateInfo;
+		_validateBufferCreateInfo( EHWBufferType::HBTVertexBuffer, validatedHWBCreateInfo );
 
-		auto gpuBuffer = _createGPUBuffer( 0, hwBufferCreateInfo );
+		auto gpuBuffer = _createGPUBuffer( CX_GPUAPI_BUFFER_REF_ID_AUTO, validatedHWBCreateInfo );
 		if( !gpuBuffer )
 		{
 			ts3DebugOutput( "HWB: GPU buffer creation has failed" );
 			return nullptr;
 		}
 
-        return nullptr;
+		return nullptr;
 	}
 
 	HWVertexBufferHandle HWBufferManager::createVertexBufferEx( gpuapi_buffer_ref_id_t pGBUBufferRefID,
 	                                                            const HWBufferCreateInfo & pHWBCreateInfo )
 	{
-        return nullptr;
+		return nullptr;
 	}
 
 	HWIndexBufferHandle HWBufferManager::createIndexBuffer( const HWBufferCreateInfo & pHWBCreateInfo )
 	{
-        return nullptr;
+		auto validatedHWBCreateInfo = pHWBCreateInfo;
+		_validateBufferCreateInfo( EHWBufferType::HBTIndexBuffer, validatedHWBCreateInfo );
+
+		auto gpuBuffer = _createGPUBuffer( CX_GPUAPI_BUFFER_REF_ID_AUTO, validatedHWBCreateInfo );
+		if( !gpuBuffer )
+		{
+			ts3DebugOutput( "HWB: GPU buffer creation has failed" );
+			return nullptr;
+		}
+
+		return nullptr;
 	}
 
 	HWIndexBufferHandle HWBufferManager::createIndexBufferEx( gpuapi_buffer_ref_id_t pGBUBufferRefID,
 	                                                          const HWBufferCreateInfo & pHWBCreateInfo )
 	{
-        return nullptr;
+		return nullptr;
 	}
 
 	GPUBufferUsageInfo HWBufferManager::getGPUBufferInfo( gpuapi_buffer_ref_id_t pGPUBufferRefID ) const
 	{
-	    return {};
+		return {};
 	}
 
 	memory_align_t HWBufferManager::queryAlignmentRequirementsForBuffer( EHWBufferType pBufferType,
 	                                                                     gpuapi::gpu_memory_size_t pBufferSize,
 	                                                                     Bitmask<gpuapi::gpu_memory_flags_value_t> pMemoryFlags )
 	{
-		return cxMemoryDefaultAlignment;
+		return CX_MEMORY_DEFAULT_ALIGNMENT;
 	}
 
 	gpuapi::GPUBufferHandle HWBufferManager::_createGPUBuffer( gpuapi_buffer_ref_id_t pGPUBufferRefID,
@@ -87,7 +97,7 @@ namespace ts3
 			return nullptr;
 		}
 
-		if( pGPUBufferRefID == 0 )
+		if( pGPUBufferRefID == CX_GPUAPI_BUFFER_REF_ID_AUTO )
 		{
 			// If no explicit refID was specified, use the GPU buffer's address.
 			pGPUBufferRefID = reinterpret_cast<gpuapi_buffer_ref_id_t>( gpuBuffer.get() );
@@ -148,7 +158,7 @@ namespace ts3
 
 		// Align the offset properly so it meets the requirements. Note, that after aligning,
 		// this offset can go beyond the memory range valid for this GPU buffer.
-		const auto alignedHeapOffset = getAlignedValue( baseHeapOffset, allocAlignment );
+		const auto alignedHeapOffset = memGetAlignedValue( baseHeapOffset, allocAlignment );
 
 		// The size of extra memory we need to allocate.
 		const auto offsetDiff = alignedHeapOffset - baseHeapOffset;

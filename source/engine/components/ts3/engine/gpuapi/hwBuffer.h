@@ -4,6 +4,7 @@
 
 #include "hwBufferCommon.h"
 #include <ts3/core/signals/signalEmitter.h>
+#include <ts3/stdext/bitmaskAtomic.h>
 
 namespace ts3
 {
@@ -13,14 +14,17 @@ namespace ts3
 		template <typename TpEvent>
 		using EventEmitterType = EventEmitter<HWBuffer, TpEvent>;
 
-		using EvtLocked = Event<E_EVT_HWB_LOCKED>;
-		using EvtUnlocked = Event<E_EVT_HWB_UNLOCKED>;
+		using EvtGPURefUpdate = Event<E_EVT_HWB_COMMON_GPU_REF_UPDATE_BEGIN, GPUBufferRef &, GPUBufferRef &>;
+		using EvtLocked = Event<E_EVT_HWB_COMMON_LOCKED>;
+		using EvtUnlocked = Event<E_EVT_HWB_COMMON_UNLOCKED>;
 
+		EventEmitterType<EvtGPURefUpdate> eGPURefUpdate;
 		EventEmitterType<EvtLocked> eLocked;
 		EventEmitterType<EvtUnlocked> eUnlocked;
 
 		explicit HWBufferEventProxy( HWBuffer & pHWBufferRef ) noexcept
-		: eLocked( pHWBufferRef )
+		: eGPURefUpdate( pHWBufferRef )
+		, eLocked( pHWBufferRef )
 		, eUnlocked( pHWBufferRef )
 		{}
 	};
@@ -34,9 +38,17 @@ namespace ts3
 		HWBuffer();
 		virtual ~HWBuffer();
 
+		void lock();
+
+		void unlock();
+
+	friendapi:
+		void setGPUBufferRef( GPUBufferRef pBufferRef );
+
 	private:
 		GPUBufferRef _gpuBufferRef;
 		HWBufferEventProxy _eventProxy;
+		AtomicBitmask<uint32> _lockFlag;
 	};
 
 }

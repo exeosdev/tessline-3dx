@@ -46,7 +46,9 @@ namespace ts3
 	};
 
 	TS3_ENGINE_OBJ const gpuapi::VertexInputFormatDesc cvVertexInputFormatDesc2DDefault;
+
 	TS3_ENGINE_OBJ const gpuapi::VertexInputFormatDesc cvVertexInputFormatDesc2DUI;
+
 	TS3_ENGINE_OBJ const gpuapi::VertexInputFormatDesc cvVertexInputFormatDesc3DDefault;
 
 	TS3_ENGINE_API const gpuapi::VertexInputFormatDesc & queryVertexInputFormatDesc( EGPUVertexFormatID pFormatID );

@@ -15,21 +15,21 @@ namespace ts3
 		gpuapi::GPUBufferHandle buffer;
 
 		// Memory region of the buffer. Note, that the offset is not buffer-relative, but heap-relative.
-		// For an example, a GPUBufferRef referencing the whole memory of a buffer B1, would have here
-		// exactly same values as stored in B1.mResourceMemory.sourceHeapRegion.
+		// For example, a GPUBufferRef referencing the whole memory of a GPUBuffer B1, would have here
+		// exactly the same values as stored in B1.mResourceMemory.sourceHeapRegion.
 		gpuapi::GPUMemoryRegion memoryRegion;
 
 		// The actual region reserved to make the allocation. This is due to alignment requirements: it is
 		// possible to sub-allocate a buffer's memory using a more strict alignment than the original buffer
 		// has. To prevent extra calculation in the client code, memoryRegion always has the exact size which
-		// was requested and the actual size of the region is stored here.
+		// was requested and the actual size of the reserved region is stored here.
 		gpuapi::GPUMemoryRegion reservedRegion;
 
 		GPUBufferRef() = default;
 
 		GPUBufferRef( std::nullptr_t )
 		: buffer{ nullptr }
-		, memoryRegion{ 0, gpuapi::cxGPUMemorySizeMax }
+		, memoryRegion{ 0, 0 }
 		{}
 
 		explicit operator bool() const
@@ -49,7 +49,7 @@ namespace ts3
 		gpuapi::gpu_memory_size_t availableMemorySize;
 
 		// Number of HWBuffers allocated from the referenced GPUBuffer.
-		uint32 allocatedSubRegionCount;
+		uint32 allocatedSubBufferCount;
 	};
 
 	struct HWBufferMetrics
