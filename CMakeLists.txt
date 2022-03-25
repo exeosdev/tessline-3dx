@@ -47,7 +47,7 @@ add_subdirectory( "source/dependencies" )
 
 add_subdirectory( "source/engine/components" )
 add_subdirectory( "source/engine/drivers" )
-# add_subdirectory( "source/engine/extensions" )
+add_subdirectory( "source/engine/tools" )
 add_subdirectory( "source/samples" )
 
 if( "${CM_EBS_SYSCONF_TARGET_PLATFORM}" STREQUAL "Android" )
