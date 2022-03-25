@@ -305,15 +305,38 @@ namespace ts3
 			using InternalType = TpInternal;
 
 			std::reference_wrapper<TpRef> value;
+			mutable TpInternal internalValue;
 
-			ValueRef( TpRef & pRef )
+			template <typename... TpArgs>
+			ValueRef( TpRef & pRef, TpArgs && ...pArgs )
+			: value( pRef )
+			, internalValue( std::forward<TpArgs>( pArgs )... )
+			{}
+
+			~ValueRef()
+			{
+				value.get() = static_cast<TpRef>( internalValue );
+			}
+
+			TpInternal & get() const
+			{
+				return internalValue;
+			}
+		};
+
+		template <typename TpRef, typename TpInternal>
+		struct ValueRef<const TpRef, TpInternal>
+		{
+			using RefType = TpRef;
+			using InternalType = TpInternal;
+
+			std::reference_wrapper<const TpRef> value;
+
+			ValueRef( const TpRef & pRef )
 			: value( pRef )
 			{}
 
-			void set( TpInternal pValue ) const
-			{
-				value.get() = static_cast<TpRef>( pValue );
-			}
+			~ValueRef() = default;
 
 			TpInternal get() const
 			{
@@ -505,7 +528,6 @@ namespace ts3
 		}
 
 
-
 		template <typename Tp, std::enable_if_t<IsTriviallySerializable<Tp>::sValue, int> = 0>
 		inline gds_size_t deserialize( const byte * pInputData, Tp & pValue )
 		{
@@ -552,7 +574,86 @@ namespace ts3
 			return deserialize( pInputData, pCastInfo.refWrapper.get(), pCastInfo.castTag );
 		}
 
-}
+
+		/// @brief Special value set for InstanceMetaData::controlKey to indicate its correctness.
+		inline constexpr uint32 CX_GDS_VALUE_META_DATA_CONTROL_KEY = 0x7CCC7333;
+
+		/// @brief Metadata with additional information about an object (or a collection of such) serialized with GDS.
+		///
+		/// Metadata serves as a solution for a problem with serializing/deserializing objects of dynamic size.
+		/// If serialized data is read from an external resource (file, pipe, network) and cannot be read at once,
+		/// the problem arises: portion of the loaded data may not contain whole data for a single instance:
+		///
+		/// char inputBuffer[256];
+		/// fread( serializedData.gds, 256, 1, inputBuffer );
+		/// SomeStruct S;
+		/// gds::deserialize( inputBuffer, S ); // -> crashes, this instance resulted in 670 bytes os serialized data
+		///
+		/// An object can be serialized with metadata using a dedicated function and then deserialized with its
+		/// counterpart. This allows for getting the actual info about the data size and, thus - space needed.
+		struct InstanceMetaData
+		{
+			/// @brief Control key. Set automatically to CX_GDS_VALUE_META_DATA_CONTROL_KEY.
+			uint32 controlKey;
+
+			/// @brief Size, in bytes, of serialized data (excluding the size of the metadata).
+			uint64 objectDataSize = 0;
+
+			/// @brief Size, in bytes, of the whole output data (objectDataSize + size of the metadata itself).
+			uint64 outputBlockSize = 0;
+
+			/// @brief Size of this struct, in bytes.
+			static constexpr gds_size_t sByteSize = sizeof( controlKey ) + sizeof( objectDataSize ) + sizeof( outputBlockSize );
+
+			/// @brief Returns true if this metadata is valid: control key is correct and object data size is not zero.
+			constexpr explicit operator bool() const
+			{
+				return ( controlKey == CX_GDS_VALUE_META_DATA_CONTROL_KEY ) && ( objectDataSize > 0 );
+			}
+
+			/// @brief Returns the size of this struct, in bytes.
+			constexpr size_t size() const
+			{
+				return sByteSize;
+			}
+		};
+
+		/// @brief Usual serialize() method for InstanceMetaData struct.
+		inline gds_size_t serialize( byte * pOutputBuffer, const InstanceMetaData & pValue )
+		{
+			gds_size_t byteSize = 0;
+			byteSize += serialize( pOutputBuffer, pValue.controlKey );
+			byteSize += serialize( pOutputBuffer + byteSize, pValue.objectDataSize );
+			byteSize += serialize( pOutputBuffer + byteSize, pValue.outputBlockSize );
+			return byteSize;
+		}
+
+		/// @brief Usual deserialize() method for InstanceMetaData struct.
+		inline gds_size_t deserialize( const byte * pInputData, InstanceMetaData & pValue )
+		{
+			gds_size_t byteSize = 0;
+			byteSize += deserialize( pInputData, pValue.controlKey );
+			byteSize += deserialize( pInputData + byteSize, pValue.objectDataSize );
+			byteSize += deserialize( pInputData + byteSize, pValue.outputBlockSize );
+			return byteSize;
+		}
+
+		/// @brief Returns the size, in bytes, of the InstanceMetaData struct.
+		inline constexpr gds_size_t getInstanceMetaDataSize()
+		{
+			return InstanceMetaData::sByteSize;
+		}
+
+		/// @brief Useful helper function to read InstanceMetaData from the specified serialized data block.
+		inline InstanceMetaData readInstanceMetaData( const byte * pInputData )
+		{
+			InstanceMetaData valueMetaData;
+			deserialize( pInputData, valueMetaData );
+			return valueMetaData;
+		}
+
+	}
+
 }
 
 #endif // __TS3_PLATFORM_GDS_H__
