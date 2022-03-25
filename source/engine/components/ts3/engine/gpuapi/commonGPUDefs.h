@@ -29,7 +29,7 @@ namespace ts3
 
 		GPUBufferRef( std::nullptr_t )
 		: buffer{ nullptr }
-		, memoryRegion{ 0, gpuapi::cxGPUMemorySizeMax }
+		, memoryRegion{ 0, gpuapi::CX_GPU_MEMORY_SIZE_MAX }
 		{}
 
 		explicit operator bool() const
