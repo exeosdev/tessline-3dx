@@ -24,6 +24,9 @@ set( TS3_CORE_SRC_FILES
 
         "memory/commonMemoryDefs.h"
 
+		"reflection/enumTypeInfo.h"
+		"reflection/enumTypeInfo.cpp"
+
 		"sync/atomicRWLock.h"
 		"sync/commonSyncDefs.h"
 		"sync/lockable.h"
@@ -32,11 +35,19 @@ set( TS3_CORE_SRC_FILES
 		"sync/spinLock.h"
 		"sync/syncInterface.h"
 
+		"typeinfo/tpiCoreEnum.cpp"
+
 		"utility/dataProvider.h"
-		"utility/gdsTypeSupportCommon.h"
-		"utility/gdsTypeSupportInternal.h"
-		"utility/gdsTypeSupportStd.h"
-		"utility/gdsCore.h"
+        "utility/gdsCore.h"
+		"utility/gdsImplCommon.inl"
+		"utility/gdsImplFuncAutoVariadic.inl"
+		"utility/gdsImplFuncExternal.inl"
+		"utility/gdsImplTypeSupportInternal.inl"
+		"utility/gdsImplTypeSupportStd.inl"
+		"utility/rxmlParser.h"
+		"utility/rxmlParser.cpp"
+		"utility/xmlTypes.h"
+		"utility/xmlTypes.cpp"
 		)
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
