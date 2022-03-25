@@ -1,6 +1,6 @@
 
 #include "openGLCommon.h"
-#include <ts3/stdext/mapUtils.h>
+#include <ts3/stdext/stlHelperAlgo.h>
 #include <sstream>
 #include <unordered_map>
 
@@ -87,7 +87,7 @@ namespace ts3::system
             { GL_INVALID_FRAMEBUFFER_OPERATION , "GL_INVALID_FRAMEBUFFER_OPERATION" },
             { GL_OUT_OF_MEMORY                 , "GL_OUT_OF_MEMORY"                 },
 		};
-        return getMapValueOrDefault( errorStringMap, pError, "UNKNOWN_ERROR" );
+        return stdx::getMapValueRefOrDefault( errorStringMap, pError, "UNKNOWN_ERROR" );
     }
 
 } // namespace ts3::system

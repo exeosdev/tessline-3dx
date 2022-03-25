@@ -76,13 +76,13 @@ namespace ts3::system
         int thrInitStatus = ::XInitThreads();
         if( thrInitStatus == False )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 
         auto * xDisplay = ::XOpenDisplay( nullptr );
         if( xDisplay == nullptr )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 
         mNativeData.xSessionData.display = xDisplay;

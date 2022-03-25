@@ -1,7 +1,7 @@
 
 #include "dxgiDisplaySystem.h"
 #include <ts3/system/internal/displaySystemPrivate.h>
-#include <ts3/stdext/mapUtils.h>
+#include <ts3/stdext/stlHelperAlgo.h>
 #include <ts3/stdext/stringUtils.h>
 
 #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
@@ -71,7 +71,7 @@ namespace ts3::system
 
                 if( FAILED( hResult ) )
                 {
-                    ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+                    ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
                 }
 
                 mNativeData.dxgiFactory = dxgiFactory1;
@@ -104,7 +104,7 @@ namespace ts3::system
             // https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiadapter-enumoutputs
             if ( FAILED( hResult ) )
             {
-                ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+                ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
             }
 
             ComPtr<IDXGIOutput1> dxgiOutput1;
@@ -113,7 +113,7 @@ namespace ts3::system
             // We require support for the DXGI version 1.1 (Windows 7 and newer). Required for DXGI_ADAPTER_FLAG member.
             if ( FAILED( hResult ) )
             {
-                ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+                ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
             }
 
             DXGI_OUTPUT_DESC dxgiOutputDesc;
@@ -121,7 +121,7 @@ namespace ts3::system
 
             if ( FAILED( hResult ) )
             {
-                ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+                ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
             }
 
             auto outputObject = adapterDXGI->createOutput<DisplayOutputDXGI>( *adapterDXGI );
@@ -180,7 +180,7 @@ namespace ts3::system
 	        // https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgifactory1-enumadapters1
 	        if ( FAILED( hResult ) )
 	        {
-	            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 	        }
 
 	        DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
@@ -190,7 +190,7 @@ namespace ts3::system
 	        // https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiadapter1-getdesc1
 	        if ( FAILED( hResult ) )
 	        {
-	            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 	        }
 
 	        auto adapterObject = createAdapter<DisplayAdapterDXGI>( *this );
@@ -235,7 +235,7 @@ namespace ts3::system
 
 	    if ( dxgiFormat == DXGI_FORMAT_UNKNOWN )
 	    {
-	        ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	        ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 	    }
 
 	    UINT displayModesNum = 0;
@@ -244,7 +244,7 @@ namespace ts3::system
 
 	    if ( FAILED( hResult ) )
 	    {
-	        ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	        ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 	    }
 
 	    std::vector<DXGI_MODE_DESC> dxgiModeList;
@@ -256,7 +256,7 @@ namespace ts3::system
 
 	    if ( FAILED( hResult ) )
 	    {
-	        ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	        ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 	    }
 
 	    // We use hash-based comparison to filter out the same modes - at our level, we are only interested
@@ -322,7 +322,7 @@ namespace ts3::system
                 { EColorFormat::R8G8B8X8     , DXGI_FORMAT_UNKNOWN             },
                 { EColorFormat::R10G10B10A2  , DXGI_FORMAT_R10G10B10A2_UNORM   },
             };
-            return getMapValueOrDefault( colorDescMap, pColorFormat, DXGI_FORMAT_UNKNOWN );
+            return stdx::getMapValueRefOrDefault( colorDescMap, pColorFormat, DXGI_FORMAT_UNKNOWN );
         }
 
     }

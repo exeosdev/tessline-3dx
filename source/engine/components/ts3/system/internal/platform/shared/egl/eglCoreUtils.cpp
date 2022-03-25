@@ -1,6 +1,6 @@
 
 #include "eglCoreUtils.h"
-#include <ts3/stdext/mapUtils.h>
+#include <ts3/stdext/stlHelperAlgo.h>
 #include <ts3/stdext/stringExt.h>
 #include <ts3/stdext/stringUtils.h>
 #include <unordered_map>
@@ -92,7 +92,7 @@ namespace ts3::system
             { EGL_BAD_SURFACE         , "EGL_BAD_SURFACE"         },
             { EGL_CONTEXT_LOST        , "EGL_CONTEXT_LOST"        },
         };
-        return getMapValueOrDefault( errorStringMap, pError, "UNKNOWN_ERROR" );
+        return stdx::getMapValueRefOrDefault( errorStringMap, pError, "UNKNOWN_ERROR" );
     }
 
 }

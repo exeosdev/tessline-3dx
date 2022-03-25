@@ -53,11 +53,12 @@ namespace ts3::system
     private:
         void _releaseWin32FileHandle();
 
-        virtual file_size_t _nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize ) override final;
-        virtual file_size_t _nativeWriteData( const void * pBuffer, file_size_t pBufferSize, file_size_t pWriteSize ) override final;
+        virtual file_size_t _nativeReadData( void * pTargetBuffer, file_size_t pReadSize ) override final;
+        virtual file_size_t _nativeWriteData( const void * pData, file_size_t pWriteSize ) override final;
         virtual file_offset_t _nativeSetFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos ) override final;
         virtual file_offset_t _nativeGetFilePointer() const override final;
         virtual file_size_t _nativeGetSize() const override final;
+        virtual file_size_t _nativeGetRemainingBytes() const override final;
         virtual bool _nativeCheckEOF() const override final;
         virtual bool _nativeIsGood() const override final;
     };

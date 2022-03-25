@@ -127,7 +127,7 @@ namespace ts3::system
 
             if ( XRRQueryVersion( xSessionData.display, &xrrVersionMajor, &xrrVersionMinor ) == False )
             {
-                ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Not_Supported );
+                ts3Throw( E_EXC_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Not_Supported );
             }
 
             mNativeData.xrrVersion.major = static_cast<uint16>( xrrVersionMajor );
@@ -138,7 +138,7 @@ namespace ts3::system
         mNativeData.xrrScreenResources = XRRGetScreenResources( xSessionData.display, xSessionData.rootWindowXID );
         if ( mNativeData.xrrScreenResources == nullptr )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 
         //
@@ -149,7 +149,7 @@ namespace ts3::system
 
         if ( ( mNativeData.xrrMonitorList == nullptr ) || ( mNativeData.xrrMonitorsNum <= 0 ) )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Internal_Error );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Internal_Error );
         }
 
         for ( int monitorIndex = 0; monitorIndex < mNativeData.xrrMonitorsNum; ++monitorIndex )
@@ -264,7 +264,7 @@ namespace ts3::system
                                               outputX11->mNativeData.xrrOutputID );
         if ( outputInfo == nullptr )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 
         if ( outputInfo->modes != nullptr )

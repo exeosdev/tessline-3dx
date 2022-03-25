@@ -63,7 +63,7 @@ namespace ts3::system
                                                                fbConfigNativeVisualID );
         if( aNativeResult < 0 )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 
         auto displaySurface = createSysObject<AndroidOpenGLDisplaySurface>( getHandle<AndroidOpenGLSystemDriver>() );

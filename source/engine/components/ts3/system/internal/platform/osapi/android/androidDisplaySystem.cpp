@@ -1,7 +1,7 @@
 
 #include "androidDisplaySystem.h"
 #include "androidWindowSystem.h"
-#include <ts3/stdext/mapUtils.h>
+#include <ts3/stdext/stlHelperAlgo.h>
 #include <map>
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
@@ -129,7 +129,7 @@ namespace ts3::system
                 { AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM,    EColorFormat::R8G8B8X8 },
                 { AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM, EColorFormat::R10G10B10A2 }
             };
-            return getMapValueOrDefault( colorDescMap, pAHWBufferFormat, EColorFormat::Unknown );
+            return stdx::getMapValueRefOrDefault( colorDescMap, pAHWBufferFormat, EColorFormat::Unknown );
         }
 
     }

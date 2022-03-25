@@ -138,7 +138,7 @@ namespace ts3::system
         }
     }
 
-    file_size_t PosixFile::_nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
+    file_size_t PosixFile::_nativeReadData( void * pTargetBuffer, file_size_t pReadSize )
     {
         auto readBytesNum = ::fread( pBuffer, 1, pReadSize, mNativeData.filePtr );
         return trunc_numeric_cast<file_size_t>( readBytesNum );
@@ -152,7 +152,7 @@ namespace ts3::system
         if( seekResult != 0 )
         {
             auto errnoString = platform::posixQueryErrnoStringByCode( errno );
-            ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errnoString ) );
+            ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER, std::move( errnoString ) );
         }
 
         auto currentFilePointer = ::ftell( mNativeData.filePtr );

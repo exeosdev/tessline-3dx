@@ -110,7 +110,7 @@ namespace ts3::system
             auto currentThreadID = std::this_thread::get_id();
             if( pJNIThreadID != currentThreadID )
             {
-                ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER,
+                ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER,
                               "acquireJNIEnv(): JNIThreadState can be only initialized by the thread itself" );
             }
 
@@ -120,7 +120,7 @@ namespace ts3::system
             auto threadAttachResult = mJavaVM->AttachCurrentThread( &jniEnv, nullptr );
             if( threadAttachResult != JNI_OK )
             {
-                ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER,
+                ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER,
                               "JavaVM::AttachCurrentThread() has failed" );
             }
 
@@ -155,7 +155,7 @@ namespace ts3::system
 
             if( refCounter > 0 )
             {
-                ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER,
+                ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER,
                               "_onJNIThreadStateDestroyRequest(): refCounter > 0" );
             }
 
