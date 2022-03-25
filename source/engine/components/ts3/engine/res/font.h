@@ -12,32 +12,24 @@
 namespace ts3
 {
 
-    struct FontBaseInfo
-    {
-        EFontBaseType baseType = EFontBaseType::Unknown;
-        std::string fontID;
-        font_size_t fontSize = 0;
-        math::Vec2u32 textureDimensions = { 0, 0 };
-        gpuapi::ETextureFormat textureFormat = gpuapi::ETextureFormat::UNKNOWN;
-        Bitmask<EFontPropertyFlags> propertyFlags = 0;
+	struct FontCommonDesc
+	{
+		EFontBaseType baseType = EFontBaseType::Unknown;
+		std::string fontID;
+		font_size_t fontSize = 0;
+		math::Vec2u32 textureDimensions = { 0, 0 };
+		gpuapi::ETextureFormat textureFormat = gpuapi::ETextureFormat::UNKNOWN;
+		Bitmask<EFontPropertyFlags> propertyFlags = 0;
 
-        TS3_FUNC_NO_DISCARD constexpr bool isValid() const
-        {
-            return ( baseType != EFontBaseType::Unknown ) &&
-                   ( fontSize > 0 ) &&
-                   ( textureDimensions.y > 0 ) &&
-                   ( textureDimensions.y > 0 ) &&
-                   ( textureFormat != gpuapi::ETextureFormat::UNKNOWN );
-        }
-    };
+	};
 
 	class Font
 	{
 	public:
-	    const FontBaseInfo * const mBaseInfo;
+		const FontCommonDesc * const mFontCommonDesc;
 
 	protected:
-	    Font( const FontBaseInfo & pBaseInfo );
+		Font( const FontCommonDesc & pFontCommonDesc );
 
 	public:
 		virtual ~Font();
@@ -51,8 +43,8 @@ namespace ts3
 		char_kerning_value_t getCharacterKerning( const CharCodePointPair & pCharCPPair ) const;
 
 	protected:
-	    using GlyphMap = std::unordered_map<char_code_point_t, FontGlyph>;
-	    using KerningInfoArray = SortedArray<CharKerningInfo>;
+		using GlyphMap = std::unordered_map<char_code_point_t, FontGlyph>;
+		using KerningInfoArray = SortedArray<CharKerningInfo>;
 
 		void addGlyph( const FontGlyph & pGlyph );
 

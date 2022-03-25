@@ -14,7 +14,7 @@ namespace ts3
 
 	struct SCFInputDataSource
 	{
-	    using DataReadCallback = std::function<uint64( uint64 /* pOffset */, uint64 /* pReadSize */, DynamicByteArray & /* pBuffer */ )>;
+		using DataReadCallback = std::function<uint64( uint64 /* pOffset */, uint64 /* pReadSize */, DynamicByteArray & /* pBuffer */ )>;
 
 		uint64 byteSize = 0;
 
@@ -30,6 +30,16 @@ namespace ts3
 		static SCFInputDataSource fromFile( system::FileManagerHandle pSysFileManager, const std::string & pFilename );
 
 		static SCFInputDataSource fromMemory( ReadOnlyMemoryView pMemoryView );
+
+		template <typename TpCallback, typename... TpArgs>
+		static SCFInputDataSource bindGenericCallback( TpCallback pCallback, TpArgs && ...pArgs )
+		{
+			return std::bind( pCallback,
+			                  std::placeholders::_1,
+			                  std::placeholders::_2,
+			                  std::placeholders::_3,
+			                  std::forward<TpArgs>( pArgs )... );
+		}
 	};
 
 	struct SCFEntryTemplate

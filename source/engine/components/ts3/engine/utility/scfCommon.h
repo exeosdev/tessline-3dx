@@ -5,6 +5,7 @@
 #define __TS3_ENGINE_SCF_COMMON_H__
 
 #include "../prerequisites.h"
+#include <ts3/core/prerequisites/enumCommon.h>
 
 namespace ts3
 {
@@ -15,17 +16,13 @@ namespace ts3
 	class SCFResource;
 	class SCFVirtualFolder;
 
-	enum ESCFFormatVersion : uint32
-	{
-		E_SCF_FORMAT_VERSION_V1 = 1,
-		E_SCF_FORMAT_VERSION_EX_CURRENT = E_SCF_FORMAT_VERSION_V1,
-	};
-
 	enum class ESCFEntryType : uint32
 	{
 		Resource,
 		VirtualFolder
 	};
+
+	ts3TypeInfoEnumDeclare( ESCFEntryType );
 
 	struct SCFEntryInfo
 	{

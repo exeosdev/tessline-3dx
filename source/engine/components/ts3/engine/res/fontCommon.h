@@ -16,11 +16,11 @@ namespace ts3
 	using font_type_t = uint64;
 
 	enum EFontBaseType : uint32
-    {
-	    Unknown,
-	    DynamicFont,
-	    StaticFont
-    };
+	{
+		Unknown,
+		DynamicFont,
+		StaticFont
+	};
 
 }
 

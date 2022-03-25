@@ -40,17 +40,17 @@ namespace ts3
 	};
 
 	struct FontTextureCreateInfo
-    {
-	    struct TextureLayerInitData
-        {
-	        uint32 layerIndex;
-	        DynamicByteArray initDataBuffer;
-        };
+	{
+		struct TextureLayerInitData
+		{
+			uint32 layerIndex;
+			DynamicByteArray initDataBuffer;
+		};
 
-	    std::vector<TextureLayerInitData> textureLayerInitDataArray;
+		std::vector<TextureLayerInitData> textureLayerInitDataArray;
 
-	    gpuapi::TextureCreateInfo gpuTextureCreateInfo;
-    };
+		gpuapi::TextureCreateInfo gpuTextureCreateInfo;
+	};
 
 //	struct FontTextureSubDataDesc
 //	{

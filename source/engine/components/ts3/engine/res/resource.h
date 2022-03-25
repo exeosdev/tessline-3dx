@@ -9,12 +9,12 @@
 namespace ts3
 {
 
-    class Resource : public DynamicInterface
-    {
-    public:
-        Resource() = default;
-        virtual ~Resource() = default;
-    };
+	class Resource : public DynamicInterface
+	{
+	public:
+		Resource() = default;
+		virtual ~Resource() = default;
+	};
 
 }
 

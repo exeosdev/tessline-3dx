@@ -9,13 +9,13 @@
 namespace ts3
 {
 
-    class ByteArray;
-    class MemoryBuffer;
-    class DynamicByteArray;
-    class DynamicMemoryBuffer;
+	class ByteArray;
+	class MemoryBuffer;
+	class DynamicByteArray;
+	class DynamicMemoryBuffer;
 
-    using SCFEntryPredicate = std::function<bool( const SCFEntry & )>;
-    using SCFEntryList = std::vector<SCFEntry *>;
+	using SCFEntryPredicate = std::function<bool( const SCFEntry & )>;
+	using SCFEntryList = std::vector<SCFEntry *>;
 
 	enum class ESCFFindMode : uint32
 	{
@@ -27,7 +27,7 @@ namespace ts3
 	class SCFEntry
 	{
 	public:
-	    SCFIndex * const mIndex;
+		SCFIndex * const mIndex;
 		SCFVirtualFolder * const mParentFolder;
 		const SCFEntryInfo * const mInfo;
 
@@ -54,12 +54,12 @@ namespace ts3
 
 		constexpr bool isResource() const
 		{
-		    return mInfo->entryType == ESCFEntryType::Resource;
+			return mInfo->entryType == ESCFEntryType::Resource;
 		}
 
 		constexpr bool isVirtualFolder() const
 		{
-		    return mInfo->entryType == ESCFEntryType::VirtualFolder;
+			return mInfo->entryType == ESCFEntryType::VirtualFolder;
 		}
 	};
 

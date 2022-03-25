@@ -9,10 +9,10 @@
 namespace ts3
 {
 
-    SCFEntry::SCFEntry( SCFIndex & pIndex, const SCFEntryInfo * pInfo )
-    : mIndex( &pIndex )
-    , mParentFolder( nullptr )
-    , mInfo( pInfo )
+	SCFEntry::SCFEntry( SCFIndex & pIndex, const SCFEntryInfo * pInfo )
+	: mIndex( &pIndex )
+	, mParentFolder( nullptr )
+	, mInfo( pInfo )
 	{}
 
 	SCFEntry::SCFEntry( SCFVirtualFolder & pParentFolder, const SCFEntryInfo * pInfo )
@@ -25,42 +25,42 @@ namespace ts3
 
 	SCFVirtualFolder & SCFEntry::asVirtualFolder()
 	{
-	    return dynamic_cast<SCFVirtualFolder &>( *this );
+		return dynamic_cast<SCFVirtualFolder &>( *this );
 	}
 
 	const SCFVirtualFolder & SCFEntry::asVirtualFolder() const
 	{
-	    return dynamic_cast<const SCFVirtualFolder &>( *this );
+		return dynamic_cast<const SCFVirtualFolder &>( *this );
 	}
 
 	SCFVirtualFolder * SCFEntry::asVirtualFolderPtr() noexcept
 	{
-	    return dynamic_cast<SCFVirtualFolder *>( this );
+		return dynamic_cast<SCFVirtualFolder *>( this );
 	}
 
 	const SCFVirtualFolder * SCFEntry::asVirtualFolderPtr() const noexcept
 	{
-	    return dynamic_cast<const SCFVirtualFolder *>( this );
+		return dynamic_cast<const SCFVirtualFolder *>( this );
 	}
 
 	SCFResource & SCFEntry::asResource()
 	{
-	    return dynamic_cast<SCFResource &>( *this );
+		return dynamic_cast<SCFResource &>( *this );
 	}
 
 	const SCFResource & SCFEntry::asResource() const
 	{
-	    return dynamic_cast<const SCFResource &>( *this );
+		return dynamic_cast<const SCFResource &>( *this );
 	}
 
 	SCFResource * SCFEntry::asResourcePtr() noexcept
 	{
-	    return dynamic_cast<SCFResource *>( this );
+		return dynamic_cast<SCFResource *>( this );
 	}
 
 	const SCFResource * SCFEntry::asResourcePtr() const noexcept
 	{
-	    return dynamic_cast<const SCFResource *>( this );
+		return dynamic_cast<const SCFResource *>( this );
 	}
 
 
@@ -71,71 +71,71 @@ namespace ts3
 
 	uint64 SCFResource::readData( void * pTarget, uint64 pCapacity ) const
 	{
-	    if( !pTarget || ( pCapacity < mResourceInfo.dataSize ) )
-	    {
-	        return 0;
-	    }
-	    return mIndex->readResourceData( pTarget, mResourceInfo.dataSize, mResourceInfo.dataOffset );
+		if( !pTarget || ( pCapacity < mResourceInfo.dataSize ) )
+		{
+			return 0;
+		}
+		return mIndex->readResourceData( pTarget, mResourceInfo.dataSize, mResourceInfo.dataOffset );
 	}
 
 	uint64 SCFResource::readData( DynamicByteArray & pTarget ) const
 	{
-	    if( pTarget.size() < mResourceInfo.dataSize )
-	    {
-	        pTarget.resize( mResourceInfo.dataSize );
-	    }
-	    return readData( pTarget.data(), pTarget.size() );
+		if( pTarget.size() < mResourceInfo.dataSize )
+		{
+			pTarget.resize( mResourceInfo.dataSize );
+		}
+		return readData( pTarget.data(), pTarget.size() );
 	}
 
 	uint64 SCFResource::readData( DynamicMemoryBuffer & pTarget ) const
 	{
-	    if( pTarget.size() < mResourceInfo.dataSize )
-	    {
-	        pTarget.resize( mResourceInfo.dataSize );
-	    }
-	    return readData( pTarget.data(), pTarget.size() );
+		if( pTarget.size() < mResourceInfo.dataSize )
+		{
+			pTarget.resize( mResourceInfo.dataSize );
+		}
+		return readData( pTarget.data(), pTarget.size() );
 	}
 
 	uint64 SCFResource::readData( std::string & pTarget ) const
 	{
-	    if( pTarget.length() < mResourceInfo.dataSize )
-	    {
-	        pTarget.resize( mResourceInfo.dataSize );
-	    }
-	    return readData( pTarget.data(), pTarget.length() );
+		if( pTarget.length() < mResourceInfo.dataSize )
+		{
+			pTarget.resize( mResourceInfo.dataSize );
+		}
+		return readData( pTarget.data(), pTarget.length() );
 	}
 
 	uint64 SCFResource::readData( std::vector<byte> & pTarget ) const
 	{
-	    if( pTarget.size() < mResourceInfo.dataSize )
-	    {
-	        pTarget.resize( mResourceInfo.dataSize );
-	    }
-	    return readData( pTarget.data(), pTarget.size() );
+		if( pTarget.size() < mResourceInfo.dataSize )
+		{
+			pTarget.resize( mResourceInfo.dataSize );
+		}
+		return readData( pTarget.data(), pTarget.size() );
 	}
 
 	uint64 SCFResource::readSubData( void * pTarget, uint64 pCapacity, uint64 pReadSize, uint64 pResOffset ) const
 	{
-	    if( !pTarget || ( pCapacity == 0 ) || ( pReadSize == 0 ) || ( pResOffset >= mResourceInfo.dataSize ) )
-	    {
-	        return 0;
-	    }
+		if( !pTarget || ( pCapacity == 0 ) || ( pReadSize == 0 ) || ( pResOffset >= mResourceInfo.dataSize ) )
+		{
+			return 0;
+		}
 
-	    const auto maxDataSize = mResourceInfo.dataSize - pResOffset;
-	    const auto maxReadSize = getMinOf( pCapacity, maxDataSize );
-	    const auto readSize = getMinOf( pReadSize, maxDataSize );
+		const auto maxDataSize = mResourceInfo.dataSize - pResOffset;
+		const auto maxReadSize = getMinOf( pCapacity, maxDataSize );
+		const auto readSize = getMinOf( pReadSize, maxDataSize );
 
-	    return mIndex->readResourceData( pTarget, readSize, mResourceInfo.dataOffset + pResOffset );
+		return mIndex->readResourceData( pTarget, readSize, mResourceInfo.dataOffset + pResOffset );
 	}
 
 	uint64 SCFResource::readSubData( const ReadWriteMemoryView & pTarget, uint64 pReadSize, uint64 pResOffset ) const
 	{
-	    return readSubData( pTarget.data(), pTarget.size(), pReadSize, pResOffset );
+		return readSubData( pTarget.data(), pTarget.size(), pReadSize, pResOffset );
 	}
 
 	uint64 SCFResource::readSubData( std::vector<byte> & pTarget, uint64 pReadSize, uint64 pResOffset ) const
 	{
-	    return readSubData( pTarget.data(), pTarget.size(), pReadSize, pResOffset );
+		return readSubData( pTarget.data(), pTarget.size(), pReadSize, pResOffset );
 	}
 
 
@@ -174,7 +174,7 @@ namespace ts3
 		auto * entryPtr = findEntryInternal( pEntryPath, pFindMode );
 		if( !entryPtr )
 		{
-			ts3ThrowDesc( E_EXCEPTION_CODE_ENGINE_SM_MAIN_SCF_ERROR, pEntryPath + " not found in " + mInfo->name );
+			ts3ThrowDesc( E_EXC_ESM_MAIN_SCF_ERROR, pEntryPath + " not found in " + mInfo->name );
 		}
 		return *entryPtr;
 	}
@@ -194,11 +194,11 @@ namespace ts3
 		auto * entryPtr = findEntryInternal( pFolderPath, pFindMode );
 		if( !entryPtr )
 		{
-			ts3ThrowDesc( E_EXCEPTION_CODE_ENGINE_SM_MAIN_SCF_ERROR, pFolderPath + " not found in " + mInfo->name );
+			ts3ThrowDesc( E_EXC_ESM_MAIN_SCF_ERROR, pFolderPath + " not found in " + mInfo->name );
 		}
 		if( !entryPtr->isVirtualFolder() )
 		{
-			ts3ThrowDesc( E_EXCEPTION_CODE_ENGINE_SM_MAIN_SCF_ERROR, pFolderPath + " in " + mInfo->name + " is not a folder" );
+			ts3ThrowDesc( E_EXC_ESM_MAIN_SCF_ERROR, pFolderPath + " in " + mInfo->name + " is not a folder" );
 		}
 		return entryPtr->asVirtualFolder();
 	}
@@ -218,11 +218,11 @@ namespace ts3
 		auto * entryPtr = findEntryInternal( pResourcePath, pFindMode );
 		if( !entryPtr )
 		{
-			ts3ThrowDesc( E_EXCEPTION_CODE_ENGINE_SM_MAIN_SCF_ERROR, pResourcePath + " not found in " + mInfo->name );
+			ts3ThrowDesc( E_EXC_ESM_MAIN_SCF_ERROR, pResourcePath + " not found in " + mInfo->name );
 		}
 		if( !entryPtr->isResource() )
 		{
-			ts3ThrowDesc( E_EXCEPTION_CODE_ENGINE_SM_MAIN_SCF_ERROR, pResourcePath + " in " + mInfo->name + " is not a resource" );
+			ts3ThrowDesc( E_EXC_ESM_MAIN_SCF_ERROR, pResourcePath + " in " + mInfo->name + " is not a resource" );
 		}
 		return entryPtr->asResource();
 	}
@@ -243,12 +243,12 @@ namespace ts3
 
 		if( pFindMode == ESCFFindMode::Recursive )
 		{
-		    for( const auto & subFolderPtr : _subFolderList )
-		    {
-		        pList.push_back( subFolderPtr.get() );
+			for( const auto & subFolderPtr : _subFolderList )
+			{
+				pList.push_back( subFolderPtr.get() );
 
-		        subFolderPtr->enumerateEntries( pList, pFindMode );
-		    }
+				subFolderPtr->enumerateEntries( pList, pFindMode );
+			}
 		}
 
 		return pList.size() > inputSize;
@@ -273,14 +273,14 @@ namespace ts3
 
 		if( pFindMode == ESCFFindMode::Recursive )
 		{
-		    for( const auto & subFolderPtr : _subFolderList )
-		    {
-		        if( pPredicate( *subFolderPtr ) )
-		        {
-		            pList.push_back( subFolderPtr.get() );
-		        }
-		        subFolderPtr->enumerateEntries( pList, pFindMode, pPredicate );
-		    }
+			for( const auto & subFolderPtr : _subFolderList )
+			{
+				if( pPredicate( *subFolderPtr ) )
+				{
+					pList.push_back( subFolderPtr.get() );
+				}
+				subFolderPtr->enumerateEntries( pList, pFindMode, pPredicate );
+			}
 		}
 
 		return pList.size() > inputSize;
@@ -288,15 +288,15 @@ namespace ts3
 
 	SCFEntryList SCFVirtualFolder::enumerateEntries( ESCFFindMode pFindMode ) const
 	{
-	    SCFEntryList result{};
-	    enumerateEntries( result, pFindMode );
+		SCFEntryList result{};
+		enumerateEntries( result, pFindMode );
 		return result;
 	}
 
 	SCFEntryList SCFVirtualFolder::enumerateEntries( ESCFFindMode pFindMode, const SCFEntryPredicate & pPredicate ) const
 	{
-	    SCFEntryList result{};
-	    enumerateEntries( result, pFindMode, pPredicate );
+		SCFEntryList result{};
+		enumerateEntries( result, pFindMode, pPredicate );
 		return result;
 	}
 

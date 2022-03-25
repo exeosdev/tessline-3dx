@@ -26,91 +26,89 @@ namespace ts3
 
 	SCFInputDataSource SCFInputDataSource::asPlaceholder( uint64 pDataSize )
 	{
-	    if( pDataSize == 0 )
-	    {
-	        return {};
-	    }
+		if( pDataSize == 0 )
+		{
+			return {};
+		}
 
-	    SCFInputDataSource dataSource;
-	    dataSource.byteSize = pDataSize;
-	    dataSource.readCallback =
-	        [pDataSize]( uint64 pOffset, uint64 pReadSize, DynamicByteArray & pTarget ) -> uint64 {
-                const auto readSize = memCheckRequestedCopySize( pDataSize, pReadSize, pOffset );
-                if( readSize > 0 )
-                {
-                    pTarget.resize( trunc_numeric_cast<size_t>( readSize ) );
-                    pTarget.fill( 0x7 );
-                    return readSize;
-                }
-                return 0;
-            };
+		SCFInputDataSource dataSource;
+		dataSource.byteSize = pDataSize;
+		dataSource.readCallback =
+			[pDataSize]( uint64 pOffset, uint64 pReadSize, DynamicByteArray & pTarget ) -> uint64 {
+				const auto readSize = memCheckRequestedCopySize( pDataSize, pReadSize, pOffset );
+				if( readSize > 0 )
+				{
+					pTarget.resize( trunc_numeric_cast<size_t>( readSize ) );
+					pTarget.fill( 0x7 );
+					return readSize;
+				}
+				return 0;
+			};
 
-	    return dataSource;
+		return dataSource;
 	}
 
 	SCFInputDataSource SCFInputDataSource::fromFile( system::FileManagerHandle pSysFileManager, const std::string & pFilename )
 	{
-	    if( !pSysFileManager || pFilename.empty() )
-	    {
-	        return {};
-	    }
+		if( !pSysFileManager || pFilename.empty() )
+		{
+			return {};
+		}
 
-	    auto sourceFile = pSysFileManager->openFile( pFilename, system::EFileOpenMode::ReadOnly );
-	    if( !sourceFile )
-	    {
-	        return {};
-	    }
+		auto sourceFile = pSysFileManager->openFile( pFilename, system::EFileOpenMode::ReadOnly );
+		if( !sourceFile )
+		{
+			return {};
+		}
 
-	    const auto fileSize = sourceFile->getSize();
+		const auto fileSize = sourceFile->getSize();
 
-	    SCFInputDataSource dataSource;
-	    dataSource.byteSize = fileSize;
-	    dataSource.readCallback =
-	        [pSysFileManager, pFilename, fileSize]( uint64 pOffset, uint64 pReadSize, DynamicByteArray & pTarget ) -> uint64 {
-	            const auto readSize = memCheckRequestedCopySize( fileSize, pReadSize, pOffset );
-	            if( readSize > 0 )
-	            {
-	                if( auto sourceFile = pSysFileManager->openFile( pFilename, system::EFileOpenMode::ReadOnly ) )
-	                {
-	                    pTarget.resize( trunc_numeric_cast<size_t>( readSize ) );
-	                    sourceFile->setFilePointer( trunc_numeric_cast<system::file_offset_t>( pOffset ) );
-	                    const auto readBytesNum = sourceFile->readData( pTarget, trunc_numeric_cast<system::file_size_t>( readSize ) );
-	                    return readBytesNum;
-	                }
-	            }
-                return 0;
-            };
+		SCFInputDataSource dataSource;
+		dataSource.byteSize = fileSize;
+		dataSource.readCallback =
+			[pSysFileManager, pFilename, fileSize]( uint64 pOffset, uint64 pReadSize, DynamicByteArray & pTarget ) -> uint64 {
+				const auto readSize = memCheckRequestedCopySize( fileSize, pReadSize, pOffset );
+				if( readSize > 0 )
+				{
+					if( auto sourceFile = pSysFileManager->openFile( pFilename, system::EFileOpenMode::ReadOnly ) )
+					{
+						sourceFile->setFilePointer( trunc_numeric_cast<system::file_offset_t>( pOffset ) );
+						return sourceFile->readAuto( pTarget, trunc_numeric_cast<system::file_size_t>( readSize ) );
+					}
+				}
+				return 0;
+			};
 
-	    return dataSource;
+		return dataSource;
 	}
 
 	SCFInputDataSource SCFInputDataSource::fromMemory( ReadOnlyMemoryView pMemoryView )
 	{
-	    if( !pMemoryView )
-	    {
-	        return {};
-	    }
+		if( !pMemoryView )
+		{
+			return {};
+		}
 
-	    SCFInputDataSource dataSource;
-	    dataSource.byteSize = pMemoryView.size();
-	    dataSource.readCallback =
-	        [pMemoryView]( uint64 pOffset, uint64 pReadSize, DynamicByteArray & pTarget ) -> uint64 {
-                const auto readSize = memCheckRequestedCopySize( pMemoryView.size(), pReadSize, pOffset );
-                if( readSize > 0 )
-                {
-                    pTarget.resize( trunc_numeric_cast<size_t>( readSize ) );
+		SCFInputDataSource dataSource;
+		dataSource.byteSize = pMemoryView.size();
+		dataSource.readCallback =
+			[pMemoryView]( uint64 pOffset, uint64 pReadSize, DynamicByteArray & pTarget ) -> uint64 {
+				const auto readSize = memCheckRequestedCopySize( pMemoryView.size(), pReadSize, pOffset );
+				if( readSize > 0 )
+				{
+					pTarget.resize( trunc_numeric_cast<size_t>( readSize ) );
 
-                    memCopyUnchecked( pTarget.data(),
-                                      pTarget.size(),
-                                      pMemoryView.data() + pOffset,
-                                      trunc_numeric_cast<size_t>( readSize ) );
+					memCopyUnchecked( pTarget.data(),
+									  pTarget.size(),
+									  pMemoryView.data() + pOffset,
+									  trunc_numeric_cast<size_t>( readSize ) );
 
-                    return readSize;
-                }
-                return 0;
-            };
+					return readSize;
+				}
+				return 0;
+			};
 
-	    return dataSource;
+		return dataSource;
 	}
 
 
@@ -203,10 +201,10 @@ namespace ts3
 															  SCFInputDataSource pDataSource,
 															  std::string pUID )
 	{
-	    if( !pDataSource || !checkNameAndUID( pResourceName, pUID ) )
-	    {
-	        return nullptr;
-	    }
+		if( !pDataSource || !checkNameAndUID( pResourceName, pUID ) )
+		{
+			return nullptr;
+		}
 
 		auto * parentFolder = _findFolderInternal( pParentLocation, nullptr );
 		if( !parentFolder )
@@ -359,42 +357,42 @@ namespace ts3
 
 	bool operator==( const SCFResourceTemplate & pLhs, const SCFResourceTemplate & pRhs )
 	{
-	    return pLhs.name == pRhs.name;
+		return pLhs.name == pRhs.name;
 	}
 
 	bool operator==( const SCFResourceTemplate & pLhs, const std::string & pRhs )
 	{
-	    return pLhs.name == pRhs;
+		return pLhs.name == pRhs;
 	}
 
 	bool operator<( const SCFResourceTemplate & pLhs, const SCFResourceTemplate & pRhs )
 	{
-	    return pLhs.name < pRhs.name;
+		return pLhs.name < pRhs.name;
 	}
 
 	bool operator<( const SCFResourceTemplate & pLhs, const std::string & pRhs )
 	{
-	    return pLhs.name < pRhs;
+		return pLhs.name < pRhs;
 	}
 
 	bool operator==( const SCFVirtualFolderTemplate & pLhs, const SCFVirtualFolderTemplate & pRhs )
 	{
-	    return pLhs.name == pRhs.name;
+		return pLhs.name == pRhs.name;
 	}
 
 	bool operator==( const SCFVirtualFolderTemplate & pLhs, const std::string & pRhs )
 	{
-	    return pLhs.name == pRhs;
+		return pLhs.name == pRhs;
 	}
 
 	bool operator<( const SCFVirtualFolderTemplate & pLhs, const SCFVirtualFolderTemplate & pRhs )
 	{
-	    return pLhs.name < pRhs.name;
+		return pLhs.name < pRhs.name;
 	}
 
 	bool operator<( const SCFVirtualFolderTemplate & pLhs, const std::string & pRhs )
 	{
-	    return pLhs.name < pRhs;
+		return pLhs.name < pRhs;
 	}
 
 }

@@ -47,7 +47,7 @@ namespace ts3
 		{
 			const auto * sourceData = imagePixelDataPtr + ( rowIndex * imagePixelRowPitch );
 			const auto targetRowIndex = imageData.formatInfo.dimensions.y - rowIndex - 1;
-			auto * targetBuffer = imageData.pixelBuffer.dataPtr() + ( targetRowIndex * imagePixelRowPitch );
+			auto * targetBuffer = imageData.pixelBuffer.data() + ( targetRowIndex * imagePixelRowPitch );
 			memCopy( targetBuffer, imagePixelRowPitch, sourceData, imagePixelRowPitch );
 		}
 
