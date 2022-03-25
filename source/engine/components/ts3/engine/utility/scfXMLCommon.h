@@ -5,146 +5,88 @@
 #define __TS3_ENGINE_SCF_XML_COMMON_H__
 
 #include "scfCommon.h"
-#include <XML/parser/rapidxml.hpp>
-#include <vector>
+#include <ts3/core/utility/xmlTypes.h>
 
 namespace ts3
 {
 
-	class SCFXMLNode;
-	class SCFXMLResourceNode;
-	class SCFXMLReader;
-
-	using SCFXMLNodeList = std::vector<const SCFXMLNode *>;
-
-	enum class SCFXMLNodeType : enum_default_value_t
-	{
-		Folder,
-		Property,
-		Resource,
-		Root
-	};
-
-	class SCFXMLNode
+	class SCFXMLResourceNode
 	{
 	public:
-		using RxNode = rapidxml::xml_node<>;
+		using PropertyNodeList = std::vector<XMLNode>;
 
-		SCFXMLNode( SCFXMLNodeType pNodeType, SCFXMLNode * pParent, RxNode * pRxNode );
+		SCFXMLResourceNode( std::nullptr_t = nullptr );
 
-		explicit operator bool() const;
+		const std::string & resourceID() const;
 
-		SCFXMLNodeType nodeType() const;
+		const std::string & resourceType() const;
 
-		std::string attribute( const char * pName ) const;
+		const XMLNode * property( const StringView<char> & pPropertyName ) const;
 
-		const std::string & name() const;
-		const std::string & value() const;
-		const std::string & id() const;
+		const PropertyNodeList & getPropertyNodes() const;
 
-		SCFXMLNode * parent() const;
+		bool hasProperty( const StringView<char> & pPropertyName ) const;
 
-		bool hasParent() const;
-		bool isRootNode() const;
-
-	protected:
-		RxNode * getRxNode() const;
+		static SCFXMLResourceNode initFromXMLNode( XMLNode pXMLNode );
 
 	private:
-		SCFXMLNodeType _nodeType;
-		SCFXMLNode * _parentNode;
-		RxNode * _rxNode;
+		using PropertyNodeMap = std::map<std::string, XMLNode *, StringViewCmpLess<char>>;
+
+		static PropertyNodeList _readProperties( const XMLNode & pXMLNode, size_t pPropertyNodesNum );
+
+		static PropertyNodeMap _buildPropertyNodeMap( PropertyNodeList & pPropertyNodes );
+
+	private:
+		XMLNode _xmlNode;
 		std::string _id;
-		std::string _name;
-		std::string _value;
+		std::string _type;
+		PropertyNodeList _propertyNodeList;
+		PropertyNodeMap _propertyNodeMap;
 	};
 
-	class SCFXMLPropertyNode : public SCFXMLNode
-	{
-	friend class SCFXMLReader;
-
-	public:
-		using PropertyNodeList = std::vector<SCFXMLPropertyNode>;
-
-		SCFXMLPropertyNode( SCFXMLNodeType pNodeType, SCFXMLNode * pParent, RxNode * pRxNode );
-
-		const SCFXMLPropertyNode * subNode( const char * pName ) const;
-
-		SCFXMLNodeList getNodeListRecursive() const;
-		SCFXMLNodeList & getNodeListRecursive( SCFXMLNodeList & pOutputList ) const;
-
-	protected:
-		PropertyNodeList _subNodes;
-	};
-
-	class SCFXMLResourceNode : public SCFXMLPropertyNode
+	class SCFXMLFolderNode
 	{
 	public:
-		SCFXMLResourceNode( SCFXMLNode * pParent, RxNode * pRxNode );
-
-		const std::string & resourceType() const
-		{
-			return _resourceType;
-		}
-
-	private:
-		std::string _resourceType;
-	};
-
-	class SCFXMLFolderNode : public SCFXMLNode
-	{
-	friend class SCFXMLReader;
-
-	public:
-		using FolderNodeList = std::vector<SCFXMLFolderNode>;
 		using ResourceNodeList = std::vector<SCFXMLResourceNode>;
+		using SubFolderNodeList = std::vector<SCFXMLFolderNode>;
 
-		SCFXMLFolderNode( SCFXMLNode * pParent, RxNode * pRxNode );
-		SCFXMLFolderNode( SCFXMLNodeType pNodeType, SCFXMLNode * pParent, RxNode * pRxNode );
+		SCFXMLFolderNode( std::nullptr_t = nullptr );
 
-		const SCFXMLFolderNode * subFolderNode( const char * pID ) const;
+		const std::string & folderName() const;
 
-		const SCFXMLResourceNode * resourceNode( const char * pID ) const;
+		const SCFXMLResourceNode * resource( const StringView<char> & pResourceID ) const;
 
-		SCFXMLNodeList getNodeListRecursive() const;
-		SCFXMLNodeList & getNodeListRecursive( SCFXMLNodeList & pOutputList ) const;
+		const SCFXMLFolderNode * subFolder( const StringView<char> & pSubFolderName ) const;
 
-		const FolderNodeList & getFolderNodes() const
-		{
-			return _folderNodes;
-		}
+		const ResourceNodeList & getResourceNodes() const;
 
-		const ResourceNodeList & getResourceNodes() const
-		{
-			return _resourceNodes;
-		}
+		const SubFolderNodeList & getSubFolderNodes() const;
 
-	protected:
-		void readFolderEntryNodes();
+		bool hasResource( const StringView<char> & pResourceID ) const;
+
+		bool hasSubFolder( const StringView<char> & pSubFolderName ) const;
+
+		static SCFXMLFolderNode initFromXMLNode( XMLNode pXMLNode );
 
 	private:
-		void addFolderNode( RxNode * pRxNode );
+		using ResourceNodeMap = std::map<std::string, SCFXMLResourceNode *, StringViewCmpLess<char>>;
+		using SubFolderNodeMap = std::map<std::string, SCFXMLFolderNode *, StringViewCmpLess<char>>;
 
-		void addResourceNode( RxNode * pRxNode );
+		static ResourceNodeList _readResources( const XMLNode & pXMLNode, size_t pResourceNodesNum );
 
-		void sortNodes();
+		static ResourceNodeMap _buildResourceNodeMap( ResourceNodeList & pResourceNodes );
 
-	private:
-		FolderNodeList _folderNodes;
-		ResourceNodeList _resourceNodes;
-	};
+		static SubFolderNodeList _readSubFolders( const XMLNode & pXMLNode, size_t pSubFolderNodesNum );
 
-	class SCFXMLRootNode : public SCFXMLFolderNode
-	{
-	public:
-		using RxDocument = rapidxml::xml_document<>;
-
-		SCFXMLRootNode( std::nullptr_t );
-		SCFXMLRootNode( std::string pXMLContent, std::unique_ptr<RxDocument> pRxDocument, RxNode * pRxNode );
+		static SubFolderNodeMap _buildSubFolderNodeMap( SubFolderNodeList & pSubFolderNodes );
 
 	private:
-		std::string _xmlContent;
-		std::unique_ptr<RxDocument> _rxDocument;
+		XMLNode _xmlNode;
+		std::string _name;
+		ResourceNodeList _resourceNodeList;
+		ResourceNodeMap _resourceNodeMap;
+		SubFolderNodeList _subFolderNodeList;
+		SubFolderNodeMap _subFolderNodeMap;
 	};
 
 }

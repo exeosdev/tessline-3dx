@@ -1,212 +1,252 @@
 
-#include "scfXMLReader.h"
+#include "scfXMLCommon.h"
+#include <ts3/stdext/mapUtils.h>
+#include <ts3/core/exception.h>
 
 namespace ts3
 {
 
-	SCFXMLNode::SCFXMLNode( SCFXMLNodeType pNodeType, SCFXMLNode * pParent, RxNode * pRxNode )
-	: _nodeType( pNodeType )
-	, _parentNode( pParent )
-	, _rxNode( pRxNode )
-	{
-		if( _rxNode )
-		{
-			_name.assign( _rxNode->name(), _rxNode->name_size() );
-			_value.assign( _rxNode->value(), _rxNode->value_size() );
+	SCFXMLResourceNode::SCFXMLResourceNode( std::nullptr_t )
+	: _xmlNode( nullptr )
+	{}
 
-			if( auto * idAttribute = _rxNode->first_attribute( "id" ) )
-			{
-				_id.assign( idAttribute->value(), idAttribute->value_size() );
-			}
-		}
-	}
-
-	SCFXMLNode::operator bool() const
-	{
-		return _rxNode != nullptr;
-	}
-
-	SCFXMLNodeType SCFXMLNode::nodeType() const
-	{
-		return _nodeType;
-	}
-
-	std::string SCFXMLNode::attribute( const char * pName ) const
-	{
-		if( auto * rxAttrib = _rxNode->first_attribute( pName ) )
-		{
-			return std::string( rxAttrib->value(), rxAttrib->value_size() );
-		}
-		return {};
-	}
-
-	const std::string & SCFXMLNode::name() const
-	{
-		return _name;
-	}
-
-	const std::string & SCFXMLNode::value() const
-	{
-		return _value;
-	}
-
-	const std::string & SCFXMLNode::id() const
+	const std::string & SCFXMLResourceNode::resourceID() const
 	{
 		return _id;
 	}
 
-	SCFXMLNode * SCFXMLNode::parent() const
+	const std::string & SCFXMLResourceNode::resourceType() const
 	{
-		return _parentNode;
+		return _type;
 	}
 
-	bool SCFXMLNode::hasParent() const
+	const XMLNode * SCFXMLResourceNode::property( const StringView<char> & pPropertyName ) const
 	{
-		return _parentNode != nullptr;
+		return stdx::getMapValueRefOrDefault( _propertyNodeMap, pPropertyName, nullptr );
 	}
 
-	bool SCFXMLNode::isRootNode() const
+	const SCFXMLResourceNode::PropertyNodeList & SCFXMLResourceNode::getPropertyNodes() const
 	{
-		return _nodeType == SCFXMLNodeType::Root;
+		return _propertyNodeList;
 	}
 
-	SCFXMLNode::RxNode * SCFXMLNode::getRxNode() const
+	bool SCFXMLResourceNode::hasProperty( const StringView<char> & pPropertyName ) const
 	{
-		return _rxNode;
+		return _propertyNodeMap.find( pPropertyName ) != _propertyNodeMap.end();
+	}
+
+	SCFXMLResourceNode SCFXMLResourceNode::initFromXMLNode( XMLNode pXMLNode )
+	{
+		const auto xmlNodeName = pXMLNode.name();
+
+		if( xmlNodeName != "resource" )
+		{
+			ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER, "SCFXML node is not valid resource node: <" + xmlNodeName + ">" );
+		}
+
+		const auto idAttribute = pXMLNode.attribute( "id" );
+		const auto typeAttribute = pXMLNode.attribute( "type" );
+
+		if( idAttribute.empty() || typeAttribute.empty() )
+		{
+			ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER, "SCFXML resource node without 'id' and/or 'type' attribute(s)" );
+		}
+
+		SCFXMLResourceNode resourceNode{};
+		resourceNode._xmlNode = pXMLNode;
+		resourceNode._id = idAttribute.value();
+		resourceNode._type = typeAttribute.value();
+
+		const auto subNodesNum = pXMLNode.countSubNodes();
+		if( subNodesNum > 0 )
+		{
+			auto propertyNodes = _readProperties( pXMLNode, subNodesNum );
+			ts3DebugAssert( !propertyNodes.empty() );
+
+			auto propertyMap = _buildPropertyNodeMap( propertyNodes );
+			ts3DebugAssert( !propertyMap.empty() );
+
+			resourceNode._propertyNodeList = std::move( propertyNodes );
+			resourceNode._propertyNodeMap = std::move( propertyMap );
+		}
+
+		return resourceNode;
+	}
+
+	SCFXMLResourceNode::PropertyNodeList SCFXMLResourceNode::_readProperties( const XMLNode & pXMLNode, size_t pPropertyNodesNum )
+	{
+		PropertyNodeList propertyNodes{};
+		propertyNodes.reserve( pPropertyNodesNum );
+
+		for( auto propertyXMLNode = pXMLNode.firstSubNode(); propertyXMLNode.valid(); )
+		{
+			propertyNodes.push_back( propertyXMLNode );
+			propertyXMLNode = propertyXMLNode.nextSibling();
+		}
+
+		return propertyNodes;
+	}
+
+	SCFXMLResourceNode::PropertyNodeMap SCFXMLResourceNode::_buildPropertyNodeMap( PropertyNodeList & pPropertyNodes )
+	{
+		ts3DebugAssert( !pPropertyNodes.empty() );
+
+		PropertyNodeMap propertyMap{};
+		for( auto & propertyNode : pPropertyNodes )
+		{
+			propertyMap[propertyNode.name()] = &propertyNode;
+		}
+
+		return propertyMap;
 	}
 
 
-	SCFXMLPropertyNode::SCFXMLPropertyNode( SCFXMLNodeType pNodeType, SCFXMLNode * pParent, RxNode * pRxNode )
-	: SCFXMLNode( pNodeType, pParent, pRxNode )
+	SCFXMLFolderNode::SCFXMLFolderNode( std::nullptr_t )
+	: _xmlNode( nullptr )
 	{}
 
-	const SCFXMLPropertyNode * SCFXMLPropertyNode::subNode( const char * pName ) const
+	const std::string & SCFXMLFolderNode::folderName() const
 	{
-		auto nodeIter = std::lower_bound(
-			_subNodes.begin(),
-			_subNodes.end(),
-			pName,
-			[]( const SCFXMLPropertyNode & pNode, const char * pNodeName ) -> bool {
-				return pNode.name() < pNodeName;
-			});
+		return _name;
+	}
 
-		if( ( nodeIter != _subNodes.end() ) && ( nodeIter->name() == pName ) )
+	const SCFXMLResourceNode * SCFXMLFolderNode::resource( const StringView<char> & pResourceID ) const
+	{
+		return stdx::getMapValueRefOrDefault( _resourceNodeMap, pResourceID, nullptr );
+	}
+
+	const SCFXMLFolderNode * SCFXMLFolderNode::subFolder( const StringView<char> & pSubFolderName ) const
+	{
+		return stdx::getMapValueRefOrDefault( _subFolderNodeMap, pSubFolderName, nullptr );
+	}
+
+	const SCFXMLFolderNode::ResourceNodeList & SCFXMLFolderNode::getResourceNodes() const
+	{
+		return _resourceNodeList;
+	}
+
+	const SCFXMLFolderNode::SubFolderNodeList & SCFXMLFolderNode::getSubFolderNodes() const
+	{
+		return _subFolderNodeList;
+	}
+
+	bool SCFXMLFolderNode::hasResource( const StringView<char> & pResourceID ) const
+	{
+		return _resourceNodeMap.find( pResourceID ) != _resourceNodeMap.end();
+	}
+
+	bool SCFXMLFolderNode::hasSubFolder( const StringView<char> & pSubFolderName ) const
+	{
+		return _subFolderNodeMap.find( pSubFolderName ) != _subFolderNodeMap.end();
+	}
+
+	SCFXMLFolderNode SCFXMLFolderNode::initFromXMLNode( XMLNode pXMLNode )
+	{
+		const auto xmlNodeName = pXMLNode.name();
+
+		if( xmlNodeName != "folder" )
 		{
-			return &( *nodeIter );
+			ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER, "SCFXML node is not valid folder node: <" + xmlNodeName + ">" );
 		}
 
-		return nullptr;
-	}
+		const auto nameAttribute = pXMLNode.attribute( "name" );
 
-	SCFXMLNodeList SCFXMLPropertyNode::getNodeListRecursive() const
-	{
-		SCFXMLNodeList resultList;
-		getNodeListRecursive( resultList );
-		return resultList;
-	}
-
-	SCFXMLNodeList & SCFXMLPropertyNode::getNodeListRecursive( SCFXMLNodeList & pOutputList ) const
-	{
-		for( auto & propertyNode : _subNodes )
+		if( nameAttribute.empty() )
 		{
-			pOutputList.push_back( &propertyNode );
-			propertyNode.getNodeListRecursive( pOutputList );
+			ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER, "SCFXML folder node without 'name' attribute" );
 		}
 
-		return pOutputList;
-	}
+		SCFXMLFolderNode folderNode{};
+		folderNode._xmlNode = pXMLNode;
+		folderNode._name = nameAttribute.value();
 
-
-	SCFXMLResourceNode::SCFXMLResourceNode( SCFXMLNode * pParent, RxNode * pRxNode )
-	: SCFXMLPropertyNode( SCFXMLNodeType::Resource, pParent, pRxNode )
-	{
-		if( pRxNode )
+		const auto resourceNodesNum = pXMLNode.countSubNodes( "resource" );
+		if( resourceNodesNum > 0 )
 		{
-			if( auto * typeAttribute = pRxNode->first_attribute( "type" ) )
-			{
-				_resourceType.assign( typeAttribute->value(), typeAttribute->value_size() );
-			}
-		}
-	}
+			auto resourceNodes = _readResources( pXMLNode, resourceNodesNum );
+			ts3DebugAssert( !resourceNodes.empty() );
 
+			auto resourceMap = _buildResourceNodeMap( resourceNodes );
+			ts3DebugAssert( !resourceMap.empty() );
 
-	SCFXMLFolderNode::SCFXMLFolderNode( SCFXMLNode * pParent, RxNode * pRxNode )
-	: SCFXMLNode( SCFXMLNodeType::Folder, pParent, pRxNode )
-	{}
-
-	SCFXMLFolderNode::SCFXMLFolderNode( SCFXMLNodeType pNodeType, SCFXMLNode * pParent, RxNode * pRxNode )
-	: SCFXMLNode( pNodeType, pParent, pRxNode )
-	{}
-
-	const SCFXMLFolderNode * SCFXMLFolderNode::subFolderNode( const char * pID ) const
-	{
-		auto nodeIter = std::lower_bound(
-			_folderNodes.begin(),
-			_folderNodes.end(),
-			pID,
-			[]( const SCFXMLFolderNode & pNode, const char * pFolderID ) -> bool {
-				return pNode.id() < pFolderID;
-			});
-
-		if( ( nodeIter != _folderNodes.end() ) && ( nodeIter->id() == pID ) )
-		{
-			return &( *nodeIter );
+			folderNode._resourceNodeList = std::move( resourceNodes );
+			folderNode._resourceNodeMap = std::move( resourceMap );
 		}
 
-		return nullptr;
-	}
-
-	const SCFXMLResourceNode * SCFXMLFolderNode::resourceNode( const char * pID ) const
-	{
-		auto nodeIter = std::lower_bound(
-			_resourceNodes.begin(),
-			_resourceNodes.end(),
-			pID,
-			[]( const SCFXMLResourceNode & pNode, const char * pResourceID ) -> bool {
-				return pNode.id() < pResourceID;
-			});
-
-		if( ( nodeIter != _resourceNodes.end() ) && ( nodeIter->id() == pID ) )
+		const auto subFolderNodesNum = pXMLNode.countSubNodes( "folder" );
+		if( subFolderNodesNum > 0 )
 		{
-			return &( *nodeIter );
+			auto subFolderNodes = _readSubFolders( pXMLNode, subFolderNodesNum );
+			ts3DebugAssert( !subFolderNodes.empty() );
+
+			auto subFolderMap = _buildSubFolderNodeMap( subFolderNodes );
+			ts3DebugAssert( !subFolderNodes.empty() );
+
+			folderNode._subFolderNodeList = std::move( subFolderNodes );
+			folderNode._subFolderNodeMap = std::move( subFolderMap );
 		}
 
-		return nullptr;
+		return folderNode;
 	}
 
-	SCFXMLNodeList SCFXMLFolderNode::getNodeListRecursive() const
+	SCFXMLFolderNode::ResourceNodeList SCFXMLFolderNode::_readResources( const XMLNode & pXMLNode, size_t pResourceNodesNum )
 	{
-		SCFXMLNodeList resultList;
-		getNodeListRecursive( resultList );
-		return resultList;
-	}
+		ts3DebugAssert( pResourceNodesNum > 0 );
 
-	SCFXMLNodeList & SCFXMLFolderNode::getNodeListRecursive( SCFXMLNodeList & pOutputList ) const
-	{
-		for( const auto & resourceNode : _resourceNodes )
+		ResourceNodeList resourceNodes{};
+		resourceNodes.reserve( pResourceNodesNum );
+
+		for( auto resourceXMLNode = pXMLNode.firstSubNode( "resource" ); resourceXMLNode.valid(); )
 		{
-			pOutputList.push_back( &resourceNode );
-			resourceNode.getNodeListRecursive( pOutputList );
+			auto scfResourceNode = SCFXMLResourceNode::initFromXMLNode( resourceXMLNode );
+			resourceNodes.push_back( std::move( scfResourceNode ) );
+			resourceXMLNode = resourceXMLNode.nextSibling();
 		}
 
-		for( const auto & subFolderNode : _folderNodes )
-		{
-			pOutputList.push_back( &subFolderNode );
-			subFolderNode.getNodeListRecursive( pOutputList );
-		}
-
-		return pOutputList;
+		return resourceNodes;
 	}
 
+	SCFXMLFolderNode::ResourceNodeMap SCFXMLFolderNode::_buildResourceNodeMap( ResourceNodeList & pResourceNodes )
+	{
+		ts3DebugAssert( !pResourceNodes.empty() );
 
-	SCFXMLRootNode::SCFXMLRootNode( std::nullptr_t )
-	: SCFXMLFolderNode( SCFXMLNodeType::Root, nullptr, nullptr )
-	{}
+		ResourceNodeMap resourceMap{};
+		for( auto & resourceNode : pResourceNodes )
+		{
+			resourceMap[resourceNode.resourceID()] = &resourceNode;
+		}
 
-	SCFXMLRootNode::SCFXMLRootNode( std::string pXMLContent, std::unique_ptr<RxDocument> pRxDocument, RxNode * pRxNode )
-	: SCFXMLFolderNode( SCFXMLNodeType::Root, nullptr, pRxNode )
-	, _xmlContent( std::move( pXMLContent ) )
-	, _rxDocument( std::move( pRxDocument ) )
-	{}
+		return resourceMap;
+	}
+
+	SCFXMLFolderNode::SubFolderNodeList SCFXMLFolderNode::_readSubFolders( const XMLNode & pXMLNode, size_t pSubFolderNodesNum )
+	{
+		ts3DebugAssert( pSubFolderNodesNum > 0 );
+
+		SubFolderNodeList subFolderNodes{};
+		subFolderNodes.reserve( pSubFolderNodesNum );
+
+		for( auto subFolderXMLNode = pXMLNode.firstSubNode( "folder" ); subFolderXMLNode.valid(); )
+		{
+			auto scfSubFolderNode = SCFXMLFolderNode::initFromXMLNode( subFolderXMLNode );
+			subFolderNodes.push_back( std::move( scfSubFolderNode ) );
+			subFolderXMLNode = subFolderXMLNode.nextSibling();
+		}
+
+		return subFolderNodes;
+	}
+
+	SCFXMLFolderNode::SubFolderNodeMap SCFXMLFolderNode::_buildSubFolderNodeMap( SubFolderNodeList & pSubFolderNodes )
+	{
+		ts3DebugAssert( !pSubFolderNodes.empty() );
+
+		SubFolderNodeMap subFolderMap{};
+		for( auto & subFolderNode : pSubFolderNodes )
+		{
+			subFolderMap[subFolderNode.folderName()] = &subFolderNode;
+		}
+
+		return subFolderMap;
+	}
 
 }
