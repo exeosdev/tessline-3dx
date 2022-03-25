@@ -1,4 +1,3 @@
-
 #pragma once
 
 #ifndef __TS3_CORE_DYNAMIC_INTERFACE_H__

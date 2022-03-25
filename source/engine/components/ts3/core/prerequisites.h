@@ -47,6 +47,8 @@
 namespace ts3
 {
 
+	ts3TypeInfoEnableEnumSupport();
+
 	constexpr uint32 cxInvalidU32ID = Limits<uint32>::maxValue;
 	constexpr uint64 cxInvalidU64ID = Limits<uint64>::maxValue;
 
