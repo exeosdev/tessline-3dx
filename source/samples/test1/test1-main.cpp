@@ -24,9 +24,6 @@ int main( int, const char ** )
 	auto sysContext = system::createSysContext( sysContextCreateInfo );
 	auto fileManager = sysContext->createFileManager();
 
-	auto & tpi = gpuapi::queryEnumTypeInfo<gpuapi::EVertexAttribFormat>();
-	const auto & cname = tpi.getConstantName( gpuapi::EVertexAttribFormat::VEC4_SBYTE_NORM );
-
 	SCFXMLReader xmlResReader{ fileManager };
 	auto rootNode = xmlResReader.readFile( "C:\\Repo\\Exeos\\tessline-3dx\\Resources.xml" );
 	auto nodes = rootNode.getNodeList( true );

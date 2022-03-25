@@ -18,8 +18,6 @@ set( TS3_ENGINE_SRC_FILES
 		"gpuapi/hwBuffer.cpp"
 		"gpuapi/hwBufferManager.h"
 		"gpuapi/hwBufferManager.cpp"
-		"gpuapi/hwBufferSubAllocator.h"
-		"gpuapi/hwBufferSubAllocator.cpp"
 		"gpuapi/hwGeometryBuffer.h"
 		"gpuapi/hwGeometryBuffer.cpp"
 		"gpuapi/vertexFormatDefs.h"

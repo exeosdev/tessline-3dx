@@ -53,7 +53,7 @@ namespace ts3
 	                                                                     gpuapi::gpu_memory_size_t pBufferSize,
 	                                                                     Bitmask<gpuapi::gpu_memory_flags_value_t> pMemoryFlags )
 	{
-		return cxMemoryDefaultAlignment;
+		return CX_MEMORY_DEFAULT_ALIGNMENT;
 	}
 
 	gpuapi::GPUBufferHandle HWBufferManager::_createGPUBuffer( gpuapi_buffer_ref_id_t pGPUBufferRefID,
@@ -148,7 +148,7 @@ namespace ts3
 
 		// Align the offset properly so it meets the requirements. Note, that after aligning,
 		// this offset can go beyond the memory range valid for this GPU buffer.
-		const auto alignedHeapOffset = getAlignedValue( baseHeapOffset, allocAlignment );
+		const auto alignedHeapOffset = memGetAlignedValue( baseHeapOffset, allocAlignment );
 
 		// The size of extra memory we need to allocate.
 		const auto offsetDiff = alignedHeapOffset - baseHeapOffset;

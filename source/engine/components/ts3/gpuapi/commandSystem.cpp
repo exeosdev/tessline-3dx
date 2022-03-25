@@ -1,7 +1,7 @@
 
 #include "commandSystem.h"
 #include "gpuDevice.h"
-#include <ts3/stdext/mapUtils.h>
+#include <ts3/stdext/stlHelperAlgo.h>
 
 namespace ts3
 {
@@ -48,7 +48,7 @@ namespace gpuapi
 	gpu_cmd_device_queue_id_t CommandSystem::resolveQueueID( gpu_cmd_device_queue_id_t pQueueID ) const
 	{
 		// Check if the specified ID is an alias. If so, the actual queue ID is the resolved name.
-		auto resolvedID = getMapValueOrDefault( _deviceQueueAliasMap, pQueueID, E_DEVICE_COMMAND_QUEUE_ID_UNKNOWN );
+		auto resolvedID = stdx::getMapValueRefOrDefault( _deviceQueueAliasMap, pQueueID, E_DEVICE_COMMAND_QUEUE_ID_UNKNOWN );
 		if( resolvedID == E_DEVICE_COMMAND_QUEUE_ID_UNKNOWN )
 		{
 			// If no such alias could be found, we assume this is a direct ID of a queue.
