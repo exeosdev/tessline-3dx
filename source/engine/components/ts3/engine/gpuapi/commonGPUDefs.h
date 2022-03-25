@@ -29,7 +29,7 @@ namespace ts3
 
 		GPUBufferRef( std::nullptr_t )
 		: buffer{ nullptr }
-		, memoryRegion{ 0, 0 }
+		, memoryRegion{ 0, gpuapi::CX_GPU_MEMORY_SIZE_MAX }
 		{}
 
 		explicit operator bool() const
@@ -49,7 +49,7 @@ namespace ts3
 		gpuapi::gpu_memory_size_t availableMemorySize;
 
 		// Number of HWBuffers allocated from the referenced GPUBuffer.
-		uint32 allocatedSubBufferCount;
+		uint32 allocatedSubRegionCount;
 	};
 
 	struct HWBufferMetrics
