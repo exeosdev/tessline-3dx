@@ -1,14 +1,14 @@
 
 #pragma once
 
-#include "enumCommon.h"
+#ifndef __ts3CORE_ENUM_TYPE_INFO_H__
+#define __ts3CORE_ENUM_TYPE_INFO_H__
+
+#include "../prerequisites.h"
 #include <unordered_map>
 
 namespace ts3
 {
-
-	// This enables usage of the enum type info system for our (exf) namespace.
-	TS3_EnumDeclareQueryFunctionTemplate();
 
 	/// @brief Basic properties of an enum to be registered.
 	struct EnumProperties
@@ -96,13 +96,18 @@ namespace ts3
 			return _constants.size();
 		}
 
+		bool empty() const
+		{
+			return _constants.empty();
+		}
+
 	private:
-		EnumConstantMap & add( std::string pName, TpEnum pValue )
+		EnumConstantMap & add( TpEnum pValue, std::string pName )
 		{
 			auto constantIndex = _constants.size();
 			auto & constantDef = _constants.emplace_back();
 			constantDef.name = std::move( pName );
-			constantDef.value = std::move( pValue );
+			constantDef.value = pValue;
 
 			_constantsByName[constantDef.name] = constantIndex;
 			_constantsByValue[constantDef.value] = constantIndex;
@@ -143,40 +148,60 @@ namespace ts3
 		 friend class EnumTypeInfoInitializer<TpEnum>;
 
 	public:
+		static inline const std::string sEmptyConstantName = "";
+
+	public:
 		template <typename TpInitFunction>
 		explicit EnumTypeInfo( TpInitFunction pInitFunction )
 		{
 			pInitFunction( *this );
 		}
 
-		const EnumConstantMap<TpEnum> & getConstantMap() const
+		TS3_FUNC_NO_DISCARD const EnumConstantMap<TpEnum> & getConstantMap() const
 		{
 			return _constantMap;
 		}
 
-		const std::string & getConstantNameOrDefault( TpEnum pValue, const std::string & pDefault = "" ) const
+		TS3_FUNC_NO_DISCARD const std::string & getConstantName( TpEnum pValue ) const
 		{
 			if( auto * constantDef = _constantMap.findByValue( pValue ) )
 			{
 				return constantDef->name;
 			}
-
-			return pDefault;
+			return sEmptyConstantName;
 		}
 
-		TpEnum getConstantValueOrDefault( const std::string & pName, TpEnum pDefault = static_cast<TpEnum>( 0u ) ) const
+		TS3_FUNC_NO_DISCARD TpEnum getConstantValue( const std::string & pName ) const
 		{
 			if( auto * constantDef = _constantMap.findByName( pName ) )
 			{
 				return constantDef->value;
 			}
 
+			return static_cast<TpEnum>( 0u );
+		}
+
+		TS3_FUNC_NO_DISCARD const std::string & getConstantNameOrDefault( TpEnum pValue, const std::string & pDefault = "" ) const
+		{
+			if( auto * constantDef = _constantMap.findByValue( pValue ) )
+			{
+				return constantDef->name;
+			}
 			return pDefault;
 		}
 
-		static constexpr bool isValid()
+		TS3_FUNC_NO_DISCARD TpEnum getConstantValueOrDefault( const std::string & pName, TpEnum pDefault = static_cast<TpEnum>( 0u ) ) const
 		{
-			return true;
+			if( auto * constantDef = _constantMap.findByName( pName ) )
+			{
+				return constantDef->value;
+			}
+			return pDefault;
+		}
+
+		TS3_FUNC_NO_DISCARD bool isValid() const
+		{
+			return !_constantMap.empty();
 		}
 
 	private:
@@ -186,9 +211,9 @@ namespace ts3
 			return *this;
 		}
 
-		EnumTypeInfo & registerConstant( std::string pName, TpEnum pValue )
+		EnumTypeInfo & registerConstant( TpEnum pValue, std::string pName )
 		{
-			_constantMap.add( std::move( pName ), std::move( pValue ) );
+			_constantMap.add( pValue, std::move( pName ) );
 			return *this;
 		}
 
@@ -198,13 +223,6 @@ namespace ts3
 		//
 		EnumConstantMap<TpEnum> _constantMap;
 	};
-
-	template <typename TpEnum>
-	inline std::string enumWithTypeInfoToString( TpEnum pValue )
-	{
-		auto & enumTypeInfo = queryEnumTypeInfo<TpEnum>();
-		return enumTypeInfo.getConstantNameOrDefault( pValue, "INVALID_ENUM" );
-	}
 
 
 	template <typename TpEnum>
@@ -216,33 +234,36 @@ namespace ts3
 			return pEnumTypeInfo.initialize( std::move( pProperties ) );
 		}
 
-		static EnumTypeInfo<TpEnum> & registerConstant( EnumTypeInfo<TpEnum> & pEnumTypeInfo, std::string pName, TpEnum pValue )
+		static EnumTypeInfo<TpEnum> & registerConstant( EnumTypeInfo<TpEnum> & pEnumTypeInfo, TpEnum pValue, std::string pName )
 		{
-			return pEnumTypeInfo.registerConstant( std::move( pName ), std::move( pValue ) );
+			return pEnumTypeInfo.registerConstant( pValue, std::move( pName ) );
 		}
 	};
 
 
 	/// @brief Implements an enum's definition/initialization procedure.
 	/// Usage and example: see below.
-	#define TS3_EnumDefineTypeInfo( TpEnum ) \
+	#define ts3TypeInfoEnumDefine( TpEnum ) \
 		/* Forward declaration of an enum-specific init method which registers all constants. */ \
-		void initializeEnumTypeInfo##TpEnum( ts3::EnumTypeInfo<TpEnum> & ); \
-		/* Here, we implement the method declared with TS3_EnumDeclareTypeInfo. */ \
-		ts3::EnumTypeInfo<TpEnum> & queryEnumTypeInfo##TpEnum() \
+		void initializeEnumTypeInfo##TpEnum( ::ts3::EnumTypeInfo<TpEnum> & ); \
+		/* Here, we implement the method declared with ts3TypeInfoEnumDeclare. */ \
+		::ts3::EnumTypeInfo<TpEnum> & _typeinfo::queryEnumTypeInfo##TpEnum() \
 		{ \
 			/* Create static EnumTypeInfo object and pass initializeEnumTypeInfoXXX function declared above. */ \
 			/* EnumTypeInfo will call this function in its ctor and pass *this as an argument for initialization. */ \
 			static ts3::EnumTypeInfo<TpEnum> enumTypeInfo{ initializeEnumTypeInfo##TpEnum }; \
 			return enumTypeInfo; \
 		} \
-		/* Begin the definition of the init function. */ \
+		const std::string & _typeinfo::toString##TpEnum( TpEnum pValue ) \
+		{ \
+			return queryEnumTypeInfo##TpEnum().getConstantName( pValue ); \
+		} \
 		void initializeEnumTypeInfo##TpEnum( ts3::EnumTypeInfo<TpEnum> & pEnumTypeInfo ) \
 
 	/// @brief This is a basic initialization of the EnumTypeInfo object (pEnumTypeInfo).
 	/// This is a continuation of initializeEnumTypeInfo##TpEnum function.
 	/// Usage and example: see below.
-	#define TS3_EnumTypeInfoBegin( TpEnum ) \
+	#define ts3TypeInfoEnumBegin( TpEnum ) \
         using EnumInitializer = ts3::EnumTypeInfoInitializer<TpEnum>; \
 		/* Create basic definition of an enum - currently only its name. */ \
 		ts3::EnumProperties enumProperties; \
@@ -253,16 +274,16 @@ namespace ts3
 		EnumInitializer::initialize( pEnumTypeInfo, std::move( enumProperties ) )
 
 	/// @brief Registers a single enumerator of a scoped enum (enum class/struct) within the EnumTypeInfo object.
-	#define TS3_EnumTypeInfoRegisterClassConstant( pConstant ) \
+	#define ts3TypeInfoEnumRegisterClassConstant( pConstant ) \
 		{ \
 			/* Preprocessor does the job for us here. */ \
 			const char * constantName = #pConstant; \
 			/* Register the constant, but do not include the prefix (e.g. 'Color::' in case of 'Color::Red'). */ \
-			EnumInitializer::registerConstant( pEnumTypeInfo, constantName + enumNamePrefixLength, pConstant ); \
+			EnumInitializer::registerConstant( pEnumTypeInfo, pConstant, constantName + enumNamePrefixLength ); \
 		}
 
 	/// @brief Registers a single enumerator of an unscoped enum within the EnumTypeInfo object.
-	#define TS3_EnumTypeInfoRegisterUnscopedConstant( pConstant ) \
+	#define ts3TypeInfoEnumRegisterUnscopedConstant( pConstant ) \
 		EnumInitializer::registerConstant( pEnumTypeInfo, #pConstant, pConstant )
 
 	/*
@@ -277,25 +298,27 @@ namespace ts3
 	 * enum DeviceFlags : uint32 {
 	 *   DEVICE_FLAG_ACTIVE_BIT = 1, DEVICE_FLAG_PRIMARY_BIT = 2
 	 * };
-	 * TS3_EnumDeclareTypeInfo( Color );
-	 * TS3_EnumDeclareTypeInfo( DeviceFlags );
+	 * ts3TypeInfoEnumDeclare( Color );
+	 * ts3TypeInfoEnumDeclare( DeviceFlags );
 	 *
 	 * MySourceFile.cpp:
 	 *
-	 * TS3_EnumDefineTypeInfo( Color )
+	 * ts3TypeInfoEnumDefine( Color )
 	 * {
-	 *   TS3_EnumTypeInfoBegin( Color );
-	 *   TS3_EnumTypeInfoRegisterClassConstant( Color::Red );
-	 *   TS3_EnumTypeInfoRegisterClassConstant( Color::Green );
-	 *   TS3_EnumTypeInfoRegisterClassConstant( Color::Blue );
+	 *   ts3TypeInfoEnumBegin( Color );
+	 *   ts3TypeInfoEnumRegisterClassConstant( Color::Red );
+	 *   ts3TypeInfoEnumRegisterClassConstant( Color::Green );
+	 *   ts3TypeInfoEnumRegisterClassConstant( Color::Blue );
 	 * }
-	 * TS3_EnumDefineTypeInfo( DeviceFlags )
+	 * ts3TypeInfoEnumDefine( DeviceFlags )
 	 * {
-	 *   TS3_EnumTypeInfoBegin( DeviceFlags );
-	 *   TS3_EnumTypeInfoRegisterUnscopedConstant( DEVICE_FLAG_ACTIVE_BIT );
-	 *   TS3_EnumTypeInfoRegisterUnscopedConstant( DEVICE_FLAG_PRIMARY_BIT );
+	 *   ts3TypeInfoEnumBegin( DeviceFlags );
+	 *   ts3TypeInfoEnumRegisterUnscopedConstant( DEVICE_FLAG_ACTIVE_BIT );
+	 *   ts3TypeInfoEnumRegisterUnscopedConstant( DEVICE_FLAG_PRIMARY_BIT );
 	 * }
 	 *
 	 */
 
-}
+} // namespace ts3
+
+#endif // __ts3CORE_ENUM_TYPE_INFO_H__

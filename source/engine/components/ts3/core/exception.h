@@ -42,10 +42,10 @@ namespace ts3
 
     enum : exception_code_value_t
     {
-        E_EXCEPTION_CODE_DEBUG_PLACEHOLDER =
+        E_EXC_DEBUG_PLACEHOLDER =
             ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_DEBUG, ts3ExcCodeIID( 0x01 ) ),
 
-        E_EXCEPTION_CODE_RESULT_CODE_ERROR =
+        E_EXC_RESULT_CODE_ERROR =
             ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_RESULT_PROXY, ts3ExcCodeIID( 0x01 ) ),
     };
 
@@ -225,7 +225,7 @@ namespace ts3
     };
 
 	template <>
-	struct ExceptionCodeClassProxy<E_EXCEPTION_CODE_RESULT_CODE_ERROR>
+	struct ExceptionCodeClassProxy<E_EXC_RESULT_CODE_ERROR>
 	{
 		using Type = ResultCodeException;
 	};

@@ -33,34 +33,43 @@ namespace ts3
         Unknown,
 
         // For debug-specific errors and messages, debug-only assertions etc.
+        // Exception codes prefix: E_EXC_DEBUG
         Debug,
 
         // Dedicated exception type for top-level engine components (graphics, scripting, etc).
         // Usually each component provides its own base class which derives from EngineSubModuleException class.
+        // Exception codes prefix: E_EXC_ESM_%SubmoduleName%
         EngineSubModule,
 
         // For all normal, error-like exceptions, intended to be used by lower-level components of the engine
         // (hence the 'framework' keyword). Defined primarily in the common ::Core component of the project.
+        // Exception codes prefix: E_EXC_CORE
         FrameworkCore,
 
         // Internal, implementation-details exception used by the framework. Used primarily for signalling errors
         // between parts of the framework, without exposing them to the user. Those exceptions should never leave
         // the "implementation detail" level of the project.
+        // Exception codes prefix: E_EXC_INTERNAL
         Internal,
 
         // For exceptions used as an interrupts (for example in thread proc).
+        // Exception codes prefix: E_EXC_INTERRUPT
         Interrupt,
 
         // Defined primarily within the ::Math component.
+        // Exception codes prefix: E_EXC_MATH
         Math,
 
         // Dedicated type for exceptions carrying ResultProxy as an error indicator.
+        // Exception codes prefix: E_EXC_RESULT
         ResultProxy,
 
         // System-specific exceptions, extended in platform-specific manner. Defined within the ::System component.
+        // Exception codes prefix: E_EXC_SYSTEM
         System,
 
         // All exceptions defined by the client libraries and frameworks.
+        // Exception codes prefix: E_EXC_USREXT
         UserExternal,
 
         //
