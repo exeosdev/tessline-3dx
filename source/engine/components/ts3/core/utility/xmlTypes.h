@@ -53,7 +53,13 @@ namespace ts3
 
 		XMLNode firstSubNode( const StringView<char> & pNodeName ) const;
 
+		size_t countSubNodes() const;
+
+		size_t countSubNodes( const StringView<char> & pNodeName ) const;
+
 		XMLNode nextSibling() const;
+
+		XMLNode nextSibling( const StringView<char> & pNodeName ) const;
 
 		XMLNode parent() const;
 
@@ -66,6 +72,8 @@ namespace ts3
 		bool hasSubNode( const StringView<char> & pNodeName ) const;
 
 		bool hasSubNodes() const;
+
+		bool hasValue() const;
 
 		bool empty() const;
 

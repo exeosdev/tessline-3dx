@@ -79,6 +79,30 @@ namespace ts3
 		return XMLNode{ _rxmlNode->first_node( pNodeName.str(), pNodeName.length() ) };
 	}
 
+	size_t XMLNode::countSubNodes() const
+	{
+		ts3DebugAssert( valid() );
+		return RxmlParser::countSubNodes( _rxmlNode );
+	}
+
+	size_t XMLNode::countSubNodes( const StringView<char> & pNodeName ) const
+	{
+		ts3DebugAssert( valid() );
+		return RxmlParser::countSubNodes( _rxmlNode, pNodeName.str(), pNodeName.length() );
+	}
+
+	XMLNode XMLNode::nextSibling() const
+	{
+		ts3DebugAssert( valid() );
+		return XMLNode{ _rxmlNode->next_sibling() };
+	}
+
+	XMLNode XMLNode::nextSibling( const StringView<char> & pNodeName ) const
+	{
+		ts3DebugAssert( valid() );
+		return XMLNode{ _rxmlNode->next_sibling( pNodeName.str(), pNodeName.length() ) };
+	}
+
 	XMLNode XMLNode::parent() const
 	{
 		ts3DebugAssert( valid() );
@@ -99,22 +123,32 @@ namespace ts3
 
 	bool XMLNode::hasAttribute( const StringView<char> & pAttribName ) const
 	{
-		return _rxmlNode && _rxmlNode->first_attribute( pAttribName.str(), pAttribName.length() );
+		ts3DebugAssert( valid() );
+		return _rxmlNode->first_attribute( pAttribName.str(), pAttribName.length() );
 	}
 
 	bool XMLNode::hasSubNode( const StringView<char> & pNodeName ) const
 	{
-		return _rxmlNode && _rxmlNode->first_node( pNodeName.str(), pNodeName.length() );
+		ts3DebugAssert( valid() );
+		return _rxmlNode->first_node( pNodeName.str(), pNodeName.length() );
 	}
 
 	bool XMLNode::hasSubNodes() const
 	{
-		return _rxmlNode && _rxmlNode->first_attribute();
+		ts3DebugAssert( valid() );
+		return _rxmlNode->first_attribute() != nullptr;
+	}
+
+	bool XMLNode::hasValue() const
+	{
+		ts3DebugAssert( valid() );
+		return RxmlParser::checkNodeHasValue( _rxmlNode );
 	}
 
 	bool XMLNode::empty() const
 	{
-		return !_rxmlNode || ( _rxmlNode->value_size() == 0 ) || !_rxmlNode->first_node();
+		ts3DebugAssert( valid() );
+		return !hasValue() && !hasSubNodes();
 	}
 
 	bool XMLNode::valid() const
@@ -145,7 +179,8 @@ namespace ts3
 
 	bool XMLTree::empty() const
 	{
-		return !_rxmlData || !_rxmlData.rootNode || !_rxmlData.rootNode->first_node();
+		ts3DebugAssert( valid() );
+		return !_rxmlData.rootNode->first_node();
 	}
 
 	bool XMLTree::valid() const

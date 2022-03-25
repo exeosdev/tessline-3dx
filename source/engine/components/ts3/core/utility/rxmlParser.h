@@ -37,6 +37,11 @@ namespace ts3
 			return checkNodeHasAttribute( pRxmlNode, &( pName[0] ), tpNameLength );
 		}
 
+		static bool checkNodeHasValue( RxmlNode * pRxmlNode )
+		{
+			return pRxmlNode && pRxmlNode->value() && ( pRxmlNode->value_size() > 0 );
+		}
+
 		static size_t countAttributes( RxmlNode * pRxmlNode )
 		{
 			size_t attribsNum = 0;
@@ -49,10 +54,16 @@ namespace ts3
 
 		static size_t countSubNodes( RxmlNode * pRxmlNode )
 		{
+			return countSubNodes( pRxmlNode, nullptr, 0 );
+		}
+
+		static size_t countSubNodes( RxmlNode * pRxmlNode, const char * pName, size_t pNameLength )
+		{
 			size_t subNodesNum = 0;
-			for( auto * subNode = pRxmlNode->first_node(); subNode != pRxmlNode->last_node(); subNode = subNode->next_sibling() )
+			for( auto * subNode = pRxmlNode->first_node( pName, pNameLength ); subNode != nullptr; )
 			{
 				++subNodesNum;
+				subNode = subNode->next_sibling( pName, pNameLength );
 			}
 			return subNodesNum;
 		}
