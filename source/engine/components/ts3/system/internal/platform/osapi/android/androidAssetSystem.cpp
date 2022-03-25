@@ -186,9 +186,9 @@ namespace ts3::system
         }
     }
 
-    file_size_t AndroidAsset::_nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
+    file_size_t AndroidAsset::_nativeReadData( void * pTargetBuffer, file_size_t pReadSize )
     {
-        int readResult = AAsset_read( mNativeData.aAsset, pBuffer, pReadSize );
+    	int readResult = AAsset_read( mNativeData.aAsset, pTargetBuffer, pReadSize );
         return trunc_numeric_cast<file_size_t>( readResult );
     }
 

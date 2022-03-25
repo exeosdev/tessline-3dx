@@ -142,9 +142,9 @@ namespace ts3::system
 
     FileAsset::~FileAsset() noexcept = default;
 
-    file_size_t FileAsset::_nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
+    file_size_t FileAsset::_nativeReadData( void * pTargetBuffer, file_size_t pReadSize )
     {
-        return mNativeData.fileHandle->readData( pBuffer, pBufferSize, pReadSize );
+    	return mNativeData.fileHandle->read( pTargetBuffer, pReadSize );
     }
 
     file_offset_t FileAsset::_nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )

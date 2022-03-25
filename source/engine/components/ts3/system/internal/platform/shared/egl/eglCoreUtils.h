@@ -50,10 +50,10 @@ namespace ts3::system
     ts3EGLMakeErrorInfo( ::eglGetError() )
 
 #define ts3EGLThrowError( pErrorDesc ) \
-    ts3ThrowDesc( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYS_EGL_ERROR, pErrorDesc )
+    ts3ThrowDesc( E_EXC_SYSTEM_OPENGL_SUBSYS_EGL_ERROR, pErrorDesc )
 
 #define ts3EGLThrowLastError() \
-    ts3ThrowEx( E_EXCEPTION_CODE_SYSTEM_OPENGL_SUBSYS_EGL_ERROR, ts3EGLGetLastErrorInfo() )
+    ts3ThrowEx( E_EXC_SYSTEM_OPENGL_SUBSYS_EGL_ERROR, ts3EGLGetLastErrorInfo() )
 
 } // namespace ts3::system
 

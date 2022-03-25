@@ -217,11 +217,11 @@ namespace ts3::system
     {
         if( !_privateData->activeEventDispatcher )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
         if( !_privateData->currentInternalConfig || !_privateData->currentSharedState )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
     }
 
@@ -249,7 +249,7 @@ namespace ts3::system
         auto eventDispatcherRef = _privateData->findEventDispatcherInternal( &pEventDispatcher );
         if( eventDispatcherRef.first )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 
         _privateData->eventDispatcherList.push_back( &pEventDispatcher );
@@ -260,7 +260,7 @@ namespace ts3::system
         auto eventDispatcherRef = _privateData->findEventDispatcherInternal( &pEventDispatcher );
         if( !eventDispatcherRef.first )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 
         _privateData->eventDispatcherList.erase( eventDispatcherRef.second );
@@ -271,7 +271,7 @@ namespace ts3::system
         auto eventSourceRef = _privateData->findEventSourceInternal( &pEventSource );
         if( eventSourceRef.first )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 
         _privateData->eventSourceList.push_back( &pEventSource );
@@ -282,7 +282,7 @@ namespace ts3::system
         auto eventSourceRef = _privateData->findEventSourceInternal( &pEventSource );
         if( !eventSourceRef.first )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 
         _privateData->eventSourceList.erase( eventSourceRef.second );
@@ -316,7 +316,7 @@ namespace ts3::system
 	    // Check for possible violation attempt.
 	    if ( baseTypeValue >= CX_ENUM_EVENT_BASE_TYPE_COUNT )
 	    {
-	        ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	        ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 	    }
 	    _privateData->handlerMapByBaseType[baseTypeValue] = std::move( pHandler );
     }
@@ -328,7 +328,7 @@ namespace ts3::system
 	    // Check for possible violation attempt.
 	    if ( categoryValue >= CX_ENUM_EVENT_CATEGORY_COUNT )
 	    {
-	        ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	        ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 	    }
 	    _privateData->handlerMapByCategory[categoryValue] = std::move( pHandler );
     }
@@ -340,7 +340,7 @@ namespace ts3::system
 	    // Check for possible violation attempt.
 	    if ( codeIndexValue >= CX_ENUM_EVENT_CODE_INDEX_COUNT )
 	    {
-	        ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	        ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 	    }
 	    _privateData->handlerMapByCodeIndex[codeIndexValue] = std::move( pHandler );
     }

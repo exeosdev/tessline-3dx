@@ -89,7 +89,7 @@ namespace ts3::system
         explicit Asset( AssetDirectoryHandle pAssetDirectory );
         virtual ~Asset() noexcept;
 
-        file_size_t readData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize = CX_FILE_SIZE_MAX );
+        file_size_t readData( void * pTargetBuffer, file_size_t pTargetBufferSize, file_size_t pReadSize = CX_FILE_SIZE_MAX );
         file_size_t readData( MemoryBuffer & pBuffer, file_size_t pReadSize = CX_FILE_SIZE_MAX );
 
         template <typename TpChar>
@@ -139,7 +139,7 @@ namespace ts3::system
         void setName( std::string pAssetName );
 
     private:
-        virtual file_size_t _nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize ) = 0;
+        virtual file_size_t _nativeReadData( void * pTargetBuffer, file_size_t pReadSize ) = 0;
 
         virtual file_offset_t _nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos ) = 0;
 

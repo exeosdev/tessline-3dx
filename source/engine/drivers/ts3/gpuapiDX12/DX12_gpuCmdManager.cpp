@@ -73,7 +73,7 @@ namespace gpuapi
 
 	bool DX12GPUCmdManager::executeContext( gpu_cmd_device_queue_id_t pQueueID, CommandContext & pContext )
 	{
-		auto * deviceQueueData = ts3::getMapValueOrNullptr( _deviceQueueMap, pQueueID );
+		auto * deviceQueueData = ts3::getMapValuePtrOrNull( _deviceQueueMap, pQueueID );
 		if( !deviceQueueData )
 		{
 			return false;
@@ -93,7 +93,7 @@ namespace gpuapi
 			return true;
 		}
 
-		auto * existingQueue = ts3::getMapValueOrNullptr( _deviceQueueMap, pQueueID );
+		auto * existingQueue = ts3::getMapValuePtrOrNull( _deviceQueueMap, pQueueID );
 		if( existingQueue )
 		{
 			return true;
@@ -115,14 +115,14 @@ namespace gpuapi
 	bool DX12GPUCmdManager::isQueueAvailable( gpu_cmd_device_queue_id_t pQueueID ) const
 	{
 		pQueueID = resolveQueueAlias( pQueueID );
-		auto * deviceQueueData = ts3::getMapValueOrNullptr( _deviceQueueMap, pQueueID );
+		auto * deviceQueueData = ts3::getMapValuePtrOrNull( _deviceQueueMap, pQueueID );
 		return deviceQueueData != nullptr;
 	}
 
 	ID3D12CommandQueue * DX12GPUCmdManager::getD3D12DeviceQueue( gpu_cmd_device_queue_id_t pQueueID ) const
 	{
 		pQueueID = resolveQueueAlias( pQueueID );
-		auto * deviceQueueData = ts3::getMapValueOrNullptr( _deviceQueueMap, pQueueID );
+		auto * deviceQueueData = ts3::getMapValuePtrOrNull( _deviceQueueMap, pQueueID );
 		return deviceQueueData ? deviceQueueData->d3d12CommandQueue.Get() : nullptr;
 	}
 

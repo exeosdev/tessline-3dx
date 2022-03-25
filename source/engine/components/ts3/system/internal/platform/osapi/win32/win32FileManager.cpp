@@ -82,7 +82,7 @@ namespace ts3::system
         {
             auto lastError = ::GetLastError();
             auto lastErrorMessage = platform::mseQuerySystemErrorMessage( lastError );
-            ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( lastErrorMessage ) );
+            ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER, std::move( lastErrorMessage ) );
         }
 
         while( win32FindFileHandle )
@@ -108,7 +108,7 @@ namespace ts3::system
                 else
                 {
                     auto lastErrorMessage = platform::mseQuerySystemErrorMessage( lastError );
-                    ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( lastErrorMessage ) );
+                    ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER, std::move( lastErrorMessage ) );
                 }
             }
         }
@@ -158,10 +158,10 @@ namespace ts3::system
         }
     }
 
-    file_size_t Win32File::_nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
+    file_size_t Win32File::_nativeReadData( void * pTargetBuffer, file_size_t pReadSize )
     {
         DWORD readBytesNum = 0u;
-        auto readResult = ::ReadFile( mNativeData.fileHandle, pBuffer, pBufferSize, &readBytesNum, nullptr );
+        auto readResult = ::ReadFile( mNativeData.fileHandle, pTargetBuffer, pReadSize, &readBytesNum, nullptr );
 
         if( readResult && ( readBytesNum == 0 ) )
         {
@@ -178,23 +178,23 @@ namespace ts3::system
             else
             {
                 auto errorMessage = platform::mseQuerySystemErrorMessage( errorCode );
-                ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
+                ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
             }
         }
 
         return trunc_numeric_cast<file_size_t>( readBytesNum );
     }
 
-    file_size_t Win32File::_nativeWriteData( const void * pBuffer, file_size_t pBufferSize, file_size_t pWriteSize )
+    file_size_t Win32File::_nativeWriteData( const void * pData, file_size_t pWriteSize )
     {
     	DWORD writtenBytesNum = 0u;
-    	auto writeResult = ::WriteFile(  mNativeData.fileHandle, pBuffer, pWriteSize, &writtenBytesNum, nullptr );
+    	auto writeResult = ::WriteFile(  mNativeData.fileHandle, pData, pWriteSize, &writtenBytesNum, nullptr );
 
     	if( !writeResult )
     	{
     		auto errorCode = ::GetLastError();
     		auto errorMessage = platform::mseQuerySystemErrorMessage( errorCode );
-    		ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
+    		ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
     	}
 
     	return trunc_numeric_cast<file_size_t>( writtenBytesNum );
@@ -218,7 +218,7 @@ namespace ts3::system
             if( lastError != NO_ERROR )
             {
                 auto errorMessage = platform::mseQuerySystemErrorMessage( lastError );
-                ts3ThrowDesc( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
+                ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
             }
         }
 
@@ -227,23 +227,46 @@ namespace ts3::system
 
     file_offset_t Win32File::_nativeGetFilePointer() const
     {
-    	LARGE_INTEGER u64FileOffset;
-    	u64FileOffset.QuadPart = 0u;
+    	LARGE_INTEGER u64SetFileOffset;
+    	u64SetFileOffset.QuadPart = 0u;
 
-    	LARGE_INTEGER u64FilePosition;
-    	u64FilePosition.QuadPart = 0u;
+    	LARGE_INTEGER u64GetFilePosition;
+    	u64GetFilePosition.QuadPart = 0u;
 
-    	::SetFilePointerEx( mNativeData.fileHandle, u64FileOffset, &u64FilePosition, SEEK_CUR );
+    	::SetFilePointerEx( mNativeData.fileHandle, u64SetFileOffset, &u64GetFilePosition, FILE_CURRENT );
 
-    	return trunc_numeric_cast<file_offset_t>( u64FilePosition.QuadPart );
+    	return trunc_numeric_cast<file_offset_t>( u64GetFilePosition.QuadPart );
     }
 
     file_size_t Win32File::_nativeGetSize() const
     {
-        ULARGE_INTEGER u64FileSize;
-        u64FileSize.LowPart = ::GetFileSize( mNativeData.fileHandle, &( u64FileSize.HighPart ) );
+        LARGE_INTEGER u64FileSize;
+        u64FileSize.QuadPart = 0L;
+
+        ::GetFileSizeEx( mNativeData.fileHandle, &u64FileSize );
 
         return trunc_numeric_cast<file_size_t>( u64FileSize.QuadPart );
+    }
+
+    file_size_t Win32File::_nativeGetRemainingBytes() const
+    {
+    	LARGE_INTEGER u64SetFileOffset;
+    	u64SetFileOffset.QuadPart = 0u;
+
+    	LARGE_INTEGER u64GetFilePosition;
+    	u64GetFilePosition.QuadPart = 0u;
+
+    	::SetFilePointerEx( mNativeData.fileHandle, u64SetFileOffset, &u64GetFilePosition, FILE_CURRENT );
+    	const auto previousFilePointer = u64GetFilePosition.QuadPart;
+
+    	::SetFilePointerEx( mNativeData.fileHandle, u64SetFileOffset, &u64GetFilePosition, FILE_END );
+    	const auto endFilePosition = u64GetFilePosition.QuadPart;
+
+    	u64SetFileOffset.QuadPart = previousFilePointer;
+
+    	::SetFilePointerEx( mNativeData.fileHandle, u64SetFileOffset, nullptr, FILE_BEGIN );
+
+    	return trunc_numeric_cast<file_offset_t>( endFilePosition - previousFilePointer );
     }
 
     bool Win32File::_nativeCheckEOF() const
@@ -270,7 +293,7 @@ namespace ts3::system
                                              pFileFlags,
                                              nullptr );
 
-            if( !fileHandle )
+            if( fileHandle == INVALID_HANDLE_VALUE )
             {
                 auto lastErrorCode = ::GetLastError();
                 auto errorMessage = platform::mseQuerySystemErrorMessage( lastErrorCode );
@@ -311,6 +334,7 @@ namespace ts3::system
             default:
                 break;
             }
+
             return GENERIC_READ | GENERIC_WRITE;
         }
 
@@ -333,6 +357,7 @@ namespace ts3::system
             default:
                 break;
             }
+
             return OPEN_ALWAYS;
         }
 

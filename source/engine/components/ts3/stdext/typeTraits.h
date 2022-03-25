@@ -114,6 +114,22 @@ namespace ts3
 	};
 
 
+	template <typename TpType, typename... TpList>
+	struct IsTypeOnTypeList;
+
+	template <typename TpType, typename TpCheck>
+	struct IsTypeOnTypeList<TpType, TpCheck>
+	{
+		static constexpr bool value = std::is_same<TpType, TpCheck>::value;
+	};
+
+	template <typename TpType, typename TpCheck, typename... TpList>
+	struct IsTypeOnTypeList<TpType, TpCheck, TpList...>
+	{
+		static constexpr bool value = std::is_same<TpType, TpCheck>::value || IsTypeOnTypeList<TpType, TpList...>::value;
+	};
+
+
 	/// @brief Contains a member typedef `type`, which is the first type from `TpTypes...` which matches `TpPred`
 	template <template<typename> class TpPred, typename... TpTypes>
 	struct FirstMatchingType;

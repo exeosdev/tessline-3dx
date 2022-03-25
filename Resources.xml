@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scf id="Resources">
+	<root>
+		<resource id="Font.FTD.Calibri0" type="font/dynamic">
+			<info>
+				<fontID>FTD.Calibri0</fontID>
+			</info>
+		</resource>
+		<folder name="fonts">
+			<resource id="Font.FTD.Calibri1" type="font/dynamic">
+				<info>
+					<fontID>FTD.Calibri1</fontID>
+					<fontSize>12</fontSize>
+					<textureDimensions>
+						<width>512</width>
+						<height>512</height>
+					</textureDimensions>
+					<textureFormat>R8_UNORM</textureFormat>
+					<fixedLayersNum>1</fixedLayersNum>
+					<dynamicLayersNum>3</dynamicLayersNum>
+					<fontResolutionHint>
+						<x>0</x>
+						<y>0</y>
+					</fontResolutionHint>
+				</info>
+				<data>
+					<fontFile>C:\Repo\Exeos\tessline-3dx\assets\fonts\ttf-calibri.ttf</fontFile>
+					<preloadGlyphSet>%DEFAULT_ASCII%</preloadGlyphSet>
+				</data>
+			</resource>
+			<resource id="Font.FTD.Calibri2" type="font-dynamic/freetype">
+				<info>
+					<fontID>FTD.Calibri2</fontID>
+				</info>
+			</resource>
+		</folder>
+		<folder name="fonts2">
+			<resource id="Font.FTD.Calibri3" type="font-dynamic/freetype">
+				<info>
+					<fontID>FTD.Calibri3</fontID>
+				</info>
+			</resource>
+		</folder>
+		<resource id="Font.FTD.Calibri4" type="font-dynamic/freetype">
+			<info>
+				<fontID>FTD.Calibri4</fontID>
+			</info>
+		</resource>
+	</root>
+</scf>

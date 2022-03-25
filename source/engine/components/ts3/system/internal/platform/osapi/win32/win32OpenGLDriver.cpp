@@ -92,26 +92,26 @@ namespace ts3::system
         tmpContextNativeData.contextHandle = ::wglCreateContext( tmpSurfaceNativeData.hdc );
         if ( tmpContextNativeData.contextHandle == nullptr )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 
         // Bind context as current, so GL calls may be used normally.
         BOOL makeCurrentResult = ::wglMakeCurrent( tmpSurfaceNativeData.hdc, tmpContextNativeData.contextHandle );
         if ( makeCurrentResult == FALSE )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 
         auto glewResult = glewInit();
         if ( glewResult != GLEW_OK )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 
         glewResult = wglewInit();
         if ( glewResult != GLEW_OK )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
     }
 
@@ -264,7 +264,7 @@ namespace ts3::system
 			}
 			if ( !contextHandle )
 			{
-				ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
         }
 
@@ -435,7 +435,7 @@ namespace ts3::system
 	        BOOL spfResult = ::SetPixelFormat( hdc, pGLSurfaceNativeData.pixelFormatIndex, &pixelFormatDescriptor );
 	        if ( spfResult == FALSE )
 	        {
-	            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 	        }
         }
 
@@ -534,7 +534,7 @@ namespace ts3::system
 
 	        if ( ( enumResult == FALSE ) || ( returnedPixelFormatsNum == 0 ) )
 	        {
-	            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+	            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 	        }
 
 	        std::vector<int> result;

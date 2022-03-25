@@ -5,6 +5,8 @@ set( TS3_ENGINE_SRC_FILES
 
         "prerequisites.h"
         "prerequisites.cpp"
+		"exception.h"
+		"exception.cpp"
 
         "camera/cameraCommonDefs.h"
         "camera/cameraController.h"
@@ -16,25 +18,51 @@ set( TS3_ENGINE_SRC_FILES
 		"gpuapi/hwBuffer.cpp"
 		"gpuapi/hwBufferManager.h"
 		"gpuapi/hwBufferManager.cpp"
+		"gpuapi/hwBufferSubAllocator.h"
+		"gpuapi/hwBufferSubAllocator.cpp"
 		"gpuapi/hwGeometryBuffer.h"
 		"gpuapi/hwGeometryBuffer.cpp"
 		"gpuapi/vertexFormatDefs.h"
         "gpuapi/vertexFormatDefs.cpp"
 
-        "rcdata/commonRDUtils.h"
-        "rcdata/commonRDUtils.cpp"
-        "rcdata/fontCommon.h"
-        "rcdata/font.h"
-        "rcdata/font.cpp"
-        "rcdata/fontTexture.h"
-        "rcdata/fontTexture.cpp"
-        "rcdata/fontManager.h"
-        "rcdata/fontManager.cpp"
-        "rcdata/imageCommon.h"
-        "rcdata/imageCommon.cpp"
-        "rcdata/mesh.h"
-        "rcdata/mesh.cpp"
-)
+		"res/font.h"
+		"res/font.cpp"
+		"res/fontCommon.h"
+		"res/fontMetrics.h"
+		"res/font/fontTypeDynamic.h"
+		"res/font/fontTypeDynamic.cpp"
+		"res/font/fontTypeStatic.h"
+		"res/font/fontTypeStatic.cpp"
+		"res/font/ftdFreeTypeCommon.h"
+		"res/font/ftdFreeTypeFontFace.h"
+		"res/font/ftdFreeTypeFontFace.cpp"
+		"res/font/ftdFreeTypeFontObject.h"
+		"res/font/ftdFreeTypeFontObject.cpp"
+		"res/imageCommon.h"
+		"res/imageCommon.cpp"
+		"res/resource.h"
+		"res/resource.cpp"
+		"res/resourceLoader.h"
+		"res/resourceLoader.cpp"
+		"res/resourceManager.h"
+		"res/resourceManager.cpp"
+
+        "typeinfo/tpiEngineEnum.cpp"
+
+		"utility/scfCommon.h"
+        "utility/scfEntry.h"
+        "utility/scfEntry.cpp"
+		"utility/scfIndex.h"
+		"utility/scfIndex.cpp"
+		"utility/scfIndexBuilder.h"
+		"utility/scfIndexBuilder.cpp"
+		"utility/scfIOSupport.h"
+		"utility/scfIOSupport.cpp"
+		"utility/scfXMLCommon.h"
+		"utility/scfXMLCommon.cpp"
+		"utility/scfXMLReader.h"
+		"utility/scfXMLReader.cpp"
+		)
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
     add_library( ts3-engine STATIC ${TS3_ENGINE_SRC_FILES} )
@@ -56,5 +84,7 @@ target_include_directories( ts3-engine PUBLIC
 		)
 
 target_link_libraries( ts3-engine PUBLIC
-        ts3-gpuapi
+		dplib-freetype
+		ts3-core
+		ts3-gpuapi
 		)

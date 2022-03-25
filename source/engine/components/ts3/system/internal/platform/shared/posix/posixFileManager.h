@@ -50,7 +50,7 @@ namespace ts3::system
     private:
         void _releasePosixFileHandle();
 
-        virtual file_size_t _nativeReadData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize ) override final;
+        virtual file_size_t _nativeReadData( void * pTargetBuffer, file_size_t pReadSize ) override final;
         virtual file_offset_t _nativeSetFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos ) override final;
         virtual file_size_t _nativeGetSize() const override final;
     };

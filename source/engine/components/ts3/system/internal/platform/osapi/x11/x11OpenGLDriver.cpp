@@ -76,7 +76,7 @@ namespace ts3::system
         // We need at least version 1.3 of the GLX runtime (that's rather a pretty old one...).
 		if( ( glxVersionMajor <= 0 ) || ( ( glxVersionMajor == 1 ) && ( glxVersionMinor < 3 ) ) )
 		{
-			ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
 
 		VisualConfig legacyVisualConfig;
@@ -95,13 +95,13 @@ namespace ts3::system
         auto glewResult = glewInit();
         if ( glewResult != GLEW_OK )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 
         glewResult = glxewInit();
         if ( glewResult != GLEW_OK )
         {
-            ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }
 	}
 
@@ -267,7 +267,7 @@ namespace ts3::system
 			}
 			if ( !contextHandle )
 			{
-				ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
 		}
 
@@ -282,7 +282,7 @@ namespace ts3::system
 		auto contextHandle = ::glXGetCurrentContext();
 		if ( contextHandle == nullptr )
 		{
-			ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
 
         auto renderContext = createSysObject<X11OpenGLRenderContext>( getHandle<X11OpenGLSystemDriver>() );
@@ -445,13 +445,13 @@ namespace ts3::system
 
             if( windowFBConfig == nullptr )
             {
-                ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+                ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
             }
 
             auto * fbConfigVisualInfo = glXGetVisualFromFBConfig( xSessionData.display, windowFBConfig );
             if( fbConfigVisualInfo == nullptr )
             {
-                ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+                ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
             }
 
             pGLSurfaceNativeData.fbConfig = windowFBConfig;
@@ -501,7 +501,7 @@ namespace ts3::system
                                                          True );
             if ( tempContextHandle == nullptr )
             {
-                ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+                ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
             }
 
             pGLContextNativeData.setSessionData( xSessionData );
@@ -512,7 +512,7 @@ namespace ts3::system
                                                        pGLContextNativeData.contextHandle );
             if ( makeCurrentResult == False )
             {
-                ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+                ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
             }
         }
 
@@ -556,7 +556,7 @@ namespace ts3::system
                 fbConfigList = glXChooseFBConfig( pDisplay, pScreenIndex, defaultVisualAttribsNoDepthStencil, &fbConfigListSize );
                 if( ( fbConfigList == nullptr ) || ( fbConfigListSize == 0 ) )
                 {
-                    ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+                    ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
                 }
             }
 
@@ -629,7 +629,7 @@ namespace ts3::system
 
             if ( ( pFBConfigList == nullptr ) || ( pFBConfigListSize == 0 ) )
             {
-                ts3Throw( E_EXCEPTION_CODE_DEBUG_PLACEHOLDER );
+                ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
             }
 
             for ( int pFBConfigIndex = 0; pFBConfigIndex < pFBConfigListSize; ++pFBConfigIndex )

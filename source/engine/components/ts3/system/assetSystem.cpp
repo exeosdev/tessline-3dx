@@ -120,15 +120,21 @@ namespace ts3::system
 
     Asset::~Asset() noexcept = default;
 
-    file_size_t Asset::readData( void * pBuffer, file_size_t pBufferSize, file_size_t pReadSize )
+    file_size_t Asset::readData( void * pTargetBuffer, file_size_t pTargetBufferSize, file_size_t pReadSize )
     {
-        return _nativeReadData( pBuffer, pBufferSize, getMinOf( pBufferSize, pReadSize ) );
+    	if( !pTargetBuffer || ( pTargetBufferSize == 0 ) || ( pReadSize == 0 ) )
+    	{
+    		return 0;
+    	}
+
+    	const auto readSize = getMinOf( pTargetBufferSize, pReadSize );
+
+    	return _nativeReadData( pTargetBuffer, readSize );
     }
 
     file_size_t Asset::readData( MemoryBuffer & pBuffer, file_size_t pReadSize )
     {
-        auto bufferSize = pBuffer.size();
-        return _nativeReadData( pBuffer.data(), bufferSize, getMinOf( bufferSize, pReadSize ) );
+    	return readData( pBuffer.data(), pBuffer.size(), pReadSize );
     }
 
     file_offset_t Asset::setReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )

@@ -49,12 +49,12 @@ namespace ts3::system
 
     enum : exception_category_value_t
     {
-        E_EXCEPTION_CATEGORY_SYSTEM_CORE             = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x01 ),
-        E_EXCEPTION_CATEGORY_SYSTEM_DISPLAY          = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x02 ),
-        E_EXCEPTION_CATEGORY_SYSTEM_EVENT            = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x03 ),
-        E_EXCEPTION_CATEGORY_SYSTEM_FILE             = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x04 ),
-        E_EXCEPTION_CATEGORY_SYSTEM_OPENGL           = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x05 ),
-        E_EXCEPTION_CATEGORY_SYSTEM_WINDOW           = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x09 ),
+        E_EXCEPTION_CATEGORY_SYSTEM_CORE    = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x01 ),
+        E_EXCEPTION_CATEGORY_SYSTEM_DISPLAY = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x02 ),
+        E_EXCEPTION_CATEGORY_SYSTEM_EVENT   = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x03 ),
+        E_EXCEPTION_CATEGORY_SYSTEM_FILE    = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x04 ),
+        E_EXCEPTION_CATEGORY_SYSTEM_OPENGL  = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x05 ),
+        E_EXCEPTION_CATEGORY_SYSTEM_WINDOW  = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x09 ),
     };
 
     template <typename TpNativeData>

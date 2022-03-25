@@ -1,7 +1,7 @@
 
 #include "visual.h"
 #include <unordered_map>
-#include <ts3/stdext/mapUtils.h>
+#include <ts3/stdext/stlHelperAlgo.h>
 
 namespace ts3::system
 {
@@ -48,7 +48,7 @@ namespace ts3::system
             { EColorFormat::R10G10B10A2  , "R10G10B10A2"  },
         };
 	    static const std::string defaultColorFormatStr = "UNKNOWN";
-	    return getMapValueOrDefault( colorFormatStrMap, pFormat, defaultColorFormatStr );
+	    return stdx::getMapValueRefOrDefault( colorFormatStrMap, pFormat, defaultColorFormatStr );
 	}
 
 	const ColorDesc & vsxGetDescForColorFormat( EColorFormat pFormat )
@@ -64,7 +64,7 @@ namespace ts3::system
 		    { EColorFormat::R8G8B8X8     , sColorDescR8G8B8X8     },
 		    { EColorFormat::R10G10B10A2  , sColorDescR10G10B10A2  },
 	    };
-    	return getMapValueOrDefault( colorDescMap, pFormat, sColorDescUnknown );
+    	return stdx::getMapValueRefOrDefault( colorDescMap, pFormat, sColorDescUnknown );
     }
 
 	// DepthStencilDesc representation of values in EDepthStencilFormat enumeration.
@@ -85,7 +85,7 @@ namespace ts3::system
 		    { EDepthStencilFormat::D32F   , sDepthStencilDescD32F   },
 		    { EDepthStencilFormat::D32FS8 , sDepthStencilDescD32FS8 },
 	    };
-	    return getMapValueOrDefault( depthStencilDescMap, pFormat, sDepthStencilDescUnknown );
+	    return stdx::getMapValueRefOrDefault( depthStencilDescMap, pFormat, sDepthStencilDescUnknown );
     }
 
 	// MSAADesc representation of values in EMSAAMode enumeration.
@@ -106,7 +106,7 @@ namespace ts3::system
 		    { EMSAAMode::x8,  sMSAADescX8  },
 		    { EMSAAMode::x16, sMSAADescX16 }
 	    };
-	    return getMapValueOrDefault( msaaModeMap, pMode, sMSAADescNone );
+	    return stdx::getMapValueRefOrDefault( msaaModeMap, pMode, sMSAADescNone );
     }
 
     const VisualConfig & vsxGetDefaultVisualConfigForSysWindow()

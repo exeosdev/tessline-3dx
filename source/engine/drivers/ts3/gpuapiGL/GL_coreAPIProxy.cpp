@@ -4,7 +4,7 @@
 #include <ts3/gpuapi/resources/samplerCommon.h>
 #include <ts3/gpuapi/resources/shaderCommon.h>
 #include <ts3/gpuapi/resources/textureCommon.h>
-#include <ts3/stdext/mapUtils.h>
+#include <ts3/stdext/stlHelperAlgo.h>
 #include <unordered_map>
 
 namespace ts3
