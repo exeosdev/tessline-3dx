@@ -51,7 +51,7 @@ namespace ts3::system
         virtual WindowHandle _nativeCreateWindow( WindowCreateInfo pCreateInfo ) override final;
     };
 
-    class Win32Window : public Window, public NativeObject<platform::Win32WindowNativeData>
+    class Win32Window : public Win32NativeObject<Window, platform::Win32WindowNativeData>
     {
         friend class Win32WindowManager;
 

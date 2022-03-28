@@ -83,8 +83,8 @@ namespace ts3::system
             return pNativeData.getSessionData();
         }
 
-        template <typename TpNativeData>
-        TS3_SYSTEM_API_NODISCARD inline X11SessionData & x11GetXSessionData( const NativeObject<TpNativeData> & pNativeObject )
+        template <typename TpBaseType, typename TpNativeData>
+        TS3_SYSTEM_API_NODISCARD inline X11SessionData & x11GetXSessionData( const NativeObject<TpBaseType, TpNativeData> & pNativeObject )
         {
             return x11GetXSessionData( static_cast<X11NativeDataCommon>( pNativeObject.mNativeData ) );
         }
@@ -92,26 +92,26 @@ namespace ts3::system
     }
 
     template <typename TpBaseType, typename TpNativeData>
-    class X11NativeObject : public TpBaseType, public NativeObject<TpNativeData>
+    class X11NativeObject : public NativeObject<TpBaseType, TpNativeData>
     {
     public:
         template <typename... TpBaseTypeArgs>
         X11NativeObject( SysContextHandle pSysContext, TpBaseTypeArgs && ...pBaseTypeArgs )
-        : TpBaseType( pSysContext, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
+        : NativeObject<TpBaseType, TpNativeData>( pSysContext, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
         {
             this->mNativeData.setSessionData( platform::x11GetXSessionData( *pSysContext ) );
         }
 
         template <typename TpParentSysObject, typename... TpBaseTypeArgs>
         X11NativeObject( TpParentSysObject & pParentSysObject, TpBaseTypeArgs && ...pBaseTypeArgs )
-        : TpBaseType( pParentSysObject, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
+        : NativeObject<TpBaseType, TpNativeData>( pParentSysObject, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
         {
             this->mNativeData.setSessionData( platform::x11GetXSessionData( pParentSysObject ) );
         }
 
         template <typename TpParentSysObject, typename... TpBaseTypeArgs>
         X11NativeObject( Handle<TpParentSysObject> pParentSysObject, TpBaseTypeArgs && ...pBaseTypeArgs )
-        : TpBaseType( pParentSysObject, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
+        : NativeObject<TpBaseType, TpNativeData>( pParentSysObject, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
         {
             this->mNativeData.setSessionData( platform::x11GetXSessionData( *pParentSysObject ) );
         }

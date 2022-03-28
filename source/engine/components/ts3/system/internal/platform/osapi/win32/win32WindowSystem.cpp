@@ -49,7 +49,7 @@ namespace ts3::system
 
 
     Win32Window::Win32Window( Win32WindowManagerHandle pWindowManager )
-    : Window( std::move( pWindowManager ), &mNativeData )
+    : Win32NativeObject( std::move( pWindowManager ) )
     {}
 
     Win32Window::~Win32Window() noexcept = default;
@@ -239,37 +239,42 @@ namespace ts3::system
         DWORD _win32TranslateFrameStyle( EFrameStyle pStyle )
         {
             //
-            constexpr DWORD overlayFrameStyle = WS_POPUP | WS_EX_TOPMOST;
+            constexpr DWORD cvCaptionFrameStyle = WS_CAPTION | WS_SYSMENU;
             //
-            constexpr DWORD captionFrameStyle = WS_CAPTION | WS_SYSMENU;
+            constexpr DWORD cvFixedFrameStyle = WS_CAPTION | WS_SYSMENU | WS_OVERLAPPED | WS_MINIMIZEBOX;
             //
-            constexpr DWORD fixedFrameStyle = WS_CAPTION | WS_SYSMENU | WS_OVERLAPPED | WS_MINIMIZEBOX;
+            constexpr DWORD cvOverlayFrameStyle = WS_POPUP | WS_EX_TOPMOST;
             //
-            constexpr DWORD resizeableFrameStyle = fixedFrameStyle | WS_SIZEBOX | WS_MAXIMIZEBOX;
+            constexpr DWORD cvResizeableFrameStyle = cvFixedFrameStyle | WS_SIZEBOX | WS_MAXIMIZEBOX;
 
             //
-            DWORD resultStyle = 0U;
+            DWORD resultStyle = Limits<DWORD>::maxValue;
 
             switch ( pStyle )
             {
                 case EFrameStyle::Caption:
                 {
-                    resultStyle = captionFrameStyle;
+                    resultStyle = cvCaptionFrameStyle;
                     break;
                 }
                 case EFrameStyle::Fixed:
                 {
-                    resultStyle = fixedFrameStyle;
+                    resultStyle = cvFixedFrameStyle;
                     break;
                 }
                 case EFrameStyle::Overlay:
                 {
-                    resultStyle = overlayFrameStyle;
+                    resultStyle = cvOverlayFrameStyle;
                     break;
                 }
                 case EFrameStyle::Resizeable:
                 {
-                    resultStyle = resizeableFrameStyle;
+                    resultStyle = cvResizeableFrameStyle;
+                    break;
+                }
+                default:
+                {
+                    resultStyle = 0u;
                     break;
                 }
             }

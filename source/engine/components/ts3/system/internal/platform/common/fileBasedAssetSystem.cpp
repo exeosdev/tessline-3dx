@@ -2,7 +2,7 @@
 #include "fileBasedAssetSystem.h"
 #include <ts3/system/fileManager.h>
 #include <ts3/system/sysContext.h>
-#include <ts3/system/internal/assetSystemPrivate.h>
+#include <ts3/system/assetSystem.h>
 
 namespace ts3::system
 {
@@ -18,7 +18,7 @@ namespace ts3::system
 
 
     FileAssetLoader::FileAssetLoader( FileManagerHandle pFileManager )
-    : AssetLoader( pFileManager->mSysContext )
+    : NativeObject( pFileManager->mSysContext )
     , mFileManager( std::move( pFileManager ) ) 
     {}
 
@@ -86,7 +86,7 @@ namespace ts3::system
 
 
     FileAssetDirectory::FileAssetDirectory( Handle<FileAssetLoader> pAssetLoader )
-    : AssetDirectory( pAssetLoader )
+    : NativeObject( pAssetLoader )
     , mFileManager( pAssetLoader->mFileManager )
     {}
 
@@ -133,11 +133,11 @@ namespace ts3::system
 
 
     FileAsset::FileAsset( AssetLoaderHandle pAssetLoader )
-    : Asset( std::move( pAssetLoader ) )
+    : NativeObject( std::move( pAssetLoader ) )
     {}
 
     FileAsset::FileAsset( AssetDirectoryHandle pAssetDirectory )
-    : Asset( std::move( pAssetDirectory ) )
+    : NativeObject( std::move( pAssetDirectory ) )
     {}
 
     FileAsset::~FileAsset() noexcept = default;

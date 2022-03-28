@@ -69,13 +69,13 @@ namespace ts3::system
             return result;
         }
 
-        const EventSystemInternalConfig & getCurrentInternalConfig() const
+        TS3_FUNC_NO_DISCARD const EventSystemInternalConfig & getCurrentInternalConfig() const
         {
             ts3DebugAssert( currentInternalConfig != nullptr );
             return *currentInternalConfig;
         }
 
-        EventSystemSharedState & getCurrentSharedState() const
+        TS3_FUNC_NO_DISCARD EventSystemSharedState & getCurrentSharedState() const
         {
             ts3DebugAssert( currentSharedState != nullptr );
             return *currentSharedState;

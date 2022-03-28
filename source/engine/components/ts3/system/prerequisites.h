@@ -57,22 +57,30 @@ namespace ts3::system
         E_EXCEPTION_CATEGORY_SYSTEM_WINDOW  = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x09 ),
     };
 
-    template <typename TpNativeData>
-    class NativeObject
+    template <typename TpBaseType, typename TpNativeData>
+    class NativeObject : public TpBaseType
     {
     public:
         TpNativeData mNativeData;
 
     public:
-        NativeObject() = default;
+        template <typename... TpBaseArgs>
+        NativeObject( TpBaseArgs && ...pBaseArgs )
+        : TpBaseType( std::forward<TpBaseArgs>( pBaseArgs )... )
+        {}
+
         virtual ~NativeObject() = default;
     };
 
-    template <>
-    class NativeObject<void>
+    template <typename TpBaseType>
+    class NativeObject<TpBaseType, void>
     {
     public:
-        NativeObject() = default;
+        template <typename... TpBaseArgs>
+        NativeObject( TpBaseArgs && ...pBaseArgs )
+        : TpBaseType( std::forward<TpBaseArgs>( pBaseArgs )... )
+        {}
+
         virtual ~NativeObject() = default;
     };
 

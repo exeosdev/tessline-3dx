@@ -22,7 +22,7 @@ namespace ts3::system
 
     }
 
-    class X11SysContext : public SysContext, public NativeObject<platform::X11SysContextNativeData>
+    class X11SysContext : public NativeObject<SysContext, platform::X11SysContextNativeData>
     {
     public:
         X11SysContext();

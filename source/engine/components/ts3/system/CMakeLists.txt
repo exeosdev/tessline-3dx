@@ -51,7 +51,7 @@ set( TS3_SYSTEM_SRC_FILES
 
         "internal/displaySystemPrivate.h"
         "internal/eventCorePrivate.h"
-        "internal/openGLPrivate.h"
+        "openGLDriver.h"
         )
 
 if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_MSE} )
@@ -142,6 +142,7 @@ endif()
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
+            "internal/platform/osapi/x11/x11AssetSystem.h"
             "internal/platform/osapi/x11/x11Common.h"
             "internal/platform/osapi/x11/x11Common.cpp"
             "internal/platform/osapi/x11/x11DisplaySystem.h"
@@ -156,9 +157,35 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
             "internal/platform/osapi/x11/x11WindowSystem.h"
             "internal/platform/osapi/x11/x11WindowSystem.cpp"
             )
+    set( CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG FALSE )
 endif()
 
-if( NOT  "${CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG}" )
+if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
+    set( TS3_SYSTEM_SRC_FILES
+            ${TS3_SYSTEM_SRC_FILES}
+            "internal/platform/osapi/osx/nsOpenGLViewProxy.h"
+            "internal/platform/osapi/osx/nsOpenGLViewProxy.mm"
+            "internal/platform/osapi/osx/nsWindowProxy.h"
+            "internal/platform/osapi/osx/nsWindowProxy.mm"
+            "internal/platform/osapi/osx/osxAssetSystem.h"
+            "internal/platform/osapi/osx/osxCommon.h"
+            "internal/platform/osapi/osx/osxCommon.cpp"
+            "internal/platform/osapi/osx/osxDisplaySystem.h"
+            "internal/platform/osapi/osx/osxDisplaySystem.mm"
+            "internal/platform/osapi/osx/osxWindowSystem.h"
+            "internal/platform/osapi/osx/osxWindowSystem.mm"
+            #"internal/platform/osapi/osx/osxEventCore.h"
+            #"internal/platform/osapi/osx/osxEventCore.cpp"
+            #"internal/platform/osapi/osx/osxFileManager.h"
+            #"internal/platform/osapi/osx/osxOpenGLDriver.h"
+            #"internal/platform/osapi/osx/osxOpenGLDriver.cpp"
+            #"internal/platform/osapi/osx/osxSysContext.h"
+            #"internal/platform/osapi/osx/osxSysContext.cpp"
+            )
+    set( CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG FALSE )
+endif()
+
+if( NOT "${CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG}" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/common/fileBasedAssetSystem.h"
@@ -216,6 +243,14 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
             Xrandr
             GL
             GLEW
+            )
+endif()
+
+if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
+    target_link_libraries( ts3-system PUBLIC
+            -framework AppKit
+            -framework CoreFoundation
+            -framework Foundation
             )
 endif()
 

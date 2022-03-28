@@ -75,8 +75,8 @@ namespace ts3::system
         virtual bool _nativeCheckAssetExists( const std::string & pAssetName ) const = 0;
 
     private:
-        struct AssetDirectoryPrivateData;
-        std::unique_ptr<AssetDirectoryPrivateData> _privateData;
+        std::string _dirName;
+        AssetNameList _assetNameList;
     };
 
     class Asset : public SysObject
@@ -146,8 +146,7 @@ namespace ts3::system
         virtual file_size_t _nativeGetSize() const = 0;
 
     private:
-        struct AssetPrivateData;
-        std::unique_ptr<AssetPrivateData> _privateData;
+        std::string _name;
     };
 
 } // namespace ts3::system

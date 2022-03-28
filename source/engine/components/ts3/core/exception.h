@@ -262,7 +262,7 @@ namespace ts3
 		// TpException is a class derived from ExceptionClass<ExceptionBaseType>. It contains 'baseType'
 		// member with type tag. It should match the type embedded within the code. In case of mismatch, there is
 		// either a typo (in case of manual call) or a problem with the throwException() function defined below.
-		ts3DebugAssert( TpException::mBaseType != ecGetExceptionCodeBaseType( pExceptionInfo.code ) );
+		ts3DebugAssert( TpException::mBaseType == ecGetExceptionCodeBaseType( pExceptionInfo.code ) );
 
 		throw TpException( std::move( pExceptionInfo ), std::forward<TpArgs>( pArgs )... );
 	}

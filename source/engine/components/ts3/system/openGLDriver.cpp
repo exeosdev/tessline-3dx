@@ -1,5 +1,5 @@
 
-#include <ts3/system/internal/openGLPrivate.h>
+#include <ts3/system/openGLDriver.h>
 #include "displaySystem.h"
 
 namespace ts3::system
@@ -8,7 +8,6 @@ namespace ts3::system
     OpenGLSystemDriver::OpenGLSystemDriver( DisplayManagerHandle pDisplayManager )
     : SysObject( pDisplayManager->mSysContext )
     , mDisplayManager( std::move( pDisplayManager ) )
-    , _privateData( std::make_unique<OpenGLSystemDriverPrivateData>() )
     {}
 
     OpenGLSystemDriver::~OpenGLSystemDriver() noexcept = default;
@@ -17,12 +16,12 @@ namespace ts3::system
     {
         _nativeInitializePlatform();
 
-        _privateData->supportedRuntimeVersion = GLCoreAPI::queryRuntimeVersion();
+        _supportedRuntimeVersion = GLCoreAPI::queryRuntimeVersion();
 
-        if( _privateData->supportedRuntimeVersion.major == 0 )
+        if( _supportedRuntimeVersion.major == 0 )
         {
-            _privateData->supportedRuntimeVersion.major = 1;
-            _privateData->supportedRuntimeVersion.minor = 0;
+            _supportedRuntimeVersion.major = 1;
+            _supportedRuntimeVersion.minor = 0;
         }
     }
 
@@ -74,7 +73,7 @@ namespace ts3::system
         }
         else if( surfaceCreateInfo.runtimeVersionDesc.apiVersion == CX_GL_VERSION_BEST_SUPPORTED )
         {
-            surfaceCreateInfo.runtimeVersionDesc.apiVersion = _privateData->supportedRuntimeVersion;
+            surfaceCreateInfo.runtimeVersionDesc.apiVersion = _supportedRuntimeVersion;
         }
 
         if( surfaceCreateInfo.runtimeVersionDesc.apiProfile == EGLAPIProfile::OpenGLES )
@@ -193,7 +192,6 @@ namespace ts3::system
     OpenGLDisplaySurface::OpenGLDisplaySurface( OpenGLSystemDriverHandle pGLSystemDriver, void * pNativeData )
     : Frame( pGLSystemDriver->mSysContext )
     , mGLSystemDriver( std::move( pGLSystemDriver ) )
-    , _privateData( std::make_unique<OpenGLDisplaySurfacePrivateData>() )
     {
         setEventSourceNativeData( pNativeData, {} );
     }
@@ -220,7 +218,7 @@ namespace ts3::system
 
     void OpenGLDisplaySurface::resize( const FrameSize & pSize )
     {
-        FrameGeometry newFrameGeometry;
+        FrameGeometry newFrameGeometry{};
         newFrameGeometry.position = CX_FRAME_POS_AUTO;
         newFrameGeometry.size = pSize;
         newFrameGeometry.style = EFrameStyle::Unspecified;
@@ -233,7 +231,7 @@ namespace ts3::system
 
     void OpenGLDisplaySurface::resizeClientArea( const FrameSize & pSize )
     {
-        FrameGeometry newFrameGeometry;
+        FrameGeometry newFrameGeometry{};
         newFrameGeometry.position = CX_FRAME_POS_AUTO;
         newFrameGeometry.size = pSize;
         newFrameGeometry.style = EFrameStyle::Unspecified;
@@ -277,24 +275,21 @@ namespace ts3::system
 
     void OpenGLDisplaySurface::setInternalOwnershipFlag( bool pOwnershipFlag )
     {
-        _privateData->internalOwnershipFlag = pOwnershipFlag;
+        _internalOwnershipFlag = pOwnershipFlag;
     }
 
     bool OpenGLDisplaySurface::hasInternalOwnershipFlag() const
     {
-        return _privateData->internalOwnershipFlag;
+        return _internalOwnershipFlag;
     }
 
 
     OpenGLRenderContext::OpenGLRenderContext( OpenGLSystemDriverHandle pDriver )
     : SysObject( pDriver->mSysContext )
     , mGLSystemDriver( std::move( pDriver ) )
-    , _privateData( std::make_unique<OpenGLRenderContextPrivateData>() )
     {}
 
-    OpenGLRenderContext::~OpenGLRenderContext() noexcept
-    {
-    }
+    OpenGLRenderContext::~OpenGLRenderContext() noexcept = default;
 
     void OpenGLRenderContext::bindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface )
     {
@@ -345,12 +340,12 @@ namespace ts3::system
 
     void OpenGLRenderContext::setInternalOwnershipFlag( bool pOwnershipFlag )
     {
-        _privateData->internalOwnershipFlag = pOwnershipFlag;
+        _internalOwnershipFlag = pOwnershipFlag;
     }
 
     bool OpenGLRenderContext::hasInternalOwnershipFlag() const
     {
-        return _privateData->internalOwnershipFlag;
+        return _internalOwnershipFlag;
     }
 
 } // namespace ts3::system

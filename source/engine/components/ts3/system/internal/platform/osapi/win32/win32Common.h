@@ -12,12 +12,12 @@ namespace ts3::system
 {
 
     template <typename TpBaseType, typename TpNativeData>
-    class Win32NativeObject : public TpBaseType, public NativeObject<TpNativeData>
+    class Win32NativeObject : public NativeObject<TpBaseType, TpNativeData>
     {
     public:
         template <typename... TpBaseTypeArgs>
         Win32NativeObject( TpBaseTypeArgs && ...pBaseTypeArgs )
-        : TpBaseType( std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
+        : NativeObject( std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
         {}
 
         virtual ~Win32NativeObject() = default;

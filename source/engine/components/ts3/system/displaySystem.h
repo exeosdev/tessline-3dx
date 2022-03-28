@@ -52,6 +52,8 @@ namespace ts3::system
 	/// @brief
 	class DisplayDriver : public SysObject
 	{
+        friend class DisplayManager;
+
 	public:
 		DisplayManagerHandle const mDisplayManager;
 		EDisplayDriverType const mDriverType;
