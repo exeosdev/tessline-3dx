@@ -106,7 +106,7 @@ namespace ts3::system
         // Returns a handle to an existing output of a specified adapter with a given output name (DeviceID);
         Handle<Win32DisplayOutput> _findAdapterOutputForDisplayDeviceName( DisplayAdapter & pAdapter, const char * pDeviceName );
 
-        // Returns a handle to an existing output of any of existing adapters with a given output name (DeviceID);
+        // Returns a handle to an existing output of an existing adapter with a given output name (DeviceID);
         Handle<Win32DisplayOutput> _findAnyOutputForDisplayDeviceName( const char * pDeviceName );
 
         //

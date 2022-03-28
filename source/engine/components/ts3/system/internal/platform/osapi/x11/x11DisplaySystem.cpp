@@ -13,34 +13,16 @@ namespace ts3::system
     }
 
 
-    X11DisplayAdapter::X11DisplayAdapter( X11DisplayDriver & pDisplayDriver )
-    : X11NativeObject( pDisplayDriver )
-    {}
-
-    X11DisplayAdapter::~X11DisplayAdapter() noexcept = default;
-
-
-    X11DisplayOutput::X11DisplayOutput( X11DisplayAdapter & pDisplayAdapter )
-    : X11NativeObject( pDisplayAdapter )
-    {}
-
-    X11DisplayOutput::~X11DisplayOutput() noexcept = default;
-
-
-    X11DisplayVideoMode::X11DisplayVideoMode( X11DisplayOutput & pDisplayOutput )
-    : X11NativeObject( pDisplayOutput )
-    {}
-
-    X11DisplayVideoMode::~X11DisplayVideoMode() noexcept = default;
-
-
     X11DisplayManager::X11DisplayManager( SysContextHandle pSysContext )
     : X11NativeObject( std::move( pSysContext ) )
     {
         _initializeX11DisplayManagerState();
     }
 
-    X11DisplayManager::~X11DisplayManager() noexcept = default;
+    X11DisplayManager::~X11DisplayManager() noexcept
+    {
+        _releaseX11DisplayManagerState();
+    }
 
     void X11DisplayManager::_initializeX11DisplayManagerState()
     {
@@ -112,9 +94,14 @@ namespace ts3::system
 
     X11DisplayDriver::X11DisplayDriver( X11DisplayManagerHandle pDisplayManager )
     : X11NativeObject( std::move( pDisplayManager ), EDisplayDriverType::Generic )
-    {}
+    {
+        _initializeX11DisplayDriverState();
+    }
 
-    X11DisplayDriver::~X11DisplayDriver() noexcept = default;
+    X11DisplayDriver::~X11DisplayDriver() noexcept
+    {
+        _releaseX11DisplayDriverState();
+    }
 
     void X11DisplayDriver::_initializeX11DisplayDriverState()
     {
@@ -193,7 +180,7 @@ namespace ts3::system
 
         auto adapterObject = createAdapter<X11DisplayAdapter>( *this );
 
-        auto & adapterDesc = adapterObject->getAdapterDescInternal();
+        auto & adapterDesc = getAdapterDescInternal( *adapterObject );
         adapterDesc.name = "XRR Default Adapter";
         adapterDesc.vendorID = EDisplayAdapterVendorID::Unknown;
         adapterDesc.flags.set( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
@@ -216,11 +203,11 @@ namespace ts3::system
                 {
                     if ( ( monitorInfo.width != 0 ) && ( monitorInfo.height != 0 ) )
                     {
-                        auto outputObject = adapterObject->createOutput<X11DisplayOutput>( *adapterObject );
+                        auto outputObject = createOutput<X11DisplayOutput>( *adapterObject );
                         outputObject->mNativeData.xrrOutputID = monitorOutputID;
                         outputObject->mNativeData.xrrCrtcID = monitorOutputInfo->crtc;
 
-                        auto & outputDesc = outputObject->getOutputDescInternal();
+                        auto & outputDesc = getOutputDescInternal( *outputObject );
                         outputDesc.name = monitorOutputInfo->name;
                         outputDesc.screenRect.offset.x = monitorInfo.x;
                         outputDesc.screenRect.offset.y = monitorInfo.y;
@@ -315,11 +302,11 @@ namespace ts3::system
                     continue;
                 }
 
-                auto videoModeObject = outputX11->createVideoMode<X11DisplayVideoMode>( *outputX11, pColorFormat );
+                auto videoModeObject = createVideoMode<X11DisplayVideoMode>( *outputX11, pColorFormat );
                 videoModeObject->mNativeData.xrrModeID = displayModeInfo.id;
                 videoModeObject->mNativeData.xrrModeInfo = &displayModeInfo;
 
-                auto & videoModeDesc = videoModeObject->getModeDescInternal();
+                auto & videoModeDesc = getVideoModeDescInternal( *videoModeObject );
                 videoModeDesc.settings = videoSettings;
                 videoModeDesc.settingsHash = settingsHash;
 

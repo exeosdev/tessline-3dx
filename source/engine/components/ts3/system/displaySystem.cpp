@@ -410,6 +410,21 @@ namespace ts3::system
         return result;
     }
 
+    DisplayAdapterDesc & DisplayDriver::getAdapterDescInternal( DisplayAdapter & pAdapter )
+    {
+        return pAdapter.getAdapterDescInternal();
+    }
+
+    DisplayOutputDesc & DisplayDriver::getOutputDescInternal( DisplayOutput & pOutput )
+    {
+        return pOutput.getOutputDescInternal();
+    }
+
+    DisplayVideoModeDesc & DisplayDriver::getVideoModeDescInternal( DisplayVideoMode & pVideoMode )
+    {
+        return pVideoMode.getModeDescInternal();
+    }
+
     void DisplayDriver::_initializeDisplayConfiguration()
     {
         // Enum all display devices (adapters and outputs). This process is combined,
@@ -466,12 +481,24 @@ namespace ts3::system
         adapterDesc.driverType = mDriverType;
         adapterDesc.adapterIndex = static_cast<dsm_index_t>( adapterIndex );
 
-        _privateData->adapterInstanceList.push_back( pAdapter );
+        _privateData->adapterInstanceList.push_back( std::move( pAdapter ) );
 
         // Adapters are not added to the helper list at this point.
         // This is done as a post-process step later in DisplayDriver::_enumAdapters().
         // Assertion added to prevent problems in case of refactoring.
         ts3DebugAssert( _privateData->adapterList.empty() );
+    }
+
+    void DisplayDriver::_registerOutput( DisplayAdapter & pAdapter, DisplayOutputHandle pOutput )
+    {
+        ts3DebugAssert( _privateData->adapterList.empty() );
+        pAdapter.registerOutput( std::move( pOutput ) );
+    }
+
+    void DisplayDriver::_registerVideoMode( DisplayOutput & pOutput, EColorFormat pColorFormat, DisplayVideoModeHandle pVideoMode )
+    {
+        ts3DebugAssert( _privateData->adapterList.empty() );
+        pOutput.registerVideoMode( pColorFormat, std::move( pVideoMode ) );
     }
 
     void DisplayDriver::_validateAdaptersConfiguration()
@@ -521,8 +548,8 @@ namespace ts3::system
                 if( !adapterDesc.flags.isSet( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT ) )
                 {
                     ts3DebugOutput(
-                            "Primary/Default adapter selected by the driver does not have "\
-                            "E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT set. Is that intentional?" );
+                        "Primary/Default adapter selected by the driver does not have "\
+                        "E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT set. Is that intentional?" );
                 }
             }
             else
