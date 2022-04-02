@@ -38,11 +38,6 @@ set( TS3_CORE_SRC_FILES
 		"typeinfo/tpiCoreEnum.cpp"
 
         "utility/gdsCore.h"
-		"utility/gdsImplCommon.inl"
-		"utility/gdsImplFuncAutoVariadic.inl"
-		"utility/gdsImplFuncExternal.inl"
-		"utility/gdsImplTypeSupportInternal.inl"
-		"utility/gdsImplTypeSupportStd.inl"
 		"utility/rxmlParser.h"
 		"utility/rxmlParser.cpp"
 		"utility/xmlTypes.h"

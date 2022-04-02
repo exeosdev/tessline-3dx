@@ -7,12 +7,21 @@
 namespace ts3
 {
 
+	/// @brief Base type for GDS-enabled user types. It makes IsGdsSerializable<> to return 'true' for such type.
+	///
+	/// If a class/struct derives from GdsSerializable, it is assumed to provide the following public functions:
+	/// - gds_size_t evalByteSize() const;
+	/// - gds_size_t serialize( void * ) const;
+	/// - gds_size_t deserialize( const void * );
+	/// This enables such type to be passes directly into various gdsCore:: functions.
+	/// Of course, absence of at least one of these functions will immediately result in a compilation error.
 	struct GdsSerializable
 	{};
 
 	template <typename Tp>
 	struct IsGdsSerializable
 	{
+
 		static inline constexpr bool sValue = std::is_base_of<GdsSerializable, Tp>::value;
 	};
 
