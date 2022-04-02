@@ -3,13 +3,10 @@
 #define __TS3_SYSTEM_PLATFORM_OSAPI_OSX_COMMON_H__
 
 #include <ts3/system/prerequisites.h>
-#include <CoreGraphics/CGError.h>
-#include <Foundation/Foundation.h>
+#import <CoreGraphics/CGError.h>
 
 namespace ts3::system
 {
-
-    class SysContext;
 
     namespace platform
     {

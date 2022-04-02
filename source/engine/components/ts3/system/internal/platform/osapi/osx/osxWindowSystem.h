@@ -2,10 +2,12 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_OSX_WINDOW_SYSTEM_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_OSX_WINDOW_SYSTEM_H__
 
-#include "nsWindowProxy.h"
+#include "osxEventCore.h"
+#include "nsOSXWindow.h"
 #include <ts3/system/windowSystem.h>
-#include <AppKit/NSScreen.h>
-#include <AppKit/NSWindow.h>
+
+#import <AppKit/NSScreen.h>
+#import <AppKit/NSWindow.h>
 
 namespace ts3::system
 {
@@ -17,24 +19,34 @@ namespace ts3::system
     namespace platform
     {
 
-        struct OSXWindowNativeData
+        struct OSXWindowNativeData : public OSXEventSourceNativeData
         {
             OSXWindow * parentWindow = nullptr;
 
-            NSWindow __strong * nsWindow = nullptr;
-
-            NSView __strong * nsWindowView = nullptr;
-
-            NSScreen __strong * nsTargetScreen = nullptr;
+			NSScreen * nsTargetScreen = nullptr;
         };
 
-        void osxCreateWindow( OSXWindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo );
+		struct OSXFrameGeometry
+		{
+			NSRect frameRect;
+			NSUInteger style;
+		};
+
+		void osxCreateWindow( OSXWindowNativeData & pWindowNativeData, NSScreen * pTargetScreen, const WindowCreateInfo & pCreateInfo );
+
+		void osxCreateWindowDefaultView( OSXWindowNativeData & pWindowNativeData );
+
+		void osxSetFrameTitle( NSWindow * pNSWindow, const std::string & pTitle );
+
+		void osxUpdateFrameGeometry( NSWindow * pNSWindow, const FrameGeometry & pFrameGeometry, Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags );
+
+		TS3_SYSTEM_API_NODISCARD FrameSize osxGetFrameSize( NSWindow * pNSWindow, EFrameSizeMode pSizeMode );
 
         TS3_SYSTEM_API_NODISCARD NSUInteger osxTranslateFrameStyle( EFrameStyle pStyle );
 
     }
 
-    class OSXWindowManager : public WindowManager
+    class OSXWindowManager : public OSXNativeObject<WindowManager, void>
     {
     public:
         explicit OSXWindowManager( OSXDisplayManagerHandle pDisplayManager );
