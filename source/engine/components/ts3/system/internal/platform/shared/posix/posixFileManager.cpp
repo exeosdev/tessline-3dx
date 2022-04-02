@@ -11,6 +11,8 @@ namespace ts3::system
 
         FILE * _posixOpenFileGeneric( const char * pFilePath, const char * pOpenMode );
 
+        const char * _posixTranslateFileOpenMode( EFileOpenMode pOpenMode );
+
         int _posixTranslateFilePointerRefPos( EFilePointerRefPos pFileRefPos );
 
         std::string _posixGenerateTempFileName();
@@ -25,7 +27,8 @@ namespace ts3::system
 
     FileHandle PosixFileManager::_nativeOpenFile( std::string pFilePath, EFileOpenMode pOpenMode )
     {
-        auto filePtr = platform::_posixOpenFileGeneric( pFilePath.c_str(), "r+" );
+        auto openMode = platform::_posixTranslateFileOpenMode( pOpenMode );
+        auto filePtr = platform::_posixOpenFileGeneric( pFilePath.c_str(), openMode );
         auto fileObject = createSysObject<PosixFile>( getHandle<PosixFileManager>() );
         fileObject->setInternalFilePtr( filePtr );
 
@@ -115,7 +118,7 @@ namespace ts3::system
 
 
     PosixFile::PosixFile( FileManagerHandle pFileManager )
-    : File( std::move( pFileManager ) )
+    : NativeObject( std::move( pFileManager ) )
     {}
 
     PosixFile::~PosixFile() noexcept
@@ -140,8 +143,14 @@ namespace ts3::system
 
     file_size_t PosixFile::_nativeReadData( void * pTargetBuffer, file_size_t pReadSize )
     {
-        auto readBytesNum = ::fread( pBuffer, 1, pReadSize, mNativeData.filePtr );
+        auto readBytesNum = ::fread( pTargetBuffer, 1, pReadSize, mNativeData.filePtr );
         return trunc_numeric_cast<file_size_t>( readBytesNum );
+    }
+
+    file_size_t PosixFile::_nativeWriteData( const void * pData, file_size_t pWriteSize )
+    {
+        auto writtenBytesNum = ::fwrite( pData, 1, pWriteSize, mNativeData.filePtr );
+        return trunc_numeric_cast<file_size_t>( writtenBytesNum );
     }
 
     file_offset_t PosixFile::_nativeSetFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
@@ -159,6 +168,12 @@ namespace ts3::system
         return static_cast<file_offset_t>( currentFilePointer );
     }
 
+    file_offset_t PosixFile::_nativeGetFilePointer() const
+    {
+        auto currentFilePointer = ::ftell( mNativeData.filePtr );
+        return static_cast<file_offset_t>( currentFilePointer );
+    }
+
     file_size_t PosixFile::_nativeGetSize() const
     {
         auto savedFilePointer = ::ftell( mNativeData.filePtr );
@@ -168,6 +183,27 @@ namespace ts3::system
         ::fseek( mNativeData.filePtr, savedFilePointer, SEEK_SET );
 
         return static_cast<file_size_t>( fileSize );
+    }
+
+    file_size_t PosixFile::_nativeGetRemainingBytes() const
+    {
+        auto currentFilePointer = ::ftell( mNativeData.filePtr );
+        ::fseek( mNativeData.filePtr, 0u, SEEK_END );
+
+        auto fileSize = ::ftell( mNativeData.filePtr );
+        ::fseek( mNativeData.filePtr, currentFilePointer, SEEK_SET );
+
+        return static_cast<file_size_t>( fileSize - currentFilePointer );
+    }
+
+    bool PosixFile::_nativeCheckEOF() const
+    {
+        return ::feof( mNativeData.filePtr ) != 0;
+    }
+
+    bool PosixFile::_nativeIsGood() const
+    {
+        return !::feof( mNativeData.filePtr ) && !::ferror( mNativeData.filePtr );
     }
 
 
@@ -185,6 +221,18 @@ namespace ts3::system
             }
 
             return filePtr;
+        }
+
+        const char * _posixTranslateFileOpenMode( EFileOpenMode pOpenMode )
+        {
+            switch( pOpenMode )
+            {
+                case EFileOpenMode::ReadOnly: return "r";
+                case EFileOpenMode::ReadWrite: return "r+";
+                case EFileOpenMode::WriteAppend: return "a";
+                case EFileOpenMode::WriteOverwrite: return "w+";
+            }
+            return "r";
         }
 
         bool _posixIsFile( const char * pFilePath )

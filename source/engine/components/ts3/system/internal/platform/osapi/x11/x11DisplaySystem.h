@@ -47,44 +47,16 @@ namespace ts3::system
         struct X11DisplayVideoModeNativeData : public X11NativeDataCommon
         {
             RRMode xrrModeID = E_X11_XID_NONE;
-            XRRModeInfo  * xrrModeInfo = nullptr;
+            XRRModeInfo * xrrModeInfo = nullptr;
         };
-
-        TS3_FUNC_NO_DISCARD bool x11CheckColorFormatSupport( XDisplay pXDisplay, int pScreenIndex, EColorFormat pColorFormat );
 
     }
 
-    /// @brief
-    class X11DisplayAdapter : public X11NativeObject<DisplayAdapter, platform::X11DisplayAdapterNativeData>
-    {
-        friend class X11DisplayDriver;
+    using X11DisplayAdapter = X11NativeObject<DisplayAdapter, platform::X11DisplayAdapterNativeData>;
+    using X11DisplayOutput = X11NativeObject<DisplayOutput, platform::X11DisplayOutputNativeData>;
+    using X11DisplayVideoMode = X11NativeObject<DisplayVideoMode, platform::X11DisplayVideoModeNativeData>;
 
-    public:
-        explicit X11DisplayAdapter( X11DisplayDriver & pDisplayDriver );
-        virtual ~X11DisplayAdapter() noexcept;
-    };
-
-    /// @brief
-    class X11DisplayOutput : public X11NativeObject<DisplayOutput, platform::X11DisplayOutputNativeData>
-    {
-        friend class X11DisplayDriver;
-
-    public:
-        explicit X11DisplayOutput( X11DisplayAdapter & pDisplayAdapter );
-        virtual ~X11DisplayOutput() noexcept;
-    };
-
-    /// @brief
-    class X11DisplayVideoMode : public X11NativeObject<DisplayVideoMode, platform::X11DisplayVideoModeNativeData>
-    {
-        friend class X11DisplayDriver;
-
-    public:
-        explicit X11DisplayVideoMode( X11DisplayOutput & pDisplayOutput );
-        virtual ~X11DisplayVideoMode() noexcept;
-    };
-
-    /// @brief
+    /// @brief Implementation of DisplayManager for the X11 subsystem.
     class X11DisplayManager : public X11NativeObject<DisplayManager, platform::X11DisplayManagerNativeData>
     {
     public:
@@ -102,7 +74,7 @@ namespace ts3::system
         virtual void _nativeQueryMinWindowSize( DisplaySize & pOutSize ) const override final;
     };
 
-    /// @brief
+    /// @brief Implementation of DisplayDriver for the X11 subsystem.
     class X11DisplayDriver : public X11NativeObject<DisplayDriver, platform::X11DisplayDriverNativeData>
     {
     public:

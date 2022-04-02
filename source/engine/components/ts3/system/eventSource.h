@@ -21,12 +21,12 @@ namespace ts3::system
         {}
 
         template <typename TpCallback>
-        EventSourceInternalDataDeleter( TpCallback pCallback )
+        explicit EventSourceInternalDataDeleter( TpCallback pCallback )
         : deleteCallback( std::forward<TpCallback>( pCallback ) )
         {}
 
         template <typename TpCallback, typename... TpArgs>
-        EventSourceInternalDataDeleter( TpCallback pCallback, TpArgs && ...pArgs )
+        explicit EventSourceInternalDataDeleter( TpCallback pCallback, TpArgs && ...pArgs )
         : deleteCallback( std::bind( pCallback, std::forward<TpArgs>( pArgs )... ) )
         {}
 

@@ -158,8 +158,7 @@ namespace ts3::system
         virtual bool _nativeIsRenderContextBound() const = 0;
 
     private:
-        struct OpenGLSystemDriverPrivateData;
-        std::unique_ptr<OpenGLSystemDriverPrivateData> _privateData;
+        Version _supportedRuntimeVersion;
     };
 
     /// @brief
@@ -233,8 +232,7 @@ namespace ts3::system
         virtual FrameSize _nativeGetSize( EFrameSizeMode pSizeMode ) const = 0;
 
     private:
-        struct OpenGLDisplaySurfacePrivateData;
-        std::unique_ptr<OpenGLDisplaySurfacePrivateData> _privateData;
+        bool _internalOwnershipFlag = true;
     };
 
     /// @brief
@@ -275,8 +273,7 @@ namespace ts3::system
         virtual bool _nativeIsValid() const = 0;
 
     private:
-        struct OpenGLRenderContextPrivateData;
-        std::unique_ptr<OpenGLRenderContextPrivateData> _privateData;
+        bool _internalOwnershipFlag = true;
     };
 
 } // namespace ts3::system

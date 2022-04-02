@@ -23,6 +23,8 @@ namespace ts3::system
         DisplayDriver * const mDisplayDriver;
 
     public:
+        explicit DisplayAdapter( DisplayDriver & pDisplayDriver );
+
         virtual ~DisplayAdapter() noexcept;
 
         TS3_FUNC_NO_DISCARD DisplayOutput * findOutput( DisplayOutputPredicate pPredicate ) const;
@@ -39,23 +41,17 @@ namespace ts3::system
         TS3_FUNC_NO_DISCARD bool hasActiveOutputs() const;
         TS3_FUNC_NO_DISCARD bool hasAnyOutputs() const;
 
-    protected:
-        explicit DisplayAdapter( DisplayDriver & pDisplayDriver );
+    private:
+        // Registers an output of this adapter. Adds it to the list and fills internal info.
+        // Called by the display driver when the display configuration is initialized.
+        void registerOutput( DisplayOutputHandle pOutput );
 
+        // Validates the list of outputs, checks and updates flags, fills the additional pointer-based list.
+        // Internally it also calls validateVideoModesConfiguration() for each output and supported color format.
         uint32 validateOutputsConfiguration();
 
+        // Returns a writable adapter desc. Used by the driver to fill the info about this adapter.
         DisplayAdapterDesc & getAdapterDescInternal();
-
-        template <typename TpOutput, typename TpAdapter>
-        Handle<TpOutput> createOutput( TpAdapter & pAdapter )
-        {
-            auto outputObject = createSysObject<TpOutput>( pAdapter );
-            _registerOutput( outputObject );
-            return outputObject;
-        }
-
-    private:
-        void _registerOutput( DisplayOutputHandle pOutput );
 
     protected:
         struct DisplayAdapterPrivateData;
@@ -65,6 +61,7 @@ namespace ts3::system
     /// @brief
     class DisplayOutput : public SysObject
     {
+        friend class DisplayDriver;
         friend class DisplayAdapter;
 
     public:
@@ -73,6 +70,7 @@ namespace ts3::system
         DisplayAdapter * const mParentAdapter;
 
     public:
+        explicit DisplayOutput( DisplayAdapter & pDisplayAdapter );
         virtual ~DisplayOutput() noexcept;
 
         TS3_FUNC_NO_DISCARD ArrayView<const EColorFormat> getSupportedColorFormatList() const;
@@ -92,23 +90,15 @@ namespace ts3::system
 
         TS3_FUNC_NO_DISCARD bool isColorFormatSupported( EColorFormat pColorFormat ) const;
 
-    protected:
-        explicit DisplayOutput( DisplayAdapter & pDisplayAdapter );
+    private:
+        // Registers a supported video mode for this output. Adds it to the list and fills internal info.
+        // Called by the display driver when the display configuration is initialized.
+        void registerVideoMode( EColorFormat pColorFormat, DisplayVideoModeHandle pVideoMode );
 
         uint32 validateVideoModesConfiguration( EColorFormat pColorFormat );
 
+        // Returns a writable output desc. Used by the driver and parent adapter to fill the info about this output.
         DisplayOutputDesc & getOutputDescInternal();
-
-        template <typename TpVideoMode, typename TpOutput>
-        Handle<TpVideoMode> createVideoMode( TpOutput & pOutput, EColorFormat pColorFormat )
-        {
-            auto videoModeObject = createSysObject<TpVideoMode>( pOutput );
-            _registerVideoMode( pColorFormat, videoModeObject );
-            return videoModeObject;
-        }
-
-    private:
-        void _registerVideoMode( EColorFormat pColorFormat, DisplayVideoModeHandle pVideoMode );
 
     protected:
         struct DisplayOutputPrivateData;
@@ -118,6 +108,7 @@ namespace ts3::system
     /// @brief
     class DisplayVideoMode : public SysObject
     {
+        friend class DisplayDriver;
         friend class DisplayOutput;
 
     public:
@@ -126,13 +117,13 @@ namespace ts3::system
         DisplayOutput * const mParentOutput;
 
     public:
+        explicit DisplayVideoMode( DisplayOutput & pDisplayOutput );
         virtual ~DisplayVideoMode() noexcept;
 
         TS3_FUNC_NO_DISCARD const DisplayVideoModeDesc & getModeDesc() const;
 
-    protected:
-        explicit DisplayVideoMode( DisplayOutput & pDisplayOutput );
-
+    private:
+        // Returns a writable video mode desc. Used by the driver and parent output to fill the info about this video mode.
         DisplayVideoModeDesc & getModeDescInternal();
 
     protected:

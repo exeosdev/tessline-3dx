@@ -54,7 +54,7 @@ namespace ts3::system
 
     void Window::resize( const FrameSize & pSize )
     {
-        FrameGeometry newFrameGeometry;
+        FrameGeometry newFrameGeometry{};
         newFrameGeometry.position = CX_FRAME_POS_AUTO;
         newFrameGeometry.size = pSize;
         newFrameGeometry.style = EFrameStyle::Unspecified;
@@ -67,7 +67,7 @@ namespace ts3::system
 
     void Window::resizeClientArea( const FrameSize & pSize )
     {
-        FrameGeometry newFrameGeometry;
+        FrameGeometry newFrameGeometry{};
         newFrameGeometry.position = CX_FRAME_POS_AUTO;
         newFrameGeometry.size = pSize;
         newFrameGeometry.style = EFrameStyle::Unspecified;

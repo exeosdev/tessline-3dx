@@ -57,22 +57,40 @@ namespace ts3::system
         E_EXCEPTION_CATEGORY_SYSTEM_WINDOW  = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x09 ),
     };
 
-    template <typename TpNativeData>
-    class NativeObject
+    /// @brief Helper proxy-like base class for platform-specific types.
+    /// @tparam TpBaseType Base class to derive from.
+    /// @tparam TpNativeData Native data type with platform-specific state.
+    ///
+    /// Public classes in the System component (like File, Window, GLDriver etc.) are implemented at the platform
+    /// level (Win32File, Win32Window, Win32GLDriver). These classes obviously carry some platform-specific data.
+    /// This class serves as a helper which adds public mNativeData member of a specified type and inherits from
+    /// a given base class. It enables much compact definition of platform-specific types - especially those, that
+    /// only require native data (like Adapter/Output/VideoMode from the display system) - they can be defined as a
+    /// simple typedef.
+    template <typename TpBaseType, typename TpNativeData>
+    class NativeObject : public TpBaseType
     {
     public:
         TpNativeData mNativeData;
 
     public:
-        NativeObject() = default;
+        template <typename... TpBaseArgs>
+        explicit NativeObject( TpBaseArgs && ...pBaseArgs )
+        : TpBaseType( std::forward<TpBaseArgs>( pBaseArgs )... )
+        {}
+
         virtual ~NativeObject() = default;
     };
 
-    template <>
-    class NativeObject<void>
+    template <typename TpBaseType>
+    class NativeObject<TpBaseType, void>
     {
     public:
-        NativeObject() = default;
+        template <typename... TpBaseArgs>
+        explicit NativeObject( TpBaseArgs && ...pBaseArgs )
+        : TpBaseType( std::forward<TpBaseArgs>( pBaseArgs )... )
+        {}
+
         virtual ~NativeObject() = default;
     };
 

@@ -143,8 +143,7 @@ namespace ts3::system
         //
         DisplayOutputDesc outputDesc;
 
-        // The main data. Stores a ColorFormatData strut for each EColorFormat supported/enumerated.
-        // This map should  not be used directly - instead there are dedicated functions provided below.
+        // The main data. Stores a ColorFormatData struct for each EColorFormat supported/enumerated.
         std::map<EColorFormat, ColorFormatData> colorFormatMap;
 
         //

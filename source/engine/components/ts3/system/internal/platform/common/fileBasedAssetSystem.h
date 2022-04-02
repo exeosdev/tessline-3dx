@@ -40,7 +40,7 @@ namespace ts3::system
 
     }
 
-    class FileAssetLoader : public AssetLoader, public NativeObject<platform::FileAssetLoaderNativeData>
+    class FileAssetLoader : public NativeObject<AssetLoader, platform::FileAssetLoaderNativeData>
     {
     public:
         FileManagerHandle const mFileManager;
@@ -63,7 +63,7 @@ namespace ts3::system
         virtual bool _nativeCheckDirectoryExists( const std::string & pDirectoryName ) const override final;
     };
     
-    class FileAssetDirectory : public AssetDirectory, public NativeObject<platform::FileAssetDirectoryNativeData>
+    class FileAssetDirectory : public NativeObject<AssetDirectory, platform::FileAssetDirectoryNativeData>
     {
         friend class FileAssetLoader;
 
@@ -88,7 +88,7 @@ namespace ts3::system
         virtual bool _nativeCheckAssetExists( const std::string & pAssetName ) const override final;
     };
 
-    class FileAsset : public Asset, public NativeObject<platform::FileAssetNativeData>
+    class FileAsset : public NativeObject<Asset, platform::FileAssetNativeData>
     {
         friend class FileAssetLoader;
         

@@ -85,10 +85,29 @@ namespace ts3::system
         return !_privateData->outputInstanceList.empty();
     }
 
+    void DisplayAdapter::registerOutput( DisplayOutputHandle pOutput )
+    {
+        const auto outputIndex = _privateData->outputInstanceList.size();
+
+        DisplayOutputIDGen outputIDGen;
+        outputIDGen.uAdapterIndex = _privateData->adapterDesc.adapterIndex;
+        outputIDGen.uOutputIndex = static_cast<dsm_index_t>( outputIndex );
+
+        auto & outputDesc = pOutput->getOutputDescInternal();
+        outputDesc.driverType = mDriverType;
+        outputDesc.outputIndex = outputIDGen.uOutputIndex;
+        outputDesc.outputID = outputIDGen.outputID;
+
+        _privateData->outputInstanceList.push_back( std::move( pOutput ) );
+
+        // Outputs are not added to the helper list at this point.
+        // This is done as a post-process step later in DisplayDriver::_enumOutputs().
+        // Assertion added to prevent problems in case of refactoring.
+        ts3DebugAssert( _privateData->outputList.empty() );
+    }
+
     uint32 DisplayAdapter::validateOutputsConfiguration()
     {
-        // If the current adapter has any outputs listed, go through them as well
-        // and update the common part of their info just like with adapters above.
         if( !_privateData->outputInstanceList.empty() )
         {
             // Reserve space for the list of pointers/handles for outputs.
@@ -119,15 +138,13 @@ namespace ts3::system
             // Validate if the default output for this adapter has been properly set.
             if( _privateData->primaryOutput )
             {
-                // Just like the above check for default adapter, we check the state of the default output.
-
                 auto & outputDesc = _privateData->primaryOutput->getOutputDescInternal();
                 if( !outputDesc.flags.isSet( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT ) )
                 {
                     ts3DebugOutputFmt(
-                            "Primary/Default output of [%s] selected by the driver does not have "\
-                            "E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT set. Is that intentional?",
-                            _privateData->adapterDesc.name.c_str() );
+                        "Primary/Default output of [%s] selected by the driver does not have "\
+                        "E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT set. Is that intentional?",
+                        _privateData->adapterDesc.name.c_str() );
                 }
             }
             else
@@ -147,27 +164,6 @@ namespace ts3::system
         return _privateData->adapterDesc;
     }
 
-    void DisplayAdapter::_registerOutput( DisplayOutputHandle pOutput )
-    {
-        const auto outputIndex = _privateData->outputInstanceList.size();
-
-        DisplayOutputIDGen outputIDGen;
-        outputIDGen.uAdapterIndex = _privateData->adapterDesc.adapterIndex;
-        outputIDGen.uOutputIndex = static_cast<dsm_index_t>( outputIndex );
-
-        auto & outputDesc = pOutput->getOutputDescInternal();
-        outputDesc.driverType = mDriverType;
-        outputDesc.outputIndex = outputIDGen.uOutputIndex;
-        outputDesc.outputID = outputIDGen.outputID;
-
-        _privateData->outputInstanceList.push_back( pOutput );
-
-        // Outputs are not added to the helper list at this point.
-        // This is done as a post-process step later in DisplayDriver::_enumOutputs().
-        // Assertion added to prevent problems in case of refactoring.
-        ts3DebugAssert( _privateData->outputList.empty() );
-    }
-
 
     DisplayOutput::DisplayOutput( DisplayAdapter & pAdapter )
     : SysObject( pAdapter.mSysContext )
@@ -181,7 +177,8 @@ namespace ts3::system
 
     ArrayView<const EColorFormat> DisplayOutput::getSupportedColorFormatList() const
     {
-        return bindArrayView( _privateData->supportedColorFormatList.data(), _privateData->supportedColorFormatList.size() );
+        return bindArrayView( _privateData->supportedColorFormatList.data(),
+                              _privateData->supportedColorFormatList.size() );
     }
 
     bool DisplayOutput::checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings, EColorFormat pColorFormat ) const
@@ -268,30 +265,7 @@ namespace ts3::system
         return !colorFormatData.videoModeInstanceList.empty();
     }
 
-    uint32 DisplayOutput::validateVideoModesConfiguration( EColorFormat pColorFormat )
-    {
-        auto & colorFormatData = _privateData->colorFormatMap.at( pColorFormat );
-        auto videoModesNum = colorFormatData.videoModeInstanceList.size();
-
-        if( videoModesNum > 0 )
-        {
-            colorFormatData.videoModeList.reserve( videoModesNum );
-
-            for( auto & videoModePtr : colorFormatData.videoModeInstanceList )
-            {
-                colorFormatData.videoModeList.push_back( videoModePtr.get() );
-            }
-        }
-
-        return static_cast<uint32>( videoModesNum );
-    }
-
-    DisplayOutputDesc & DisplayOutput::getOutputDescInternal()
-    {
-        return _privateData->outputDesc;
-    }
-
-    void DisplayOutput::_registerVideoMode( EColorFormat pColorFormat, DisplayVideoModeHandle pVideoMode )
+    void DisplayOutput::registerVideoMode( EColorFormat pColorFormat, DisplayVideoModeHandle pVideoMode )
     {
         auto & colorFormatData = _privateData->colorFormatMap[pColorFormat];
 
@@ -320,6 +294,29 @@ namespace ts3::system
         // This is done as a post-process step later in DisplayDriver::_enumVideoModes().
         // Assertion added to prevent problems in case of refactoring.
         ts3DebugAssert( colorFormatData.videoModeList.empty() );
+    }
+
+    uint32 DisplayOutput::validateVideoModesConfiguration( EColorFormat pColorFormat )
+    {
+        auto & colorFormatData = _privateData->colorFormatMap.at( pColorFormat );
+        auto videoModesNum = colorFormatData.videoModeInstanceList.size();
+
+        if( videoModesNum > 0 )
+        {
+            colorFormatData.videoModeList.reserve( videoModesNum );
+
+            for( auto & videoModePtr : colorFormatData.videoModeInstanceList )
+            {
+                colorFormatData.videoModeList.push_back( videoModePtr.get() );
+            }
+        }
+
+        return static_cast<uint32>( videoModesNum );
+    }
+
+    DisplayOutputDesc & DisplayOutput::getOutputDescInternal()
+    {
+        return _privateData->outputDesc;
     }
 
 

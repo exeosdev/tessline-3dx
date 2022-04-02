@@ -1,5 +1,5 @@
 
-#include "internal/assetSystemPrivate.h"
+#include "assetSystem.h"
 
 namespace ts3::system
 {
@@ -52,16 +52,15 @@ namespace ts3::system
     AssetDirectory::AssetDirectory( AssetLoaderHandle pAssetLoader )
     : SysObject( pAssetLoader->mSysContext )
     , mAssetLoader( std::move( pAssetLoader ) )
-    , _privateData( std::make_unique<AssetDirectoryPrivateData>() )
     {}
 
     AssetDirectory::~AssetDirectory() noexcept = default;
 
     void AssetDirectory::refreshAssetList()
     {
-        if( !_privateData->assetNameList.empty() )
+        if( !_assetNameList.empty() )
         {
-            _privateData->assetNameList.clear();
+            _assetNameList.clear();
         }
         _nativeRefreshAssetList();
     }
@@ -77,7 +76,7 @@ namespace ts3::system
 
     const AssetNameList & AssetDirectory::getAssetList() const
     {
-        return _privateData->assetNameList;
+        return _assetNameList;
     }
 
     bool AssetDirectory::checkAssetExists( const std::string & pAssetName ) const
@@ -87,35 +86,33 @@ namespace ts3::system
 
     const std::string & AssetDirectory::getDirName() const
     {
-        return _privateData->dirName;
+        return _dirName;
     }
 
     void AssetDirectory::addAsset( std::string pAssetName )
     {
-        _privateData->assetNameList.push_back( std::move( pAssetName ) );
+        _assetNameList.push_back( std::move( pAssetName ) );
     }
 
     void AssetDirectory::setAssetList( AssetNameList pAssetList )
     {
-        _privateData->assetNameList = std::move( pAssetList );
+        _assetNameList = std::move( pAssetList );
     }
 
     void AssetDirectory::setDirName( std::string pDirName )
     {
-        _privateData->dirName = std::move( pDirName );
+        _dirName = std::move( pDirName );
     }
 
 
     Asset::Asset( AssetLoaderHandle pAssetLoader )
     : SysObject( pAssetLoader->mSysContext )
     , mAssetDirectory( nullptr )
-    , _privateData( std::make_unique<AssetPrivateData>() )
     {}
 
     Asset::Asset( AssetDirectoryHandle pAssetDirectory )
     : SysObject( pAssetDirectory->mSysContext )
     , mAssetDirectory( std::move( pAssetDirectory ) )
-    , _privateData( std::make_unique<AssetPrivateData>() )
     {}
 
     Asset::~Asset() noexcept = default;
@@ -149,12 +146,12 @@ namespace ts3::system
 
     const std::string & Asset::getName() const
     {
-        return _privateData->name;
+        return _name;
     }
 
     void Asset::setName( std::string pAssetName )
     {
-        _privateData->name = std::move( pAssetName );
+        _name = std::move( pAssetName );
     }
 
 } // namespace ts3::system

@@ -123,7 +123,7 @@ namespace ts3
 
 		const auto maxDataSize = mResourceInfo.dataSize - pResOffset;
 		const auto maxReadSize = getMinOf( pCapacity, maxDataSize );
-		const auto readSize = getMinOf( pReadSize, maxDataSize );
+		const auto readSize = getMinOf( pReadSize, maxReadSize );
 
 		return mIndex->readResourceData( pTarget, readSize, mResourceInfo.dataOffset + pResOffset );
 	}

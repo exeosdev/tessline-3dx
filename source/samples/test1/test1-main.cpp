@@ -11,6 +11,10 @@
 #include <ts3/engine/utility/scfIOSupport.h>
 #include <ts3/engine/utility/scfXMLReader.h>
 #include <ts3/system/sysContextNative.h>
+#include <ts3/system/fileManager.h>
+
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-variable"
 
 using namespace ts3;
 
@@ -20,12 +24,14 @@ void test2_gds();
 int main( int, const char ** )
 {
 	system::SysContextCreateInfo sysContextCreateInfo;
-	sysContextCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
+	// sysContextCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
 	auto sysContext = system::createSysContext( sysContextCreateInfo );
 	auto fileManager = sysContext->createFileManager();
 
+    //fileManager->createFile( "smptex.txt" );
+
 	SCFXMLReader xmlResReader{ fileManager };
-	auto rootNode = xmlResReader.readFile( "C:\\Repo\\Exeos\\tessline-3dx\\Resources.xml" );
+	auto rootNode = xmlResReader.readFile( "/home/mateusz/Desktop/Parallels Shared Folders/Home/Develop/tessline-3dx/Resources.xml" );
 	auto nodes = rootNode.getNodeList( true );
 
 	const auto & resnodes = rootNode.subFolder( "fonts" )->getResourceNodes();
