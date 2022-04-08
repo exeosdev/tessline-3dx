@@ -12,6 +12,114 @@ namespace ts3::system
         {
             switch( pErrno )
             {
+			#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_APPLE )
+				ts3CaseReturn( EPERM           , "Operation not permitted" );
+                ts3CaseReturn( ENOENT          , "No such file or directory" );
+                ts3CaseReturn( ESRCH           , "No such process" );
+                ts3CaseReturn( EINTR           , "Interrupted system call" );
+                ts3CaseReturn( EIO             , "Input/output error" );
+                ts3CaseReturn( ENXIO           , "No such device or address" );
+                ts3CaseReturn( E2BIG           , "Argument list too long" );
+                ts3CaseReturn( ENOEXEC         , "Exec format error" );
+                ts3CaseReturn( EBADF           , "Bad file descriptor" );
+                ts3CaseReturn( ECHILD          , "No child processes" );
+				ts3CaseReturn( EDEADLK         , "Resource deadlock avoided" );
+                ts3CaseReturn( ENOMEM          , "Cannot allocate memory" );
+                ts3CaseReturn( EACCES          , "Permission denied" );
+                ts3CaseReturn( EFAULT          , "Bad address" );
+                ts3CaseReturn( ENOTBLK         , "Block device required" );
+                ts3CaseReturn( EBUSY           , "Device or resource busy" );
+                ts3CaseReturn( EEXIST          , "File exists" );
+                ts3CaseReturn( EXDEV           , "Invalid cross-device link" );
+                ts3CaseReturn( ENODEV          , "No such device" );
+                ts3CaseReturn( ENOTDIR         , "Not a directory" );
+                ts3CaseReturn( EISDIR          , "Is a directory" );
+                ts3CaseReturn( EINVAL          , "Invalid argument" );
+                ts3CaseReturn( ENFILE          , "Too many open files in system" );
+                ts3CaseReturn( EMFILE          , "Too many open files" );
+                ts3CaseReturn( ENOTTY          , "Inappropriate ioctl for device" );
+                ts3CaseReturn( ETXTBSY         , "Text file busy" );
+                ts3CaseReturn( EFBIG           , "File too large" );
+                ts3CaseReturn( ENOSPC          , "No space left on device" );
+                ts3CaseReturn( ESPIPE          , "Illegal seek" );
+                ts3CaseReturn( EROFS           , "Read-only file system" );
+                ts3CaseReturn( EMLINK          , "Too many links" );
+                ts3CaseReturn( EPIPE           , "Broken pipe" );
+                ts3CaseReturn( EDOM            , "Numerical argument out of domain" );
+                ts3CaseReturn( ERANGE          , "Numerical result out of range" );
+				ts3CaseReturn( EAGAIN          , "Resource temporarily unavailable" );
+				ts3CaseReturn( EINPROGRESS     , "Operation now in progress" );
+				ts3CaseReturn( EALREADY        , "Operation already in progress" );
+				ts3CaseReturn( ENOTSOCK        , "Socket operation on non-socket */" );
+				ts3CaseReturn( EDESTADDRREQ    , "Destination address required */" );
+				ts3CaseReturn( EMSGSIZE        , "Message too long */" );
+				ts3CaseReturn( EPROTOTYPE      , "Protocol wrong type for socket */" );
+				ts3CaseReturn( ENOPROTOOPT     , "Protocol not available */" );
+				ts3CaseReturn( EPROTONOSUPPORT , "Protocol not supported */" );
+				ts3CaseReturn( ESOCKTNOSUPPORT , "Socket type not supported" );
+				ts3CaseReturn( ENOTSUP         , " Operation not supported" );
+				ts3CaseReturn( EPFNOSUPPORT    , "Protocol family not supported" );
+				ts3CaseReturn( EAFNOSUPPORT    , "Address family not supported by protocol family */" );
+				ts3CaseReturn( EADDRINUSE      , "Address already in use */" );
+				ts3CaseReturn( EADDRNOTAVAIL   , "Can't assign requested address */" );
+				ts3CaseReturn( ENETDOWN        , "Network is down */" );
+				ts3CaseReturn( ENETUNREACH     , "Network is unreachable */" );
+				ts3CaseReturn( ENETRESET       , "Network dropped connection on reset */" );
+				ts3CaseReturn( ECONNABORTED    , "Software caused connection abort */" );
+				ts3CaseReturn( ECONNRESET      , "Connection reset by peer */" );
+				ts3CaseReturn( ENOBUFS         , "No buffer space available */" );
+				ts3CaseReturn( EISCONN         , "Socket is already connected */" );
+				ts3CaseReturn( ENOTCONN        , "Socket is not connected */" );
+				ts3CaseReturn( ESHUTDOWN       , "Can't send after socket shutdown */" );
+				ts3CaseReturn( ETOOMANYREFS    , "Too many references: can't splice */" );
+				ts3CaseReturn( ETIMEDOUT       , "Operation timed out */" );
+				ts3CaseReturn( ECONNREFUSED    , "Connection refused */" );
+				ts3CaseReturn( ELOOP           , "Too many levels of symbolic links */" );
+				ts3CaseReturn( ENAMETOOLONG    , "File name too long */" );
+				ts3CaseReturn( EHOSTDOWN       , "Host is down */" );
+				ts3CaseReturn( EHOSTUNREACH    , "No route to host */" );
+				ts3CaseReturn( ENOTEMPTY       , "Directory not empty */" );
+				ts3CaseReturn( EPROCLIM        , "Too many processes */" );
+				ts3CaseReturn( EUSERS          , "Too many users */" );
+				ts3CaseReturn( EDQUOT          , "Disc quota exceeded */" );
+				ts3CaseReturn( ESTALE          , "Stale NFS file handle */" );
+				ts3CaseReturn( EREMOTE         , "Too many levels of remote in path */" );
+				ts3CaseReturn( EBADRPC         , "RPC struct is bad */" );
+				ts3CaseReturn( ERPCMISMATCH    , "RPC version wrong */" );
+				ts3CaseReturn( EPROGUNAVAIL    , "RPC prog. not avail */" );
+				ts3CaseReturn( EPROGMISMATCH   , "Program version wrong */" );
+				ts3CaseReturn( EPROCUNAVAIL    , "Bad procedure for program */" );
+				ts3CaseReturn( ENOLCK          , "No locks available */" );
+				ts3CaseReturn( ENOSYS          , "Function not implemented */" );
+				ts3CaseReturn( EFTYPE          , "Inappropriate file type or format */" );
+				ts3CaseReturn( EAUTH           , "Authentication error */" );
+				ts3CaseReturn( ENEEDAUTH       , "Need authenticator */" );
+				ts3CaseReturn( EPWROFF         , "Device power is off */" );
+				ts3CaseReturn( EDEVERR         , "Device error, e.g. paper out */" );
+				ts3CaseReturn( EOVERFLOW       , "Value too large to be stored in data type */" );
+				ts3CaseReturn( EBADEXEC        , "Bad executable */" );
+				ts3CaseReturn( EBADARCH        , "Bad CPU type in executable */" );
+				ts3CaseReturn( ESHLIBVERS      , "Shared library version mismatch */" );
+				ts3CaseReturn( EBADMACHO       , "Malformed Macho file */" );
+				ts3CaseReturn( ECANCELED       , "Operation canceled */" );
+				ts3CaseReturn( EIDRM           , "Identifier removed */" );
+				ts3CaseReturn( ENOMSG          , "No message of desired type */" );
+				ts3CaseReturn( EILSEQ          , "Illegal byte sequence */" );
+				ts3CaseReturn( ENOATTR         , "Attribute not found */" );
+				ts3CaseReturn( EBADMSG         , "Bad message */" );
+				ts3CaseReturn( EMULTIHOP       , "Reserved */" );
+				ts3CaseReturn( ENODATA         , "No message available on STREAM */" );
+				ts3CaseReturn( ENOLINK         , "Reserved */" );
+				ts3CaseReturn( ENOSR           , "No STREAM resources */" );
+				ts3CaseReturn( ENOSTR          , "Not a STREAM */" );
+				ts3CaseReturn( EPROTO          , "Protocol error */" );
+				ts3CaseReturn( ETIME           , "STREAM ioctl timeout */" );
+				ts3CaseReturn( EOPNOTSUPP      , "Operation not supported on socket */" );
+				ts3CaseReturn( ENOPOLICY       , "No such policy registered */" );
+				ts3CaseReturn( ENOTRECOVERABLE , "State not recoverable */" );
+				ts3CaseReturn( EOWNERDEAD      , "Previous owner died */" );
+				ts3CaseReturn( EQFULL          , "Interface output queue is full */" );
+			#elif( TS3_PCL_TARGET_OS & ( TS3_PCL_TARGET_PLATFORM_ANDROID | TS3_PCL_TARGET_PLATFORM_LINUX ) )
                 ts3CaseReturn( EPERM           , "Operation not permitted" );
                 ts3CaseReturn( ENOENT          , "No such file or directory" );
                 ts3CaseReturn( ESRCH           , "No such process" );
@@ -143,10 +251,12 @@ namespace ts3::system
                 ts3CaseReturn( ENOTRECOVERABLE , "State not recoverable" );
                 ts3CaseReturn( ERFKILL         , "Operation not possible due to RF-kill" );
                 ts3CaseReturn( EHWPOISON       , "Memory page has hardware error" );
+			#endif
+				default: break;
             }
             return "UNKNOWN_ERROR";
         }
 
-    }
+    } // namespace platform
 
-}
+} // namespace ts3::system

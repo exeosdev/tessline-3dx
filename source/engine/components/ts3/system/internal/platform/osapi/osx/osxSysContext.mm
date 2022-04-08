@@ -5,6 +5,7 @@
 #include "osxWindowSystem.h"
 #include <ts3/system/sysContextNative.h>
 #include <ts3/system/assetSystemNative.h>
+#include "nsOSXApplicationProxy.h"
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_OSX )
 namespace ts3::system
@@ -33,7 +34,7 @@ namespace ts3::system
 
     EventControllerHandle OSXSysContext::createEventController()
     {
-        return nullptr;//createSysObject<OSXEventController>( getHandle<OSXSysContext>() );
+        return createSysObject<OSXEventController>( getHandle<OSXSysContext>() );
     }
 
     FileManagerHandle OSXSysContext::createFileManager()
@@ -70,13 +71,42 @@ namespace ts3::system
         return executableFilePath;
     }
 
+	bool OSXSysContext::isNSAppProxyRegistered() const
+	{
+		return _stateMask.isSet( E_STATE_NS_APP_PROXY_REGISTERED, std::memory_order_acquire );
+	}
+
     void OSXSysContext::_initializeOSXContextState()
     {
+		_registerNSAppProxy();
     }
 
     void OSXSysContext::_releaseOSXContextState()
     {
     }
+
+	void OSXSysContext::_registerNSAppProxy()
+	{
+	@autoreleasepool
+	{
+		auto & osxSharedData = platform::osxGetOSXSharedData( *this );
+
+		[NSOSXApplicationProxy sharedApplication];
+		ts3DebugAssert( NSApp != nil );
+
+		auto * nsAppDelegate = [[NSOSXApplicationDelegate alloc] init];
+		[nsAppDelegate setOSXSysContext:this];
+		[(NSApplication *)NSApp setDelegate:nsAppDelegate];
+		mNativeData.nsApplicationDelegate = nsAppDelegate;
+
+		_stateMask.set( E_STATE_NS_APP_PROXY_REGISTERED, std::memory_order_release );
+
+		if( !osxSharedData.stateFlags.isSet( platform::E_OSX_COMMON_STATE_APP_FINISHED_LAUNCHING_BIT ) )
+		{
+			[NSApp finishLaunching];
+		}
+	}
+	}
 
 
 	namespace platform

@@ -66,7 +66,7 @@ namespace ts3::system
                 xSessionDataPtr = nullptr;
             }
 
-            X11SessionData & getSessionData() const
+			TS3_FUNC_NO_DISCARD X11SessionData & getSessionData() const
             {
                 ts3DebugAssert( xSessionDataPtr != nullptr );
                 return *xSessionDataPtr;
