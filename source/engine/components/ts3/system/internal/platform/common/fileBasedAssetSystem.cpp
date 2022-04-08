@@ -161,9 +161,7 @@ namespace ts3::system
     namespace platform
     {
 
-        AssetLoaderHandle createFileAssetLoader( SysContextHandle pSysContext,
-                                                 FileManagerHandle pFileManager,
-                                                 std::string pRootDirectory )
+        AssetLoaderHandle createFileAssetLoader( SysContextHandle pSysContext, FileManagerHandle pFileManager, const std::string & pRootDirectory )
         {
             if( !pFileManager )
             {
@@ -180,6 +178,15 @@ namespace ts3::system
 
             return assetLoader;
         }
+
+
+		AssetLoaderHandle createFileAssetLoader( SysContextHandle pSysContext, const AssetLoaderCreateInfoNativeParams & pCreateParams )
+		{
+			const auto & fileManager = pCreateParams.fileManager;
+			const auto & rootDir = pCreateParams.relativeAssetRootDir;
+
+			return createFileAssetLoader( std::move( pSysContext ), fileManager, rootDir );
+		}
 
 
         std::string _commonResolveFileName( FileManager & pFileManager,

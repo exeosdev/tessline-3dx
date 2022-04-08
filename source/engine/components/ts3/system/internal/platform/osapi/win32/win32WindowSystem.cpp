@@ -284,33 +284,33 @@ namespace ts3::system
 
         Win32FrameGeometry _win32CheckFrameGeometry( const FrameGeometry & pFrameGeometry )
         {
-            Win32FrameGeometry frameGeometry;
-            frameGeometry.frameRect.left = static_cast<LONG>( pFrameGeometry.position.x );
-            frameGeometry.frameRect.top = static_cast<LONG>( pFrameGeometry.position.y );
-            frameGeometry.frameRect.right = frameGeometry.frameRect.left + static_cast<LONG>( pFrameGeometry.size.x );
-            frameGeometry.frameRect.bottom = frameGeometry.frameRect.top + static_cast<LONG>( pFrameGeometry.size.y );
-            frameGeometry.style = _win32TranslateFrameStyle( pFrameGeometry.style );
+            Win32FrameGeometry win32Geometry;
+            win32Geometry.frameRect.left = static_cast<LONG>( pFrameGeometry.position.x );
+            win32Geometry.frameRect.top = static_cast<LONG>( pFrameGeometry.position.y );
+            win32Geometry.frameRect.right = win32Geometry.frameRect.left + static_cast<LONG>( pFrameGeometry.size.x );
+            win32Geometry.frameRect.bottom = win32Geometry.frameRect.top + static_cast<LONG>( pFrameGeometry.size.y );
+            win32Geometry.style = _win32TranslateFrameStyle( pFrameGeometry.style );
 
-            ::AdjustWindowRect( &( frameGeometry.frameRect ), frameGeometry.style, FALSE );
+            ::AdjustWindowRect( &( win32Geometry.frameRect ), win32Geometry.style, FALSE );
 
-            return frameGeometry;
+            return win32Geometry;
         }
 
         Win32FrameGeometry _win32CheckFrameGeometryUpdate( HWND pWindowHwnd,
                                                            const FrameGeometry & pFrameGeometry,
                                                            Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags )
         {
-            Win32FrameGeometry resultFrameGeometry;
+            Win32FrameGeometry win32Geometry;
 
             if( pUpdateFlags.isSet( E_FRAME_GEOMETRY_UPDATE_FLAG_STYLE_BIT ) )
             {
                 // If the style-related flag is set, it means the window style will change.
                 // Current style is irrelevant - translate the new one and save it in result.
-                resultFrameGeometry.style = _win32TranslateFrameStyle( pFrameGeometry.style );
+                win32Geometry.style = _win32TranslateFrameStyle( pFrameGeometry.style );
             }
             else
             {
-                resultFrameGeometry.style = ::GetWindowLongA( pWindowHwnd, GWL_STYLE );
+                win32Geometry.style = ::GetWindowLongA( pWindowHwnd, GWL_STYLE );
             }
 
             if( pUpdateFlags.isSetAnyOf( E_FRAME_GEOMETRY_UPDATE_FLAG_POSITION_BIT | E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_BIT ) )
@@ -334,22 +334,22 @@ namespace ts3::system
                     frameHeight = static_cast<LONG>( pFrameGeometry.size.y );
                 }
 
-                resultFrameGeometry.frameRect.left = framePosX;
-                resultFrameGeometry.frameRect.top = framePosY;
-                resultFrameGeometry.frameRect.right = framePosX + frameWidth;
-                resultFrameGeometry.frameRect.bottom = framePosY + frameHeight;
+                win32Geometry.frameRect.left = framePosX;
+                win32Geometry.frameRect.top = framePosY;
+                win32Geometry.frameRect.right = framePosX + frameWidth;
+                win32Geometry.frameRect.bottom = framePosY + frameHeight;
 
                 if( pUpdateFlags.isSet( E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_CLIENT_AREA_BIT ) )
                 {
-                    ::AdjustWindowRect( &( resultFrameGeometry.frameRect ), resultFrameGeometry.style, FALSE );
+                    ::AdjustWindowRect( &( win32Geometry.frameRect ), win32Geometry.style, FALSE );
                 }
             }
             else
             {
-                ::GetWindowRect( pWindowHwnd, &( resultFrameGeometry.frameRect ) );
+                ::GetWindowRect( pWindowHwnd, &( win32Geometry.frameRect ) );
             }
 
-            return resultFrameGeometry;
+            return win32Geometry;
         }
 
         LRESULT __stdcall _win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam )

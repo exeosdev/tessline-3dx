@@ -34,9 +34,12 @@ namespace ts3::system
             std::string relativeAssetRootDir;
         };
 
-        TS3_SYSTEM_API_NODISCARD AssetLoaderHandle createFileAssetLoader( SysContextHandle pSysContext,
-                                                                          FileManagerHandle pFileManager,
-                                                                          std::string pRootDirectory );
+		TS3_SYSTEM_API_NODISCARD AssetLoaderHandle createFileAssetLoader( SysContextHandle pSysContext,
+																		  FileManagerHandle pFileManager,
+																		  const std::string & pRootDirectory );
+
+		TS3_SYSTEM_API_NODISCARD AssetLoaderHandle createFileAssetLoader( SysContextHandle pSysContext,
+																		  const AssetLoaderCreateInfoNativeParams & pCreateParams );
 
     }
 
