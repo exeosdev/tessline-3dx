@@ -38,16 +38,6 @@ namespace ts3::system
     	return _readAuto( pTarget, pReadSize );
     }
 
-    file_size_t File::readAuto( std::vector<byte> & pTarget, file_size_t pReadSize )
-    {
-    	return _readAuto( pTarget, pReadSize );
-    }
-
-    file_size_t File::readAuto( std::string & pTarget, file_size_t pReadSize )
-    {
-    	return _readAuto( pTarget, pReadSize );
-    }
-
     file_size_t File::write( const void * pData, file_size_t pDataSize, file_size_t pWriteSize )
     {
     	if( !pData || ( pDataSize == 0 ) || ( pWriteSize == 0 ) )
@@ -66,16 +56,6 @@ namespace ts3::system
     }
 
     file_size_t File::write( const ByteArray & pSource, file_size_t pWriteSize )
-    {
-    	return _write( pSource, pWriteSize );
-    }
-
-    file_size_t File::write( const std::vector<byte> & pSource, file_size_t pWriteSize )
-    {
-    	return _write( pSource, pWriteSize );
-    }
-
-    file_size_t File::write( const std::string & pSource, file_size_t pWriteSize )
     {
     	return _write( pSource, pWriteSize );
     }

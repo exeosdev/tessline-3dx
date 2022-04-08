@@ -83,7 +83,7 @@ namespace ts3::system
     };
 
     template <typename TpBaseType>
-    class NativeObject<TpBaseType, void>
+    class NativeObject<TpBaseType, void> : public TpBaseType
     {
     public:
         template <typename... TpBaseArgs>

@@ -1,7 +1,6 @@
 
 #include "displaySystem.h"
 #include "internal/displaySystemPrivate.h"
-#include "displaySystemNative.h"
 
 namespace ts3::system
 {

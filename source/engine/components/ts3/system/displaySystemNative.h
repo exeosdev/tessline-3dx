@@ -6,6 +6,8 @@
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 #  include "internal/platform/osapi/android/androidDisplaySystem.h"
+#elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_OSX )
+#  include "internal/platform/osapi/osx/osxDisplaySystem.h"
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 )
 #  include "internal/platform/osapi/win32/win32DisplaySystem.h"
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )

@@ -6,17 +6,6 @@
 #include "sysObject.h"
 #include <ts3/stdext/byteArray.h>
 
-namespace std
-{
-
-	template <typename _T, size_t _N>
-	class array;
-
-	template <typename _T, typename _Alloc>
-	class vector;
-
-}
-
 namespace ts3::system
 {
 
@@ -66,16 +55,24 @@ namespace ts3::system
 
 		file_size_t readAuto( DynamicMemoryBuffer & pTarget, file_size_t pReadSize = CX_FILE_SIZE_MAX );
 		file_size_t readAuto( DynamicByteArray & pTarget, file_size_t pReadSize = CX_FILE_SIZE_MAX );
-		file_size_t readAuto( std::vector<byte> & pTarget, file_size_t pReadSize = CX_FILE_SIZE_MAX );
-		file_size_t readAuto( std::string & pTarget, file_size_t pReadSize = CX_FILE_SIZE_MAX );
+
+		template <typename TpResizableBuffer>//, std::enable_if_t<!std::is_pointer<TpResizableBuffer>::value, int>>
+		file_size_t readAuto( TpResizableBuffer & pTarget, file_size_t pReadSize = CX_FILE_SIZE_MAX )
+		{
+			return _readAuto( pTarget, pReadSize );
+		}
 
 		file_size_t write( const void * pData, file_size_t pDataSize, file_size_t pWriteSize = CX_FILE_SIZE_MAX );
 		file_size_t write( const ReadOnlyMemoryView & pSource, file_size_t pWriteSize = CX_FILE_SIZE_MAX );
 		
 		file_size_t write( const MemoryBuffer & pSource, file_size_t pWriteSize = CX_FILE_SIZE_MAX );
 		file_size_t write( const ByteArray & pSource, file_size_t pWriteSize = CX_FILE_SIZE_MAX );
-		file_size_t write( const std::vector<byte> & pSource, file_size_t pWriteSize = CX_FILE_SIZE_MAX );
-		file_size_t write( const std::string & pSource, file_size_t pWriteSize = CX_FILE_SIZE_MAX );
+
+		template <typename TpBuffer, std::enable_if_t<!std::is_pointer<TpBuffer>::value, int>>
+		file_size_t write( const TpBuffer & pSource, file_size_t pWriteSize )
+		{
+			return _write( pSource, pWriteSize );
+		}
 
 		file_offset_t moveFilePointer( file_offset_t pOffset );
 
@@ -107,17 +104,17 @@ namespace ts3::system
 			return _nativeReadData( pTarget.data(), readSize );
 		}
 
-		template <typename TpBuffer>
-		file_size_t _write( const TpBuffer & pSource, file_size_t pWriteSize )
+		template <typename TpContinuousBuffer>
+		file_size_t _write( const TpContinuousBuffer & pBuffer, file_size_t pWriteSize )
 		{
 			if( pWriteSize == 0 )
 			{
 				return 0;
 			}
 
-			const auto writeSize = getMinOf( pSource.size(), pWriteSize );
+			const auto writeSize = getMinOf( pBuffer.size(), pWriteSize );
 
-			return _nativeWriteData( pSource.data(), writeSize );
+			return _nativeWriteData( pBuffer.data(), writeSize );
 		}
 
 		virtual file_size_t _nativeReadData( void * pTargetBuffer, file_size_t pReadSize ) = 0;

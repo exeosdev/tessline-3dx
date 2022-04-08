@@ -7,6 +7,14 @@
 namespace ts3::system
 {
 
+	namespace platform
+	{
+
+		struct AssetLoaderCreateInfoNativeParams;
+		struct SysContextCreateInfoNativeParams;
+
+	}
+
     ts3SysDeclareHandle( SysContext );
     ts3SysDeclareHandle( AssetLoader );
     ts3SysDeclareHandle( DisplayManager );
@@ -15,7 +23,15 @@ namespace ts3::system
     ts3SysDeclareHandle( OpenGLSystemDriver );
     ts3SysDeclareHandle( WindowManager );
 
-    struct AssetLoaderCreateInfo;
+	struct AssetLoaderCreateInfo
+	{
+		platform::AssetLoaderCreateInfoNativeParams * nativeParams = nullptr;
+	};
+
+	struct SysContextCreateInfo
+	{
+		platform::SysContextCreateInfoNativeParams * nativeParams = nullptr;
+	};
 
 	/// @brief
 	class SysContext : public DynamicInterface
@@ -40,6 +56,15 @@ namespace ts3::system
 
         std::string queryCurrentProcessExecutableDirectory() const;
     };
+
+	namespace platform
+	{
+
+		/// @brief Creates a new SysContext instance and returns the handle.
+		/// @param pCreateInfo
+		TS3_SYSTEM_API_NODISCARD SysContextHandle createSysContext( const SysContextCreateInfo & pCreateInfo );
+
+	}
 
 } // namespace ts3::system
 
