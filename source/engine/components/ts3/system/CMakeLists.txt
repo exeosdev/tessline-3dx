@@ -163,15 +163,23 @@ endif()
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
-            "internal/platform/osapi/osx/nsOpenGLViewProxy.h"
-            "internal/platform/osapi/osx/nsOpenGLViewProxy.mm"
-            "internal/platform/osapi/osx/nsWindowProxy.h"
-            "internal/platform/osapi/osx/nsWindowProxy.mm"
+            "internal/platform/osapi/osx/nsOSXApplicationProxy.h"
+            "internal/platform/osapi/osx/nsOSXApplicationProxy.mm"
+            "internal/platform/osapi/osx/nsOSXEventListener.h"
+            "internal/platform/osapi/osx/nsOSXEventListener.mm"
+            "internal/platform/osapi/osx/nsOSXOpenGL.h"
+            "internal/platform/osapi/osx/nsOSXOpenGL.mm"
+            "internal/platform/osapi/osx/nsOSXWindow.h"
+            "internal/platform/osapi/osx/nsOSXWindow.mm"
             "internal/platform/osapi/osx/osxAssetSystem.h"
             "internal/platform/osapi/osx/osxCommon.h"
             "internal/platform/osapi/osx/osxCommon.mm"
             "internal/platform/osapi/osx/osxDisplaySystem.h"
             "internal/platform/osapi/osx/osxDisplaySystem.mm"
+            "internal/platform/osapi/osx/osxEventCore.h"
+            "internal/platform/osapi/osx/osxEventCore.mm"
+            "internal/platform/osapi/osx/osxSysContext.h"
+            "internal/platform/osapi/osx/osxSysContext.mm"
             "internal/platform/osapi/osx/osxWindowSystem.h"
             "internal/platform/osapi/osx/osxWindowSystem.mm"
             #"internal/platform/osapi/osx/osxEventCore.h"
@@ -246,11 +254,18 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
             )
 endif()
 
+find_library(FrmLib_AppKit AppKit)
+find_library(FrmLib_CoreFoundation CoreFoundation)
+find_library(FrmLib_Foundation Foundation)
+
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
     target_link_libraries( ts3-system PUBLIC
-            -framework AppKit
-            -framework CoreFoundation
-            -framework Foundation
+            #-framework AppKit
+            #-framework CoreFoundation
+            #-framework Foundation
+            ${FrmLib_AppKit}
+            ${FrmLib_CoreFoundation}
+            ${FrmLib_Foundation}
             )
 endif()
 

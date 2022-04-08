@@ -4,7 +4,6 @@
 
 #include "osxWindowSystem.h"
 #include <ts3/system/windowCommon.h>
-
 #import <AppKit/NSOpenGL.h>
 #import <AppKit/NSOpenGLView.h>
 #import <stdatomic.h>

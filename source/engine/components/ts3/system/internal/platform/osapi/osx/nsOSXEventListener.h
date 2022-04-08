@@ -4,25 +4,22 @@
 
 #include "osxCommon.h"
 #include <ts3/system/eventCommon.h>
-
 #import <AppKit/NSWindow.h>
-
-namespace ts3::system::platform
-{
-
-	struct OSXEventSourceNativeData;
-
-}
 
 /// @brief
 @interface NSOSXEventListener : NSResponder<NSWindowDelegate>
 {
-	@public ts3::system::platform::OSXEventSourceNativeData * mEventSourceNativeData;
+	@public NSWindow * mNSWindow;
+	@public NSView * mNSView;
 }
+
+-( NSOSXEventListener * ) initForNSWindow:( NSWindow * ) pNSWindow;
 
 -( void ) bind;
 -( void ) unbind;
 
+-( void ) keyDown:( NSEvent * ) pEvent;
+-( void ) keyUp:( NSEvent * ) pEvent;
 -( void ) mouseDown:( NSEvent * ) pEvent;
 -( void ) rightMouseDown:( NSEvent * ) pEvent;
 -( void ) otherMouseDown:( NSEvent * ) pEvent;
@@ -54,6 +51,7 @@ namespace ts3::system::platform
 -( void ) windowDidEnterFullScreen:( NSNotification * ) pNotification;
 -( void ) windowWillExitFullScreen:( NSNotification * ) pNotification;
 -( void ) windowDidExitFullScreen:( NSNotification * ) pNotification;
+-( void ) windowWillClose:( NSNotification * ) pNotification;
 -( BOOL ) windowShouldClose:( id ) pSender;
 
 -( NSApplicationPresentationOptions ) window:( NSWindow * ) pWindow
