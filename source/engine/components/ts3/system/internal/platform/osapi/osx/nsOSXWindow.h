@@ -4,7 +4,6 @@
 
 #include "osxCommon.h"
 #include <ts3/system/windowCommon.h>
-
 #import <AppKit/NSWindow.h>
 
 namespace ts3::system
@@ -43,6 +42,12 @@ namespace ts3::system
 }
 
 -( void ) setNSWindow:( NSOSXWindow * ) pWindow;
+
+-( BOOL ) acceptsFirstResponder;
+
+//-( void ) keyDown:( NSEvent * ) pEvent;
+
+//-( void ) rightMouseDown:( NSEvent * ) pEvent;
 
 @end
 

@@ -2,10 +2,11 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_OSX_DISPLAY_SYSTEM_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_OSX_DISPLAY_SYSTEM_H__
 
-#include "osxCommon.h"
+#include "osxSysContext.h"
 #include <ts3/system/displayConfiguration.h>
 #include <ts3/system/displaySystem.h>
-#include <CoreGraphics/CGDirectDisplay.h>
+
+#import <CoreGraphics/CGDirectDisplay.h>
 
 namespace ts3::system
 {
@@ -16,28 +17,32 @@ namespace ts3::system
     namespace platform
     {
 
-        struct OSXDisplayManagerNativeData
+        struct OSXDisplayManagerNativeData : public OSXNativeDataCommon
         {
             std::unique_ptr<CGDirectDisplayID[]> cgActiveDisplayList;
             CGDisplayCount cgActiveDisplaysNum = 0;
 			CGDirectDisplayID cgMainDisplayID = kCGNullDirectDisplay;
         };
 
-        struct OSXDisplayDriverNativeData
+        struct OSXDisplayDriverNativeData : public OSXNativeDataCommon
         {
         };
 
-        struct OSXDisplayAdapterNativeData
+        struct OSXDisplayAdapterNativeData : public OSXNativeDataCommon
         {
         };
 
-        struct OSXDisplayOutputNativeData
+        struct OSXDisplayOutputNativeData : public OSXNativeDataCommon
         {
         };
 
-        struct OSXDisplayVideoModeNativeData
+        struct OSXDisplayVideoModeNativeData : public OSXNativeDataCommon
         {
         };
+
+		TS3_SYSTEM_API_NODISCARD ScreenRect osxQueryDisplayBounds( CGDirectDisplayID pCGDisplayID );
+
+		TS3_SYSTEM_API_NODISCARD DisplaySize osxQueryDisplaySize( CGDirectDisplayID pCGDisplayID );
 
     }
 
@@ -67,7 +72,7 @@ namespace ts3::system
     class OSXDisplayDriver : public OSXNativeObject<DisplayDriver, platform::OSXDisplayDriverNativeData>
     {
     public:
-        explicit OSXDisplayDriver( DisplayManagerHandle pDisplayManager );
+        explicit OSXDisplayDriver( OSXDisplayManagerHandle pDisplayManager );
         virtual ~OSXDisplayDriver() noexcept;
 
     private:

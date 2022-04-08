@@ -78,16 +78,65 @@ namespace ts3::system
 			throw 0;
 		}
 
-		const auto displayRect = ::CGDisplayBounds( mNativeData.cgMainDisplayID );
-
-		pOutSize.x = static_cast<uint32>( displayRect.size.width );
-		pOutSize.y = static_cast<uint32>( displayRect.size.height );
+		pOutSize = platform::osxQueryDisplaySize( mNativeData.cgMainDisplayID );
 	}
 
 	void OSXDisplayManager::_nativeQueryMinWindowSize( DisplaySize & pOutSize ) const
 	{
 		pOutSize.x = 1;
 		pOutSize.y = 1;
+	}
+
+
+	OSXDisplayDriver::OSXDisplayDriver( OSXDisplayManagerHandle pDisplayManager )
+	: OSXNativeObject( std::move( pDisplayManager ), EDisplayDriverType::Generic )
+	{}
+
+	OSXDisplayDriver::~OSXDisplayDriver() noexcept = default;
+
+	void OSXDisplayDriver::_nativeEnumDisplayDevices()
+	{}
+
+	void OSXDisplayDriver::_nativeEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat )
+	{}
+
+	EColorFormat OSXDisplayDriver::_nativeQueryDefaultSystemColorFormat() const
+	{
+		return EColorFormat::B8G8R8A8;
+	}
+
+
+	namespace platform
+	{
+
+		ScreenRect osxQueryDisplayBounds( CGDirectDisplayID pCGDisplayID )
+		{
+			ts3DebugAssert( pCGDisplayID != kCGNullDirectDisplay );
+
+			const auto cgDisplayRect = ::CGDisplayBounds( pCGDisplayID );
+
+			ScreenRect displayRect{};
+			displayRect.offset.x = static_cast<int32>( cgDisplayRect.origin.x );
+			displayRect.offset.y = static_cast<int32>( cgDisplayRect.origin.y );
+			displayRect.size.x = static_cast<int32>( cgDisplayRect.size.width );
+			displayRect.size.y = static_cast<int32>( cgDisplayRect.size.height );
+
+			return displayRect;
+		}
+
+		DisplaySize osxQueryDisplaySize( CGDirectDisplayID pCGDisplayID )
+		{
+			ts3DebugAssert( pCGDisplayID != kCGNullDirectDisplay );
+
+			const auto cgDisplayRect = ::CGDisplayBounds( pCGDisplayID );
+
+			DisplaySize displaySize{};
+			displaySize.x = static_cast<int32>( cgDisplayRect.size.width );
+			displaySize.y = static_cast<int32>( cgDisplayRect.size.height );
+
+			return displaySize;
+		}
+
 	}
 
 } // namespace ts3::system

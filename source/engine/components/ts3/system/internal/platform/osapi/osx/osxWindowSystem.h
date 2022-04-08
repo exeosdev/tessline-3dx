@@ -3,9 +3,7 @@
 #define __TS3_SYSTEM_PLATFORM_OSAPI_OSX_WINDOW_SYSTEM_H__
 
 #include "osxEventCore.h"
-#include "nsOSXWindow.h"
 #include <ts3/system/windowSystem.h>
-
 #import <AppKit/NSScreen.h>
 #import <AppKit/NSWindow.h>
 
@@ -36,6 +34,8 @@ namespace ts3::system
 
 		void osxCreateWindowDefaultView( OSXWindowNativeData & pWindowNativeData );
 
+		void osxCreateEventListener( OSXWindowNativeData & pWindowNativeData );
+
 		void osxSetFrameTitle( NSWindow * pNSWindow, const std::string & pTitle );
 
 		void osxUpdateFrameGeometry( NSWindow * pNSWindow, const FrameGeometry & pFrameGeometry, Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags );
@@ -46,7 +46,7 @@ namespace ts3::system
 
     }
 
-    class OSXWindowManager : public OSXNativeObject<WindowManager, void>
+    class OSXWindowManager : public OSXNativeObject<WindowManager, platform::OSXNativeDataCommon>
     {
     public:
         explicit OSXWindowManager( OSXDisplayManagerHandle pDisplayManager );

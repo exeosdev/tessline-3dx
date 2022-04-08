@@ -15,6 +15,7 @@
 
 -( void ) sendEvent: ( NSEvent * )pEvent
 {
+	[super sendEvent:pEvent];
 }
 
 -( void ) doCommandBySelector: ( SEL )pSelector
@@ -28,7 +29,23 @@
 
 -( void ) setNSWindow: ( NSOSXWindow * )pWindow
 {
-	self->mNSWindow = pWindow;
+	mNSWindow = pWindow;
 }
+
+-( BOOL ) acceptsFirstResponder
+{
+	return NO;
+}
+
+//-( void ) keyDown:( NSEvent * ) pEvent
+//{
+//	ts3DebugInterrupt();
+//	[super keyDown:pEvent];
+//}
+
+//-( void ) rightMouseDown:( NSEvent * ) pEvent
+//{
+//	[super rightMouseDown:pEvent];
+//}
 
 @end

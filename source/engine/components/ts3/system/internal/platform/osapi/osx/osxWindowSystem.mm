@@ -2,6 +2,7 @@
 #include "osxWindowSystem.h"
 #include "osxDisplaySystem.h"
 #include "nsOSXWindow.h"
+#include "nsOSXEventListener.h"
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_OSX )
 namespace ts3::system
@@ -34,12 +35,37 @@ namespace ts3::system
 
 		auto windowObject = createSysObject<OSXWindow>( getHandle<OSXWindowManager>() );
 
-		platform::osxCreateWindow( windowObject->mNativeData, defaultScreen, pCreateInfo );
+		@try
+		{
+			platform::osxCreateWindow( windowObject->mNativeData, defaultScreen, pCreateInfo );
 
-		auto * nsWindow = windowObject->mNativeData.nsWindow;
+			platform::osxCreateWindowDefaultView( windowObject->mNativeData );
 
-		[nsWindow update];
-		[nsWindow display];
+			platform::osxCreateEventListener( windowObject->mNativeData );
+
+			auto * nsWindow = ( NSWindow * )windowObject->mNativeData.nsWindow;
+
+			// [nsWindow update];
+			// [nsWindow display];
+
+			if( ![nsWindow isMiniaturized] )
+			{
+				// auto * nsWindowEventListener = windowObject->mNativeData.nsEventListener;
+
+				//[nsWindowEventListener pauseVisibleObservation];
+
+				[NSApp activateIgnoringOtherApps:YES];
+				// [nsWindow makeKeyAndOrderFront:nil];
+				[nsWindow orderFrontRegardless];
+
+				//[windowData->listener resumeVisibleObservation];
+			}
+		}
+		@catch( NSException * pException )
+		{
+			const auto message = [[pException reason] UTF8String];
+			ts3DebugInterrupt();
+		}
 
 		return windowObject;
 	}
@@ -110,7 +136,6 @@ namespace ts3::system
 		{
 		@autoreleasepool
 		{
-
 			if( ![( id )pWindowNativeData.nsWindow isKindOfClass:[NSOSXWindow class]] )
 			{
 				return;
@@ -123,8 +148,37 @@ namespace ts3::system
 				const auto windowRect = [nsWindow contentRectForFrameRect:[nsWindow frame]];
 				NSOSXWindowView * nsWindowView = [[NSOSXWindowView alloc] initWithFrame:windowRect];
 				[nsWindowView setNSWindow:nsWindow];
-
 				[nsWindow setContentView:nsWindowView];
+				[nsWindow makeFirstResponder:nsWindowView];
+
+				pWindowNativeData.nsView = nsWindowView;
+			}
+			@catch( NSException * pException )
+			{
+				const auto message = [[pException reason] UTF8String];
+				ts3DebugInterrupt();
+			}
+		}
+		}
+
+		void osxCreateEventListener( OSXWindowNativeData & pWindowNativeData )
+		{
+		@autoreleasepool
+		{
+
+			if( ![( id )pWindowNativeData.nsWindow isKindOfClass:[NSOSXWindow class]] )
+			{
+				return;
+			}
+
+			auto * nsWindow = static_cast<NSOSXWindow *>( pWindowNativeData.nsWindow );
+
+			@try
+			{
+				auto * nsEventListener = [[NSOSXEventListener alloc] initForNSWindow:nsWindow];
+				[nsEventListener bind];
+
+				pWindowNativeData.nsEventListener = nsEventListener;
 			}
 			@catch( NSException * pException )
 			{
