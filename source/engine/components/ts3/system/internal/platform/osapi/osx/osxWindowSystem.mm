@@ -145,12 +145,7 @@ namespace ts3::system
 
 			@try
 			{
-				const auto windowRect = [nsWindow contentRectForFrameRect:[nsWindow frame]];
-				NSOSXWindowView * nsWindowView = [[NSOSXWindowView alloc] initWithFrame:windowRect];
-				[nsWindowView setNSWindow:nsWindow];
-				[nsWindow setContentView:nsWindowView];
-				[nsWindow makeFirstResponder:nsWindowView];
-
+				NSOSXWindowView * nsWindowView = [[NSOSXWindowView alloc] initForWindow:nsWindow];
 				pWindowNativeData.nsView = nsWindowView;
 			}
 			@catch( NSException * pException )
@@ -165,13 +160,12 @@ namespace ts3::system
 		{
 		@autoreleasepool
 		{
-
 			if( ![( id )pWindowNativeData.nsWindow isKindOfClass:[NSOSXWindow class]] )
 			{
 				return;
 			}
 
-			auto * nsWindow = static_cast<NSOSXWindow *>( pWindowNativeData.nsWindow );
+			auto * nsWindow = ( NSOSXWindow * )( pWindowNativeData.nsWindow );
 
 			@try
 			{

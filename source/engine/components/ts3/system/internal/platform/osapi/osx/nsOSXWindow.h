@@ -32,6 +32,12 @@ namespace ts3::system
 
 -( void ) doCommandBySelector:( SEL ) pSelector;
 
+-( void ) keyDown:( NSEvent * ) pEvent;
+
+-( void ) mouseDown:( NSEvent * ) pEvent;
+
+-( void ) rightMouseDown:( NSEvent * ) pEvent;
+
 @end
 
 
@@ -41,13 +47,15 @@ namespace ts3::system
 	NSOSXWindow * mNSWindow;
 }
 
--( void ) setNSWindow:( NSOSXWindow * ) pWindow;
+-( NSOSXWindowView * ) initForWindow:( NSOSXWindow * ) pWindow;
 
 -( BOOL ) acceptsFirstResponder;
 
-//-( void ) keyDown:( NSEvent * ) pEvent;
+-( void ) keyDown:( NSEvent * ) pEvent;
 
-//-( void ) rightMouseDown:( NSEvent * ) pEvent;
+-( void ) mouseDown:( NSEvent * ) pEvent;
+
+-( void ) rightMouseDown:( NSEvent * ) pEvent;
 
 @end
 

@@ -18,10 +18,9 @@
 {
 	ts3DebugAssert( mNSWindow != nil );
 
-	NSNotificationCenter * nsNotificationCenter = [NSNotificationCenter defaultCenter];
-
 	if( [mNSWindow delegate] != nil )
 	{
+		NSNotificationCenter * nsNotificationCenter = [NSNotificationCenter defaultCenter];
 		[nsNotificationCenter addObserver:self selector:@selector(windowDidExpose:) name:NSWindowDidExposeNotification object:mNSWindow];
 		[nsNotificationCenter addObserver:self selector:@selector(windowDidMove:) name:NSWindowDidMoveNotification object:mNSWindow];
 		[nsNotificationCenter addObserver:self selector:@selector(windowDidResize:) name:NSWindowDidResizeNotification object:mNSWindow];
@@ -35,8 +34,8 @@
 		[nsNotificationCenter addObserver:self selector:@selector(windowDidEnterFullScreen:) name:NSWindowDidEnterFullScreenNotification object:mNSWindow];
 		[nsNotificationCenter addObserver:self selector:@selector(windowWillExitFullScreen:) name:NSWindowWillExitFullScreenNotification object:mNSWindow];
 		[nsNotificationCenter addObserver:self selector:@selector(windowDidExitFullScreen:) name:NSWindowDidExitFullScreenNotification object:mNSWindow];
-		[nsNotificationCenter addObserver:self selector:@selector(windowDidFailToEnterFullScreen:) name:@"NSWindowDidFailToEnterFullScreenNotification" object:mNSWindow];
-		[nsNotificationCenter addObserver:self selector:@selector(windowDidFailToExitFullScreen:) name:@"NSWindowDidFailToExitFullScreenNotification" object:mNSWindow];
+		//[nsNotificationCenter addObserver:self selector:@selector(windowDidFailToEnterFullScreen:) name:@"NSWindowDidFailToEnterFullScreenNotification" object:mNSWindow];
+		//[nsNotificationCenter addObserver:self selector:@selector(windowDidFailToExitFullScreen:) name:@"NSWindowDidFailToExitFullScreenNotification" object:mNSWindow];
 	}
 	else
 	{
@@ -47,9 +46,6 @@
 
 	[mNSWindow setNextResponder:self];
 	[mNSWindow setAcceptsMouseMovedEvents:YES];
-
-	[mNSView setNextResponder:self];
-	[mNSView setAcceptsTouchEvents:YES];
 }
 }
 
@@ -57,10 +53,9 @@
 {
 @autoreleasepool
 {
-	NSNotificationCenter * nsNotificationCenter = [NSNotificationCenter defaultCenter];
-
 	if( [mNSWindow delegate] != self )
 	{
+		NSNotificationCenter * nsNotificationCenter = [NSNotificationCenter defaultCenter];
 		[nsNotificationCenter removeObserver:self name:NSWindowDidExposeNotification object:mNSWindow];
 		[nsNotificationCenter removeObserver:self name:NSWindowDidMoveNotification object:mNSWindow];
 		[nsNotificationCenter removeObserver:self name:NSWindowDidResizeNotification object:mNSWindow];
@@ -74,8 +69,8 @@
 		[nsNotificationCenter removeObserver:self name:NSWindowDidEnterFullScreenNotification object:mNSWindow];
 		[nsNotificationCenter removeObserver:self name:NSWindowWillExitFullScreenNotification object:mNSWindow];
 		[nsNotificationCenter removeObserver:self name:NSWindowDidExitFullScreenNotification object:mNSWindow];
-		[nsNotificationCenter removeObserver:self name:@"NSWindowDidFailToEnterFullScreenNotification" object:mNSWindow];
-		[nsNotificationCenter removeObserver:self name:@"NSWindowDidFailToExitFullScreenNotification" object:mNSWindow];
+		//[nsNotificationCenter removeObserver:self name:@"NSWindowDidFailToEnterFullScreenNotification" object:mNSWindow];
+		//[nsNotificationCenter removeObserver:self name:@"NSWindowDidFailToExitFullScreenNotification" object:mNSWindow];
 	}
 	else
 	{
@@ -125,7 +120,6 @@
 
 -( void ) keyDown:( NSEvent * ) pEvent
 {
-	ts3DebugInterrupt();
 }
 
 -( void ) keyUp:( NSEvent * ) pEvent
@@ -138,7 +132,6 @@
 
 -( void ) rightMouseDown:( NSEvent * ) pEvent
 {
-	ts3DebugInterrupt();
 	[super rightMouseDown:pEvent];
 }
 
@@ -253,7 +246,6 @@
 
 -( void ) windowWillClose:( NSNotification * ) pNotification
 {
-	[self nextResponder];
 }
 
 -( BOOL ) windowShouldClose:( id ) pSender

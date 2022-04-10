@@ -45,11 +45,21 @@ namespace ts3::system
 
 -( void ) dealloc;
 
--( void ) windowWillClose: (NSNotification *)pNotification;
+-( void ) applicationDidBecomeActiveNotificationHandler:( NSNotification * )pNotification;
 
--( void ) applicationWillFinishLaunching: (NSNotification *)pNotification;
+-( void ) currentLocaleDidChangeNotificationHandler:( NSNotification * )pNotification;
 
--( void ) applicationDidFinishLaunching: (NSNotification *)pNotification;
+-( void ) windowWillCloseNotificationHandler:( NSNotification * )pNotification;
+
+-( void ) applicationWillFinishLaunching:( NSNotification * )pNotification;
+
+-( void ) applicationDidFinishLaunching:( NSNotification * )pNotification;
+
+-( BOOL ) applicationShouldTerminateAfterLastWindowClosed:( NSApplication * )pApplication;
+
+-( NSApplicationTerminateReply ) applicationShouldTerminate:( NSApplication * )pSender;
+
+-( void ) applicationWillTerminate:( NSNotification * )pNotification;
 
 @end
 
