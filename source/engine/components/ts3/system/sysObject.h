@@ -81,7 +81,7 @@ namespace ts3::system
 
 		void setStateFlags( bool pSetOrUnset, Bitmask<ESysObjectStateFlags> pFlags )
 		{
-			_stateMask.setOrUnset( pSetOrUnset, pFlags );
+			_stateMask.setOrUnset( pFlags, pSetOrUnset );
 		}
 
 	private:

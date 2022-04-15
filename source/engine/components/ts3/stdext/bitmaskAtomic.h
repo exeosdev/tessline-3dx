@@ -92,7 +92,7 @@ namespace ts3
 		}
 
 		template <typename TpBits>
-		void setOrUnset( bool pSet, TpBits pBits )
+		void setOrUnset( TpBits pBits, bool pSet )
 		{
 			if( pSet )
 			{
@@ -105,7 +105,7 @@ namespace ts3
 		}
 
 		template <typename TpBits>
-		void setOrUnset( bool pSet, TpBits pBits, std::memory_order pOrder )
+		void setOrUnset( TpBits pBits, bool pSet, std::memory_order pOrder )
 		{
 			if( pSet )
 			{
