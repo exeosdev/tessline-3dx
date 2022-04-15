@@ -21,12 +21,13 @@ namespace ts3::system
         struct X11DisplayManagerNativeData : public X11NativeDataCommon
         {
             uint32 screenDepth = 0;
+            Version xrrVersion = CX_VERSION_UNKNOWN;
+            XRRMonitorInfo xrrDefaultMonitorInfo;
         };
 
         struct X11DisplayDriverNativeData : public X11NativeDataCommon
         {
             uint32 screenDepth = 0;
-            Version xrrVersion = CX_VERSION_UNKNOWN;
             XRRScreenResources * xrrScreenResources = nullptr;
             XRRMonitorInfo * xrrMonitorList = nullptr;
             int xrrMonitorsNum = 0;
@@ -68,6 +69,8 @@ namespace ts3::system
         void _releaseX11DisplayManagerState();
 
         virtual DisplayDriverHandle _nativeCreateDisplayDriver() override final;
+
+        virtual void _nativeQueryDefaultDisplayOffset( DisplayOffset & pOutOffset ) const override final;
 
         virtual void _nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const override final;
 

@@ -87,6 +87,13 @@ namespace ts3::system
         return resolvedDriverID;
     }
 
+    DisplayOffset DisplayManager::queryDefaultDisplayOffset() const
+    {
+    	DisplayOffset result;
+    	_nativeQueryDefaultDisplayOffset( result );
+    	return result;
+    }
+
     DisplaySize DisplayManager::queryDefaultDisplaySize() const
     {
         DisplaySize result;
@@ -131,8 +138,10 @@ namespace ts3::system
             {
                 return false;
             }
+
             auto maxPosX = static_cast<int32>( screenSize.x - frameSize.x );
             auto maxPosY = static_cast<int32>( screenSize.y - frameSize.y );
+
             if ( ( framePos.x > maxPosX ) || ( framePos.y > maxPosY ) )
             {
                 return false;
@@ -149,6 +158,7 @@ namespace ts3::system
         const auto & framePos = pFrameGeometry.position;
         const auto & frameSize = pFrameGeometry.size;
 
+        auto screenOffset = queryDefaultDisplayOffset();
         auto screenSize = queryDefaultDisplaySize();
         auto minFrameSize = queryMinWindowSize();
 
@@ -191,6 +201,9 @@ namespace ts3::system
             resultGeometry.position.x = getMinOf( resultGeometry.position.x, maxPosX );
             resultGeometry.position.y = getMinOf( resultGeometry.position.y, maxPosY );
         }
+
+        resultGeometry.position.x += screenOffset.x;
+        resultGeometry.position.y += screenOffset.y;
 
         return resultGeometry;
     }
