@@ -190,9 +190,9 @@ int main( int pArgc, const char ** pArgv )
                 return true;
             });
     evtDispatcher->setEventHandler(
-            EEventCodeIndex::WindowUpdateClose,
+            EEventCodeIndex::WindowUpdateDestroy,
             [evtDispatcher,&gxDriverState](const EventObject & pEvt) -> bool {
-                if( pEvt.eWindowUpdateClose.checkEventSource( gxDriverState.presentationLayer->getInternalSystemEventSource() ) )
+                if( pEvt.eWindowUpdateDestroy.checkEventSource( gxDriverState.presentationLayer->getInternalSystemEventSource() ) )
                 {
                     evtDispatcher->postEventAppQuit();
                 }

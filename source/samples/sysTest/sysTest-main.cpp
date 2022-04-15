@@ -27,7 +27,7 @@ void initializeGraphicsCreateDriver( GfxState & pGfxState )
 void initializeGraphicsCreateSurface( GfxState & pGfxState )
 {
     GLDisplaySurfaceCreateInfo surfaceCreateInfo;
-    surfaceCreateInfo.frameGeometry.size = {0, 0 };
+    surfaceCreateInfo.frameGeometry.size = {800, 600 };
     surfaceCreateInfo.frameGeometry.style = EFrameStyle::Caption;
     surfaceCreateInfo.visualConfig = vsxGetDefaultVisualConfigForSysWindow();
     surfaceCreateInfo.runtimeVersionDesc.apiProfile = EGLAPIProfile::OpenGL;
@@ -103,14 +103,14 @@ int main( int pArgc, const char ** pArgv )
 
 #endif
 
-    auto psAsset = assetLoader->openSubAsset( "shaders/GL4/fx_passthrough_ps", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
-    auto vsAsset = assetLoader->openSubAsset( "shaders/GL4/fx_passthrough_vs", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
-
-    std::string shaderCodePS;
-    psAsset->readAll( shaderCodePS );
-
-    std::string shaderCodeVS;
-    vsAsset->readAll( shaderCodeVS );
+//    auto psAsset = assetLoader->openSubAsset( "shaders/GL4/fx_passthrough_ps", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
+//    auto vsAsset = assetLoader->openSubAsset( "shaders/GL4/fx_passthrough_vs", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
+//
+//    std::string shaderCodePS;
+//    psAsset->readAll( shaderCodePS );
+//
+//    std::string shaderCodeVS;
+//    vsAsset->readAll( shaderCodeVS );
 
     GfxState gfxState;
 
@@ -167,11 +167,11 @@ int main( int pArgc, const char ** pArgv )
                 return true;
             });
     evtDispatcher->setEventHandler(
-            EEventCodeIndex::WindowUpdateClose,
+            EEventCodeIndex::WindowUpdateDestroy,
             [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
-                if( pEvt.eWindowUpdateClose.checkEventSource( gfxState.glSurface.get() ) )
+                if( pEvt.eWindowUpdateDestroy.checkEventSource( gfxState.glSurface.get() ) )
                 {
-                    evtDispatcher->postEventAppQuit();
+                    // evtDispatcher->postEventAppQuit();
                 }
                 return true;
             });
@@ -180,14 +180,15 @@ int main( int pArgc, const char ** pArgv )
             [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
                 if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::Escape )
                 {
-                    evtDispatcher->postEventAppQuit();
                 }
                 return true;
             });
 
     initializeGraphics( sysContext, gfxState );
 
-    evtController->registerEventSource( *(gfxState.glSurface) );
+    evtController->registerPrimaryEventSource( *(gfxState.glSurface) );
+    evtController->setEventSystemConfigFlags( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_QUIT_ON_PRIMARY_SOURCE_DESTROY_BIT );
+
     gfxState.glSystemDriver->releaseInitState( *(gfxState.glContext) );
     gfxState.glContext->bindForCurrentThread( *(gfxState.glSurface) );
 
