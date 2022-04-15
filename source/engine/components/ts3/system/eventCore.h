@@ -121,11 +121,11 @@ namespace ts3::system
 
 		TS3_FUNC_NO_DISCARD size_t getRegisteredEventSourcesNum() const noexcept;
 
+		TS3_FUNC_NO_DISCARD EventSource * getPrimaryEventSource() const noexcept;
+
 		TS3_FUNC_NO_DISCARD EventSource * getRegisteredEventSourceByIndex( size_t pIndex ) const noexcept;
 
 		TS3_FUNC_NO_DISCARD bool isEventSourceRegistered( const EventSource & pEventSource ) const noexcept;
-
-		TS3_FUNC_NO_DISCARD bool isPrimaryEventSource( const EventSource & pEventSource ) const noexcept;
 
 	protected:
 	    EventDispatcherInputState & getEventDispatcherInputState();

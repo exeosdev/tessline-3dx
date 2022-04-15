@@ -25,7 +25,7 @@ namespace ts3::system
 
 	bool EventSource::isPrimaryEventSource() const
 	{
-		return _eventControllerActiveRef && _eventControllerActiveRef->isPrimaryEventSource( *this );
+		return _eventControllerActiveRef && ( this == _eventControllerActiveRef->getPrimaryEventSource() );
 	}
 
 	bool EventSource::isLastEventSource() const

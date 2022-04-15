@@ -116,11 +116,14 @@ namespace ts3::system
 
 		const auto dispatchResult = _privateData->activeEventDispatcher->postEvent( pEvent );
 
-		if( dispatchResult && ( pEvent.code == E_EVENT_CODE_WINDOW_UPDATE_CLOSE ) )
+		if( dispatchResult && ( pEvent.code == E_EVENT_CODE_WINDOW_UPDATE_DESTROY ) )
 		{
-			auto * eventSource = pEvent.eWindowUpdateClose.eventSource;
-
-			_checkAndPostAppAutoQuitEvent( E_EVENT_CODE_WINDOW_UPDATE_CLOSE, *eventSource );
+			//
+			if( auto * eventSource = pEvent.eWindowUpdateDestroy.eventSource )
+			{
+				//
+				_checkAndPostAppAutoQuitEvent( E_EVENT_CODE_WINDOW_UPDATE_DESTROY, *eventSource );
+			}
 		}
 
 		return dispatchResult;
@@ -236,7 +239,7 @@ namespace ts3::system
 	{
 		const auto configFlagsOnly = ( pFlags & E_EVENT_SYSTEM_CONFIG_MASK_ALL );
 		ts3DebugAssert( configFlagsOnly == pFlags );
-		return _checkInternalStateFlags( configFlagsOnly );
+		return _checkInternalStateFlags( configFlagsOnly ) == configFlagsOnly;
 	}
 
 	EventSource * EventController::findEventSource( const EventSourceFindPredicate & pPredicate ) const
@@ -293,6 +296,11 @@ namespace ts3::system
 		return _privateData->eventSourceList.size();
 	}
 
+	EventSource * EventController::getPrimaryEventSource() const noexcept
+	{
+		return _privateData->primaryEventSource;
+	}
+
 	EventSource * EventController::getRegisteredEventSourceByIndex( size_t pIndex ) const noexcept
 	{
 		return _privateData->eventSourceList[pIndex];
@@ -308,11 +316,6 @@ namespace ts3::system
 			}
 		}
 		return false;
-	}
-
-	bool EventController::isPrimaryEventSource( const EventSource & pEventSource ) const noexcept
-	{
-		return &pEventSource == _privateData->primaryEventSource;
 	}
 
 	EventDispatcherInputState & EventController::getEventDispatcherInputState()
@@ -403,7 +406,7 @@ namespace ts3::system
 
 	bool EventController::_checkAndPostAppAutoQuitEvent( EEventCode pEvent, EventSource & pEventSource )
 	{
-		if( pEvent != E_EVENT_CODE_WINDOW_UPDATE_CLOSE )
+		if( pEvent != E_EVENT_CODE_WINDOW_UPDATE_DESTROY )
 		{
 			return false;
 		}
@@ -566,12 +569,12 @@ namespace ts3::system
 
 	void EventDispatcher::setDispatcherConfigFlags( Bitmask<EEventDispatcherConfigFlags> pFlags, bool pSetOrUnset )
 	{
-		_privateData->evtDispatcherConfig.dispatcherConfigFlags.setOrUnset( pSetOrUnset, pFlags );
+		_privateData->evtDispatcherConfig.dispatcherConfigFlags.setOrUnset( pFlags, pSetOrUnset );
 	}
 
 	void EventDispatcher::setIdleProcessingMode( bool pIdle )
 	{
-		_privateData->evtDispatcherConfig.dispatcherConfigFlags.setOrUnset( pIdle, E_EVENT_DISPATCHER_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT );
+		_privateData->evtDispatcherConfig.dispatcherConfigFlags.setOrUnset( E_EVENT_DISPATCHER_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT, pIdle );
 	}
 
 	bool EventDispatcher::postEvent( EventObject pEvent )
@@ -646,12 +649,12 @@ namespace ts3::system
 	}
 
 	void _preProcessEventOnInputMouseButton( EvtInputMouseButton & pMouseButtonEvent,
-	                                         const EventDispatcherConfig & pDispatcherConfig,
-	                                         EvtSharedInputMouseState & pInputMouseState );
+											 const EventDispatcherConfig & pDispatcherConfig,
+											 EvtSharedInputMouseState & pInputMouseState );
 
 	void _preProcessEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent,
-	                                                   const EventDispatcherConfig & pDispatcherConfig,
-	                                                   EvtSharedInputMouseState & pInputMouseState );
+													   const EventDispatcherConfig & pDispatcherConfig,
+													   EvtSharedInputMouseState & pInputMouseState );
 
 	void EventDispatcher::_preProcessEvent( EventObject & pEvent )
 	{
@@ -660,14 +663,14 @@ namespace ts3::system
 		if ( pEvent.code == E_EVENT_CODE_INPUT_MOUSE_BUTTON )
 		{
 			_preProcessEventOnInputMouseButton( pEvent.eInputMouseButton,
-			                                    _privateData->evtDispatcherConfig,
-			                                    _privateData->evtDispatcherInputState.inputMouseState );
+												_privateData->evtDispatcherConfig,
+												_privateData->evtDispatcherInputState.inputMouseState );
 		}
 	}
 
 	void _preProcessEventOnInputMouseButton( EvtInputMouseButton & pMouseButtonEvent,
-	                                         const EventDispatcherConfig & pDispatcherConfig,
-	                                         EvtSharedInputMouseState & pInputMouseState )
+											 const EventDispatcherConfig & pDispatcherConfig,
+											 EvtSharedInputMouseState & pInputMouseState )
 	{
 		if ( pDispatcherConfig.dispatcherConfigFlags.isSet( E_EVENT_DISPATCHER_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT ) )
 		{
@@ -679,8 +682,8 @@ namespace ts3::system
 	}
 
 	void _preProcessEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent,
-	                                                   const EventDispatcherConfig & pDispatcherConfig,
-	                                                   EvtSharedInputMouseState & pInputMouseState )
+													   const EventDispatcherConfig & pDispatcherConfig,
+													   EvtSharedInputMouseState & pInputMouseState )
 	{
 		bool multiClickEventSet = false;
 

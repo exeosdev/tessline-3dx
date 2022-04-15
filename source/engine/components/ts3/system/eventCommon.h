@@ -68,7 +68,8 @@ namespace ts3::system
 		InputTouchDown,
 		InputTouchMove,
 		InputTouchUp,
-		WindowUpdateClose,
+		WindowUpdateCreate,
+		WindowUpdateDestroy,
 		WindowUpdateFullscreen,
 		WindowUpdateResize,
 		WindowUpdateVisibility,
@@ -191,7 +192,8 @@ namespace ts3::system
 		E_EVENT_CODE_INPUT_TOUCH_MOVE           = ecDeclareEventCodeInputTouch( EEventCodeIndex::InputTouchMove ),
 		E_EVENT_CODE_INPUT_TOUCH_UP             = ecDeclareEventCodeInputTouch( EEventCodeIndex::InputTouchUp ),
 
-		E_EVENT_CODE_WINDOW_UPDATE_CLOSE        = ecDeclareEventCodeWindowUpdate( EEventCodeIndex::WindowUpdateClose ),
+		E_EVENT_CODE_WINDOW_UPDATE_CREATE       = ecDeclareEventCodeWindowUpdate( EEventCodeIndex::WindowUpdateCreate ),
+		E_EVENT_CODE_WINDOW_UPDATE_DESTROY      = ecDeclareEventCodeWindowUpdate( EEventCodeIndex::WindowUpdateDestroy ),
 		E_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN   = ecDeclareEventCodeWindowUpdate( EEventCodeIndex::WindowUpdateFullscreen ),
 		E_EVENT_CODE_WINDOW_UPDATE_RESIZE       = ecDeclareEventCodeWindowUpdate( EEventCodeIndex::WindowUpdateResize ),
 		E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY   = ecDeclareEventCodeWindowUpdate( EEventCodeIndex::WindowUpdateVisibility )
