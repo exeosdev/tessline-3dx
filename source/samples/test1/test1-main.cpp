@@ -118,16 +118,16 @@ void test2_gds()
 {
     const std::wstring driverName1 = L"GL4";
     byte binaryBuffer[512];
-    GdsCore::serialize( binaryBuffer, driverName1 );
+    gdscore::serialize( binaryBuffer, driverName1 );
 
     std::wstring driverName2;
-    GdsCore::deserialize( binaryBuffer, driverName2 );
+    gdscore::deserialize( binaryBuffer, driverName2 );
 
     std::vector<int64> vector1{ 4, 5, 6, 7, 8 };
-    GdsCore::serialize( binaryBuffer, vector1 );
+    gdscore::serialize( binaryBuffer, vector1 );
 
     std::vector<int64> vector2;
-    GdsCore::deserialize( binaryBuffer, vector2 );
+    gdscore::deserialize( binaryBuffer, vector2 );
 
     std::string smString = "SampleX1";
     std::vector<std::string> strVec1;
@@ -139,19 +139,19 @@ void test2_gds()
     auto strVec1AV = bindArrayView( strVec1.data(), strVec1.size() );
     auto strVec2AV = bindArrayView( strVec2.data(), strVec2.size() );
 
-    GdsCore::serialize( binaryBuffer, strVec1AV );
-    GdsCore::deserialize( binaryBuffer, strVec2AV );
+    gdscore::serialize( binaryBuffer, strVec1AV );
+    gdscore::deserialize( binaryBuffer, strVec2AV );
 
-    const auto binSize1 = GdsCore::evalByteSize( strVec1AV );
-    const auto binSize2 = GdsCore::evalByteSize( strVec2AV );
+    const auto binSize1 = gdscore::evalByteSize( strVec1AV );
+    const auto binSize2 = gdscore::evalByteSize( strVec2AV );
 
     std::vector<uint16> u16Vec;
     u16Vec.resize( 32 );
 
-    //const auto u16VecS0 = GdsCore::evalByteSize( u16Vec );
+    //const auto u16VecS0 = gdscore::evalByteSize( u16Vec );
     //ts3DebugAssert( u16VecS0 == ( u16Vec.size() * sizeof( uint16 ) + sizeof( uint64 ) ) );
 
-    //const auto u16VecS1 = GdsCore::evalByteSize( gds::typeCast<uint64>( u16Vec ) );
+    //const auto u16VecS1 = gdscore::evalByteSize( gds::typeCast<uint64>( u16Vec ) );
     //ts3DebugAssert( u16VecS1 == ( u16Vec.size() * sizeof( uint64 ) + sizeof( uint64 ) ) );
 
     std::unordered_map<std::string, std::string> M0;
@@ -160,6 +160,6 @@ void test2_gds()
     M0["Magdalena1"] = "Mazur";
 
     std::unordered_map<std::string, std::string> M1;
-    GdsCore::serialize( binaryBuffer, M0 );
-    GdsCore::deserialize( binaryBuffer, M1 );
+    gdscore::serialize( binaryBuffer, M0 );
+    gdscore::deserialize( binaryBuffer, M1 );
 }

@@ -3,7 +3,6 @@ set( TS3SAMPLES_LINK_INPUT
         ts3-system
         ts3-engine
         ts3-gpuapi
-        ts3ext-rcsupport
         )
 
 if( TARGET ts3drv-gpuapi-dx11 )
@@ -28,7 +27,10 @@ set( TS3_SAMPLE_LIST
         "test1"
         )
 
-
 foreach( module ${TS3_SAMPLE_LIST} )
     add_subdirectory( "${module}" )
 endforeach()
+
+if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
+    add_subdirectory( "appleCocoaTest" )
+endif()
