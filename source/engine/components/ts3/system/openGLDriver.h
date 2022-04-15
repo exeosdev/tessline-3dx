@@ -22,7 +22,7 @@ namespace ts3::system
 	struct GLDisplaySurfaceCreateInfo
 	{
 		//
-		FrameGeometry frameGeometry;
+		FrameGeometry frameGeometry = CX_FRAME_GEOMETRY_DEFAULT;
 		//
 		std::string title;
 		//

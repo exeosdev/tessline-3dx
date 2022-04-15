@@ -94,6 +94,7 @@ namespace ts3::system
         mNativeData.xSessionData.screenIndex = XDefaultScreen( mNativeData.xSessionData.display );
         mNativeData.xSessionData.rootWindowXID = XRootWindow( mNativeData.xSessionData.display, mNativeData.xSessionData.screenIndex );
         mNativeData.xSessionData.wmpDeleteWindow = XInternAtom( mNativeData.xSessionData.display, "WM_DELETE_WINDOW", False );
+        mNativeData.xSessionData.wmpDestroyWindow = XInternAtom( mNativeData.xSessionData.display, "WM_DESTROY_WINDOW", False );
         mNativeData.xSessionData.sessionInfo.connectionNumber = XConnectionNumber( xDisplay );
         mNativeData.xSessionData.sessionInfo.vendorName = XServerVendor( xDisplay );
         mNativeData.xSessionData.sessionInfo.displayString = XDisplayString( xDisplay );

@@ -48,6 +48,7 @@ namespace ts3::system
             XWindow rootWindowXID = E_X11_XID_NONE;
             int screenIndex = -1;
             Atom wmpDeleteWindow = 0;
+            Atom wmpDestroyWindow = 0;
             X11SessionInfo sessionInfo;
         };
 

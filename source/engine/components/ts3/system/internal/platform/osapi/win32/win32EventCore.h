@@ -10,6 +10,8 @@
 namespace ts3::system
 {
 
+	class Win32EventController;
+
     namespace platform
     {
 
@@ -30,9 +32,9 @@ namespace ts3::system
 
         using Win32NativeEvent = NativeEventType;
 
-		EventSource * win32FindEventSourceByHWND( EventController & pEventController, HWND pHWND );
+        TS3_SYSTEM_API_NODISCARD EventSource * win32FindEventSourceByHWND( Win32EventController & pEventController, HWND pHWND );
 
-		bool win32TranslateEvent( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
+        bool win32TranslateEvent( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
 
 		// Default event procedure for all windows created by the system.
 		LRESULT __stdcall win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );

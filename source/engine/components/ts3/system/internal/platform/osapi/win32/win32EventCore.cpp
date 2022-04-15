@@ -22,6 +22,8 @@ namespace ts3::system
 
         bool _win32TranslateInputEventTouch( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
 
+        EWindowVisibilityState _win32TranslateWindowVisibility( WPARAM pWparam );
+
         EKeyCode _win32GetSysKeyCode( WPARAM pWparam );
 
         Bitmask<EMouseButtonFlagBits> _win32GetMouseButtonStateMask( WPARAM pWparam );
@@ -110,35 +112,32 @@ namespace ts3::system
 
         bool nativeEventTranslate( EventController & pEventController, const NativeEventType & pNativeEvent, EventObject & pOutEvent )
         {
-			return win32TranslateEvent( pEventController, pNativeEvent, pOutEvent );
+        	auto * win32EventController = pEventController.queryInterface<Win32EventController>();
+
+        	return win32TranslateEvent( *win32EventController, pNativeEvent, pOutEvent );
         }
 
-		EventSource * win32FindEventSourceByHWND( EventController & pEventController, HWND pHWND )
+		EventSource * win32FindEventSourceByHWND( Win32EventController & pEventController, HWND pHWND )
 		{
-            auto * win32EventController = pEventController.queryInterface<Win32EventController>();
-
-			auto * eventSource = win32EventController->findEventSource( [pHWND]( const EventSource & pEventSource ) -> bool {
+        	auto * eventSource = pEventController.findEventSource( [pHWND]( const EventSource & pEventSource ) -> bool {
 				const auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::Win32EventSourceNativeData>();
 				return eventSourceNativeData->hwnd == pHWND;
 			});
-
 			return eventSource;
 		}
 
-		bool win32TranslateEvent( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
+		bool win32TranslateEvent( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
 		{
-            auto * win32EventController = pEventController.queryInterface<Win32EventController>();
-
             if( pNativeEvent.message >= WM_KEYFIRST && pNativeEvent.message <= WM_TOUCH )
             {
-                if( _win32TranslateInputEvent( *win32EventController, pNativeEvent, pOutEvent ) )
+            	if( _win32TranslateInputEvent( pEventController, pNativeEvent, pOutEvent ) )
                 {
                     return true;
                 }
             }
             else
             {
-                if( _win32TranslateAppOrWindowEvent( *win32EventController, pNativeEvent, pOutEvent ) )
+            	if( _win32TranslateAppOrWindowEvent( pEventController, pNativeEvent, pOutEvent ) )
                 {
                     return true;
                 }
@@ -212,7 +211,7 @@ namespace ts3::system
                     auto * eventSource = win32FindEventSourceByHWND( pEventController, pMSG.hwnd );
                     auto & eWindowUpdateVisibility = pOutEvent.eWindowUpdateVisibility;
                     eWindowUpdateVisibility.eventCode = E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY;
-                    eWindowUpdateVisibility.newVisibilityState = ( pMSG.wParam != FALSE );
+                    eWindowUpdateVisibility.newVisibilityState = _win32TranslateWindowVisibility( pMSG.wParam );
                     eWindowUpdateVisibility.eventSource = eventSource;
                     break;
                 }
@@ -229,9 +228,9 @@ namespace ts3::system
                 case WM_CLOSE:
                 {
                     auto * eventSource = win32FindEventSourceByHWND( pEventController, pMSG.hwnd );
-                    auto & eWindowUpdateClose = pOutEvent.eWindowUpdateClose;
-                    eWindowUpdateClose.eventCode = E_EVENT_CODE_WINDOW_UPDATE_CLOSE;
-                    eWindowUpdateClose.eventSource = eventSource;
+                    auto & eWindowUpdateDestroy = pOutEvent.eWindowUpdateDestroy;
+                    eWindowUpdateDestroy.eventCode = E_EVENT_CODE_WINDOW_UPDATE_DESTROY;
+                    eWindowUpdateDestroy.eventSource = eventSource;
                     break;
                 }
                 case WM_QUIT:
@@ -456,6 +455,18 @@ namespace ts3::system
         bool _win32TranslateInputEventTouch( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
         {
             return false;
+        }
+
+        EWindowVisibilityState _win32TranslateWindowVisibility( WPARAM pWparam )
+        {
+        	if( pWparam != FALSE )
+        	{
+        		return EWindowVisibilityState::Visible;
+        	}
+        	else
+        	{
+        		return EWindowVisibilityState::Hidden;
+        	}
         }
 
         static const EKeyCode sASCIIKeyCodeMap_08_7B[] =

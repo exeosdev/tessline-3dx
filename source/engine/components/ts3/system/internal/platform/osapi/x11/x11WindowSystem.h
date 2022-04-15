@@ -35,6 +35,8 @@ namespace ts3::system
 		
 		void x11DestroyWindow( X11WindowNativeData & pWindowNativeData );
 
+		void x11SetWindowFullscreenState( X11WindowNativeData & pWindowNativeData, bool pSetFullscreen );
+
 		void x11SetFrameTitle( const X11WindowNativeData & pWindowNativeData, const std::string & pTitle );
 
 		void x11UpdateFrameGeometry( const X11WindowNativeData & pWindowNativeData,

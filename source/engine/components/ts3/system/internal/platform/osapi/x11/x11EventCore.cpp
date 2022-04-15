@@ -11,16 +11,20 @@ namespace ts3::system
     namespace platform
     {
 
-        bool _x11TranslateGenericEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent );
+        bool _x11TranslateGenericEvent( X11EventController & pEventController,
+		                                EventSource & pEventSource,
+		                                const XEvent & pXEvent,
+		                                EventObject & pOutEvent );
         
-        bool _x11TranslateInputEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent );
+        bool _x11TranslateInputEvent( X11EventController & pEventController,
+		                              EventSource & pEventSource,
+		                              const XEvent & pXEvent,
+		                              EventObject & pOutEvent );
         
-        bool _x11TranslateInputEventMouseButton( X11EventController & pEventController,
-                                                 const XEvent & pXEvent,
-                                                 EventObject & pOutEvent,
-                                                 EMouseButtonActionType pButtonAction );
-        
-        bool _x11TranslateSystemEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent );
+        bool _x11TranslateSystemEvent( X11EventController & pEventController,
+		                               EventSource & pEventSource,
+		                               const XEvent & pXEvent,
+		                               EventObject & pOutEvent );
         
         EKeyCode _x11GetSysKeyCode( KeySym pXkeySym );
         
@@ -48,7 +52,7 @@ namespace ts3::system
     {
         auto & xSessionData = platform::x11GetXSessionData( *this );
 
-        platform::NativeEventType x11NativeEvent;
+        platform::NativeEventType x11NativeEvent{};
         if( XEventsQueued( xSessionData.display, QueuedAfterReading ) > 0 )
         {
             XNextEvent( xSessionData.display, &( x11NativeEvent.xEvent ) );
@@ -63,7 +67,7 @@ namespace ts3::system
     {
         auto & xSessionData = platform::x11GetXSessionData( *this );
 
-        platform::NativeEventType x11NativeEvent;
+        platform::NativeEventType x11NativeEvent{};
         if( XEventsQueued( xSessionData.display, QueuedAfterFlush ) > 0 )
         {
             XNextEvent( xSessionData.display, &( x11NativeEvent.xEvent ) );
@@ -80,91 +84,93 @@ namespace ts3::system
 
         bool nativeEventTranslate( EventController & pEventController, const NativeEventType & pNativeEvent, EventObject & pOutEvent )
         {
-            auto * x11EventController = pEventController.queryInterface<X11EventController>();
+        	auto * x11EventController = pEventController.queryInterface<X11EventController>();
 
-            if( ( pNativeEvent.xEvent.type >= KeyPress ) && ( pNativeEvent.xEvent.type <= MotionNotify ) )
-            {
-                if( _x11TranslateInputEvent( *x11EventController, pNativeEvent.xEvent, pOutEvent ) )
-                {
-                    return true;
-                }
-            }
-            else if( ( pNativeEvent.xEvent.type >= EnterNotify ) && ( pNativeEvent.xEvent.type <= MapRequest ) )
-            {
-                if( _x11TranslateGenericEvent( *x11EventController, pNativeEvent.xEvent, pOutEvent  ) )
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                if( _x11TranslateSystemEvent( *x11EventController, pNativeEvent.xEvent, pOutEvent  ) )
-                {
-                    return true;
-                }
-            }
-
-            return false;
+        	return x11TranslateEvent( *x11EventController, pNativeEvent.xEvent, pOutEvent );
         }
 
+        EventSource * x11FindEventSourceByXWindow( X11EventController & pEventController, XWindow pWindowXID )
+        {
+        	auto * eventSource = pEventController.findEventSource( [pWindowXID]( const EventSource & pEventSource ) -> bool {
+        		const auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::X11EventSourceNativeData>();
+        		return eventSourceNativeData->windowXID == pWindowXID;
+        	});
+        	return eventSource;
+        }
 
-        bool _x11TranslateGenericEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent )
+        bool x11TranslateEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent )
+        {
+        	auto * eventSource = x11FindEventSourceByXWindow( pEventController, pXEvent.xany.window );
+
+        	if( ( pXEvent.type >= KeyPress ) && ( pXEvent.type <= MotionNotify ) )
+        	{
+        		if( eventSource && _x11TranslateInputEvent( pEventController, *eventSource, pXEvent, pOutEvent ) )
+        		{
+        			return true;
+        		}
+        	}
+        	else if( ( pXEvent.type >= EnterNotify ) && ( pXEvent.type <= MapRequest ) )
+        	{
+        		if( eventSource && _x11TranslateGenericEvent( pEventController, *eventSource, pXEvent, pOutEvent  ) )
+        		{
+        			return true;
+        		}
+        	}
+        	else
+        	{
+        		if( eventSource && _x11TranslateSystemEvent( pEventController, *eventSource, pXEvent, pOutEvent  ) )
+        		{
+        			return true;
+        		}
+        	}
+
+        	return false;
+        }
+
+        bool _x11TranslateGenericEvent( X11EventController & /* pEventController */,
+		                                EventSource & pEventSource,
+		                                const XEvent & pXEvent,
+		                                EventObject & pOutEvent )
         {
             switch( pXEvent.type )
             {
                 case EnterNotify:
-                    break;
                 case LeaveNotify:
-                    break;
                 case FocusIn:
-                    break;
                 case FocusOut:
-                    break;
                 case KeymapNotify:
-                    break;
                 case Expose:
-                    break;
                 case GraphicsExpose:
-                    break;
                 case NoExpose:
-                    break;
                 case VisibilityNotify:
-                    break;
+                {
+                	break;
+                }
                 case CreateNotify:
-                    break;
+                {
+                	break;
+                }
                 case DestroyNotify:
                 {
-                    auto * eventSource = pEventController.findEventSource( [&pXEvent]( const EventSource & pEventSource ) -> bool {
-                        const auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::X11EventSourceNativeData>();
-                        return eventSourceNativeData->windowXID == pXEvent.xdestroywindow.window;
-                    });
-                    auto & eWindowUpdateClose = pOutEvent.eWindowUpdateClose;
-                    eWindowUpdateClose.eventCode = E_EVENT_CODE_WINDOW_UPDATE_CLOSE;
-                    eWindowUpdateClose.eventSource = eventSource;
+                    auto & eWindowUpdateDestroy = pOutEvent.eWindowUpdateDestroy;
+                    eWindowUpdateDestroy.eventCode = E_EVENT_CODE_WINDOW_UPDATE_DESTROY;
+                    eWindowUpdateDestroy.eventSource = &pEventSource;
                     break;
                 }
                 case UnmapNotify:
                 {
-                    auto * eventSource = pEventController.findEventSource( [&pXEvent]( const EventSource & pEventSource ) -> bool {
-                        const auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::X11EventSourceNativeData>();
-                        return eventSourceNativeData->windowXID == pXEvent.xvisibility.window;
-                    });
                     auto & eWindowUpdateVisibility = pOutEvent.eWindowUpdateVisibility;
                     eWindowUpdateVisibility.eventCode = E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY;
-                    eWindowUpdateVisibility.newVisibilityState = false;
-                    eWindowUpdateVisibility.eventSource = eventSource;
+                    eWindowUpdateVisibility.newVisibilityState = EWindowVisibilityState::Hidden;
+                    eWindowUpdateVisibility.eventSource = &pEventSource;
                     break;
                 }
                 case MapNotify:
                 {
-                    auto * eventSource = pEventController.findEventSource( [&pXEvent]( const EventSource & pEventSource ) -> bool {
-                        const auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::X11EventSourceNativeData>();
-                        return eventSourceNativeData->windowXID == pXEvent.xvisibility.window;
-                    });
                     auto & eWindowUpdateVisibility = pOutEvent.eWindowUpdateVisibility;
                     eWindowUpdateVisibility.eventCode = E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY;
-                    eWindowUpdateVisibility.newVisibilityState = true;
-                    eWindowUpdateVisibility.eventSource = eventSource;
+                    eWindowUpdateVisibility.newVisibilityState = EWindowVisibilityState::Visible;
+                    eWindowUpdateVisibility.eventSource = &pEventSource;
                     break;
                 }
                 case MapRequest:
@@ -176,7 +182,15 @@ namespace ts3::system
             return true;
         }
 
-        bool _x11TranslateInputEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent )
+        bool _x11TranslateInputEventMouseButton( X11EventController & pEventController,
+		                                         const XEvent & pXEvent,
+		                                         EventObject & pOutEvent,
+		                                         EMouseButtonActionType pButtonAction );
+
+        bool _x11TranslateInputEvent( X11EventController & pEventController,
+									  EventSource & /* pEventSource */,
+		                              const XEvent & pXEvent,
+		                              EventObject & pOutEvent )
         {
             switch( pXEvent.type )
             {
@@ -199,6 +213,7 @@ namespace ts3::system
                     eventData.inputKeyboardState = &inputKeyboardState;
                     eventData.keyCode = keycode;
                     eventData.keyAction = EKeyActionType::Press;
+
                     break;
                 }
                 case KeyRelease:
@@ -220,13 +235,20 @@ namespace ts3::system
                 }
                 case ButtonPress:
                 {
-                    _x11TranslateInputEventMouseButton( pEventController, pXEvent, pOutEvent, EMouseButtonActionType::Click );
+                    _x11TranslateInputEventMouseButton( pEventController,
+					                                    pXEvent,
+					                                    pOutEvent,
+					                                    EMouseButtonActionType::Click );
 
                     break;
                 }
                 case ButtonRelease:
                 {
-                    _x11TranslateInputEventMouseButton( pEventController, pXEvent, pOutEvent, EMouseButtonActionType::Release );
+                    _x11TranslateInputEventMouseButton( pEventController,
+					                                    pXEvent,
+					                                    pOutEvent,
+					                                    EMouseButtonActionType::Release );
+
 
                     break;
                 }
@@ -266,20 +288,21 @@ namespace ts3::system
             return pOutEvent.commonData.eventCode != E_EVENT_CODE_UNDEFINED;
         }
 
-        bool _x11TranslateInputEventMouseButton( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent, EMouseButtonActionType pButtonAction )
+        bool _x11TranslateInputEventMouseButton( X11EventController & pEventController,
+		                                         const XEvent & pXEvent,
+		                                         EventObject & pOutEvent,
+		                                         EMouseButtonActionType pButtonAction )
         {
-            auto & inputMouseState = pEventController.getEventDispatcherInputState().inputMouseState;
+            const auto x11MouseButtonID = _x11GetMouseButtonID( pXEvent.xbutton.button );
 
-            const math::Vec2i32 cursorPos { pXEvent.xbutton.x, pXEvent.xbutton.y };
-            const auto EX11MouseButtonID = _x11GetMouseButtonID( pXEvent.xbutton.button );
-
-            switch( EX11MouseButtonID )
+            switch( x11MouseButtonID )
             {
                 case EX11MouseButtonID::Left:
                 {
+                	auto & inputMouseState = pEventController.getEventDispatcherInputState().inputMouseState;
                     auto & eInputMouseButton = pOutEvent.eInputMouseButton;
                     eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
-                    eInputMouseButton.cursorPos = cursorPos;
+                    eInputMouseButton.cursorPos = { pXEvent.xbutton.x, pXEvent.xbutton.y };;
                     eInputMouseButton.buttonAction = pButtonAction;
                     eInputMouseButton.buttonID = EMouseButtonID::Left;
 
@@ -296,9 +319,10 @@ namespace ts3::system
                 }
                 case EX11MouseButtonID::Middle:
                 {
+                	auto & inputMouseState = pEventController.getEventDispatcherInputState().inputMouseState;
                     auto & eInputMouseButton = pOutEvent.eInputMouseButton;
                     eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
-                    eInputMouseButton.cursorPos = cursorPos;
+                    eInputMouseButton.cursorPos = { pXEvent.xbutton.x, pXEvent.xbutton.y };;
                     eInputMouseButton.buttonAction = pButtonAction;
                     eInputMouseButton.buttonID = EMouseButtonID::Middle;
 
@@ -315,9 +339,10 @@ namespace ts3::system
                 }
                 case EX11MouseButtonID::Right:
                 {
+                	auto & inputMouseState = pEventController.getEventDispatcherInputState().inputMouseState;
                     auto & eInputMouseButton = pOutEvent.eInputMouseButton;
                     eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
-                    eInputMouseButton.cursorPos = cursorPos;
+                    eInputMouseButton.cursorPos = { pXEvent.xbutton.x, pXEvent.xbutton.y };;
                     eInputMouseButton.buttonAction = pButtonAction;
                     eInputMouseButton.buttonID = EMouseButtonID::Right;
 
@@ -369,9 +394,10 @@ namespace ts3::system
                 }
                 case EX11MouseButtonID::XBT1:
                 {
+                	auto & inputMouseState = pEventController.getEventDispatcherInputState().inputMouseState;
                     auto & eInputMouseButton = pOutEvent.eInputMouseButton;
                     eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
-                    eInputMouseButton.cursorPos = cursorPos;
+                    eInputMouseButton.cursorPos = { pXEvent.xbutton.x, pXEvent.xbutton.y };;
                     eInputMouseButton.buttonAction = pButtonAction;
                     eInputMouseButton.buttonID = EMouseButtonID::XB1;
 
@@ -388,9 +414,10 @@ namespace ts3::system
                 }
                 case EX11MouseButtonID::XBT2:
                 {
+                	auto & inputMouseState = pEventController.getEventDispatcherInputState().inputMouseState;
                     auto & eInputMouseButton = pOutEvent.eInputMouseButton;
                     eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
-                    eInputMouseButton.cursorPos = cursorPos;
+                    eInputMouseButton.cursorPos = { pXEvent.xbutton.x, pXEvent.xbutton.y };;
                     eInputMouseButton.buttonAction = pButtonAction;
                     eInputMouseButton.buttonID = EMouseButtonID::XB2;
 
@@ -414,25 +441,25 @@ namespace ts3::system
             return true;
         }
 
-        bool _x11TranslateSystemEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent )
+        bool _x11TranslateSystemEvent( X11EventController & pEventController,
+		                               EventSource & pEventSource,
+		                               const XEvent & pXEvent,
+		                               EventObject & pOutEvent )
         {
             switch( pXEvent.type )
             {
                 case ClientMessage:
                 {
-                    auto & xSessionData = platform::x11GetXSessionData( *( pEventController.mSysContext ) );
+                	auto & xSessionData = platform::x11GetXSessionData( pEventController );
 
-                    // Type of wm protocol message is stored in data.l[0].
-                    long wmpMessageType = pXEvent.xclient.data.l[0];
-                    if ( wmpMessageType == xSessionData.wmpDeleteWindow )
+                    // Window Message Protocol (WMP) id is stored in data.l[0].
+                    long wmpMessageID = pXEvent.xclient.data.l[0];
+
+                    if ( wmpMessageID == xSessionData.wmpDeleteWindow )
                     {
-                        auto * eventSource = pEventController.findEventSource( [&pXEvent]( const EventSource & pEventSource ) -> bool {
-                            const auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::X11EventSourceNativeData>();
-                            return eventSourceNativeData->windowXID == pXEvent.xclient.window;
-                        });
-                        auto & eventData = pOutEvent.eWindowUpdateClose;
-                        eventData.eventCode = E_EVENT_CODE_WINDOW_UPDATE_CLOSE;
-                        eventData.eventSource = eventSource;
+                        auto & eventData = pOutEvent.eWindowUpdateDestroy;
+                        eventData.eventCode = E_EVENT_CODE_WINDOW_UPDATE_DESTROY;
+                        eventData.eventSource = &pEventSource;
                     }
                     break;
                 }

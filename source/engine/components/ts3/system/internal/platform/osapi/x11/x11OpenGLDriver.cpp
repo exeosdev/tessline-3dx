@@ -84,6 +84,9 @@ namespace ts3::system
 		legacyVisualConfig.flags.set( E_VISUAL_ATTRIB_FLAG_LEGACY_BIT );
 
 		platform::X11WindowCreateInfo windowCreateInfo;
+		windowCreateInfo.frameGeometry.position = { 0, 0 };
+		windowCreateInfo.frameGeometry.size = { 600, 600 };
+		windowCreateInfo.frameGeometry.style = EFrameStyle::Overlay;
 
 		auto & tmpSurfaceNativeData = mNativeData.initState->surfaceData;
 		tmpSurfaceNativeData.setSessionData( xSessionData );
@@ -150,7 +153,7 @@ namespace ts3::system
 		x11WindowCreateInfo.title = "TS3 OpenGL Window";
 		x11WindowCreateInfo.fullscreenMode = pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 
-		_x11CreateGLWindowAndSurface( displaySurface->mNativeData, x11WindowCreateInfo, pCreateInfo.visualConfig );
+		platform::_x11CreateGLWindowAndSurface( displaySurface->mNativeData, x11WindowCreateInfo, pCreateInfo.visualConfig );
 
 		platform::x11WindowPostCreateUpdate( displaySurface->mNativeData, x11WindowCreateInfo );
 

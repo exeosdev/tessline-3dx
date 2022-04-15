@@ -73,6 +73,8 @@ namespace ts3::system
 		EFrameStyle style;
 	};
 
+	inline constexpr FrameGeometry CX_FRAME_GEOMETRY_DEFAULT{ CX_FRAME_POS_AUTO, CX_FRAME_SIZE_AUTO, EFrameStyle::Default };
+
 	class Frame : public EventSource
 	{
 	public:
