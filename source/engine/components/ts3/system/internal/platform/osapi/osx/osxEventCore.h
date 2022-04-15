@@ -45,7 +45,7 @@ namespace ts3::system
 		virtual ~OSXEventController() noexcept;
 
 		using EventController::getEventSystemInternalConfig;
-		using EventController::getEventSystemSharedState;
+		using EventController::getEventDispatcherInputState;
 
 	private:
 		/// @override EventController::_nativeRegisterEventSource

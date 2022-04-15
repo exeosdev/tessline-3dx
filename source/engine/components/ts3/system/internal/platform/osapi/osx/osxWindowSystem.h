@@ -55,6 +55,9 @@ namespace ts3::system
     private:
         // @override WindowManager::_nativeCreateWindow
         virtual WindowHandle _nativeCreateWindow( WindowCreateInfo pCreateInfo ) override final;
+
+		// @override WindowManager::_nativeDestroyWindow
+		virtual void _nativeDestroyWindow( Window & pWindow ) override final;
     };
 
     class OSXWindow : public OSXNativeObject<Window, platform::OSXWindowNativeData>

@@ -26,7 +26,6 @@ namespace ts3::system
         auto windowObject = createSysObject<X11Window>( getHandle<X11WindowManager>() );
 
         platform::X11WindowCreateInfo x11CreateInfo;
-        x11CreateInfo.setSessionData( xSessionData );
         x11CreateInfo.frameGeometry = pCreateInfo.frameGeometry;
         x11CreateInfo.title = std::move( pCreateInfo.title );
         x11CreateInfo.colorDepth = XDefaultDepth( xSessionData.display, xSessionData.screenIndex );
@@ -34,10 +33,19 @@ namespace ts3::system
 
         platform::x11CreateWindow( windowObject->mNativeData, x11CreateInfo );
 
-        platform::x11UpdateNewWindowState( windowObject->mNativeData, x11CreateInfo );
+        platform::x11WindowPostCreateUpdate( windowObject->mNativeData, x11CreateInfo );
 
         return windowObject;
     }
+
+	void X11WindowManager::_nativeDestroyWindow( Window & pWindow )
+	{
+		auto * x11Window = pWindow.queryInterface<X11Window>();
+
+		x11WindowPreDestroyUpdate( x11Window->mNativeData );
+
+		x11DestroyWindow( x11Window->mNativeData );
+	}
     
 
     X11Window::X11Window( X11WindowManagerHandle pWindowManager )
@@ -148,12 +156,11 @@ namespace ts3::system
                                  1 );
             }
 
-            pWindowNativeData.setSessionData( xSessionData );
             pWindowNativeData.windowXID = windowXID;
             pWindowNativeData.xColormap = colormap;
         }
 
-        void x11UpdateNewWindowState( X11WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo )
+        void x11WindowPostCreateUpdate( X11WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo )
         {
             auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
 
@@ -170,6 +177,15 @@ namespace ts3::system
             XFlush( xSessionData.display );
         }
 
+        void x11WindowPreDestroyUpdate( X11WindowNativeData & pWindowNativeData )
+        {
+            auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
+
+            XUnmapWindow( xSessionData.display, pWindowNativeData.windowXID );
+
+            XFlush( xSessionData.display );
+        }
+
         void x11DestroyWindow( X11WindowNativeData & pWindowNativeData )
         {
             auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
@@ -179,8 +195,6 @@ namespace ts3::system
 
             XFreeColormap( xSessionData.display, pWindowNativeData.xColormap );
             pWindowNativeData.xColormap = E_X11_XID_NONE;
-
-            pWindowNativeData.resetSessionData();
         }
 
         void x11SetFrameTitle( const X11WindowNativeData & pWindowNativeData, const std::string & pTitle )

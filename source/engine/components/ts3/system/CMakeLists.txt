@@ -51,7 +51,6 @@ set( TS3_SYSTEM_SRC_FILES
 
         "internal/displaySystemPrivate.h"
         "internal/eventCorePrivate.h"
-        "openGLDriver.h"
         )
 
 if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_MSE} )
@@ -247,10 +246,11 @@ endif()
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
     target_link_libraries( ts3-system PUBLIC
+            dplib-glew
             X11
             Xrandr
             GL
-            GLEW
+            GLX
             )
 endif()
 

@@ -191,7 +191,7 @@ namespace ts3::system
         return result;
     }
 
-    bool AndroidOpenGLDisplaySurface::_nativeIsValid() const
+    bool AndroidOpenGLDisplaySurface::_nativeSysValidate() const
     {
         return ( mNativeData.eSurfaceHandle != EGL_NO_SURFACE ) && mNativeData.eNativeWindow;
     }
@@ -243,7 +243,7 @@ namespace ts3::system
         return mNativeData.eContextHandle == currentContext;
     }
 
-    bool AndroidOpenGLRenderContext::_nativeIsValid() const
+    bool AndroidOpenGLRenderContext::_nativeSysValidate() const
     {
         return mNativeData.eContextHandle != EGL_NO_CONTEXT;
     }

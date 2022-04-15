@@ -25,21 +25,17 @@ namespace ts3::system
             EventController * eventController = nullptr;
         };
 
-        struct Win32EventSourceStateDeleter
-        {
-            void operator()( void * pState )
-            {
-                auto * win32State = static_cast<Win32EventSourceState *>( pState );
-                delete win32State;
-            }
-        };
-
         struct NativeEventType : public MSG
         {};
 
         using Win32NativeEvent = NativeEventType;
 
-        bool win32TranslateEvent( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
+		EventSource * win32FindEventSourceByHWND( EventController & pEventController, HWND pHWND );
+
+		bool win32TranslateEvent( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
+
+		// Default event procedure for all windows created by the system.
+		LRESULT __stdcall win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 
     }
 
@@ -50,7 +46,7 @@ namespace ts3::system
         virtual ~Win32EventController() noexcept;
 
         using EventController::getEventSystemInternalConfig;
-        using EventController::getEventSystemSharedState;
+        using EventController::getEventDispatcherInputState;
 
     private:
         /// @override EventController::_nativeRegisterEventSource

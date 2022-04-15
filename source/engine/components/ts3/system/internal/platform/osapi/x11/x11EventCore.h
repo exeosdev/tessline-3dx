@@ -46,8 +46,8 @@ namespace ts3::system
         X11EventController( SysContextHandle pSysContext );
         virtual ~X11EventController() noexcept;
 
-        using EventController::getEventSystemInternalConfig;
-        using EventController::getEventSystemSharedState;
+        using EventController::getEventDispatcherInputState;
+        using EventController::getEventDispatcherConfig;
 
     private:
         /// @override EventController::_nativeRegisterEventSource

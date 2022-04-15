@@ -36,33 +36,22 @@ namespace ts3::system
         return mDisplayManager->validateFrameGeometry( pFrameGeometry );
     }
 
-    void WindowManager::onWindowDestroy( Window & pWindow ) noexcept
-    {}
+    void WindowManager::destroyWindow( Window & pWindow ) noexcept
+    {
+		_nativeDestroyWindow( pWindow );
+	}
 
 
     Window::Window( WindowManagerHandle pWindowManager, void * pNativeData )
     : Frame( pWindowManager->mSysContext )
     , mWindowManager( std::move( pWindowManager ) )
     {
-        setEventSourceNativeData( pNativeData, {} );
+        setEventSourceNativeData( pNativeData );
     }
 
     Window::~Window() noexcept
     {
         resetEventSourceNativeData();
-    }
-
-    void Window::resize( const FrameSize & pSize )
-    {
-        FrameGeometry newFrameGeometry{};
-        newFrameGeometry.position = CX_FRAME_POS_AUTO;
-        newFrameGeometry.size = pSize;
-        newFrameGeometry.style = EFrameStyle::Unspecified;
-
-        newFrameGeometry = mWindowManager->validateFrameGeometry( newFrameGeometry );
-
-        const auto updateFlags = E_FRAME_GEOMETRY_UPDATE_FLAG_POSITION_BIT | E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_OUTER_RECT_BIT;
-        _nativeUpdateGeometry( newFrameGeometry, updateFlags );
     }
 
     void Window::resizeClientArea( const FrameSize & pSize )
@@ -77,6 +66,19 @@ namespace ts3::system
         const auto updateFlags = E_FRAME_GEOMETRY_UPDATE_FLAG_POSITION_BIT | E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_CLIENT_AREA_BIT;
         _nativeUpdateGeometry( newFrameGeometry, updateFlags );
     }
+
+	void Window::resizeFrame( const FrameSize & pSize )
+	{
+		FrameGeometry newFrameGeometry{};
+		newFrameGeometry.position = CX_FRAME_POS_AUTO;
+		newFrameGeometry.size = pSize;
+		newFrameGeometry.style = EFrameStyle::Unspecified;
+
+		newFrameGeometry = mWindowManager->validateFrameGeometry( newFrameGeometry );
+
+		const auto updateFlags = E_FRAME_GEOMETRY_UPDATE_FLAG_POSITION_BIT | E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_OUTER_RECT_BIT;
+		_nativeUpdateGeometry( newFrameGeometry, updateFlags );
+	}
 
     void Window::setFullscreenMode( bool pEnable )
     {
@@ -100,14 +102,21 @@ namespace ts3::system
         return _nativeGetSize( EFrameSizeMode::ClientArea );
     }
 
-    FrameSize Window::getSize() const
+    FrameSize Window::getFrameSize() const
     {
-        return _nativeGetSize( EFrameSizeMode::ClientArea );
+        return _nativeGetSize( EFrameSizeMode::OuterRect );
     }
 
     bool Window::isFullscreen() const
     {
         return false;
     }
+
+	void Window::onDestroySystemObjectRequested()
+	{
+		mWindowManager->destroyWindow( *this );
+
+		EventSource::onDestroySystemObjectRequested();
+	}
 
 } // namespace ts3::system

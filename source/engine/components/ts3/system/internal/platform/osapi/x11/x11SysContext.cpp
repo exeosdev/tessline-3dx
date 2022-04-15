@@ -13,9 +13,14 @@
 namespace ts3::system
 {
 
-    SysContextHandle createSysContext( const SysContextCreateInfo & pCreateInfo )
+    namespace platform
     {
-        return createDynamicInterfaceObject<X11SysContext>();
+
+        SysContextHandle createSysContext( const SysContextCreateInfo & pCreateInfo )
+        {
+            return createDynamicInterfaceObject<X11SysContext>();
+        }
+
     }
 
 
@@ -32,8 +37,8 @@ namespace ts3::system
     AssetLoaderHandle X11SysContext::createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo )
     {
         return platform::createFileAssetLoader( getHandle<X11SysContext>(),
-                                                pCreateInfo.nativeParams.fileManager,
-                                                pCreateInfo.nativeParams.relativeAssetRootDir );
+                                                pCreateInfo.nativeParams->fileManager,
+                                                pCreateInfo.nativeParams->relativeAssetRootDir );
     }
 
     DisplayManagerHandle X11SysContext::createDisplayManager()
@@ -73,11 +78,11 @@ namespace ts3::system
 
     void X11SysContext::_initializeX11ContextState()
     {
-        int thrInitStatus = ::XInitThreads();
-        if( thrInitStatus == False )
-        {
-            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
-        }
+//        int thrInitStatus = ::XInitThreads();
+//        if( thrInitStatus == False )
+//        {
+//            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
+//        }
 
         auto * xDisplay = ::XOpenDisplay( nullptr );
         if( xDisplay == nullptr )

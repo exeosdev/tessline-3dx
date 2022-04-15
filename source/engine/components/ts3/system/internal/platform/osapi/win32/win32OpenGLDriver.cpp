@@ -349,7 +349,7 @@ namespace ts3::system
         return platform::win32GetFrameSize( mNativeData.hwnd, EFrameSizeMode::ClientArea );
     }
 
-    bool Win32OpenGLDisplaySurface::_nativeIsValid() const
+    bool Win32OpenGLDisplaySurface::_nativeSysValidate() const
     {
         return mNativeData.hwnd && mNativeData.hdc;
     }
@@ -398,7 +398,7 @@ namespace ts3::system
         return mNativeData.contextHandle && ( mNativeData.contextHandle == currentContextHandle );
     }
 
-    bool Win32OpenGLRenderContext::_nativeIsValid() const
+    bool Win32OpenGLRenderContext::_nativeSysValidate() const
     {
         return mNativeData.contextHandle != nullptr;
     }

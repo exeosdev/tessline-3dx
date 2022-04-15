@@ -187,7 +187,7 @@ namespace ts3::system
                 // [Source: https://tronche.com/gui/x/xlib/input/keyboard-encoding.html#KeySym]
                 case KeyPress:
                 {
-                    auto & inputKeyboardState = pEventController.getEventSystemSharedState().inputKeyboardState;
+                    auto & inputKeyboardState = pEventController.getEventDispatcherInputState().inputKeyboardState;
 
                     // XLookupKeysym requires non-const XKeyEvent parameter.
                     // Use locally copied one to keep the API right (we don't want to drop 'const for input event param).
@@ -203,7 +203,7 @@ namespace ts3::system
                 }
                 case KeyRelease:
                 {
-                    auto & inputKeyboardState = pEventController.getEventSystemSharedState().inputKeyboardState;
+                    auto & inputKeyboardState = pEventController.getEventDispatcherInputState().inputKeyboardState;
 
                     // XLookupKeysym requires non-const XKeyEvent parameter.
                     // Use locally copied one to keep the API right (we don't want to drop 'const for input event param).
@@ -232,7 +232,7 @@ namespace ts3::system
                 }
                 case MotionNotify:
                 {
-                    auto & inputMouseState = pEventController.getEventSystemSharedState().inputMouseState;
+                    auto & inputMouseState = pEventController.getEventDispatcherInputState().inputMouseState;
                     const math::Vec2i32 cursorPos { pXEvent.xmotion.x, pXEvent.xmotion.y };
 
                     if ( inputMouseState.lastCursorPos == CX_EVENT_MOUSE_POS_INVALID )
@@ -268,7 +268,7 @@ namespace ts3::system
 
         bool _x11TranslateInputEventMouseButton( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent, EMouseButtonActionType pButtonAction )
         {
-            auto & inputMouseState = pEventController.getEventSystemSharedState().inputMouseState;
+            auto & inputMouseState = pEventController.getEventDispatcherInputState().inputMouseState;
 
             const math::Vec2i32 cursorPos { pXEvent.xbutton.x, pXEvent.xbutton.y };
             const auto EX11MouseButtonID = _x11GetMouseButtonID( pXEvent.xbutton.button );

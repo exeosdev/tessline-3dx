@@ -45,20 +45,12 @@ namespace ts3::system
 
 			auto * nsWindow = ( NSWindow * )windowObject->mNativeData.nsWindow;
 
-			// [nsWindow update];
-			// [nsWindow display];
-
 			if( ![nsWindow isMiniaturized] )
 			{
-				// auto * nsWindowEventListener = windowObject->mNativeData.nsEventListener;
-
-				//[nsWindowEventListener pauseVisibleObservation];
-
 				[NSApp activateIgnoringOtherApps:YES];
-				// [nsWindow makeKeyAndOrderFront:nil];
-				[nsWindow orderFrontRegardless];
 
-				//[windowData->listener resumeVisibleObservation];
+				[nsWindow makeKeyAndOrderFront:nil];
+				[nsWindow orderFrontRegardless];
 			}
 		}
 		@catch( NSException * pException )
@@ -68,6 +60,10 @@ namespace ts3::system
 		}
 
 		return windowObject;
+	}
+
+	void OSXWindowManager::_nativeDestroyWindow( Window & pWindow )
+	{
 	}
 
 

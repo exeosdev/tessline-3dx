@@ -49,7 +49,7 @@ namespace ts3::system
         virtual ~AndroidEventController() noexcept;
 
         using EventController::getEventSystemInternalConfig;
-        using EventController::getEventSystemSharedState;
+        using EventController::getEventDispatcherInputState;
 
     private:
         /// @override EventController::_nativeRegisterEventSource
