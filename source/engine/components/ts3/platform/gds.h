@@ -322,6 +322,11 @@ namespace ts3
 			{
 				return internalValue;
 			}
+
+			void set( TpInternal pValue ) const
+			{
+				value.get() = pValue;
+			}
 		};
 
 		template <typename TpRef, typename TpInternal>

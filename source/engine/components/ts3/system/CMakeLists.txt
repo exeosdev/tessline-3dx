@@ -169,7 +169,7 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
             "internal/platform/osapi/osx/nsWindowProxy.mm"
             "internal/platform/osapi/osx/osxAssetSystem.h"
             "internal/platform/osapi/osx/osxCommon.h"
-            "internal/platform/osapi/osx/osxCommon.cpp"
+            "internal/platform/osapi/osx/osxCommon.mm"
             "internal/platform/osapi/osx/osxDisplaySystem.h"
             "internal/platform/osapi/osx/osxDisplaySystem.mm"
             "internal/platform/osapi/osx/osxWindowSystem.h"
