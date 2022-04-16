@@ -5,16 +5,16 @@
 namespace ts3::system
 {
 
-    namespace platform
-    {
+	namespace platform
+	{
 
-        ASessionData & androidGetASessionData( SysContext & pSysContext )
-        {
-            auto * androidSysContext = pSysContext.queryInterface<AndroidSysContext>();
-            return androidSysContext->mNativeData.aSessionData;
-        }
+		ASessionData & androidGetASessionData( SysContext & pSysContext )
+		{
+			auto * androidSysContext = pSysContext.queryInterface<AndroidSysContext>();
+			return androidSysContext->mNativeData.aSessionData;
+		}
 
-    }
+	}
 
 } // namespace ts3::system
 #endif // TS3_PCL_TARGET_SYSAPI_ANDROID

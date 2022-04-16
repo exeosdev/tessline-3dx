@@ -12,20 +12,4 @@
 #  include "internal/platform/osapi/x11/x11FileManager.h"
 #endif
 
-//namespace ts3::system
-//{
-//
-//    struct File::ObjectInternalData
-//    {
-//        FileNativeData nativeDataPriv;
-//        file_str_t name;
-//        file_str_t fullPath;
-//    };
-//
-//    struct FileManager::ObjectInternalData
-//    {
-//    };
-//
-//}
-
 #endif //__TS3_SYSTEM_FILE_MANAGER_NATIVE_H__

@@ -58,9 +58,9 @@ namespace ts3::system
 
 		constexpr explicit operator bool() const
 		{
-		    return ( code != E_EVENT_CODE_UNDEFINED ) && ecValidateEventCode( code );
+			return ( code != E_EVENT_CODE_UNDEFINED ) && ecValidateEventCode( code );
 		}
-    };
+	};
 
 } // namespace ts3::system
 

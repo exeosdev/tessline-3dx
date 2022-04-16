@@ -29,142 +29,142 @@
 namespace ts3::system
 {
 
-    ts3SysDeclareHandle( OpenGLSystemDriver );
-    ts3SysDeclareHandle( OpenGLDisplaySurface );
-    ts3SysDeclareHandle( OpenGLRenderContext );
+	ts3SysDeclareHandle( OpenGLSystemDriver );
+	ts3SysDeclareHandle( OpenGLDisplaySurface );
+	ts3SysDeclareHandle( OpenGLRenderContext );
 
-    struct GLDisplaySurfaceCreateInfo;
-    struct GLRenderContextCreateInfo;
+	struct GLDisplaySurfaceCreateInfo;
+	struct GLRenderContextCreateInfo;
 
-    /// @brief
-    enum EGLSurfaceCreateFlags : uint32
-    {
-        // Specifies a full-screen surface, covering the whole screen.
-        // Ignored for mobile (iOS and Android), where fullscreen is always used.
-        E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT = 0x1000,
-        E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT = 0x2000,
-        E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT = 0x4000,
-    };
+	/// @brief
+	enum EGLSurfaceCreateFlags : uint32
+	{
+		// Specifies a full-screen surface, covering the whole screen.
+		// Ignored for mobile (iOS and Android), where fullscreen is always used.
+		E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT = 0x1000,
+		E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT = 0x2000,
+		E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT = 0x4000,
+	};
 
-    /// @brief
-    enum EGLRenderContextCreateFlags : uint32
-    {
-        E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT = 0x1000,
-        E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT = 0x2000,
-        E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT = 0x0010,
-        E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARING_OPTIONAL_BIT = 0x0020,
-        E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT = 0x0040
-    };
+	/// @brief
+	enum EGLRenderContextCreateFlags : uint32
+	{
+		E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT = 0x1000,
+		E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT = 0x2000,
+		E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT = 0x0010,
+		E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARING_OPTIONAL_BIT = 0x0020,
+		E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT = 0x0040
+	};
 
-    enum class EGLAPIProfile : enum_default_value_t
-    {
-        OpenGL,
-        OpenGLES
-    };
+	enum class EGLAPIProfile : enum_default_value_t
+	{
+		OpenGL,
+		OpenGLES
+	};
 
-    /// @brief
-    enum class EGLContextProfile : enum_default_value_t
-    {
-        Auto,
-        Core,
-        GLES,
-        Legacy,
-    };
+	/// @brief
+	enum class EGLContextProfile : enum_default_value_t
+	{
+		Auto,
+		Core,
+		GLES,
+		Legacy,
+	};
 
-    enum : exception_code_value_t
-    {
-        E_EXC_SYSTEM_OPENGL_CORE_ERROR       = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE0 ),
-        E_EXC_SYSTEM_OPENGL_SUBSYS_AGL_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE1 ),
-        E_EXC_SYSTEM_OPENGL_SUBSYS_EGL_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE2 ),
-        E_EXC_SYSTEM_OPENGL_SUBSYS_GLX_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE3 ),
-        E_EXC_SYSTEM_OPENGL_SUBSYS_WGL_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE4 )
-    };
+	enum : exception_code_value_t
+	{
+		E_EXC_SYSTEM_OPENGL_CORE_ERROR	   = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE0 ),
+		E_EXC_SYSTEM_OPENGL_SUBSYS_AGL_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE1 ),
+		E_EXC_SYSTEM_OPENGL_SUBSYS_EGL_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE2 ),
+		E_EXC_SYSTEM_OPENGL_SUBSYS_GLX_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE3 ),
+		E_EXC_SYSTEM_OPENGL_SUBSYS_WGL_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE4 )
+	};
 
-    inline constexpr Version CX_GL_VERSION_BEST_SUPPORTED{ CX_UINT16_MAX, CX_UINT16_MAX };
+	inline constexpr Version CX_GL_VERSION_BEST_SUPPORTED{ CX_UINT16_MAX, CX_UINT16_MAX };
 
-    inline constexpr Version CX_GL_VERSION_UNKNOWN{ 0, 0 };
+	inline constexpr Version CX_GL_VERSION_UNKNOWN{ 0, 0 };
 
-    inline constexpr Version CX_GL_VERSION_MAX_DESKTOP{ 4, 6 };
+	inline constexpr Version CX_GL_VERSION_MAX_DESKTOP{ 4, 6 };
 
-    inline constexpr Version CX_GL_VERSION_MAX_ES{ 3, 2 };
+	inline constexpr Version CX_GL_VERSION_MAX_ES{ 3, 2 };
 
-    /// @brief Represents combined info about the current OpenGL subsystem version.
-    /// Basically, this struct stores the output from all version-related GL queries.
-    struct GLSystemVersionInfo
-    {
-    public:
-        // Numeric version of the GL (GL_VERSION_MAJOR.GL_VERSION_MINOR)
-        Version apiVersion;
-        // Text version of the GL (GL_VERSION)
-        std::string apiVersionStr;
-        // Text version of the GLSL (GL_SHADING_LANGUAGE_VERSION)
-        std::string glslVersionStr;
-        // Name of the renderer (GL_RENDERER_NAME)
-        std::string rendererName;
-        // Name of the vendor (GL_VENDOR_NAME)
-        std::string vendorName;
+	/// @brief Represents combined info about the current OpenGL subsystem version.
+	/// Basically, this struct stores the output from all version-related GL queries.
+	struct GLSystemVersionInfo
+	{
+	public:
+		// Numeric version of the GL (GL_VERSION_MAJOR.GL_VERSION_MINOR)
+		Version apiVersion;
+		// Text version of the GL (GL_VERSION)
+		std::string apiVersionStr;
+		// Text version of the GLSL (GL_SHADING_LANGUAGE_VERSION)
+		std::string glslVersionStr;
+		// Name of the renderer (GL_RENDERER_NAME)
+		std::string rendererName;
+		// Name of the vendor (GL_VENDOR_NAME)
+		std::string vendorName;
 
-    public:
-        std::string toString() const;
-    };
+	public:
+		std::string toString() const;
+	};
 
-    struct GLErrorInfo
-    {
-    public:
-        // The error code. It will contains either a common OpenGL error
-        // code (GLenum) or one of the subsystem-specific ones (AGL/EGL/GLX/WGL).
-        uint32 errorCode;
+	struct GLErrorInfo
+	{
+	public:
+		// The error code. It will contains either a common OpenGL error
+		// code (GLenum) or one of the subsystem-specific ones (AGL/EGL/GLX/WGL).
+		uint32 errorCode;
 
-        // Message describing
-        const char * errorString;
+		// Message describing
+		const char * errorString;
 
-    public:
-        constexpr GLErrorInfo( bool pStatus )
-        : errorCode( pStatus ? 0u : Limits<uint32>::maxValue )
-        , errorString( CX_STR_CHAR_EMPTY )
-        {}
+	public:
+		constexpr GLErrorInfo( bool pStatus )
+		: errorCode( pStatus ? 0u : Limits<uint32>::maxValue )
+		, errorString( CX_STR_CHAR_EMPTY )
+		{}
 
-        template <typename TpGLErrorCode>
-        constexpr GLErrorInfo( TpGLErrorCode pErrorCode, const char * pErrorMessage = nullptr )
-        : errorCode( trunc_numeric_cast<uint32>( pErrorCode ) )
-        , errorString( pErrorMessage ? CX_STR_CHAR_EMPTY : pErrorMessage )
-        {}
-    };
+		template <typename TpGLErrorCode>
+		constexpr GLErrorInfo( TpGLErrorCode pErrorCode, const char * pErrorMessage = nullptr )
+		: errorCode( trunc_numeric_cast<uint32>( pErrorCode ) )
+		, errorString( pErrorMessage ? CX_STR_CHAR_EMPTY : pErrorMessage )
+		{}
+	};
 
-    class GLSystemException : public SystemException
-    {
-    public:
-        GLErrorInfo mGLErrorInfo;
+	class GLSystemException : public SystemException
+	{
+	public:
+		GLErrorInfo mGLErrorInfo;
 
-    public:
-        explicit GLSystemException( ExceptionInfo pExceptionInfo )
-        : SystemException( std::move( pExceptionInfo ) )
-        , mGLErrorInfo( true )
-        {}
+	public:
+		explicit GLSystemException( ExceptionInfo pExceptionInfo )
+		: SystemException( std::move( pExceptionInfo ) )
+		, mGLErrorInfo( true )
+		{}
 
-        GLSystemException( ExceptionInfo pExceptionInfo, GLErrorInfo pGLErrorInfo )
-        : SystemException( std::move( pExceptionInfo ) )
-        , mGLErrorInfo( std::move( pGLErrorInfo ) )
-        {}
-    };
+		GLSystemException( ExceptionInfo pExceptionInfo, GLErrorInfo pGLErrorInfo )
+		: SystemException( std::move( pExceptionInfo ) )
+		, mGLErrorInfo( std::move( pGLErrorInfo ) )
+		{}
+	};
 
-    ts3SetExceptionCategoryType( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, GLSystemException );
+	ts3SetExceptionCategoryType( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, GLSystemException );
 
-    class GLCoreAPI
-    {
-    public:
-        static Version queryRuntimeVersion();
+	class GLCoreAPI
+	{
+	public:
+		static Version queryRuntimeVersion();
 
-        static bool checkLastResult();
+		static bool checkLastResult();
 
-        static bool checkLastError( GLenum pErrorCode );
+		static bool checkLastError( GLenum pErrorCode );
 
-        static void handleLastError();
+		static void handleLastError();
 
-        static void resetErrorQueue();
+		static void resetErrorQueue();
 
-        static const char * translateErrorCode( GLenum pError );
-    };
+		static const char * translateErrorCode( GLenum pError );
+	};
 
 } // namespace ts3::system
 

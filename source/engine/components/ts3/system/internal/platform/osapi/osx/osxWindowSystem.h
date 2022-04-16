@@ -10,19 +10,19 @@
 namespace ts3::system
 {
 
-    ts3SysDeclareHandle( OSXDisplayManager );
-    ts3SysDeclareHandle( OSXWindow );
-    ts3SysDeclareHandle( OSXWindowManager );
+	ts3SysDeclareHandle( OSXDisplayManager );
+	ts3SysDeclareHandle( OSXWindow );
+	ts3SysDeclareHandle( OSXWindowManager );
 
-    namespace platform
-    {
+	namespace platform
+	{
 
-        struct OSXWindowNativeData : public OSXEventSourceNativeData
-        {
-            OSXWindow * parentWindow = nullptr;
+		struct OSXWindowNativeData : public OSXEventSourceNativeData
+		{
+			OSXWindow * parentWindow = nullptr;
 
 			NSScreen * nsTargetScreen = nullptr;
-        };
+		};
 
 		struct OSXFrameGeometry
 		{
@@ -42,49 +42,49 @@ namespace ts3::system
 
 		TS3_SYSTEM_API_NODISCARD FrameSize osxGetFrameSize( NSWindow * pNSWindow, EFrameSizeMode pSizeMode );
 
-        TS3_SYSTEM_API_NODISCARD NSUInteger osxTranslateFrameStyle( EFrameStyle pStyle );
+		TS3_SYSTEM_API_NODISCARD NSUInteger osxTranslateFrameStyle( EFrameStyle pStyle );
 
-    }
+	}
 
-    class OSXWindowManager : public OSXNativeObject<WindowManager, platform::OSXNativeDataCommon>
-    {
-    public:
-        explicit OSXWindowManager( OSXDisplayManagerHandle pDisplayManager );
-        virtual ~OSXWindowManager() noexcept;
+	class OSXWindowManager : public OSXNativeObject<WindowManager, platform::OSXNativeDataCommon>
+	{
+	public:
+		explicit OSXWindowManager( OSXDisplayManagerHandle pDisplayManager );
+		virtual ~OSXWindowManager() noexcept;
 
-    private:
-        // @override WindowManager::_nativeCreateWindow
-        virtual WindowHandle _nativeCreateWindow( WindowCreateInfo pCreateInfo ) override final;
+	private:
+		// @override WindowManager::_nativeCreateWindow
+		virtual WindowHandle _nativeCreateWindow( WindowCreateInfo pCreateInfo ) override final;
 
 		// @override WindowManager::_nativeDestroyWindow
 		virtual void _nativeDestroyWindow( Window & pWindow ) override final;
-    };
+	};
 
-    class OSXWindow : public OSXNativeObject<Window, platform::OSXWindowNativeData>
-    {
-        friend class OSXWindowManager;
+	class OSXWindow : public OSXNativeObject<Window, platform::OSXWindowNativeData>
+	{
+		friend class OSXWindowManager;
 
-    public:
-        explicit OSXWindow( OSXWindowManagerHandle pWindowManager );
-        virtual ~OSXWindow() noexcept;
+	public:
+		explicit OSXWindow( OSXWindowManagerHandle pWindowManager );
+		virtual ~OSXWindow() noexcept;
 
-    private:
-        // @override Window::_nativeResize
-        virtual void _nativeResize( const FrameSize & pFrameSize, EFrameSizeMode pSizeMode ) override final;
+	private:
+		// @override Window::_nativeResize
+		virtual void _nativeResize( const FrameSize & pFrameSize, EFrameSizeMode pSizeMode ) override final;
 
-        // @override Window::_nativeSetFullscreenMode
-        virtual void _nativeSetFullscreenMode( bool pEnable ) override final;
+		// @override Window::_nativeSetFullscreenMode
+		virtual void _nativeSetFullscreenMode( bool pEnable ) override final;
 
-        // @override Window::_nativeSetTitle
-        virtual void _nativeSetTitle( const std::string & pTitle ) override final;
+		// @override Window::_nativeSetTitle
+		virtual void _nativeSetTitle( const std::string & pTitle ) override final;
 
-        // @override Window::_nativeUpdateGeometry
-        virtual void _nativeUpdateGeometry( const FrameGeometry & pFrameGeometry,
-                                            Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags ) override final;
+		// @override Window::_nativeUpdateGeometry
+		virtual void _nativeUpdateGeometry( const FrameGeometry & pFrameGeometry,
+		                                    Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags ) override final;
 
-        // @override Window::_nativeGetSize
-        virtual FrameSize _nativeGetSize( EFrameSizeMode pSizeMode ) const override final;
-    };
+		// @override Window::_nativeGetSize
+		virtual FrameSize _nativeGetSize( EFrameSizeMode pSizeMode ) const override final;
+	};
 
 } // namespace ts3::system
 

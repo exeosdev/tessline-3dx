@@ -16,9 +16,9 @@ namespace ts3::system
 	namespace platform
 	{
 
-	    std::string mseQueryCOMErrorMessage( HRESULT pHResult );
+		std::string mseQueryCOMErrorMessage( HRESULT pHResult );
 
-	    std::string mseQuerySystemErrorMessage( DWORD pErrorCode );
+		std::string mseQuerySystemErrorMessage( DWORD pErrorCode );
 
 	}
 

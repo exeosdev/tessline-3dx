@@ -8,51 +8,51 @@
 namespace ts3::system
 {
 
-    namespace platform
-    {
+	namespace platform
+	{
 
-        struct X11SysContextNativeData
-        {
-            X11SessionData xSessionData;
-        };
+		struct X11SysContextNativeData
+		{
+			X11SessionData xSessionData;
+		};
 
-        struct SysContextCreateInfoNativeParams
-        {
-        };
+		struct SysContextCreateInfoNativeParams
+		{
+		};
 
-    }
+	}
 
-    class X11SysContext : public NativeObject<SysContext, platform::X11SysContextNativeData>
-    {
-    public:
-        X11SysContext();
-        virtual ~X11SysContext() noexcept;
+	class X11SysContext : public NativeObject<SysContext, platform::X11SysContextNativeData>
+	{
+	public:
+		X11SysContext();
+		virtual ~X11SysContext() noexcept;
 
-        /// @override SysContext::createAssetLoader
-        virtual AssetLoaderHandle createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo ) override final;
+		/// @override SysContext::createAssetLoader
+		virtual AssetLoaderHandle createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo ) override final;
 
-        /// @override SysContext::createDisplayManager
-        virtual DisplayManagerHandle createDisplayManager() override final;
+		/// @override SysContext::createDisplayManager
+		virtual DisplayManagerHandle createDisplayManager() override final;
 
-        /// @override SysContext::createEventController
-        virtual EventControllerHandle createEventController() override final;
+		/// @override SysContext::createEventController
+		virtual EventControllerHandle createEventController() override final;
 
-        /// @override SysContext::createFileManager
-        virtual FileManagerHandle createFileManager() override final;
+		/// @override SysContext::createFileManager
+		virtual FileManagerHandle createFileManager() override final;
 
-        /// @override SysContext::createOpenGLSystemDriver
-        virtual OpenGLSystemDriverHandle createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager ) override final;
+		/// @override SysContext::createOpenGLSystemDriver
+		virtual OpenGLSystemDriverHandle createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager ) override final;
 
-        /// @override SysContext::createWindowManager
-        virtual WindowManagerHandle createWindowManager( DisplayManagerHandle pDisplayManager ) override final;
+		/// @override SysContext::createWindowManager
+		virtual WindowManagerHandle createWindowManager( DisplayManagerHandle pDisplayManager ) override final;
 
-        /// @override SysContext::queryCurrentProcessExecutableFilePath
-        virtual std::string queryCurrentProcessExecutableFilePath() const override final;
+		/// @override SysContext::queryCurrentProcessExecutableFilePath
+		virtual std::string queryCurrentProcessExecutableFilePath() const override final;
 
-    private:
-        void _initializeX11ContextState();
-        void _releaseX11ContextState();
-    };
+	private:
+		void _initializeX11ContextState();
+		void _releaseX11ContextState();
+	};
 
 } // namespace ts3::system
 

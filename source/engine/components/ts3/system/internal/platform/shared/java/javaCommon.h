@@ -9,18 +9,18 @@
 namespace ts3::system
 {
 
-    class JavaNativeInterface;
-    class JavaVMInstance;
+	class JavaNativeInterface;
+	class JavaVMInstance;
 
-    namespace platform
-    {
+	namespace platform
+	{
 
-        using JNIEnvPtr = JNIEnv *;
-        using JNIThreadID = std::thread::id;
+		using JNIEnvPtr = JNIEnv *;
+		using JNIThreadID = std::thread::id;
 
-    }
+	}
 
-    using JavaNativeInterfacePtr = std::shared_ptr<JavaNativeInterface>;
+	using JavaNativeInterfacePtr = std::shared_ptr<JavaNativeInterface>;
 
 } // namespace ts3::system
 

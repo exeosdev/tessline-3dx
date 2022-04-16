@@ -4,11 +4,11 @@
 namespace ts3::system
 {
 
-    SysObject::SysObject( system::SysContextHandle pSysContext )
-    : mSysContext( std::move( pSysContext ) )
-    {}
+	SysObject::SysObject( system::SysContextHandle pSysContext )
+	: mSysContext( std::move( pSysContext ) )
+	{}
 
-    SysObject::~SysObject() = default;
+	SysObject::~SysObject() = default;
 
 	bool SysObject::destroySystemObject()
 	{

@@ -11,8 +11,8 @@ namespace ts3::system
 	struct EvtApp : public EvtBase
 	{
 	public:
-	    constexpr EvtApp()
-        : EvtBase( tpEventCode )
+		constexpr EvtApp()
+		: EvtBase( tpEventCode )
 		{}
 	};
 

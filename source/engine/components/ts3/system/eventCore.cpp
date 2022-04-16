@@ -649,12 +649,12 @@ namespace ts3::system
 	}
 
 	void _preProcessEventOnInputMouseButton( EvtInputMouseButton & pMouseButtonEvent,
-											 const EventDispatcherConfig & pDispatcherConfig,
-											 EvtSharedInputMouseState & pInputMouseState );
+	                                         const EventDispatcherConfig & pDispatcherConfig,
+	                                         EvtSharedInputMouseState & pInputMouseState );
 
 	void _preProcessEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent,
-													   const EventDispatcherConfig & pDispatcherConfig,
-													   EvtSharedInputMouseState & pInputMouseState );
+	                                                   const EventDispatcherConfig & pDispatcherConfig,
+	                                                   EvtSharedInputMouseState & pInputMouseState );
 
 	void EventDispatcher::_preProcessEvent( EventObject & pEvent )
 	{
@@ -663,14 +663,14 @@ namespace ts3::system
 		if ( pEvent.code == E_EVENT_CODE_INPUT_MOUSE_BUTTON )
 		{
 			_preProcessEventOnInputMouseButton( pEvent.eInputMouseButton,
-												_privateData->evtDispatcherConfig,
-												_privateData->evtDispatcherInputState.inputMouseState );
+			                                    _privateData->evtDispatcherConfig,
+			                                    _privateData->evtDispatcherInputState.inputMouseState );
 		}
 	}
 
 	void _preProcessEventOnInputMouseButton( EvtInputMouseButton & pMouseButtonEvent,
-											 const EventDispatcherConfig & pDispatcherConfig,
-											 EvtSharedInputMouseState & pInputMouseState )
+	                                         const EventDispatcherConfig & pDispatcherConfig,
+	                                         EvtSharedInputMouseState & pInputMouseState )
 	{
 		if ( pDispatcherConfig.dispatcherConfigFlags.isSet( E_EVENT_DISPATCHER_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT ) )
 		{
@@ -682,8 +682,8 @@ namespace ts3::system
 	}
 
 	void _preProcessEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent,
-													   const EventDispatcherConfig & pDispatcherConfig,
-													   EvtSharedInputMouseState & pInputMouseState )
+	                                                   const EventDispatcherConfig & pDispatcherConfig,
+	                                                   EvtSharedInputMouseState & pInputMouseState )
 	{
 		bool multiClickEventSet = false;
 

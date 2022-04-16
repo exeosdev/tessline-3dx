@@ -11,7 +11,7 @@
 namespace ts3::system
 {
 
-    namespace platform
+	namespace platform
 	{
 
 		struct AndroidSysContextNativeData
