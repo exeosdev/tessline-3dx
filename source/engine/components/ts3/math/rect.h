@@ -23,27 +23,27 @@ namespace ts3::math
 	struct Rect
 	{
 	public:
-	    union
-        {
-	        struct
-            {
-                Vector2<TpOffset> offset;
-                Vector2<TpSize> size;
-            };
+		union
+		{
+			struct
+			{
+				Vector2<TpOffset> offset;
+				Vector2<TpSize> size;
+			};
 
-            struct
-            {
-                TpOffset x;
-                TpOffset y;
-                TpSize width;
-                TpSize height;
-            };
-	    };
+			struct
+			{
+				TpOffset x;
+				TpOffset y;
+				TpSize width;
+				TpSize height;
+			};
+		};
 
 	public:
-        constexpr Rect() = default;
+		constexpr Rect() = default;
 
-        constexpr Rect( const Rect & ) = default;
+		constexpr Rect( const Rect & ) = default;
 		constexpr Rect & operator=( const Rect & ) = default;
 
 		template <typename TpScalar, enable_if_scalar_t<TpScalar> = true>
@@ -70,20 +70,20 @@ namespace ts3::math
 		, size( pSize )
 		{}
 
-        TS3_PCL_ATTR_NO_DISCARD TpSize area() const
-        {
-            return width * height;
-        }
+		TS3_PCL_ATTR_NO_DISCARD TpSize area() const
+		{
+			return width * height;
+		}
 
-        TS3_PCL_ATTR_NO_DISCARD bool isNonZero() const
-        {
-            return ( width != 0 ) && ( height != 0 );
-        }
+		TS3_PCL_ATTR_NO_DISCARD bool isNonZero() const
+		{
+			return ( width != 0 ) && ( height != 0 );
+		}
 
-        TS3_PCL_ATTR_NO_DISCARD bool isZero() const
-        {
-            return ( width == 0 ) || ( height == 0 );
-        }
+		TS3_PCL_ATTR_NO_DISCARD bool isZero() const
+		{
+			return ( width == 0 ) || ( height == 0 );
+		}
 	};
 
 	using Recti32 = Rect<int32, uint32>;
