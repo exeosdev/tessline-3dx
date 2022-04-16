@@ -142,7 +142,7 @@ namespace ts3::system
 			auto maxPosX = static_cast<int32>( screenSize.x - frameSize.x );
 			auto maxPosY = static_cast<int32>( screenSize.y - frameSize.y );
 
-			if ( ( framePos.x > maxPosX ) || ( framePos.y > maxPosY ) )
+			if( ( framePos.x > maxPosX ) || ( framePos.y > maxPosY ) )
 			{
 				return false;
 			}
@@ -170,7 +170,7 @@ namespace ts3::system
 		}
 		else
 		{
-			if ( ( frameSize.x == 0 ) || ( frameSize.y == 0 ) )
+			if( ( frameSize.x == 0 ) || ( frameSize.y == 0 ) )
 			{
 				// Any dimension set to 0 means "use default size". By default,
 				// we just use the ratio of the screen and 70% of its dimensions.
@@ -189,7 +189,7 @@ namespace ts3::system
 			}
 		}
 
-		if ( ( framePos.x < 0 ) || ( framePos.y < 0 ) )
+		if( ( framePos.x < 0 ) || ( framePos.y < 0 ) )
 		{
 			resultGeometry.position.x = static_cast<int32>( ( screenSize.x - resultGeometry.size.x ) / 2 );
 			resultGeometry.position.y = static_cast<int32>( ( screenSize.y - resultGeometry.size.y ) / 2 );

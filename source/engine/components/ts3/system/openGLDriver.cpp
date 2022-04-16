@@ -322,19 +322,19 @@ namespace ts3::system
 		GLSystemVersionInfo systemVersionInfo;
 		systemVersionInfo.apiVersion = GLCoreAPI::queryRuntimeVersion();
 
-		if ( const auto * versionStr = glGetString( GL_VERSION ) )
+		if( const auto * versionStr = glGetString( GL_VERSION ) )
 		{
 			systemVersionInfo.apiVersionStr.assign( reinterpret_cast<const char *>( versionStr ) );
 		}
-		if ( const auto * glslVersionStr = glGetString( GL_SHADING_LANGUAGE_VERSION ) )
+		if( const auto * glslVersionStr = glGetString( GL_SHADING_LANGUAGE_VERSION ) )
 		{
 			systemVersionInfo.glslVersionStr.assign( reinterpret_cast<const char *>( glslVersionStr ) );
 		}
-		if ( const auto * rendererNameStr = glGetString( GL_RENDERER ) )
+		if( const auto * rendererNameStr = glGetString( GL_RENDERER ) )
 		{
 			systemVersionInfo.rendererName.assign( reinterpret_cast<const char *>( rendererNameStr ) );
 		}
-		if ( const auto * vendorNameStr = glGetString( GL_VENDOR ) )
+		if( const auto * vendorNameStr = glGetString( GL_VENDOR ) )
 		{
 			systemVersionInfo.vendorName.assign( reinterpret_cast<const char *>( vendorNameStr ) );
 		}

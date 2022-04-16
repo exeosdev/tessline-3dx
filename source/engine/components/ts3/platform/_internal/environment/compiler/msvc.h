@@ -22,7 +22,7 @@
 #define  TS3_PCL_ATTR_NO_RETURN                __declspec( noreturn )
 #define  TS3_PCL_ATTR_ALWAYS_INLINE            __forceinline
 
-#if (  TS3_PCL_COMPILER <  TS3_PCL_COMPILER_MSVC_2015 )
+#if(  TS3_PCL_COMPILER <  TS3_PCL_COMPILER_MSVC_2015 )
 #  define  TS3_PCL_ATTR_THREAD_LOCAL __declspec( thread )
 #else
 #  define  TS3_PCL_ATTR_THREAD_LOCAL thread_local

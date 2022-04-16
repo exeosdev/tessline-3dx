@@ -198,7 +198,7 @@
 #elif defined( __APPLE__ ) || defined( __apple )
 #
 #  include <TargetConditionals.h>
-#  if ( TARGET_OS_IPHONE )
+#  if( TARGET_OS_IPHONE )
 #    define TS3_PCL_TARGET_OS             TS3_PCL_TARGET_OS_IOS
 #    define TS3_PCL_TARGET_SYSAPI_NATIVE  TS3_PCL_TARGET_SYSAPI_IOS
 #  elif defined( __MACH__ ) || TARGET_OS_MAC
@@ -273,23 +273,23 @@
 
 #if defined( __INTEL_COMPILER )
 #
-#  if ( __INTEL_COMPILER >= 1900 )
+#  if( __INTEL_COMPILER >= 1900 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_ICC_19
-#  elif ( __INTEL_COMPILER >= 1800 )
+#  elif( __INTEL_COMPILER >= 1800 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_ICC_18
-#  elif ( __INTEL_COMPILER >= 1700 )
+#  elif( __INTEL_COMPILER >= 1700 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_ICC_17
-#  elif ( __INTEL_COMPILER >= 1600 )
+#  elif( __INTEL_COMPILER >= 1600 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_ICC_16
-#  elif ( __INTEL_COMPILER >= 1500 )
+#  elif( __INTEL_COMPILER >= 1500 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_ICC_15
-#  elif ( __INTEL_COMPILER >= 1400 )
+#  elif( __INTEL_COMPILER >= 1400 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_ICC_14
-#  elif ( __INTEL_COMPILER >= 1300 )
+#  elif( __INTEL_COMPILER >= 1300 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_ICC_13
-#  elif ( __INTEL_COMPILER == 1210 )
+#  elif( __INTEL_COMPILER == 1210 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_ICC_12_1
-#  elif ( __INTEL_COMPILER == 1200 )
+#  elif( __INTEL_COMPILER == 1200 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_ICC_12
 #  else
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_ICC_UV
@@ -297,27 +297,27 @@
 #
 #elif defined( __LLVM ) || defined( __CLANG__ ) || defined( __clang__ )
 #
-#  if ( __clang_major__ == 4 ) && ( __clang_minor__ == 0 )
+#  if( __clang_major__ == 4 ) && ( __clang_minor__ == 0 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_CLANG_4_0
-#  elif ( __clang_major__ == 4 ) && ( __clang_minor__ == 1 )
+#  elif( __clang_major__ == 4 ) && ( __clang_minor__ == 1 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_CLANG_4_1
-#  elif ( __clang_major__ == 4 ) && ( __clang_minor__ == 2 )
+#  elif( __clang_major__ == 4 ) && ( __clang_minor__ == 2 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_CLANG_4_2
-#  elif ( __clang_major__ == 4 ) && ( __clang_minor__ > 2 )
+#  elif( __clang_major__ == 4 ) && ( __clang_minor__ > 2 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_CLANG_4_X
-#  elif ( __clang_major__ == 5 )
+#  elif( __clang_major__ == 5 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_CLANG_5
 #    define TS3_PCL_FEATURE_ANONYMOUS_UNIONS 1
-#  elif ( __clang_major__ == 6 )
+#  elif( __clang_major__ == 6 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_CLANG_6
 #    define TS3_PCL_FEATURE_ANONYMOUS_UNIONS 1
-#  elif ( __clang_major__ == 7 )
+#  elif( __clang_major__ == 7 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_CLANG_7
 #    define TS3_PCL_FEATURE_ANONYMOUS_UNIONS 1
-#  elif ( __clang_major__ == 8 )
+#  elif( __clang_major__ == 8 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_CLANG_8
 #    define TS3_PCL_FEATURE_ANONYMOUS_UNIONS 1
-#  elif ( __clang_major__ == 9 )
+#  elif( __clang_major__ == 9 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_CLANG_9
 #    define TS3_PCL_FEATURE_ANONYMOUS_UNIONS 1
 #  else
@@ -330,15 +330,15 @@
 #
 #elif defined( _MSC_VER )
 #
-#  if ( ( _MSC_VER >= 1920 ) && ( _MSC_VER <= 1924 ) )
+#  if( ( _MSC_VER >= 1920 ) && ( _MSC_VER <= 1924 ) )
 #    define TS3_PCL_COMPILER  TS3_PCL_COMPILER_MSVC_2019
-#  elif ( ( _MSC_VER >= 1911 ) && ( _MSC_VER <= 1919 ) )
+#  elif( ( _MSC_VER >= 1911 ) && ( _MSC_VER <= 1919 ) )
 #    define TS3_PCL_COMPILER  TS3_PCL_COMPILER_MSVC_2017
-#  elif ( _MSC_VER == 1900 )
+#  elif( _MSC_VER == 1900 )
 #    define TS3_PCL_COMPILER  TS3_PCL_COMPILER_MSVC_2015
-#  elif ( _MSC_VER == 1800 )
+#  elif( _MSC_VER == 1800 )
 #    define TS3_PCL_COMPILER  TS3_PCL_COMPILER_MSVC_2013
-#  elif ( _MSC_VER == 1700 )
+#  elif( _MSC_VER == 1700 )
 #    define TS3_PCL_COMPILER  TS3_PCL_COMPILER_MSVC_2012
 #  else
 #    define TS3_PCL_COMPILER  TS3_PCL_COMPILER_MSVC_UV
@@ -360,32 +360,32 @@
 #
 #  include <cstdlib>
 #
-#  if ( __GNUC__ == 4 )
-#    if ( __GNUC_MINOR__ == 6 )
+#  if( __GNUC__ == 4 )
+#    if( __GNUC_MINOR__ == 6 )
 #      define TS3_PCL_COMPILER TS3_PCL_COMPILER_GCC_4_6
-#    elif ( __GNUC_MINOR__ == 7 )
+#    elif( __GNUC_MINOR__ == 7 )
 #      define TS3_PCL_COMPILER TS3_PCL_COMPILER_GCC_4_7
-#    elif ( __GNUC_MINOR__ == 8 )
+#    elif( __GNUC_MINOR__ == 8 )
 #      define TS3_PCL_COMPILER TS3_PCL_COMPILER_GCC_4_8
-#    elif ( __GNUC_MINOR__ == 9 )
+#    elif( __GNUC_MINOR__ == 9 )
 #      define TS3_PCL_COMPILER TS3_PCL_COMPILER_GCC_4_9
 #    endif
-#  elif ( __GNUC__ == 5 )
+#  elif( __GNUC__ == 5 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_GCC_5
 #    define TS3_PCL_FEATURE_ANONYMOUS_UNIONS 1
-#  elif ( __GNUC__ == 6 )
+#  elif( __GNUC__ == 6 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_GCC_6
 #    define TS3_PCL_FEATURE_ANONYMOUS_UNIONS 1
-#  elif ( __GNUC__ == 7 )
+#  elif( __GNUC__ == 7 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_GCC_7
 #    define TS3_PCL_FEATURE_ANONYMOUS_UNIONS 1
-#  elif ( __GNUC__ == 8 )
+#  elif( __GNUC__ == 8 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_GCC_8
 #    define TS3_PCL_FEATURE_ANONYMOUS_UNIONS 1
-#  elif ( __GNUC__ == 9 )
+#  elif( __GNUC__ == 9 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_GCC_9
 #    define TS3_PCL_FEATURE_ANONYMOUS_UNIONS 1
-#  elif ( __GNUC__ == 9 )
+#  elif( __GNUC__ == 9 )
 #    define TS3_PCL_COMPILER TS3_PCL_COMPILER_GCC_UV
 #  endif
 #
@@ -403,7 +403,7 @@
 
 
 #if !defined( TS3_PCL_FEATURE_ANONYMOUS_UNIONS )
-#  if ( TS3_PCL_COMPILER & ( TS3_PCL_COMPILER_MSVC | TS3_PCL_COMPILER_ICC ) )
+#  if( TS3_PCL_COMPILER & ( TS3_PCL_COMPILER_MSVC | TS3_PCL_COMPILER_ICC ) )
 #    if defined( _MSC_EXTENSIONS )
 #      define TS3_PCL_FEATURE_ANONYMOUS_UNIONS 1
 #    else
@@ -415,14 +415,14 @@
 #endif
 
 
-#if ( ( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINDOWS ) && (EPCONFIG_COMPILER & (EPCONFIG_COMPILER_ICC | TS3_PCL_COMPILER_MSVC)) )
+#if( ( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_WINDOWS ) && (EPCONFIG_COMPILER & (EPCONFIG_COMPILER_ICC | TS3_PCL_COMPILER_MSVC)) )
 #  define TS3_PCL_TARGET_PROPERTY_LIB_PRAGMA_SUPPORTED 1
 #else
 #  define TS3_PCL_TARGET_PROPERTY_LIB_PRAGMA_SUPPORTED 0
 #endif
 
 
-#if ( TS3_PCL_COMPILER & ( TS3_PCL_COMPILER_LLVM | TS3_PCL_COMPILER_CLANG ) )
+#if( TS3_PCL_COMPILER & ( TS3_PCL_COMPILER_LLVM | TS3_PCL_COMPILER_CLANG ) )
 #  if defined( __AVX2__ )
 #    define TS3_PCL_EIS_SUPPORT_COMPILER_LEVEL TS3_PCL_EIS_LEVEL_AVX2
 #  elif defined( __AVX__ )
@@ -438,7 +438,7 @@
 #  elif defined( __SSE2__ )
 #    define TS3_PCL_EIS_SUPPORT_COMPILER_LEVEL TS3_PCL_EIS_LEVEL_SSE2
 #  endif
-#elif ( ( TS3_PCL_COMPILER & TS3_PCL_COMPILER_ICC ) && ( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_LINUX ) )
+#elif( ( TS3_PCL_COMPILER & TS3_PCL_COMPILER_ICC ) && ( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_LINUX ) )
 #  if defined( __AVX2__ )
 #    define TS3_PCL_EIS_SUPPORT_COMPILER_LEVEL TS3_PCL_EIS_LEVEL_AVX2
 #  elif defined( __AVX__ )
@@ -450,20 +450,20 @@
 #  elif defined( __SSE__ )
 #    define TS3_PCL_EIS_SUPPORT_COMPILER_LEVEL TS3_PCL_EIS_LEVEL_SSE2
 #  endif
-#elif ( ( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC ) || ( ( TS3_PCL_COMPILER & TS3_PCL_COMPILER_ICC ) && ( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 ) ) )
+#elif( ( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC ) || ( ( TS3_PCL_COMPILER & TS3_PCL_COMPILER_ICC ) && ( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_WIN32 ) ) )
 #  if defined( _M_ARM_FP )
 #    define TS3_PCL_EIS_SUPPORT_COMPILER_LEVEL TS3_PCL_EIS_LEVEL_NEON
 #  elif defined( __AVX2__ )
 #    define TS3_PCL_EIS_SUPPORT_COMPILER_LEVEL TS3_PCL_EIS_LEVEL_AVX2
 #  elif defined( __AVX__ )
 #    define TS3_PCL_EIS_SUPPORT_COMPILER_LEVEL TS3_PCL_EIS_LEVEL_AVX
-#  elif ( _M_IX86_FP == 2 )
+#  elif( _M_IX86_FP == 2 )
 #    define TS3_PCL_EIS_SUPPORT_COMPILER_LEVEL TS3_PCL_EIS_LEVEL_SSE2
-#  elif ( _M_IX86_FP == 1 )
+#  elif( _M_IX86_FP == 1 )
 #    define TS3_PCL_EIS_SUPPORT_COMPILER_LEVEL TS3_PCL_EIS_LEVEL_SSE
 #  endif
 #// GCC, all pltforms, x86/x86_64
-#elif ( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC ) && ( TS3_PCL_TARGET_ARCHITECTURE & ( TS3_PCL_TARGET_ARCHITECTURE_X86 | TS3_PCL_TARGET_ARCHITECTURE_X86_64 ) )
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC ) && ( TS3_PCL_TARGET_ARCHITECTURE & ( TS3_PCL_TARGET_ARCHITECTURE_X86 | TS3_PCL_TARGET_ARCHITECTURE_X86_64 ) )
 #  if defined( __AVX2__ )
 #    define TS3_PCL_EIS_SUPPORT_COMPILER_LEVEL TS3_PCL_EIS_LEVEL_AVX2
 #  elif defined( __AVX__ )
@@ -535,43 +535,43 @@
 #  define TS3_PCL_EIS_SUPPORT_HAS_MM_PAUSE 1
 #endif
 
-#if ( TS3_PCL_TARGET_ARCHITECTURE == TS3_PCL_TARGET_ARCHITECTURE_X86 )
+#if( TS3_PCL_TARGET_ARCHITECTURE == TS3_PCL_TARGET_ARCHITECTURE_X86 )
 #  include "environment/arch/x86.h"
-#elif ( TS3_PCL_TARGET_ARCHITECTURE == TS3_PCL_TARGET_ARCHITECTURE_X86_64 )
+#elif( TS3_PCL_TARGET_ARCHITECTURE == TS3_PCL_TARGET_ARCHITECTURE_X86_64 )
 #  include "environment/arch/x86_64.h"
-#elif ( TS3_PCL_TARGET_ARCHITECTURE == TS3_PCL_TARGET_ARCHITECTURE_ARM )
+#elif( TS3_PCL_TARGET_ARCHITECTURE == TS3_PCL_TARGET_ARCHITECTURE_ARM )
 #  include "environment/arch/arm.h"
-#elif ( TS3_PCL_TARGET_ARCHITECTURE == TS3_PCL_TARGET_ARCHITECTURE_ARM64 )
+#elif( TS3_PCL_TARGET_ARCHITECTURE == TS3_PCL_TARGET_ARCHITECTURE_ARM64 )
 #  include "environment/arch/arm64.h"
 #else
 #  error "Unsupported architecture!"
 #endif
 
-#if ( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_WINDESKTOP )
+#if( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_WINDESKTOP )
 #  include "environment/os/windesktop.h"
-#elif ( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_WINUWP )
+#elif( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_WINUWP )
 #  include "environment/os/winuwp.h"
-#elif ( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_ANDROID )
+#elif( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_ANDROID )
 #  include "environment/os/android.h"
-#elif ( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_LINUX )
+#elif( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_LINUX )
 #  include "environment/os/linux.h"
-#elif ( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_MACOS )
+#elif( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_MACOS )
 #  include "environment/os/osx.h"
-#elif ( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_IOS )
+#elif( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_IOS )
 #  include "environment/os/ios.h"
 #else
 #  error "Unsupported os!"
 #endif
 
-#if ( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
+#if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
 #  include "environment/compiler/clang.h"
-#elif ( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_GCC )
 #  include "environment/compiler/gcc.h"
-#elif ( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MINGW64 )
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MINGW64 )
 #  include "environment/compiler/mingw64.h"
-#elif ( TS3_PCL_COMPILER & TS3_PCL_COMPILER_ICC )
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_ICC )
 #  include "environment/compiler/icc.h"
-#elif ( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
+#elif( TS3_PCL_COMPILER & TS3_PCL_COMPILER_MSVC )
 #  include "environment/compiler/msvc.h"
 #else
 #  error "Unsupported compiler!"

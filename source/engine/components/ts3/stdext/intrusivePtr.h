@@ -160,7 +160,7 @@ namespace ts3
 
 		IntrusivePtr & operator=( IntrusivePtr && pRhs )
 		{
-			if ( this != &pRhs )
+			if( this != &pRhs )
 			{
 				IntrusivePtr( std::move( pRhs ) ).swap( *this );
 			}
@@ -170,7 +170,7 @@ namespace ts3
 
 		IntrusivePtr & operator=( const IntrusivePtr & pRhs )
 		{
-			if ( this != &pRhs )
+			if( this != &pRhs )
 			{
 				IntrusivePtr( pRhs ).swap( *this );
 			}
@@ -256,7 +256,7 @@ namespace ts3
 	private:
 		void _release()
 		{
-			if ( _ptr != nullptr )
+			if( _ptr != nullptr )
 			{
 				_releasePtr( _ptr );
 				_ptr = nullptr;
@@ -265,7 +265,7 @@ namespace ts3
 
 		void _setNoRelease( TpType * pPointer )
 		{
-			if ( ( pPointer != nullptr ) && ( addRefDefault( pPointer ) > 0 ) )
+			if( ( pPointer != nullptr ) && ( addRefDefault( pPointer ) > 0 ) )
 			{
 				_ptr = pPointer;
 			}
@@ -283,11 +283,11 @@ namespace ts3
 
 		void _set( TpType * pPointer )
 		{
-			if ( pPointer != _ptr )
+			if( pPointer != _ptr )
 			{
 				TpType * prevPtr = _ptr;
 				_setNoRelease( pPointer );
-				if ( prevPtr != nullptr )
+				if( prevPtr != nullptr )
 				{
 					_releasePtr( prevPtr );
 				}
@@ -303,7 +303,7 @@ namespace ts3
 		static void _releasePtr( TpType * pPointer )
 		{
 			ref_counter_value_t remainingRefs = releaseRefDefault( pPointer );
-			if ( remainingRefs == 0 )
+			if( remainingRefs == 0 )
 			{
 				TpDeleter()( pPointer );
 			}

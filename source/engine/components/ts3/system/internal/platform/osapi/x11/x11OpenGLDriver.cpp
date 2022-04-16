@@ -9,6 +9,10 @@ namespace ts3::system
 	namespace platform
 	{
 
+		PFNGLXCREATECONTEXTATTRIBSARBPROC _x11QueryGLXCreateContextAttribsProc();
+
+		PFNGLXSWAPINTERVALEXTPROC _x11QueryGLXSwapIntervalProc();
+
 		// Creates X11 OpenGL surface using provided window create attributes and visual config.
 		void _x11CreateGLWindowAndSurface( X11OpenGLDisplaySurfaceNativeData & pGLSurfaceNativeData,
 		                                   X11WindowCreateInfo & pWindowCreateInfo,
@@ -97,13 +101,13 @@ namespace ts3::system
 		_x11CreateAndBindLegacyRenderContext( tmpContextNativeData, tmpSurfaceNativeData );
 
 //		auto glewResult = glewInit();
-//		if ( glewResult != GLEW_OK )
+//		if( glewResult != GLEW_OK )
 //		{
 //			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 //		}
 
 //		glewResult = glxewInit();
-//		if ( glewResult != GLEW_OK )
+//		if( glewResult != GLEW_OK )
 //		{
 //			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 //		}
@@ -157,6 +161,24 @@ namespace ts3::system
 
 		platform::x11WindowPostCreateUpdate( displaySurface->mNativeData, x11WindowCreateInfo );
 
+		if( auto glXSwapIntervalEXTProc = platform::_x11QueryGLXSwapIntervalProc() )
+		{
+			auto & xSessionData = platform::x11GetXSessionData( *this );
+
+			if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_DISABLED_BIT ) )
+			{
+				glXSwapIntervalEXTProc( xSessionData.display, displaySurface->mNativeData.windowXID, 0 );
+			}
+			else if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT ) )
+			{
+				glXSwapIntervalEXTProc( xSessionData.display, displaySurface->mNativeData.windowXID, -1 );
+			}
+			else if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT ) )
+			{
+				glXSwapIntervalEXTProc( xSessionData.display, displaySurface->mNativeData.windowXID, 1 );
+			}
+		}
+
 		return displaySurface;
 	}
 
@@ -188,47 +210,34 @@ namespace ts3::system
 
 		auto * x11DisplaySurface = pDisplaySurface.queryInterface<X11OpenGLDisplaySurface>();
 
-		static PFNGLXCREATECONTEXTATTRIBSARBPROC cvGLXCreateContextAttribsProc = nullptr;
-		static PFNGLXSWAPINTERVALEXTPROC cvGLXSwapIntervalEXTProc = nullptr;
-
-		if( cvGLXCreateContextAttribsProc == nullptr )
-		{
-			auto procAddress = glXGetProcAddressARB( (const GLubyte *) "glXCreateContextAttribsARB" );
-			cvGLXCreateContextAttribsProc = reinterpret_cast<PFNGLXCREATECONTEXTATTRIBSARBPROC>( procAddress );
-		}
-
-		if( cvGLXSwapIntervalEXTProc == nullptr )
-		{
-			auto procAddress = glXGetProcAddressARB( (const GLubyte *) "glXSwapIntervalEXT" );
-			cvGLXSwapIntervalEXTProc = reinterpret_cast<PFNGLXSWAPINTERVALEXTPROC>( procAddress );
-		}
+		auto glXCreateContextAttribsProc = platform::_x11QueryGLXCreateContextAttribsProc();
 
 		int contextProfile = 0;
 		Bitmask<int> contextCreateFlags = 0;
 		GLXContext shareContextHandle = nullptr;
 
-		if ( pCreateInfo.contextProfile == EGLContextProfile::Core )
+		if( pCreateInfo.contextProfile == EGLContextProfile::Core )
 		{
 			contextProfile = GLX_CONTEXT_CORE_PROFILE_BIT_ARB;
 		}
-		else if ( pCreateInfo.contextProfile == EGLContextProfile::Legacy )
+		else if( pCreateInfo.contextProfile == EGLContextProfile::Legacy )
 		{
 			contextProfile = GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
 		}
-		else if ( pCreateInfo.contextProfile == EGLContextProfile::GLES )
+		else if( pCreateInfo.contextProfile == EGLContextProfile::GLES )
 		{
 			contextProfile = GLX_CONTEXT_ES_PROFILE_BIT_EXT;
 		}
 
-		if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
+		if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
 		{
 			contextCreateFlags |= GLX_CONTEXT_DEBUG_BIT_ARB;
 		}
-		if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
+		if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
 		{
 			contextCreateFlags |= GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
 		}
-		if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
+		if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
 		{
 			if( pCreateInfo.shareContext )
 			{
@@ -251,23 +260,23 @@ namespace ts3::system
 			FALSE
 		};
 
-		GLXContext contextHandle = cvGLXCreateContextAttribsProc( xSessionData.display,
-		                                                          x11DisplaySurface->mNativeData.fbConfig,
-		                                                          shareContextHandle,
-		                                                          True,
-		                                                          &( contextAttributes[0] ) );
+		GLXContext contextHandle = glXCreateContextAttribsProc( xSessionData.display,
+		                                                        x11DisplaySurface->mNativeData.fbConfig,
+		                                                        shareContextHandle,
+		                                                        True,
+		                                                        &( contextAttributes[0] ) );
 
-		if ( !contextHandle )
+		if( !contextHandle )
 		{
 			if( shareContextHandle && pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARING_OPTIONAL_BIT ) )
 			{
-				contextHandle = cvGLXCreateContextAttribsProc( xSessionData.display,
-				                                               x11DisplaySurface->mNativeData.fbConfig,
-				                                               nullptr,
-				                                               True,
-				                                               &( contextAttributes[0] ) );
+				contextHandle = glXCreateContextAttribsProc( xSessionData.display,
+				                                             x11DisplaySurface->mNativeData.fbConfig,
+				                                             nullptr,
+				                                             True,
+				                                             &( contextAttributes[0] ) );
 			}
-			if ( !contextHandle )
+			if( !contextHandle )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
@@ -282,7 +291,7 @@ namespace ts3::system
 	OpenGLRenderContextHandle X11OpenGLSystemDriver::_nativeCreateRenderContextForCurrentThread()
 	{
 		auto contextHandle = ::glXGetCurrentContext();
-		if ( contextHandle == nullptr )
+		if( contextHandle == nullptr )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
@@ -426,6 +435,32 @@ namespace ts3::system
 	namespace platform
 	{
 
+		PFNGLXCREATECONTEXTATTRIBSARBPROC _x11QueryGLXCreateContextAttribsProc()
+		{
+			static PFNGLXCREATECONTEXTATTRIBSARBPROC cvGLXCreateContextAttribsProc = nullptr;
+
+			if( !cvGLXCreateContextAttribsProc )
+			{
+				auto procAddress = glXGetProcAddressARB( (const GLubyte *) "glXCreateContextAttribsARB" );
+				cvGLXCreateContextAttribsProc = reinterpret_cast<PFNGLXCREATECONTEXTATTRIBSARBPROC>( procAddress );
+			}
+
+			return cvGLXCreateContextAttribsProc;
+		}
+
+		PFNGLXSWAPINTERVALEXTPROC _x11QueryGLXSwapIntervalProc()
+		{
+			static PFNGLXSWAPINTERVALEXTPROC cvGLXSwapIntervalEXTProc = nullptr;
+
+			if( !cvGLXSwapIntervalEXTProc )
+			{
+				auto procAddress = glXGetProcAddressARB( (const GLubyte *) "glXSwapIntervalEXT" );
+				cvGLXSwapIntervalEXTProc = reinterpret_cast<PFNGLXSWAPINTERVALEXTPROC>( procAddress );
+			}
+
+			return cvGLXSwapIntervalEXTProc;
+		}
+
 		void _x11CreateGLWindowAndSurface( X11OpenGLDisplaySurfaceNativeData & pGLSurfaceNativeData,
 		                                   X11WindowCreateInfo & pWindowCreateInfo,
 		                                   const VisualConfig & pVisualConfig )
@@ -486,7 +521,7 @@ namespace ts3::system
 			auto & xSessionData = platform::x11GetXSessionData( pGLSurfaceNativeData );
 
 			auto tempContextHandle = ::glXCreateContext( xSessionData.display, pGLSurfaceNativeData.visualInfo, nullptr, True );
-			if ( tempContextHandle == nullptr )
+			if( tempContextHandle == nullptr )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
@@ -494,7 +529,7 @@ namespace ts3::system
 			pGLContextNativeData.contextHandle = tempContextHandle;
 
 			auto makeCurrentResult = ::glXMakeCurrent( xSessionData.display, pGLSurfaceNativeData.windowXID, tempContextHandle );
-			if ( makeCurrentResult == False )
+			if( makeCurrentResult == False )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
@@ -588,10 +623,10 @@ namespace ts3::system
 			int bestMatchRate = 0;
 			GLXFBConfig bestFBConfig = nullptr;
 
-			for ( auto fbConfig : fbConfigList )
+			for( auto fbConfig : fbConfigList )
 			{
 				int matchRate = _x11GetFBConfigMatchRate( pDisplay, fbConfig, pVisualConfig );
-				if ( matchRate > bestMatchRate )
+				if( matchRate > bestMatchRate )
 				{
 					bestMatchRate = matchRate;
 					bestFBConfig = fbConfig;
@@ -617,17 +652,17 @@ namespace ts3::system
 			int fbConfigListSize = 0;
 			auto * fbConfigList = glXChooseFBConfig( pDisplay, pScreenIndex, fbConfigAttribArray, &fbConfigListSize );
 
-			if ( ( fbConfigList == nullptr ) || ( fbConfigListSize == 0 ) )
+			if( ( fbConfigList == nullptr ) || ( fbConfigListSize == 0 ) )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
 
-			for ( int pFBConfigIndex = 0; pFBConfigIndex < fbConfigListSize; ++pFBConfigIndex )
+			for( int pFBConfigIndex = 0; pFBConfigIndex < fbConfigListSize; ++pFBConfigIndex )
 			{
 				auto pFBConfig = fbConfigList[pFBConfigIndex];
 				auto * visualInfo = glXGetVisualFromFBConfig( pDisplay, pFBConfig );
 
-				if ( visualInfo != nullptr )
+				if( visualInfo != nullptr )
 				{
 					int fbConfigAlphaSize = 0;
 					glXGetFBConfigAttrib( pDisplay, pFBConfig, GLX_ALPHA_SIZE, &fbConfigAlphaSize );
@@ -651,13 +686,13 @@ namespace ts3::system
 			int doubleBufferRequestedState = True;
 			int stereoModeRequestedState = False;
 
-			if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
+			if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
 				 !pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 			{
 				doubleBufferRequestedState = False;
 			}
 
-			if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
+			if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
 				 !pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 			{
 				stereoModeRequestedState = True;
@@ -707,29 +742,29 @@ namespace ts3::system
 			pAttribArray[attribIndex++] = GLX_X_VISUAL_TYPE;
 			pAttribArray[attribIndex++] = GLX_TRUE_COLOR;
 
-			if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
+			if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 			{
 				pAttribArray[attribIndex++] = GLX_DOUBLEBUFFER;
 				pAttribArray[attribIndex++] = True;
 			}
-			else if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
+			else if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
 			{
 				pAttribArray[attribIndex++] = GLX_DOUBLEBUFFER;
 				pAttribArray[attribIndex++] = False;
 			}
 
-			if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
+			if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 			{
 				pAttribArray[attribIndex++] = GLX_STEREO;
 				pAttribArray[attribIndex++] = False;
 			}
-			else if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
+			else if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
 			{
 				pAttribArray[attribIndex++] = GLX_STEREO;
 				pAttribArray[attribIndex++] = True;
 			}
 
-			if ( ( pVisualConfig.msaaDesc.bufferCount != 0 ) && ( pVisualConfig.msaaDesc.quality != 0 ) )
+			if( ( pVisualConfig.msaaDesc.bufferCount != 0 ) && ( pVisualConfig.msaaDesc.quality != 0 ) )
 			{
 				pAttribArray[attribIndex++] = GLX_SAMPLE_BUFFERS;
 				pAttribArray[attribIndex++] = pVisualConfig.msaaDesc.bufferCount;
@@ -738,7 +773,7 @@ namespace ts3::system
 				pAttribArray[attribIndex++] = pVisualConfig.msaaDesc.quality;
 			}
 
-			if ( pVisualConfig.colorDesc.rgba.u32Code != 0 )
+			if( pVisualConfig.colorDesc.rgba.u32Code != 0 )
 			{
 				pAttribArray[attribIndex++] = GLX_RED_SIZE;
 				pAttribArray[attribIndex++] = pVisualConfig.colorDesc.rgba.u8Red;
@@ -753,13 +788,13 @@ namespace ts3::system
 				pAttribArray[attribIndex++] = pVisualConfig.colorDesc.rgba.u8Alpha;
 			}
 
-			if ( pVisualConfig.depthStencilDesc.depthBufferSize != 0 )
+			if( pVisualConfig.depthStencilDesc.depthBufferSize != 0 )
 			{
 				pAttribArray[attribIndex++] = GLX_DEPTH_SIZE;
 				pAttribArray[attribIndex++] = pVisualConfig.depthStencilDesc.depthBufferSize;
 			}
 
-			if ( pVisualConfig.depthStencilDesc.stencilBufferSize != 0 )
+			if( pVisualConfig.depthStencilDesc.stencilBufferSize != 0 )
 			{
 				pAttribArray[attribIndex++] = GLX_STENCIL_SIZE;
 				pAttribArray[attribIndex++] = pVisualConfig.depthStencilDesc.stencilBufferSize;

@@ -165,10 +165,10 @@ namespace ts3
 		{
 			size_t result = 0;
 
-			for ( const _Char * strEnd = pInputStr + pInputStrLength; pInputStr < strEnd; )
+			for( const _Char * strEnd = pInputStr + pInputStrLength; pInputStr < strEnd; )
 			{
 				const _Char * tokenPtr = std::char_traits<_Char>::find( pInputStr, pInputStrLength, pSeparator );
-				if ( tokenPtr == nullptr )
+				if( tokenPtr == nullptr )
 				{
 					pAppendPredicate( pInputStr, strEnd - pInputStr );
 					break;
@@ -227,10 +227,10 @@ namespace ts3
 			std::basic_string<_Char> shortFilename = pFilename;
 			size_t filenameSeparator = shortFilename.find_last_of( pPathSeparator, 0 );
 
-			if ( filenameSeparator != std::basic_string<_Char>::npos )
+			if( filenameSeparator != std::basic_string<_Char>::npos )
 			{
 				size_t lastDirSep = shortFilename.find_last_of( pPathSeparator, filenameSeparator );
-				if ( lastDirSep != std::basic_string<_Char>::npos )
+				if( lastDirSep != std::basic_string<_Char>::npos )
 				{
 					shortFilename.erase( 0, lastDirSep + 1 );
 				}

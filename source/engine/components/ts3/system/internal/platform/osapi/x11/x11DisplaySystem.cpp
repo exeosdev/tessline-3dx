@@ -31,10 +31,10 @@ namespace ts3::system
 		// Get default screen depth for the X screen.
 		auto screenDepth = XDefaultDepth( xSessionData.display, xSessionData.screenIndex );
 
-		if ( screenDepth < 32 )
+		if( screenDepth < 32 )
 		{
 			XVisualInfo visualInfo;
-			if ( XMatchVisualInfo( xSessionData.display, xSessionData.screenIndex, 32, TrueColor, &visualInfo ) == True )
+			if( XMatchVisualInfo( xSessionData.display, xSessionData.screenIndex, 32, TrueColor, &visualInfo ) == True )
 			{
 				screenDepth = 32;
 			}
@@ -47,7 +47,7 @@ namespace ts3::system
 			int xrrVersionMajor = 0;
 			int xrrVersionMinor = 0;
 
-			if ( XRRQueryVersion( xSessionData.display, &xrrVersionMajor, &xrrVersionMinor ) == False )
+			if( XRRQueryVersion( xSessionData.display, &xrrVersionMajor, &xrrVersionMinor ) == False )
 			{
 				return;
 			}
@@ -56,17 +56,17 @@ namespace ts3::system
 			mNativeData.xrrVersion.major = static_cast<uint16>( xrrVersionMinor );
 		}
 
-		if ( auto * xrrScreenResources = XRRGetScreenResources( xSessionData.display, xSessionData.rootWindowXID ) )
+		if( auto * xrrScreenResources = XRRGetScreenResources( xSessionData.display, xSessionData.rootWindowXID ) )
 		{
 			int xrrMonitorsNum = 0;
 			auto * xrrMonitorList = XRRGetMonitors( xSessionData.display, xSessionData.rootWindowXID, False, &xrrMonitorsNum );
 
-			if ( xrrMonitorList && ( xrrMonitorsNum > 0 ) )
+			if( xrrMonitorList && ( xrrMonitorsNum > 0 ) )
 			{
-				for ( int monitorIndex = 0; monitorIndex < xrrMonitorsNum; ++monitorIndex )
+				for( int monitorIndex = 0; monitorIndex < xrrMonitorsNum; ++monitorIndex )
 				{
 					auto & xrrMonitorInfo = xrrMonitorList[monitorIndex];
-					if ( xrrMonitorInfo.primary != 0 )
+					if( xrrMonitorInfo.primary != 0 )
 					{
 						mNativeData.xrrDefaultMonitorInfo = xrrMonitorInfo;
 						//break;
@@ -147,7 +147,7 @@ namespace ts3::system
 
 		//
 		mNativeData.xrrScreenResources = XRRGetScreenResources( xSessionData.display, xSessionData.rootWindowXID );
-		if ( mNativeData.xrrScreenResources == nullptr )
+		if( mNativeData.xrrScreenResources == nullptr )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
@@ -158,15 +158,15 @@ namespace ts3::system
 		                                             False,
 		                                             &( mNativeData.xrrMonitorsNum ) );
 
-		if ( ( mNativeData.xrrMonitorList == nullptr ) || ( mNativeData.xrrMonitorsNum <= 0 ) )
+		if( ( mNativeData.xrrMonitorList == nullptr ) || ( mNativeData.xrrMonitorsNum <= 0 ) )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Internal_Error );
 		}
 
-		for ( int monitorIndex = 0; monitorIndex < mNativeData.xrrMonitorsNum; ++monitorIndex )
+		for( int monitorIndex = 0; monitorIndex < mNativeData.xrrMonitorsNum; ++monitorIndex )
 		{
 			auto & monitorInfo = mNativeData.xrrMonitorList[monitorIndex];
-			if ( monitorInfo.primary != 0 )
+			if( monitorInfo.primary != 0 )
 			{
 				mNativeData.xrrDefaultMonitorInfo = &monitorInfo;
 			}
@@ -181,13 +181,13 @@ namespace ts3::system
 	
 	void X11DisplayDriver::_releaseX11DisplayDriverState()
 	{
-		if ( mNativeData.xrrScreenResources != nullptr )
+		if( mNativeData.xrrScreenResources != nullptr )
 		{
 			XRRFreeScreenResources( mNativeData.xrrScreenResources );
 			mNativeData.xrrScreenResources = nullptr;
 		}
 
-		if ( mNativeData.xrrMonitorList != nullptr )
+		if( mNativeData.xrrMonitorList != nullptr )
 		{
 			XRRFreeMonitors( mNativeData.xrrMonitorList );
 			mNativeData.xrrMonitorList = nullptr;
@@ -210,22 +210,22 @@ namespace ts3::system
 		adapterDesc.flags.set( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
 		adapterDesc.flags.set( E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT );
 
-		for ( size_t monitorIndex = 0; monitorIndex < mNativeData.xrrMonitorsNum; ++monitorIndex )
+		for( size_t monitorIndex = 0; monitorIndex < mNativeData.xrrMonitorsNum; ++monitorIndex )
 		{
 			auto & monitorInfo = mNativeData.xrrMonitorList[monitorIndex];
 			//char * monitorName = XGetAtomName( xSessionData.display, monitorInfo.name );
 
 			// Iterate over monitor's outputs and find the one used by the system.
-			for ( int monitorOutputIndex = 0; monitorOutputIndex < monitorInfo.noutput; ++monitorOutputIndex )
+			for( int monitorOutputIndex = 0; monitorOutputIndex < monitorInfo.noutput; ++monitorOutputIndex )
 			{
 				auto monitorOutputID = monitorInfo.outputs[monitorOutputIndex];
 				auto * monitorOutputInfo = XRRGetOutputInfo( xSessionData.display,
 				                                             mNativeData.xrrScreenResources,
 				                                             monitorOutputID );
 
-				if ( monitorOutputInfo )
+				if( monitorOutputInfo )
 				{
-					if ( ( monitorInfo.width != 0 ) && ( monitorInfo.height != 0 ) )
+					if( ( monitorInfo.width != 0 ) && ( monitorInfo.height != 0 ) )
 					{
 						auto outputObject = createOutput<X11DisplayOutput>( *adapterObject );
 						outputObject->mNativeData.xrrOutputID = monitorOutputID;
@@ -238,12 +238,12 @@ namespace ts3::system
 						outputDesc.screenRect.size.x = monitorInfo.width;
 						outputDesc.screenRect.size.y = monitorInfo.height;
 
-						if ( monitorOutputInfo->connection == RR_Connected )
+						if( monitorOutputInfo->connection == RR_Connected )
 						{
 							outputDesc.flags.set( E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT );
 						}
 
-						if ( monitorInfo.primary != 0 )
+						if( monitorInfo.primary != 0 )
 						{
 							outputDesc.flags.set( E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT );
 						}
@@ -273,27 +273,27 @@ namespace ts3::system
 		auto * outputInfo = XRRGetOutputInfo( xSessionData.display,
 		                                      mNativeData.xrrScreenResources,
 		                                      outputX11->mNativeData.xrrOutputID );
-		if ( outputInfo == nullptr )
+		if( outputInfo == nullptr )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
 
-		if ( outputInfo->modes != nullptr )
+		if( outputInfo->modes != nullptr )
 		{
 			dsm_video_settings_hash_t lastSettingsHash = CX_DSM_VIDEO_SETTINGS_HASH_INVALID;
 
-			for ( size_t modeIndex = 0; modeIndex < outputInfo->nmode; ++modeIndex )
+			for( size_t modeIndex = 0; modeIndex < outputInfo->nmode; ++modeIndex )
 			{
 				auto outputModeID = outputInfo->modes[modeIndex];
 				auto displayModeInfoPtrIter = mNativeData.xrrModeInfoMap.find( outputModeID );
-				if ( displayModeInfoPtrIter == mNativeData.xrrModeInfoMap.end() )
+				if( displayModeInfoPtrIter == mNativeData.xrrModeInfoMap.end() )
 				{
 					continue;
 				}
 
 				auto & displayModeInfo = *( displayModeInfoPtrIter->second );
 
-				if ( ( displayModeInfo.modeFlags & ( RR_DoubleScan | RR_PixelMultiplex ) ) != 0 )
+				if( ( displayModeInfo.modeFlags & ( RR_DoubleScan | RR_PixelMultiplex ) ) != 0 )
 				{
 					continue;
 				}
@@ -301,7 +301,7 @@ namespace ts3::system
 				auto rateVHTotal = displayModeInfo.hTotal * displayModeInfo.vTotal;
 				auto refreshRate = 0U;
 
-				if ( rateVHTotal != 0 )
+				if( rateVHTotal != 0 )
 				{
 					refreshRate = static_cast<uint32_t>( std::round( ( double )displayModeInfo.dotClock / ( double )rateVHTotal ) );
 				}
@@ -311,7 +311,7 @@ namespace ts3::system
 				videoSettings.resolution.y = static_cast<uint32>( displayModeInfo.height );
 				videoSettings.refreshRate = static_cast<uint16>( refreshRate );
 
-				if ( ( displayModeInfo.modeFlags & RR_Interlace ) != 0 )
+				if( ( displayModeInfo.modeFlags & RR_Interlace ) != 0 )
 				{
 					videoSettings.flags.set( E_DISPLAY_VIDEO_SETTINGS_FLAG_SCAN_INTERLACED_BIT );
 				}
@@ -355,7 +355,7 @@ namespace ts3::system
 			const auto & colorFormatDesc = vsxGetDescForColorFormat( pColorFormat );
 
 			XVisualInfo visualInfo;
-			if ( XMatchVisualInfo( pXDisplay, pScreenIndex, colorFormatDesc.size, TrueColor, &visualInfo ) == True )
+			if( XMatchVisualInfo( pXDisplay, pScreenIndex, colorFormatDesc.size, TrueColor, &visualInfo ) == True )
 			{
 				return true;
 			}

@@ -326,7 +326,7 @@ namespace ts3::system
 					cursorPos.x = AMotionEvent_getX( pInputEvent, 0u );
 					cursorPos.y = AMotionEvent_getY( pInputEvent, 0u );
 
-					if ( inputMouseState.lastCursorPos == CX_EVENT_MOUSE_POS_INVALID )
+					if( inputMouseState.lastCursorPos == CX_EVENT_MOUSE_POS_INVALID )
 					{
 						inputMouseState.lastCursorPos = cursorPos;
 					}

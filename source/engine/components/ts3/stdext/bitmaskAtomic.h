@@ -132,14 +132,14 @@ namespace ts3
 		{
 			ValueType current = _value.load( std::memory_order_relaxed );
 
-			while ( true )
+			while( true )
 			{
-				if ( ( current & static_cast<ValueType>(pBits) ) != 0 )
+				if( ( current & static_cast<ValueType>(pBits) ) != 0 )
 				{
 					return false;
 				}
 
-				if ( _value.compare_exchange_weak( current, current | static_cast<ValueType>(pBits),
+				if( _value.compare_exchange_weak( current, current | static_cast<ValueType>(pBits),
 												   std::memory_order_acq_rel, std::memory_order_relaxed ) )
 				{
 					return true;
@@ -152,14 +152,14 @@ namespace ts3
 		{
 			ValueType current = _value.load( std::memory_order_relaxed );
 
-			while ( true )
+			while( true )
 			{
-				if ( ( current & static_cast<ValueType>(pBits) ) != static_cast<ValueType>(pBits) )
+				if( ( current & static_cast<ValueType>(pBits) ) != static_cast<ValueType>(pBits) )
 				{
 					return false;
 				}
 
-				if ( _value.compare_exchange_weak( current, current & ~static_cast<ValueType>(pBits),
+				if( _value.compare_exchange_weak( current, current & ~static_cast<ValueType>(pBits),
 												   std::memory_order_acq_rel, std::memory_order_relaxed ) )
 				{
 					return true;

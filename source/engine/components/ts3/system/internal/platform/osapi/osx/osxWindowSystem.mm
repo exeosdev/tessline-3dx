@@ -110,7 +110,7 @@ namespace ts3::system
 				                                defer:NO
 				                                screen:pTargetScreen];
 
-				if ( [nsWindow respondsToSelector:@selector( setTabbingMode: )] )
+				if( [nsWindow respondsToSelector:@selector( setTabbingMode: )] )
 				{
 					[nsWindow setTabbingMode:NSWindowTabbingModeDisallowed];
 				}

@@ -90,26 +90,26 @@ namespace ts3::system
 
 		// Create legacy OpenGL context for initialization phase.
 		tmpContextNativeData.contextHandle = ::wglCreateContext( tmpSurfaceNativeData.hdc );
-		if ( tmpContextNativeData.contextHandle == nullptr )
+		if( tmpContextNativeData.contextHandle == nullptr )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
 
 		// Bind context as current, so GL calls may be used normally.
 		BOOL makeCurrentResult = ::wglMakeCurrent( tmpSurfaceNativeData.hdc, tmpContextNativeData.contextHandle );
-		if ( makeCurrentResult == FALSE )
+		if( makeCurrentResult == FALSE )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
 
 		auto glewResult = glewInit();
-		if ( glewResult != GLEW_OK )
+		if( glewResult != GLEW_OK )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
 
 		glewResult = wglewInit();
-		if ( glewResult != GLEW_OK )
+		if( glewResult != GLEW_OK )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
@@ -144,17 +144,17 @@ namespace ts3::system
 
 		_win32CreateGLSurface( displaySurface->mNativeData, pCreateInfo.visualConfig );
 
-		if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT ) )
+		if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_DISABLED_BIT ) )
+		{
+			wglSwapIntervalEXT( 0 );
+		}
+		else if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT ) )
 		{
 			wglSwapIntervalEXT( -1 );
 		}
 		else if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT ) )
 		{
 			wglSwapIntervalEXT( 1 );
-		}
-		else
-		{
-			// wglSwapIntervalEXT( 0 );
 		}
 
 		::ShowWindow( displaySurface->mNativeData.hwnd, SW_SHOWNORMAL );
@@ -172,7 +172,7 @@ namespace ts3::system
 	OpenGLDisplaySurfaceHandle Win32OpenGLSystemDriver::_nativeCreateDisplaySurfaceForCurrentThread()
 	{
 		auto currentDC = ::wglGetCurrentDC();
-		if ( currentDC == nullptr )
+		if( currentDC == nullptr )
 		{
 			return nullptr;
 		}
@@ -206,28 +206,28 @@ namespace ts3::system
 		Bitmask<int> contextCreateFlags = 0;
 		HGLRC shareContextHandle = nullptr;
 
-		if ( pCreateInfo.contextProfile == EGLContextProfile::Core )
+		if( pCreateInfo.contextProfile == EGLContextProfile::Core )
 		{
 			contextProfile = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
 		}
-		else if ( pCreateInfo.contextProfile == EGLContextProfile::Legacy )
+		else if( pCreateInfo.contextProfile == EGLContextProfile::Legacy )
 		{
 			contextProfile = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
 		}
-		else if ( pCreateInfo.contextProfile == EGLContextProfile::GLES )
+		else if( pCreateInfo.contextProfile == EGLContextProfile::GLES )
 		{
 			contextProfile = WGL_CONTEXT_ES_PROFILE_BIT_EXT;
 		}
 
-		if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
+		if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
 		{
 			contextCreateFlags |= WGL_CONTEXT_DEBUG_BIT_ARB;
 		}
-		if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
+		if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
 		{
 			contextCreateFlags |= WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
 		}
-		if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
+		if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
 		{
 			if( pCreateInfo.shareContext )
 			{
@@ -254,7 +254,7 @@ namespace ts3::system
 		                                                  shareContextHandle,
 		                                                  &( contextAttributes[0] ) );
 
-		if ( !contextHandle )
+		if( !contextHandle )
 		{
 			if( shareContextHandle && pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARING_OPTIONAL_BIT ) )
 			{
@@ -262,7 +262,7 @@ namespace ts3::system
 				                                            nullptr,
 				                                            &( contextAttributes[0] ) );
 			}
-			if ( !contextHandle )
+			if( !contextHandle )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
@@ -277,7 +277,7 @@ namespace ts3::system
 	OpenGLRenderContextHandle Win32OpenGLSystemDriver::_nativeCreateRenderContextForCurrentThread()
 	{
 		auto contextHandle = ::wglGetCurrentContext();
-		if ( contextHandle == nullptr )
+		if( contextHandle == nullptr )
 		{
 			return nullptr;
 		}
@@ -423,7 +423,7 @@ namespace ts3::system
 			pixelFormatDescriptor.nSize = sizeof( PIXELFORMATDESCRIPTOR );
 			pixelFormatDescriptor.nVersion = 1;
 
-			if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
+			if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_LEGACY_BIT ) )
 			{
 				pGLSurfaceNativeData.pixelFormatIndex = _win32ChooseLegacyGLPixelFormat( hdc, pixelFormatDescriptor );
 			}
@@ -433,7 +433,7 @@ namespace ts3::system
 			}
 
 			BOOL spfResult = ::SetPixelFormat( hdc, pGLSurfaceNativeData.pixelFormatIndex, &pixelFormatDescriptor );
-			if ( spfResult == FALSE )
+			if( spfResult == FALSE )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
@@ -441,7 +441,7 @@ namespace ts3::system
 
 		void _win32DestroyGLSurface( Win32OpenGLDisplaySurfaceNativeData & pGLSurfaceNativeData )
 		{
-			if ( pGLSurfaceNativeData.hdc != nullptr )
+			if( pGLSurfaceNativeData.hdc != nullptr )
 			{
 				::ReleaseDC( pGLSurfaceNativeData.hwnd, pGLSurfaceNativeData.hdc );
 
@@ -485,7 +485,7 @@ namespace ts3::system
 
 			int pixelFormatIndex = ::ChoosePixelFormat( pDisplaySurfaceDC, &pPfmtDescriptor );
 
-			if ( pixelFormatIndex == 0 )
+			if( pixelFormatIndex == 0 )
 			{
 				pPfmtDescriptor.cColorBits = 24; // 24-bit color, no alpha, no explicit RGB
 				pPfmtDescriptor.cDepthBits = 32; // 32-bit depth buffer, no stencil attachment
@@ -502,10 +502,10 @@ namespace ts3::system
 			int bestMatchRate = 0;
 			int bestPixelFormatID = 0;
 
-			for ( auto pixelFormatID : pixelFormatList )
+			for( auto pixelFormatID : pixelFormatList )
 			{
 				int matchRate = _win32GetPixelFormatMatchRate( pDisplaySurfaceDC, pixelFormatID, pVisualConfig );
-				if ( matchRate > bestMatchRate )
+				if( matchRate > bestMatchRate )
 				{
 					bestMatchRate = matchRate;
 					bestPixelFormatID = pixelFormatID;
@@ -532,7 +532,7 @@ namespace ts3::system
 			                                             pixelFormatArray,
 			                                             &returnedPixelFormatsNum );
 
-			if ( ( enumResult == FALSE ) || ( returnedPixelFormatsNum == 0 ) )
+			if( ( enumResult == FALSE ) || ( returnedPixelFormatsNum == 0 ) )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
@@ -559,13 +559,13 @@ namespace ts3::system
 			int doubleBufferRequestedState = TRUE;
 			int stereoModeRequestedState = FALSE;
 
-			if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
+			if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) &&
 			!pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 			{
 				doubleBufferRequestedState = FALSE;
 			}
 
-			if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
+			if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) &&
 			!pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 			{
 				stereoModeRequestedState = TRUE;
@@ -589,23 +589,23 @@ namespace ts3::system
 			int matchRate = 0;
 			int attribIndex = 0;
 
-			if ( attribValueArray[attribIndex++] == doubleBufferRequestedState )
+			if( attribValueArray[attribIndex++] == doubleBufferRequestedState )
 			{
 				++matchRate;
 			}
-			if ( attribValueArray[attribIndex++] == stereoModeRequestedState )
+			if( attribValueArray[attribIndex++] == stereoModeRequestedState )
 			{
 				++matchRate;
 			}
-			if ( attribValueArray[attribIndex++] == pVisualConfig.depthStencilDesc.depthBufferSize )
+			if( attribValueArray[attribIndex++] == pVisualConfig.depthStencilDesc.depthBufferSize )
 			{
 				++matchRate;
 			}
-			if ( attribValueArray[attribIndex++] == pVisualConfig.depthStencilDesc.stencilBufferSize )
+			if( attribValueArray[attribIndex++] == pVisualConfig.depthStencilDesc.stencilBufferSize )
 			{
 				++matchRate;
 			}
-			if ( attribValueArray[attribIndex] == pVisualConfig.msaaDesc.quality )
+			if( attribValueArray[attribIndex] == pVisualConfig.msaaDesc.quality )
 			{
 				++matchRate;
 			}
@@ -629,35 +629,35 @@ namespace ts3::system
 			pAttribArray[attribIndex++] = WGL_PIXEL_TYPE_ARB;
 			pAttribArray[attribIndex++] = WGL_TYPE_RGBA_ARB;
 
-			if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
+			if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT ) )
 			{
 				pAttribArray[attribIndex++] = WGL_DOUBLE_BUFFER_ARB;
 				pAttribArray[attribIndex++] = GL_TRUE;
 			}
-			else if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
+			else if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT ) )
 			{
 				pAttribArray[attribIndex++] = WGL_DOUBLE_BUFFER_ARB;
 				pAttribArray[attribIndex++] = GL_FALSE;
 			}
 
-			if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
+			if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT ) )
 			{
 				pAttribArray[attribIndex++] = WGL_STEREO_ARB;
 				pAttribArray[attribIndex++] = GL_FALSE;
 			}
-			else if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
+			else if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT ) )
 			{
 				pAttribArray[attribIndex++] = WGL_STEREO_ARB;
 				pAttribArray[attribIndex++] = GL_TRUE;
 			}
 
-			if ( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SRGB_CAPABLE_BIT ) )
+			if( pVisualConfig.flags.isSet( E_VISUAL_ATTRIB_FLAG_SRGB_CAPABLE_BIT ) )
 			{
 				pAttribArray[attribIndex++] = WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB;
 				pAttribArray[attribIndex++] = GL_TRUE;
 			}
 
-			if ( pVisualConfig.colorDesc.rgba.u32Code != 0 )
+			if( pVisualConfig.colorDesc.rgba.u32Code != 0 )
 			{
 				pAttribArray[attribIndex++] = WGL_RED_BITS_ARB;
 				pAttribArray[attribIndex++] = pVisualConfig.colorDesc.rgba.u8Red;
@@ -672,7 +672,7 @@ namespace ts3::system
 				pAttribArray[attribIndex++] = pVisualConfig.colorDesc.rgba.u8Alpha;
 			}
 
-			if ( ( pVisualConfig.msaaDesc.bufferCount != 0 ) && ( pVisualConfig.msaaDesc.quality != 0 ) )
+			if( ( pVisualConfig.msaaDesc.bufferCount != 0 ) && ( pVisualConfig.msaaDesc.quality != 0 ) )
 			{
 				pAttribArray[attribIndex++] = WGL_SAMPLE_BUFFERS_ARB;
 				pAttribArray[attribIndex++] = pVisualConfig.msaaDesc.bufferCount;
@@ -681,13 +681,13 @@ namespace ts3::system
 				pAttribArray[attribIndex++] = pVisualConfig.msaaDesc.quality;
 			}
 
-			if ( pVisualConfig.depthStencilDesc.depthBufferSize != 0 )
+			if( pVisualConfig.depthStencilDesc.depthBufferSize != 0 )
 			{
 				pAttribArray[attribIndex++] = WGL_DEPTH_BITS_ARB;
 				pAttribArray[attribIndex++] = pVisualConfig.depthStencilDesc.depthBufferSize;
 			}
 
-			if ( pVisualConfig.depthStencilDesc.stencilBufferSize != 0 )
+			if( pVisualConfig.depthStencilDesc.stencilBufferSize != 0 )
 			{
 				pAttribArray[attribIndex++] = WGL_STENCIL_BITS_ARB;
 				pAttribArray[attribIndex++] = pVisualConfig.depthStencilDesc.stencilBufferSize;
