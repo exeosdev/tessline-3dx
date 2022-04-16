@@ -56,7 +56,7 @@ namespace ts3::system
 	/// @brief
 	class DisplayDriver : public SysObject
 	{
-        friend class DisplayManager;
+		friend class DisplayManager;
 
 	public:
 		DisplayManagerHandle const mDisplayManager;
@@ -95,11 +95,11 @@ namespace ts3::system
 	protected:
 		DisplayDriver( DisplayManagerHandle pDisplayManager, EDisplayDriverType pDriverType );
 
-        static DisplayAdapterDesc & getAdapterDescInternal( DisplayAdapter & pAdapter );
+		static DisplayAdapterDesc & getAdapterDescInternal( DisplayAdapter & pAdapter );
 
-        static DisplayOutputDesc & getOutputDescInternal( DisplayOutput & pOutput );
+		static DisplayOutputDesc & getOutputDescInternal( DisplayOutput & pOutput );
 
-        static DisplayVideoModeDesc & getVideoModeDescInternal( DisplayVideoMode & pVideoMode );
+		static DisplayVideoModeDesc & getVideoModeDescInternal( DisplayVideoMode & pVideoMode );
 
 		template <typename TpAdapter, typename TpDriver>
 		Handle<TpAdapter> createAdapter( TpDriver & pDriver)
@@ -109,30 +109,30 @@ namespace ts3::system
 			return adapterHandle;
 		}
 
-        template <typename TpOutput, typename TpAdapter>
-        Handle<TpOutput> createOutput( TpAdapter & pAdapter )
-        {
-            auto outputHandle = createSysObject<TpOutput>( pAdapter );
-            _registerOutput( pAdapter, outputHandle );
-            return outputHandle;
-        }
+		template <typename TpOutput, typename TpAdapter>
+		Handle<TpOutput> createOutput( TpAdapter & pAdapter )
+		{
+			auto outputHandle = createSysObject<TpOutput>( pAdapter );
+			_registerOutput( pAdapter, outputHandle );
+			return outputHandle;
+		}
 
-        template <typename TpVideoMode, typename TpOutput>
-        Handle<TpVideoMode> createVideoMode( TpOutput & pOutput, EColorFormat pColorFormat )
-        {
-            auto videoModeHandle = createSysObject<TpVideoMode>( pOutput );
-            _registerVideoMode( pOutput, pColorFormat, videoModeHandle );
-            return videoModeHandle;
-        }
+		template <typename TpVideoMode, typename TpOutput>
+		Handle<TpVideoMode> createVideoMode( TpOutput & pOutput, EColorFormat pColorFormat )
+		{
+			auto videoModeHandle = createSysObject<TpVideoMode>( pOutput );
+			_registerVideoMode( pOutput, pColorFormat, videoModeHandle );
+			return videoModeHandle;
+		}
 
 	private:
 		/// Platform-level function: enumerates display devices in the system (adapters and their outputs).
 		virtual void _nativeEnumDisplayDevices() = 0;
 
-        /// Platform-level function: enumerates supported video modes for a given output and color format.
+		/// Platform-level function: enumerates supported video modes for a given output and color format.
 		virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat ) = 0;
 
-        /// Platform-level function: returns the default color format (OS-/driver-specific).
+		/// Platform-level function: returns the default color format (OS-/driver-specific).
 		virtual EColorFormat _nativeQueryDefaultSystemColorFormat() const = 0;
 
 		void _initializeDisplayConfiguration();
@@ -140,8 +140,8 @@ namespace ts3::system
 		void _enumDisplayDevices();
 		void _enumVideoModes();
 		void _registerAdapter( DisplayAdapterHandle pAdapter );
-        void _registerOutput( DisplayAdapter & pAdapter, DisplayOutputHandle pOutput );
-        void _registerVideoMode( DisplayOutput & pOutput, EColorFormat pColorFormat, DisplayVideoModeHandle pVideoMode );
+		void _registerOutput( DisplayAdapter & pAdapter, DisplayOutputHandle pOutput );
+		void _registerVideoMode( DisplayOutput & pOutput, EColorFormat pColorFormat, DisplayVideoModeHandle pVideoMode );
 		void _validateAdaptersConfiguration();
 
 	protected:

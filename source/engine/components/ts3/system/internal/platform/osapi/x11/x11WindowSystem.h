@@ -31,7 +31,7 @@ namespace ts3::system
 
 		void x11WindowPostCreateUpdate( X11WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo );
 
-        void x11WindowPreDestroyUpdate( X11WindowNativeData & pWindowNativeData );
+		void x11WindowPreDestroyUpdate( X11WindowNativeData & pWindowNativeData );
 		
 		void x11DestroyWindow( X11WindowNativeData & pWindowNativeData );
 

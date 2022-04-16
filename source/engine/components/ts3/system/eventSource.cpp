@@ -5,12 +5,12 @@
 namespace ts3::system
 {
 
-    EventSource::EventSource( SysContextHandle pSysContext )
-    : SysObject( std::move( pSysContext ) )
-    {}
+	EventSource::EventSource( SysContextHandle pSysContext )
+	: SysObject( std::move( pSysContext ) )
+	{}
 
-    EventSource::~EventSource() noexcept
-    {
+	EventSource::~EventSource() noexcept
+	{
 		if( _eventControllerActiveRef )
 		{
 			_eventControllerActiveRef->onEventSourceDestroy( *this );
@@ -18,10 +18,10 @@ namespace ts3::system
 		}
 	}
 
-    void * EventSource::getEventSourceNativeData() const
-    {
-        return _eventSourceNativeData;
-    }
+	void * EventSource::getEventSourceNativeData() const
+	{
+		return _eventSourceNativeData;
+	}
 
 	bool EventSource::isPrimaryEventSource() const
 	{
@@ -64,10 +64,10 @@ namespace ts3::system
 		_eventControllerActiveRef = std::move( pEventController );
 	}
 
-    void EventSource::setEventSourceNativeData( void * pNativeData )
-    {
-        _eventSourceNativeData = pNativeData;
-    }
+	void EventSource::setEventSourceNativeData( void * pNativeData )
+	{
+		_eventSourceNativeData = pNativeData;
+	}
 
 	void EventSource::resetEventSourceNativeData()
 	{

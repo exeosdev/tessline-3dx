@@ -14,8 +14,8 @@ namespace ts3::system
 		OSXFrameGeometry _osxCheckFrameGeometry( NSScreen * pNSScreen, const FrameGeometry & pFrameGeometry );
 
 		OSXFrameGeometry _osxCheckFrameGeometryUpdate( NSWindow * pNSWindow,
-													   const FrameGeometry & pFrameGeometry,
-													   Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags );
+		                                               const FrameGeometry & pFrameGeometry,
+		                                               Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags );
 
 	}
 
@@ -91,11 +91,11 @@ namespace ts3::system
 	}
 	
 
-    namespace platform
-    {
+	namespace platform
+	{
 
-        void osxCreateWindow( OSXWindowNativeData & pWindowNativeData, NSScreen * pTargetScreen, const WindowCreateInfo & pCreateInfo )
-        {
+		void osxCreateWindow( OSXWindowNativeData & pWindowNativeData, NSScreen * pTargetScreen, const WindowCreateInfo & pCreateInfo )
+		{
 		@autoreleasepool
 		{
 			NSOSXWindow * nsWindow = nil;
@@ -105,10 +105,10 @@ namespace ts3::system
 				const auto frameGeometry = _osxCheckFrameGeometry( pTargetScreen, pCreateInfo.frameGeometry );
 
 				nsWindow = [[NSOSXWindow alloc] initWithContentRect:frameGeometry.frameRect
-				                                     styleMask:static_cast<NSWindowStyleMask>( frameGeometry.style )
-				                                     backing:NSBackingStoreBuffered
-				                                     defer:NO
-				                                     screen:pTargetScreen];
+				                                styleMask:static_cast<NSWindowStyleMask>( frameGeometry.style )
+				                                backing:NSBackingStoreBuffered
+				                                defer:NO
+				                                screen:pTargetScreen];
 
 				if ( [nsWindow respondsToSelector:@selector( setTabbingMode: )] )
 				{
@@ -126,7 +126,7 @@ namespace ts3::system
 				ts3DebugInterrupt();
 			}
 		}
-        }
+		}
 
 		void osxCreateWindowDefaultView( OSXWindowNativeData & pWindowNativeData )
 		{
@@ -241,50 +241,50 @@ namespace ts3::system
 		}
 		}
 
-        NSUInteger osxTranslateFrameStyle( EFrameStyle pStyle )
-        {
-            //
-            constexpr NSUInteger cvCaptionFrameStyle = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
-            //
-            constexpr NSUInteger cvFixedFrameStyle = cvCaptionFrameStyle | NSWindowStyleMaskMiniaturizable;
-            //
-            constexpr NSUInteger cvOverlayFrameStyle = NSWindowStyleMaskBorderless;
-            //
-            constexpr NSUInteger cvResizeableFrameStyle = cvFixedFrameStyle | NSWindowStyleMaskResizable;
+		NSUInteger osxTranslateFrameStyle( EFrameStyle pStyle )
+		{
+			//
+			constexpr NSUInteger cvCaptionFrameStyle = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
+			//
+			constexpr NSUInteger cvFixedFrameStyle = cvCaptionFrameStyle | NSWindowStyleMaskMiniaturizable;
+			//
+			constexpr NSUInteger cvOverlayFrameStyle = NSWindowStyleMaskBorderless;
+			//
+			constexpr NSUInteger cvResizeableFrameStyle = cvFixedFrameStyle | NSWindowStyleMaskResizable;
 
-            NSUInteger resultStyle = Limits<NSUInteger>::maxValue;
+			NSUInteger resultStyle = Limits<NSUInteger>::maxValue;
 
-            switch ( pStyle )
-            {
-                case EFrameStyle::Caption:
-                {
-                    resultStyle = cvCaptionFrameStyle;
-                    break;
-                }
-                case EFrameStyle::Fixed:
-                {
-                    resultStyle = cvFixedFrameStyle;
-                    break;
-                }
-                case EFrameStyle::Overlay:
-                {
-                    resultStyle = cvOverlayFrameStyle;
-                    break;
-                }
-                case EFrameStyle::Resizeable:
-                {
-                    resultStyle = cvResizeableFrameStyle;
-                    break;
-                }
-                default:
-                {
-                    resultStyle = 0u;
-                    break;
-                }
-            }
+			switch ( pStyle )
+			{
+				case EFrameStyle::Caption:
+				{
+					resultStyle = cvCaptionFrameStyle;
+					break;
+				}
+				case EFrameStyle::Fixed:
+				{
+					resultStyle = cvFixedFrameStyle;
+					break;
+				}
+				case EFrameStyle::Overlay:
+				{
+					resultStyle = cvOverlayFrameStyle;
+					break;
+				}
+				case EFrameStyle::Resizeable:
+				{
+					resultStyle = cvResizeableFrameStyle;
+					break;
+				}
+				default:
+				{
+					resultStyle = 0u;
+					break;
+				}
+			}
 
-            return resultStyle;
-        }
+			return resultStyle;
+		}
 
 		OSXFrameGeometry _osxCheckFrameGeometry( NSScreen * pNSScreen, const FrameGeometry & pFrameGeometry )
 		{
@@ -310,8 +310,8 @@ namespace ts3::system
 		}
 
 		OSXFrameGeometry _osxCheckFrameGeometryUpdate( NSWindow * pNSWindow,
-													   const FrameGeometry & pFrameGeometry,
-													   Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags )
+		                                               const FrameGeometry & pFrameGeometry,
+		                                               Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags )
 		{
 			OSXFrameGeometry osxGeometry{};
 
@@ -347,7 +347,7 @@ namespace ts3::system
 			return osxGeometry;
 		}
 
-    }
+	}
 
 } // namespace ts3::system
 #endif // TS3_PCL_TARGET_SYSAPI_OSX

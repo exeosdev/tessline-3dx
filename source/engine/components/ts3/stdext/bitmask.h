@@ -25,7 +25,7 @@ namespace ts3
 
 		template <typename TpBits>
 		constexpr Bitmask( TpBits pValue ) noexcept
-        : _value( static_cast<ValueType>( pValue ) )
+		: _value( static_cast<ValueType>( pValue ) )
 		{}
 
 		template <typename TpBits>
@@ -202,7 +202,7 @@ namespace ts3
 	template <typename TpIntegral>
 	inline constexpr Bitmask<TpIntegral> makeBitmask( TpIntegral pValue )
 	{
-	    return Bitmask<TpIntegral>( pValue );
+		return Bitmask<TpIntegral>( pValue );
 	}
 
 }

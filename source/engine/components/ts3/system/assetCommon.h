@@ -13,9 +13,9 @@
 namespace ts3::system
 {
 
-    class Asset;
-    class AssetDirectory;
-    class AssetLoader;
+	class Asset;
+	class AssetDirectory;
+	class AssetLoader;
 
 } // namespace ts3::system
 

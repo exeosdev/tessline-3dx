@@ -15,45 +15,45 @@ namespace ts3::system
 		Visible
 	};
 
-    template <event_code_value_t tpEventCode>
-    struct EvtWindow : public EvtBase
-    {
-    public:
-        EventSource * eventSource = nullptr;
+	template <event_code_value_t tpEventCode>
+	struct EvtWindow : public EvtBase
+	{
+	public:
+		EventSource * eventSource = nullptr;
 
-    public:
-        constexpr EvtWindow()
-        : EvtBase( tpEventCode )
-        {}
+	public:
+		constexpr EvtWindow()
+		: EvtBase( tpEventCode )
+		{}
 
-        template <typename TpObject>
-        bool checkEventSource( const TpObject * pSource ) const
-        {
-            return static_cast<const void *>( pSource ) == eventSource;
-        }
-    };
+		template <typename TpObject>
+		bool checkEventSource( const TpObject * pSource ) const
+		{
+			return static_cast<const void *>( pSource ) == eventSource;
+		}
+	};
 
-    struct EvtWindowUpdateCreate : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_CREATE>
-    {
-    };
+	struct EvtWindowUpdateCreate : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_CREATE>
+	{
+	};
 
-    struct EvtWindowUpdateDestroy : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_DESTROY>
-    {
-    };
+	struct EvtWindowUpdateDestroy : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_DESTROY>
+	{
+	};
 
-    struct EvtWindowUpdateFullscreen : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN>
-    {
-    };
+	struct EvtWindowUpdateFullscreen : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN>
+	{
+	};
 
-    struct EvtWindowUpdateResize : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_RESIZE>
-    {
-        FrameSize newSize;
-    };
+	struct EvtWindowUpdateResize : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_RESIZE>
+	{
+		FrameSize newSize;
+	};
 
-    struct EvtWindowUpdateVisibility : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY>
-    {
-    	EWindowVisibilityState newVisibilityState = EWindowVisibilityState::Unknown;
-    };
+	struct EvtWindowUpdateVisibility : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY>
+	{
+		EWindowVisibilityState newVisibilityState = EWindowVisibilityState::Unknown;
+	};
 
 } // namespace ts3::system
 

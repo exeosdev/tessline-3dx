@@ -15,13 +15,13 @@ namespace ts3::system
 
 	}
 
-    ts3SysDeclareHandle( SysContext );
-    ts3SysDeclareHandle( AssetLoader );
-    ts3SysDeclareHandle( DisplayManager );
-    ts3SysDeclareHandle( EventController );
-    ts3SysDeclareHandle( FileManager );
-    ts3SysDeclareHandle( OpenGLSystemDriver );
-    ts3SysDeclareHandle( WindowManager );
+	ts3SysDeclareHandle( SysContext );
+	ts3SysDeclareHandle( AssetLoader );
+	ts3SysDeclareHandle( DisplayManager );
+	ts3SysDeclareHandle( EventController );
+	ts3SysDeclareHandle( FileManager );
+	ts3SysDeclareHandle( OpenGLSystemDriver );
+	ts3SysDeclareHandle( WindowManager );
 
 	struct AssetLoaderCreateInfo
 	{
@@ -35,27 +35,27 @@ namespace ts3::system
 
 	/// @brief
 	class SysContext : public DynamicInterface
-    {
-    public:
-        SysContext();
-        virtual ~SysContext() noexcept;
+	{
+	public:
+		SysContext();
+		virtual ~SysContext() noexcept;
 
-        virtual AssetLoaderHandle createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo ) = 0;
+		virtual AssetLoaderHandle createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo ) = 0;
 
-        virtual DisplayManagerHandle createDisplayManager() = 0;
+		virtual DisplayManagerHandle createDisplayManager() = 0;
 
-        virtual EventControllerHandle createEventController() = 0;
+		virtual EventControllerHandle createEventController() = 0;
 
-        virtual FileManagerHandle createFileManager() = 0;
+		virtual FileManagerHandle createFileManager() = 0;
 
-        virtual OpenGLSystemDriverHandle createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager ) = 0;
+		virtual OpenGLSystemDriverHandle createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager ) = 0;
 
-        virtual WindowManagerHandle createWindowManager( DisplayManagerHandle pDisplayManager ) = 0;
+		virtual WindowManagerHandle createWindowManager( DisplayManagerHandle pDisplayManager ) = 0;
 
-        virtual std::string queryCurrentProcessExecutableFilePath() const = 0;
+		virtual std::string queryCurrentProcessExecutableFilePath() const = 0;
 
-        std::string queryCurrentProcessExecutableDirectory() const;
-    };
+		std::string queryCurrentProcessExecutableDirectory() const;
+	};
 
 	namespace platform
 	{

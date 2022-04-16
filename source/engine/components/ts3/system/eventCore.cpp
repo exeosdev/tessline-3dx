@@ -511,7 +511,7 @@ namespace ts3::system
 		// EventBaseType enum is numbered from zero to have constant access time to its entry.
 		auto baseTypeValue = static_cast<size_t>( pBaseType );
 		// Check for possible violation attempt.
-		if ( baseTypeValue >= CX_ENUM_EVENT_BASE_TYPE_COUNT )
+		if( baseTypeValue >= CX_ENUM_EVENT_BASE_TYPE_COUNT )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
@@ -523,7 +523,7 @@ namespace ts3::system
 		// EventCategory enum is numbered from zero to have constant access time to its entry.
 		auto categoryValue = static_cast<size_t>( pCategory );
 		// Check for possible violation attempt.
-		if ( categoryValue >= CX_ENUM_EVENT_CATEGORY_COUNT )
+		if( categoryValue >= CX_ENUM_EVENT_CATEGORY_COUNT )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
@@ -535,7 +535,7 @@ namespace ts3::system
 		// EventCodeIndex enum is numbered from zero to have constant access time to its entry.
 		auto codeIndexValue = static_cast<size_t>( pCodeIndex );
 		// Check for possible violation attempt.
-		if ( codeIndexValue >= CX_ENUM_EVENT_CODE_INDEX_COUNT )
+		if( codeIndexValue >= CX_ENUM_EVENT_CODE_INDEX_COUNT )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
@@ -591,7 +591,7 @@ namespace ts3::system
 		{
 			auto codeIndexValue = static_cast<size_t>( ecGetEventCodeCodeIndex( pEvent.code ) );
 			auto & eventHandler = _privateData->handlerMapByCodeIndex[codeIndexValue];
-			if ( eventHandler && eventHandler( pEvent ) )
+			if( eventHandler && eventHandler( pEvent ) )
 			{
 				return true;
 			}
@@ -599,7 +599,7 @@ namespace ts3::system
 		{
 			auto categoryValue = static_cast<size_t>( ecGetEventCodeCategory( pEvent.code ) );
 			auto & eventHandler = _privateData->handlerMapByCategory[categoryValue];
-			if ( eventHandler && eventHandler( pEvent ) )
+			if( eventHandler && eventHandler( pEvent ) )
 			{
 				return true;
 			}
@@ -607,14 +607,14 @@ namespace ts3::system
 		{
 			auto baseTypeValue = static_cast<size_t>( ecGetEventCodeBaseType( pEvent.code ) );
 			auto & eventHandler = _privateData->handlerMapByBaseType[baseTypeValue];
-			if ( eventHandler && eventHandler( pEvent ) )
+			if( eventHandler && eventHandler( pEvent ) )
 			{
 				return true;
 			}
 		}
 		{
 			auto & defaultHandler = _privateData->defaultHandler;
-			if ( defaultHandler && defaultHandler( pEvent ) )
+			if( defaultHandler && defaultHandler( pEvent ) )
 			{
 				return true;
 			}
@@ -649,32 +649,44 @@ namespace ts3::system
 	}
 
 	void _preProcessEventOnInputMouseButton( EvtInputMouseButton & pMouseButtonEvent,
-											 const EventDispatcherConfig & pDispatcherConfig,
-											 EvtSharedInputMouseState & pInputMouseState );
+	                                         const EventDispatcherConfig & pDispatcherConfig,
+	                                         EvtSharedInputMouseState & pInputMouseState );
 
 	void _preProcessEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent,
-													   const EventDispatcherConfig & pDispatcherConfig,
-													   EvtSharedInputMouseState & pInputMouseState );
+	                                                   const EventDispatcherConfig & pDispatcherConfig,
+	                                                   EvtSharedInputMouseState & pInputMouseState );
 
 	void EventDispatcher::_preProcessEvent( EventObject & pEvent )
 	{
 		// For INPUT_MOUSE_BUTTON events, we may want to modify event's data depending on the input configuration.
 		// _evtImplOnInputMouseButton() checks the input config and handles, for example, multi-click sequences.
-		if ( pEvent.code == E_EVENT_CODE_INPUT_MOUSE_BUTTON )
+		if( pEvent.code == E_EVENT_CODE_INPUT_MOUSE_BUTTON )
 		{
 			_preProcessEventOnInputMouseButton( pEvent.eInputMouseButton,
-												_privateData->evtDispatcherConfig,
-												_privateData->evtDispatcherInputState.inputMouseState );
+			                                    _privateData->evtDispatcherConfig,
+			                                    _privateData->evtDispatcherInputState.inputMouseState );
+		}
+		else if( pEvent.code == E_EVENT_CODE_INPUT_KEYBOARD_KEY )
+		{
+			auto & keyboardState = _privateData->evtDispatcherInputState.inputKeyboardState;
+			if( pEvent.eInputKeyboardKey.keyAction == EKeyActionType::Press )
+			{
+				keyboardState.keyStateMap[pEvent.eInputKeyboardKey.keyCode] = true;
+			}
+			else if( pEvent.eInputKeyboardKey.keyAction == EKeyActionType::Release )
+			{
+				keyboardState.keyStateMap[pEvent.eInputKeyboardKey.keyCode] = false;
+			}
 		}
 	}
 
 	void _preProcessEventOnInputMouseButton( EvtInputMouseButton & pMouseButtonEvent,
-											 const EventDispatcherConfig & pDispatcherConfig,
-											 EvtSharedInputMouseState & pInputMouseState )
+	                                         const EventDispatcherConfig & pDispatcherConfig,
+	                                         EvtSharedInputMouseState & pInputMouseState )
 	{
-		if ( pDispatcherConfig.dispatcherConfigFlags.isSet( E_EVENT_DISPATCHER_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT ) )
+		if( pDispatcherConfig.dispatcherConfigFlags.isSet( E_EVENT_DISPATCHER_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT ) )
 		{
-			if ( pMouseButtonEvent.buttonAction == EMouseButtonActionType::Click )
+			if( pMouseButtonEvent.buttonAction == EMouseButtonActionType::Click )
 			{
 				_preProcessEventOnInputMouseButtonMultiClick( pMouseButtonEvent, pDispatcherConfig, pInputMouseState );
 			}
@@ -682,16 +694,16 @@ namespace ts3::system
 	}
 
 	void _preProcessEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent,
-													   const EventDispatcherConfig & pDispatcherConfig,
-													   EvtSharedInputMouseState & pInputMouseState )
+	                                                   const EventDispatcherConfig & pDispatcherConfig,
+	                                                   EvtSharedInputMouseState & pInputMouseState )
 	{
 		bool multiClickEventSet = false;
 
-		if ( pInputMouseState.lastPressButtonID == pMouseButtonEvent.buttonID )
+		if( pInputMouseState.lastPressButtonID == pMouseButtonEvent.buttonID )
 		{
 			auto lastClickDiff = pMouseButtonEvent.timeStamp - pInputMouseState.lastPressTimestamp;
 			auto lastClickDiffMs = PerfCounter::convertToDuration<EDurationPeriod::Millisecond>( lastClickDiff );
-			if ( lastClickDiffMs <= pDispatcherConfig.mouseClickSequenceTimeoutMs )
+			if( lastClickDiffMs <= pDispatcherConfig.mouseClickSequenceTimeoutMs )
 			{
 				if( pInputMouseState.multiClickSequenceLength == 1 )
 				{
@@ -699,7 +711,7 @@ namespace ts3::system
 					pInputMouseState.multiClickSequenceLength = 2;
 					multiClickEventSet = true;
 				}
-				else if ( pDispatcherConfig.dispatcherConfigFlags.isSet( E_EVENT_DISPATCHER_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT ) )
+				else if( pDispatcherConfig.dispatcherConfigFlags.isSet( E_EVENT_DISPATCHER_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT ) )
 				{
 					pMouseButtonEvent.buttonAction = EMouseButtonActionType::MultiClick;
 					pInputMouseState.multiClickSequenceLength += 1;

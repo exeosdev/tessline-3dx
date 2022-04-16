@@ -96,10 +96,10 @@ namespace ts3::math
 				Tp x, y;
 			};
 
-            struct
-            {
-                Tp values[2];
-            };
+			struct
+			{
+				Tp values[2];
+			};
 		};
 
 	public:
@@ -172,10 +172,10 @@ namespace ts3::math
 				Tp x, y, z;
 			};
 
-            struct
-            {
-                Tp values[3];
-            };
+			struct
+			{
+				Tp values[3];
+			};
 		};
 
 	public:
@@ -267,16 +267,16 @@ namespace ts3::math
 				Tp x, y, z, w;
 			};
 
-            struct
-            {
-                // Either generic array of values or SSE/AVX SIMD type (depends on support and build config).
-                SIMDDataType mmv;
-            };
+			struct
+			{
+				// Either generic array of values or SSE/AVX SIMD type (depends on support and build config).
+				SIMDDataType mmv;
+			};
 
-            struct
-            {
-                Tp values[4];
-            };
+			struct
+			{
+				Tp values[4];
+			};
 		};
 
 	public:
@@ -361,17 +361,17 @@ namespace ts3::math
 		, w( static_cast<Tp>( pW ) )
 		{}
 
-        Tp & operator[]( size_t pIndex ) noexcept
-        {
-            ts3DebugAssert( pIndex < sLength )
-            return values[pIndex];
-        }
+		Tp & operator[]( size_t pIndex ) noexcept
+		{
+			ts3DebugAssert( pIndex < sLength )
+			return values[pIndex];
+		}
 
-        const Tp & operator[]( size_t pIndex ) const noexcept
-        {
-            ts3DebugAssert( pIndex < sLength )
-            return values[pIndex];
-        }
+		const Tp & operator[]( size_t pIndex ) const noexcept
+		{
+			ts3DebugAssert( pIndex < sLength )
+			return values[pIndex];
+		}
 
 		Tp * data() noexcept
 		{
@@ -383,15 +383,15 @@ namespace ts3::math
 			return &( values[0] );
 		}
 
-        SIMDDataType * simdPtr() noexcept
-        {
-            return &mmv;
-        }
+		SIMDDataType * simdPtr() noexcept
+		{
+			return &mmv;
+		}
 
-        const SIMDDataType * simdPtr() const noexcept
-        {
-            return &mmv;
-        }
+		const SIMDDataType * simdPtr() const noexcept
+		{
+			return &mmv;
+		}
 	};
 
 	template <typename Tp>

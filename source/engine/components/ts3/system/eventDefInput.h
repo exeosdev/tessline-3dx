@@ -7,26 +7,26 @@
 namespace ts3::system
 {
 
-    template <event_code_value_t tpEventCode>
-    struct EvtInput : public EvtBase
-    {
-    public:
-        constexpr EvtInput()
-        : EvtBase( tpEventCode )
-        {}
-    };
+	template <event_code_value_t tpEventCode>
+	struct EvtInput : public EvtBase
+	{
+	public:
+		constexpr EvtInput()
+		: EvtBase( tpEventCode )
+		{}
+	};
 
-    struct EvtInputGamepadAxis : public EvtInput<E_EVENT_CODE_INPUT_GAMEPAD_AXIS>
-    {
-    };
+	struct EvtInputGamepadAxis : public EvtInput<E_EVENT_CODE_INPUT_GAMEPAD_AXIS>
+	{
+	};
 
-    struct EvtInputGamepadButton : public EvtInput<E_EVENT_CODE_INPUT_GAMEPAD_BUTTON>
-    {
-    };
+	struct EvtInputGamepadButton : public EvtInput<E_EVENT_CODE_INPUT_GAMEPAD_BUTTON>
+	{
+	};
 
-    struct EvtInputGamepadState : public EvtInput<E_EVENT_CODE_INPUT_GAMEPAD_STATE>
-    {
-    };
+	struct EvtInputGamepadState : public EvtInput<E_EVENT_CODE_INPUT_GAMEPAD_STATE>
+	{
+	};
 
 } // namespace ts3::system
 

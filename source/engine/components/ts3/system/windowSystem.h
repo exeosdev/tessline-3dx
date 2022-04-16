@@ -8,89 +8,89 @@
 namespace ts3::system
 {
 
-    ts3DeclareClassHandle( DisplayManager );
-    ts3DeclareClassHandle( Window );
-    ts3DeclareClassHandle( WindowManager );
+	ts3DeclareClassHandle( DisplayManager );
+	ts3DeclareClassHandle( Window );
+	ts3DeclareClassHandle( WindowManager );
 
-    struct WindowCreateInfo
-    {
-    	FrameGeometry frameGeometry = CX_FRAME_GEOMETRY_DEFAULT;
-    	std::string title;
-    };
+	struct WindowCreateInfo
+	{
+		FrameGeometry frameGeometry = CX_FRAME_GEOMETRY_DEFAULT;
+		std::string title;
+	};
 
-    /// @brief
-    class WindowManager : public SysObject
-    {
-        friend class Window;
+	/// @brief
+	class WindowManager : public SysObject
+	{
+		friend class Window;
 
-    public:
-        DisplayManagerHandle const mDisplayManager;
+	public:
+		DisplayManagerHandle const mDisplayManager;
 
-    public:
-        explicit WindowManager( DisplayManagerHandle pDisplayManager );
-        virtual ~WindowManager() noexcept;
+	public:
+		explicit WindowManager( DisplayManagerHandle pDisplayManager );
+		virtual ~WindowManager() noexcept;
 
-        TS3_FUNC_NO_DISCARD WindowHandle createWindow( WindowCreateInfo pCreateInfo );
+		TS3_FUNC_NO_DISCARD WindowHandle createWindow( WindowCreateInfo pCreateInfo );
 
-        TS3_FUNC_NO_DISCARD bool checkFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
+		TS3_FUNC_NO_DISCARD bool checkFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
 
-        TS3_FUNC_NO_DISCARD FrameGeometry validateFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
+		TS3_FUNC_NO_DISCARD FrameGeometry validateFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
 
 		TS3_FUNC_NO_DISCARD uint32 getActiveWindowsNum() const;
 
-    friendapi:
-        // Used by the Window class.
-        virtual void destroyWindow( Window & pWindow ) noexcept;
+	friendapi:
+		// Used by the Window class.
+		virtual void destroyWindow( Window & pWindow ) noexcept;
 
-    private:
-        virtual WindowHandle _nativeCreateWindow( WindowCreateInfo pCreateInfo ) = 0;
+	private:
+		virtual WindowHandle _nativeCreateWindow( WindowCreateInfo pCreateInfo ) = 0;
 
 		virtual void _nativeDestroyWindow( Window & pWindow ) = 0;
-    };
+	};
 
-    /// @brief
-    class Window : public Frame
-    {
-        friend class WindowManager;
+	/// @brief
+	class Window : public Frame
+	{
+		friend class WindowManager;
 
-    public:
-        WindowManagerHandle const mWindowManager;
+	public:
+		WindowManagerHandle const mWindowManager;
 
-    public:
+	public:
 		explicit Window( WindowManagerHandle pWindowManager, void * pNativeData );
-        virtual ~Window() noexcept;
+		virtual ~Window() noexcept;
 
-        virtual void resizeClientArea( const FrameSize & pSize ) override final;
+		virtual void resizeClientArea( const FrameSize & pSize ) override final;
 
 		virtual void resizeFrame( const FrameSize & pSize ) override final;
 
-        virtual void setFullscreenMode( bool pEnable ) override final;
+		virtual void setFullscreenMode( bool pEnable ) override final;
 
-        virtual void setTitle( const std::string & pTitleText ) override final;
+		virtual void setTitle( const std::string & pTitleText ) override final;
 
-        virtual void updateGeometry( const FrameGeometry & pFrameGeometry,
-                                     Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags ) override final;
+		virtual void updateGeometry( const FrameGeometry & pFrameGeometry,
+		                             Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags ) override final;
 
-        TS3_FUNC_NO_DISCARD virtual FrameSize getClientAreaSize() const override final;
+		TS3_FUNC_NO_DISCARD virtual FrameSize getClientAreaSize() const override final;
 
-        TS3_FUNC_NO_DISCARD virtual FrameSize getFrameSize() const override final;
+		TS3_FUNC_NO_DISCARD virtual FrameSize getFrameSize() const override final;
 
-        TS3_FUNC_NO_DISCARD virtual bool isFullscreen() const override final;
+		TS3_FUNC_NO_DISCARD virtual bool isFullscreen() const override final;
 
-    private:
+	private:
 		virtual void onDestroySystemObjectRequested() override final;
 
 		virtual void _nativeResize( const FrameSize & pFrameSize, EFrameSizeMode pSizeMode ) = 0;
 
-        virtual void _nativeSetFullscreenMode( bool pEnable ) = 0;
+		virtual void _nativeSetFullscreenMode( bool pEnable ) = 0;
 
-        virtual void _nativeSetTitle( const std::string & pTitle ) = 0;
+		virtual void _nativeSetTitle( const std::string & pTitle ) = 0;
 
-        virtual void _nativeUpdateGeometry( const FrameGeometry & pFrameGeometry,
-                                            Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags ) = 0;
+		virtual void _nativeUpdateGeometry( const FrameGeometry & pFrameGeometry,
+		                                    Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags ) = 0;
 
-        virtual FrameSize _nativeGetSize( EFrameSizeMode pSizeMode ) const = 0;
-    };
+		virtual FrameSize _nativeGetSize( EFrameSizeMode pSizeMode ) const = 0;
+	};
 
 } // namespace ts3::system
 

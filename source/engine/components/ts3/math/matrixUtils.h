@@ -346,7 +346,7 @@ namespace ts3::math
 			rMat.row0.x, rMat.row0.y, rMat.row0.z, 0,
 			rMat.row1.x, rMat.row1.y, rMat.row1.z, 0,
 			rMat.row2.x, rMat.row2.y, rMat.row2.z, 0,
-			0,          0,          0,          1
+			0,           0,           0,           1
 		};
 	}
 

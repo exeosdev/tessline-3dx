@@ -12,8 +12,8 @@ namespace ts3::system
 
 	class OSXSysContext;
 
-    namespace platform
-    {
+	namespace platform
+	{
 
 		enum EOSXCommonStateFlags : uint32
 		{
@@ -66,13 +66,13 @@ namespace ts3::system
 			return osxGetOSXSharedData( static_cast<OSXNativeDataCommon>( pNativeObject.mNativeData ) );
 		}
 
-        TS3_SYSTEM_API_NODISCARD const char * osxQueryCGErrorMessage( CGError pCGError );
+		TS3_SYSTEM_API_NODISCARD const char * osxQueryCGErrorMessage( CGError pCGError );
 
 		bool osxNibLoadMenuNibFile();
 
 		void osxNibCreateDefaultApplicationMenu();
 
-    }
+	}
 
 
 	template <typename TpBaseType, typename TpNativeData>

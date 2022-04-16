@@ -22,8 +22,8 @@ namespace ts3
 		: _storageMemoryPtr( pSource._storageMemoryPtr )
 		, _dataSize( pSource._dataSize )
 		{
-		    pSource._storageMemoryPtr = nullptr;
-		    pSource._dataSize = 0u;
+			pSource._storageMemoryPtr = nullptr;
+			pSource._dataSize = 0u;
 		}
 
 		ByteArray( void * pBufferBasePtr, size_t pBufferLength ) noexcept
@@ -33,259 +33,259 @@ namespace ts3
 
 		explicit operator bool() const
 		{
-		    return _storageMemoryPtr && ( _dataSize > 0 );
+			return _storageMemoryPtr && ( _dataSize > 0 );
 		}
 
 		void fill( byte pValue, size_t pFillCount = CX_MAX_SIZE, size_t pFillOffset = 0 )
 		{
-		    if( pFillOffset >= _dataSize )
-		    {
-		        return;
-		    }
+			if( pFillOffset >= _dataSize )
+			{
+				return;
+			}
 
-		    auto bufferCapacity = _dataSize - pFillOffset;
-		    pFillCount = getMinOf( pFillCount, bufferCapacity );
-		    memFillChecked( _storageMemoryPtr + pFillOffset, bufferCapacity, pValue, pFillCount );
+			auto bufferCapacity = _dataSize - pFillOffset;
+			pFillCount = getMinOf( pFillCount, bufferCapacity );
+			memFillChecked( _storageMemoryPtr + pFillOffset, bufferCapacity, pValue, pFillCount );
 		}
 
 		void setData( const void * pData, size_t pDataSize, size_t pSetOffset = 0 )
 		{
-		    if( !pData || ( pDataSize == 0 ) || ( pSetOffset >= _dataSize ) )
-		    {
-		        return;
-		    }
+			if( !pData || ( pDataSize == 0 ) || ( pSetOffset >= _dataSize ) )
+			{
+				return;
+			}
 
-		    auto bufferCapacity = _dataSize - pSetOffset;
-		    pSetOffset = getMinOf( pSetOffset, bufferCapacity );
-		    memCopyUnchecked( _storageMemoryPtr + pSetOffset, bufferCapacity, pData, pDataSize );
+			auto bufferCapacity = _dataSize - pSetOffset;
+			pSetOffset = getMinOf( pSetOffset, bufferCapacity );
+			memCopyUnchecked( _storageMemoryPtr + pSetOffset, bufferCapacity, pData, pDataSize );
 		}
 
 		void copy( void * pBuffer, size_t pBufferSize, size_t pCopySize, size_t pCopyOffset = 0 )
 		{
-		    if( !pBuffer || ( pBufferSize == 0 ) || ( pCopyOffset >= _dataSize ) )
-		    {
-		        return;
-		    }
+			if( !pBuffer || ( pBufferSize == 0 ) || ( pCopyOffset >= _dataSize ) )
+			{
+				return;
+			}
 
-		    pCopySize = getMinOf( pCopySize, pBufferSize );
-		    pCopySize = getMinOf( pCopySize, _dataSize - pCopyOffset );
+			pCopySize = getMinOf( pCopySize, pBufferSize );
+			pCopySize = getMinOf( pCopySize, _dataSize - pCopyOffset );
 
-		    if( pCopySize == 0 )
-		    {
-		        return;
-		    }
+			if( pCopySize == 0 )
+			{
+				return;
+			}
 
-		    memCopyUnchecked( pBuffer, pBufferSize, _storageMemoryPtr + pCopyOffset, pCopySize );
+			memCopyUnchecked( pBuffer, pBufferSize, _storageMemoryPtr + pCopyOffset, pCopySize );
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD ReadWriteMemoryView asMemoryView() noexcept
 		{
-		    return bindMemoryView( _storageMemoryPtr, _dataSize );
+			return bindMemoryView( _storageMemoryPtr, _dataSize );
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD ReadOnlyMemoryView asMemoryView() const noexcept
 		{
-		    return bindMemoryView( _storageMemoryPtr, _dataSize );
+			return bindMemoryView( _storageMemoryPtr, _dataSize );
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD byte & operator[]( size_t pOffset ) noexcept
 		{
-		    ts3DebugAssert( pOffset < _dataSize );
-		    return _storageMemoryPtr[pOffset];
+			ts3DebugAssert( pOffset < _dataSize );
+			return _storageMemoryPtr[pOffset];
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD const byte & operator[]( size_t pOffset ) const noexcept
 		{
-		    ts3DebugAssert( pOffset < _dataSize );
-		    return _storageMemoryPtr[pOffset];
+			ts3DebugAssert( pOffset < _dataSize );
+			return _storageMemoryPtr[pOffset];
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD byte * data() noexcept
 		{
-		    return _storageMemoryPtr;
+			return _storageMemoryPtr;
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD const byte * data() const noexcept
 		{
-		    return _storageMemoryPtr;
+			return _storageMemoryPtr;
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD byte * dataOffset( size_t pOffset ) noexcept
 		{
-		    ts3DebugAssert( pOffset < _dataSize );
-		    return _storageMemoryPtr + pOffset;
+			ts3DebugAssert( pOffset < _dataSize );
+			return _storageMemoryPtr + pOffset;
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD const byte * dataOffset( size_t pOffset ) const noexcept
 		{
-		    ts3DebugAssert( pOffset < _dataSize );
-		    return _storageMemoryPtr + pOffset;
+			ts3DebugAssert( pOffset < _dataSize );
+			return _storageMemoryPtr + pOffset;
 		}
 
 		template <typename TpResult>
 		TS3_PCL_ATTR_NO_DISCARD TpResult * dataAs() noexcept
 		{
-		    ts3DebugAssert( _dataSize % sizeof( TpResult ) == 0 );
-		    return reinterpret_cast<TpResult *>( data() );
+			ts3DebugAssert( _dataSize % sizeof( TpResult ) == 0 );
+			return reinterpret_cast<TpResult *>( data() );
 		}
 
 		template <typename TpResult>
 		TS3_PCL_ATTR_NO_DISCARD const TpResult * dataAs() const noexcept
 		{
-		    ts3DebugAssert( _dataSize % sizeof( TpResult ) == 0 );
-		    return reinterpret_cast<TpResult *>( data() );
+			ts3DebugAssert( _dataSize % sizeof( TpResult ) == 0 );
+			return reinterpret_cast<TpResult *>( data() );
 		}
 
 		template <typename TpResult>
 		TS3_PCL_ATTR_NO_DISCARD TpResult * dataOffsetAs( size_t pOffset ) noexcept
 		{
-		    ts3DebugAssert( ( _dataSize - pOffset ) % sizeof( TpResult ) == 0 );
-		    return reinterpret_cast<TpResult *>( dataOffset( pOffset ) );
+			ts3DebugAssert( ( _dataSize - pOffset ) % sizeof( TpResult ) == 0 );
+			return reinterpret_cast<TpResult *>( dataOffset( pOffset ) );
 		}
 
 		template <typename TpResult>
 		TS3_PCL_ATTR_NO_DISCARD const TpResult * dataOffsetAs( size_t pOffset ) const noexcept
 		{
-		    ts3DebugAssert( ( _dataSize - pOffset ) % sizeof( TpResult ) == 0 );
-		    return reinterpret_cast<TpResult *>( dataOffset( pOffset ) );
+			ts3DebugAssert( ( _dataSize - pOffset ) % sizeof( TpResult ) == 0 );
+			return reinterpret_cast<TpResult *>( dataOffset( pOffset ) );
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD bool empty() const noexcept
 		{
-		    return !_storageMemoryPtr || ( _dataSize == 0 );
+			return !_storageMemoryPtr || ( _dataSize == 0 );
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD size_t size() const noexcept
 		{
-		    return _dataSize;
+			return _dataSize;
 		}
 
 	protected:
-	    void updateStorage( void * pBufferBasePtr )
-	    {
-		    _storageMemoryPtr = reinterpret_cast<byte *>( pBufferBasePtr );
-	    }
+		void updateStorage( void * pBufferBasePtr )
+		{
+			_storageMemoryPtr = reinterpret_cast<byte *>( pBufferBasePtr );
+		}
 
 	protected:
-	    byte * _storageMemoryPtr;
+		byte * _storageMemoryPtr;
 		size_t _dataSize;
 	};
 
 	inline ReadWriteMemoryView bindMemoryView( ByteArray & pByteArray )
-    {
-	    return ReadWriteMemoryView( pByteArray.data(), pByteArray.size() );
-    }
+	{
+		return ReadWriteMemoryView( pByteArray.data(), pByteArray.size() );
+	}
 
-    inline ReadOnlyMemoryView bindMemoryView( const ByteArray & pByteArray )
-    {
-	    return ReadOnlyMemoryView( pByteArray.data(), pByteArray.size() );
-    }
+	inline ReadOnlyMemoryView bindMemoryView( const ByteArray & pByteArray )
+	{
+		return ReadOnlyMemoryView( pByteArray.data(), pByteArray.size() );
+	}
 
 	class DynamicByteArray : public ByteArray
-    {
-    public:
-        DynamicByteArray() = default;
+	{
+	public:
+		DynamicByteArray() = default;
 
-        DynamicByteArray( DynamicByteArray && pSource ) noexcept
-        : ByteArray( std::move( pSource ) )
-        , _internalBuffer( std::move( pSource._internalBuffer ) )
-        {}
+		DynamicByteArray( DynamicByteArray && pSource ) noexcept
+		: ByteArray( std::move( pSource ) )
+		, _internalBuffer( std::move( pSource._internalBuffer ) )
+		{}
 
-        DynamicByteArray( DynamicMemoryBuffer pInternalBuffer, size_t pSize = CX_MAX_SIZE )
-        : _internalBuffer( std::move( pInternalBuffer ) )
-        {
-            _storageMemoryPtr = _internalBuffer.data();
-            _dataSize = getMinOf( _internalBuffer.size(), pSize );
-        }
+		DynamicByteArray( DynamicMemoryBuffer pInternalBuffer, size_t pSize = CX_MAX_SIZE )
+		: _internalBuffer( std::move( pInternalBuffer ) )
+		{
+			_storageMemoryPtr = _internalBuffer.data();
+			_dataSize = getMinOf( _internalBuffer.size(), pSize );
+		}
 
-        explicit DynamicByteArray( size_t pSize )
-        {
-            resize( pSize );
-        }
+		explicit DynamicByteArray( size_t pSize )
+		{
+			resize( pSize );
+		}
 
-        DynamicByteArray & operator=( DynamicByteArray && pRhs ) noexcept
-        {
-            DynamicByteArray( std::move( pRhs ) ).swap( *this );
-            return *this;
-        }
+		DynamicByteArray & operator=( DynamicByteArray && pRhs ) noexcept
+		{
+			DynamicByteArray( std::move( pRhs ) ).swap( *this );
+			return *this;
+		}
 
-        DynamicByteArray clone() const
-        {
-            DynamicByteArray newArray;
-            newArray.assign( *this );
-            return newArray;
-        }
+		DynamicByteArray clone() const
+		{
+			DynamicByteArray newArray;
+			newArray.assign( *this );
+			return newArray;
+		}
 
-        DynamicByteArray & assign( const DynamicByteArray & pOther )
-	    {
-	        resize( pOther.size() );
-	        setData( pOther.data(), pOther.size(), 0 );
-	        return *this;
-	    }
+		DynamicByteArray & assign( const DynamicByteArray & pOther )
+		{
+			resize( pOther.size() );
+			setData( pOther.data(), pOther.size(), 0 );
+			return *this;
+		}
 
-	    void resize( size_t pNewSize )
-	    {
-	        if( pNewSize > _internalBuffer.size() )
-	        {
-	            _internalBuffer.resize( pNewSize );
-	            updateStorage( _internalBuffer.data() );
-	        }
-	        _dataSize = pNewSize;
-	    }
+		void resize( size_t pNewSize )
+		{
+			if( pNewSize > _internalBuffer.size() )
+			{
+				_internalBuffer.resize( pNewSize );
+				updateStorage( _internalBuffer.data() );
+			}
+			_dataSize = pNewSize;
+		}
 
-	    bool optimizeStorage( float pAllowedFactor = 0.5f )
-	    {
-	        const auto storageCapacity = _internalBuffer.size();
-	        const auto overSpace = static_cast<float>( storageCapacity - _dataSize ) / _dataSize;
+		bool optimizeStorage( float pAllowedFactor = 0.5f )
+		{
+			const auto storageCapacity = _internalBuffer.size();
+			const auto overSpace = static_cast<float>( storageCapacity - _dataSize ) / _dataSize;
 
-	        if( overSpace > pAllowedFactor )
-	        {
-	            _internalBuffer.resize( _dataSize );
-	            updateStorage( _internalBuffer.data() );
-	            return true;
-	        }
+			if( overSpace > pAllowedFactor )
+			{
+				_internalBuffer.resize( _dataSize );
+				updateStorage( _internalBuffer.data() );
+				return true;
+			}
 
-	        return false;
-	    }
+			return false;
+		}
 
-	    void release()
-	    {
-	        _internalBuffer.release();
-	        _dataSize = 0;
-	    }
+		void release()
+		{
+			_internalBuffer.release();
+			_dataSize = 0;
+		}
 
-	    void swap( DynamicByteArray & pOther )
-	    {
-            ts3::swap( _internalBuffer, pOther._internalBuffer );
-            std::swap( _storageMemoryPtr, pOther._storageMemoryPtr );
-	        std::swap( _dataSize, pOther._dataSize );
-	    }
+		void swap( DynamicByteArray & pOther )
+		{
+			ts3::swap( _internalBuffer, pOther._internalBuffer );
+			std::swap( _storageMemoryPtr, pOther._storageMemoryPtr );
+			std::swap( _dataSize, pOther._dataSize );
+		}
 
-    private:
-        DynamicMemoryBuffer _internalBuffer;
-    };
+	private:
+		DynamicMemoryBuffer _internalBuffer;
+	};
 
 	inline void swap( DynamicByteArray & pFirst, DynamicByteArray & pSecond )
 	{
-	    pFirst.swap( pSecond );
+		pFirst.swap( pSecond );
 	}
 
 	template <size_t tpSize>
 	class FixedByteArray : public ByteArray
-    {
-    public:
-        FixedByteArray( const FixedByteArray & ) = delete;
-        FixedByteArray & operator=( const FixedByteArray & ) = delete;
+	{
+	public:
+		FixedByteArray( const FixedByteArray & ) = delete;
+		FixedByteArray & operator=( const FixedByteArray & ) = delete;
 
-        FixedByteArray()
-        {
-            _storageMemoryPtr = _internalBuffer.data();
-            _dataSize = _internalBuffer.size();
-        }
+		FixedByteArray()
+		{
+			_storageMemoryPtr = _internalBuffer.data();
+			_dataSize = _internalBuffer.size();
+		}
 
-    private:
-        FixedMemoryBuffer<tpSize> _internalBuffer;
-    };
+	private:
+		FixedMemoryBuffer<tpSize> _internalBuffer;
+	};
 
 }
 

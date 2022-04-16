@@ -163,7 +163,7 @@ namespace ts3::math
 	template <typename Tp, size_t tSize>
 	inline Tp length( const Vector<Tp, tSize> & pVector )
 	{
-	    return static_cast<Tp>( arrayOps::length( pVector.values ) );
+		return static_cast<Tp>( arrayOps::length( pVector.values ) );
 	}
 
 	template <typename TpResult, typename Tp, size_t tSize>

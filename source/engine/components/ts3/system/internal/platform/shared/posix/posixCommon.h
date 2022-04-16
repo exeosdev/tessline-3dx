@@ -7,12 +7,12 @@
 namespace ts3::system
 {
 
-    namespace platform
-    {
+	namespace platform
+	{
 
-        const char * posixQueryErrnoStringByCode( int pErrno );
+		const char * posixQueryErrnoStringByCode( int pErrno );
 
-    }
+	}
 
 }
 

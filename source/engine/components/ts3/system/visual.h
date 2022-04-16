@@ -10,7 +10,7 @@ namespace ts3::system
 
 	enum class EColorFormat : uint32
 	{
-	    Unknown,
+		Unknown,
 		B8G8R8,
 		B8G8R8A8,
 		B8G8R8A8SRGB,
@@ -36,11 +36,11 @@ namespace ts3::system
 	};
 
 	enum class EPixelOrder : uint32
-    {
-	    Unknown,
-	    BGR,
-	    RGB
-    };
+	{
+		Unknown,
+		BGR,
+		RGB
+	};
 
 	enum class EDepthStencilFormat : uint16
 	{
@@ -130,17 +130,17 @@ namespace ts3::system
 	/// @brief Returns a ColorDesc structure representation of a specified EColorFormat.
 	TS3_SYSTEM_API const ColorDesc & vsxGetDescForColorFormat( EColorFormat pFormat );
 
-    /// @brief Returns a DepthStencilDesc structure representation of a specified EDepthStencilFormat.
-    TS3_SYSTEM_API const DepthStencilDesc & vsxGetDescForDepthStencilFormat( EDepthStencilFormat pFormat );
+	/// @brief Returns a DepthStencilDesc structure representation of a specified EDepthStencilFormat.
+	TS3_SYSTEM_API const DepthStencilDesc & vsxGetDescForDepthStencilFormat( EDepthStencilFormat pFormat );
 
-    /// @brief Returns an MSAADesc structure representation of a specified EMSAAMode.
-    TS3_SYSTEM_API const MSAADesc & vsxGetDescForMSAAMode( EMSAAMode pMode );
+	/// @brief Returns an MSAADesc structure representation of a specified EMSAAMode.
+	TS3_SYSTEM_API const MSAADesc & vsxGetDescForMSAAMode( EMSAAMode pMode );
 
-    /// @brief Returns a ColorDesc structure representation of a specified EColorFormat.
-    TS3_SYSTEM_API const VisualConfig & vsxGetDefaultVisualConfigForSysWindow();
+	/// @brief Returns a ColorDesc structure representation of a specified EColorFormat.
+	TS3_SYSTEM_API const VisualConfig & vsxGetDefaultVisualConfigForSysWindow();
 
-    ///
-    TS3_SYSTEM_API bool vsxCheckColorFormatCompatibility( EColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha );
+	///
+	TS3_SYSTEM_API bool vsxCheckColorFormatCompatibility( EColorFormat pFormat, uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pAlpha );
 
 } // namespace ts3::system
 

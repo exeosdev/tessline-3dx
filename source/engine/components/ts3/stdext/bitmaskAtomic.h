@@ -140,7 +140,7 @@ namespace ts3
 				}
 
 				if ( _value.compare_exchange_weak( current, current | static_cast<ValueType>(pBits),
-				                                   std::memory_order_acq_rel, std::memory_order_relaxed ) )
+												   std::memory_order_acq_rel, std::memory_order_relaxed ) )
 				{
 					return true;
 				}
@@ -160,7 +160,7 @@ namespace ts3
 				}
 
 				if ( _value.compare_exchange_weak( current, current & ~static_cast<ValueType>(pBits),
-				                                   std::memory_order_acq_rel, std::memory_order_relaxed ) )
+												   std::memory_order_acq_rel, std::memory_order_relaxed ) )
 				{
 					return true;
 				}

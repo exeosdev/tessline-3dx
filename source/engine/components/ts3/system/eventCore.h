@@ -8,14 +8,14 @@
 namespace ts3::system
 {
 
-    ts3SysDeclareHandle( EventController );
-    ts3SysDeclareHandle( EventDispatcher );
+	ts3SysDeclareHandle( EventController );
+	ts3SysDeclareHandle( EventDispatcher );
 
-    struct EventDispatcherConfig;
-    struct EventDispatcherInputState;
+	struct EventDispatcherConfig;
+	struct EventDispatcherInputState;
 
-    using EventSourceFindPredicate = std::function<bool( const EventSource & )>;
-    using EventSourceNativeDataFindPredicate = std::function<bool( const void * )>;
+	using EventSourceFindPredicate = std::function<bool( const EventSource & )>;
+	using EventSourceNativeDataFindPredicate = std::function<bool( const void * )>;
 
 	/// @brief A set of flags which modify the behaviour of the event system. Used in EventController::setEventSystemConfigFlags().
 	enum EEventSystemConfigFlags : uint32
@@ -67,11 +67,11 @@ namespace ts3::system
 		E_EVENT_DISPATCHER_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT = 0x0004
 	};
 
-    /// @brief
+	/// @brief
 	class EventController : public SysObject
 	{
-	    friend class EventDispatcher;
-	    friend class EventSource;
+		friend class EventDispatcher;
+		friend class EventSource;
 
 	public:
 		explicit EventController( SysContextHandle pSysContext );
@@ -128,9 +128,9 @@ namespace ts3::system
 		TS3_FUNC_NO_DISCARD bool isEventSourceRegistered( const EventSource & pEventSource ) const noexcept;
 
 	protected:
-	    EventDispatcherInputState & getEventDispatcherInputState();
+		EventDispatcherInputState & getEventDispatcherInputState();
 
-	    const EventDispatcherConfig & getEventDispatcherConfig() const;
+		const EventDispatcherConfig & getEventDispatcherConfig() const;
 
 	friendapi:
 		// Used by the EventSource class. It is called inside its destructor.
@@ -155,14 +155,14 @@ namespace ts3::system
 
 		// Registers the event source at the system level. Empty for most OSes.
 		// Win32: replaces WNDPROC with a custom one and allocates extra window data.
-	    virtual void _nativeRegisterEventSource( EventSource & pEventSource );
+		virtual void _nativeRegisterEventSource( EventSource & pEventSource );
 
 		// Unregisters the event source at the system level. Empty for most OSes.
 		// Win32: restores the original (default) WNDPROC and releases the allocated data.
-	    virtual void _nativeUnregisterEventSource( EventSource & pEventSource );
+		virtual void _nativeUnregisterEventSource( EventSource & pEventSource );
 
 		// Private utility function. Handles internal details of replacing active dispatcher with another one (or NULL).
-	    void _onActiveDispatcherChange( EventDispatcher * pEventDispatcher );
+		void _onActiveDispatcherChange( EventDispatcher * pEventDispatcher );
 
 		// Private utility function. Pulls events from the priority queue, which comes before the system one.
 		bool _processLocalQueues();
@@ -181,52 +181,52 @@ namespace ts3::system
 		TS3_FUNC_NO_DISCARD Bitmask<uint32> _getInternalStateFlags() const;
 
 	protected:
-	    struct EventControllerPrivateData;
-	    std::unique_ptr<EventControllerPrivateData> _privateData;
+		struct EventControllerPrivateData;
+		std::unique_ptr<EventControllerPrivateData> _privateData;
 	};
 
 	/// @brief
 	class EventDispatcher : public SysObject
-    {
-	    friend class EventController;
+	{
+		friend class EventController;
 
-    public:
-        explicit EventDispatcher( EventControllerHandle pEventController );
-        virtual ~EventDispatcher() noexcept;
+	public:
+		explicit EventDispatcher( EventControllerHandle pEventController );
+		virtual ~EventDispatcher() noexcept;
 
-        void setActive();
+		void setActive();
 
-        void setEventHandler( EEventBaseType pBaseType, EventHandler pHandler );
-        void setEventHandler( EEventCategory pCategory, EventHandler pHandler );
-        void setEventHandler( EEventCodeIndex pCodeIndex, EventHandler pHandler );
-        void setDefaultEventHandler( EventHandler pHandler );
+		void setEventHandler( EEventBaseType pBaseType, EventHandler pHandler );
+		void setEventHandler( EEventCategory pCategory, EventHandler pHandler );
+		void setEventHandler( EEventCodeIndex pCodeIndex, EventHandler pHandler );
+		void setDefaultEventHandler( EventHandler pHandler );
 
-        void resetEventHandler( EEventBaseType pBaseType );
-        void resetEventHandler( EEventCategory pCategory );
-        void resetEventHandler( EEventCodeIndex pCodeIndex );
-        void resetDefaultEventHandler();
+		void resetEventHandler( EEventBaseType pBaseType );
+		void resetEventHandler( EEventCategory pCategory );
+		void resetEventHandler( EEventCodeIndex pCodeIndex );
+		void resetDefaultEventHandler();
 
 		void setDispatcherConfigFlags( Bitmask<EEventDispatcherConfigFlags> pFlags, bool pSetOrUnset = true );
-        void setIdleProcessingMode( bool pIdle );
+		void setIdleProcessingMode( bool pIdle );
 
-        bool postEvent( EventObject pEvent );
-        bool postEvent( event_code_value_t pEventCode );
-        bool postEventAppQuit();
-        bool postEventAppTerminate();
+		bool postEvent( EventObject pEvent );
+		bool postEvent( event_code_value_t pEventCode );
+		bool postEventAppQuit();
+		bool postEventAppTerminate();
 
-    friendapi:
-        EventDispatcherInputState & getInputState();
+	friendapi:
+		EventDispatcherInputState & getInputState();
 
-        const EventDispatcherConfig & getConfig() const;
+		const EventDispatcherConfig & getConfig() const;
 
-    private:
-        void _preProcessEvent( EventObject & pEvent );
+	private:
+		void _preProcessEvent( EventObject & pEvent );
 
-    protected:
-        struct EventDispatcherPrivateData;
-        EventControllerHandle _eventControllerActiveRef;
-        std::unique_ptr<EventDispatcherPrivateData> _privateData;
-    };
+	protected:
+		struct EventDispatcherPrivateData;
+		EventControllerHandle _eventControllerActiveRef;
+		std::unique_ptr<EventDispatcherPrivateData> _privateData;
+	};
 
 } // namespace ts3::system
 
