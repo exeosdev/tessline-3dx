@@ -8,6 +8,13 @@
 namespace ts3::system
 {
 
+	enum class EWindowVisibilityState : uint32
+	{
+		Unknown,
+		Hidden,
+		Visible
+	};
+
     template <event_code_value_t tpEventCode>
     struct EvtWindow : public EvtBase
     {
@@ -26,7 +33,11 @@ namespace ts3::system
         }
     };
 
-    struct EvtWindowUpdateClose : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_CLOSE>
+    struct EvtWindowUpdateCreate : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_CREATE>
+    {
+    };
+
+    struct EvtWindowUpdateDestroy : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_DESTROY>
     {
     };
 
@@ -41,7 +52,7 @@ namespace ts3::system
 
     struct EvtWindowUpdateVisibility : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY>
     {
-        bool newVisibilityState;
+    	EWindowVisibilityState newVisibilityState = EWindowVisibilityState::Unknown;
     };
 
 } // namespace ts3::system

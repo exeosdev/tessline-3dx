@@ -9,6 +9,8 @@
 namespace ts3::system
 {
 
+	class X11EventController;
+
     namespace platform
     {
 
@@ -38,6 +40,10 @@ namespace ts3::system
 
         using X11NativeEvent = NativeEventType;
 
+        TS3_SYSTEM_API_NODISCARD EventSource * x11FindEventSourceByXWindow( X11EventController & pEventController, XWindow pWindowXID );
+
+        bool x11TranslateEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent );
+
     }
 
     class X11EventController : public X11NativeObject<EventController, platform::X11NativeDataCommon>
@@ -46,8 +52,8 @@ namespace ts3::system
         X11EventController( SysContextHandle pSysContext );
         virtual ~X11EventController() noexcept;
 
-        using EventController::getEventSystemInternalConfig;
-        using EventController::getEventSystemSharedState;
+        using EventController::getEventDispatcherInputState;
+        using EventController::getEventDispatcherConfig;
 
     private:
         /// @override EventController::_nativeRegisterEventSource

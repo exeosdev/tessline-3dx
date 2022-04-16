@@ -40,7 +40,7 @@ namespace ts3::system
         Release
     };
 
-    struct ESSharedInputMouseState
+    struct EvtSharedInputMouseState
     {
         // State of the mouse buttons. Used for motion events on systems which do not have reliable states (X11).
         Bitmask<EMouseButtonFlagBits> buttonStateMask = 0;
@@ -61,7 +61,7 @@ namespace ts3::system
     template <event_code_value_t tpEventCode>
     struct EvtInputMouse : public EvtInput<tpEventCode>
     {
-        const ESSharedInputMouseState * inputMouseState;
+        const EvtSharedInputMouseState * inputMouseState;
     };
 
     struct EvtInputMouseButton : public EvtInputMouse<E_EVENT_CODE_INPUT_MOUSE_BUTTON>

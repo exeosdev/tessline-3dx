@@ -171,7 +171,7 @@ namespace ts3::system
     {
         try
         {
-            if( pRenderContext.hasInternalOwnershipFlag() && pRenderContext.isValid() )
+            if( pRenderContext.hasInternalOwnershipFlag() && pRenderContext.sysValidate() )
             {
                 _nativeDestroyRenderContext( pRenderContext );
                 pRenderContext.setInternalOwnershipFlag( false );
@@ -193,12 +193,18 @@ namespace ts3::system
     : Frame( pGLSystemDriver->mSysContext )
     , mGLSystemDriver( std::move( pGLSystemDriver ) )
     {
-        setEventSourceNativeData( pNativeData, {} );
+        setEventSourceNativeData( pNativeData );
     }
 
     OpenGLDisplaySurface::~OpenGLDisplaySurface() noexcept
     {
         resetEventSourceNativeData();
+    }
+
+    void OpenGLDisplaySurface::clearColorBuffer()
+    {
+        glClearColor( 0.2, 0.4, 0.92, 1.0 );
+        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     }
 
     void OpenGLDisplaySurface::swapBuffers()
@@ -213,20 +219,7 @@ namespace ts3::system
 
     bool OpenGLDisplaySurface::isValid() const
     {
-        return _nativeIsValid();
-    }
-
-    void OpenGLDisplaySurface::resize( const FrameSize & pSize )
-    {
-        FrameGeometry newFrameGeometry{};
-        newFrameGeometry.position = CX_FRAME_POS_AUTO;
-        newFrameGeometry.size = pSize;
-        newFrameGeometry.style = EFrameStyle::Unspecified;
-
-        newFrameGeometry = mGLSystemDriver->mDisplayManager->validateFrameGeometry( newFrameGeometry );
-
-        const auto updateFlags = E_FRAME_GEOMETRY_UPDATE_FLAG_POSITION_BIT | E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_OUTER_RECT_BIT;
-        _nativeUpdateGeometry( newFrameGeometry, updateFlags );
+        return _nativeSysValidate();
     }
 
     void OpenGLDisplaySurface::resizeClientArea( const FrameSize & pSize )
@@ -239,6 +232,19 @@ namespace ts3::system
         newFrameGeometry = mGLSystemDriver->mDisplayManager->validateFrameGeometry( newFrameGeometry );
 
         const auto updateFlags = E_FRAME_GEOMETRY_UPDATE_FLAG_POSITION_BIT | E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_CLIENT_AREA_BIT;
+        _nativeUpdateGeometry( newFrameGeometry, updateFlags );
+    }
+
+    void OpenGLDisplaySurface::resizeFrame( const FrameSize & pSize )
+    {
+        FrameGeometry newFrameGeometry{};
+        newFrameGeometry.position = CX_FRAME_POS_AUTO;
+        newFrameGeometry.size = pSize;
+        newFrameGeometry.style = EFrameStyle::Unspecified;
+
+        newFrameGeometry = mGLSystemDriver->mDisplayManager->validateFrameGeometry( newFrameGeometry );
+
+        const auto updateFlags = E_FRAME_GEOMETRY_UPDATE_FLAG_POSITION_BIT | E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_OUTER_RECT_BIT;
         _nativeUpdateGeometry( newFrameGeometry, updateFlags );
     }
 
@@ -263,7 +269,7 @@ namespace ts3::system
         return _nativeGetSize( EFrameSizeMode::ClientArea );
     }
 
-    FrameSize OpenGLDisplaySurface::getSize() const
+    FrameSize OpenGLDisplaySurface::getFrameSize() const
     {
         return _nativeGetSize( EFrameSizeMode::OuterRect );
     }
@@ -296,19 +302,19 @@ namespace ts3::system
         _nativeBindForCurrentThread( pTargetSurface );
     }
 
-    bool OpenGLRenderContext::isCurrent() const
+    bool OpenGLRenderContext::sysCheckIsCurrent() const
     {
-        return _nativeIsCurrent();
+        return _nativeSysCheckIsCurrent();
     }
 
-    bool OpenGLRenderContext::isValid() const
+    bool OpenGLRenderContext::sysValidate() const
     {
-        return _nativeIsValid();
+        return _nativeSysValidate();
     }
 
     GLSystemVersionInfo OpenGLRenderContext::querySystemVersionInfo() const
     {
-        if( !isValid() )
+        if( !sysValidate() )
         {
             ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
         }

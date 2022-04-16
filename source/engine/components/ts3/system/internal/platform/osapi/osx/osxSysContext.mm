@@ -11,6 +11,17 @@
 namespace ts3::system
 {
 
+    namespace platform
+    {
+
+        SysContextHandle createSysContext( const SysContextCreateInfo & pCreateInfo )
+        {
+            return createDynamicInterfaceObject<OSXSysContext>();
+        }
+
+    }
+
+
     OSXSysContext::OSXSysContext()
     {
         _initializeOSXContextState();
@@ -122,17 +133,6 @@ namespace ts3::system
 			}
 		}
 	}
-	}
-
-
-	namespace platform
-	{
-
-		SysContextHandle createSysContext( const SysContextCreateInfo & pCreateInfo )
-		{
-			return createDynamicInterfaceObject<OSXSysContext>();
-		}
-
 	}
 
 } // namespace ts3::system

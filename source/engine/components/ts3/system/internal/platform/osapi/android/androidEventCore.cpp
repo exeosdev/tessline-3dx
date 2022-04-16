@@ -321,7 +321,7 @@ namespace ts3::system
             {
                 case AINPUT_EVENT_TYPE_MOTION:
                 {
-                    auto & inputMouseState = eventController->getEventSystemSharedState().inputMouseState;
+                    auto & inputMouseState = eventController->getEventDispatcherInputState().inputMouseState;
 
                     decltype( inputMouseState.lastCursorPos ) cursorPos;
                     cursorPos.x = AMotionEvent_getX( pInputEvent, 0u );

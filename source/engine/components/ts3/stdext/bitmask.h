@@ -70,7 +70,7 @@ namespace ts3
 		}
 
 		template <typename TpBits>
-		void setOrUnset( bool pSet, TpBits pBits )
+		void setOrUnset( TpBits pBits, bool pSet )
 		{
 			if( pSet )
 			{

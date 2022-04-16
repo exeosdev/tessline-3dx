@@ -1,5 +1,6 @@
 
-#include <ts3/system/displayDriver.h>
+#include <ts3/system/displayConfiguration.h>
+#include <ts3/system/displaySystem.h>
 #include <ts3/system/sysContextNative.h>
 #include <ts3/system/windowNative.h>
 #include <ts3/system/eventCoreNative.h>
@@ -19,16 +20,18 @@ struct GfxState
 
 void initializeGraphicsCreateDriver( GfxState & pGfxState )
 {
-    pGfxState.glSystemDriver = createSysObject<OpenGLSystemDriver>( pGfxState.displayManager );
+    pGfxState.glSystemDriver = pGfxState.displayManager->mSysContext->createOpenGLSystemDriver( pGfxState.displayManager );
     pGfxState.glSystemDriver->initializePlatform();
 }
 
 void initializeGraphicsCreateSurface( GfxState & pGfxState )
 {
     GLDisplaySurfaceCreateInfo surfaceCreateInfo;
-    surfaceCreateInfo.windowGeometry.size = {0, 0 };
-    surfaceCreateInfo.windowGeometry.frameStyle = EFrameStyle::Caption;
+    surfaceCreateInfo.frameGeometry.size = {800, 600 };
+    surfaceCreateInfo.frameGeometry.style = EFrameStyle::Caption;
     surfaceCreateInfo.visualConfig = vsxGetDefaultVisualConfigForSysWindow();
+    surfaceCreateInfo.runtimeVersionDesc.apiProfile = EGLAPIProfile::OpenGL;
+    surfaceCreateInfo.runtimeVersionDesc.apiVersion = CX_GL_VERSION_BEST_SUPPORTED;
     surfaceCreateInfo.flags.set( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 
     pGfxState.glSurface = pGfxState.glSystemDriver->createDisplaySurface( surfaceCreateInfo );
@@ -37,8 +40,8 @@ void initializeGraphicsCreateSurface( GfxState & pGfxState )
 void initializeGraphicsCreateContext( GfxState & pGfxState )
 {
     GLRenderContextCreateInfo renderContextCreateInfo;
-    renderContextCreateInfo.requiredAPIVersion = cvGLVersionBestSupported;
-    renderContextCreateInfo.targetAPIProfile = EGLAPIProfile::Core;
+    renderContextCreateInfo.runtimeVersionDesc.apiProfile = EGLAPIProfile::OpenGL;
+    renderContextCreateInfo.runtimeVersionDesc.apiVersion = CX_GL_VERSION_BEST_SUPPORTED;
     renderContextCreateInfo.shareContext = nullptr;
     renderContextCreateInfo.flags = E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT;
 
@@ -54,7 +57,7 @@ void initializeGraphicsGL( GfxState & pGfxState )
 
 void initializeGraphics( SysContextHandle pSysContext, GfxState & pGfxState )
 {
-    pGfxState.displayManager = createSysObject<DisplayManager>( pSysContext );
+    pGfxState.displayManager = pSysContext->createDisplayManager();
     initializeGraphicsGL( pGfxState );
 }
 
@@ -90,24 +93,24 @@ int main( int pArgc, const char ** pArgv )
 int main( int pArgc, const char ** pArgv )
 {
     SysContextCreateInfo sysContextCreateInfo;
-    sysContextCreateInfo.flags = 0;
-    auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+    auto sysContext = platform::createSysContext( sysContextCreateInfo );
 
+    platform::AssetLoaderCreateInfoNativeParams aslCreateInfoNP;
+    aslCreateInfoNP.relativeAssetRootDir = "../../../../tessline-3dx/assets";
     AssetLoaderCreateInfo aslCreateInfo;
-    aslCreateInfo.sysContext = sysContext;
-    aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
-    auto assetLoader = createAssetLoader( aslCreateInfo );
+    aslCreateInfo.nativeParams = &aslCreateInfoNP;
+    auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
 
 #endif
 
-    auto psAsset = assetLoader->openSubAsset( "shaders/GLES3/fx_passthrough_ps", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
-    auto vsAsset = assetLoader->openSubAsset( "shaders/GLES3/fx_passthrough_vs", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
-
-    std::string shaderCodePS;
-    psAsset->readAll( shaderCodePS );
-
-    std::string shaderCodeVS;
-    vsAsset->readAll( shaderCodeVS );
+//    auto psAsset = assetLoader->openSubAsset( "shaders/GL4/fx_passthrough_ps", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
+//    auto vsAsset = assetLoader->openSubAsset( "shaders/GL4/fx_passthrough_vs", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
+//
+//    std::string shaderCodePS;
+//    psAsset->readAll( shaderCodePS );
+//
+//    std::string shaderCodeVS;
+//    vsAsset->readAll( shaderCodeVS );
 
     GfxState gfxState;
 
@@ -115,11 +118,11 @@ int main( int pArgc, const char ** pArgv )
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    auto evtController = createSysObject<EventController>( sysContext );
+    auto evtController = sysContext->createEventController();
     auto evtDispatcher = evtController->createEventDispatcher();
     evtController->setActiveEventDispatcher( *evtDispatcher );
 
-#if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_OS_ANDROID )
+#if( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_ANDROID )
     bool waitForDisplay = true;
 
     evtDispatcher->setEventHandler(
@@ -131,7 +134,7 @@ int main( int pArgc, const char ** pArgv )
 
     while( waitForDisplay )
     {
-        evtController->updateSysQueueAuto();
+        evtController->processEventsAuto();
     }
 
     evtDispatcher->setEventHandler(
@@ -164,11 +167,11 @@ int main( int pArgc, const char ** pArgv )
                 return true;
             });
     evtDispatcher->setEventHandler(
-            EEventCodeIndex::WindowUpdateClose,
+            EEventCodeIndex::WindowUpdateDestroy,
             [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
-                if( pEvt.eWindowUpdateClose.checkEventSource( gfxState.glSurface.get() ) )
+                if( pEvt.eWindowUpdateDestroy.checkEventSource( gfxState.glSurface.get() ) )
                 {
-                    evtDispatcher->postEventAppQuit();
+                    // evtDispatcher->postEventAppQuit();
                 }
                 return true;
             });
@@ -177,14 +180,15 @@ int main( int pArgc, const char ** pArgv )
             [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
                 if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::Escape )
                 {
-                    evtDispatcher->postEventAppQuit();
                 }
                 return true;
             });
 
     initializeGraphics( sysContext, gfxState );
 
-    evtController->registerEventSource( *(gfxState.glSurface) );
+    evtController->registerPrimaryEventSource( *(gfxState.glSurface) );
+    evtController->setEventSystemConfigFlags( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_QUIT_ON_PRIMARY_SOURCE_DESTROY_BIT );
+
     gfxState.glSystemDriver->releaseInitState( *(gfxState.glContext) );
     gfxState.glContext->bindForCurrentThread( *(gfxState.glSurface) );
 
@@ -194,7 +198,7 @@ int main( int pArgc, const char ** pArgv )
 
     while( runApp )
     {
-        evtController->updateSysQueueAuto();
+        evtController->processEventsAuto();
         if( gfxState.pauseAnimation )
         {
             continue;

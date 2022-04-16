@@ -159,7 +159,7 @@ int main( int pArgc, const char ** pArgv )
 
     while( waitForDisplay )
     {
-        evtController->updateSysQueueAuto();
+        evtController->processEventsAuto();
     }
 
 //    evtDispatcher->setEventHandler(
@@ -190,9 +190,9 @@ int main( int pArgc, const char ** pArgv )
                 return true;
             });
     evtDispatcher->setEventHandler(
-            EEventCodeIndex::WindowUpdateClose,
+            EEventCodeIndex::WindowUpdateDestroy,
             [evtDispatcher,&gxDriverState](const EventObject & pEvt) -> bool {
-                if( pEvt.eWindowUpdateClose.checkEventSource( gxDriverState.presentationLayer->getInternalSystemEventSource() ) )
+                if( pEvt.eWindowUpdateDestroy.checkEventSource( gxDriverState.presentationLayer->getInternalSystemEventSource() ) )
                 {
                     evtDispatcher->postEventAppQuit();
                 }
@@ -506,7 +506,7 @@ int main( int pArgc, const char ** pArgv )
 
         try
         {
-            evtController->updateSysQueueAuto();
+            evtController->processEventsAuto();
 
             auto ts3ViewScreen = cameraController.computeViewMatrixLH();
             gxDriverState.cmdContext->beginCommandSequence();

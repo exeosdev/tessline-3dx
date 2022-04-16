@@ -140,7 +140,7 @@ namespace ts3::system
         }
     };
 
-    struct ESSharedInputKeyboardState
+    struct EvtSharedInputKeyboardState
     {
         KeyStateMap keyStateMap;
     };
@@ -149,7 +149,7 @@ namespace ts3::system
     struct EvtInputKeyboard : public EvtInput<tpEventCode>
     {
         //
-        const ESSharedInputKeyboardState * inputKeyboardState;
+        const EvtSharedInputKeyboardState * inputKeyboardState;
     };
 
     struct EvtInputKeyboardKey : public EvtInputKeyboard<E_EVENT_CODE_INPUT_KEYBOARD_KEY>

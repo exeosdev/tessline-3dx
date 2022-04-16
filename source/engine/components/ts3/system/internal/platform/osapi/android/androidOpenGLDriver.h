@@ -108,8 +108,8 @@ namespace ts3::system
         /// @override OpenGLDisplaySurface::_nativeQueryRenderAreaSize
         virtual FrameSize _nativeQueryRenderAreaSize() const override final;
 
-        /// @override OpenGLDisplaySurface::_nativeIsValid
-        virtual bool _nativeIsValid() const override final;
+        /// @override OpenGLDisplaySurface::_nativeSysValidate
+        virtual bool _nativeSysValidate() const override final;
 
         /// @override OpenGLDisplaySurface::_nativeResize
         virtual void _nativeResize( const FrameSize & pFrameSize, EFrameSizeMode pSizeMode ) override final;
@@ -144,8 +144,8 @@ namespace ts3::system
         /// @override OpenGLRenderContext::_nativeIsCurrent
         virtual bool _nativeIsCurrent() const override final;
 
-        /// @override OpenGLRenderContext::_nativeIsValid
-        virtual bool _nativeIsValid() const override final;
+        /// @override OpenGLRenderContext::_nativeSysValidate
+        virtual bool _nativeSysValidate() const override final;
     };
 
 } // namespace ts3::system

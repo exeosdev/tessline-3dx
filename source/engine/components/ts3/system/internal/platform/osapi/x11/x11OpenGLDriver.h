@@ -4,7 +4,7 @@
 
 #include "x11WindowSystem.h"
 #include <ts3/system/openGLDriver.h>
-#include <GL/glxew.h>
+#include <GL/glx.h>
 
 namespace ts3::system
 {
@@ -15,6 +15,8 @@ namespace ts3::system
 
 	namespace platform
     {
+
+		using GLXFBConfigArray = std::vector<GLXFBConfig>;
 
         struct X11OpenGLDisplaySurfaceNativeData : public X11WindowNativeData
         {
@@ -35,6 +37,18 @@ namespace ts3::system
                 X11OpenGLRenderContextNativeData contextData;
             };
             std::unique_ptr<InitState> initState = nullptr;
+        };
+
+        struct X11OpenGLVisualConfig
+        {
+            GLXFBConfig fbConfig = nullptr;
+
+            XVisualInfo * xVisualInfo = nullptr;
+
+            explicit operator bool() const
+            {
+                return fbConfig && xVisualInfo;
+            }
         };
 
     }
@@ -107,8 +121,8 @@ namespace ts3::system
         /// @override OpenGLDisplaySurface::_nativeQueryRenderAreaSize
         virtual FrameSize _nativeQueryRenderAreaSize() const override final;
 
-        /// @override OpenGLDisplaySurface::_nativeIsValid
-        virtual bool _nativeIsValid() const override final;
+        /// @override OpenGLDisplaySurface::_nativeSysValidate
+        virtual bool _nativeSysValidate() const override final;
 
         /// @override OpenGLDisplaySurface::_nativeResize
         virtual void _nativeResize( const FrameSize & pFrameSize, EFrameSizeMode pSizeMode ) override final;
@@ -141,10 +155,10 @@ namespace ts3::system
         virtual void _nativeBindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface ) override final;
 
         /// @override OpenGLRenderContext::_nativeIsCurrent
-        virtual bool _nativeIsCurrent() const override final;
+        virtual bool _nativeSysCheckIsCurrent() const override final;
 
-        /// @override OpenGLRenderContext::_nativeIsValid
-        virtual bool _nativeIsValid() const override final;
+        /// @override OpenGLRenderContext::_nativeSysValidate
+        virtual bool _nativeSysValidate() const override final;
     };
 
 } // namespace ts3::system

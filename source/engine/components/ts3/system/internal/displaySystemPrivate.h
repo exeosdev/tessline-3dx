@@ -12,7 +12,7 @@ namespace ts3::system
 
     // The default array with all ColorFormats supported by the library.
     // Used by the common driver layer to iterate over support CFs.
-    inline constexpr EColorFormat cvColorFormatArray[8] =
+    inline constexpr EColorFormat cvColorFormatArray[] =
     {
         EColorFormat::B8G8R8,
         EColorFormat::B8G8R8A8,

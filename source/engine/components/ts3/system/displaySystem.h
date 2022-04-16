@@ -29,6 +29,8 @@ namespace ts3::system
 
 		TS3_FUNC_NO_DISCARD EDisplayDriverType resolveDisplayDriverID( EDisplayDriverType pDriverID ) const;
 
+		TS3_FUNC_NO_DISCARD DisplayOffset queryDefaultDisplayOffset() const;
+
 		TS3_FUNC_NO_DISCARD DisplaySize queryDefaultDisplaySize() const;
 
 		TS3_FUNC_NO_DISCARD DisplaySize queryMinWindowSize() const;
@@ -39,6 +41,8 @@ namespace ts3::system
 
 	private:
 		virtual DisplayDriverHandle _nativeCreateDisplayDriver() = 0;
+
+		virtual void _nativeQueryDefaultDisplayOffset( DisplayOffset & pOutOffset ) const = 0;
 
 		virtual void _nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const = 0;
 

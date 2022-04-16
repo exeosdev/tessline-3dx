@@ -11,28 +11,29 @@
 
 namespace ts3::system
 {
+	
+	using LocalEventQueue = std::deque<EventObject>;
 
-    enum EEventSystemConfigFlags : uint32
-    {
-        E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT = 0x0001,
-        E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT = 0x0002 | E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT,
-        E_EVENT_SYSTEM_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT = 0x1000
-    };
+	enum EEventSystemInternalFlags : uint32
+	{
+		//
+		E_EVENT_SYSTEM_INTERNAL_FLAG_APP_QUIT_REQUEST_SET_BIT = 0x010000,
+	};
 
-    struct EventSystemInternalConfig
+    struct EventDispatcherConfig
     {
-        // Configuration flags. Allow controlling aspects like mouse behaviour.
-        Bitmask<EEventSystemConfigFlags> configFlags = 0u;
+        // Configuration flags. Allow controlling aspects like mouse or keyboard behaviour.
+        Bitmask<EEventDispatcherConfigFlags> dispatcherConfigFlags = 0u;
 
         // Timeout (in milliseconds) after which mouse click sequence is reset.
         duration_value_t mouseClickSequenceTimeoutMs = 100;
     };
 
-    struct EventSystemSharedState
+    struct EventDispatcherInputState
     {
-        ESSharedInputKeyboardState inputKeyboardState;
+        EvtSharedInputKeyboardState inputKeyboardState;
 
-        ESSharedInputMouseState inputMouseState;
+        EvtSharedInputMouseState inputMouseState;
     };
 
     /// @brief Private, implementation-specific data of the EventController class.
@@ -41,19 +42,29 @@ namespace ts3::system
         // Current active dispatcher used to forward all events. Initially NULL and can be reset to this state.
         EventDispatcher * activeEventDispatcher = nullptr;
 
+		// Pointer to the primary event source. Set by the user, may be NULL at any given point.
+		// Used primarily for the auto-quit behaviour (emitting quit event after last/primary event source is destroyed).
+		EventSource * primaryEventSource = nullptr;
+
         // Container for all dispatchers created in the system.
         std::vector<EventDispatcher *> eventDispatcherList;
 
-        //
+        // List of all registered event sources, i.e. all windows/surfaces/views currently observed by our event system.
         std::vector<EventSource *> eventSourceList;
 
-        // Pointer to the configuration data from currently bound dispatcher.
-        EventSystemSharedState * currentSharedState = nullptr;
+		// Pointer to the configuration data from currently bound dispatcher.
+		EventDispatcherInputState * currentDispatcherInputState = nullptr;
 
-        // Pointer to the configuration data from currently bound dispatcher.
-        const EventSystemInternalConfig * currentInternalConfig = nullptr;
+		// Pointer to the configuration data from currently bound dispatcher.
+		const EventDispatcherConfig * currentDispatcherConfig = nullptr;
 
-        std::pair<bool, std::vector<EventDispatcher *>::iterator> findEventDispatcherInternal( EventDispatcher * pEventDispatcher )
+		Bitmask<uint32> internalContollerStateFlags = 0u;
+
+		LocalEventQueue priorityEventQueue;
+
+		LocalEventQueue userEventQueue;
+
+		TS3_FUNC_NO_DISCARD std::pair<bool, std::vector<EventDispatcher *>::iterator> findEventDispatcherInternal( EventDispatcher * pEventDispatcher )
         {
             std::pair<bool, std::vector<EventDispatcher *>::iterator> result;
             result.second = std::find( eventDispatcherList.begin(), eventDispatcherList.end(), pEventDispatcher );
@@ -61,7 +72,7 @@ namespace ts3::system
             return result;
         }
 
-        std::pair<bool, std::vector<EventSource *>::iterator> findEventSourceInternal( EventSource * pEventSource )
+		TS3_FUNC_NO_DISCARD std::pair<bool, std::vector<EventSource *>::iterator> findEventSourceInternal( EventSource * pEventSource )
         {
             std::pair<bool, std::vector<EventSource *>::iterator> result;
             result.second = std::find( eventSourceList.begin(), eventSourceList.end(), pEventSource );
@@ -69,16 +80,16 @@ namespace ts3::system
             return result;
         }
 
-        TS3_FUNC_NO_DISCARD const EventSystemInternalConfig & getCurrentInternalConfig() const
+        TS3_FUNC_NO_DISCARD const EventDispatcherConfig & getCurrentDispatcherConfig() const
         {
-            ts3DebugAssert( currentInternalConfig != nullptr );
-            return *currentInternalConfig;
+            ts3DebugAssert( currentDispatcherConfig != nullptr );
+            return *currentDispatcherConfig;
         }
 
-        TS3_FUNC_NO_DISCARD EventSystemSharedState & getCurrentSharedState() const
+        TS3_FUNC_NO_DISCARD EventDispatcherInputState & getCurrentDispatcherInputState() const
         {
-            ts3DebugAssert( currentSharedState != nullptr );
-            return *currentSharedState;
+            ts3DebugAssert( currentDispatcherInputState != nullptr );
+            return *currentDispatcherInputState;
         }
     };
 
@@ -87,10 +98,10 @@ namespace ts3::system
     {
         // Internal configuration of the event system. The configuration is stored per-dispatcher, so that in case
         // of multiple instances, configuration is properly restored each time a dispatcher is set as an active one.
-        EventSystemInternalConfig evtSysInternalConfig;
+        EventDispatcherConfig evtDispatcherConfig;
 
         // Shared state
-        EventSystemSharedState evtSysSharedState;
+        EventDispatcherInputState evtDispatcherInputState;
 
         // A default handler. If set, it is called if there is no handler registered for a given code/category/base type.
         EventHandler defaultHandler;
@@ -134,6 +145,7 @@ namespace ts3::system
                     return true;
                 }
             }
+
             return false;
         }
 

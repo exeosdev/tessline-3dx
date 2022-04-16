@@ -24,9 +24,6 @@ namespace ts3::system
                                                            const FrameGeometry & pFrameGeometry,
                                                            Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags );
 
-        // Default event procedure for all windows created by the system.
-        LRESULT __stdcall _win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
-
     }
 
 
@@ -218,7 +215,7 @@ namespace ts3::system
                 windowClass.hIconSm = ::LoadIconA( nullptr, IDI_WINLOGO );
                 windowClass.hInstance = wndProcModuleHandle;
                 windowClass.lpszClassName = wndClassName;
-                windowClass.lpfnWndProc = _win32DefaultWindowEventCallback;
+                windowClass.lpfnWndProc = win32DefaultWindowEventCallback;
                 windowClass.lpszMenuName = nullptr;
                 windowClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 
@@ -350,11 +347,6 @@ namespace ts3::system
             }
 
             return win32Geometry;
-        }
-
-        LRESULT __stdcall _win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam )
-        {
-            return ::DefWindowProcA( pHWND, pMessage, pWparam, pLparam );
         }
 
 	}

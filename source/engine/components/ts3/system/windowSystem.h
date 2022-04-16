@@ -12,8 +12,10 @@ namespace ts3::system
     ts3DeclareClassHandle( Window );
     ts3DeclareClassHandle( WindowManager );
 
-    struct WindowCreateInfo : public WindowProperties
+    struct WindowCreateInfo
     {
+    	FrameGeometry frameGeometry = CX_FRAME_GEOMETRY_DEFAULT;
+    	std::string title;
     };
 
     /// @brief
@@ -34,12 +36,16 @@ namespace ts3::system
 
         TS3_FUNC_NO_DISCARD FrameGeometry validateFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
 
+		TS3_FUNC_NO_DISCARD uint32 getActiveWindowsNum() const;
+
     friendapi:
-        // Used by the Window class. It is called inside its destructor.
-        virtual void onWindowDestroy( Window & pWindow ) noexcept;
+        // Used by the Window class.
+        virtual void destroyWindow( Window & pWindow ) noexcept;
 
     private:
         virtual WindowHandle _nativeCreateWindow( WindowCreateInfo pCreateInfo ) = 0;
+
+		virtual void _nativeDestroyWindow( Window & pWindow ) = 0;
     };
 
     /// @brief
@@ -51,11 +57,12 @@ namespace ts3::system
         WindowManagerHandle const mWindowManager;
 
     public:
+		explicit Window( WindowManagerHandle pWindowManager, void * pNativeData );
         virtual ~Window() noexcept;
 
-        virtual void resize( const FrameSize & pSize ) override final;
-
         virtual void resizeClientArea( const FrameSize & pSize ) override final;
+
+		virtual void resizeFrame( const FrameSize & pSize ) override final;
 
         virtual void setFullscreenMode( bool pEnable ) override final;
 
@@ -66,15 +73,14 @@ namespace ts3::system
 
         TS3_FUNC_NO_DISCARD virtual FrameSize getClientAreaSize() const override final;
 
-        TS3_FUNC_NO_DISCARD virtual FrameSize getSize() const override final;
+        TS3_FUNC_NO_DISCARD virtual FrameSize getFrameSize() const override final;
 
         TS3_FUNC_NO_DISCARD virtual bool isFullscreen() const override final;
 
-    protected:
-        explicit Window( WindowManagerHandle pWindowManager, void * pNativeData );
-
     private:
-        virtual void _nativeResize( const FrameSize & pFrameSize, EFrameSizeMode pSizeMode ) = 0;
+		virtual void onDestroySystemObjectRequested() override final;
+
+		virtual void _nativeResize( const FrameSize & pFrameSize, EFrameSizeMode pSizeMode ) = 0;
 
         virtual void _nativeSetFullscreenMode( bool pEnable ) = 0;
 

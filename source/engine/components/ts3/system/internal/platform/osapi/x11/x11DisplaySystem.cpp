@@ -41,6 +41,43 @@ namespace ts3::system
         }
 
         mNativeData.screenDepth = screenDepth;
+
+        if( mNativeData.xrrVersion == CX_VERSION_UNKNOWN )
+        {
+        	int xrrVersionMajor = 0;
+        	int xrrVersionMinor = 0;
+
+        	if ( XRRQueryVersion( xSessionData.display, &xrrVersionMajor, &xrrVersionMinor ) == False )
+        	{
+        		return;
+        	}
+
+        	mNativeData.xrrVersion.major = static_cast<uint16>( xrrVersionMajor );
+        	mNativeData.xrrVersion.major = static_cast<uint16>( xrrVersionMinor );
+        }
+
+        if ( auto * xrrScreenResources = XRRGetScreenResources( xSessionData.display, xSessionData.rootWindowXID ) )
+        {
+        	int xrrMonitorsNum = 0;
+        	auto * xrrMonitorList = XRRGetMonitors( xSessionData.display, xSessionData.rootWindowXID, False, &xrrMonitorsNum );
+
+        	if ( xrrMonitorList && ( xrrMonitorsNum > 0 ) )
+        	{
+        		for ( int monitorIndex = 0; monitorIndex < xrrMonitorsNum; ++monitorIndex )
+        		{
+        			auto & xrrMonitorInfo = xrrMonitorList[monitorIndex];
+        			if ( xrrMonitorInfo.primary != 0 )
+        			{
+        				mNativeData.xrrDefaultMonitorInfo = xrrMonitorInfo;
+        				//break;
+        			}
+        		}
+
+        		XRRFreeMonitors( xrrMonitorList );
+        	}
+
+        	XRRFreeScreenResources( xrrScreenResources );
+        }
     }
 
     void X11DisplayManager::_releaseX11DisplayManagerState()
@@ -53,32 +90,33 @@ namespace ts3::system
         return createSysObject<X11DisplayDriver>( getHandle<X11DisplayManager>() );
     }
 
+    void X11DisplayManager::_nativeQueryDefaultDisplayOffset( DisplayOffset & pOutOffset ) const
+    {
+    	if( mNativeData.xrrVersion != CX_VERSION_UNKNOWN )
+    	{
+    		pOutOffset.x = static_cast<int32>( mNativeData.xrrDefaultMonitorInfo.x );
+    		pOutOffset.y = static_cast<int32>( mNativeData.xrrDefaultMonitorInfo.y );
+    	}
+    	else
+    	{
+    		pOutOffset.x = 0;
+    		pOutOffset.y = 0;
+    	}
+    }
+
     void X11DisplayManager::_nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const
     {
-        auto & xSessionData = platform::x11GetXSessionData( *this );
-
-        // Ideally, we have XRR available here and can fetch the data from XRRMonitorInfo structure.
-        // With that approach, we can tell precisely the size of the default monitor (not the entire virtual screen).
-        // auto * xrrDefaultMonitorInfo = mInternal->nativeDataPriv.xrrDefaultMonitorInfo;
-
-        // if( xrrDefaultMonitorInfo != nullptr )
-        // {
-        //     // Monitor info for the default monitor. Width and height are the exact dimensions, in pixels.
-        //     pOutSize.x = static_cast<uint32>( xrrDefaultMonitorInfo->width );
-        //     pOutSize.y = static_cast<uint32>( xrrDefaultMonitorInfo->height );
-        // }
-        // else
+        if( mNativeData.xrrVersion != CX_VERSION_UNKNOWN )
         {
-            // auto & mNativeData = dsmGetObjectNativeData( *this );
-            // With "raw" X11 only, there is really no good way to get what we want... *screen* refers to the virtual
-            // area which (in case of a usual multi-monitor setup) may contain more than one monitor. E.g. for my setup
-            // with two 27" 1440p monitors, all X11 functions return the screen size as 5120 x 1440 pixels.
-            // TODO: can we somehow get the size of a current default monitor without using XRR/XF86 APIs?
-            auto displayWidth = XDisplayWidth( xSessionData.display,
-                                               xSessionData.screenIndex );
+        	pOutSize.x = static_cast<uint32>( mNativeData.xrrDefaultMonitorInfo.width );
+        	pOutSize.y = static_cast<uint32>( mNativeData.xrrDefaultMonitorInfo.height );
+        }
+        else
+        {
+        	auto & xSessionData = platform::x11GetXSessionData( *this );
 
-            auto displayHeight = XDisplayHeight( xSessionData.display,
-                                                 xSessionData.screenIndex );
+            const auto displayWidth = XDisplayWidth( xSessionData.display, xSessionData.screenIndex );
+            const auto displayHeight = XDisplayHeight( xSessionData.display, xSessionData.screenIndex );
 
             pOutSize.x = static_cast<uint32>( displayWidth );
             pOutSize.y = static_cast<uint32>( displayHeight );
@@ -107,20 +145,6 @@ namespace ts3::system
     {
         auto & xSessionData = platform::x11GetXSessionData( *this );
 
-        if( mNativeData.xrrVersion == CX_VERSION_UNKNOWN )
-        {
-            int xrrVersionMajor = 0;
-            int xrrVersionMinor = 0;
-
-            if ( XRRQueryVersion( xSessionData.display, &xrrVersionMajor, &xrrVersionMinor ) == False )
-            {
-                ts3Throw( E_EXC_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Not_Supported );
-            }
-
-            mNativeData.xrrVersion.major = static_cast<uint16>( xrrVersionMajor );
-            mNativeData.xrrVersion.major = static_cast<uint16>( xrrVersionMinor );
-        }
-
         //
         mNativeData.xrrScreenResources = XRRGetScreenResources( xSessionData.display, xSessionData.rootWindowXID );
         if ( mNativeData.xrrScreenResources == nullptr )
@@ -130,9 +154,9 @@ namespace ts3::system
 
         //
         mNativeData.xrrMonitorList = XRRGetMonitors( xSessionData.display,
-                                                          xSessionData.rootWindowXID,
-                                                          False,
-                                                          &( mNativeData.xrrMonitorsNum ) );
+                                                     xSessionData.rootWindowXID,
+                                                     False,
+                                                     &( mNativeData.xrrMonitorsNum ) );
 
         if ( ( mNativeData.xrrMonitorList == nullptr ) || ( mNativeData.xrrMonitorsNum <= 0 ) )
         {
