@@ -178,8 +178,10 @@ int main( int pArgc, const char ** pArgv )
     evtDispatcher->setEventHandler(
             EEventCodeIndex::InputKeyboardKey,
             [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
-                if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::Escape )
+                auto & keyMap = pEvt.eInputKeyboardKey.inputKeyboardState->keyStateMap;
+                if( keyMap[EKeyCode::AltLeft] && keyMap[EKeyCode::Enter] )
                 {
+                	ts3DebugInterrupt();
                 }
                 return true;
             });
