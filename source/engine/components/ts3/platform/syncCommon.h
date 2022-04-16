@@ -10,15 +10,15 @@ namespace ts3
 	namespace sync
 	{
 
-	    /// @brief
-	    void hardwarePause();
+		/// @brief
+		void hardwarePause();
 
-	    /// @brief
-	    void yieldCurrentThread();
+		/// @brief
+		void yieldCurrentThread();
 
-	    /// @brief
-	    /// @param pCounter
-	    void yieldCurrentThreadAuto( uint64_t pCounter = 0 );
+		/// @brief
+		/// @param pCounter
+		void yieldCurrentThreadAuto( uint64_t pCounter = 0 );
 
 	}
 

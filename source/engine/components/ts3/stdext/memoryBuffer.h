@@ -46,12 +46,12 @@ namespace ts3
 
 		TS3_PCL_ATTR_NO_DISCARD ReadWriteMemoryView asMemoryView() noexcept
 		{
-		    return bindMemoryView( _bufferBasePtr, _bufferLength );
+			return bindMemoryView( _bufferBasePtr, _bufferLength );
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD ReadOnlyMemoryView asMemoryView() const noexcept
 		{
-		    return bindMemoryView( _bufferBasePtr, _bufferLength );
+			return bindMemoryView( _bufferBasePtr, _bufferLength );
 		}
 
 		TS3_PCL_ATTR_NO_DISCARD byte * data() noexcept
@@ -95,12 +95,12 @@ namespace ts3
 
 	inline ReadWriteMemoryView bindMemoryView( MemoryBuffer & pMemoryBuffer )
 	{
-	    return ReadWriteMemoryView( pMemoryBuffer.data(), pMemoryBuffer.size() );
+		return ReadWriteMemoryView( pMemoryBuffer.data(), pMemoryBuffer.size() );
 	}
 
 	inline ReadOnlyMemoryView bindMemoryView( const MemoryBuffer & pMemoryBuffer )
 	{
-	    return ReadOnlyMemoryView( pMemoryBuffer.data(), pMemoryBuffer.size() );
+		return ReadOnlyMemoryView( pMemoryBuffer.data(), pMemoryBuffer.size() );
 	}
 
 	class DynamicMemoryBuffer : public MemoryBuffer
@@ -183,7 +183,7 @@ namespace ts3
 
 	inline void swap( DynamicMemoryBuffer & pFirst, DynamicMemoryBuffer & pSecond )
 	{
-	    pFirst.swap( pSecond );
+		pFirst.swap( pSecond );
 	}
 
 	template <size_t tpSize>

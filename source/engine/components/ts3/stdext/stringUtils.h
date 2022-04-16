@@ -10,127 +10,127 @@
 namespace ts3
 {
 
-    /// @brief
-    template <typename _Char>
-    struct CharConv;
+	/// @brief
+	template <typename _Char>
+	struct CharConv;
 
-    template <>
-    struct CharConv<char>
-    {
-        static inline char toLower( char pChar )
-        {
-            return static_cast<char>( std::tolower( pChar ) );
-        }
+	template <>
+	struct CharConv<char>
+	{
+		static inline char toLower( char pChar )
+		{
+			return static_cast<char>( std::tolower( pChar ) );
+		}
 
-        static inline char toUpper( char pChar )
-        {
-            return static_cast<char>( std::toupper( pChar ) );
-        }
-    };
+		static inline char toUpper( char pChar )
+		{
+			return static_cast<char>( std::toupper( pChar ) );
+		}
+	};
 
-    template <>
-    struct CharConv<wchar_t>
-    {
-        static inline wchar_t toLower( wchar_t pChar )
-        {
-            return static_cast<char>( std::towlower( pChar ) );
-        }
+	template <>
+	struct CharConv<wchar_t>
+	{
+		static inline wchar_t toLower( wchar_t pChar )
+		{
+			return static_cast<char>( std::towlower( pChar ) );
+		}
 
-        static inline wchar_t toUpper( wchar_t pChar )
-        {
-            return static_cast<char>( std::towupper( pChar ) );
-        }
-    };
+		static inline wchar_t toUpper( wchar_t pChar )
+		{
+			return static_cast<char>( std::towupper( pChar ) );
+		}
+	};
 
 
-    /// @brief
-    template <typename _Char>
-    struct StringConv;
+	/// @brief
+	template <typename _Char>
+	struct StringConv;
 
-    template <>
-    struct StringConv<char>
-    {
-        static inline std::basic_string<char> convert( const wchar_t * pInput, size_t pInputLength )
-        {
-            const auto convBufferLength = pInputLength * 4;
+	template <>
+	struct StringConv<char>
+	{
+		static inline std::basic_string<char> convert( const wchar_t * pInput, size_t pInputLength )
+		{
+			const auto convBufferLength = pInputLength * 4;
 
-            std::basic_string<char> convBuffer;
-            convBuffer.reserve( convBufferLength );
+			std::basic_string<char> convBuffer;
+			convBuffer.reserve( convBufferLength );
 
-            const auto outputLength = std::wcstombs( convBuffer.data(), pInput, convBufferLength );
+			const auto outputLength = std::wcstombs( convBuffer.data(), pInput, convBufferLength );
 
-            return std::basic_string<char>( convBuffer.data(), outputLength );
-        }
+			return std::basic_string<char>( convBuffer.data(), outputLength );
+		}
 
-        static inline std::basic_string<char> convert( const wchar_t * pInput )
-        {
-            const auto inputLength = wcslen( pInput );
-            return convert( pInput, inputLength );
-        }
+		static inline std::basic_string<char> convert( const wchar_t * pInput )
+		{
+			const auto inputLength = wcslen( pInput );
+			return convert( pInput, inputLength );
+		}
 
-        static inline std::basic_string<char> convert( const std::basic_string<wchar_t> & pInput )
-        {
-            return convert( pInput.data(), pInput.length() );
-        }
+		static inline std::basic_string<char> convert( const std::basic_string<wchar_t> & pInput )
+		{
+			return convert( pInput.data(), pInput.length() );
+		}
 
-        static inline std::basic_string<char> convert( std::basic_string<char> pInput )
-        {
-            return std::basic_string<char>( std::move( pInput ) );
-        }
-    };
+		static inline std::basic_string<char> convert( std::basic_string<char> pInput )
+		{
+			return std::basic_string<char>( std::move( pInput ) );
+		}
+	};
 
-    template <>
-    struct StringConv<wchar_t>
-    {
-        static inline std::basic_string<wchar_t> convert( const char * pInput, size_t pInputLength )
-        {
-            const auto convBufferLength = pInputLength;
+	template <>
+	struct StringConv<wchar_t>
+	{
+		static inline std::basic_string<wchar_t> convert( const char * pInput, size_t pInputLength )
+		{
+			const auto convBufferLength = pInputLength;
 
-            std::basic_string<wchar_t> convBuffer;
-            convBuffer.reserve( convBufferLength );
+			std::basic_string<wchar_t> convBuffer;
+			convBuffer.reserve( convBufferLength );
 
-            const auto outputLength = std::mbstowcs( convBuffer.data(), pInput, convBufferLength );
+			const auto outputLength = std::mbstowcs( convBuffer.data(), pInput, convBufferLength );
 
-            return std::basic_string<wchar_t>( convBuffer.data(), outputLength );
-        }
+			return std::basic_string<wchar_t>( convBuffer.data(), outputLength );
+		}
 
-        static inline std::basic_string<wchar_t> convert( const char * pInput )
-        {
-            const auto inputLength = strlen( pInput );
-            return convert( pInput, inputLength );
-        }
+		static inline std::basic_string<wchar_t> convert( const char * pInput )
+		{
+			const auto inputLength = strlen( pInput );
+			return convert( pInput, inputLength );
+		}
 
-        static inline std::basic_string<wchar_t> convert( const std::basic_string<char> & pInput )
-        {
-            return convert( pInput.data(), pInput.length() );
-        }
+		static inline std::basic_string<wchar_t> convert( const std::basic_string<char> & pInput )
+		{
+			return convert( pInput.data(), pInput.length() );
+		}
 
-        static inline std::basic_string<wchar_t> convert( std::basic_string<wchar_t> pInput )
-        {
-            return std::basic_string<wchar_t>( std::move( pInput ) );
-        }
-    };
+		static inline std::basic_string<wchar_t> convert( std::basic_string<wchar_t> pInput )
+		{
+			return std::basic_string<wchar_t>( std::move( pInput ) );
+		}
+	};
 
 	namespace strUtils
 	{
 
-	    template <typename _CharOut, typename _CharIn>
-	    inline std::basic_string<_CharOut> convertStringRepresentation( const _CharIn * pInput, size_t pInputLength )
-	    {
-	        return StringConv<_CharOut>::convert( pInput, pInputLength );
-	    }
+		template <typename _CharOut, typename _CharIn>
+		inline std::basic_string<_CharOut> convertStringRepresentation( const _CharIn * pInput, size_t pInputLength )
+		{
+			return StringConv<_CharOut>::convert( pInput, pInputLength );
+		}
 
-	    template <typename _CharOut, typename _CharIn>
-	    inline std::basic_string<_CharOut> convertStringRepresentation( const _CharIn * pInput )
-	    {
-	        return StringConv<_CharOut>::convert( pInput );
-	    }
+		template <typename _CharOut, typename _CharIn>
+		inline std::basic_string<_CharOut> convertStringRepresentation( const _CharIn * pInput )
+		{
+			return StringConv<_CharOut>::convert( pInput );
+		}
 
-	    template <typename _CharOut, typename _CharIn>
-	    inline std::basic_string<_CharOut> convertStringRepresentation( const std::basic_string<_CharIn> & pInput )
-	    {
-	        return StringConv<_CharOut>::convert( pInput );
-	    }
+		template <typename _CharOut, typename _CharIn>
+		inline std::basic_string<_CharOut> convertStringRepresentation( const std::basic_string<_CharIn> & pInput )
+		{
+			return StringConv<_CharOut>::convert( pInput );
+		}
 
 		template <typename _Char>
 		inline void makeLowerTransform( std::basic_string<_Char> & pInput )
