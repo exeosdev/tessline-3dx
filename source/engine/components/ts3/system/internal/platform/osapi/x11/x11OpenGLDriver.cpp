@@ -94,23 +94,11 @@ namespace ts3::system
 
 		auto & tmpSurfaceNativeData = mNativeData.initState->surfaceData;
 		tmpSurfaceNativeData.setSessionData( xSessionData );
-		_x11CreateGLWindowAndSurface( tmpSurfaceNativeData, windowCreateInfo, legacyVisualConfig );
+		platform::_x11CreateGLWindowAndSurface( tmpSurfaceNativeData, windowCreateInfo, legacyVisualConfig );
 
 		auto & tmpContextNativeData = mNativeData.initState->contextData;
 		tmpContextNativeData.setSessionData( xSessionData );
-		_x11CreateAndBindLegacyRenderContext( tmpContextNativeData, tmpSurfaceNativeData );
-
-//		auto glewResult = glewInit();
-//		if( glewResult != GLEW_OK )
-//		{
-//			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
-//		}
-
-//		glewResult = glxewInit();
-//		if( glewResult != GLEW_OK )
-//		{
-//			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
-//		}
+		platform::_x11CreateAndBindLegacyRenderContext( tmpContextNativeData, tmpSurfaceNativeData );
 	}
 
 	void X11OpenGLSystemDriver::_nativeReleaseInitState() noexcept
@@ -134,7 +122,7 @@ namespace ts3::system
 
 		if( tmpSurfaceNativeData.windowXID != platform::E_X11_XID_NONE )
 		{
-			_x11DestroyGLWindowAndSurface( tmpSurfaceNativeData );
+			platform::_x11DestroyGLWindowAndSurface( tmpSurfaceNativeData );
 			tmpSurfaceNativeData.fbConfig = nullptr;
 			tmpSurfaceNativeData.resetSessionData();
 		}
@@ -268,18 +256,7 @@ namespace ts3::system
 
 		if( !contextHandle )
 		{
-			if( shareContextHandle && pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARING_OPTIONAL_BIT ) )
-			{
-				contextHandle = glXCreateContextAttribsProc( xSessionData.display,
-				                                             x11DisplaySurface->mNativeData.fbConfig,
-				                                             nullptr,
-				                                             True,
-				                                             &( contextAttributes[0] ) );
-			}
-			if( !contextHandle )
-			{
-				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
-			}
+			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
 
 		auto renderContext = createSysObject<X11OpenGLRenderContext>( getHandle<X11OpenGLSystemDriver>() );
@@ -375,7 +352,9 @@ namespace ts3::system
 	{}
 
 	void X11OpenGLDisplaySurface::_nativeSetFullscreenMode( bool pEnable )
-	{}
+	{
+		platform::x11SetWindowFullscreenState( mNativeData, pEnable );
+	}
 
 	void X11OpenGLDisplaySurface::_nativeSetTitle( const std::string & pTitle )
 	{
@@ -391,6 +370,11 @@ namespace ts3::system
 	FrameSize X11OpenGLDisplaySurface::_nativeGetSize( EFrameSizeMode pSizeMode ) const
 	{
 		return platform::x11GetFrameSize( mNativeData, pSizeMode );
+	}
+
+	bool X11OpenGLDisplaySurface::_nativeIsFullscreen() const
+	{
+		return platform::x11IsFullscreenWindow( mNativeData );
 	}
 
 
@@ -493,9 +477,6 @@ namespace ts3::system
 
 		void _x11DestroyGLWindowAndSurface( X11OpenGLDisplaySurfaceNativeData & pGLSurfaceNativeData )
 		{
-			auto & xSessionData = platform::x11GetXSessionData( pGLSurfaceNativeData );
-
-			XUnmapWindow( xSessionData.display, pGLSurfaceNativeData.windowXID );
 			platform::x11DestroyWindow( pGLSurfaceNativeData );
 		}
 

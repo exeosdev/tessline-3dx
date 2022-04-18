@@ -30,12 +30,12 @@ namespace ts3::system
 		void x11CreateWindow( X11WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo );
 
 		void x11WindowPostCreateUpdate( X11WindowNativeData & pWindowNativeData, const X11WindowCreateInfo & pCreateInfo );
-
-		void x11WindowPreDestroyUpdate( X11WindowNativeData & pWindowNativeData );
 		
 		void x11DestroyWindow( X11WindowNativeData & pWindowNativeData );
 
 		void x11SetWindowFullscreenState( X11WindowNativeData & pWindowNativeData, bool pSetFullscreen );
+
+		TS3_SYSTEM_API_NODISCARD bool x11QueryWindowFullscreenState( const X11WindowNativeData & pWindowNativeData );
 
 		void x11SetFrameTitle( const X11WindowNativeData & pWindowNativeData, const std::string & pTitle );
 
@@ -43,8 +43,16 @@ namespace ts3::system
 		                             const FrameGeometry & pFrameGeometry,
 		                             Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags );
 
-		TS3_SYSTEM_API_NODISCARD FrameSize x11GetFrameSize( const X11WindowNativeData & pWindowNativeData,
-		                                                    EFrameSizeMode pSizeMode );
+		TS3_SYSTEM_API_NODISCARD FrameSize x11GetFrameSize( const X11WindowNativeData & pWindowNativeData, EFrameSizeMode pSizeMode );
+
+		TS3_SYSTEM_API_NODISCARD bool x11IsFullscreenWindow( const X11WindowNativeData & pWindowNativeData );
+
+		TS3_SYSTEM_API_NODISCARD std::vector<Atom> x11QueryWindowPropertyValueArray( const X11WindowNativeData & pWindowNativeData,
+																					 const char * pPropertyName );
+
+		TS3_SYSTEM_API_NODISCARD bool x11CheckWindowPropertyValueSet( const X11WindowNativeData & pWindowNativeData,
+																	  const char * pPropertyName,
+																	  const char * pValueID );
 
 	}
 

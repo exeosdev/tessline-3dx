@@ -276,7 +276,7 @@ namespace ts3::system
 
 	bool OpenGLDisplaySurface::isFullscreen() const
 	{
-		return false;
+		return _nativeIsFullscreen();
 	}
 
 	void OpenGLDisplaySurface::setInternalOwnershipFlag( bool pOwnershipFlag )

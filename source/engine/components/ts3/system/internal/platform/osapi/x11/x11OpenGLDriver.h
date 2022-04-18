@@ -139,6 +139,9 @@ namespace ts3::system
 
 		/// @override OpenGLDisplaySurface::_nativeGetSize
 		virtual FrameSize _nativeGetSize( EFrameSizeMode pSizeMode ) const override final;
+
+		/// @override OpenGLDisplaySurface::_nativeIsFullscreen
+		virtual bool _nativeIsFullscreen() const override final;
 	};
 
 	/// @brief X11-specific implementation of the OpenGLRenderContext class.
