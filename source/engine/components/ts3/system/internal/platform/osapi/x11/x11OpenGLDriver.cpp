@@ -232,6 +232,13 @@ namespace ts3::system
 				auto * x11ShareContext = pCreateInfo.shareContext->queryInterface<X11OpenGLRenderContext>();
 				shareContextHandle = x11ShareContext->mNativeData.contextHandle;
 			}
+			else if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT ) )
+			{
+				if( auto * currentGLXContext = ::glXGetCurrentContext() )
+				{
+					shareContextHandle = currentGLXContext;
+				}
+			}
 		}
 
 		const int contextAttributes[] =

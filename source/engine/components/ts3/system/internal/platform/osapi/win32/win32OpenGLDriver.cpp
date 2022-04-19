@@ -234,6 +234,13 @@ namespace ts3::system
 				auto * win32ShareContext = pCreateInfo.shareContext->queryInterface<Win32OpenGLRenderContext>();
 				shareContextHandle = win32ShareContext->mNativeData.contextHandle;
 			}
+			else if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT ) )
+			{
+				if( auto * currentWGLContext = ::wglGetCurrentContext() )
+				{
+					shareContextHandle = currentWGLContext;
+				}
+			}
 		}
 
 		const int contextAttributes[] =
@@ -256,16 +263,7 @@ namespace ts3::system
 
 		if( !contextHandle )
 		{
-			if( shareContextHandle && pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARING_OPTIONAL_BIT ) )
-			{
-				contextHandle = wglCreateContextAttribsARB( win32DisplaySurface->mNativeData.hdc,
-				                                            nullptr,
-				                                            &( contextAttributes[0] ) );
-			}
-			if( !contextHandle )
-			{
-				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
-			}
+			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
 
 		auto renderContext = createSysObject<Win32OpenGLRenderContext>( getHandle<Win32OpenGLSystemDriver>() );

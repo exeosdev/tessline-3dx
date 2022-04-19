@@ -181,17 +181,24 @@ namespace ts3::system
 			auto createInfo = pCreateInfo;
 
 			_eglValidateRequestedContextVersion( pCreateInfo.runtimeVersionDesc.apiProfile,
-			                                 createInfo.runtimeVersionDesc.apiVersion );
+			                                     createInfo.runtimeVersionDesc.apiVersion );
 
 			EGLContext shareContextHandle = EGL_NO_CONTEXT;
 			EGLContext contextHandle = EGL_NO_CONTEXT;
 
 			if( createInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
 			{
-				// if( createInfo.shareContext )
-				// {
-				// 	shareContextHandle = createInfo.shareContext->mNativeData->eContextHandle;
-				// }
+				if( createInfo.shareContext )
+				{
+					shareContextHandle = createInfo.shareContext->mNativeData->eContextHandle;
+				}
+				else if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT ) )
+				{
+					if( auto * currentEGLContext = ::eglGetCurrentContext() )
+					{
+						shareContextHandle = currentEGLContext;
+					}
+				}
 			}
 
 			if( createInfo.runtimeVersionDesc.apiProfile != EGLAPIProfile::OpenGLES )
