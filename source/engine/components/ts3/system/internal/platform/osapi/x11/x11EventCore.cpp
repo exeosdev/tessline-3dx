@@ -257,7 +257,7 @@ namespace ts3::system
 					auto & inputMouseState = pEventController.getEventDispatcherInputState().inputMouseState;
 					const math::Vec2i32 cursorPos { pXEvent.xmotion.x, pXEvent.xmotion.y };
 
-					if ( inputMouseState.lastCursorPos == CX_EVENT_MOUSE_POS_INVALID )
+					if( inputMouseState.lastCursorPos == CX_EVENT_MOUSE_POS_INVALID )
 					{
 						inputMouseState.lastCursorPos = cursorPos;
 					}
@@ -455,7 +455,7 @@ namespace ts3::system
 					// Window Message Protocol (WMP) id is stored in data.l[0].
 					long wmpMessageID = pXEvent.xclient.data.l[0];
 
-					if ( wmpMessageID == xSessionData.wmpDeleteWindow )
+					if( wmpMessageID == xSessionData.wmpDeleteWindow )
 					{
 						auto & eventData = pOutEvent.eWindowUpdateDestroy;
 						eventData.eventCode = E_EVENT_CODE_WINDOW_UPDATE_DESTROY;
@@ -633,60 +633,60 @@ namespace ts3::system
 
 		EKeyCode _x11GetSysKeyCode( KeySym pXkeySym )
 		{
-			if ( ( pXkeySym >= 0x0020 ) && ( pXkeySym <= 0x007a ) )
+			if( ( pXkeySym >= 0x0020 ) && ( pXkeySym <= 0x007a ) )
 			{
 				auto baseIndex = static_cast<uint32>( pXkeySym ) - 0x0020;
 				return x11KeycodeMap_20_7A[baseIndex];
 			}
 
-			if ( ( pXkeySym >= 0xff50 ) && ( pXkeySym <= 0xffea ) )
+			if( ( pXkeySym >= 0xff50 ) && ( pXkeySym <= 0xffea ) )
 			{
-				if ( ( pXkeySym >= 0xff50 ) && ( pXkeySym <= 0xff57 ) )
+				if( ( pXkeySym >= 0xff50 ) && ( pXkeySym <= 0xff57 ) )
 				{
 					auto baseIndex = static_cast<uint32>( pXkeySym ) - 0xff50;
 					return x11KeycodeMap_50_57[baseIndex];
 				}
 
-				if ( ( pXkeySym >= 0xffaa ) && ( pXkeySym <= 0xffb9 ) )
+				if( ( pXkeySym >= 0xffaa ) && ( pXkeySym <= 0xffb9 ) )
 				{
 					auto baseIndex = static_cast<uint32>( pXkeySym ) - 0xffaa;
 					return x11KeycodeMap_AA_B9[baseIndex];
 				}
 
-				if ( ( pXkeySym >= 0xffbe ) && ( pXkeySym <= 0xffc9 ) )
+				if( ( pXkeySym >= 0xffbe ) && ( pXkeySym <= 0xffc9 ) )
 				{
 					auto baseIndex = static_cast<uint32>( pXkeySym ) - 0xffbe;
 					return x11KeycodeMap_BE_C9[baseIndex];
 				}
 
-				if ( ( pXkeySym >= 0xffe1 ) && ( pXkeySym <= 0xffea ) )
+				if( ( pXkeySym >= 0xffe1 ) && ( pXkeySym <= 0xffea ) )
 				{
 					auto baseIndex = static_cast<uint32>( pXkeySym ) - 0xffe1;
 					return x11KeycodeMap_E1_EA[baseIndex];
 				}
 			}
 
-			if ( pXkeySym == XK_Tab )
+			if( pXkeySym == XK_Tab )
 			{
 				return EKeyCode::Tab;
 			}
-			else if ( pXkeySym == XK_Return )
+			else if( pXkeySym == XK_Return )
 			{
 				return EKeyCode::Enter;
 			}
-			else if ( pXkeySym == XK_Escape )
+			else if( pXkeySym == XK_Escape )
 			{
 				return EKeyCode::Escape;
 			}
-			else if ( pXkeySym == XK_BackSpace )
+			else if( pXkeySym == XK_BackSpace )
 			{
 				return EKeyCode::Backspace;
 			}
-			else if ( pXkeySym == XK_Insert )
+			else if( pXkeySym == XK_Insert )
 			{
 				return EKeyCode::Insert;
 			}
-			else if ( pXkeySym == XK_Delete )
+			else if( pXkeySym == XK_Delete )
 			{
 				return EKeyCode::Delete;
 			}

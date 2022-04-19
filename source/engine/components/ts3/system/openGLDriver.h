@@ -230,6 +230,8 @@ namespace ts3::system
 
 		virtual FrameSize _nativeGetSize( EFrameSizeMode pSizeMode ) const = 0;
 
+		virtual bool _nativeIsFullscreen() const = 0;
+
 	private:
 		bool _internalOwnershipFlag = true;
 	};

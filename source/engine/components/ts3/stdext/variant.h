@@ -70,7 +70,7 @@ namespace stdx
 		template <typename... _Args>
 		static variant_index_t construct( const variant_index_t pTypeIndex, void * pStorage, _Args && ...pArgs )
 		{
-			if ( pTypeIndex == VariantTypeIndex<RawType>::value )
+			if( pTypeIndex == VariantTypeIndex<RawType>::value )
 			{
 				new ( reinterpret_cast< RawType * >( pStorage ) ) _Type( std::forward<_Args>( pArgs )... );
 				return VariantTypeIndex<RawType>::value;
@@ -84,7 +84,7 @@ namespace stdx
 		template <typename _Value>
 		static variant_index_t constructConv( void * pStorage, _Value pValue )
 		{
-			if ( std::is_convertible<_Value, RawType>::value )
+			if( std::is_convertible<_Value, RawType>::value )
 			{
 				new ( reinterpret_cast< RawType * >( pStorage ) ) RawType( std::forward<_Value>( pValue ) );
 				return VariantTypeIndex<RawType>::value;
@@ -97,7 +97,7 @@ namespace stdx
 
 		static variant_index_t constructDefault( void * pStorage )
 		{
-			if ( std::isDefault_constructible<RawType>::value )
+			if( std::isDefault_constructible<RawType>::value )
 			{
 				new ( reinterpret_cast< RawType * >( pStorage ) ) RawType();
 				return VariantTypeIndex<RawType>::value;
@@ -110,7 +110,7 @@ namespace stdx
 
 		static variant_index_t copy( const variant_index_t pTypeIndex, void * pStorage, void * pSource )
 		{
-			if ( pTypeIndex == VariantTypeIndex<RawType>::value )
+			if( pTypeIndex == VariantTypeIndex<RawType>::value )
 			{
 				new ( reinterpret_cast< RawType * >( pStorage ) ) RawType( *( reinterpret_cast< RawType * >( pSource ) ) );
 				return VariantTypeIndex<RawType>::value;
@@ -123,7 +123,7 @@ namespace stdx
 
 		static variant_index_t move( const variant_index_t pTypeIndex, void * pStorage, void * pSource )
 		{
-			if ( pTypeIndex == VariantTypeIndex<RawType>::value )
+			if( pTypeIndex == VariantTypeIndex<RawType>::value )
 			{
 				new ( reinterpret_cast< RawType * >( pStorage ) ) RawType( std::move( *( reinterpret_cast< RawType * >( pSource ) ) ) );
 				return VariantTypeIndex<RawType>::value;
@@ -136,7 +136,7 @@ namespace stdx
 
 		static variant_index_t destroy( const variant_index_t pTypeIndex, void * pStorage )
 		{
-			if ( pTypeIndex == VariantTypeIndex<RawType>::value )
+			if( pTypeIndex == VariantTypeIndex<RawType>::value )
 			{
 				reinterpret_cast< RawType * >( pStorage )->~_Type();
 				return VariantTypeIndex<RawType>::value;
@@ -149,7 +149,7 @@ namespace stdx
 
 		static bool validateType( const variant_index_t pTypeIndex )
 		{
-			if ( pTypeIndex == VariantTypeIndex<RawType>::value )
+			if( pTypeIndex == VariantTypeIndex<RawType>::value )
 			{
 				return true;
 			}
@@ -269,7 +269,7 @@ namespace stdx
 
 		Variant & operator=( Variant && pRhs )
 		{
-			if ( this != &pRhs )
+			if( this != &pRhs )
 			{
 				Variant( std::move( pRhs ) ).swap( *this );
 			}
@@ -279,7 +279,7 @@ namespace stdx
 
 		Variant & operator=( const Variant & pRhs )
 		{
-			if ( this != &pRhs )
+			if( this != &pRhs )
 			{
 				Variant( pRhs ).swap( *this );
 			}
@@ -368,7 +368,7 @@ namespace stdx
 		template <typename T>
 		void _validate() const
 		{
-			if ( _typeIndex != VariantTypeIndex<T>::value )
+			if( _typeIndex != VariantTypeIndex<T>::value )
 			{
 				throw 0;
 			}

@@ -269,7 +269,7 @@ namespace ts3
 		ts3::EnumProperties enumProperties; \
 		enumProperties.enumName = #TpEnum; \
 		/* This is used for scoped enum constants (e.g. Color::Red). Prefix is the length of enum type name plus '::'. */ \
-		const size_t enumNamePrefixLength = enumProperties.enumName.length() + 2; \
+		const size_t enumNamePrefixLength = enumProperties.enumName.length() + 2; ( enumNamePrefixLength ); \
 		/* Initialize the EnumTypeInfo object. */ \
 		EnumInitializer::initialize( pEnumTypeInfo, std::move( enumProperties ) )
 
@@ -284,7 +284,7 @@ namespace ts3
 
 	/// @brief Registers a single enumerator of an unscoped enum within the EnumTypeInfo object.
 	#define ts3TypeInfoEnumRegisterUnscopedConstant( pConstant ) \
-		EnumInitializer::registerConstant( pEnumTypeInfo, #pConstant, pConstant )
+		EnumInitializer::registerConstant( pEnumTypeInfo, pConstant, #pConstant )
 
 	/*
 	 * Basically, all above macros should be used together to form a definition of an EnumTypeInfo.

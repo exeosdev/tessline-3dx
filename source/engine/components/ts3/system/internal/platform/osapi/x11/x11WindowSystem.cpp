@@ -44,9 +44,7 @@ namespace ts3::system
 	{
 		auto * x11Window = pWindow.queryInterface<X11Window>();
 
-		x11WindowPreDestroyUpdate( x11Window->mNativeData );
-
-		x11DestroyWindow( x11Window->mNativeData );
+		platform::x11DestroyWindow( x11Window->mNativeData );
 	}
 	
 
@@ -60,7 +58,9 @@ namespace ts3::system
 	{}
 
 	void X11Window::_nativeSetFullscreenMode( bool pEnable )
-	{}
+	{
+		platform::x11SetWindowFullscreenState( mNativeData, pEnable );
+	}
 
 	void X11Window::_nativeSetTitle( const std::string & pTitle )
 	{
@@ -153,11 +153,6 @@ namespace ts3::system
 			                 ( unsigned char * )windowActionTable.data(),
 			                 ( int )windowActionTable.size() );
 
-			if( pCreateInfo.fullscreenMode )
-			{
-				x11SetWindowFullscreenState( pWindowNativeData, true );
-			}
-
 			auto windowSizeHints = platform::_x11QuerySizeHintsForFrameStyle( xSessionData.display, windowStyle, pCreateInfo.frameGeometry );
 
 			windowSizeHints.flags |= PPosition;
@@ -183,6 +178,11 @@ namespace ts3::system
 			// on Kubuntu 20.04 and Mint. Non-fullscreen windows seem to work regardless of the call order.
 			XMapWindow( xSessionData.display, pWindowNativeData.windowXID );
 
+			if( pCreateInfo.fullscreenMode )
+			{
+				x11SetWindowFullscreenState( pWindowNativeData, true );
+			}
+
 			Atom registeredWMProtocolArray[] =
 			{
 				xSessionData.wmpDeleteWindow,
@@ -199,57 +199,112 @@ namespace ts3::system
 			XFlush( xSessionData.display );
 		}
 
-		void x11WindowPreDestroyUpdate( X11WindowNativeData & pWindowNativeData )
+		void x11DestroyWindow( X11WindowNativeData & pWindowNativeData )
 		{
 			auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
 
 			XUnmapWindow( xSessionData.display, pWindowNativeData.windowXID );
-
-			XFlush( xSessionData.display );
-		}
-
-		void x11DestroyWindow( X11WindowNativeData & pWindowNativeData )
-		{
-			auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
 
 			XDestroyWindow( xSessionData.display, pWindowNativeData.windowXID );
 			pWindowNativeData.windowXID = E_X11_XID_NONE;
 
 			XFreeColormap( xSessionData.display, pWindowNativeData.xColormap );
 			pWindowNativeData.xColormap = E_X11_XID_NONE;
+
+			XFlush( xSessionData.display );
 		}
 
 		void x11SetWindowFullscreenState( X11WindowNativeData & pWindowNativeData, bool pSetFullscreen )
 		{
-			auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
+			const auto isWindowFullscreen = x11IsFullscreenWindow( pWindowNativeData );
 
-			// Fullscreen state of the window can be controlled by using _NET_WM_STATE property, containing a list
-			// of atoms describing current state of a window. WM is required to respect this setting and provide
-			// an internal mechanism for restoring the correct window geometry after the FS state is deactivated.
-
-			Atom wmState = XInternAtom( xSessionData.display, "_NET_WM_STATE", true );
-
-			Atom wmStateValueArray[] = { 0 };
-
-			int32 wmStateValuesNum = 0;
-
-			if( pSetFullscreen )
+			if( isWindowFullscreen == pSetFullscreen )
 			{
-				// The atom _NET_WM_STATE_FULLSCREEN indicates, that our window is currently is fullscreen mode.
-				Atom wmFullscreen = XInternAtom( xSessionData.display, "_NET_WM_STATE_FULLSCREEN", true );
-
-				wmStateValueArray[0] = wmFullscreen;
-				wmStateValuesNum = 1;
+				return;
 			}
 
-			XChangeProperty( xSessionData.display,
-							 pWindowNativeData.windowXID,
-							 wmState,
-							 XA_ATOM,
-							 32,
-							 PropModeReplace,
-							 ( unsigned char * )( &( wmStateValueArray[0] ) ),
-							 wmStateValuesNum );
+			auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
+
+			Atom wmState = XInternAtom( xSessionData.display, "_NET_WM_STATE", False );
+			Atom wmFullscreenState = XInternAtom( xSessionData.display, "_NET_WM_STATE_FULLSCREEN", False );
+
+			XEvent wmEvent;
+			memset( &wmEvent, 0, sizeof( wmEvent ) );
+			wmEvent.type = ClientMessage;
+			wmEvent.xclient.window = pWindowNativeData.windowXID;
+			wmEvent.xclient.message_type = wmState;
+			wmEvent.xclient.format = 32;
+			wmEvent.xclient.data.l[0] = pSetFullscreen ? 1 : 0;
+			wmEvent.xclient.data.l[1] = trunc_numeric_cast<long>( wmFullscreenState );
+			wmEvent.xclient.data.l[2] = 0;
+
+			XSendEvent( xSessionData.display,
+						xSessionData.rootWindowXID,
+						False,
+						SubstructureRedirectMask | SubstructureNotifyMask,
+						&wmEvent );
+
+			XFlush( xSessionData.display );
+		}
+
+		bool x11QueryWindowFullscreenState( const X11WindowNativeData & pWindowNativeData )
+		{
+			auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
+
+			Atom wmStateValueType = 0;
+			int wmStateValueFormat = 0;
+			unsigned long wmStateValueItemsNum = 0;
+			unsigned long wmStateValueBytesNum = 0;
+			unsigned char * wmStateValueData8 = nullptr;
+
+			const Atom wmState = XInternAtom( xSessionData.display, "_NET_WM_STATE", true );
+
+			XGetWindowProperty( xSessionData.display,
+								pWindowNativeData.windowXID,
+								wmState,
+								0,
+								0,
+								False,
+								AnyPropertyType,
+								&wmStateValueType,
+								&wmStateValueFormat,
+								&wmStateValueItemsNum,
+								&wmStateValueBytesNum,
+								&wmStateValueData8 );
+
+			const long wmStateValuesNum = trunc_numeric_cast<long>( wmStateValueBytesNum ) / 4;
+
+			XGetWindowProperty( xSessionData.display,
+								pWindowNativeData.windowXID,
+								wmState,
+								0,
+								wmStateValuesNum,
+								False,
+								XA_ATOM,
+								&wmStateValueType,
+								&wmStateValueFormat,
+								&wmStateValueItemsNum,
+								&wmStateValueBytesNum,
+								&wmStateValueData8 );
+
+			const auto * wmStateValueData32 = reinterpret_cast<unsigned long *>( wmStateValueData8 );
+
+			const Atom wmStateFullscreen = XInternAtom( xSessionData.display, "_NET_WM_STATE_FULLSCREEN", true );
+
+			bool propertyValueFound = false;
+
+			for( size_t wmStateValueIndex = 0; wmStateValueIndex < wmStateValuesNum; ++wmStateValueIndex  )
+			{
+				if( wmStateValueData32[wmStateValueIndex] == wmStateFullscreen )
+				{
+					propertyValueFound = true;
+					break;
+				}
+			}
+
+			XFree( wmStateValueData8 );
+
+			return propertyValueFound;
 		}
 
 		void x11SetFrameTitle( const X11WindowNativeData & pWindowNativeData, const std::string & pTitle )
@@ -296,7 +351,6 @@ namespace ts3::system
 			                      &windowAttributes );
 
 			FrameSize resultFrameSize;
-
 			if( pSizeMode == EFrameSizeMode::ClientArea )
 			{
 				resultFrameSize.x = windowAttributes.width - windowAttributes.border_width;
@@ -309,6 +363,130 @@ namespace ts3::system
 			}
 
 			return resultFrameSize;
+		}
+
+		bool x11IsFullscreenWindow( const X11WindowNativeData & pWindowNativeData )
+		{
+			return x11CheckWindowPropertyValueSet( pWindowNativeData, "_NET_WM_STATE", "_NET_WM_STATE_FULLSCREEN" );
+		}
+
+		std::vector<Atom> x11QueryWindowPropertyValueArray( const X11WindowNativeData & pWindowNativeData,
+															const char * pPropertyName )
+		{
+			auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
+
+			std::vector<Atom> wmPropertyValueArray;
+
+			Atom wmPropertyValueType = 0;
+			int wmPropertyValueFormat = 0;
+			unsigned long wmPropertyValueItemsNum = 0;
+			unsigned long wmPropertyValueBytesNum = 0;
+			unsigned char * wmPropertyValueData8 = nullptr;
+
+			const Atom wmProperty = XInternAtom( xSessionData.display, pPropertyName, true );
+
+			XGetWindowProperty( xSessionData.display,
+								pWindowNativeData.windowXID,
+								wmProperty,
+								0,
+								0,
+								False,
+								AnyPropertyType,
+								&wmPropertyValueType,
+								&wmPropertyValueFormat,
+								&wmPropertyValueItemsNum,
+								&wmPropertyValueBytesNum,
+								&wmPropertyValueData8 );
+
+			const long wmPropertyValuesNum = trunc_numeric_cast<long>( wmPropertyValueBytesNum ) / 4;
+
+			XGetWindowProperty( xSessionData.display,
+								pWindowNativeData.windowXID,
+								wmProperty,
+								0,
+								wmPropertyValuesNum,
+								False,
+								XA_ATOM,
+								&wmPropertyValueType,
+								&wmPropertyValueFormat,
+								&wmPropertyValueItemsNum,
+								&wmPropertyValueBytesNum,
+								&wmPropertyValueData8 );
+
+			const auto * wmPropertyValueData32 = reinterpret_cast<unsigned long *>( wmPropertyValueData8 );
+
+			wmPropertyValueArray.resize( wmPropertyValuesNum );
+
+			for( size_t wmPropertyValueIndex = 0; wmPropertyValueIndex < wmPropertyValuesNum; ++wmPropertyValueIndex  )
+			{
+				wmPropertyValueArray[wmPropertyValueIndex] = wmPropertyValueData32[wmPropertyValueIndex];
+			}
+
+			XFree( wmPropertyValueData8 );
+
+			return wmPropertyValueArray;
+		}
+
+		bool x11CheckWindowPropertyValueSet( const X11WindowNativeData & pWindowNativeData,
+											 const char * pPropertyName,
+											 const char * pValueID )
+		{
+			auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
+
+			Atom wmPropertyValueType = 0;
+			int wmPropertyValueFormat = 0;
+			unsigned long wmPropertyValueItemsNum = 0;
+			unsigned long wmPropertyValueBytesNum = 0;
+			unsigned char * wmPropertyValueData8 = nullptr;
+
+			const Atom wmProperty = XInternAtom( xSessionData.display, pPropertyName, true );
+
+			XGetWindowProperty( xSessionData.display,
+								pWindowNativeData.windowXID,
+								wmProperty,
+								0,
+								0,
+								False,
+								AnyPropertyType,
+								&wmPropertyValueType,
+								&wmPropertyValueFormat,
+								&wmPropertyValueItemsNum,
+								&wmPropertyValueBytesNum,
+								&wmPropertyValueData8 );
+
+			const long wmPropertyValuesNum = trunc_numeric_cast<long>( wmPropertyValueBytesNum ) / 4;
+
+			XGetWindowProperty( xSessionData.display,
+								pWindowNativeData.windowXID,
+								wmProperty,
+								0,
+								wmPropertyValuesNum,
+								False,
+								XA_ATOM,
+								&wmPropertyValueType,
+								&wmPropertyValueFormat,
+								&wmPropertyValueItemsNum,
+								&wmPropertyValueBytesNum,
+								&wmPropertyValueData8 );
+
+			const auto * wmPropertyValueData32 = reinterpret_cast<unsigned long *>( wmPropertyValueData8 );
+
+			const Atom wmPropertyValue = XInternAtom( xSessionData.display, pValueID, true );
+
+			bool propertyValueFound = false;
+
+			for( size_t wmPropertyValueIndex = 0; wmPropertyValueIndex < wmPropertyValuesNum; ++wmPropertyValueIndex  )
+			{
+				if( wmPropertyValueData32[wmPropertyValueIndex] == wmPropertyValue )
+				{
+					propertyValueFound = true;
+					break;
+				}
+			}
+
+			XFree( wmPropertyValueData8 );
+
+			return propertyValueFound;
 		}
 
 		// List of Xlib-defined window actions:

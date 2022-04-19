@@ -32,7 +32,7 @@ namespace ts3
 
 		void emit( TpEventArgs &&... pArgs )
 		{
-			for ( auto & handlerRef : _handlerOrderedRefList )
+			for( auto & handlerRef : _handlerOrderedRefList )
 			{
 				( *handlerRef )( _sourceObjectRef, std::forward<TpEventArgs>( pArgs )... );
 			}

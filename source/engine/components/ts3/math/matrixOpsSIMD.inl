@@ -6,7 +6,7 @@
 namespace ts3::math
 {
 
-#if ( TS3_MATH_SIMD_USE_VX128F )
+#if( TS3_MATH_SIMD_USE_VX128F )
 
 	TS3_PCL_ATTR_ALWAYS_INLINE __m128 _mm_mul_mat4_vec4_128f( __m128 pM0, __m128 pM1, __m128 pM2, __m128 pM3, __m128 pV0 )
 	{

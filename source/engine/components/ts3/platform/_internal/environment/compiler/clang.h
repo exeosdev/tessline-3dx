@@ -18,7 +18,7 @@
 #define TS3_PCL_ATTR_NO_RETURN                __attribute__(( noreturn ))
 #define TS3_PCL_ATTR_THREAD_LOCAL             thread_local
 
-#if ( defined( __has_attribute ) && __has_attribute( always_inline ) )
+#if( defined( __has_attribute ) && __has_attribute( always_inline ) )
 #  define TS3_PCL_ATTR_ALWAYS_INLINE __attribute__(( always_inline )) inline
 #else
 #  define TS3_PCL_ATTR_ALWAYS_INLINE inline

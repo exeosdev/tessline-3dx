@@ -312,7 +312,7 @@ namespace ts3::system
 
 			auto & inputMouseState = pEventController.getEventDispatcherInputState().inputMouseState;
 
-			if ( inputMouseState.lastCursorPos == CX_EVENT_MOUSE_POS_INVALID )
+			if( inputMouseState.lastCursorPos == CX_EVENT_MOUSE_POS_INVALID )
 			{
 				inputMouseState.lastCursorPos = cursorPos;
 			}
@@ -601,13 +601,13 @@ namespace ts3::system
 
 		EKeyCode _win32GetSysKeyCode( WPARAM pWparam )
 		{
-			if ( ( pWparam >= 0x0008 ) && ( pWparam <= 0x007B ) )
+			if( ( pWparam >= 0x0008 ) && ( pWparam <= 0x007B ) )
 			{
 				auto baseIndex = pWparam - 0x0008;
 				return sASCIIKeyCodeMap_08_7B[baseIndex];
 			}
 
-			if ( ( pWparam >= 0x00A0 ) && ( pWparam <= 0x00A5 ) )
+			if( ( pWparam >= 0x00A0 ) && ( pWparam <= 0x00A5 ) )
 			{
 				auto baseIndex = pWparam - 0x00A0;
 				return sASCIIKeyCodeMap_A0_A5[baseIndex];

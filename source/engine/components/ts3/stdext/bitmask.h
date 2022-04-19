@@ -85,7 +85,7 @@ namespace ts3
 		template <typename TpBits>
 		bool testAndSet( TpBits pBits )
 		{
-			if ( ( _value & static_cast<ValueType>( pBits ) ) != 0 )
+			if( ( _value & static_cast<ValueType>( pBits ) ) != 0 )
 			{
 				return false;
 			}
@@ -97,7 +97,7 @@ namespace ts3
 		template <typename TpBits>
 		bool testAndUnset( TpBits pBits )
 		{
-			if ( ( _value & static_cast<ValueType>( pBits ) ) != static_cast<ValueType>( pBits ) )
+			if( ( _value & static_cast<ValueType>( pBits ) ) != static_cast<ValueType>( pBits ) )
 			{
 				return false;
 			}

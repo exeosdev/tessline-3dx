@@ -82,10 +82,10 @@ namespace ts3::system
 			int bestMatchRate = 0;
 			EGLConfig bestEGLConfig = nullptr;
 
-			for ( auto eglConfig : eglConfigList )
+			for( auto eglConfig : eglConfigList )
 			{
 				int matchRate = _eglGetEGLConfigMatchRate( pDisplay, eglConfig, pVisualConfig );
-				if ( matchRate > bestMatchRate )
+				if( matchRate > bestMatchRate )
 				{
 					bestMatchRate = matchRate;
 					bestEGLConfig = eglConfig;
@@ -181,20 +181,27 @@ namespace ts3::system
 			auto createInfo = pCreateInfo;
 
 			_eglValidateRequestedContextVersion( pCreateInfo.runtimeVersionDesc.apiProfile,
-			                                 createInfo.runtimeVersionDesc.apiVersion );
+			                                     createInfo.runtimeVersionDesc.apiVersion );
 
 			EGLContext shareContextHandle = EGL_NO_CONTEXT;
 			EGLContext contextHandle = EGL_NO_CONTEXT;
 
-			if ( createInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
+			if( createInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
 			{
-				// if( createInfo.shareContext )
-				// {
-				// 	shareContextHandle = createInfo.shareContext->mNativeData->eContextHandle;
-				// }
+				if( createInfo.shareContext )
+				{
+					shareContextHandle = createInfo.shareContext->mNativeData->eContextHandle;
+				}
+				else if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT ) )
+				{
+					if( auto * currentEGLContext = ::eglGetCurrentContext() )
+					{
+						shareContextHandle = currentEGLContext;
+					}
+				}
 			}
 
-			if ( createInfo.runtimeVersionDesc.apiProfile != EGLAPIProfile::OpenGLES )
+			if( createInfo.runtimeVersionDesc.apiProfile != EGLAPIProfile::OpenGLES )
 			{
 				contextHandle = _eglCreateCoreContextDefault( pEGLContextNativeData,
 				                                              pEGLSurfaceNativeData,
@@ -273,7 +280,7 @@ namespace ts3::system
 			                                           eglConfigArray,
 			                                           CX_EGL_MAX_EGL_CONFIGS_NUM,
 			                                           &returnedEGLConfigsNum );
-			if ( enumResult == EGL_FALSE )
+			if( enumResult == EGL_FALSE )
 			{
 				ts3EGLThrowLastError();
 			}
@@ -335,7 +342,7 @@ namespace ts3::system
 			pAttribArray[attribIndex++] = EGL_COLOR_BUFFER_TYPE;
 			pAttribArray[attribIndex++] = EGL_RGB_BUFFER;
 
-			if ( ( pVisualConfig.msaaDesc.bufferCount != 0 ) && ( pVisualConfig.msaaDesc.quality != 0 ) )
+			if( ( pVisualConfig.msaaDesc.bufferCount != 0 ) && ( pVisualConfig.msaaDesc.quality != 0 ) )
 			{
 				pAttribArray[attribIndex++] = EGL_SAMPLE_BUFFERS;
 				pAttribArray[attribIndex++] = pVisualConfig.msaaDesc.bufferCount;
@@ -344,7 +351,7 @@ namespace ts3::system
 				pAttribArray[attribIndex++] = pVisualConfig.msaaDesc.quality;
 			}
 
-			if ( pVisualConfig.colorDesc.rgba.u32Code != 0 )
+			if( pVisualConfig.colorDesc.rgba.u32Code != 0 )
 			{
 				pAttribArray[attribIndex++] = EGL_RED_SIZE;
 				pAttribArray[attribIndex++] = pVisualConfig.colorDesc.rgba.u8Red;
@@ -359,13 +366,13 @@ namespace ts3::system
 				pAttribArray[attribIndex++] = pVisualConfig.colorDesc.rgba.u8Alpha;
 			}
 
-			if ( pVisualConfig.depthStencilDesc.depthBufferSize != 0 )
+			if( pVisualConfig.depthStencilDesc.depthBufferSize != 0 )
 			{
 				pAttribArray[attribIndex++] = EGL_DEPTH_SIZE;
 				pAttribArray[attribIndex++] = pVisualConfig.depthStencilDesc.depthBufferSize;
 			}
 
-			if ( pVisualConfig.depthStencilDesc.stencilBufferSize != 0 )
+			if( pVisualConfig.depthStencilDesc.stencilBufferSize != 0 )
 			{
 				pAttribArray[attribIndex++] = EGL_STENCIL_SIZE;
 				pAttribArray[attribIndex++] = pVisualConfig.depthStencilDesc.stencilBufferSize;
@@ -390,23 +397,23 @@ namespace ts3::system
 			}
 
 			int contextProfile = 0;
-			if ( pCreateInfo.contextProfile == EGLContextProfile::Core )
+			if( pCreateInfo.contextProfile == EGLContextProfile::Core )
 			{
 				contextProfile = EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT;
 			}
-			else if ( pCreateInfo.contextProfile == EGLContextProfile::Legacy )
+			else if( pCreateInfo.contextProfile == EGLContextProfile::Legacy )
 			{
 				contextProfile = EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT;
 			}
 
 			EGLint debugContextFlag = EGL_FALSE;
-			if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
+			if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
 			{
 				debugContextFlag = EGL_TRUE;
 			}
 
 			EGLint forwardCompatibleContextFlag = EGL_FALSE;
-			if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
+			if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
 			{
 				forwardCompatibleContextFlag = EGL_TRUE;
 			}

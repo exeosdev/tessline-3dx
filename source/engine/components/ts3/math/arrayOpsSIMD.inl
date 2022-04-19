@@ -18,7 +18,7 @@ namespace ts3::math
 
 	namespace arrayOps
 	{
-	#if ( TS3_MATH_SIMD_USE_VX128F )
+	#if( TS3_MATH_SIMD_USE_VX128F )
 
 		inline void set( __m128 & pTarget, float pX, float pY, float pZ, float pW )
 		{

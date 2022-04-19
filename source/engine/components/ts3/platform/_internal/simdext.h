@@ -41,7 +41,7 @@ inline void _mm_sfence()
 // Computes dot product of two 4-component vectors of single-precision floating point numbers.
 inline __m128 _mm128f_dp_ps0( const __m128 & m1, const __m128 & m2 )
 {
-#if ( ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_SSE41 ) && TS3_PCL_EIS_USE_DP_INTRINSICS )
+#if( ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_SSE41 ) && TS3_PCL_EIS_USE_DP_INTRINSICS )
 	// Use the bultin intrinsic. This, however, is known to have worse performance on AMD hardware
 	// (Ryzen included) and older/low-end Intels than doing it manually via below implementation.
 	//
@@ -74,7 +74,7 @@ inline __m128 _mm128f_dp_ps0( const __m128 & m1, const __m128 & m2 )
 // Computes dot product of two 4-component vectors of single-precision floating point numbers.
 inline __m128 _mm128f_dp_ps4( const __m128 & m1, const __m128 & m2 )
 {
-#if ( ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_SSE41 ) && TS3_PCL_EIS_USE_DP_INTRINSICS )
+#if( ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_SSE41 ) && TS3_PCL_EIS_USE_DP_INTRINSICS )
 	// Compute using intrinsic, specify distribution mask for all components of the result vector.
 	return _mm_dp_ps( m1, m2, 0x0F );
 #else
@@ -104,11 +104,11 @@ inline float _mm128f_dp_psf( const __m128 & m1, const __m128 & m2 )
 }
 #endif
 
-#if ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_AVX )
+#if( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_AVX )
 // Computes dot product of two 4-component vectors of double-precision floating point numbers.
 inline double _mm256d_dp_pd0( const __m256d & m1, const __m256d & m2 )
 {
-#if ( ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_AVX2 ) && TS3_PCL_EIS_USE_DP_INTRINSICS )
+#if( ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_AVX2 ) && TS3_PCL_EIS_USE_DP_INTRINSICS )
 	// Compute using intrinsic, specify distribution mask only for the first component of the result vector.
 	// const __m256 dotpVector = _mm_dp_pd( m1, m2, 0x01 );
 	// Get the result from the vector.
@@ -134,11 +134,11 @@ inline double _mm256d_dp_pd0( const __m256d & m1, const __m256d & m2 )
 }
 #endif
 
-#if ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_AVX )
+#if( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_AVX )
 // Computes dot product of two 4-component vectors of double-precision floating point numbers.
 inline __m256d _mm256d_dp_pd4( const __m256d & m1, const __m256d & m2 )
 {
-#if ( ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_AVX2 ) && TS3_PCL_EIS_USE_DP_INTRINSICS )
+#if( ( TS3_PCL_EIS_SUPPORT_LEVEL & TS3_PCL_EIS_FEATURE_AVX2 ) && TS3_PCL_EIS_USE_DP_INTRINSICS )
 	// Compute using intrinsic, specify distribution mask for all components of the result vector.
 	// return _mm_dp_pd( m1, m2, 0x0F );
 #else

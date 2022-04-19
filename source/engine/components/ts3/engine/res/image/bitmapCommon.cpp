@@ -16,7 +16,7 @@ namespace ts3
 
 		BitmapMetadata bitmapMetadata;
 
-		if ( !readBitmapMetadata( pData, pDataSize, &bitmapMetadata ) )
+		if( !readBitmapMetadata( pData, pDataSize, &bitmapMetadata ) )
 		{
 			return nullptr;
 		}

@@ -129,7 +129,7 @@ namespace ts3
 		}
 	};
 
-#if ( TRUE )
+#if( TRUE )
 
 	using ResultCode = ResultProxy<result_code_value_t, ResultCodeErrorPredicate>;
 

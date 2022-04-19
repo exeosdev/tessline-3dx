@@ -98,7 +98,7 @@ namespace ts3::system
 			                                     pWindowNativeData.moduleHandle,
 			                                     &pWindowNativeData );
 
-			if ( windowHwnd == nullptr )
+			if( windowHwnd == nullptr )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
@@ -202,7 +202,7 @@ namespace ts3::system
 			//
 			BOOL classFindResult = ::GetClassInfoExA( wndProcModuleHandle, wndClassName, &windowClass );
 
-			if ( classFindResult == FALSE )
+			if( classFindResult == FALSE )
 			{
 				windowClass.cbSize = sizeof( WNDCLASSEXA );
 				// Note this! We need one integer value for a simple ref counter.
@@ -220,7 +220,7 @@ namespace ts3::system
 
 				//
 				auto wndClassID = ::RegisterClassExA( &windowClass );
-				if ( wndClassID == 0 )
+				if( wndClassID == 0 )
 				{
 					ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 				}

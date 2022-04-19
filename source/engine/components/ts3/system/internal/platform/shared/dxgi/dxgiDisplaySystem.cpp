@@ -53,7 +53,7 @@ namespace ts3::system
 		if( mNativeData.dxgiFactory == nullptr )
 		{
 			Bitmask<UINT> dxgiFactoryCreateFlags = 0;
-		#if ( TS3_DEBUG )
+		#if( TS3_DEBUG )
 			dxgiFactoryCreateFlags.set( DXGI_CREATE_FACTORY_DEBUG );
 		#endif
 
@@ -94,7 +94,7 @@ namespace ts3::system
 			auto hResult = dxgiAdapterInterface->EnumOutputs( outputIndex, dxgiOutput.GetAddressOf() );
 
 			// Exactly the same situation: if DXGI_ERROR_NOT_FOUND is returned - no more adapters to enumerate.
-			if ( hResult == DXGI_ERROR_NOT_FOUND )
+			if( hResult == DXGI_ERROR_NOT_FOUND )
 			{
 				break;
 			}
@@ -102,7 +102,7 @@ namespace ts3::system
 			// According to the docs, the only possible error is DXGI_ERROR_NOT_FOUND which is returned
 			// for an adapter created with D3D_DRIVER_TYPE_WARP D3D device. Not an option here. Still...
 			// https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiadapter-enumoutputs
-			if ( FAILED( hResult ) )
+			if( FAILED( hResult ) )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
@@ -111,7 +111,7 @@ namespace ts3::system
 			hResult = dxgiOutput->QueryInterface( __uuidof( IDXGIOutput1 ), reinterpret_cast< void** >( dxgiOutput1.GetAddressOf() ) );
 
 			// We require support for the DXGI version 1.1 (Windows 7 and newer). Required for DXGI_ADAPTER_FLAG member.
-			if ( FAILED( hResult ) )
+			if( FAILED( hResult ) )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
@@ -119,7 +119,7 @@ namespace ts3::system
 			DXGI_OUTPUT_DESC dxgiOutputDesc;
 			hResult = dxgiOutput1->GetDesc( &dxgiOutputDesc );
 
-			if ( FAILED( hResult ) )
+			if( FAILED( hResult ) )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
@@ -170,7 +170,7 @@ namespace ts3::system
 
 			// Adapters are returned in order, starting with index 0. When DXGI_ERROR_NOT_FOUND is returned,
 			// it means all valid adapters have been already queried and there is nothing else to get.
-			if ( hResult == DXGI_ERROR_NOT_FOUND )
+			if( hResult == DXGI_ERROR_NOT_FOUND )
 			{
 				break;
 			}
@@ -178,7 +178,7 @@ namespace ts3::system
 			// According to the docs, the only possible error is DXGI_ERROR_INVALID_CALL which is returned
 			// if the second parameter is NULL (not possible in our case). Still - handle potential flaws.
 			// https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgifactory1-enumadapters1
-			if ( FAILED( hResult ) )
+			if( FAILED( hResult ) )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
@@ -188,7 +188,7 @@ namespace ts3::system
 
 			// Again - for a valid adapter, the only error can be E_INVALIDARG if the only parameter is NULL. Still...
 			// https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiadapter1-getdesc1
-			if ( FAILED( hResult ) )
+			if( FAILED( hResult ) )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
@@ -233,7 +233,7 @@ namespace ts3::system
 		// a "resolved" color format (look for 'dsmResolveSystemColorFormat').
 		auto dxgiFormat = platform::_dxgiTranslateColorFormatToDXGIFormat( pColorFormat );
 
-		if ( dxgiFormat == DXGI_FORMAT_UNKNOWN )
+		if( dxgiFormat == DXGI_FORMAT_UNKNOWN )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
@@ -242,7 +242,7 @@ namespace ts3::system
 		// Passing nullptr as 'pDesc' causes the DXGI runtime to return the total number of supported modes for an adapter.
 		auto hResult = dxgiOutputInterface->GetDisplayModeList( dxgiFormat, 0, &displayModesNum, nullptr );
 
-		if ( FAILED( hResult ) )
+		if( FAILED( hResult ) )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
@@ -254,7 +254,7 @@ namespace ts3::system
 		// Any optional filtering and processing is done afterwards, it's more efficient to fetch this in one go.
 		hResult = dxgiOutputInterface->GetDisplayModeList( dxgiFormat, 0, &displayModesNum, dxgiModeList.data() );
 
-		if ( FAILED( hResult ) )
+		if( FAILED( hResult ) )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
@@ -263,7 +263,7 @@ namespace ts3::system
 		// in settings and color format (and couple flags), so duplications can be safely removed here).
 		dsm_video_settings_hash_t lastSettingsHash = CX_DSM_VIDEO_SETTINGS_HASH_INVALID;
 
-		for ( auto & dxgiDisplayModeDesc : dxgiModeList )
+		for( auto & dxgiDisplayModeDesc : dxgiModeList )
 		{
 			DisplayVideoSettings videoSettings;
 			videoSettings.resolution.x = static_cast<uint32>( dxgiDisplayModeDesc.Width );

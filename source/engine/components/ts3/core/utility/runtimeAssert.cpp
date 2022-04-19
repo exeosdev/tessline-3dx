@@ -12,7 +12,7 @@ namespace ts3
 		message.append( "\nCondition: " );
 		message.append( pConditionStr );
 
-	#if ( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_WINDESKTOP )
+	#if( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_WINDESKTOP )
 		message.append( "\n\nAbort: terminate\nRetry: break here\nIgnore: skip" );
 		int result = ::MessageBoxA( nullptr, message.data(), "Runtime interrupt", MB_ABORTRETRYIGNORE | MB_ICONERROR | MB_APPLMODAL );
 		if( result == IDABORT )
@@ -33,7 +33,7 @@ namespace ts3
 		message.append( "\nWhere: " );
 		message.append( pLocationInfo.toString() );
 
-	#if ( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_WINDESKTOP )
+	#if( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_WINDESKTOP )
 		message.append( "\n\nAbort: terminate\nRetry: break here\nIgnore: skip" );
 		::MessageBoxA( nullptr, message.data(), "Runtime interrupt", MB_ABORTRETRYIGNORE | MB_ICONERROR | MB_APPLMODAL );
 	#else

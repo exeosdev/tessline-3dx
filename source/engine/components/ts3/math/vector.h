@@ -25,7 +25,7 @@ namespace ts3::math
 		using Type = Tp[4];
 	};
 
-#if ( TS3_MATH_SIMD_USE_VX128F )
+#if( TS3_MATH_SIMD_USE_VX128F )
 	template <>
 	struct Vector4SIMDData<float>
 	{
@@ -33,7 +33,7 @@ namespace ts3::math
 	};
 #endif
 
-#if ( TS3_MATH_SIMD_USE_VX128I )
+#if( TS3_MATH_SIMD_USE_VX128I )
 	template <>
 	struct Vector4SIMDData<int32>
 	{
@@ -47,7 +47,7 @@ namespace ts3::math
 	};
 #endif
 
-#if ( TS3_MATH_SIMD_USE_VX256D )
+#if( TS3_MATH_SIMD_USE_VX256D )
 	template <>
 	struct Vector4SIMDData<double>
 	{
@@ -55,7 +55,7 @@ namespace ts3::math
 	};
 #endif
 
-#if ( TS3_MATH_SIMD_USE_VX256I )
+#if( TS3_MATH_SIMD_USE_VX256I )
 	template <>
 	struct Vector4SIMDData<int64>
 	{

@@ -181,7 +181,7 @@ int main( int pArgc, const char ** pArgv )
                 auto & keyMap = pEvt.eInputKeyboardKey.inputKeyboardState->keyStateMap;
                 if( keyMap[EKeyCode::AltLeft] && keyMap[EKeyCode::Enter] )
                 {
-                	ts3DebugInterrupt();
+                	gfxState.glSurface->setFullscreenMode( !gfxState.glSurface->isFullscreen() );
                 }
                 return true;
             });
