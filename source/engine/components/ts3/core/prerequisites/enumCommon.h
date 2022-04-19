@@ -40,6 +40,8 @@ namespace ts3
         	return _typeinfo::toString##TpEnum( pValue );                                                    \
         }
 
+    ts3TypeInfoEnableEnumSupport();
+
 } // namespace ts3
 
 #endif // __TS3_CORE_ENUM_COMMON_H__

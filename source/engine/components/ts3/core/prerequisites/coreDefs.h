@@ -10,8 +10,11 @@
 
 #define ts3MakeStr( pValue ) _ts3MakeStr2( pValue )
 
-#define ts3CaseReturn( pCaseLabel, pReturnValue ) \
-	case pCaseLabel: return pReturnValue
+#define ts3CaseReturn( pCaseValue, pReturnValue ) \
+	case pCaseValue: return pReturnValue
+
+#define ts3CaseReturnStr( pCaseValue ) \
+	case pCaseValue: return #pCaseValue
 
 namespace ts3
 {
