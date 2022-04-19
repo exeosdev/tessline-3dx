@@ -32,7 +32,7 @@ void initializeGraphicsCreateSurface( GfxState & pGfxState )
     surfaceCreateInfo.visualConfig = vsxGetDefaultVisualConfigForSysWindow();
     surfaceCreateInfo.runtimeVersionDesc.apiProfile = EGLAPIProfile::OpenGL;
     surfaceCreateInfo.runtimeVersionDesc.apiVersion = CX_GL_VERSION_BEST_SUPPORTED;
-    surfaceCreateInfo.flags.set( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
+    //surfaceCreateInfo.flags.set( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 
     pGfxState.glSurface = pGfxState.glSystemDriver->createDisplaySurface( surfaceCreateInfo );
 }
@@ -166,6 +166,17 @@ int main( int pArgc, const char ** pArgv )
                 runApp = false;
                 return true;
             });
+    evtDispatcher->setEventHandler(
+    		EEventCodeIndex::WindowUpdateFullscreen,
+    		[&gfxState](const EventObject & pEvt) -> bool {
+    			printf("Fullscreen change: %s\n", toString( pEvt.eWindowUpdateFullscreen.fullscreenState ).c_str() );
+    			if( pEvt.eWindowUpdateFullscreen.eventSource == gfxState.glSurface.get() )
+    			{
+    				const auto size = gfxState.glSurface->getClientAreaSize();
+    				printf("Size: %ux%u\n", size.x, size.y );
+    			}
+    			return true;
+    		});
     evtDispatcher->setEventHandler(
             EEventCodeIndex::WindowUpdateDestroy,
             [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {

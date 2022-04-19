@@ -43,6 +43,7 @@ namespace ts3::system
 
 	struct EvtWindowUpdateFullscreen : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN>
 	{
+		EActiveState fullscreenState = EActiveState::Unknown;
 	};
 
 	struct EvtWindowUpdateResize : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_RESIZE>

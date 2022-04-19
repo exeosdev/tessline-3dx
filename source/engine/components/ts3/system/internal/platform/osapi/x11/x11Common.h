@@ -44,11 +44,18 @@ namespace ts3::system
 
 		struct X11SessionData
 		{
+			struct AtomCache
+			{
+				Atom wmProtocol = 0;
+				Atom wmProtocolDelete = 0;
+				Atom wmProtocolDestroy = 0;
+				Atom wmState = 0;
+				Atom wmStateFullscreen = 0;
+			};
 			XDisplay display = CX_X11_DISPLAY_NULL;
 			XWindow rootWindowXID = E_X11_XID_NONE;
 			int screenIndex = -1;
-			Atom wmpDeleteWindow = 0;
-			Atom wmpDestroyWindow = 0;
+			AtomCache atomCache;
 			X11SessionInfo sessionInfo;
 		};
 
