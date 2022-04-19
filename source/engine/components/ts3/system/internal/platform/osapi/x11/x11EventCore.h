@@ -28,9 +28,16 @@ namespace ts3::system
 			XBT2
 		};
 
+		enum EX11SystemWindowFlags : uint32
+		{
+			E_X11_SYSTEM_WINDOW_FLAG_WM_STATE_FULLSCREEN = 0x8000
+		};
+
 		struct X11EventSourceNativeData : public X11NativeDataCommon
 		{
 			XWindow windowXID = E_X11_XID_NONE;
+
+			Bitmask<uint32> sysWindowFlags = 0;
 		};
 
 		struct NativeEventType

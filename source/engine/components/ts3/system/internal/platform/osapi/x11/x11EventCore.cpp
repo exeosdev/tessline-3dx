@@ -1,5 +1,6 @@
 
 #include "x11EventCore.h"
+#include "x11WindowSystem.h"
 #include <ts3/system/internal/eventCorePrivate.h>
 #include <ts3/math/vectorOps.h>
 #include <X11/keysym.h>
@@ -98,9 +99,54 @@ namespace ts3::system
 			return eventSource;
 		}
 
+		const char * translateEventTypeName( int pEventType )
+		{
+			switch( pEventType )
+			{
+				ts3CaseReturnStr( KeyPress );
+				ts3CaseReturnStr( KeyRelease );
+				ts3CaseReturnStr( ButtonPress );
+				ts3CaseReturnStr( ButtonRelease );
+				ts3CaseReturnStr( MotionNotify );
+				ts3CaseReturnStr( EnterNotify );
+				ts3CaseReturnStr( LeaveNotify );
+				ts3CaseReturnStr( FocusIn );
+				ts3CaseReturnStr( FocusOut );
+				ts3CaseReturnStr( KeymapNotify );
+				ts3CaseReturnStr( Expose );
+				ts3CaseReturnStr( GraphicsExpose );
+				ts3CaseReturnStr( NoExpose );
+				ts3CaseReturnStr( VisibilityNotify );
+				ts3CaseReturnStr( CreateNotify );
+				ts3CaseReturnStr( DestroyNotify );
+				ts3CaseReturnStr( UnmapNotify );
+				ts3CaseReturnStr( MapNotify );
+				ts3CaseReturnStr( MapRequest );
+				ts3CaseReturnStr( ReparentNotify );
+				ts3CaseReturnStr( ConfigureNotify );
+				ts3CaseReturnStr( ConfigureRequest );
+				ts3CaseReturnStr( GravityNotify );
+				ts3CaseReturnStr( ResizeRequest );
+				ts3CaseReturnStr( CirculateNotify );
+				ts3CaseReturnStr( CirculateRequest );
+				ts3CaseReturnStr( PropertyNotify );
+				ts3CaseReturnStr( SelectionClear );
+				ts3CaseReturnStr( SelectionRequest );
+				ts3CaseReturnStr( SelectionNotify );
+				ts3CaseReturnStr( ColormapNotify );
+				ts3CaseReturnStr( ClientMessage );
+				ts3CaseReturnStr( MappingNotify );
+				ts3CaseReturnStr( GenericEvent );
+				default: break;
+			}
+			return "UNKNOWN";
+		}
+
 		bool x11TranslateEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent )
 		{
 			auto * eventSource = x11FindEventSourceByXWindow( pEventController, pXEvent.xany.window );
+
+			// printf("XEvent: %s\n", translateEventTypeName(pXEvent.type));
 
 			if( ( pXEvent.type >= KeyPress ) && ( pXEvent.type <= MotionNotify ) )
 			{
@@ -109,7 +155,7 @@ namespace ts3::system
 					return true;
 				}
 			}
-			else if( ( pXEvent.type >= EnterNotify ) && ( pXEvent.type <= MapRequest ) )
+			else if( ( pXEvent.type >= EnterNotify ) && ( pXEvent.type <= PropertyNotify ) )
 			{
 				if( eventSource && _x11TranslateGenericEvent( pEventController, *eventSource, pXEvent, pOutEvent  ) )
 				{
@@ -127,11 +173,14 @@ namespace ts3::system
 			return false;
 		}
 
-		bool _x11TranslateGenericEvent( X11EventController & /* pEventController */,
+		bool _x11TranslateGenericEvent( X11EventController & pEventController,
 		                                EventSource & pEventSource,
 		                                const XEvent & pXEvent,
 		                                EventObject & pOutEvent )
 		{
+			auto & xSessionData = x11GetXSessionData( pEventController );
+			xSessionData.atomCache.wmProtocolDelete;
+
 			switch( pXEvent.type )
 			{
 				case EnterNotify:
@@ -143,13 +192,9 @@ namespace ts3::system
 				case GraphicsExpose:
 				case NoExpose:
 				case VisibilityNotify:
-				{
-					break;
-				}
 				case CreateNotify:
-				{
 					break;
-				}
+
 				case DestroyNotify:
 				{
 					auto & eWindowUpdateDestroy = pOutEvent.eWindowUpdateDestroy;
@@ -174,9 +219,44 @@ namespace ts3::system
 					break;
 				}
 				case MapRequest:
+				case ReparentNotify:
+				case ConfigureNotify:
+				case ConfigureRequest:
+				case GravityNotify:
+				case ResizeRequest:
+				case CirculateNotify:
+				case CirculateRequest:
 					break;
+
+				case PropertyNotify:
+				{
+					if( pXEvent.xproperty.atom == xSessionData.atomCache.wmState )
+					{
+						auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::X11EventSourceNativeData>();
+
+						// PropertyNotify is emitted after the state has been changed.
+						// Check what is the current state of WM_STATE_FULLSCREEN.
+						const auto isFullscreenWindow = platform::x11IsFullscreenWindow( xSessionData.display, eventSourceNativeData->windowXID );
+
+						// This is the cached fullscreen state, updated on each change.
+						const auto previousFullscreenState = eventSourceNativeData->sysWindowFlags.isSet( E_X11_SYSTEM_WINDOW_FLAG_WM_STATE_FULLSCREEN );
+
+						if( isFullscreenWindow != previousFullscreenState )
+						{
+							auto & eWindowUpdateFullscreen = pOutEvent.eWindowUpdateFullscreen;
+							eWindowUpdateFullscreen.eventCode = E_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN;
+							eWindowUpdateFullscreen.fullscreenState = isFullscreenWindow ? EActiveState::Enabled : EActiveState::Disabled;
+							eWindowUpdateFullscreen.eventSource = &pEventSource;
+							// Save the current state inside the native data of the event source.
+							eventSourceNativeData->sysWindowFlags.setOrUnset( E_X11_SYSTEM_WINDOW_FLAG_WM_STATE_FULLSCREEN, isFullscreenWindow );
+						}
+					}
+					break;
+				}
 				default:
+				{
 					return false;
+				}
 			}
 
 			return true;
@@ -452,15 +532,19 @@ namespace ts3::system
 				{
 					auto & xSessionData = platform::x11GetXSessionData( pEventController );
 
-					// Window Message Protocol (WMP) id is stored in data.l[0].
-					long wmpMessageID = pXEvent.xclient.data.l[0];
+					// printf("--ClientMessage: %s\n", XGetAtomName( pXEvent.xclient.display, pXEvent.xclient.message_type ) );
 
-					if( wmpMessageID == xSessionData.wmpDeleteWindow )
+					if( pXEvent.xclient.message_type == xSessionData.atomCache.wmProtocol )
 					{
-						auto & eventData = pOutEvent.eWindowUpdateDestroy;
-						eventData.eventCode = E_EVENT_CODE_WINDOW_UPDATE_DESTROY;
-						eventData.eventSource = &pEventSource;
+						// Window Message Protocol (WMP) id is stored in data.l[0].
+						if( pXEvent.xclient.data.l[0] == xSessionData.atomCache.wmProtocolDelete )
+						{
+							auto & eventData = pOutEvent.eWindowUpdateDestroy;
+							eventData.eventCode = E_EVENT_CODE_WINDOW_UPDATE_DESTROY;
+							eventData.eventSource = &pEventSource;
+						}
 					}
+
 					break;
 				}
 				default:
