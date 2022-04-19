@@ -13,113 +13,123 @@
 namespace ts3::system
 {
 
-    SysContextHandle createSysContext( const SysContextCreateInfo & pCreateInfo )
-    {
-        return createDynamicInterfaceObject<X11SysContext>();
-    }
+	namespace platform
+	{
+
+		SysContextHandle createSysContext( const SysContextCreateInfo & pCreateInfo )
+		{
+			return createDynamicInterfaceObject<X11SysContext>();
+		}
+
+	}
 
 
-    X11SysContext::X11SysContext()
-    {
-        _initializeX11ContextState();
-    }
+	X11SysContext::X11SysContext()
+	{
+		_initializeX11ContextState();
+	}
 
-    X11SysContext::~X11SysContext() noexcept
-    {
-        _releaseX11ContextState();
-    }
+	X11SysContext::~X11SysContext() noexcept
+	{
+		_releaseX11ContextState();
+	}
 
-    AssetLoaderHandle X11SysContext::createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo )
-    {
-        return platform::createFileAssetLoader( getHandle<X11SysContext>(),
-                                                pCreateInfo.nativeParams.fileManager,
-                                                pCreateInfo.nativeParams.relativeAssetRootDir );
-    }
+	AssetLoaderHandle X11SysContext::createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo )
+	{
+		return platform::createFileAssetLoader( getHandle<X11SysContext>(),
+		                                        pCreateInfo.nativeParams->fileManager,
+		                                        pCreateInfo.nativeParams->relativeAssetRootDir );
+	}
 
-    DisplayManagerHandle X11SysContext::createDisplayManager()
-    {
-        return createSysObject<X11DisplayManager>( getHandle<X11SysContext>() );
-    }
+	DisplayManagerHandle X11SysContext::createDisplayManager()
+	{
+		return createSysObject<X11DisplayManager>( getHandle<X11SysContext>() );
+	}
 
-    EventControllerHandle X11SysContext::createEventController()
-    {
-        return createSysObject<X11EventController>( getHandle<X11SysContext>() );
-    }
+	EventControllerHandle X11SysContext::createEventController()
+	{
+		return createSysObject<X11EventController>( getHandle<X11SysContext>() );
+	}
 
-    FileManagerHandle X11SysContext::createFileManager()
-    {
-        return createSysObject<PosixFileManager>( getHandle<X11SysContext>() );
-    }
+	FileManagerHandle X11SysContext::createFileManager()
+	{
+		return createSysObject<PosixFileManager>( getHandle<X11SysContext>() );
+	}
 
-    OpenGLSystemDriverHandle X11SysContext::createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager )
-    {
-        if( !pDisplayManager )
-        {
-            pDisplayManager = createDisplayManager();
-        }
+	OpenGLSystemDriverHandle X11SysContext::createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager )
+	{
+		if( !pDisplayManager )
+		{
+			pDisplayManager = createDisplayManager();
+		}
 
-        return createSysObject<X11OpenGLSystemDriver>( pDisplayManager->getHandle<X11DisplayManager>() );
-    }
+		return createSysObject<X11OpenGLSystemDriver>( pDisplayManager->getHandle<X11DisplayManager>() );
+	}
 
-    WindowManagerHandle X11SysContext::createWindowManager( DisplayManagerHandle pDisplayManager )
-    {
-        if( !pDisplayManager )
-        {
-            pDisplayManager = createDisplayManager();
-        }
+	WindowManagerHandle X11SysContext::createWindowManager( DisplayManagerHandle pDisplayManager )
+	{
+		if( !pDisplayManager )
+		{
+			pDisplayManager = createDisplayManager();
+		}
 
-        return createSysObject<X11WindowManager>( pDisplayManager->getHandle<X11DisplayManager>() );
-    }
+		return createSysObject<X11WindowManager>( pDisplayManager->getHandle<X11DisplayManager>() );
+	}
 
-    void X11SysContext::_initializeX11ContextState()
-    {
-        int thrInitStatus = ::XInitThreads();
-        if( thrInitStatus == False )
-        {
-            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
-        }
+	void X11SysContext::_initializeX11ContextState()
+	{
+		// This has completely crashed the whole X11 subsystem when ran on a VM-ed ARM-based Ubuntu 21.
+		// The environment: MacBook Pro 16.2 with M1 Max, Ubuntu 21.04 (ARM version), Parallels Pro.
+		// Most X11 started giving infinite freezes diagnosed as deadlocks on a system-level mutexes.
+		//
+		// int thrInitStatus = ::XInitThreads();
+		// if( thrInitStatus == False )
+		// {
+		// 	ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
+		// }
 
-        auto * xDisplay = ::XOpenDisplay( nullptr );
-        if( xDisplay == nullptr )
-        {
-            ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
-        }
+		auto * xDisplay = ::XOpenDisplay( nullptr );
+		if( xDisplay == nullptr )
+		{
+			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
+		}
 
-        mNativeData.xSessionData.display = xDisplay;
-        mNativeData.xSessionData.screenIndex = XDefaultScreen( mNativeData.xSessionData.display );
-        mNativeData.xSessionData.rootWindowXID = XRootWindow( mNativeData.xSessionData.display, mNativeData.xSessionData.screenIndex );
-        mNativeData.xSessionData.wmpDeleteWindow = XInternAtom( mNativeData.xSessionData.display, "WM_DELETE_WINDOW", False );
-        mNativeData.xSessionData.sessionInfo.connectionNumber = XConnectionNumber( xDisplay );
-        mNativeData.xSessionData.sessionInfo.vendorName = XServerVendor( xDisplay );
-        mNativeData.xSessionData.sessionInfo.displayString = XDisplayString( xDisplay );
-    }
+		mNativeData.xSessionData.display = xDisplay;
+		mNativeData.xSessionData.screenIndex = XDefaultScreen( mNativeData.xSessionData.display );
+		mNativeData.xSessionData.rootWindowXID = XRootWindow( mNativeData.xSessionData.display, mNativeData.xSessionData.screenIndex );
+		mNativeData.xSessionData.wmpDeleteWindow = XInternAtom( mNativeData.xSessionData.display, "WM_DELETE_WINDOW", False );
+		mNativeData.xSessionData.wmpDestroyWindow = XInternAtom( mNativeData.xSessionData.display, "WM_DESTROY_WINDOW", False );
+		mNativeData.xSessionData.sessionInfo.connectionNumber = XConnectionNumber( xDisplay );
+		mNativeData.xSessionData.sessionInfo.vendorName = XServerVendor( xDisplay );
+		mNativeData.xSessionData.sessionInfo.displayString = XDisplayString( xDisplay );
+	}
 
-    void X11SysContext::_releaseX11ContextState()
-    {
-        mNativeData.xSessionData.display = nullptr;
-        mNativeData.xSessionData.screenIndex = -1;
-        mNativeData.xSessionData.rootWindowXID = platform::E_X11_XID_NONE;
-        mNativeData.xSessionData.wmpDeleteWindow = 0;
-        mNativeData.xSessionData.sessionInfo.connectionNumber = -1;
-        mNativeData.xSessionData.sessionInfo.vendorName.clear();
-        mNativeData.xSessionData.sessionInfo.displayString.clear();
-    }
+	void X11SysContext::_releaseX11ContextState()
+	{
+		mNativeData.xSessionData.display = nullptr;
+		mNativeData.xSessionData.screenIndex = -1;
+		mNativeData.xSessionData.rootWindowXID = platform::E_X11_XID_NONE;
+		mNativeData.xSessionData.wmpDeleteWindow = 0;
+		mNativeData.xSessionData.sessionInfo.connectionNumber = -1;
+		mNativeData.xSessionData.sessionInfo.vendorName.clear();
+		mNativeData.xSessionData.sessionInfo.displayString.clear();
+	}
 
-    std::string X11SysContext::queryCurrentProcessExecutableFilePath() const
-    {
-        pid_t currentProcessID = getpid();
+	std::string X11SysContext::queryCurrentProcessExecutableFilePath() const
+	{
+		pid_t currentProcessID = getpid();
 
-        std::string executableFilePath;
-        std::string exeLink = std::string( "/proc/" ) + std::to_string( currentProcessID ) + std::string( "/exe" );
+		std::string executableFilePath;
+		std::string exeLink = std::string( "/proc/" ) + std::to_string( currentProcessID ) + std::string( "/exe" );
 
-        if( char * bufferPtr = realpath( exeLink.c_str(), nullptr ) )
-        {
-            executableFilePath = bufferPtr;
-            free( bufferPtr );
-        }
+		if( char * bufferPtr = realpath( exeLink.c_str(), nullptr ) )
+		{
+			executableFilePath = bufferPtr;
+			free( bufferPtr );
+		}
 
-        return executableFilePath;
-    }
+		return executableFilePath;
+	}
 
 } // namespace ts3::system
 #endif // TS3_PCL_TARGET_SYSAPI_X11

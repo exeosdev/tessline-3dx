@@ -44,12 +44,12 @@ namespace gpuapi
 
 	void GLDebugOutput::enableBreakOnEvent( bool pEnable )
 	{
-		_stateFlags.setOrUnset( pEnable, STATE_FLAG_ENABLE_BREAK_ON_EVENT );
+		_stateFlags.setOrUnset( STATE_FLAG_ENABLE_BREAK_ON_EVENT, pEnable );
 	}
 
 	void GLDebugOutput::enableEventFilter( bool pEnable )
 	{
-		_stateFlags.setOrUnset( pEnable, STATE_FLAG_ENABLE_EVENT_FILTER );
+		_stateFlags.setOrUnset( STATE_FLAG_ENABLE_EVENT_FILTER, pEnable );
 	}
 
 	void GLDebugOutput::setEventFilter( GLuint pEventID, bool pIgnored )

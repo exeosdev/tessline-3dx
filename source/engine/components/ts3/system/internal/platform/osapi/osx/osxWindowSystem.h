@@ -2,74 +2,89 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_OSX_WINDOW_SYSTEM_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_OSX_WINDOW_SYSTEM_H__
 
-#include "nsWindowProxy.h"
+#include "osxEventCore.h"
 #include <ts3/system/windowSystem.h>
-#include <AppKit/NSScreen.h>
-#include <AppKit/NSWindow.h>
+#import <AppKit/NSScreen.h>
+#import <AppKit/NSWindow.h>
 
 namespace ts3::system
 {
 
-    ts3SysDeclareHandle( OSXDisplayManager );
-    ts3SysDeclareHandle( OSXWindow );
-    ts3SysDeclareHandle( OSXWindowManager );
+	ts3SysDeclareHandle( OSXDisplayManager );
+	ts3SysDeclareHandle( OSXWindow );
+	ts3SysDeclareHandle( OSXWindowManager );
 
-    namespace platform
-    {
+	namespace platform
+	{
 
-        struct OSXWindowNativeData
-        {
-            OSXWindow * parentWindow = nullptr;
+		struct OSXWindowNativeData : public OSXEventSourceNativeData
+		{
+			OSXWindow * parentWindow = nullptr;
 
-            NSWindow __strong * nsWindow = nullptr;
+			NSScreen * nsTargetScreen = nullptr;
+		};
 
-            NSView __strong * nsWindowView = nullptr;
+		struct OSXFrameGeometry
+		{
+			NSRect frameRect;
+			NSUInteger style;
+		};
 
-            NSScreen __strong * nsTargetScreen = nullptr;
-        };
+		void osxCreateWindow( OSXWindowNativeData & pWindowNativeData, NSScreen * pTargetScreen, const WindowCreateInfo & pCreateInfo );
 
-        void osxCreateWindow( OSXWindowNativeData & pWindowNativeData, const WindowCreateInfo & pCreateInfo );
+		void osxCreateWindowDefaultView( OSXWindowNativeData & pWindowNativeData );
 
-        TS3_SYSTEM_API_NODISCARD NSUInteger osxTranslateFrameStyle( EFrameStyle pStyle );
+		void osxCreateEventListener( OSXWindowNativeData & pWindowNativeData );
 
-    }
+		void osxSetFrameTitle( NSWindow * pNSWindow, const std::string & pTitle );
 
-    class OSXWindowManager : public WindowManager
-    {
-    public:
-        explicit OSXWindowManager( OSXDisplayManagerHandle pDisplayManager );
-        virtual ~OSXWindowManager() noexcept;
+		void osxUpdateFrameGeometry( NSWindow * pNSWindow, const FrameGeometry & pFrameGeometry, Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags );
 
-    private:
-        // @override WindowManager::_nativeCreateWindow
-        virtual WindowHandle _nativeCreateWindow( WindowCreateInfo pCreateInfo ) override final;
-    };
+		TS3_SYSTEM_API_NODISCARD FrameSize osxGetFrameSize( NSWindow * pNSWindow, EFrameSizeMode pSizeMode );
 
-    class OSXWindow : public OSXNativeObject<Window, platform::OSXWindowNativeData>
-    {
-        friend class OSXWindowManager;
+		TS3_SYSTEM_API_NODISCARD NSUInteger osxTranslateFrameStyle( EFrameStyle pStyle );
 
-    public:
-        explicit OSXWindow( OSXWindowManagerHandle pWindowManager );
-        virtual ~OSXWindow() noexcept;
+	}
 
-    private:
-        // @override Window::_nativeResize
-        virtual void _nativeResize( const FrameSize & pFrameSize, EFrameSizeMode pSizeMode ) override final;
+	class OSXWindowManager : public OSXNativeObject<WindowManager, platform::OSXNativeDataCommon>
+	{
+	public:
+		explicit OSXWindowManager( OSXDisplayManagerHandle pDisplayManager );
+		virtual ~OSXWindowManager() noexcept;
 
-        // @override Window::_nativeSetFullscreenMode
-        virtual void _nativeSetFullscreenMode( bool pEnable ) override final;
+	private:
+		// @override WindowManager::_nativeCreateWindow
+		virtual WindowHandle _nativeCreateWindow( WindowCreateInfo pCreateInfo ) override final;
 
-        // @override Window::_nativeSetTitle
-        virtual void _nativeSetTitle( const std::string & pTitle ) override final;
+		// @override WindowManager::_nativeDestroyWindow
+		virtual void _nativeDestroyWindow( Window & pWindow ) override final;
+	};
 
-        // @override Window::_nativeUpdateGeometry
-        virtual void _nativeUpdateGeometry( const FrameGeometry & pFrameGeometry,
-                                            Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags ) override final;
+	class OSXWindow : public OSXNativeObject<Window, platform::OSXWindowNativeData>
+	{
+		friend class OSXWindowManager;
 
-        // @override Window::_nativeGetSize
-        virtual FrameSize _nativeGetSize( EFrameSizeMode pSizeMode ) const override final;
-    };
+	public:
+		explicit OSXWindow( OSXWindowManagerHandle pWindowManager );
+		virtual ~OSXWindow() noexcept;
+
+	private:
+		// @override Window::_nativeResize
+		virtual void _nativeResize( const FrameSize & pFrameSize, EFrameSizeMode pSizeMode ) override final;
+
+		// @override Window::_nativeSetFullscreenMode
+		virtual void _nativeSetFullscreenMode( bool pEnable ) override final;
+
+		// @override Window::_nativeSetTitle
+		virtual void _nativeSetTitle( const std::string & pTitle ) override final;
+
+		// @override Window::_nativeUpdateGeometry
+		virtual void _nativeUpdateGeometry( const FrameGeometry & pFrameGeometry,
+		                                    Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags ) override final;
+
+		// @override Window::_nativeGetSize
+		virtual FrameSize _nativeGetSize( EFrameSizeMode pSizeMode ) const override final;
+	};
 
 } // namespace ts3::system
 

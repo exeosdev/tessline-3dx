@@ -9,106 +9,109 @@
 namespace ts3::system
 {
 
-    namespace platform
-    {
+	namespace platform
+	{
 
-        struct FileAssetNativeData
-        {
-            FileHandle fileHandle = nullptr;
-            std::string filePath;
-        };
+		struct FileAssetNativeData
+		{
+			FileHandle fileHandle = nullptr;
+			std::string filePath;
+		};
 
-        struct FileAssetDirectoryNativeData
-        {
-            std::string combinedDirPath;
-        };
+		struct FileAssetDirectoryNativeData
+		{
+			std::string combinedDirPath;
+		};
 
-        struct FileAssetLoaderNativeData
-        {
-            std::string rootDir;
-        };
+		struct FileAssetLoaderNativeData
+		{
+			std::string rootDir;
+		};
 
-        struct AssetLoaderCreateInfoNativeParams
-        {
-            FileManagerHandle fileManager = nullptr;
-            std::string relativeAssetRootDir;
-        };
+		struct AssetLoaderCreateInfoNativeParams
+		{
+			FileManagerHandle fileManager = nullptr;
+			std::string relativeAssetRootDir;
+		};
 
-        TS3_SYSTEM_API_NODISCARD AssetLoaderHandle createFileAssetLoader( SysContextHandle pSysContext,
-                                                                          FileManagerHandle pFileManager,
-                                                                          std::string pRootDirectory );
+		TS3_SYSTEM_API_NODISCARD AssetLoaderHandle createFileAssetLoader( SysContextHandle pSysContext,
+		                                                                  FileManagerHandle pFileManager,
+		                                                                  const std::string & pRootDirectory );
 
-    }
+		TS3_SYSTEM_API_NODISCARD AssetLoaderHandle createFileAssetLoader( SysContextHandle pSysContext,
+		                                                                  const AssetLoaderCreateInfoNativeParams & pCreateParams );
 
-    class FileAssetLoader : public NativeObject<AssetLoader, platform::FileAssetLoaderNativeData>
-    {
-    public:
-        FileManagerHandle const mFileManager;
+	}
 
-    public:
-        explicit FileAssetLoader( FileManagerHandle pFileManager );
-        virtual ~FileAssetLoader() noexcept;
+	class FileAssetLoader : public NativeObject<AssetLoader, platform::FileAssetLoaderNativeData>
+	{
+	public:
+		FileManagerHandle const mFileManager;
 
-        void setRootDir( std::string pRootDir );
+	public:
+		explicit FileAssetLoader( FileManagerHandle pFileManager );
+		virtual ~FileAssetLoader() noexcept;
 
-    private:
-        /// @override AssetLoader::_nativeOpenSubAsset
-        virtual AssetHandle _nativeOpenSubAsset( FSUtilityAPI::FilePathInfo pAssetPathInfo,
-                                                 Bitmask<EAssetOpenFlags> pFlags ) override final;
+		void setRootDir( std::string pRootDir );
 
-        /// @override AssetLoader::_nativeOpenDirectory
-        virtual AssetDirectoryHandle _nativeOpenDirectory( std::string pDirectoryName ) override final;
+	private:
+		/// @override AssetLoader::_nativeOpenSubAsset
+		virtual AssetHandle _nativeOpenSubAsset( FSUtilityAPI::FilePathInfo pAssetPathInfo,
+		                                         Bitmask<EAssetOpenFlags> pFlags ) override final;
 
-        /// @override AssetLoader::_nativeCheckDirectoryExists
-        virtual bool _nativeCheckDirectoryExists( const std::string & pDirectoryName ) const override final;
-    };
-    
-    class FileAssetDirectory : public NativeObject<AssetDirectory, platform::FileAssetDirectoryNativeData>
-    {
-        friend class FileAssetLoader;
+		/// @override AssetLoader::_nativeOpenDirectory
+		virtual AssetDirectoryHandle _nativeOpenDirectory( std::string pDirectoryName ) override final;
 
-    public:
-        FileManagerHandle const mFileManager;
+		/// @override AssetLoader::_nativeCheckDirectoryExists
+		virtual bool _nativeCheckDirectoryExists( const std::string & pDirectoryName ) const override final;
+	};
+	
+	class FileAssetDirectory : public NativeObject<AssetDirectory, platform::FileAssetDirectoryNativeData>
+	{
+		friend class FileAssetLoader;
 
-    public:
-        explicit FileAssetDirectory( Handle<FileAssetLoader> pAssetLoader );
-        virtual ~FileAssetDirectory() noexcept;
+	public:
+		FileManagerHandle const mFileManager;
 
-        using AssetDirectory::addAsset;
-        using AssetDirectory::setDirName;
-        
-    private:
-        /// @override AssetDirectory::_nativeRefreshAssetList
-        virtual void _nativeRefreshAssetList() override final;
+	public:
+		explicit FileAssetDirectory( Handle<FileAssetLoader> pAssetLoader );
+		virtual ~FileAssetDirectory() noexcept;
 
-        /// @override AssetDirectory::_nativeOpenAsset
-        virtual AssetHandle _nativeOpenAsset( std::string pAssetName, Bitmask<EAssetOpenFlags> pFlags ) override final;
+		using AssetDirectory::addAsset;
+		using AssetDirectory::setDirName;
+		
+	private:
+		/// @override AssetDirectory::_nativeRefreshAssetList
+		virtual void _nativeRefreshAssetList() override final;
 
-        /// @override AssetDirectory::_nativeCheckAssetExists
-        virtual bool _nativeCheckAssetExists( const std::string & pAssetName ) const override final;
-    };
+		/// @override AssetDirectory::_nativeOpenAsset
+		virtual AssetHandle _nativeOpenAsset( std::string pAssetName, Bitmask<EAssetOpenFlags> pFlags ) override final;
 
-    class FileAsset : public NativeObject<Asset, platform::FileAssetNativeData>
-    {
-        friend class FileAssetLoader;
-        
-    public:
-        explicit FileAsset( AssetLoaderHandle pAssetLoader );
-        explicit FileAsset( AssetDirectoryHandle pAssetDirectory );
-        virtual ~FileAsset() noexcept;
+		/// @override AssetDirectory::_nativeCheckAssetExists
+		virtual bool _nativeCheckAssetExists( const std::string & pAssetName ) const override final;
+	};
 
-        using Asset::setName;
+	class FileAsset : public NativeObject<Asset, platform::FileAssetNativeData>
+	{
+		friend class FileAssetLoader;
+		
+	public:
+		explicit FileAsset( AssetLoaderHandle pAssetLoader );
+		explicit FileAsset( AssetDirectoryHandle pAssetDirectory );
+		virtual ~FileAsset() noexcept;
 
-    private:
-        /// @override Asset::_nativeReadData
-        virtual file_size_t _nativeReadData( void * pTargetBuffer, file_size_t pReadSize ) override final;
+		using Asset::setName;
 
-        /// @override Asset::_nativeSetReadPointer
-        virtual file_offset_t _nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos ) override final;
+	private:
+		/// @override Asset::_nativeReadData
+		virtual file_size_t _nativeReadData( void * pTargetBuffer, file_size_t pReadSize ) override final;
 
-        /// @override Asset::_nativeGetSize
-        virtual file_size_t _nativeGetSize() const override final;
-    };
+		/// @override Asset::_nativeSetReadPointer
+		virtual file_offset_t _nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos ) override final;
+
+		/// @override Asset::_nativeGetSize
+		virtual file_size_t _nativeGetSize() const override final;
+	};
 
 } // namespace ts3::system
 #endif // TS3_SYSTEM_USE_ASSET_SYSTEM_DEFAULT

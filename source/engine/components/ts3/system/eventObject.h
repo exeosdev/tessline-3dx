@@ -37,7 +37,8 @@ namespace ts3::system
 			EvtInputTouchDown          eInputTouchDown;
 			EvtInputTouchMove          eInputTouchMove;
 			EvtInputTouchUp            eInputTouchUp;
-			EvtWindowUpdateClose       eWindowUpdateClose;
+			EvtWindowUpdateCreate      eWindowUpdateCreate;
+			EvtWindowUpdateDestroy     eWindowUpdateDestroy;
 			EvtWindowUpdateFullscreen  eWindowUpdateFullscreen;
 			EvtWindowUpdateResize      eWindowUpdateResize;
 			EvtWindowUpdateVisibility  eWindowUpdateVisibility;
@@ -57,9 +58,9 @@ namespace ts3::system
 
 		constexpr explicit operator bool() const
 		{
-		    return ( code != E_EVENT_CODE_UNDEFINED ) && ecValidateEventCode( code );
+			return ( code != E_EVENT_CODE_UNDEFINED ) && ecValidateEventCode( code );
 		}
-    };
+	};
 
 } // namespace ts3::system
 

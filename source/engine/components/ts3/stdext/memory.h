@@ -59,18 +59,18 @@ namespace ts3
 	};
 
 	template <typename TpSize, typename TpOffset = TpSize>
-    struct AlignedMemoryAllocInfo
-    {
-        Region<TpSize, TpOffset> accessibleRegion;
-        Region<TpSize, TpOffset> reservedRegion;
-    };
+	struct AlignedMemoryAllocInfo
+	{
+		Region<TpSize, TpOffset> accessibleRegion;
+		Region<TpSize, TpOffset> reservedRegion;
+	};
 
 	inline constexpr uint64 memCheckRequestedCopySize( uint64 pBufferSize, uint64 pCopySize, uint64 pCopyOffset )
 	{
-	    const auto copyOffset = getMinOf( pCopyOffset, pBufferSize );
-	    const auto maxCopySize = pBufferSize - copyOffset;
-	    const auto copySize = getMinOf( pCopySize, maxCopySize );
-	    return copySize;
+		const auto copyOffset = getMinOf( pCopyOffset, pBufferSize );
+		const auto maxCopySize = pBufferSize - copyOffset;
+		const auto copySize = getMinOf( pCopySize, maxCopySize );
+		return copySize;
 	}
 
 	///
@@ -97,18 +97,18 @@ namespace ts3
 	}
 
 	template <typename TpSize, typename TpOffset = TpSize, typename std::enable_if<std::is_integral<TpSize>::value, int>::type = 0>
-    inline AlignedMemoryAllocInfo<TpSize, TpOffset> memComputeAlignedAllocationInfo( TpOffset pBaseAddress, TpSize pAllocationSize, uint32 pAlignment )
-    {
-        const auto alignedOffset = memGetAlignedValue( pBaseAddress, pAlignment );
+	inline AlignedMemoryAllocInfo<TpSize, TpOffset> memComputeAlignedAllocationInfo( TpOffset pBaseAddress, TpSize pAllocationSize, uint32 pAlignment )
+	{
+		const auto alignedOffset = memGetAlignedValue( pBaseAddress, pAlignment );
 
-        AlignedMemoryAllocInfo<TpSize, TpOffset> allocInfo;
-        allocInfo.accessibleRegion.offset = alignedOffset;
-        allocInfo.accessibleRegion.size = pAllocationSize;
-        allocInfo.reservedRegion.offset = pBaseAddress;
-        allocInfo.reservedRegion.size = ( alignedOffset - pBaseAddress ) + pAllocationSize;
+		AlignedMemoryAllocInfo<TpSize, TpOffset> allocInfo;
+		allocInfo.accessibleRegion.offset = alignedOffset;
+		allocInfo.accessibleRegion.size = pAllocationSize;
+		allocInfo.reservedRegion.offset = pBaseAddress;
+		allocInfo.reservedRegion.size = ( alignedOffset - pBaseAddress ) + pAllocationSize;
 
-        return allocInfo;
-    }
+		return allocInfo;
+	}
 
 	///
 	/// @param pMemory1

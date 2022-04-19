@@ -10,7 +10,7 @@
 namespace ts3::math
 {
 
-#if ( TS3_MATH_SIMD_USE_VX128F )
+#if( TS3_MATH_SIMD_USE_VX128F )
 
 	TS3_PCL_ATTR_ALWAYS_INLINE void _mm_transpose_mat4_128f( __m128 pM0, __m128 pM1, __m128 pM2, __m128 pM3, __m128 pResult[4] )
 	{
@@ -19,7 +19,7 @@ namespace ts3::math
 		// M2: [ M20, M21, M22, M23 ]
 		// M3: [ M30, M31, M32, M33 ]
 
-	#if ( !TS3_MATH_SIMD_ENABLE_TRANSPOSE_WITH_UNPACK )
+	#if( !TS3_MATH_SIMD_ENABLE_TRANSPOSE_WITH_UNPACK )
 		const __m128 tmp0 = _mm_shuffle_ps( pM0, pM1, _MM_SHUFFLE_R( 0, 1, 0, 1 ) ); // [ M00, M01, M10, M11 ]
 		const __m128 tmp1 = _mm_shuffle_ps( pM0, pM1, _MM_SHUFFLE_R( 2, 3, 2, 3 ) ); // [ M02, M03, M12, M13 ]
 		const __m128 tmp2 = _mm_shuffle_ps( pM2, pM3, _MM_SHUFFLE_R( 0, 1, 0, 1 ) ); // [ M20, M21, M30, M31 ]

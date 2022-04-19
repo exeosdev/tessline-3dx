@@ -141,7 +141,7 @@ namespace ts3
 		template <typename... Args>
 		void _reinit( Args && ...pArgs )
 		{
-			if (_valuePtr != nullptr)
+			if(_valuePtr != nullptr)
 			{
 				_valuePtr->~_Type();
 			}
@@ -160,7 +160,7 @@ namespace ts3
 
 		void _validate() const
 		{
-			if (_valuePtr == nullptr)
+			if(_valuePtr == nullptr)
 			{
 				throw 0;
 			}
@@ -168,7 +168,7 @@ namespace ts3
 
 		void _release()
 		{
-			if (_valuePtr != nullptr)
+			if(_valuePtr != nullptr)
 			{
 				_valuePtr->~_Type();
 				_valuePtr = nullptr;

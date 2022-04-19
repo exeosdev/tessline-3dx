@@ -52,7 +52,7 @@ namespace ts3::system
 
 		// @override Window::_nativeUpdateGeometry
 		virtual void _nativeUpdateGeometry( const FrameGeometry & pFrameGeometry,
-											Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags ) override final;
+		                                    Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags ) override final;
 
 		// @override Window::_nativeGetSize
 		virtual FrameSize _nativeGetSize( EFrameSizeMode pSizeMode ) const override final;

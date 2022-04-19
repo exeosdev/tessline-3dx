@@ -5,37 +5,37 @@
 namespace ts3::system
 {
 
-    namespace platform
+	namespace platform
 	{
 
 		// Returns an array of EGLConfigs matching specified VisualConfig definition and API version (ES).
 		std::vector<EGLConfig> _eglQueryCompatibleEGLConfigList( EGLDisplay pDisplay,
-																 const VisualConfig & pVisualConfig,
-																 const Version & pTargetAPIVersion );
+		                                                         const VisualConfig & pVisualConfig,
+		                                                         const Version & pTargetAPIVersion );
 
 		// Computes a "compatibility rate", i.e. how much the specified FBConfig matches the visual.
 		int _eglGetEGLConfigMatchRate( EGLDisplay pDisplay, EGLConfig pEGLConfig,
-									   const VisualConfig & pVisualConfig );
+		                               const VisualConfig & pVisualConfig );
 
 		// Translation: VisualConfig+APIVersion --> array of EGL_* attributes required by the system API.
 		// Used for surface/context creation.
 		void _eglGetAttribArrayForVisualConfig( const VisualConfig & pVisualConfig,
-												const Version & pTargetAPIVersion,
-												int * pAttribArray );
+		                                        const Version & pTargetAPIVersion,
+		                                        int * pAttribArray );
 
 		// Creates an EGL rendering context for the Core/Legacy API profile.
 		// Uses full set of context creation features (debug and forward compatibility flags, detailed version, etc).
 		EGLContext _eglCreateCoreContextDefault( EGLRenderContextNativeData & pEGLContextNativeData,
-												 const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-												 const GLRenderContextCreateInfo & pCreateInfo,
-												 EGLContext pEGLShareContext );
+		                                         const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
+		                                         const GLRenderContextCreateInfo & pCreateInfo,
+		                                         EGLContext pEGLShareContext );
 
 		// Creates an EGL rendering context for the ES API profile.
 		// Uses only the client API version number.
 		EGLContext _eglCreateCoreContextES( EGLRenderContextNativeData & pEGLContextNativeData,
-											const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-											const Version & pTargetAPIVersion,
-											EGLContext pEGLShareContext );
+		                                    const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
+		                                    const Version & pTargetAPIVersion,
+		                                    EGLContext pEGLShareContext );
 
 		// Validates specified API version using selected target API profile (Core/ES).
 		// 'Version' parameter is an IN/OUT parameter and updated with a valid version number.
@@ -74,18 +74,18 @@ namespace ts3::system
 		}
 
 		EGLConfig platform::eglChooseCoreFBConfig( EGLDisplay pDisplay,
-												   const VisualConfig & pVisualConfig,
-												   const Version & pTargetAPIVersion )
+		                                           const VisualConfig & pVisualConfig,
+		                                           const Version & pTargetAPIVersion )
 		{
 			auto eglConfigList = _eglQueryCompatibleEGLConfigList( pDisplay, pVisualConfig, pTargetAPIVersion );
 
 			int bestMatchRate = 0;
 			EGLConfig bestEGLConfig = nullptr;
 
-			for ( auto eglConfig : eglConfigList )
+			for( auto eglConfig : eglConfigList )
 			{
 				int matchRate = _eglGetEGLConfigMatchRate( pDisplay, eglConfig, pVisualConfig );
-				if ( matchRate > bestMatchRate )
+				if( matchRate > bestMatchRate )
 				{
 					bestMatchRate = matchRate;
 					bestEGLConfig = eglConfig;
@@ -110,10 +110,10 @@ namespace ts3::system
 		}
 
 		void platform::eglCreateSurface( EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-										 EGLDisplay pEGLDisplay,
-										 EGLNativeWindowType pWindow,
-										 EGLConfig pEGLConfig,
-										 const VisualConfig & pVisualConfig )
+		                                 EGLDisplay pEGLDisplay,
+		                                 EGLNativeWindowType pWindow,
+		                                 EGLConfig pEGLConfig,
+		                                 const VisualConfig & pVisualConfig )
 		{
 			const EGLint defaultSurfaceAttributeList[] = { EGL_NONE };
 			const EGLint sRGBSurfaceAttributeList[] = { EGL_GL_COLORSPACE, EGL_GL_COLORSPACE_SRGB, EGL_NONE };
@@ -175,39 +175,46 @@ namespace ts3::system
 		}
 
 		void platform::eglCreateCoreContext( EGLRenderContextNativeData & pEGLContextNativeData,
-											 const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-											 const GLRenderContextCreateInfo & pCreateInfo )
+		                                     const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
+		                                     const GLRenderContextCreateInfo & pCreateInfo )
 		{
 			auto createInfo = pCreateInfo;
 
 			_eglValidateRequestedContextVersion( pCreateInfo.runtimeVersionDesc.apiProfile,
-										   createInfo.runtimeVersionDesc.apiVersion );
+			                                     createInfo.runtimeVersionDesc.apiVersion );
 
 			EGLContext shareContextHandle = EGL_NO_CONTEXT;
 			EGLContext contextHandle = EGL_NO_CONTEXT;
 
-			if ( createInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
+			if( createInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
 			{
-				// if( createInfo.shareContext )
-				// {
-				// 	shareContextHandle = createInfo.shareContext->mNativeData->eContextHandle;
-				// }
+				if( createInfo.shareContext )
+				{
+					shareContextHandle = createInfo.shareContext->mNativeData->eContextHandle;
+				}
+				else if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT ) )
+				{
+					if( auto * currentEGLContext = ::eglGetCurrentContext() )
+					{
+						shareContextHandle = currentEGLContext;
+					}
+				}
 			}
 
-			if ( createInfo.runtimeVersionDesc.apiProfile != EGLAPIProfile::OpenGLES )
+			if( createInfo.runtimeVersionDesc.apiProfile != EGLAPIProfile::OpenGLES )
 			{
 				contextHandle = _eglCreateCoreContextDefault( pEGLContextNativeData,
-															  pEGLSurfaceNativeData,
-															  createInfo,
-															  shareContextHandle );
+				                                              pEGLSurfaceNativeData,
+				                                              createInfo,
+				                                              shareContextHandle );
 			}
 
 			if( ( createInfo.runtimeVersionDesc.apiProfile == EGLAPIProfile::OpenGLES ) || !contextHandle )
 			{
 				contextHandle = _eglCreateCoreContextES( pEGLContextNativeData,
-														 pEGLSurfaceNativeData,
-														 createInfo.runtimeVersionDesc.apiVersion,
-														 shareContextHandle );
+				                                         pEGLSurfaceNativeData,
+				                                         createInfo.runtimeVersionDesc.apiVersion,
+				                                         shareContextHandle );
 			}
 
 			if( !contextHandle )
@@ -246,12 +253,12 @@ namespace ts3::system
 		}
 
 		void platform::eglBindContextForCurrentThread( const EGLRenderContextNativeData & pEGLContextNativeData,
-													   const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData )
+		                                               const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData )
 		{
 			::eglMakeCurrent( pEGLContextNativeData.eDisplay,
-							  pEGLSurfaceNativeData.eSurfaceHandle,
-							  pEGLSurfaceNativeData.eSurfaceHandle,
-							  pEGLContextNativeData.eContextHandle );
+			                  pEGLSurfaceNativeData.eSurfaceHandle,
+			                  pEGLSurfaceNativeData.eSurfaceHandle,
+			                  pEGLContextNativeData.eContextHandle );
 		}
 
 
@@ -269,11 +276,11 @@ namespace ts3::system
 
 			// Enumerate framebuffer configs.
 			EGLBoolean enumResult = ::eglChooseConfig( pDisplay,
-													   eglConfigAttribArray,
-													   eglConfigArray,
-													   CX_EGL_MAX_EGL_CONFIGS_NUM,
-													   &returnedEGLConfigsNum );
-			if ( enumResult == EGL_FALSE )
+			                                           eglConfigAttribArray,
+			                                           eglConfigArray,
+			                                           CX_EGL_MAX_EGL_CONFIGS_NUM,
+			                                           &returnedEGLConfigsNum );
+			if( enumResult == EGL_FALSE )
 			{
 				ts3EGLThrowLastError();
 			}
@@ -335,7 +342,7 @@ namespace ts3::system
 			pAttribArray[attribIndex++] = EGL_COLOR_BUFFER_TYPE;
 			pAttribArray[attribIndex++] = EGL_RGB_BUFFER;
 
-			if ( ( pVisualConfig.msaaDesc.bufferCount != 0 ) && ( pVisualConfig.msaaDesc.quality != 0 ) )
+			if( ( pVisualConfig.msaaDesc.bufferCount != 0 ) && ( pVisualConfig.msaaDesc.quality != 0 ) )
 			{
 				pAttribArray[attribIndex++] = EGL_SAMPLE_BUFFERS;
 				pAttribArray[attribIndex++] = pVisualConfig.msaaDesc.bufferCount;
@@ -344,7 +351,7 @@ namespace ts3::system
 				pAttribArray[attribIndex++] = pVisualConfig.msaaDesc.quality;
 			}
 
-			if ( pVisualConfig.colorDesc.rgba.u32Code != 0 )
+			if( pVisualConfig.colorDesc.rgba.u32Code != 0 )
 			{
 				pAttribArray[attribIndex++] = EGL_RED_SIZE;
 				pAttribArray[attribIndex++] = pVisualConfig.colorDesc.rgba.u8Red;
@@ -359,13 +366,13 @@ namespace ts3::system
 				pAttribArray[attribIndex++] = pVisualConfig.colorDesc.rgba.u8Alpha;
 			}
 
-			if ( pVisualConfig.depthStencilDesc.depthBufferSize != 0 )
+			if( pVisualConfig.depthStencilDesc.depthBufferSize != 0 )
 			{
 				pAttribArray[attribIndex++] = EGL_DEPTH_SIZE;
 				pAttribArray[attribIndex++] = pVisualConfig.depthStencilDesc.depthBufferSize;
 			}
 
-			if ( pVisualConfig.depthStencilDesc.stencilBufferSize != 0 )
+			if( pVisualConfig.depthStencilDesc.stencilBufferSize != 0 )
 			{
 				pAttribArray[attribIndex++] = EGL_STENCIL_SIZE;
 				pAttribArray[attribIndex++] = pVisualConfig.depthStencilDesc.stencilBufferSize;
@@ -375,9 +382,9 @@ namespace ts3::system
 		}
 
 		EGLContext _eglCreateCoreContextDefault( EGLRenderContextNativeData & pEGLContextNativeData,
-												 const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-												 const GLRenderContextCreateInfo & pCreateInfo,
-												 EGLContext pEGLShareContext )
+		                                         const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
+		                                         const GLRenderContextCreateInfo & pCreateInfo,
+		                                         EGLContext pEGLShareContext )
 		{
 			auto currentAPI = ::eglQueryAPI();
 			if( currentAPI == EGL_OPENGL_API )
@@ -390,23 +397,23 @@ namespace ts3::system
 			}
 
 			int contextProfile = 0;
-			if ( pCreateInfo.contextProfile == EGLContextProfile::Core )
+			if( pCreateInfo.contextProfile == EGLContextProfile::Core )
 			{
 				contextProfile = EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT;
 			}
-			else if ( pCreateInfo.contextProfile == EGLContextProfile::Legacy )
+			else if( pCreateInfo.contextProfile == EGLContextProfile::Legacy )
 			{
 				contextProfile = EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT;
 			}
 
 			EGLint debugContextFlag = EGL_FALSE;
-			if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
+			if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
 			{
 				debugContextFlag = EGL_TRUE;
 			}
 
 			EGLint forwardCompatibleContextFlag = EGL_FALSE;
-			if ( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
+			if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
 			{
 				forwardCompatibleContextFlag = EGL_TRUE;
 			}
@@ -428,9 +435,9 @@ namespace ts3::system
 			};
 
 			EGLContext contextHandle = ::eglCreateContext( pEGLSurfaceNativeData.eDisplay,
-														   pEGLSurfaceNativeData.eFBConfig,
-														   pEGLShareContext,
-														   contextAttributesCore );
+			                                               pEGLSurfaceNativeData.eFBConfig,
+			                                               pEGLShareContext,
+			                                               contextAttributesCore );
 			if( contextHandle == EGL_NO_CONTEXT )
 			{
 				ts3EGLThrowLastError();
@@ -440,9 +447,9 @@ namespace ts3::system
 		}
 
 		EGLContext _eglCreateCoreContextES( EGLRenderContextNativeData & pEGLContextNativeData,
-											const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-											const Version & pTargetAPIVersion,
-											EGLContext pEGLShareContext )
+		                                    const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
+		                                    const Version & pTargetAPIVersion,
+		                                    EGLContext pEGLShareContext )
 		{
 			auto currentAPI = ::eglQueryAPI();
 			if( currentAPI == EGL_OPENGL_ES_API )
@@ -463,9 +470,9 @@ namespace ts3::system
 			};
 
 			EGLContext contextHandle = ::eglCreateContext( pEGLSurfaceNativeData.eDisplay,
-														   pEGLSurfaceNativeData.eFBConfig,
-														   pEGLShareContext,
-														   contextAttributesES );
+			                                               pEGLSurfaceNativeData.eFBConfig,
+			                                               pEGLShareContext,
+			                                               contextAttributesES );
 			if( contextHandle == EGL_NO_CONTEXT )
 			{
 				ts3EGLThrowLastError();

@@ -25,7 +25,7 @@
 
 #if !defined( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
 #  if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_MSE )
-#    define TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI 1
+#    efine TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI 1
 #  else
 #    define TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI 0
 #  endif
@@ -38,12 +38,12 @@
 namespace ts3::system
 {
 
-    ts3SysDeclareHandle( DisplayManager );
-    ts3SysDeclareHandle( DisplayDriver );
+	ts3SysDeclareHandle( DisplayManager );
+	ts3SysDeclareHandle( DisplayDriver );
 
-    class DisplayAdapter;
-    class DisplayOutput;
-    class DisplayVideoMode;
+	class DisplayAdapter;
+	class DisplayOutput;
+	class DisplayVideoMode;
 
 	using dsm_index_t = uint16;
 	using dsm_output_id_t = uint32;
@@ -107,7 +107,7 @@ namespace ts3::system
 	/// @brief Represents ID of the vendor of the graphics adapter/device.
 	enum class EDisplayAdapterVendorID : enum_default_value_t
 	{
-	    Unknown,
+		Unknown,
 		AMD,
 		ARM,
 		Google,
@@ -120,11 +120,11 @@ namespace ts3::system
 	/// @brief
 	enum EDisplayAdapterFlags : uint32
 	{
-	    // Adapter is active. The meaning of this flag is driver-specific - do not assume an active adapter
-	    // to have, for example, any active outputs. Use DisplayAdapter::hasActiveOutputs() to check that.
-	    E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT = 0x1,
-	    // Adapter is a primary/default adapter in the system.
-	    E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT = 0x2,
+		// Adapter is active. The meaning of this flag is driver-specific - do not assume an active adapter
+		// to have, for example, any active outputs. Use DisplayAdapter::hasActiveOutputs() to check that.
+		E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT = 0x1,
+		// Adapter is a primary/default adapter in the system.
+		E_DISPLAY_ADAPTER_FLAG_PRIMARY_BIT = 0x2,
 		// Adapter is a software adapter.
 		E_DISPLAY_ADAPTER_FLAG_HARDWARE_BIT = 0x4,
 		// Adapter is a software adapter. May indicate WARP-capable adapter in case of a DXGI driver.
@@ -136,8 +136,8 @@ namespace ts3::system
 	/// @brief
 	enum EDisplayOutputFlags : uint32
 	{
-	    // Output is active. In most cases it means the output is connected to the desktop.
-	    E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT = 0x1,
+		// Output is active. In most cases it means the output is connected to the desktop.
+		E_DISPLAY_OUTPUT_FLAG_ACTIVE_BIT = 0x1,
 		// Output is the primary output of an adapter.
 		E_DISPLAY_OUTPUT_FLAG_PRIMARY_BIT = 0x2
 	};
@@ -166,36 +166,36 @@ namespace ts3::system
 
 	struct ScreenRect
 	{
-	    DisplayOffset offset;
+		DisplayOffset offset;
 		DisplaySize size;
 	};
 
 	/// @brief
 	struct DisplayVideoSettings
 	{
-	    DisplaySize resolution;
+		DisplaySize resolution;
 		uint16 refreshRate = 0u;
 		Bitmask<EDisplayVideoSettingsFlags> flags = 0u;
 
 		bool equals( const DisplayVideoSettings & pOther ) const
 		{
-		    return ( resolution == pOther.resolution ) && ( refreshRate == pOther.refreshRate ) && ( flags == pOther.flags );
+			return ( resolution == pOther.resolution ) && ( refreshRate == pOther.refreshRate ) && ( flags == pOther.flags );
 		}
 
 		bool matches( const DisplayVideoSettings & pOther ) const
 		{
-		    return ( resolution == pOther.resolution ) && ( refreshRate == pOther.refreshRate ) && flags.isSet( pOther.flags );
+			return ( resolution == pOther.resolution ) && ( refreshRate == pOther.refreshRate ) && flags.isSet( pOther.flags );
 		}
 	};
 
 	inline bool operator==( const DisplayVideoSettings & pLhs, const DisplayVideoSettings & pRhs )
 	{
-	    return pLhs.equals( pRhs );
+		return pLhs.equals( pRhs );
 	}
 
 	inline bool operator!=( const DisplayVideoSettings & pLhs, const DisplayVideoSettings & pRhs )
 	{
-	    return !pLhs.equals( pRhs );
+		return !pLhs.equals( pRhs );
 	}
 
 	inline constexpr DisplayVideoSettings cvDisplayVideoSettingsEmpty { { 0U, 0U }, 0U, 0U };
@@ -217,12 +217,12 @@ namespace ts3::system
 
 	inline bool operator==( const DisplayVideoSettingsFilter & pLhs, const DisplayVideoSettingsFilter & pRhs )
 	{
-	    return ( pLhs.refSettings == pRhs.refSettings ) && ( pLhs.flags == pRhs.flags );
+		return ( pLhs.refSettings == pRhs.refSettings ) && ( pLhs.flags == pRhs.flags );
 	}
 
 	inline bool operator!=( const DisplayVideoSettingsFilter & pLhs, const DisplayVideoSettingsFilter & pRhs )
 	{
-	    return ( pLhs.refSettings != pRhs.refSettings ) || ( pLhs.flags != pRhs.flags );
+		return ( pLhs.refSettings != pRhs.refSettings ) || ( pLhs.flags != pRhs.flags );
 	}
 
 	inline constexpr DisplayVideoSettingsFilter cvDisplayVideoSettingsFilterNone { cvDisplayVideoSettingsEmpty, 0U };

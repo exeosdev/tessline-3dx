@@ -8,41 +8,52 @@
 namespace ts3::system
 {
 
-    template <event_code_value_t tpEventCode>
-    struct EvtWindow : public EvtBase
-    {
-    public:
-        EventSource * eventSource = nullptr;
+	enum class EWindowVisibilityState : uint32
+	{
+		Unknown,
+		Hidden,
+		Visible
+	};
 
-    public:
-        constexpr EvtWindow()
-        : EvtBase( tpEventCode )
-        {}
+	template <event_code_value_t tpEventCode>
+	struct EvtWindow : public EvtBase
+	{
+	public:
+		EventSource * eventSource = nullptr;
 
-        template <typename TpObject>
-        bool checkEventSource( const TpObject * pSource ) const
-        {
-            return static_cast<const void *>( pSource ) == eventSource;
-        }
-    };
+	public:
+		constexpr EvtWindow()
+		: EvtBase( tpEventCode )
+		{}
 
-    struct EvtWindowUpdateClose : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_CLOSE>
-    {
-    };
+		template <typename TpObject>
+		bool checkEventSource( const TpObject * pSource ) const
+		{
+			return static_cast<const void *>( pSource ) == eventSource;
+		}
+	};
 
-    struct EvtWindowUpdateFullscreen : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN>
-    {
-    };
+	struct EvtWindowUpdateCreate : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_CREATE>
+	{
+	};
 
-    struct EvtWindowUpdateResize : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_RESIZE>
-    {
-        FrameSize newSize;
-    };
+	struct EvtWindowUpdateDestroy : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_DESTROY>
+	{
+	};
 
-    struct EvtWindowUpdateVisibility : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY>
-    {
-        bool newVisibilityState;
-    };
+	struct EvtWindowUpdateFullscreen : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN>
+	{
+	};
+
+	struct EvtWindowUpdateResize : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_RESIZE>
+	{
+		FrameSize newSize;
+	};
+
+	struct EvtWindowUpdateVisibility : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY>
+	{
+		EWindowVisibilityState newVisibilityState = EWindowVisibilityState::Unknown;
+	};
 
 } // namespace ts3::system
 

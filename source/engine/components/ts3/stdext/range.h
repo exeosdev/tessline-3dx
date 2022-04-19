@@ -124,47 +124,47 @@ namespace ts3
 		}
 	};
 
-    template <typename TpSize, typename TpOffset = TpSize>
-    struct Region
-    {
-        using Range = InclusiveRange<TpSize>;
+	template <typename TpSize, typename TpOffset = TpSize>
+	struct Region
+	{
+		using Range = InclusiveRange<TpSize>;
 
-        TpOffset offset = 0;
-        TpSize size = 0;
+		TpOffset offset = 0;
+		TpSize size = 0;
 
-        explicit operator bool() const
-        {
-            return !empty();
-        }
+		explicit operator bool() const
+		{
+			return !empty();
+		}
 
-        Range asRange() const
-        {
-            return { offset, offset + size };
-        }
+		Range asRange() const
+		{
+			return { offset, offset + size };
+		}
 
-        void reset()
-        {
-            offset = 0;
-            size = 0;
-        }
+		void reset()
+		{
+			offset = 0;
+			size = 0;
+		}
 
-        TS3_PCL_ATTR_NO_DISCARD bool empty() const
-        {
-            return size == 0;
-        }
-    };
+		TS3_PCL_ATTR_NO_DISCARD bool empty() const
+		{
+			return size == 0;
+		}
+	};
 
-    template <typename TpSize, typename TpOffset>
-    inline bool operator==( const Region<TpSize, TpOffset> & pLhs, const Region<TpSize, TpOffset> & pRhs )
-    {
-        return ( pLhs.offset == pRhs.offset ) && ( pLhs.size == pRhs.size );
-    }
+	template <typename TpSize, typename TpOffset>
+	inline bool operator==( const Region<TpSize, TpOffset> & pLhs, const Region<TpSize, TpOffset> & pRhs )
+	{
+		return ( pLhs.offset == pRhs.offset ) && ( pLhs.size == pRhs.size );
+	}
 
-    template <typename TpSize, typename TpOffset>
-    inline bool operator!=( const Region<TpSize, TpOffset> & pLhs, const Region<TpSize, TpOffset> & pRhs )
-    {
-        return ( pLhs.offset != pRhs.offset ) || ( pLhs.size != pRhs.size );
-    }
+	template <typename TpSize, typename TpOffset>
+	inline bool operator!=( const Region<TpSize, TpOffset> & pLhs, const Region<TpSize, TpOffset> & pRhs )
+	{
+		return ( pLhs.offset != pRhs.offset ) || ( pLhs.size != pRhs.size );
+	}
 
 }
 

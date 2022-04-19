@@ -14,7 +14,7 @@ namespace ts3
 	uint32 HashTraits<HashAlgo::Adler32>::update( uint32 pHash, const void * pInput, size_t pInputSize )
 	{
 		uint32 result = pHash;
-		if ( pInputSize > 0 )
+		if( pInputSize > 0 )
 		{
 			const byte * inputBytes = reinterpret_cast<const byte *>( pInput );
 			auto tmpRes = adler32( pHash, inputBytes, static_cast<uInt>( pInputSize ) );
@@ -32,11 +32,11 @@ namespace ts3
 	uint32 HashTraits<HashAlgo::CRC32>::update( uint32 pHash, const void * pInput, size_t pInputSize )
 	{
 		uint32 result = pHash;
-		if ( pInputSize > 0 )
+		if( pInputSize > 0 )
 		{
 			const byte * inputBytes = reinterpret_cast<const byte *>( pInput );
-		#if ( EBS_EIS_SUPPORT_LEVEL & ECL_EIS_FEATURE_SSE42 )
-			for ( ; pInputSize >= 4; inputBytes += 4, pInputSize -= 4 )
+		#if( EBS_EIS_SUPPORT_LEVEL & ECL_EIS_FEATURE_SSE42 )
+			for( ; pInputSize >= 4; inputBytes += 4, pInputSize -= 4 )
 			{
 				auto tmpres = _mm_crc32_u32( result, *( reinterpret_cast<const uint32 *>( inputBytes ) ) );
 				result = static_cast<uint32>( tmpres );
@@ -57,7 +57,7 @@ namespace ts3
 	uint32 HashTraits<HashAlgo::DJB2>::update( uint32 pHash, const void * pInput, size_t pInputSize )
 	{
 		uint32 result = pHash;
-		if ( pInputSize > 0 )
+		if( pInputSize > 0 )
 		{
 			const byte * inputBytes = reinterpret_cast<const byte *>( pInput );
 			for( size_t byteIndex = 0; byteIndex < pInputSize; ++byteIndex )
@@ -80,7 +80,7 @@ namespace ts3
 	uint64 HashTraits<HashAlgo::FNV1A>::update( uint64 pHash, const void * pInput, size_t pInputSize )
 	{
 		uint64 result = pHash;
-		if ( pInputSize > 0 )
+		if( pInputSize > 0 )
 		{
 			const byte * inputBytes = reinterpret_cast<const byte *>( pInput );
 			for( size_t byteIndex = 0; byteIndex < pInputSize; ++byteIndex )
@@ -101,7 +101,7 @@ namespace ts3
 	uint32 HashTraits<HashAlgo::SDBM>::update( uint32 pHash, const void * pInput, size_t pInputSize )
 	{
 		uint32 result = pHash;
-		if ( pInputSize > 0 )
+		if( pInputSize > 0 )
 		{
 			const byte * inputBytes = reinterpret_cast<const byte *>( pInput );
 			for( size_t byteIndex = 0; byteIndex < pInputSize; ++byteIndex )

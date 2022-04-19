@@ -25,7 +25,7 @@ namespace ts3::math
 		using Type = Tp[4];
 	};
 
-#if ( TS3_MATH_SIMD_USE_VX128F )
+#if( TS3_MATH_SIMD_USE_VX128F )
 	template <>
 	struct Vector4SIMDData<float>
 	{
@@ -33,7 +33,7 @@ namespace ts3::math
 	};
 #endif
 
-#if ( TS3_MATH_SIMD_USE_VX128I )
+#if( TS3_MATH_SIMD_USE_VX128I )
 	template <>
 	struct Vector4SIMDData<int32>
 	{
@@ -47,7 +47,7 @@ namespace ts3::math
 	};
 #endif
 
-#if ( TS3_MATH_SIMD_USE_VX256D )
+#if( TS3_MATH_SIMD_USE_VX256D )
 	template <>
 	struct Vector4SIMDData<double>
 	{
@@ -55,7 +55,7 @@ namespace ts3::math
 	};
 #endif
 
-#if ( TS3_MATH_SIMD_USE_VX256I )
+#if( TS3_MATH_SIMD_USE_VX256I )
 	template <>
 	struct Vector4SIMDData<int64>
 	{
@@ -96,10 +96,10 @@ namespace ts3::math
 				Tp x, y;
 			};
 
-            struct
-            {
-                Tp values[2];
-            };
+			struct
+			{
+				Tp values[2];
+			};
 		};
 
 	public:
@@ -172,10 +172,10 @@ namespace ts3::math
 				Tp x, y, z;
 			};
 
-            struct
-            {
-                Tp values[3];
-            };
+			struct
+			{
+				Tp values[3];
+			};
 		};
 
 	public:
@@ -267,16 +267,16 @@ namespace ts3::math
 				Tp x, y, z, w;
 			};
 
-            struct
-            {
-                // Either generic array of values or SSE/AVX SIMD type (depends on support and build config).
-                SIMDDataType mmv;
-            };
+			struct
+			{
+				// Either generic array of values or SSE/AVX SIMD type (depends on support and build config).
+				SIMDDataType mmv;
+			};
 
-            struct
-            {
-                Tp values[4];
-            };
+			struct
+			{
+				Tp values[4];
+			};
 		};
 
 	public:
@@ -361,17 +361,17 @@ namespace ts3::math
 		, w( static_cast<Tp>( pW ) )
 		{}
 
-        Tp & operator[]( size_t pIndex ) noexcept
-        {
-            ts3DebugAssert( pIndex < sLength )
-            return values[pIndex];
-        }
+		Tp & operator[]( size_t pIndex ) noexcept
+		{
+			ts3DebugAssert( pIndex < sLength )
+			return values[pIndex];
+		}
 
-        const Tp & operator[]( size_t pIndex ) const noexcept
-        {
-            ts3DebugAssert( pIndex < sLength )
-            return values[pIndex];
-        }
+		const Tp & operator[]( size_t pIndex ) const noexcept
+		{
+			ts3DebugAssert( pIndex < sLength )
+			return values[pIndex];
+		}
 
 		Tp * data() noexcept
 		{
@@ -383,15 +383,15 @@ namespace ts3::math
 			return &( values[0] );
 		}
 
-        SIMDDataType * simdPtr() noexcept
-        {
-            return &mmv;
-        }
+		SIMDDataType * simdPtr() noexcept
+		{
+			return &mmv;
+		}
 
-        const SIMDDataType * simdPtr() const noexcept
-        {
-            return &mmv;
-        }
+		const SIMDDataType * simdPtr() const noexcept
+		{
+			return &mmv;
+		}
 	};
 
 	template <typename Tp>

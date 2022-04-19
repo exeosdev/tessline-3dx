@@ -25,7 +25,7 @@ namespace ts3
 
 		template <typename TpBits>
 		constexpr Bitmask( TpBits pValue ) noexcept
-        : _value( static_cast<ValueType>( pValue ) )
+		: _value( static_cast<ValueType>( pValue ) )
 		{}
 
 		template <typename TpBits>
@@ -70,7 +70,7 @@ namespace ts3
 		}
 
 		template <typename TpBits>
-		void setOrUnset( bool pSet, TpBits pBits )
+		void setOrUnset( TpBits pBits, bool pSet )
 		{
 			if( pSet )
 			{
@@ -85,7 +85,7 @@ namespace ts3
 		template <typename TpBits>
 		bool testAndSet( TpBits pBits )
 		{
-			if ( ( _value & static_cast<ValueType>( pBits ) ) != 0 )
+			if( ( _value & static_cast<ValueType>( pBits ) ) != 0 )
 			{
 				return false;
 			}
@@ -97,7 +97,7 @@ namespace ts3
 		template <typename TpBits>
 		bool testAndUnset( TpBits pBits )
 		{
-			if ( ( _value & static_cast<ValueType>( pBits ) ) != static_cast<ValueType>( pBits ) )
+			if( ( _value & static_cast<ValueType>( pBits ) ) != static_cast<ValueType>( pBits ) )
 			{
 				return false;
 			}
@@ -202,7 +202,7 @@ namespace ts3
 	template <typename TpIntegral>
 	inline constexpr Bitmask<TpIntegral> makeBitmask( TpIntegral pValue )
 	{
-	    return Bitmask<TpIntegral>( pValue );
+		return Bitmask<TpIntegral>( pValue );
 	}
 
 }

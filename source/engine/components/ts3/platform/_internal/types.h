@@ -18,7 +18,7 @@ using uint64 = uint64_t;
 #  define w64
 #endif
 
-#if ( TS3_PCL_TARGET_64 )
+#if( TS3_PCL_TARGET_64 )
 using _native_int = int64;
 using _native_uint = uint64;
 #else

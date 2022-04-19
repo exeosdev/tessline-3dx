@@ -9,51 +9,51 @@
 namespace ts3::system
 {
 
-    struct EGLError
-    {
-    public:
-        EGLenum errorCode;
+	struct EGLError
+	{
+	public:
+		EGLenum errorCode;
 
-    public:
-        EGLError( EGLenum pErrorCode )
-        : errorCode( pErrorCode )
-        {}
+	public:
+		EGLError( EGLenum pErrorCode )
+		: errorCode( pErrorCode )
+		{}
 
-        constexpr explicit operator bool() const
-        {
-            return errorCode != EGL_SUCCESS;
-        }
-    };
+		constexpr explicit operator bool() const
+		{
+			return errorCode != EGL_SUCCESS;
+		}
+	};
 
-    class EGLCoreAPI
-    {
-    public:
-        static Version queryRuntimeVersion();
+	class EGLCoreAPI
+	{
+	public:
+		static Version queryRuntimeVersion();
 
-        static bool checkLastResult();
+		static bool checkLastResult();
 
-        static bool checkLastError( EGLenum pErrorCode );
+		static bool checkLastError( EGLenum pErrorCode );
 
-        static EGLError getLastError();
+		static EGLError getLastError();
 
-        static void handleLastError();
+		static void handleLastError();
 
-        static void resetErrorQueue();
+		static void resetErrorQueue();
 
-        static const char * translateErrorCode( EGLenum pError );
-    };
+		static const char * translateErrorCode( EGLenum pError );
+	};
 
 #define ts3EGLMakeErrorInfo( pEGLError ) \
-    GLErrorInfo( pEGLError, EGLCoreAPI::translateErrorCode( pEGLError ) )
+	GLErrorInfo( pEGLError, EGLCoreAPI::translateErrorCode( pEGLError ) )
 
 #define ts3EGLGetLastErrorInfo() \
-    ts3EGLMakeErrorInfo( ::eglGetError() )
+	ts3EGLMakeErrorInfo( ::eglGetError() )
 
 #define ts3EGLThrowError( pErrorDesc ) \
-    ts3ThrowDesc( E_EXC_SYSTEM_OPENGL_SUBSYS_EGL_ERROR, pErrorDesc )
+	ts3ThrowDesc( E_EXC_SYSTEM_OPENGL_SUBSYS_EGL_ERROR, pErrorDesc )
 
 #define ts3EGLThrowLastError() \
-    ts3ThrowEx( E_EXC_SYSTEM_OPENGL_SUBSYS_EGL_ERROR, ts3EGLGetLastErrorInfo() )
+	ts3ThrowEx( E_EXC_SYSTEM_OPENGL_SUBSYS_EGL_ERROR, ts3EGLGetLastErrorInfo() )
 
 } // namespace ts3::system
 

@@ -49,10 +49,10 @@ namespace ts3::math
 		return 1.0 / sqrt( pValue );
 	}
 
-    inline std::pair<float, float> sinCos( float pValue )
-    {
-        return { std::sin( pValue ), std::cos( pValue ) };
-    }
+	inline std::pair<float, float> sinCos( float pValue )
+	{
+		return { std::sin( pValue ), std::cos( pValue ) };
+	}
 
 }
 

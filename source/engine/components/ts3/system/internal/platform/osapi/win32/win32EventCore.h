@@ -10,61 +10,59 @@
 namespace ts3::system
 {
 
-    namespace platform
-    {
+	class Win32EventController;
 
-        struct Win32EventSourceNativeData
-        {
-            HWND hwnd = nullptr;
-        };
+	namespace platform
+	{
 
-        struct Win32EventSourceState
-        {
-            LONG_PTR savedEventCallback = 0;
-            LONG_PTR savedEventCallbackUserData = 0;
-            EventController * eventController = nullptr;
-        };
+		struct Win32EventSourceNativeData
+		{
+			HWND hwnd = nullptr;
+		};
 
-        struct Win32EventSourceStateDeleter
-        {
-            void operator()( void * pState )
-            {
-                auto * win32State = static_cast<Win32EventSourceState *>( pState );
-                delete win32State;
-            }
-        };
+		struct Win32EventSourceState
+		{
+			LONG_PTR savedEventCallback = 0;
+			LONG_PTR savedEventCallbackUserData = 0;
+			EventController * eventController = nullptr;
+		};
 
-        struct NativeEventType : public MSG
-        {};
+		struct NativeEventType : public MSG
+		{};
 
-        using Win32NativeEvent = NativeEventType;
+		using Win32NativeEvent = NativeEventType;
 
-        bool win32TranslateEvent( EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
+		TS3_SYSTEM_API_NODISCARD EventSource * win32FindEventSourceByHWND( Win32EventController & pEventController, HWND pHWND );
 
-    }
+		bool win32TranslateEvent( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
 
-    class Win32EventController : public Win32NativeObject<EventController, void>
-    {
-    public:
-        Win32EventController( SysContextHandle pSysContext );
-        virtual ~Win32EventController() noexcept;
+		// Default event procedure for all windows created by the system.
+		LRESULT __stdcall win32DefaultWindowEventCallback( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 
-        using EventController::getEventSystemInternalConfig;
-        using EventController::getEventSystemSharedState;
+	}
 
-    private:
-        /// @override EventController::_nativeRegisterEventSource
-        virtual void _nativeRegisterEventSource( EventSource & pEventSource ) override final;
+	class Win32EventController : public Win32NativeObject<EventController, void>
+	{
+	public:
+		Win32EventController( SysContextHandle pSysContext );
+		virtual ~Win32EventController() noexcept;
 
-        /// @override EventController::_nativeUnregisterEventSource
-        virtual void _nativeUnregisterEventSource( EventSource & pEventSource ) override final;
+		using EventController::getEventSystemInternalConfig;
+		using EventController::getEventDispatcherInputState;
 
-        /// @override EventController::_nativeUpdateSysQueue
-        virtual bool _nativeUpdateSysQueue() override final;
+	private:
+		/// @override EventController::_nativeRegisterEventSource
+		virtual void _nativeRegisterEventSource( EventSource & pEventSource ) override final;
 
-        /// @override EventController::_nativeUpdateSysQueueWait
-        virtual bool _nativeUpdateSysQueueWait() override final;
-    };
+		/// @override EventController::_nativeUnregisterEventSource
+		virtual void _nativeUnregisterEventSource( EventSource & pEventSource ) override final;
+
+		/// @override EventController::_nativeUpdateSysQueue
+		virtual bool _nativeUpdateSysQueue() override final;
+
+		/// @override EventController::_nativeUpdateSysQueueWait
+		virtual bool _nativeUpdateSysQueueWait() override final;
+	};
 
 } // namespace ts3::system
 

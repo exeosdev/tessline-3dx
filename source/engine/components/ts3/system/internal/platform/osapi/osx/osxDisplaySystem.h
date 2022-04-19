@@ -2,81 +2,86 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_OSX_DISPLAY_SYSTEM_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_OSX_DISPLAY_SYSTEM_H__
 
-#include "osxCommon.h"
+#include "osxSysContext.h"
 #include <ts3/system/displayConfiguration.h>
 #include <ts3/system/displaySystem.h>
-#include <CoreGraphics/CGDirectDisplay.h>
+
+#import <CoreGraphics/CGDirectDisplay.h>
 
 namespace ts3::system
 {
 
-    ts3SysDeclareHandle( OSXDisplayManager );
-    ts3SysDeclareHandle( OSXDisplayDriver );
+	ts3SysDeclareHandle( OSXDisplayManager );
+	ts3SysDeclareHandle( OSXDisplayDriver );
 
-    namespace platform
-    {
+	namespace platform
+	{
 
-        struct OSXDisplayManagerNativeData
-        {
-            std::unique_ptr<CGDirectDisplayID[]> cgActiveDisplayList;
-            CGDisplayCount cgActiveDisplaysNum = 0;
+		struct OSXDisplayManagerNativeData : public OSXNativeDataCommon
+		{
+			std::unique_ptr<CGDirectDisplayID[]> cgActiveDisplayList;
+			CGDisplayCount cgActiveDisplaysNum = 0;
 			CGDirectDisplayID cgMainDisplayID = kCGNullDirectDisplay;
-        };
+		};
 
-        struct OSXDisplayDriverNativeData
-        {
-        };
+		struct OSXDisplayDriverNativeData : public OSXNativeDataCommon
+		{
+		};
 
-        struct OSXDisplayAdapterNativeData
-        {
-        };
+		struct OSXDisplayAdapterNativeData : public OSXNativeDataCommon
+		{
+		};
 
-        struct OSXDisplayOutputNativeData
-        {
-        };
+		struct OSXDisplayOutputNativeData : public OSXNativeDataCommon
+		{
+		};
 
-        struct OSXDisplayVideoModeNativeData
-        {
-        };
+		struct OSXDisplayVideoModeNativeData : public OSXNativeDataCommon
+		{
+		};
 
-    }
+		TS3_SYSTEM_API_NODISCARD ScreenRect osxQueryDisplayBounds( CGDirectDisplayID pCGDisplayID );
 
-    using OSXDisplayAdapter = OSXNativeObject<DisplayAdapter, platform::OSXDisplayAdapterNativeData>;
-    using OSXDisplayOutput = OSXNativeObject<DisplayOutput, platform::OSXDisplayOutputNativeData>;
-    using OSXDisplayVideoMode = OSXNativeObject<DisplayVideoMode, platform::OSXDisplayVideoModeNativeData>;
+		TS3_SYSTEM_API_NODISCARD DisplaySize osxQueryDisplaySize( CGDirectDisplayID pCGDisplayID );
 
-    /// @brief
-    class OSXDisplayManager : public OSXNativeObject<DisplayManager, platform::OSXDisplayManagerNativeData>
-    {
-    public:
-        explicit OSXDisplayManager( SysContextHandle pSysContext );
-        virtual ~OSXDisplayManager() noexcept;
+	}
 
-    private:
-        void _initializeOSXDisplayManagerState();
-        void _releaseOSXDisplayManagerState();
-        
-        virtual DisplayDriverHandle _nativeCreateDisplayDriver() override final;
+	using OSXDisplayAdapter = OSXNativeObject<DisplayAdapter, platform::OSXDisplayAdapterNativeData>;
+	using OSXDisplayOutput = OSXNativeObject<DisplayOutput, platform::OSXDisplayOutputNativeData>;
+	using OSXDisplayVideoMode = OSXNativeObject<DisplayVideoMode, platform::OSXDisplayVideoModeNativeData>;
 
-        virtual void _nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const override final;
+	/// @brief
+	class OSXDisplayManager : public OSXNativeObject<DisplayManager, platform::OSXDisplayManagerNativeData>
+	{
+	public:
+		explicit OSXDisplayManager( SysContextHandle pSysContext );
+		virtual ~OSXDisplayManager() noexcept;
 
-        virtual void _nativeQueryMinWindowSize( DisplaySize & pOutSize ) const override final;
-    };
+	private:
+		void _initializeOSXDisplayManagerState();
+		void _releaseOSXDisplayManagerState();
+		
+		virtual DisplayDriverHandle _nativeCreateDisplayDriver() override final;
 
-    /// @brief
-    class OSXDisplayDriver : public OSXNativeObject<DisplayDriver, platform::OSXDisplayDriverNativeData>
-    {
-    public:
-        explicit OSXDisplayDriver( DisplayManagerHandle pDisplayManager );
-        virtual ~OSXDisplayDriver() noexcept;
+		virtual void _nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const override final;
 
-    private:
-        virtual void _nativeEnumDisplayDevices() override final;
+		virtual void _nativeQueryMinWindowSize( DisplaySize & pOutSize ) const override final;
+	};
 
-        virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat ) override final;
+	/// @brief
+	class OSXDisplayDriver : public OSXNativeObject<DisplayDriver, platform::OSXDisplayDriverNativeData>
+	{
+	public:
+		explicit OSXDisplayDriver( OSXDisplayManagerHandle pDisplayManager );
+		virtual ~OSXDisplayDriver() noexcept;
 
-        virtual EColorFormat _nativeQueryDefaultSystemColorFormat() const override final;
-    };
+	private:
+		virtual void _nativeEnumDisplayDevices() override final;
+
+		virtual void _nativeEnumVideoModes( DisplayOutput & pOutput, EColorFormat pColorFormat ) override final;
+
+		virtual EColorFormat _nativeQueryDefaultSystemColorFormat() const override final;
+	};
 
 } // namespace ts3::system
 

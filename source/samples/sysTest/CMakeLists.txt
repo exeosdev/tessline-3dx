@@ -1,15 +1,15 @@
 
 if( "${CM_EBS_SYSCONF_TARGET_PLATFORM}" STREQUAL "Android" )
     add_library( ts3sample-sysTest STATIC
-            "sysTest-gpuapi-meshDefs.h"
-            "sysTest-gpuapi.cpp"
-            #"sysTest-main.cpp"
+            #"sysTest-gpuapi-meshDefs.h"
+            #"sysTest-gpuapi.cpp"
+            "sysTest-main.cpp"
             )
 else()
     add_executable( ts3sample-sysTest
-            "sysTest-gpuapi-meshDefs.h"
-            "sysTest-gpuapi.cpp"
-            #"sysTest-main.cpp"
+            #"sysTest-gpuapi-meshDefs.h"
+            #"sysTest-gpuapi.cpp"
+            "sysTest-main.cpp"
             )
 endif()
 

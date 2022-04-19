@@ -12,14 +12,4 @@
 #  endif
 #endif
 
-namespace ts3::system
-{
-
-    struct AssetLoaderCreateInfo
-    {
-        platform::AssetLoaderCreateInfoNativeParams nativeParams;
-    };
-
-} // namespace ts3::system
-
 #endif // __TS3_SYSTEM_ASSET_SYSTEM_NATIVE_H__

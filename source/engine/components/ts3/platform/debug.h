@@ -66,12 +66,12 @@ namespace ts3
 	/// @brief Issues a debug interrupt if provided condition is not met. Usually implemented via { asm int 3 } or its equivalent.
 	/// If _ts3DebugAssertionFailHandler is defined, provided handler is used instead.
 	#define ts3DebugAssert( pCondition ) \
-        { \
-            if(!(pCondition)) \
-            { \
-                ::ts3::DebugInterface::assertionFail( _ts3DebugAssertionFailHandler, ts3CurrentFileLocationInfo(), #pCondition ); \
-            } \
-        }
+		{ \
+			if(!(pCondition)) \
+			{ \
+				::ts3::DebugInterface::assertionFail( _ts3DebugAssertionFailHandler, ts3CurrentFileLocationInfo(), #pCondition ); \
+			} \
+		}
 
 	/// @brief Issues a debug interrupt if provided condition is not met. Interruption is triggered only once, at the first condition failure.
 	/// If _ts3DebugAssertionFailHandler is defined, provided handler is used instead.
@@ -88,9 +88,9 @@ namespace ts3
 	/// @brief Issues a debug interrupt. Usually implemented via { asm int 3 } or its equivalent.
 	/// If _ts3DebugInterruptHandler is defined, provided handler is used instead.
 	#define ts3DebugInterrupt() \
-        { \
-            ::ts3::DebugInterface::interrupt( _ts3DebugInterruptHandler, ts3CurrentFileLocationInfo() ); \
-        }
+		{ \
+			::ts3::DebugInterface::interrupt( _ts3DebugInterruptHandler, ts3CurrentFileLocationInfo() ); \
+		}
 
 	/// @brief Issues a debug interrupt. Interruption is triggered only once, at the first condition failure.
 	/// If _ts3DebugInterruptHandler is defined, provided handler is used instead.
@@ -118,12 +118,12 @@ namespace ts3
 	/// @brief Similar to ts3DebugAssert, but uses explicitly specified handler to handle a condition failure.
 	/// If _ts3DebugAssertionFailHandler is defined, provided handler is used instead.
 	#define ts3DebugAssertEx( pHandler, pCondition ) \
-        { \
-	        if(!(pCondition)) \
-	        { \
-	            ::ts3::DebugInterface::assertionFail( pHandler, ts3CurrentFileLocationInfo(), #pCondition ); \
-	        } \
-        }
+		{ \
+			if(!(pCondition)) \
+			{ \
+				::ts3::DebugInterface::assertionFail( pHandler, ts3CurrentFileLocationInfo(), #pCondition ); \
+			} \
+		}
 
 	/// @brief Similar to ts3DebugAssertOnce, but uses explicitly specified handler to handle a condition failure.
 	/// If _ts3DebugAssertionFailHandler is defined, provided handler is used instead.
@@ -140,9 +140,9 @@ namespace ts3
 	/// @brief Similar to ts3DebugInterrupt, but uses explicitly specified handler to handle a condition failure.
 	/// If _ts3DebugInterruptHandler is defined, provided handler is used instead.
 	#define ts3DebugInterruptEx( pHandler ) \
-        { \
-            ::ts3::DebugInterface::interrupt( pHandler, ts3CurrentFileLocationInfo() ); \
-        }
+		{ \
+			::ts3::DebugInterface::interrupt( pHandler, ts3CurrentFileLocationInfo() ); \
+		}
 
 	/// @brief Similar to ts3DebugInterruptOnce, but uses explicitly specified handler to handle a condition failure.
 	/// If _ts3DebugInterruptHandler is defined, provided handler is used instead.

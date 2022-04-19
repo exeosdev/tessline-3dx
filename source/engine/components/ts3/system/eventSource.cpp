@@ -5,62 +5,73 @@
 namespace ts3::system
 {
 
-    EventSource::EventSource( SysContextHandle pSysContext )
-    : SysObject( std::move( pSysContext ) )
-    {}
+	EventSource::EventSource( SysContextHandle pSysContext )
+	: SysObject( std::move( pSysContext ) )
+	{}
 
-    EventSource::~EventSource() noexcept
-    {
-        if( _eventControllerActiveRef )
-        {
-            _eventControllerActiveRef->onEventSourceDestroy( *this );
-            _eventControllerActiveRef = nullptr;
-        }
-    }
+	EventSource::~EventSource() noexcept
+	{
+		if( _eventControllerActiveRef )
+		{
+			_eventControllerActiveRef->onEventSourceDestroy( *this );
+			_eventControllerActiveRef = nullptr;
+		}
+	}
 
-    void * EventSource::getEventSourceNativeData() const
-    {
-        return _eventSourceNativeData.get();
-    }
+	void * EventSource::getEventSourceNativeData() const
+	{
+		return _eventSourceNativeData;
+	}
 
-    void * EventSource::getEventSourcePlatformData() const
-    {
-        return _eventSourcePlatformData.get();
-    }
+	bool EventSource::isPrimaryEventSource() const
+	{
+		return _eventControllerActiveRef && ( this == _eventControllerActiveRef->getPrimaryEventSource() );
+	}
 
-    void EventSource::setEventController( EventControllerHandle pEventController )
-    {
-        _eventControllerActiveRef = pEventController;
-    }
+	bool EventSource::isLastEventSource() const
+	{
+		if( _eventControllerActiveRef && ( _eventControllerActiveRef->getRegisteredEventSourcesNum() == 1 ) )
+		{
+			// EventController has one event source registered. They are indexed starting from 0 - get that last one.
+			auto * lastRegEventSource = _eventControllerActiveRef->getRegisteredEventSourceByIndex( 0 );
 
-    void EventSource::setEventSourceNativeData( EventSourceInternalDataPtr pNativeDataPtr )
-    {
-        _eventSourceNativeData = std::move( pNativeDataPtr );
-    }
+			if( this == lastRegEventSource )
+			{
+				return true;
+			}
 
-    void EventSource::setEventSourceNativeData( void * pNativeData, EventSourceInternalDataDeleter pDeleter )
-    {
-        _eventSourceNativeData = EventSourceInternalDataPtr{ pNativeData, std::move( pDeleter ) };
-    }
+			// This is veeery weird. If this source has a controller set (which means it is a registered event source),
+			// it definitely should be present on that controller's event source list. Investigate if this gets triggered.
+			ts3DebugInterrupt();
+		}
 
-    void EventSource::resetEventSourceNativeData()
-    {
-        _eventSourceNativeData.reset();
-    }
+		return false;
+	}
 
-    void EventSource::setEventSourcePlatformData( EventSourceInternalDataPtr pPlatformDataPtr )
-    {
-        _eventSourcePlatformData = std::move( pPlatformDataPtr );
-    }
+	void EventSource::onDestroySystemObjectRequested()
+	{
+		if( _eventControllerActiveRef )
+		{
+			_eventControllerActiveRef->onEventSourceDestroy( *this );
+			_eventControllerActiveRef = nullptr;
+		}
 
-    void EventSource::setEventSourcePlatformData( void * pPlatformData, EventSourceInternalDataDeleter pDeleter )
-    {
-        _eventSourcePlatformData = EventSourceInternalDataPtr{ pPlatformData, std::move( pDeleter ) };
-    }
+		SysObject::onDestroySystemObjectRequested();
+	}
 
-    void EventSource::resetEventSourcePlatformData()
-    {
-        _eventSourcePlatformData.reset();
-    }
+	void EventSource::setEventController( EventControllerHandle pEventController )
+	{
+		_eventControllerActiveRef = std::move( pEventController );
+	}
+
+	void EventSource::setEventSourceNativeData( void * pNativeData )
+	{
+		_eventSourceNativeData = pNativeData;
+	}
+
+	void EventSource::resetEventSourceNativeData()
+	{
+		_eventSourceNativeData = nullptr;
+	}
 
 } // namespace ts3::system

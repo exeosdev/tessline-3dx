@@ -61,13 +61,13 @@ namespace ts3
             /// @brief
             void lock()
             {
-                for ( auto spinCounter = 0; ; ++spinCounter )
+                for( auto spinCounter = 0; ; ++spinCounter )
                 {
                     // Acquire unique access. If some other thread is holding it, this loop will block the current thread.
-                    if ( !_uniqueAccessFlag.test_and_set( std::memory_order_acq_rel ) )
+                    if( !_uniqueAccessFlag.test_and_set( std::memory_order_acq_rel ) )
                     {
                         // Wait until all threads which hold shared access will release it.
-                        for ( spinCounter = 0; _sharedCounter.load( std::memory_order_acquire ) > 0; ++spinCounter )
+                        for( spinCounter = 0; _sharedCounter.load( std::memory_order_acquire ) > 0; ++spinCounter )
                         {
                             yieldCurrentThreadAuto( spinCounter );
                         }
@@ -80,9 +80,9 @@ namespace ts3
             /// @brief
             bool tryLock()
             {
-                if ( !_uniqueAccessFlag.test_and_set( std::memory_order_acq_rel ) )
+                if( !_uniqueAccessFlag.test_and_set( std::memory_order_acq_rel ) )
                 {
-                    if ( _sharedCounter.load( std::memory_order_acquire ) == 0 )
+                    if( _sharedCounter.load( std::memory_order_acquire ) == 0 )
                     {
                         // Unique access flag has been set, shared access counter is zero - unique access has been acquired.
                         return true;
@@ -102,7 +102,7 @@ namespace ts3
             /// @brief
             void lockShared()
             {
-                for ( auto spinCounter = 0; ; ++spinCounter )
+                for( auto spinCounter = 0; ; ++spinCounter )
                 {
                     if( tryLockShared() )
                     {
@@ -116,7 +116,7 @@ namespace ts3
             bool tryLockShared()
             {
                 // Acquire temporary unique access.
-                if ( !_uniqueAccessFlag.test_and_set( std::memory_order_acq_rel ) )
+                if( !_uniqueAccessFlag.test_and_set( std::memory_order_acq_rel ) )
                 {
                     // Add 1 to shared counter. Unique access will not be allowed as long as shared counter is greater than zero.
                     _sharedCounter.fetch_add( 1, std::memory_order_acq_rel );

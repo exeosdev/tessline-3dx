@@ -170,9 +170,9 @@ namespace stdx
 
 		void clear()
 		{
-			if ( node_type* top_node = this->_top.exchange( nullptr, std::memory_order_acq_rel ) )
+			if( node_type* top_node = this->_top.exchange( nullptr, std::memory_order_acq_rel ) )
 			{
-				while ( top_node != nullptr )
+				while( top_node != nullptr )
 				{
 					node_type* next_node = top_node->next;
 					this->_destroy_node( top_node );
@@ -207,7 +207,7 @@ namespace stdx
 		// Freed the whole list of nodes, starting from specified node (the beginning of the list).
 		void _free_node_list( node_type* node )
 		{
-			while ( node != nullptr )
+			while( node != nullptr )
 			{
 				node_type* next_node = node->next;
 				this->_free_node( node );
@@ -237,7 +237,7 @@ namespace stdx
 		{
 			node_type* top_retained_node = this->_retained_node_list.load( std::memory_order_relaxed );
 
-			while ( true )
+			while( true )
 			{
 				node->next = top_retained_node;
 
@@ -245,7 +245,7 @@ namespace stdx
 				// (is has been removed from the stack) and no other thread could acsess
 				// it in any way (it is neither on the stack, nor on the release list).
 
-				if ( this->_retained_node_list.compare_exchange_weak( top_retained_node, node, std::memory_order_acq_rel, std::memory_order_relaxed ) )
+				if( this->_retained_node_list.compare_exchange_weak( top_retained_node, node, std::memory_order_acq_rel, std::memory_order_relaxed ) )
 				{
 					break;
 				}
@@ -258,16 +258,16 @@ namespace stdx
 		{
 			node_type* top_retained_node = this->_retained_node_list.load( std::memory_order_relaxed );
 
-			while ( top_retained_node != nullptr )
+			while( top_retained_node != nullptr )
 			{
-				if ( this->_pop_counter.load( std::memory_order_relaxed ) != 0 )
+				if( this->_pop_counter.load( std::memory_order_relaxed ) != 0 )
 				{
 					// If any thread is currently inside the protected section of _Pop() method, we cannot
 					// free retained nodes. This prevents from freeing the node which may be still in use.
 					break;
 				}
 
-				if ( this->_retained_node_list.compare_exchange_weak( top_retained_node, nullptr, std::memory_order_acq_rel, std::memory_order_relaxed ) )
+				if( this->_retained_node_list.compare_exchange_weak( top_retained_node, nullptr, std::memory_order_acq_rel, std::memory_order_relaxed ) )
 				{
 					this->_free_node_list( top_retained_node );
 					break;
@@ -281,12 +281,12 @@ namespace stdx
 		{
 			node_type* top_node = this->_top.load( std::memory_order_relaxed );
 
-			while ( true )
+			while( true )
 			{
 				node->next = top_node;
 				node->control_tag = this->_control_tag_counter.fetch_add( 1, std::memory_order_relaxed );
 
-				if ( this->_top.compare_exchange_weak( top_node, node, std::memory_order_acq_rel, std::memory_order_relaxed ) )
+				if( this->_top.compare_exchange_weak( top_node, node, std::memory_order_acq_rel, std::memory_order_relaxed ) )
 				{
 					this->_size.fetch_add( 1, std::memory_order_relaxed );
 					
@@ -308,18 +308,18 @@ namespace stdx
 			this->_pop_counter.fetch_add( 1, std::memory_order_relaxed );
 
 			// Get current pointer to the top of the stack.
-			if ( node_type* top_node = this->_top.load( std::memory_order_consume ) )
+			if( node_type* top_node = this->_top.load( std::memory_order_consume ) )
 			{
 				//
 				auto control_tag = top_node->control_tag;
 
 				// Nullptr --> empty stack, nothing to pop.
-				while ( top_node != nullptr )
+				while( top_node != nullptr )
 				{
 					// Check if stack was not modified from the time of the first load. If not, atomically set top of the stack to next node.
-					if ( ( top_node->control_tag == control_tag ) && this->_top.compare_exchange_weak( top_node, top_node->next, std::memory_order_acq_rel, std::memory_order_consume ) )
+					if( ( top_node->control_tag == control_tag ) && this->_top.compare_exchange_weak( top_node, top_node->next, std::memory_order_acq_rel, std::memory_order_consume ) )
 					{
-						if ( dest != nullptr )
+						if( dest != nullptr )
 						{
 							*dest = std::move( top_node->value );
 						}
@@ -335,7 +335,7 @@ namespace stdx
 
 						break;
 					}
-					else if ( top_node != nullptr )
+					else if( top_node != nullptr )
 					{
 						control_tag = top_node->control_tag;
 					}

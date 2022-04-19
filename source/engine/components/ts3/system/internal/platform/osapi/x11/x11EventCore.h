@@ -9,59 +9,65 @@
 namespace ts3::system
 {
 
-    namespace platform
-    {
+	class X11EventController;
 
-        enum class EX11MouseButtonID : enum_default_value_t
-        {
-            Unknown,
-            Left,
-            Middle,
-            Right,
-            VWheelUp,
-            VWheelDown,
-            HWheelLeft,
-            HWheelRight,
-            XBT1,
-            XBT2
-        };
+	namespace platform
+	{
 
-        struct X11EventSourceNativeData : public X11NativeDataCommon
-        {
-            XWindow windowXID = E_X11_XID_NONE;
-        };
+		enum class EX11MouseButtonID : enum_default_value_t
+		{
+			Unknown,
+			Left,
+			Middle,
+			Right,
+			VWheelUp,
+			VWheelDown,
+			HWheelLeft,
+			HWheelRight,
+			XBT1,
+			XBT2
+		};
 
-        struct NativeEventType
-        {
-            XEvent xEvent;
-        };
+		struct X11EventSourceNativeData : public X11NativeDataCommon
+		{
+			XWindow windowXID = E_X11_XID_NONE;
+		};
 
-        using X11NativeEvent = NativeEventType;
+		struct NativeEventType
+		{
+			XEvent xEvent;
+		};
 
-    }
+		using X11NativeEvent = NativeEventType;
 
-    class X11EventController : public X11NativeObject<EventController, platform::X11NativeDataCommon>
-    {
-    public:
-        X11EventController( SysContextHandle pSysContext );
-        virtual ~X11EventController() noexcept;
+		TS3_SYSTEM_API_NODISCARD EventSource * x11FindEventSourceByXWindow( X11EventController & pEventController, XWindow pWindowXID );
 
-        using EventController::getEventSystemInternalConfig;
-        using EventController::getEventSystemSharedState;
+		bool x11TranslateEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent );
 
-    private:
-        /// @override EventController::_nativeRegisterEventSource
-        virtual void _nativeRegisterEventSource( EventSource & pEventSource ) override final;
+	}
 
-        /// @override EventController::_nativeUnregisterEventSource
-        virtual void _nativeUnregisterEventSource( EventSource & pEventSource ) override final;
+	class X11EventController : public X11NativeObject<EventController, platform::X11NativeDataCommon>
+	{
+	public:
+		X11EventController( SysContextHandle pSysContext );
+		virtual ~X11EventController() noexcept;
 
-        /// @override EventController::_nativeUpdateSysQueue
-        virtual bool _nativeUpdateSysQueue() override final;
+		using EventController::getEventDispatcherInputState;
+		using EventController::getEventDispatcherConfig;
 
-        /// @override EventController::_nativeUpdateSysQueueWait
-        virtual bool _nativeUpdateSysQueueWait() override final;
-    };
+	private:
+		/// @override EventController::_nativeRegisterEventSource
+		virtual void _nativeRegisterEventSource( EventSource & pEventSource ) override final;
+
+		/// @override EventController::_nativeUnregisterEventSource
+		virtual void _nativeUnregisterEventSource( EventSource & pEventSource ) override final;
+
+		/// @override EventController::_nativeUpdateSysQueue
+		virtual bool _nativeUpdateSysQueue() override final;
+
+		/// @override EventController::_nativeUpdateSysQueueWait
+		virtual bool _nativeUpdateSysQueueWait() override final;
+	};
 
 } // namespace ts3::system
 

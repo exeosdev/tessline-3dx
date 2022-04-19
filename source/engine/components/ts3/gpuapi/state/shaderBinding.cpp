@@ -70,7 +70,7 @@ namespace gpuapi
 			pBindingInfo.shaderArray[stageIndex] = stageDesc.shaderObject;
 		}
 
-		if ( !pBindingInfo.shaderArray[E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX] )
+		if( !pBindingInfo.shaderArray[E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX] )
 		{
 			return false;
 		}
