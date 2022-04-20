@@ -109,6 +109,7 @@ namespace gpuapi
 
 	void GLScreenPresentationLayer::setFullscreenMode( bool pEnable )
 	{
+		mSysGLDisplaySurface->setFullscreenMode( pEnable );
 	}
 
 	ts3::math::Vec2u32 GLScreenPresentationLayer::queryRenderTargetSize() const

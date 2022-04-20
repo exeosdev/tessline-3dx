@@ -124,10 +124,12 @@ int main( int pArgc, const char ** pArgv )
     const std::string sGxDriverName = "GL4";
 
     SysContextCreateInfo sysContextCreateInfo;
-    auto sysContext = createSysContext( sysContextCreateInfo );
+    auto sysContext = platform::createSysContext( sysContextCreateInfo );
 
-    AssetLoaderCreateInfo aslCreateInfo;\
-    aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+    platform::AssetLoaderCreateInfoNativeParams aslCreateInfoNP;
+    aslCreateInfoNP.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+    AssetLoaderCreateInfo aslCreateInfo;
+    aslCreateInfo.nativeParams = &aslCreateInfoNP;
     auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
 
     GraphicsDriverState gxDriverState;
@@ -180,6 +182,8 @@ int main( int pArgc, const char ** pArgv )
 //            });
 #endif
 
+	bool isFullscreen = true;
+
     evtDispatcher->setEventHandler(
             EEventCodeIndex::AppActivityQuit,
             [&runApp,&gxDriverState](const EventObject & pEvt) -> bool {
@@ -197,10 +201,16 @@ int main( int pArgc, const char ** pArgv )
             });
     evtDispatcher->setEventHandler(
             EEventCodeIndex::InputKeyboardKey,
-            [evtDispatcher,&gxDriverState](const EventObject & pEvt) -> bool {
+            [evtDispatcher,&gxDriverState,&isFullscreen](const EventObject & pEvt) -> bool {
+            	auto & keyMap = pEvt.eInputKeyboardKey.inputKeyboardState->keyStateMap;
                 if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::Escape )
                 {
                     evtDispatcher->postEventAppQuit();
+                }
+                else if( keyMap[EKeyCode::AltLeft] && keyMap[EKeyCode::Enter] )
+                {
+                	isFullscreen = !isFullscreen;
+                	gxDriverState.presentationLayer->setFullscreenMode( isFullscreen );
                 }
                 return true;
             });
@@ -608,7 +618,10 @@ void initializeGraphicsDriver( SysContextHandle pSysContext, GraphicsDriverState
     pGxDriverState.device = pGxDriverState.driver->createDevice( gpuDeviceCreateInfo );
 
     PresentationLayerCreateInfo presentationLayerCreateInfo;
-    presentationLayerCreateInfo.displayConfigFlags = E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT;
+    presentationLayerCreateInfo.screenRect.size.x = 1024;
+    presentationLayerCreateInfo.screenRect.size.y = 600;
+    presentationLayerCreateInfo.displayConfigFlags = 0;
+    // presentationLayerCreateInfo.displayConfigFlags = E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT;
     pGxDriverState.presentationLayer = pGxDriverState.driverInterface->createScreenPresentationLayer( *( pGxDriverState.device ), presentationLayerCreateInfo );
 
     pGxDriverState.device->setPresentationLayer( pGxDriverState.presentationLayer );
