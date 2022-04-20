@@ -97,8 +97,11 @@ namespace ts3::system
 		mNativeData.xSessionData.display = xDisplay;
 		mNativeData.xSessionData.screenIndex = XDefaultScreen( mNativeData.xSessionData.display );
 		mNativeData.xSessionData.rootWindowXID = XRootWindow( mNativeData.xSessionData.display, mNativeData.xSessionData.screenIndex );
-		mNativeData.xSessionData.wmpDeleteWindow = XInternAtom( mNativeData.xSessionData.display, "WM_DELETE_WINDOW", False );
-		mNativeData.xSessionData.wmpDestroyWindow = XInternAtom( mNativeData.xSessionData.display, "WM_DESTROY_WINDOW", False );
+		mNativeData.xSessionData.atomCache.wmProtocol = XInternAtom( mNativeData.xSessionData.display, "WM_PROTOCOLS", True );
+		mNativeData.xSessionData.atomCache.wmProtocolDelete = XInternAtom( mNativeData.xSessionData.display, "WM_DELETE_WINDOW", True );
+		mNativeData.xSessionData.atomCache.wmProtocolDestroy = XInternAtom( mNativeData.xSessionData.display, "WM_DESTROY_WINDOW", True );
+		mNativeData.xSessionData.atomCache.wmState = XInternAtom( mNativeData.xSessionData.display, "_NET_WM_STATE", True );
+		mNativeData.xSessionData.atomCache.wmStateFullscreen = XInternAtom( mNativeData.xSessionData.display, "_NET_WM_STATE_FULLSCREEN", True );
 		mNativeData.xSessionData.sessionInfo.connectionNumber = XConnectionNumber( xDisplay );
 		mNativeData.xSessionData.sessionInfo.vendorName = XServerVendor( xDisplay );
 		mNativeData.xSessionData.sessionInfo.displayString = XDisplayString( xDisplay );
@@ -109,7 +112,10 @@ namespace ts3::system
 		mNativeData.xSessionData.display = nullptr;
 		mNativeData.xSessionData.screenIndex = -1;
 		mNativeData.xSessionData.rootWindowXID = platform::E_X11_XID_NONE;
-		mNativeData.xSessionData.wmpDeleteWindow = 0;
+		mNativeData.xSessionData.atomCache.wmProtocolDelete = 0;
+		mNativeData.xSessionData.atomCache.wmProtocolDestroy = 0;
+		mNativeData.xSessionData.atomCache.wmState = 0;
+		mNativeData.xSessionData.atomCache.wmStateFullscreen = 0;
 		mNativeData.xSessionData.sessionInfo.connectionNumber = -1;
 		mNativeData.xSessionData.sessionInfo.vendorName.clear();
 		mNativeData.xSessionData.sessionInfo.displayString.clear();

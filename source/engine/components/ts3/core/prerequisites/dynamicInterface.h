@@ -95,6 +95,17 @@ namespace ts3
 		return objectHandle;
 	}
 
+    template <typename TpClass, typename TpDeleter, typename... TpArgs>
+    inline SharedHandle<TpClass> createDynamicInterfaceObjectWithDeleter( TpDeleter pDeleter, TpArgs && ...pArgs )
+    {
+        auto objectHandle = std::shared_ptr<TpClass>{ new TpClass( std::forward<TpArgs>( pArgs )... ), std::forward<TpDeleter>( pDeleter ) };
+    #if( TS3_DEBUG )
+        // This will trigger a compile-time error if TpClass is not a subclass of DynamicInterface.
+        static_cast<DynamicInterface *>( objectHandle.get() );
+    #endif
+        return objectHandle;
+    }
+
 	template <typename TpOutInterface, typename TpInInterface>
 	inline std::unique_ptr<TpOutInterface> moveInterfaceUniquePtr( std::unique_ptr<TpInInterface> pUPtr )
 	{

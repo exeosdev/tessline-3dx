@@ -51,7 +51,7 @@ namespace ts3::system
 	void AndroidEventController::_nativeUnregisterEventSource( EventSource & pEventSource )
 	{}
 
-	bool AndroidEventController::_nativeUpdateSysQueue()
+	bool AndroidEventController::_nativeDispatchPendingEvents()
 	{
 		// Note for Android event dispatching:
 		// We use a modified native_app_glue code from the NDK to handle the Activity <--> C++ flow.
@@ -95,7 +95,7 @@ namespace ts3::system
 		return false;
 	}
 
-	bool AndroidEventController::_nativeUpdateSysQueueWait()
+	bool AndroidEventController::_nativeDispatchPendingEventsWait()
 	{
 		auto & aSessionData = platform::androidGetASessionData( *this );
 

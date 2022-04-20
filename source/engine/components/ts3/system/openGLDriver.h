@@ -121,10 +121,10 @@ namespace ts3::system
 
 	friendapi:
 		// Used by the OpenGLDisplaySurface class. It is called inside its destructor.
-		virtual void onDisplaySurfaceDestroy( OpenGLDisplaySurface & pDisplaySurface ) noexcept;
+		virtual void releaseSystemDisplaySurface( OpenGLDisplaySurface & pDisplaySurface ) noexcept;
 
 		// Used by the OpenGLRenderContext class. It is called inside its destructor.
-		virtual void onRenderContextDestroy( OpenGLRenderContext & pRenderContext ) noexcept;
+		virtual void releaseSystemRenderContext( OpenGLRenderContext & pRenderContext ) noexcept;
 
 	private:
 		virtual void _nativeInitializePlatform() = 0;
@@ -180,7 +180,7 @@ namespace ts3::system
 		TS3_FUNC_NO_DISCARD FrameSize queryRenderAreaSize() const;
 
 		/// @brief
-		TS3_FUNC_NO_DISCARD bool isValid() const;
+		TS3_FUNC_NO_DISCARD bool sysValidate() const;
 
 		/// @override Frame::resizeClientArea
 		virtual void resizeClientArea( const FrameSize & pSize ) override final;
@@ -208,6 +208,8 @@ namespace ts3::system
 		TS3_FUNC_NO_DISCARD virtual bool isFullscreen() const override final;
 
 	protected:
+		virtual void onDestroySystemObjectRequested() override;
+
 		void setInternalOwnershipFlag( bool pOwnershipFlag );
 
 		bool hasInternalOwnershipFlag() const;
@@ -261,6 +263,8 @@ namespace ts3::system
 		TS3_FUNC_NO_DISCARD GLSystemVersionInfo querySystemVersionInfo() const;
 
 	protected:
+		virtual void onDestroySystemObjectRequested() override;
+
 		void setInternalOwnershipFlag( bool pOwnershipFlag );
 
 		bool hasInternalOwnershipFlag() const;

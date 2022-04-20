@@ -54,11 +54,11 @@ namespace ts3::system
 		/// @override EventController::_nativeUnregisterEventSource
 		virtual void _nativeUnregisterEventSource( EventSource & pEventSource ) override final;
 
-		/// @override EventController::_nativeUpdateSysQueue
-		virtual bool _nativeUpdateSysQueue() override final;
+		/// @override EventController::_nativeDispatchPendingEvents
+		virtual bool _nativeDispatchPendingEvents() override final;
 
-		/// @override EventController::_nativeUpdateSysQueueWait
-		virtual bool _nativeUpdateSysQueueWait() override final;
+		/// @override EventController::_nativeDispatchPendingEventsWait
+		virtual bool _nativeDispatchPendingEventsWait() override final;
 	};
 
 } // namespace ts3::system

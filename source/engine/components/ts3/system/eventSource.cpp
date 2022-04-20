@@ -55,8 +55,6 @@ namespace ts3::system
 			_eventControllerActiveRef->onEventSourceDestroy( *this );
 			_eventControllerActiveRef = nullptr;
 		}
-
-		SysObject::onDestroySystemObjectRequested();
 	}
 
 	void EventSource::setEventController( EventControllerHandle pEventController )

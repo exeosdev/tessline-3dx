@@ -26,13 +26,9 @@
 #include <ts3/engine/camera/cameraController.h>
 #include <ts3/engine/gpuapi/vertexFormatDefs.h>
 #include <ts3/engine/gpuapi/hwBuffer.h>
-#include <ts3/engine/resource/font.h>
-#include <ts3/engine/rcdata/fontManager.h>
+#include <ts3/engine/res/image/bitmapCommon.h>
 
-#include <ts3ext/rcsupport/fonts/fontTypeFTF.h>
-#include <ts3ext/rcsupport/images/bitmapCommon.h>
-
-#include "sysTest-gpuapi-meshDefs.h"
+#include "gpuapi01-meshDefs.h"
 
 using namespace ts3;
 using namespace ts3::gpuapi;
@@ -92,20 +88,21 @@ int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 #include <ts3/gpuapiGL4/GL4_gpuDriverAPI.h>
 #include <ts3/gpuapiDX11/DX11_gpuDriverAPI.h>
 
-#include <ts3/stdext/gdsStdCore.h>
-#include <ts3/stdext/gdsStdSTL.h>
-
 int main( int pArgc, const char ** pArgv )
 {
     const std::string sGxDriverName = "GL4";
 
-    SysContextCreateInfo sysContextCreateInfo;
-    sysContextCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
-    auto sysContext = createSysContext( sysContextCreateInfo );
+	SysContextCreateInfo sysContextCreateInfo;
+	platform::SysContextCreateInfoNativeParams sysContextCreateInfoNP;
+	sysContextCreateInfoNP.appExecModuleHandle = ::GetModuleHandleA( nullptr );
+	sysContextCreateInfo.nativeParams = &sysContextCreateInfoNP;
+	auto sysContext = platform::createSysContext( sysContextCreateInfo );
 
-    AssetLoaderCreateInfo aslCreateInfo;
-    aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
-    auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
+	platform::AssetLoaderCreateInfoNativeParams aslCreateInfoNP;
+	aslCreateInfoNP.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+	AssetLoaderCreateInfo aslCreateInfo;
+	aslCreateInfo.nativeParams = &aslCreateInfoNP;
+	auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
 
     GraphicsDriverState gxDriverState;
     gxDriverState.driverID = sGxDriverName;
@@ -159,7 +156,7 @@ int main( int pArgc, const char ** pArgv )
 
     while( waitForDisplay )
     {
-        evtController->processEventsAuto();
+        evtController->dispatchPendingEventsAuto();
     }
 
 //    evtDispatcher->setEventHandler(
@@ -506,7 +503,7 @@ int main( int pArgc, const char ** pArgv )
 
         try
         {
-            evtController->processEventsAuto();
+            evtController->dispatchPendingEventsAuto();
 
             auto ts3ViewScreen = cameraController.computeViewMatrixLH();
             gxDriverState.cmdContext->beginCommandSequence();

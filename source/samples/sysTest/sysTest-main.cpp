@@ -32,7 +32,7 @@ void initializeGraphicsCreateSurface( GfxState & pGfxState )
     surfaceCreateInfo.visualConfig = vsxGetDefaultVisualConfigForSysWindow();
     surfaceCreateInfo.runtimeVersionDesc.apiProfile = EGLAPIProfile::OpenGL;
     surfaceCreateInfo.runtimeVersionDesc.apiVersion = CX_GL_VERSION_BEST_SUPPORTED;
-    surfaceCreateInfo.flags.set( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
+    //surfaceCreateInfo.flags.set( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 
     pGfxState.glSurface = pGfxState.glSystemDriver->createDisplaySurface( surfaceCreateInfo );
 }
@@ -79,14 +79,16 @@ int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 int main( int pArgc, const char ** pArgv )
 {
     SysContextCreateInfo sysContextCreateInfo;
-    sysContextCreateInfo.flags = 0;
-    sysContextCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
-    auto sysContext = nativeSysContextCreate( sysContextCreateInfo );
+    platform::SysContextCreateInfoNativeParams sysContextCreateInfoNP;
+    sysContextCreateInfoNP.appExecModuleHandle = ::GetModuleHandleA( nullptr );
+    sysContextCreateInfo.nativeParams = &sysContextCreateInfoNP;
+    auto sysContext = platform::createSysContext( sysContextCreateInfo );
 
+    platform::AssetLoaderCreateInfoNativeParams aslCreateInfoNP;
+    aslCreateInfoNP.relativeAssetRootDir = "../../../../tessline-3dx/assets";
     AssetLoaderCreateInfo aslCreateInfo;
-    aslCreateInfo.sysContext = sysContext;
-    aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
-    auto assetLoader = createAssetLoader( aslCreateInfo );
+    aslCreateInfo.nativeParams = &aslCreateInfoNP;
+    auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
 
 #elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_X11 )
 
@@ -134,7 +136,7 @@ int main( int pArgc, const char ** pArgv )
 
     while( waitForDisplay )
     {
-        evtController->processEventsAuto();
+        evtController->dispatchPendingEventsAuto();
     }
 
     evtDispatcher->setEventHandler(
@@ -167,14 +169,17 @@ int main( int pArgc, const char ** pArgv )
                 return true;
             });
     evtDispatcher->setEventHandler(
-            EEventCodeIndex::WindowUpdateDestroy,
-            [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
-                if( pEvt.eWindowUpdateDestroy.checkEventSource( gfxState.glSurface.get() ) )
-                {
-                    // evtDispatcher->postEventAppQuit();
-                }
-                return true;
-            });
+    		EEventCodeIndex::WindowUpdateFullscreen,
+    		[&gfxState](const EventObject & pEvt) -> bool {
+    			printf("Fullscreen change: %s\n", toString( pEvt.eWindowUpdateFullscreen.fullscreenState ).c_str() );
+    			if( pEvt.eWindowUpdateFullscreen.eventSource == gfxState.glSurface.get() )
+    			{
+    				const auto size = gfxState.glSurface->getClientAreaSize();
+    				printf("Size: %ux%u\n", size.x, size.y );
+    			}
+			    fflush( stdout );
+    			return true;
+    		});
     evtDispatcher->setEventHandler(
             EEventCodeIndex::InputKeyboardKey,
             [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
@@ -185,6 +190,18 @@ int main( int pArgc, const char ** pArgv )
                 }
                 return true;
             });
+	if( false )
+	{
+		evtDispatcher->setEventHandler(
+				EEventCodeIndex::WindowUpdateDestroy,
+				[evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
+					if( pEvt.eWindowUpdateDestroy.checkEventSource( gfxState.glSurface.get() ) )
+					{
+						// evtDispatcher->postEventAppQuit();
+					}
+					return true;
+				});
+	}
 
     initializeGraphics( sysContext, gfxState );
 
@@ -200,7 +217,7 @@ int main( int pArgc, const char ** pArgv )
 
     while( runApp )
     {
-        evtController->processEventsAuto();
+        evtController->dispatchPendingEventsAuto();
         if( gfxState.pauseAnimation )
         {
             continue;

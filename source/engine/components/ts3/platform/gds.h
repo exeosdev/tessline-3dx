@@ -325,7 +325,7 @@ namespace ts3
 
 			void set( TpInternal pValue ) const
 			{
-				value.get() = pValue;
+				value.get() = static_cast<TpRef>( pValue );
 			}
 		};
 

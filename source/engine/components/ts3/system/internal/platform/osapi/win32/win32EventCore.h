@@ -18,6 +18,8 @@ namespace ts3::system
 		struct Win32EventSourceNativeData
 		{
 			HWND hwnd = nullptr;
+
+			Bitmask<uint32> sysWindowFlags = 0;
 		};
 
 		struct Win32EventSourceState
@@ -47,8 +49,8 @@ namespace ts3::system
 		Win32EventController( SysContextHandle pSysContext );
 		virtual ~Win32EventController() noexcept;
 
-		using EventController::getEventSystemInternalConfig;
 		using EventController::getEventDispatcherInputState;
+        using EventController::getEventDispatcherConfig;
 
 	private:
 		/// @override EventController::_nativeRegisterEventSource
@@ -57,11 +59,11 @@ namespace ts3::system
 		/// @override EventController::_nativeUnregisterEventSource
 		virtual void _nativeUnregisterEventSource( EventSource & pEventSource ) override final;
 
-		/// @override EventController::_nativeUpdateSysQueue
-		virtual bool _nativeUpdateSysQueue() override final;
+		/// @override EventController::_nativeDispatchPendingEvents
+		virtual bool _nativeDispatchPendingEvents() override final;
 
-		/// @override EventController::_nativeUpdateSysQueueWait
-		virtual bool _nativeUpdateSysQueueWait() override final;
+		/// @override EventController::_nativeDispatchPendingEventsWait
+		virtual bool _nativeDispatchPendingEventsWait() override final;
 	};
 
 } // namespace ts3::system

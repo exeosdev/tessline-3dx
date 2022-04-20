@@ -15,6 +15,12 @@ namespace ts3::system
 		// Translates a common-level frame style into a Win32-specific style mask.
 		DWORD _win32TranslateFrameStyle( EFrameStyle pStyle );
 
+		//
+		EFrameStyle _win32QueryWindowStyle( HWND pHWND );
+
+		//
+		FrameGeometry _win32QueryCurrentWindowGeometry( HWND pHWND );
+
 		// Translates the specified geometry definition for a new frame (create) into a Win32-specific format.
 		Win32FrameGeometry _win32CheckFrameGeometry( const FrameGeometry & pFrameGeometry );
 
@@ -44,9 +50,16 @@ namespace ts3::system
 		return windowObject;
 	}
 
+    void Win32WindowManager::_nativeDestroyWindow( Window & pWindow )
+    {
+        auto * win32Window = pWindow.queryInterface<Win32Window>();
+
+        platform::win32DestroyWindow( win32Window->mNativeData );
+    }
+
 
 	Win32Window::Win32Window( Win32WindowManagerHandle pWindowManager )
-	: Win32NativeObject( std::move( pWindowManager ) )
+	: Win32NativeObject( std::move( pWindowManager ), &mNativeData )
 	{}
 
 	Win32Window::~Win32Window() noexcept = default;
@@ -55,7 +68,9 @@ namespace ts3::system
 	{}
 
 	void Win32Window::_nativeSetFullscreenMode( bool pEnable )
-	{}
+	{
+		platform::win32ChangeWindowFullscreenState( mNativeData, pEnable );
+	}
 
 	void Win32Window::_nativeSetTitle( const std::string & pTitle )
 	{
@@ -91,8 +106,8 @@ namespace ts3::system
 			                                     win32FrameGeometry.style,
 			                                     win32FrameGeometry.frameRect.left,
 			                                     win32FrameGeometry.frameRect.top,
-			                                     win32FrameGeometry.frameRect.right,
-			                                     win32FrameGeometry.frameRect.bottom,
+			                                     win32FrameGeometry.frameRect.right - win32FrameGeometry.frameRect.left,
+			                                     win32FrameGeometry.frameRect.bottom - win32FrameGeometry.frameRect.top,
 			                                     nullptr,
 			                                     nullptr,
 			                                     pWindowNativeData.moduleHandle,
@@ -148,6 +163,63 @@ namespace ts3::system
 			pWindowNativeData.moduleHandle = nullptr;
 		}
 
+		void win32ChangeWindowFullscreenState( Win32WindowNativeData & pWindowNativeData, bool pSetFullscreen )
+		{
+			const auto currentFullscreenState = pWindowNativeData.sysWindowFlags.isSet( E_WIN32_SYSTEM_WINDOW_FLAG_WM_STATE_FULLSCREEN );
+
+			if( currentFullscreenState != pSetFullscreen )
+			{
+				// We need to go through the event system and properly emit an EvtWindowUpdateFullscreen.
+				// To avoid mixing event and window systems, we simply use the OS ability to post messages
+				// to any window event queue.
+				// Out custom message indicates a fullscreen state change request. Already pre-validated,
+				// it just needs to be handled and dispatched.
+
+				const auto messageID = platform::CX_WIN32_MESSAGE_ID_FULLSCREEN_STATE_CHANGE;
+				const auto wParam = static_cast<WPARAM>( pSetFullscreen ? 1 : 0 );
+
+				// This is an asynchronous post. This functions returns immediately - the message will be
+				// put into the queue and fetched when the event system pulls the event queue next time.
+				::PostMessageA( pWindowNativeData.hwnd, messageID, wParam, 0 );
+			}
+		}
+
+		void win32UpdateWindowFullscreenState( Win32WindowNativeData & pWindowNativeData, bool pSetFullscreen )
+		{
+			FrameGeometry newFrameGeometry{};
+			Bitmask<EFrameGeometryUpdateFlags> updateFlags = E_FRAME_GEOMETRY_UPDATE_FLAG_POSITION_BIT | E_FRAME_GEOMETRY_UPDATE_FLAG_STYLE_BIT;
+
+			if( pSetFullscreen )
+			{
+				// _win32QueryCurrentWindowGeometry() returns the geometry of the whole window, not only the client area!
+				pWindowNativeData.fsCachedGeometry = _win32QueryCurrentWindowGeometry( pWindowNativeData.hwnd );
+
+				const auto screenDC = ::GetWindowDC( nullptr );
+
+				const auto xBorderSize = ::GetSystemMetrics(SM_CXEDGE);
+				const auto yBorderSize = ::GetSystemMetrics(SM_CYEDGE);
+
+				newFrameGeometry.position.x = -xBorderSize;
+				newFrameGeometry.position.y = -yBorderSize;
+				newFrameGeometry.size.x = ::GetDeviceCaps( screenDC, HORZRES ) + 2 * xBorderSize;
+				newFrameGeometry.size.y = ::GetDeviceCaps( screenDC, VERTRES ) + 2 * yBorderSize;
+				newFrameGeometry.style = EFrameStyle::Overlay;
+				updateFlags.set( E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_CLIENT_AREA_BIT );
+			}
+			else
+			{
+				// The geometry has the size of the whole window. That is because some window styles cannot be passed
+				// to AdjustWindowRect(). To get around that, we set the outer rect directly, bypassing adjustment.
+
+				newFrameGeometry = pWindowNativeData.fsCachedGeometry;
+				updateFlags.set( E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_OUTER_RECT_BIT );
+			}
+
+			win32UpdateFrameGeometry( pWindowNativeData.hwnd, newFrameGeometry, updateFlags );
+
+			pWindowNativeData.sysWindowFlags.setOrUnset( E_WIN32_SYSTEM_WINDOW_FLAG_WM_STATE_FULLSCREEN, pSetFullscreen );
+		}
+
 		void win32SetFrameTitle( HWND pHWND, const std::string & pTitle )
 		{
 			::SetWindowTextA( pHWND, pTitle.c_str() );
@@ -165,8 +237,8 @@ namespace ts3::system
 			                nullptr,
 			                win32Geometry.frameRect.left, // X coordinate
 			                win32Geometry.frameRect.top, // Y coordinate
-			                win32Geometry.frameRect.right, // Width of the frame
-			                win32Geometry.frameRect.bottom, // Height of the frame
+			                win32Geometry.frameRect.right - win32Geometry.frameRect.left, // Width of the frame
+			                win32Geometry.frameRect.bottom - win32Geometry.frameRect.top, // Height of the frame
 			                SWP_NOZORDER | SWP_FRAMECHANGED | SWP_SHOWWINDOW );
 		}
 
@@ -176,6 +248,7 @@ namespace ts3::system
 			if( pSizeMode == EFrameSizeMode::ClientArea )
 			{
 				::GetClientRect( pHWND, &frameRect );
+				::AdjustWindowRect( &frameRect, WS_VISIBLE, FALSE );
 			}
 			else
 			{
@@ -187,6 +260,11 @@ namespace ts3::system
 			resultFrameSize.y = frameRect.bottom - frameRect.top;
 
 			return resultFrameSize;
+		}
+
+		bool win32IsFullscreenWindow( const Win32WindowNativeData & pWindowNativeData )
+		{
+			return pWindowNativeData.sysWindowFlags.isSet( platform::E_WIN32_SYSTEM_WINDOW_FLAG_WM_STATE_FULLSCREEN );
 		}
 
 		void _win32RegisterWndClass( Win32WindowNativeData & pWindowNativeData )
@@ -278,9 +356,55 @@ namespace ts3::system
 			return resultStyle;
 		}
 
+		EFrameStyle _win32QueryWindowStyle( HWND pHWND )
+		{
+			const DWORD cvStyleSupportMask = WS_CAPTION | WS_SYSMENU | WS_OVERLAPPED | WS_MINIMIZEBOX |
+			                                 WS_POPUP | WS_EX_TOPMOST | WS_SIZEBOX | WS_MAXIMIZEBOX;
+
+			const auto cvWindowStyle = ::GetWindowLongA( pHWND, GWL_STYLE );
+
+			Bitmask<DWORD> windowStyleMask = ( cvWindowStyle & cvStyleSupportMask );
+
+			EFrameStyle frameStyle = EFrameStyle::Unspecified;
+
+			if( windowStyleMask.isSet( WS_POPUP ) && !windowStyleMask.isSet( WS_SYSMENU ) )
+			{
+				frameStyle = EFrameStyle::Overlay;
+			}
+			else if( windowStyleMask.isSetAnyOf( WS_SIZEBOX | WS_MAXIMIZEBOX ) )
+			{
+				frameStyle = EFrameStyle::Resizeable;
+			}
+			else if( windowStyleMask.isSet( WS_OVERLAPPED ) )
+			{
+				frameStyle = EFrameStyle::Fixed;
+			}
+			else if( windowStyleMask.isSetAnyOf( WS_SYSMENU | WS_CAPTION ) )
+			{
+				frameStyle = EFrameStyle::Caption;
+			}
+
+			return frameStyle;
+		}
+
+		FrameGeometry _win32QueryCurrentWindowGeometry( HWND pHWND )
+		{
+			RECT windowRect;
+			::GetWindowRect( pHWND, &windowRect );
+
+			FrameGeometry windowGeometry{};
+			windowGeometry.position.x = windowRect.left;
+			windowGeometry.position.y = windowRect.top;
+			windowGeometry.size.x = static_cast<uint32>( windowRect.right - windowRect.left );
+			windowGeometry.size.y = static_cast<uint32>( windowRect.bottom - windowRect.top );
+			windowGeometry.style = _win32QueryWindowStyle( pHWND );
+
+			return windowGeometry;
+		}
+
 		Win32FrameGeometry _win32CheckFrameGeometry( const FrameGeometry & pFrameGeometry )
 		{
-			Win32FrameGeometry win32Geometry;
+			Win32FrameGeometry win32Geometry{};
 			win32Geometry.frameRect.left = static_cast<LONG>( pFrameGeometry.position.x );
 			win32Geometry.frameRect.top = static_cast<LONG>( pFrameGeometry.position.y );
 			win32Geometry.frameRect.right = win32Geometry.frameRect.left + static_cast<LONG>( pFrameGeometry.size.x );
@@ -296,7 +420,7 @@ namespace ts3::system
 		                                                   const FrameGeometry & pFrameGeometry,
 		                                                   Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags )
 		{
-			Win32FrameGeometry win32Geometry;
+			Win32FrameGeometry win32Geometry{};
 
 			if( pUpdateFlags.isSet( E_FRAME_GEOMETRY_UPDATE_FLAG_STYLE_BIT ) )
 			{
@@ -338,6 +462,17 @@ namespace ts3::system
 				if( pUpdateFlags.isSet( E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_CLIENT_AREA_BIT ) )
 				{
 					::AdjustWindowRect( &( win32Geometry.frameRect ), win32Geometry.style, FALSE );
+
+					// AdjustWindowRect() modifies the position as well. We need to preserve the calculated values.
+					// So, we compute the offset applied to the framePosX/Y and adjust the whole rect accordingly.
+
+					const auto xOffset = win32Geometry.frameRect.left - framePosX;
+					const auto yOffset = win32Geometry.frameRect.top - framePosY;
+
+					win32Geometry.frameRect.left -= xOffset;
+					win32Geometry.frameRect.right -= xOffset;
+					win32Geometry.frameRect.top -= yOffset;
+					win32Geometry.frameRect.bottom -= yOffset;
 				}
 			}
 			else
