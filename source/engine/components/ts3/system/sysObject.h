@@ -88,10 +88,23 @@ namespace ts3::system
 		AtomicBitmask<uint32> _stateMask;
     };
 
+    struct SysObjectDeleter
+    {
+        void operator()( SysObject * pSysObject ) const
+        {
+            if( pSysObject )
+            {
+                pSysObject->destroySystemObject();
+
+                delete pSysObject;
+            }
+        }
+    };
+
     template <typename TpObject, typename... TpArgs>
     inline Handle<TpObject> createSysObject( TpArgs && ...pArgs )
     {
-        return createDynamicInterfaceObject<TpObject>( std::forward<TpArgs>( pArgs )... );
+        return createDynamicInterfaceObjectWithDeleter<TpObject>( SysObjectDeleter{}, std::forward<TpArgs>( pArgs )... );
     }
 
 } // namespace ts3::system
