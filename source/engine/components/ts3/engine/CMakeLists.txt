@@ -38,6 +38,8 @@ set( TS3_ENGINE_SRC_FILES
 		"res/font/ftdFreeTypeFontObject.cpp"
 		"res/imageCommon.h"
 		"res/imageCommon.cpp"
+		"res/image/bitmapCommon.h"
+		"res/image/bitmapCommon.cpp"
 		"res/resource.h"
 		"res/resource.cpp"
 		"res/resourceLoader.h"

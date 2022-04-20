@@ -11,10 +11,10 @@ namespace ts3
 namespace gpuapi
 {
 
-	class HresultErrorException : public ts3::ExternalException
+	class HresultErrorException : public UserExternalException
 	{
 	public:
-		using BaseException = ts3::ExternalException;
+		using BaseException = UserExternalException;
 
 		explicit HresultErrorException( ts3::ExceptionInfo pInfo )
 		: BaseException( std::move( pInfo ) )

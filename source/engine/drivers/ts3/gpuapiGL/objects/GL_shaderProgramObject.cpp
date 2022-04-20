@@ -1,10 +1,9 @@
 
 #include "GL_shaderProgramObject.h"
 #include "GL_shaderObject.h"
+#include <ts3/stdext/byteArray.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLShaderProgramObject::GLShaderProgramObject( GLuint pHandle, GLShaderProgramType pProgramType )
@@ -222,7 +221,7 @@ namespace gpuapi
 		auto infoLogLength = getInfoLogLength();
 		if ( infoLogLength > 0 )
 		{
-			DynamicMemoryBuffer infoLogBuffer;
+			DynamicByteArray infoLogBuffer;
 			infoLogBuffer.resize( infoLogLength );
 
 			glGetProgramInfoLog( mGLHandle, static_cast<GLsizei>( infoLogLength ), nullptr, infoLogBuffer.dataAs<GLchar>() );
@@ -283,5 +282,4 @@ namespace gpuapi
 		return infoLogLength > 0;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
