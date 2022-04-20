@@ -84,7 +84,7 @@ namespace ts3::system
 		}
 	}
 
-	bool Win32EventController::_nativeUpdateSysQueue()
+	bool Win32EventController::_nativeDispatchPendingEvents()
 	{
 		MSG pMSG;
 		if( ::PeekMessageA( &pMSG, nullptr, 0, 0, PM_REMOVE ) != FALSE )
@@ -98,7 +98,7 @@ namespace ts3::system
 		return false;
 	}
 
-	bool Win32EventController::_nativeUpdateSysQueueWait()
+	bool Win32EventController::_nativeDispatchPendingEventsWait()
 	{
 		MSG pMSG;
 		if( ::GetMessageA( &pMSG, nullptr, 0, 0 ) != FALSE )

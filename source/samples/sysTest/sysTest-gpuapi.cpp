@@ -159,7 +159,7 @@ int main( int pArgc, const char ** pArgv )
 
     while( waitForDisplay )
     {
-        evtController->processEventsAuto();
+        evtController->dispatchPendingEventsAuto();
     }
 
 //    evtDispatcher->setEventHandler(
@@ -506,7 +506,7 @@ int main( int pArgc, const char ** pArgv )
 
         try
         {
-            evtController->processEventsAuto();
+            evtController->dispatchPendingEventsAuto();
 
             auto ts3ViewScreen = cameraController.computeViewMatrixLH();
             gxDriverState.cmdContext->beginCommandSequence();

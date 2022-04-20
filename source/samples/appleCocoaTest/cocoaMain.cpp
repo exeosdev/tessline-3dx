@@ -25,7 +25,7 @@ int main( int argc, const char ** argv )
 
 	while( true )
 	{
-		ev->processEventsPeek();
+		ev->dispatchPendingEventsPeek();
 	}
 
 	return 0;

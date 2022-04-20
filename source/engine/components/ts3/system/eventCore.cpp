@@ -116,7 +116,7 @@ namespace ts3::system
 
 		const auto dispatchResult = _privateData->activeEventDispatcher->postEvent( pEvent );
 
-		if( dispatchResult && ( pEvent.code == E_EVENT_CODE_WINDOW_UPDATE_DESTROY ) )
+		if( pEvent.code == E_EVENT_CODE_WINDOW_UPDATE_DESTROY )
 		{
 			//
 			if( auto * eventSource = pEvent.eWindowUpdateDestroy.eventSource )
@@ -149,7 +149,7 @@ namespace ts3::system
 		return _privateData->priorityEventQueue.emplace_back();
 	}
 
-	uint32 EventController::processEventsAuto()
+	uint32 EventController::dispatchPendingEventsAuto()
 	{
 		validateActiveDispatcherState();
 
@@ -160,7 +160,7 @@ namespace ts3::system
 			++eventCounter;
 		}
 
-		while( _nativeUpdateSysQueue() )
+		while( _nativeDispatchPendingEvents() )
 		{
 			++eventCounter;
 		}
@@ -170,14 +170,14 @@ namespace ts3::system
 			auto & dispatcherConfig = _privateData->getCurrentDispatcherConfig();
 			if( dispatcherConfig.dispatcherConfigFlags.isSet( E_EVENT_DISPATCHER_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT ) )
 			{
-				_nativeUpdateSysQueueWait();
+				_nativeDispatchPendingEventsWait();
 			}
 		}
 
 		return eventCounter;
 	}
 
-	uint32 EventController::processEventsPeek( uint32 pLimit )
+	uint32 EventController::dispatchPendingEventsPeek( uint32 pLimit )
 	{
 		validateActiveDispatcherState();
 
@@ -188,7 +188,7 @@ namespace ts3::system
 			++eventCounter;
 		}
 
-		while( _nativeUpdateSysQueue() && ( eventCounter <= pLimit ) )
+		while( _nativeDispatchPendingEvents() && ( eventCounter <= pLimit ) )
 		{
 			++eventCounter;
 		}
@@ -196,25 +196,49 @@ namespace ts3::system
 		return eventCounter;
 	}
 
-	uint32 EventController::processEventsWait( uint32 pLimit )
+	uint32 EventController::dispatchPendingEventsWait( uint32 pLimit )
 	{
 		validateActiveDispatcherState();
 
 		uint32 eventCounter = 0;
 
-		while( _nativeUpdateSysQueue() && ( eventCounter <= pLimit ) )
+		while( _processLocalQueues() && ( eventCounter <= pLimit ) )
 		{
 			++eventCounter;
 		}
 
-		while( _nativeUpdateSysQueue() && ( eventCounter <= pLimit ) )
+		while( _nativeDispatchPendingEvents() && ( eventCounter <= pLimit ) )
 		{
 			++eventCounter;
 		}
 
 		if( eventCounter == 0 )
 		{
-			_nativeUpdateSysQueueWait();
+			_nativeDispatchPendingEventsWait();
+		}
+
+		return eventCounter;
+	}
+
+	uint32 EventController::dispatchPendingEventsWaitTimeout( const Microseconds & pTimeout, uint32 pLimit )
+	{
+		validateActiveDispatcherState();
+
+		uint32 eventCounter = 0;
+
+		while( _processLocalQueues() && ( eventCounter <= pLimit ) )
+		{
+			++eventCounter;
+		}
+
+		while( _nativeDispatchPendingEvents() && ( eventCounter <= pLimit ) )
+		{
+			++eventCounter;
+		}
+
+		if( eventCounter == 0 )
+		{
+			_nativeDispatchPendingEventsWaitTimeout( pTimeout );
 		}
 
 		return eventCounter;
