@@ -18,6 +18,8 @@ namespace ts3::system
 		struct Win32EventSourceNativeData
 		{
 			HWND hwnd = nullptr;
+
+			Bitmask<uint32> sysWindowFlags = 0;
 		};
 
 		struct Win32EventSourceState
@@ -47,8 +49,8 @@ namespace ts3::system
 		Win32EventController( SysContextHandle pSysContext );
 		virtual ~Win32EventController() noexcept;
 
-		using EventController::getEventSystemInternalConfig;
 		using EventController::getEventDispatcherInputState;
+        using EventController::getEventDispatcherConfig;
 
 	private:
 		/// @override EventController::_nativeRegisterEventSource

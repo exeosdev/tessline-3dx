@@ -40,7 +40,8 @@ namespace ts3::system
 
 	friendapi:
 		// Used by the Window class.
-		virtual void destroyWindow( Window & pWindow ) noexcept;
+		// Destroys system-level window internals without invalidating 'pWindow' itself.
+		virtual void releaseSystemWindow( Window & pWindow ) noexcept;
 
 	private:
 		virtual WindowHandle _nativeCreateWindow( WindowCreateInfo pCreateInfo ) = 0;

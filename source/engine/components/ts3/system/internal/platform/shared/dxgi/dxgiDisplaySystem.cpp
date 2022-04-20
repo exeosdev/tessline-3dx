@@ -16,29 +16,8 @@ namespace ts3::system
 	}
 
 
-	DisplayAdapterDXGI::DisplayAdapterDXGI( DisplayDriverDXGI & pDisplayDriver )
-	: DisplayAdapter( pDisplayDriver )
-	{}
-
-	DisplayAdapterDXGI::~DisplayAdapterDXGI() noexcept = default;
-
-
-	DisplayOutputDXGI::DisplayOutputDXGI( DisplayAdapterDXGI & pDisplayAdapter )
-	: DisplayOutput( pDisplayAdapter )
-	{}
-
-	DisplayOutputDXGI::~DisplayOutputDXGI() noexcept = default;
-
-
-	DisplayVideoModeDXGI::DisplayVideoModeDXGI( DisplayOutputDXGI & pDisplayOutput )
-	: DisplayVideoMode( pDisplayOutput )
-	{}
-
-	DisplayVideoModeDXGI::~DisplayVideoModeDXGI() noexcept = default;
-
-
 	DisplayDriverDXGI::DisplayDriverDXGI( DisplayManagerHandle pDisplayManager )
-	: DisplayDriver( pDisplayManager, EDisplayDriverType::DXGI )
+	: NativeObject( std::move( pDisplayManager ), EDisplayDriverType::DXGI )
 	{
 		_initializeDXGIDriverState();
 	}
@@ -124,11 +103,11 @@ namespace ts3::system
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}
 
-			auto outputObject = adapterDXGI->createOutput<DisplayOutputDXGI>( *adapterDXGI );
+			auto outputObject = createOutput<DisplayOutputDXGI>( *adapterDXGI );
 			outputObject->mNativeData.dxgiOutput = dxgiOutput1;
 			outputObject->mNativeData.dxgiOutputDesc = dxgiOutputDesc;
 			
-			auto & outputDesc = outputObject->getOutputDescInternal();
+			auto & outputDesc = getOutputDescInternal( *outputObject );
 			outputDesc.name = strUtils::convertStringRepresentation<char>( dxgiOutputDesc.DeviceName );
 			outputDesc.screenRect.offset.x = dxgiOutputDesc.DesktopCoordinates.left;
 			outputDesc.screenRect.offset.y = dxgiOutputDesc.DesktopCoordinates.top;
@@ -197,7 +176,7 @@ namespace ts3::system
 			adapterObject->mNativeData.dxgiAdapter = dxgiAdapter;
 			adapterObject->mNativeData.dxgiAdapterDesc = dxgiAdapterDesc;
 			
-			auto & adapterDesc = adapterObject->getAdapterDescInternal();
+			auto & adapterDesc = getAdapterDescInternal( *adapterObject );
 			adapterDesc.name = strUtils::convertStringRepresentation<char>( dxgiAdapterDesc.Description );
 			adapterDesc.flags.set( E_DISPLAY_ADAPTER_FLAG_ACTIVE_BIT );
 
@@ -290,10 +269,10 @@ namespace ts3::system
 				continue;
 			}
 
-			auto videoModeObject = outputDXGI->createVideoMode<DisplayVideoModeDXGI>( *outputDXGI, pColorFormat );
+			auto videoModeObject = createVideoMode<DisplayVideoModeDXGI>( *outputDXGI, pColorFormat );
 			videoModeObject->mNativeData.dxgiModeDesc = dxgiDisplayModeDesc;
 			
-			auto & videoModeDesc = videoModeObject->getModeDescInternal();
+			auto & videoModeDesc = getVideoModeDescInternal( *videoModeObject );
 			videoModeDesc.settings = videoSettings;
 			videoModeDesc.settingsHash = settingsHash;
 

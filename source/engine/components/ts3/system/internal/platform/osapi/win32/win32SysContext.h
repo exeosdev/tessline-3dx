@@ -23,7 +23,7 @@ namespace ts3::system
 
 	}
 
-	class Win32SysContext : public SysContext, public NativeObject<platform::Win32SysContextNativeData>
+	class Win32SysContext : public NativeObject<SysContext, platform::Win32SysContextNativeData>
 	{
 	public:
 		Win32SysContext();
