@@ -177,6 +177,7 @@ int main( int pArgc, const char ** pArgv )
     				const auto size = gfxState.glSurface->getClientAreaSize();
     				printf("Size: %ux%u\n", size.x, size.y );
     			}
+			    fflush( stdout );
     			return true;
     		});
     evtDispatcher->setEventHandler(

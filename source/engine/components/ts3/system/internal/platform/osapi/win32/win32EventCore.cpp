@@ -247,11 +247,17 @@ namespace ts3::system
 					eAppActivityQuit.eventCode = E_EVENT_CODE_APP_ACTIVITY_QUIT;
 					break;
 				}
+				// This is our custom message for fullscreen state changes.
 				case platform::CX_WIN32_MESSAGE_ID_FULLSCREEN_STATE_CHANGE:
 				{
 					auto * win32WindowNativeData = pEventSource.getEventSourceNativeDataAs<platform::Win32WindowNativeData>();
 
+					// Fullscreen state is encoded in the WPARAM argument. Note, that it will always differ
+					// from the current fullscreen state (this is checked upfront before sending the message).
 					const auto isFullscreenEnabled = ( pMSG.wParam != 0 );
+
+					// The actual update. Sets proper window geometry, updates the style.
+					// This is handled automatically by the WM on X11, but here we need to explicitly do it.
 					platform::win32UpdateWindowFullscreenState( *win32WindowNativeData, isFullscreenEnabled );
 
 					auto & eWindowUpdateFullscreen = pOutEvent.eWindowUpdateFullscreen;
@@ -451,7 +457,8 @@ namespace ts3::system
 					eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 					eInputMouseButton.cursorPos = cursorPos;
 					eInputMouseButton.buttonAction = EMouseButtonActionType::Click;
-					eInputMouseButton.buttonID = ( GET_XBUTTON_WPARAM( pMSG.wParam ) == XBUTTON1 ) ? EMouseButtonID::XB1 : EMouseButtonID::XB2;
+					const auto xButtonID = GET_XBUTTON_WPARAM( pMSG.wParam );
+					eInputMouseButton.buttonID = ( xButtonID == XBUTTON1 ) ? EMouseButtonID::XB1 : EMouseButtonID::XB2;
 					eInputMouseButton.buttonStateMask = _win32GetMouseButtonStateMask( pMSG.wParam );
 					break;
 				}
@@ -461,7 +468,8 @@ namespace ts3::system
 					eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
 					eInputMouseButton.cursorPos = cursorPos;
 					eInputMouseButton.buttonAction = EMouseButtonActionType::Release;
-					eInputMouseButton.buttonID = ( GET_XBUTTON_WPARAM( pMSG.wParam ) == XBUTTON1 ) ? EMouseButtonID::XB1 : EMouseButtonID::XB2;
+					const auto xButtonID = GET_XBUTTON_WPARAM( pMSG.wParam );
+					eInputMouseButton.buttonID = ( xButtonID == XBUTTON1 ) ? EMouseButtonID::XB1 : EMouseButtonID::XB2;
 					eInputMouseButton.buttonStateMask = _win32GetMouseButtonStateMask( pMSG.wParam );
 					break;
 				}

@@ -146,13 +146,17 @@ namespace ts3::system
 		return _nativeIsRenderContextBound();
 	}
 
-	void OpenGLSystemDriver::onDisplaySurfaceDestroy( OpenGLDisplaySurface & pDisplaySurface ) noexcept
+	void OpenGLSystemDriver::releaseSystemDisplaySurface( OpenGLDisplaySurface & pDisplaySurface ) noexcept
 	{
 		try
 		{
-			if( pDisplaySurface.hasInternalOwnershipFlag() && pDisplaySurface.isValid() )
+			if( pDisplaySurface.hasInternalOwnershipFlag() )
 			{
-				_nativeDestroyDisplaySurface( pDisplaySurface );
+				if( pDisplaySurface.sysValidate() )
+				{
+					_nativeDestroyDisplaySurface( pDisplaySurface );
+				}
+
 				pDisplaySurface.setInternalOwnershipFlag( false );
 			}
 		}
@@ -167,13 +171,17 @@ namespace ts3::system
 		}
 	}
 
-	void OpenGLSystemDriver::onRenderContextDestroy( OpenGLRenderContext & pRenderContext ) noexcept
+	void OpenGLSystemDriver::releaseSystemRenderContext( OpenGLRenderContext & pRenderContext ) noexcept
 	{
 		try
 		{
-			if( pRenderContext.hasInternalOwnershipFlag() && pRenderContext.sysValidate() )
+			if( pRenderContext.hasInternalOwnershipFlag() )
 			{
-				_nativeDestroyRenderContext( pRenderContext );
+				if( pRenderContext.sysValidate() )
+				{
+					_nativeDestroyRenderContext( pRenderContext );
+				}
+
 				pRenderContext.setInternalOwnershipFlag( false );
 			}
 		}
@@ -217,7 +225,7 @@ namespace ts3::system
 		return _nativeQueryRenderAreaSize();
 	}
 
-	bool OpenGLDisplaySurface::isValid() const
+	bool OpenGLDisplaySurface::sysValidate() const
 	{
 		return _nativeSysValidate();
 	}
@@ -277,6 +285,13 @@ namespace ts3::system
 	bool OpenGLDisplaySurface::isFullscreen() const
 	{
 		return _nativeIsFullscreen();
+	}
+
+	void OpenGLDisplaySurface::onDestroySystemObjectRequested()
+	{
+		EventSource::onDestroySystemObjectRequested();
+
+		mGLSystemDriver->releaseSystemDisplaySurface( *this );
 	}
 
 	void OpenGLDisplaySurface::setInternalOwnershipFlag( bool pOwnershipFlag )
@@ -342,6 +357,11 @@ namespace ts3::system
 		ts3GLResetErrorQueue();
 
 		return systemVersionInfo;
+	}
+
+	void OpenGLRenderContext::onDestroySystemObjectRequested()
+	{
+		mGLSystemDriver->releaseSystemRenderContext( *this );
 	}
 
 	void OpenGLRenderContext::setInternalOwnershipFlag( bool pOwnershipFlag )

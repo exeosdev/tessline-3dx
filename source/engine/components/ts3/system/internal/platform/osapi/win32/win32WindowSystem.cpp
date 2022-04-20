@@ -106,8 +106,8 @@ namespace ts3::system
 			                                     win32FrameGeometry.style,
 			                                     win32FrameGeometry.frameRect.left,
 			                                     win32FrameGeometry.frameRect.top,
-			                                     win32FrameGeometry.frameRect.right,
-			                                     win32FrameGeometry.frameRect.bottom,
+			                                     win32FrameGeometry.frameRect.right - win32FrameGeometry.frameRect.left,
+			                                     win32FrameGeometry.frameRect.bottom - win32FrameGeometry.frameRect.top,
 			                                     nullptr,
 			                                     nullptr,
 			                                     pWindowNativeData.moduleHandle,
@@ -169,9 +169,17 @@ namespace ts3::system
 
 			if( currentFullscreenState != pSetFullscreen )
 			{
+				// We need to go through the event system and properly emit an EvtWindowUpdateFullscreen.
+				// To avoid mixing event and window systems, we simply use the OS ability to post messages
+				// to any window event queue.
+				// Out custom message indicates a fullscreen state change request. Already pre-validated,
+				// it just needs to be handled and dispatched.
+
 				const auto messageID = platform::CX_WIN32_MESSAGE_ID_FULLSCREEN_STATE_CHANGE;
 				const auto wParam = static_cast<WPARAM>( pSetFullscreen ? 1 : 0 );
 
+				// This is an asynchronous post. This functions returns immediately - the message will be
+				// put into the queue and fetched when the event system pulls the event queue next time.
 				::PostMessageA( pWindowNativeData.hwnd, messageID, wParam, 0 );
 			}
 		}
@@ -183,21 +191,28 @@ namespace ts3::system
 
 			if( pSetFullscreen )
 			{
+				// _win32QueryCurrentWindowGeometry() returns the geometry of the whole window, not only the client area!
 				pWindowNativeData.fsCachedGeometry = _win32QueryCurrentWindowGeometry( pWindowNativeData.hwnd );
 
 				const auto screenDC = ::GetWindowDC( nullptr );
 
-				newFrameGeometry.position.x = 0;
-				newFrameGeometry.position.y = 0;
-				newFrameGeometry.size.x = ::GetDeviceCaps( screenDC, HORZRES );
-				newFrameGeometry.size.y = ::GetDeviceCaps( screenDC, VERTRES );
+				const auto xBorderSize = ::GetSystemMetrics(SM_CXEDGE);
+				const auto yBorderSize = ::GetSystemMetrics(SM_CYEDGE);
+
+				newFrameGeometry.position.x = -xBorderSize;
+				newFrameGeometry.position.y = -yBorderSize;
+				newFrameGeometry.size.x = ::GetDeviceCaps( screenDC, HORZRES ) + 2 * xBorderSize;
+				newFrameGeometry.size.y = ::GetDeviceCaps( screenDC, VERTRES ) + 2 * yBorderSize;
 				newFrameGeometry.style = EFrameStyle::Overlay;
 				updateFlags.set( E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_CLIENT_AREA_BIT );
 			}
 			else
 			{
+				// The geometry has the size of the whole window. That is because some window styles cannot be passed
+				// to AdjustWindowRect(). To get around that, we set the outer rect directly, bypassing adjustment.
+
 				newFrameGeometry = pWindowNativeData.fsCachedGeometry;
-				updateFlags.set( E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_CLIENT_AREA_BIT );
+				updateFlags.set( E_FRAME_GEOMETRY_UPDATE_FLAG_SIZE_OUTER_RECT_BIT );
 			}
 
 			win32UpdateFrameGeometry( pWindowNativeData.hwnd, newFrameGeometry, updateFlags );
@@ -233,6 +248,7 @@ namespace ts3::system
 			if( pSizeMode == EFrameSizeMode::ClientArea )
 			{
 				::GetClientRect( pHWND, &frameRect );
+				::AdjustWindowRect( &frameRect, WS_VISIBLE, FALSE );
 			}
 			else
 			{
@@ -373,22 +389,14 @@ namespace ts3::system
 
 		FrameGeometry _win32QueryCurrentWindowGeometry( HWND pHWND )
 		{
-			// WindowRect represents the screen-space window rectangle.
-			// This is the simplest way of getting the position.
 			RECT windowRect;
 			::GetWindowRect( pHWND, &windowRect );
-
-			// ClientRect represents window-space client area.
-			// Awesome way for getting the size of the "internal" area.
-			// However, the position is useless - it will be (0,0) in most cases.
-			RECT clientAreaRect;
-			::GetClientRect( pHWND, &clientAreaRect );
 
 			FrameGeometry windowGeometry{};
 			windowGeometry.position.x = windowRect.left;
 			windowGeometry.position.y = windowRect.top;
-			windowGeometry.size.x = static_cast<uint32>( clientAreaRect.right - clientAreaRect.left );
-			windowGeometry.size.y = static_cast<uint32>( clientAreaRect.bottom - clientAreaRect.top );
+			windowGeometry.size.x = static_cast<uint32>( windowRect.right - windowRect.left );
+			windowGeometry.size.y = static_cast<uint32>( windowRect.bottom - windowRect.top );
 			windowGeometry.style = _win32QueryWindowStyle( pHWND );
 
 			return windowGeometry;

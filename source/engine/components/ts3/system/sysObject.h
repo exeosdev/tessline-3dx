@@ -72,6 +72,11 @@ namespace ts3::system
 		}
 
 	protected:
+		/// @brief Implements class-specific logic for releasing system-level resources.
+		///
+		/// Base method (from SysObject class) should ALWAYS be called at the end of the class-specific one.
+		/// However, it is not mandatory to form a complete call chain for all subclasses. Classes are also
+		/// free to decide at which point a base class version should be called.
 		virtual void onDestroySystemObjectRequested();
 
 		bool setDestroyRequestFlag()
