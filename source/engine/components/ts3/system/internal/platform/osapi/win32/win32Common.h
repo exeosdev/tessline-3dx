@@ -11,13 +11,25 @@
 namespace ts3::system
 {
 
+    namespace platform
+    {
+
+		enum EWin32SystemWindowFlags : uint32
+		{
+			E_WIN32_SYSTEM_WINDOW_FLAG_WM_STATE_FULLSCREEN = 0x8000
+		};
+
+        inline constexpr UINT CX_WIN32_MESSAGE_ID_FULLSCREEN_STATE_CHANGE = 0x0477;
+
+    }
+
 	template <typename TpBaseType, typename TpNativeData>
 	class Win32NativeObject : public NativeObject<TpBaseType, TpNativeData>
 	{
 	public:
 		template <typename... TpBaseTypeArgs>
 		Win32NativeObject( TpBaseTypeArgs && ...pBaseTypeArgs )
-		: NativeObject( std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
+		: NativeObject<TpBaseType, TpNativeData>( std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
 		{}
 
 		virtual ~Win32NativeObject() = default;

@@ -1,5 +1,5 @@
 
-#include "win32EventCore.h"
+#include "win32WindowSystem.h"
 #include <ts3/system/internal/eventCorePrivate.h>
 #include <ts3/math/vectorOps.h>
 
@@ -12,15 +12,23 @@ namespace ts3::system
 
 		LRESULT __stdcall _win32EventSourceProxyEventProc( HWND pHWND, UINT pMessage, WPARAM pWparam, LPARAM pLparam );
 
-		bool _win32TranslateAppOrWindowEvent( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
+		bool _win32TranslateAppOrWindowEvent( Win32EventController & pEventControlle,
+		                                      EventSource & pEventSource,
+											  const MSG & pMSG,
+											  EventObject & pOutEvent );
 
-		bool _win32TranslateInputEvent( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
+		bool _win32TranslateInputEvent( Win32EventController & pEventController,
+		                                EventSource & pEventSource,
+										const MSG & pMSG,
+										EventObject & pOutEvent );
 
 		bool _win32TranslateInputEventKeyboard( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
 
 		bool _win32TranslateInputEventMouse( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
 
 		bool _win32TranslateInputEventTouch( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
+
+		bool _win32TranslateInputEventGesture( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
 
 		EWindowVisibilityState _win32TranslateWindowVisibility( WPARAM pWparam );
 
@@ -60,21 +68,19 @@ namespace ts3::system
 
 	void Win32EventController::_nativeUnregisterEventSource( EventSource & pEventSource )
 	{
-		LONG_PTR windowUserData = ::GetWindowLongPtrA( pHWND, GWLP_USERDATA );
-		auto * win32EventSourceState = reinterpret_cast<Win32EventSourceState *>( windowUserData );
-		if( auto * win32EventSourceState = pEventSource.getEventSourcePlatformDataAs<platform::Win32EventSourceState>() )
+        auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::Win32EventSourceNativeData>();
+        ts3DebugAssert( eventSourceNativeData != nullptr );
+
+		LONG_PTR windowUserData = ::GetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_USERDATA );
+
+		if( auto * win32EventSourceState = reinterpret_cast<platform::Win32EventSourceState *>( windowUserData ) )
 		{
-			if( auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::Win32EventSourceNativeData>() )
-			{
-				::SetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_WNDPROC, win32EventSourceState->savedEventCallback );
+            ::SetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_WNDPROC, win32EventSourceState->savedEventCallback );
 
-				::SetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_USERDATA, win32EventSourceState->savedEventCallbackUserData );
+            ::SetWindowLongPtrA( eventSourceNativeData->hwnd, GWLP_USERDATA, win32EventSourceState->savedEventCallbackUserData );
 
-				// Trigger the update of the window to ensure changes are visible.
-				::SetWindowPos( eventSourceNativeData->hwnd, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
-			}
-
-			resetEventSourcePlatformData( pEventSource );
+            // Trigger the update of the window to ensure changes are visible.
+            ::SetWindowPos( eventSourceNativeData->hwnd, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED );
 		}
 	}
 
@@ -128,16 +134,18 @@ namespace ts3::system
 
 		bool win32TranslateEvent( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
 		{
-			if( pNativeEvent.message >= WM_KEYFIRST && pNativeEvent.message <= WM_TOUCH )
+			auto * eventSource = win32FindEventSourceByHWND( pEventController, pMSG.hwnd );
+
+			if( pMSG.message >= WM_KEYFIRST && pMSG.message <= WM_TOUCH )
 			{
-				if( _win32TranslateInputEvent( pEventController, pNativeEvent, pOutEvent ) )
+				if( eventSource && _win32TranslateInputEvent( pEventController, *eventSource, pMSG, pOutEvent ) )
 				{
 					return true;
 				}
 			}
 			else
 			{
-				if( _win32TranslateAppOrWindowEvent( pEventController, pNativeEvent, pOutEvent ) )
+				if( eventSource && _win32TranslateAppOrWindowEvent( pEventController, *eventSource, pMSG, pOutEvent ) )
 				{
 					return true;
 				}
@@ -202,41 +210,55 @@ namespace ts3::system
 			return ::DefWindowProcA( pHWND, pMessage, pWparam, pLparam );
 		}
 
-		bool _win32TranslateAppOrWindowEvent( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
+		bool _win32TranslateAppOrWindowEvent( Win32EventController & pEventController,
+		                                      EventSource & pEventSource,
+											  const MSG & pMSG,
+											  EventObject & pOutEvent )
 		{
 			switch ( pMSG.message )
 			{
 				case WM_SHOWWINDOW:
 				{
-					auto * eventSource = win32FindEventSourceByHWND( pEventController, pMSG.hwnd );
 					auto & eWindowUpdateVisibility = pOutEvent.eWindowUpdateVisibility;
 					eWindowUpdateVisibility.eventCode = E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY;
 					eWindowUpdateVisibility.newVisibilityState = _win32TranslateWindowVisibility( pMSG.wParam );
-					eWindowUpdateVisibility.eventSource = eventSource;
+					eWindowUpdateVisibility.eventSource = &pEventSource;
 					break;
 				}
 				case WM_SIZE:
 				{
-					auto * eventSource = win32FindEventSourceByHWND( pEventController, pMSG.hwnd );
 					auto & eWindowUpdateResize = pOutEvent.eWindowUpdateResize;
 					eWindowUpdateResize.eventCode = E_EVENT_CODE_WINDOW_UPDATE_RESIZE;
 					eWindowUpdateResize.newSize.x = LOWORD( pMSG.lParam );
 					eWindowUpdateResize.newSize.y = HIWORD( pMSG.lParam );
-					eWindowUpdateResize.eventSource = eventSource;
+					eWindowUpdateResize.eventSource = &pEventSource;
 					break;
 				}
 				case WM_CLOSE:
 				{
-					auto * eventSource = win32FindEventSourceByHWND( pEventController, pMSG.hwnd );
 					auto & eWindowUpdateDestroy = pOutEvent.eWindowUpdateDestroy;
 					eWindowUpdateDestroy.eventCode = E_EVENT_CODE_WINDOW_UPDATE_DESTROY;
-					eWindowUpdateDestroy.eventSource = eventSource;
+					eWindowUpdateDestroy.eventSource = &pEventSource;
 					break;
 				}
 				case WM_QUIT:
 				{
 					auto & eAppActivityQuit = pOutEvent.eAppActivityQuit;
 					eAppActivityQuit.eventCode = E_EVENT_CODE_APP_ACTIVITY_QUIT;
+					break;
+				}
+				case platform::CX_WIN32_MESSAGE_ID_FULLSCREEN_STATE_CHANGE:
+				{
+					auto * win32WindowNativeData = pEventSource.getEventSourceNativeDataAs<platform::Win32WindowNativeData>();
+
+					const auto isFullscreenEnabled = ( pMSG.wParam != 0 );
+					platform::win32UpdateWindowFullscreenState( *win32WindowNativeData, isFullscreenEnabled );
+
+					auto & eWindowUpdateFullscreen = pOutEvent.eWindowUpdateFullscreen;
+					eWindowUpdateFullscreen.eventCode = E_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN;
+					eWindowUpdateFullscreen.fullscreenState = isFullscreenEnabled ? EActiveState::Enabled : EActiveState::Disabled;
+					eWindowUpdateFullscreen.eventSource = &pEventSource;
+
 					break;
 				}
 				default:
@@ -248,7 +270,10 @@ namespace ts3::system
 			return true;
 		}
 
-		bool _win32TranslateInputEvent( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
+		bool _win32TranslateInputEvent( Win32EventController & pEventController,
+		                                EventSource & pEventSource,
+										const MSG & pMSG,
+										EventObject & pOutEvent )
 		{
 			if( ( pMSG.message >= WM_KEYFIRST ) && ( pMSG.message <= WM_KEYLAST ) )
 			{
@@ -258,12 +283,16 @@ namespace ts3::system
 			{
 				return _win32TranslateInputEventMouse( pEventController, pMSG, pOutEvent );
 			}
-		#if defined( WM_TOUCH )
+		#if( WINVER >= 0x0602 )
 			else if( pMSG.message == WM_TOUCH )
 			{
 				return _win32TranslateInputEventTouch( pEventController, pMSG, pOutEvent );
 			}
 		#endif
+			else if( ( pMSG.message == WM_GESTURE ) || ( pMSG.message == WM_GESTURENOTIFY ) )
+			{
+				return _win32TranslateInputEventGesture( pEventController, pMSG, pOutEvent );
+			}
 			else
 			{
 				return false;
@@ -277,6 +306,7 @@ namespace ts3::system
 			switch( pMSG.message )
 			{
 				case WM_KEYDOWN:
+				case WM_SYSKEYDOWN:
 				{
 					auto & eInputKeyboardKey = pOutEvent.eInputKeyboardKey;
 					eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
@@ -286,6 +316,7 @@ namespace ts3::system
 					break;
 				}
 				case WM_KEYUP:
+				case WM_SYSKEYUP:
 				{
 					auto & eInputKeyboardKey = pOutEvent.eInputKeyboardKey;
 					eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
@@ -453,6 +484,11 @@ namespace ts3::system
 		}
 
 		bool _win32TranslateInputEventTouch( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
+		{
+			return false;
+		}
+
+		bool _win32TranslateInputEventGesture( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
 		{
 			return false;
 		}

@@ -15,10 +15,15 @@
 namespace ts3::system
 {
 
-	SysContextHandle createSysContext( const SysContextCreateInfo & pCreateInfo )
-	{
-		return createDynamicInterfaceObject<Win32SysContext>();
-	}
+    namespace platform
+    {
+
+        SysContextHandle createSysContext( const SysContextCreateInfo & pCreateInfo )
+        {
+            return createDynamicInterfaceObject<Win32SysContext>();
+        }
+
+    }
 
 
 	Win32SysContext::Win32SysContext()
@@ -34,8 +39,8 @@ namespace ts3::system
 	AssetLoaderHandle Win32SysContext::createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo )
 	{
 		return platform::createFileAssetLoader( getHandle<Win32SysContext>(),
-		                                        pCreateInfo.nativeParams.fileManager,
-		                                        pCreateInfo.nativeParams.relativeAssetRootDir );
+		                                        pCreateInfo.nativeParams->fileManager,
+		                                        pCreateInfo.nativeParams->relativeAssetRootDir );
 	}
 
 	DisplayManagerHandle Win32SysContext::createDisplayManager()

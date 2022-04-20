@@ -356,7 +356,9 @@ namespace ts3::system
 	{}
 
 	void Win32OpenGLDisplaySurface::_nativeSetFullscreenMode( bool pEnable )
-	{}
+	{
+		platform::win32ChangeWindowFullscreenState( mNativeData, pEnable );
+	}
 
 	void Win32OpenGLDisplaySurface::_nativeSetTitle( const std::string & pTitle )
 	{
@@ -374,6 +376,11 @@ namespace ts3::system
 		return platform::win32GetFrameSize( mNativeData.hwnd, pSizeMode );
 	}
 
+    bool Win32OpenGLDisplaySurface::_nativeIsFullscreen() const
+    {
+        return platform::win32IsFullscreenWindow( mNativeData );
+    }
+
 
 	Win32OpenGLRenderContext::Win32OpenGLRenderContext( Win32OpenGLSystemDriverHandle pGLSystemDriver )
 	: Win32NativeObject( std::move( pGLSystemDriver ) )
@@ -390,7 +397,7 @@ namespace ts3::system
 		::wglMakeCurrent( win32DisplaySurface->mNativeData.hdc, mNativeData.contextHandle );
 	}
 
-	bool Win32OpenGLRenderContext::_nativeIsCurrent() const
+	bool Win32OpenGLRenderContext::_nativeSysCheckIsCurrent() const
 	{
 		auto currentContextHandle = ::wglGetCurrentContext();
 		return mNativeData.contextHandle && ( mNativeData.contextHandle == currentContextHandle );

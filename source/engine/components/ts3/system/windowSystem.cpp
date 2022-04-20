@@ -114,9 +114,9 @@ namespace ts3::system
 
 	void Window::onDestroySystemObjectRequested()
 	{
-		mWindowManager->destroyWindow( *this );
-
 		EventSource::onDestroySystemObjectRequested();
+
+		mWindowManager->destroyWindow( *this );
 	}
 
 } // namespace ts3::system

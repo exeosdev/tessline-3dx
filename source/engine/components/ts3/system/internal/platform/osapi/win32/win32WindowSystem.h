@@ -20,6 +20,7 @@ namespace ts3::system
 			ATOM wndClsID = 0;
 			LPCSTR wndClsName = nullptr;
 			HMODULE moduleHandle = nullptr;
+			FrameGeometry fsCachedGeometry = {};
 		};
 
 		struct Win32FrameGeometry
@@ -32,11 +33,17 @@ namespace ts3::system
 
 		void win32DestroyWindow( Win32WindowNativeData & pWindowNativeData );
 
+        void win32ChangeWindowFullscreenState( Win32WindowNativeData & pWindowNativeData, bool pSetFullscreen );
+
+		void win32UpdateWindowFullscreenState( Win32WindowNativeData & pWindowNativeData, bool pSetFullscreen );
+
 		void win32SetFrameTitle( HWND pHWND, const std::string & pTitle );
 
 		void win32UpdateFrameGeometry( HWND pHWND, const FrameGeometry & pFrameGeometry, Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags );
 
 		TS3_SYSTEM_API_NODISCARD FrameSize win32GetFrameSize( HWND pHWND, EFrameSizeMode pSizeMode );
+
+		TS3_SYSTEM_API_NODISCARD bool win32IsFullscreenWindow( const Win32WindowNativeData & pWindowNativeData );
 
 	}
 
@@ -49,6 +56,9 @@ namespace ts3::system
 	private:
 		// @override WindowManager::_nativeCreateWindow
 		virtual WindowHandle _nativeCreateWindow( WindowCreateInfo pCreateInfo ) override final;
+
+        // @override WindowManager::_nativeDestroyWindow
+        virtual void _nativeDestroyWindow( Window & pWindow ) override final;
 	};
 
 	class Win32Window : public Win32NativeObject<Window, platform::Win32WindowNativeData>

@@ -203,7 +203,7 @@ namespace ts3::system
 
 	void OpenGLDisplaySurface::clearColorBuffer()
 	{
-		glClearColor( 0.2, 0.4, 0.92, 1.0 );
+		glClearColor( 0.2f, 0.4f, 0.92f, 1.0f );
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	}
 

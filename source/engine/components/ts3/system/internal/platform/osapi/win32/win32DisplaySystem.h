@@ -42,34 +42,9 @@ namespace ts3::system
 	}
 
 	/// @brief
-	class Win32DisplayAdapter : public Win32NativeObject<DisplayAdapter, platform::Win32DisplayAdapterNativeData>
-	{
-		friend class Win32DisplayDriver;
-
-	public:
-		explicit Win32DisplayAdapter( Win32DisplayDriver & pDisplayDriver );
-		virtual ~Win32DisplayAdapter() noexcept;
-	};
-
-	/// @brief
-	class Win32DisplayOutput : public Win32NativeObject<DisplayOutput, platform::Win32DisplayOutputNativeData>
-	{
-		friend class Win32DisplayDriver;
-
-	public:
-		explicit Win32DisplayOutput( Win32DisplayAdapter & pDisplayAdapter );
-		virtual ~Win32DisplayOutput() noexcept;
-	};
-
-	/// @brief
-	class Win32DisplayVideoMode : public Win32NativeObject<DisplayVideoMode, platform::Win32DisplayVideoModeNativeData>
-	{
-		friend class Win32DisplayDriver;
-
-	public:
-		explicit Win32DisplayVideoMode( Win32DisplayOutput & pDisplayOutput );
-		virtual ~Win32DisplayVideoMode() noexcept;
-	};
+	using Win32DisplayAdapter = Win32NativeObject<DisplayAdapter, platform::Win32DisplayAdapterNativeData>;
+	using Win32DisplayOutput = Win32NativeObject<DisplayOutput, platform::Win32DisplayOutputNativeData>;
+	using Win32DisplayVideoMode = Win32NativeObject<DisplayVideoMode, platform::Win32DisplayVideoModeNativeData>;
 
 	/// @brief
 	class Win32DisplayManager : public DisplayManager
@@ -80,6 +55,8 @@ namespace ts3::system
 
 	private:
 		virtual DisplayDriverHandle _nativeCreateDisplayDriver() override final;
+
+        virtual void _nativeQueryDefaultDisplayOffset( DisplayOffset & pOutOffset ) const override final;
 
 		virtual void _nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const override final;
 

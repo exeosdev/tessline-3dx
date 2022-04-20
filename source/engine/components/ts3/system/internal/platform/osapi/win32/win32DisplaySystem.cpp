@@ -16,27 +16,6 @@ namespace ts3::system
 	}
 
 
-	Win32DisplayAdapter::Win32DisplayAdapter( Win32DisplayDriver & pDisplayDriver )
-	: Win32NativeObject( pDisplayDriver )
-	{}
-
-	Win32DisplayAdapter::~Win32DisplayAdapter() noexcept = default;
-
-
-	Win32DisplayOutput::Win32DisplayOutput( Win32DisplayAdapter & pDisplayAdapter )
-	: Win32NativeObject( pDisplayAdapter )
-	{}
-
-	Win32DisplayOutput::~Win32DisplayOutput() noexcept = default;
-
-
-	Win32DisplayVideoMode::Win32DisplayVideoMode( Win32DisplayOutput & pDisplayOutput )
-	: Win32NativeObject( pDisplayOutput )
-	{}
-
-	Win32DisplayVideoMode::~Win32DisplayVideoMode() noexcept = default;
-
-
 	Win32DisplayManager::Win32DisplayManager( SysContextHandle pSysContext )
 	: DisplayManager( std::move( pSysContext ) )
 	{}
@@ -47,6 +26,12 @@ namespace ts3::system
 	{
 		return createSysObject<Win32DisplayDriver>( getHandle<Win32DisplayManager>() );
 	}
+
+    void Win32DisplayManager::_nativeQueryDefaultDisplayOffset( DisplayOffset & pOutOffset ) const
+    {
+        pOutOffset.x = 0;
+        pOutOffset.y = 0;
+    }
 
 	void Win32DisplayManager::_nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const
 	{
@@ -121,7 +106,7 @@ namespace ts3::system
 				newAdapterObject->mNativeData.deviceUUID = std::move( adapterUUID );
 				newAdapterObject->mNativeData.deviceName = adapterInfoGDI.DeviceName;
 
-				auto & adapterDesc = newAdapterObject->getAdapterDescInternal();
+				auto & adapterDesc = getAdapterDescInternal( *newAdapterObject );
 				adapterDesc.name = adapterInfoGDI.DeviceString;
 
 				if( makeBitmask( adapterInfoGDI.StateFlags ).isSet( DISPLAY_DEVICE_ATTACHED_TO_DESKTOP ) )
@@ -145,11 +130,11 @@ namespace ts3::system
 					break;
 				}
 
-				auto outputObject = adapterObject->createOutput<Win32DisplayOutput>( *adapterObject );
+				auto outputObject = createOutput<Win32DisplayOutput>( *adapterObject );
 				outputObject->mNativeData.displayDeviceName = adapterInfoGDI.DeviceName;
 				outputObject->mNativeData.outputID = outputInfoGDI.DeviceName;
 
-				auto & outputDesc = outputObject->getOutputDescInternal();
+				auto & outputDesc = getOutputDescInternal( *outputObject );
 				// NOTE: 'DISPLAY_DEVICE_PRIMARY_DEVICE' flag is not set in case of output devices (unlike adapters).
 				// Primary output can be detected by analysing at monitor flags and looking for MONITORINFOF_PRIMARY.
 				// See _win32MonitorEnumProc function above where this gets done.
@@ -184,7 +169,7 @@ namespace ts3::system
 				auto * win32OutputObject = outputObject->queryInterface<Win32DisplayOutput>();
 				win32OutputObject->mNativeData.gdiMonitorHandle = pMonitorHandle;
 
-				auto & outputDesc = win32OutputObject->getOutputDescInternal();
+				auto & outputDesc = getOutputDescInternal( *win32OutputObject );
 				outputDesc.name = strUtils::convertStringRepresentation<char>( gdiMonitorInfo.szDevice );
 				outputDesc.screenRect.offset.x = gdiMonitorInfo.rcMonitor.left;
 				outputDesc.screenRect.offset.y = gdiMonitorInfo.rcMonitor.top;
@@ -259,10 +244,10 @@ namespace ts3::system
 				continue;
 			}
 
-			auto videoModeObject = outputWin32->createVideoMode<Win32DisplayVideoMode>( *outputWin32, pColorFormat );
+			auto videoModeObject = createVideoMode<Win32DisplayVideoMode>( *outputWin32, pColorFormat );
 			videoModeObject->mNativeData.gdiModeInfo = gdiDevMode;
 
-			auto & videoModeDesc = videoModeObject->getModeDescInternal();
+			auto & videoModeDesc = getVideoModeDescInternal( *videoModeObject );
 			videoModeDesc.settings = videoSettings;
 			videoModeDesc.settingsHash = settingsHash;
 
