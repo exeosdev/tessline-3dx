@@ -101,11 +101,32 @@ namespace ts3::system
 
 		EventObject & emplacePriorityEvent();
 
-		uint32 processEventsAuto();
+		// Note on event fetching order:
+		// Event controller works with three different event queues:
+		// 1) Local priority queue:
+		//  The name is rather self-descriptive. This queue can be populated using dedicated pushPriorityEvent() and
+		//  emplacePriorityEvent() functions. It has the highest priority and is always checked first. This queue
+		//  is also used for additional system-level events.
+		// 2) Local user queue:
+		//  This is simply a lower-prioritised version of the first queue. It is checked as second
+		//  and can be populated  using dedicated pushUserEvent() and emplaceUserEvent() functions.
+		// 3) System queue:
+		//  "THE" event queue, coming directly from the system. Checked as last, after priority and user queues.
 
-		uint32 processEventsPeek( uint32 pLimit = CX_INT32_MAX );
+		/// @brief Retrieves pending events from the queue using waiting policy based on the current configuration.
+		/// #
+		/// This function retrieves pending events from queues and dispatches them. If no events are currently
+		/// available, the function behaves as follows:
+		/// 1) If E_EVENT_DISPATCHER_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT is not set, this function returns immediately.
+		/// 2) Otherwise, it blocks until a new events arrives in the system queue (just like dispatchPendingEventsWait()
+		///  would normally do).
+		uint32 dispatchPendingEventsAuto();
 
-		uint32 processEventsWait( uint32 pLimit = CX_INT32_MAX );
+		uint32 dispatchPendingEventsPeek( uint32 pLimit = CX_INT32_MAX );
+
+		uint32 dispatchPendingEventsWait( uint32 pLimit = CX_INT32_MAX );
+
+		uint32 dispatchPendingEventsWaitTimeout( const Microseconds & pTimeout, uint32 pLimit = CX_INT32_MAX );
 
 		void setEventSystemConfigFlags( Bitmask<EEventSystemConfigFlags> pFlags, bool pSetOrUnset = true );
 
@@ -142,16 +163,16 @@ namespace ts3::system
 	private:
 		// System-level call. Pulls events from the system queue.
 		// If the queue is empty, returns immediately.
-		virtual bool _nativeUpdateSysQueue() = 0;
+		virtual bool _nativeDispatchPendingEvents() = 0;
 
 		// System-level call. Pulls events from the system queue.
 		// If the queue is empty, waits until an event arrives (infinite timeout).
-		virtual bool _nativeUpdateSysQueueWait() = 0;
+		virtual bool _nativeDispatchPendingEventsWait() = 0;
 
 		// System-level call. Pulls events from the system queue.
 		// If the queue is empty, waits until an event arrives or the specified timeout occurs.
 		// A separate function because on some OSes timeout-based event fetching may be tricky (yes, you again, Win32).
-		virtual bool _nativeUpdateSysQueueWaitTimeout( const Microseconds & pTimeout ) { return false; }
+		virtual bool _nativeDispatchPendingEventsWaitTimeout( const Microseconds & pTimeout ) { return false; }
 
 		// Registers the event source at the system level. Empty for most OSes.
 		// Win32: replaces WNDPROC with a custom one and allocates extra window data.

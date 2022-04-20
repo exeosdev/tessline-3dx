@@ -49,7 +49,7 @@ namespace ts3::system
 	void X11EventController::_nativeUnregisterEventSource( EventSource & /* pEventSource */ )
 	{}
 
-	bool X11EventController::_nativeUpdateSysQueue()
+	bool X11EventController::_nativeDispatchPendingEvents()
 	{
 		auto & xSessionData = platform::x11GetXSessionData( *this );
 
@@ -64,7 +64,7 @@ namespace ts3::system
 		return false;
 	}
 
-	bool X11EventController::_nativeUpdateSysQueueWait()
+	bool X11EventController::_nativeDispatchPendingEventsWait()
 	{
 		auto & xSessionData = platform::x11GetXSessionData( *this );
 

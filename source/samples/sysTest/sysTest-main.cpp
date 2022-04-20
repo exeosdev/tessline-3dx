@@ -136,7 +136,7 @@ int main( int pArgc, const char ** pArgv )
 
     while( waitForDisplay )
     {
-        evtController->processEventsAuto();
+        evtController->dispatchPendingEventsAuto();
     }
 
     evtDispatcher->setEventHandler(
@@ -181,15 +181,6 @@ int main( int pArgc, const char ** pArgv )
     			return true;
     		});
     evtDispatcher->setEventHandler(
-            EEventCodeIndex::WindowUpdateDestroy,
-            [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
-                if( pEvt.eWindowUpdateDestroy.checkEventSource( gfxState.glSurface.get() ) )
-                {
-                    // evtDispatcher->postEventAppQuit();
-                }
-                return true;
-            });
-    evtDispatcher->setEventHandler(
             EEventCodeIndex::InputKeyboardKey,
             [evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
                 auto & keyMap = pEvt.eInputKeyboardKey.inputKeyboardState->keyStateMap;
@@ -199,6 +190,18 @@ int main( int pArgc, const char ** pArgv )
                 }
                 return true;
             });
+	if( false )
+	{
+		evtDispatcher->setEventHandler(
+				EEventCodeIndex::WindowUpdateDestroy,
+				[evtDispatcher,&gfxState](const EventObject & pEvt) -> bool {
+					if( pEvt.eWindowUpdateDestroy.checkEventSource( gfxState.glSurface.get() ) )
+					{
+						// evtDispatcher->postEventAppQuit();
+					}
+					return true;
+				});
+	}
 
     initializeGraphics( sysContext, gfxState );
 
@@ -214,7 +217,7 @@ int main( int pArgc, const char ** pArgv )
 
     while( runApp )
     {
-        evtController->processEventsAuto();
+        evtController->dispatchPendingEventsAuto();
         if( gfxState.pauseAnimation )
         {
             continue;
