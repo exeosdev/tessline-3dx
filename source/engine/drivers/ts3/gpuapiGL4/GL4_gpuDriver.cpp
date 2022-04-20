@@ -23,7 +23,7 @@ namespace gpuapi
 		auto sysContext = pCreateInfo.sysContext;
 		if( !sysContext )
 		{
-			sysContext = system::createSysContext( pCreateInfo.sysContextCreateInfo );
+			sysContext = system::platform::createSysContext( pCreateInfo.sysContextCreateInfo );
 			if( !sysContext )
 			{
 				return nullptr;
