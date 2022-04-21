@@ -31,7 +31,7 @@ namespace gpuapi
 		return !mGLRenderbufferObject && !mGLTextureObject;
 	}
 
-	Handle<GLRenderBuffer> GLRenderBuffer::create( GLGPUDevice & pGLGPUDevice, const RenderBufferCreateInfo & pCreateInfo )
+	GpaHandle<GLRenderBuffer> GLRenderBuffer::create( GLGPUDevice & pGLGPUDevice, const RenderBufferCreateInfo & pCreateInfo )
 	{
 		if( !validateCreateInfo( pCreateInfo ) )
 		{

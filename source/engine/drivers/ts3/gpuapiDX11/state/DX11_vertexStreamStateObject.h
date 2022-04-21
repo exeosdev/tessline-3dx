@@ -22,8 +22,8 @@ namespace gpuapi
 		DX11VertexStreamStateObject( DX11GPUDevice & pGPUDevice,
 		                             DX11VertexDataSourceBinding pDX11VertexDataSourceBinding );
 
-		static Handle<DX11VertexStreamStateObject> create( DX11GPUDevice & pGPUDevice,
-		                                                   const VertexStreamStateObjectCreateInfo & pCreateInfo );
+		static GpaHandle<DX11VertexStreamStateObject> create( DX11GPUDevice & pGPUDevice,
+		                                                      const VertexStreamStateObjectCreateInfo & pCreateInfo );
 	};
 
 } /* namespace ts3 */

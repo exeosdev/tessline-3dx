@@ -230,7 +230,7 @@ namespace ts3
 		using Type = ResultCodeException;
 	};
 
-    #define ts3EnableExceptionSupport() \
+    #define ts3EnableCustomExceptionSupport() \
         template <exception_category_value_t tExceptionCategory> \
         struct ExceptionCategoryClassProxy \
         { \

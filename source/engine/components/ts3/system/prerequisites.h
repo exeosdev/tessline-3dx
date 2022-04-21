@@ -32,16 +32,17 @@
 namespace ts3::system
 {
 
-	ts3EnableExceptionSupport();
+	ts3EnableCustomExceptionSupport();
+	ts3EnableEnumTypeInfoSupport();
 
 	template <typename TpObject>
-	using Handle = ::ts3::SharedHandle<TpObject>;
+	using SysHandle = ::ts3::SharedHandle<TpObject>;
 
 	/// @brief Declares the handle type for a given system class.
 	/// The handle's type name is created by appending 'Handle' suffix to a given class name.
 	/// For example: ts3SysDeclareHandle( MyType ) will produce a declaration for 'MyTypeHandle'.
 	#define ts3SysDeclareHandle( pType ) \
-		class pType; using pType##Handle = Handle<::ts3::system::pType>
+		class pType; using pType##Handle = SysHandle<::ts3::system::pType>
 
 	// These two types need to be visible everywhere.
 	ts3SysDeclareHandle( SysContext );

@@ -27,7 +27,7 @@ namespace gpuapi
 		return !mD3D11Texture2D;
 	}
 
-	Handle<DX11RenderBuffer> DX11RenderBuffer::create( DX11GPUDevice & pDX11GPUDevice, const RenderBufferCreateInfo & pCreateInfo )
+	GpaHandle<DX11RenderBuffer> DX11RenderBuffer::create( DX11GPUDevice & pDX11GPUDevice, const RenderBufferCreateInfo & pCreateInfo )
 	{
 		if( !validateCreateInfo( pCreateInfo ) )
 		{

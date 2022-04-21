@@ -30,7 +30,7 @@ namespace gpuapi
 
 		virtual bool isNull() const override;
 
-		static Handle<DX11RenderBuffer> create( DX11GPUDevice & pDX11GPUDevice, const RenderBufferCreateInfo & pCreateInfo );
+		static GpaHandle<DX11RenderBuffer> create( DX11GPUDevice & pDX11GPUDevice, const RenderBufferCreateInfo & pCreateInfo );
 	};
 
 } /* namespace ts3 */

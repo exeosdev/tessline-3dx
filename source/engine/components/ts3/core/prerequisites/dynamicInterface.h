@@ -63,7 +63,7 @@ namespace ts3
 		SharedHandle<TpSubclass> getHandle()
 		{
 		#if( TS3_DEBUG )
-			return dynamic_shared_ptr_cast_check<TpSubclass>( shared_from_this() );
+			return dynamic_ptr_cast_check<TpSubclass>( shared_from_this() );
 		#else
 			return std::static_pointer_cast<TpSubclass>( shared_from_this() );
 		#endif
@@ -73,7 +73,7 @@ namespace ts3
 		SharedHandle<TpSubclass> queryHandle()
 		{
 		#if( TS3_DEBUG )
-			return dynamic_shared_ptr_cast_throw<TpSubclass>( shared_from_this() );
+			return dynamic_ptr_cast_throw<TpSubclass>( shared_from_this() );
 		#else
 			return std::static_pointer_cast<TpSubclass>( shared_from_this() );
 		#endif

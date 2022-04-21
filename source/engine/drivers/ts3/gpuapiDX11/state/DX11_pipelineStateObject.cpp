@@ -19,8 +19,8 @@ namespace gpuapi
 
 	DX11GraphicsPipelineStateObject::~DX11GraphicsPipelineStateObject() = default;
 
-	Handle<DX11GraphicsPipelineStateObject> DX11GraphicsPipelineStateObject::create( DX11GPUDevice & pGPUDevice,
-	                                                                                 const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
+	GpaHandle<DX11GraphicsPipelineStateObject> DX11GraphicsPipelineStateObject::create( DX11GPUDevice & pGPUDevice,
+	                                                                                    const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
 	{
 		CommonPSOState commonPSOState;
 		if( !createCommonPSOState( pCreateInfo, commonPSOState ) )

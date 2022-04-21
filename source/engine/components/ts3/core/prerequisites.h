@@ -38,23 +38,21 @@
 
 #define friendapi protected
 
-#include "prerequisites/enumCommon.h"
-#include "prerequisites/coreEnums.h"
 #include "prerequisites/coreDefs.h"
+#include "prerequisites/coreEnums.h"
 #include "prerequisites/result.h"
 #include "prerequisites/dynamicInterface.h"
 
 namespace ts3
 {
 
-	constexpr uint32 cxInvalidU32ID = Limits<uint32>::maxValue;
-	constexpr uint64 cxInvalidU64ID = Limits<uint64>::maxValue;
-
-	struct tag_init_empty_t
+	/// @brief Helper struct for triggering a dedicated "init-as-empty" constructor. Used whenever default ctor is not feasible.
+	struct InitEmptyTag
 	{
 	};
 
-	constexpr tag_init_empty_t cvInitEmpty {};
+	/// @brief A dedicated instance of InitEmptyTag
+	inline constexpr InitEmptyTag CX_INIT_EMPTY {};
 
 }
 

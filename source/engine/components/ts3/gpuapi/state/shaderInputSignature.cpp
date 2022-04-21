@@ -40,12 +40,12 @@ namespace gpuapi
 
 		if( !createInputSignatureConstantLayout( pInputSignatureDesc, inputSignature ) )
 		{
-			return cvInitEmpty;
+			return CX_INIT_EMPTY;
 		}
 
 		if( !createInputSignatureDescriptorLayout( pInputSignatureDesc, inputSignature ) )
 		{
-			return cvInitEmpty;
+			return CX_INIT_EMPTY;
 		}
 
 		inputSignature.constantsNum = inputSignature.constantLayout.constantsNum;

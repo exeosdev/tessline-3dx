@@ -21,8 +21,8 @@ namespace gpuapi
 
 	DX11RenderTargetStateObject::~DX11RenderTargetStateObject() = default;
 
-	Handle<DX11RenderTargetStateObject> DX11RenderTargetStateObject::create( DX11GPUDevice & pGPUDevice,
-	                                                                         const RenderTargetStateObjectCreateInfo & pCreateInfo )
+	GpaHandle<DX11RenderTargetStateObject> DX11RenderTargetStateObject::create( DX11GPUDevice & pGPUDevice,
+	                                                                            const RenderTargetStateObjectCreateInfo & pCreateInfo )
 	{
 		RenderTargetLayout rtLayout;
 		RenderTargetResourceBinding rtResourceBinding;

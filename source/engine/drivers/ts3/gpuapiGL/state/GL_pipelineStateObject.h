@@ -34,8 +34,8 @@ namespace gpuapi
 
 		virtual ~GLGraphicsPipelineStateObject();
 
-		static Handle<GLGraphicsPipelineStateObject> create( GLGPUDevice & pGPUDevice,
-		                                                     const GraphicsPipelineStateObjectCreateInfo & pCreateInfo );
+		static GpaHandle<GLGraphicsPipelineStateObject> create( GLGPUDevice & pGPUDevice,
+		                                                        const GraphicsPipelineStateObjectCreateInfo & pCreateInfo );
 
 	private:
 		static GLShaderPipelineObjectHandle createGraphicsShaderPipelineObject( const GraphicsShaderBinding & pShaderBinding );

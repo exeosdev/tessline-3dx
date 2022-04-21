@@ -4,8 +4,7 @@ set( TS3_CORE_SRC_FILES
 		"prerequisites/coreEnums.h"
 		"prerequisites/dynamicInterface.h"
         "prerequisites/dynamicInterface.cpp"
-		"prerequisites/enumCommon.h"
-		"prerequisites/result.h"
+        "prerequisites/result.h"
 
         "prerequisites.h"
         "prerequisites.cpp"

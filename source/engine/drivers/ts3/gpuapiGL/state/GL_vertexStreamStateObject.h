@@ -22,8 +22,8 @@ namespace gpuapi
 	public:
 		GLVertexStreamStateObject( GLGPUDevice & pGPUDevice, GLVertexDataSourceBinding pVertexDataSourceBinding );
 
-		static Handle<GLVertexStreamStateObject> create( GLGPUDevice & pGPUDevice,
-		                                                 const VertexStreamStateObjectCreateInfo & pCreateInfo );
+		static GpaHandle<GLVertexStreamStateObject> create( GLGPUDevice & pGPUDevice,
+		                                                    const VertexStreamStateObjectCreateInfo & pCreateInfo );
 	};
 
 } /* namespace ts3 */

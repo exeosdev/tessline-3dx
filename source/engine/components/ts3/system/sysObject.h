@@ -107,7 +107,7 @@ namespace ts3::system
     };
 
     template <typename TpObject, typename... TpArgs>
-    inline Handle<TpObject> createSysObject( TpArgs && ...pArgs )
+    inline SysHandle<TpObject> createSysObject( TpArgs && ...pArgs )
     {
         return createDynamicInterfaceObjectWithDeleter<TpObject>( SysObjectDeleter{}, std::forward<TpArgs>( pArgs )... );
     }

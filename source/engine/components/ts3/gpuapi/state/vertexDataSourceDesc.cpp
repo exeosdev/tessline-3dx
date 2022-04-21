@@ -25,7 +25,7 @@ namespace gpuapi
 
 		if( dataSourceBinding.vertexBufferActiveBindingsNum == 0 )
 		{
-			return cvInitEmpty;
+			return CX_INIT_EMPTY;
 		}
 
 		dataSourceBinding.vertexStreamActiveIndexArray.reserve( dataSourceBinding.vertexBufferActiveBindingsNum );

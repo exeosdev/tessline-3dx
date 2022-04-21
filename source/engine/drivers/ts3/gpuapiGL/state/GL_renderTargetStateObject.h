@@ -28,8 +28,8 @@ namespace gpuapi
 
 		virtual ~GLRenderTargetStateObject();
 
-		static Handle<GLRenderTargetStateObject> create( GLGPUDevice & pGPUDevice,
-		                                                 const RenderTargetStateObjectCreateInfo & pCreateInfo );
+		static GpaHandle<GLRenderTargetStateObject> create( GLGPUDevice & pGPUDevice,
+		                                                    const RenderTargetStateObjectCreateInfo & pCreateInfo );
 	};
 
 } /* namespace ts3 */

@@ -23,8 +23,8 @@ namespace gpuapi
 
 		virtual ~DX11GraphicsPipelineStateObject();
 
-		static Handle<DX11GraphicsPipelineStateObject> create( DX11GPUDevice & pGPUDevice,
-		                                                       const GraphicsPipelineStateObjectCreateInfo & pCreateInfo );
+		static GpaHandle<DX11GraphicsPipelineStateObject> create( DX11GPUDevice & pGPUDevice,
+		                                                          const GraphicsPipelineStateObjectCreateInfo & pCreateInfo );
 	};
 
 } /* namespace ts3 */

@@ -39,7 +39,7 @@ namespace gpuapi
 
 		GraphicsShaderBinding() = default;
 
-		GraphicsShaderBinding( const tag_init_empty_t & )
+		GraphicsShaderBinding( const InitEmptyTag & )
 		: activeStagesMask( 0 )
 		{}
 
