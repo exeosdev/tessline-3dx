@@ -70,9 +70,6 @@ namespace gpuapi
 	{
 		RenderTargetLayout rtLayout;
 
-		rtLayout.attachmentMask = 0;
-		rtLayout.colorAttachmentActiveCount = 0;
-
 		for( const auto & attachmentLayoutDesc : pRTLayoutDesc.attachmentLayoutDescArray )
 		{
 			if( attachmentLayoutDesc )
@@ -109,8 +106,6 @@ namespace gpuapi
 		return renderTargetLayout;
 	}
 
-	constexpr uint32 cvRTBufferMSAALevelInvalid = Limits<uint32>::maxValue;
-
 	static bool validateRenderBufferRef( RenderTargetResourceBinding & pRTResourceBinding, const RTARenderBufferRef & pRenderBufferRef );
 	static bool validateTextureRef( RenderTargetResourceBinding & pRTResourceBinding, const RTATextureRef & pTextureRef );
 
@@ -120,12 +115,14 @@ namespace gpuapi
 	{
 		RenderTargetLayout rtLayout;
 		RenderTargetResourceBinding rtResourceBinding;
-		rtLayout.attachmentMask = 0;
-		rtLayout.colorAttachmentActiveCount = 0;
-		rtResourceBinding.commonMSAALevel = cvRTBufferMSAALevelInvalid;
 
 		for( const auto & attachmentResourceBindingDesc : pRTResourceBindingDesc.attachmentResourceBindingDescArray )
 		{
+			if( rtLayout.colorAttachmentActiveCount + rtLayout.depthStencilAttachmentState == pRTResourceBindingDesc.activeBindingsNum )
+			{
+				break;
+			}
+
 			if( attachmentResourceBindingDesc )
 			{
 				auto attachmentIndex = static_cast<uint32>( attachmentResourceBindingDesc.attachmentID );
@@ -243,7 +240,7 @@ namespace gpuapi
 			return false;
 		}
 
-		if( pRTResourceBinding.commonMSAALevel == cvRTBufferMSAALevelInvalid )
+		if( pRTResourceBinding.commonMSAALevel == CX_RT_BUFFER_MSAA_LEVEL_INVALID )
 		{
 			pRTResourceBinding.commonBufferSize = pRenderBufferRef.renderBuffer->mRenderBufferLayout.bufferSize;
 			pRTResourceBinding.commonMSAALevel = pRenderBufferRef.renderBuffer->mRenderBufferLayout.msaaLevel;
@@ -274,7 +271,7 @@ namespace gpuapi
 
 		const auto & textureLayout = pTextureRef.texture->mTextureLayout;
 
-		if( pRTResourceBinding.commonMSAALevel == cvRTBufferMSAALevelInvalid )
+		if( pRTResourceBinding.commonMSAALevel == CX_RT_BUFFER_MSAA_LEVEL_INVALID )
 		{
 			pRTResourceBinding.commonBufferSize.width = textureLayout.dimensions.width;
 			pRTResourceBinding.commonBufferSize.height = textureLayout.dimensions.height;

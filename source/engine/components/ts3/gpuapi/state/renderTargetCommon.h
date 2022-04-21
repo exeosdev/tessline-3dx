@@ -108,6 +108,7 @@ namespace gpuapi
 		};
 		using AttachmentResourceBindingDescArray = std::array<AttachmentResourceBindingDesc, GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
 		AttachmentResourceBindingDescArray attachmentResourceBindingDescArray;
+		uint32 activeBindingsNum = GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM;
 		uint32 sharedMSAALevel = 0;
 	};
 
@@ -141,17 +142,20 @@ namespace gpuapi
 	struct RenderTargetLayout
 	{
 		Bitmask<ERenderTargetAttachmentFlags> attachmentMask = 0;
-		uint32 colorAttachmentActiveCount;
+		uint32 colorAttachmentActiveCount = 0;
+		uint32 depthStencilAttachmentState = 0;
 		RenderTargetAttachmentLayout colorAttachmentArray[GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
 		RenderTargetAttachmentLayout depthStencilAttachment;
 	};
+
+	inline constexpr uint32 CX_RT_BUFFER_MSAA_LEVEL_INVALID = Limits<uint32>::maxValue;
 
 	struct RenderTargetResourceBinding
 	{
 		RenderTargetAttachmentResourceBinding colorAttachmentArray[GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
 		RenderTargetAttachmentResourceBinding depthStencilAttachment;
 		TextureSize2D commonBufferSize;
-		uint32 commonMSAALevel;
+		uint32 commonMSAALevel = CX_RT_BUFFER_MSAA_LEVEL_INVALID;
 	};
 
 	TS3_GPUAPI_OBJ const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultBGRA8;

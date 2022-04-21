@@ -14,7 +14,7 @@ namespace gpuapi
 	{
 		static std::atomic_flag sInitFlag = { ATOMIC_FLAG_INIT };
 
-		if( sInitFlag.test_and_set( std::memory_order_acq_rel ) )
+		if( !sInitFlag.test_and_set( std::memory_order_acq_rel ) )
 		{
 			::glewInit();
 		}
@@ -38,9 +38,9 @@ namespace gpuapi
 			commandContext = std::make_unique<CommandContextDirectGraphics>( *this, *commandList );
 			commandList->mSysGLRenderContext->bindForCurrentThread( *_targetSysGLSurface );
 
-			// A dirty workaround. GLEW is no longer used at the system level (now we use only the minimal set
-			// of GLX/WGL functions), so it needs to happen here. This is best to be replaced with a custom API
-			// loader/manager.
+			// A dirty workaround. GLEW is no longer used at the system level (now we use only
+			// the minimal set of GLX/WGL functions), so it needs to happen here. This is best
+			// to be replaced with a custom API loader/manager.
 			initializeOpenGLAPI();
 		}
 
