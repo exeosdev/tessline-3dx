@@ -4,7 +4,7 @@
 #ifndef __TS3_GPUAPI_PREREQUISITES_H__
 #define __TS3_GPUAPI_PREREQUISITES_H__
 
-#include <ts3/core/prerequisites.h>
+#include <ts3/core/exception.h>
 #include <ts3/core/coreEngineState.h>
 #include <ts3/core/graphicsTypes.h>
 #include <ts3/core/mathImports.h>
@@ -33,9 +33,7 @@
 #include "prerequisites/gpuBaseObject.h"
 #include "prerequisites/gpuDataFormats.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	// Same for all drivers. A top-level interface for querying capabilities and
@@ -87,7 +85,6 @@ namespace gpuapi
 		GDID0 = 0
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_PREREQUISITES_H__

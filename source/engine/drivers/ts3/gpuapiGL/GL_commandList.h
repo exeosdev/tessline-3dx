@@ -9,9 +9,7 @@
 #include "state/GL_pipelineStateController.h"
 #include <ts3/gpuapi/commandList.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	/// @brief
@@ -54,7 +52,6 @@ namespace gpuapi
 		GLGraphicsPipelineStateController _stateController;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_GPU_CMD_CONTEXT_H__

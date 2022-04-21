@@ -1,9 +1,7 @@
 
 #include "GL_renderbufferObject.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLRenderbufferObject::GLRenderbufferObject( GLuint pHandle, const GLRenderbufferCreateInfo & pGLCreateInfo )
@@ -72,5 +70,4 @@ namespace gpuapi
 		return true;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

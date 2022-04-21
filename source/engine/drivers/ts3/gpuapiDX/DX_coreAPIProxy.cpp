@@ -5,9 +5,7 @@
 #include <ts3/stdext/stlHelperAlgo.h>
 #include <ts3/stdext/utilities.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DXGIGetDebugInterfaceType DXCoreAPIProxy::loadDXGIDebugLegacyLoader()
@@ -385,5 +383,4 @@ namespace gpuapi
 	    return DXGI_FORMAT_UNKNOWN;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

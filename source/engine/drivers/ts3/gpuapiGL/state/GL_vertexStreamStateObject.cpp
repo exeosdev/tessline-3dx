@@ -3,9 +3,7 @@
 #include "../GL_gpuDevice.h"
 #include "../resources/GL_gpuBuffer.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLVertexStreamStateObject::GLVertexStreamStateObject( GLGPUDevice & pGPUDevice, GLVertexDataSourceBinding pGLVertexDataSourceBinding )
@@ -13,8 +11,8 @@ namespace gpuapi
     , mGLVertexDataSourceBinding( std::move( pGLVertexDataSourceBinding ) )
 	{}
 
-	Handle<GLVertexStreamStateObject> GLVertexStreamStateObject::create( GLGPUDevice & pGPUDevice,
-	                                                                     const VertexStreamStateObjectCreateInfo & pCreateInfo )
+	GpaHandle<GLVertexStreamStateObject> GLVertexStreamStateObject::create( GLGPUDevice & pGPUDevice,
+	                                                                        const VertexStreamStateObjectCreateInfo & pCreateInfo )
 	{
 		CommonSSOState commonSSOState;
 		if( !createCommonSSOState( pCreateInfo, commonSSOState ) )
@@ -33,5 +31,4 @@ namespace gpuapi
 		return vertexStreamStateObject;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

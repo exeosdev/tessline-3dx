@@ -3,9 +3,7 @@
 #include "DX_gpuDriver.h"
 #include "DX_coreAPIProxy.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DXGPUDevice::DXGPUDevice( DXGPUDriver & pDXGPUDriver, ComPtr<IDXGIFactory2> pDXGIFactory2 )
@@ -17,5 +15,4 @@ namespace gpuapi
 
 	DXGPUDevice::~DXGPUDevice() = default;
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

@@ -10,9 +10,7 @@
 #define ts3DX12CmdContextVerifyGraphics( pDX12CmdContext ) \
 	ts3DebugAssert( pDX12CmdContext->mD3D12GraphicsCommandList )
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct DX12RenderTargetState
@@ -55,7 +53,6 @@ namespace gpuapi
 		DX12RenderTargetState _renderTargetState;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX12_GPU_CMD_CONTEXT_H__

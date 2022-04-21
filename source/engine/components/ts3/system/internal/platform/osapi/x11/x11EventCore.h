@@ -28,9 +28,16 @@ namespace ts3::system
 			XBT2
 		};
 
+		enum EX11SystemWindowFlags : uint32
+		{
+			E_X11_SYSTEM_WINDOW_FLAG_WM_STATE_FULLSCREEN = 0x8000
+		};
+
 		struct X11EventSourceNativeData : public X11NativeDataCommon
 		{
 			XWindow windowXID = E_X11_XID_NONE;
+
+			Bitmask<uint32> sysWindowFlags = 0;
 		};
 
 		struct NativeEventType
@@ -62,11 +69,11 @@ namespace ts3::system
 		/// @override EventController::_nativeUnregisterEventSource
 		virtual void _nativeUnregisterEventSource( EventSource & pEventSource ) override final;
 
-		/// @override EventController::_nativeUpdateSysQueue
-		virtual bool _nativeUpdateSysQueue() override final;
+		/// @override EventController::_nativeDispatchPendingEvents
+		virtual bool _nativeDispatchPendingEvents() override final;
 
-		/// @override EventController::_nativeUpdateSysQueueWait
-		virtual bool _nativeUpdateSysQueueWait() override final;
+		/// @override EventController::_nativeDispatchPendingEventsWait
+		virtual bool _nativeDispatchPendingEventsWait() override final;
 	};
 
 } // namespace ts3::system

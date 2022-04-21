@@ -4,9 +4,7 @@
 #ifndef __TS3DRIVER_GPUAPI_DXCOMMON_COMMON_SHADER_DEFS_H__
 #define __TS3DRIVER_GPUAPI_DXCOMMON_COMMON_SHADER_DEFS_H__
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	enum class DXShaderTarget : uint64
@@ -23,7 +21,6 @@ namespace gpuapi
 		SM_5_0_CS,
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DXCOMMON_COMMON_SHADER_DEFS_H__

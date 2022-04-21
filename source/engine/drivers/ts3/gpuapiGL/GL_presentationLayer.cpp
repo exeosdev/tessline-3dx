@@ -3,9 +3,7 @@
 #include "GL_commandList.h"
 #include "GL_gpuDevice.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	static system::OpenGLDisplaySurfaceHandle createSysGLSurface( system::OpenGLSystemDriverHandle pSysGLDriver,
@@ -109,6 +107,7 @@ namespace gpuapi
 
 	void GLScreenPresentationLayer::setFullscreenMode( bool pEnable )
 	{
+		mSysGLDisplaySurface->setFullscreenMode( pEnable );
 	}
 
 	ts3::math::Vec2u32 GLScreenPresentationLayer::queryRenderTargetSize() const
@@ -116,5 +115,4 @@ namespace gpuapi
 		return mSysGLDisplaySurface->queryRenderAreaSize();
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

@@ -8,9 +8,7 @@
 #include <ts3/core/sync/spinLock.h>
 #include <ts3/core/sync/syncInterface.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	class GPUMemoryRef
@@ -37,8 +35,7 @@ namespace gpuapi
 		std::atomic<uint32_t> _poolMemoryLockStatus;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GPU_MEMORY_POOL_H__
 

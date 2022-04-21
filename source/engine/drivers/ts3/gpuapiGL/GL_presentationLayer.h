@@ -7,9 +7,7 @@
 #include "GL_prerequisites.h"
 #include <ts3/gpuapi/presentationLayer.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( GLPresentationLayer );
@@ -54,7 +52,6 @@ namespace gpuapi
 		static GLScreenPresentationLayerHandle create( GLGPUDevice & pDevice, const GLPresentationLayerCreateInfo & pCreateInfo );
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_PRESENTATION_LAYER_H__

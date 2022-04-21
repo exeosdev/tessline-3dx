@@ -7,9 +7,7 @@
 #include "GL_pipelineStateDesc.h"
 #include <ts3/gpuapi/state/renderTargetStateObject.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3GLDeclareOpenGLObjectHandle( GLFramebufferObject );
@@ -28,11 +26,10 @@ namespace gpuapi
 
 		virtual ~GLRenderTargetStateObject();
 
-		static Handle<GLRenderTargetStateObject> create( GLGPUDevice & pGPUDevice,
-		                                                 const RenderTargetStateObjectCreateInfo & pCreateInfo );
+		static GpaHandle<GLRenderTargetStateObject> create( GLGPUDevice & pGPUDevice,
+		                                                    const RenderTargetStateObjectCreateInfo & pCreateInfo );
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_RENDER_TARGET_STATE_OBJECT_H__

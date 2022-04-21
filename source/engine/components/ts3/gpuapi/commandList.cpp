@@ -4,9 +4,7 @@
 #include "gpuDevice.h"
 #include "resources/gpuBuffer.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	CommandList::CommandList( CommandSystem & pCommandSystem, ECommandListType pListType )
@@ -211,5 +209,4 @@ namespace gpuapi
 		return _renderTargetClearConfig;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

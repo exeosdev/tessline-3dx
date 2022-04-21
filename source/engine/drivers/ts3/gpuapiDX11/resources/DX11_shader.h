@@ -7,9 +7,7 @@
 #include "../DX11_prerequisites.h"
 #include <ts3/gpuapi/resources/shader.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( DX11Shader );
@@ -42,7 +40,6 @@ namespace gpuapi
 		static ShaderBinary compileShader( const void * pCode, size_t pCodeLength, const char * pEntryPoint, DXShaderTarget pShaderTarget, Bitmask<UINT> pCompileFlags );
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX11_SHADER_INTERFACE_H__

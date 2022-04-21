@@ -16,7 +16,7 @@ namespace ts3::system
 		{
 			onDestroySystemObjectRequested();
 
-			ts3DebugAssert( isStateMaskSet( E_SYS_OBJECT_STATE_FLAG_DESTROY_REQUEST_PROCESSED_BIT ) );
+			setStateFlags( true, E_SYS_OBJECT_STATE_FLAG_DESTROY_REQUEST_PROCESSED_BIT );
 
 			return true;
 		}
@@ -24,10 +24,6 @@ namespace ts3::system
 	}
 
 	void SysObject::onDestroySystemObjectRequested()
-	{
-		ts3DebugAssert( isDestroyRequestSet() );
-
-		setStateFlags( true, E_SYS_OBJECT_STATE_FLAG_DESTROY_REQUEST_PROCESSED_BIT );
-	}
+	{}
 
 } // namespace ts3::system

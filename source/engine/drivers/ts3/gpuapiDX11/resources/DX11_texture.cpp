@@ -4,9 +4,7 @@
 #include <ts3/gpuapiDX11/DX11_gpuDevice.h>
 #include <ts3/gpuapiDX11/DX11_commandList.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DX11Texture::DX11Texture( DX11GPUDevice & pDX11GPUDevice,
@@ -326,5 +324,4 @@ namespace gpuapi
 		return reinterpret_cast<DX11CommandList *>( pCommandObject )->mD3D11DeviceContext1.Get();
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

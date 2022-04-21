@@ -32,7 +32,7 @@ namespace ts3::system
 	{
 	}
 
-	bool OSXEventController::_nativeUpdateSysQueue()
+	bool OSXEventController::_nativeDispatchPendingEvents()
 	{
 		for( NSEvent * nsEvent = nullptr; ; )
 		{
@@ -50,7 +50,7 @@ namespace ts3::system
 		return true;
 	}
 
-	bool OSXEventController::_nativeUpdateSysQueueWait()
+	bool OSXEventController::_nativeDispatchPendingEventsWait()
 	{
 		for( NSEvent * nsEvent = nullptr; ; )
 		{

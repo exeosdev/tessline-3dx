@@ -319,4 +319,4 @@ namespace ts3
 		_initContent( rootNode, pInitNode );
 	}
 
-}
+} // namespace ts3

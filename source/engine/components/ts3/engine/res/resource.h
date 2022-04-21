@@ -16,6 +16,6 @@ namespace ts3
 		virtual ~Resource() = default;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_RES_RESOURCE_H__

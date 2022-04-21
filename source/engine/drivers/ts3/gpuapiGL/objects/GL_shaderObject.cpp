@@ -1,10 +1,9 @@
 
 #include "GL_shaderObject.h"
+#include <ts3/stdext/byteArray.h>
 #include <ts3/stdext/stlHelperAlgo.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLShaderObject::GLShaderObject( GLuint pHandle, GLenum pGLEShaderType, GLenum pGLShaderStageMaskBit )
@@ -125,7 +124,7 @@ namespace gpuapi
 		auto infoLogLength = getInfoLogLength();
 		if( infoLogLength > 0 )
 		{
-			ts3::DynamicMemoryBuffer infoLogBuffer;
+			ts3::DynamicByteArray infoLogBuffer;
 			infoLogBuffer.resize( infoLogLength );
 
 			glGetShaderInfoLog( mGLHandle, static_cast<GLsizei>( infoLogLength ), nullptr, infoLogBuffer.dataAs<GLchar>() );
@@ -145,7 +144,7 @@ namespace gpuapi
 		auto sourceLength = getSourceLength();
 		if (sourceLength > 0)
 		{
-			ts3::DynamicMemoryBuffer sourceBuffer;
+			ts3::DynamicByteArray sourceBuffer;
 			sourceBuffer.resize( sourceLength );
 
 			glGetShaderSource( mGLHandle, static_cast<GLsizei>( sourceLength ), nullptr, sourceBuffer.dataAs<GLchar>() );
@@ -220,5 +219,4 @@ namespace gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

@@ -99,6 +99,6 @@ namespace ts3
 		return static_cast<gpuapi::resource_flags_value_t>( ( ( hardware_buffer_flags_value_t ) pBufferUsage ) & Limits<uint32>::maxValue );
 	}
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_HARDWARE_BUFFER_COMMON_H__

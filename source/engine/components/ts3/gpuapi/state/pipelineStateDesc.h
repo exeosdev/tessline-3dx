@@ -7,9 +7,7 @@
 #include "commonGPUStateDefs.h"
 #include <ts3/stdext/hash.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct ComputePipelineStateObjectCreateInfo;
@@ -134,7 +132,6 @@ namespace gpuapi
 		return ts3::HashGen::compute<ts3::HashAlgo::FNV1A>( pStateDescriptorData );
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_PIPELINE_STATE_DESC_COMMON_H__

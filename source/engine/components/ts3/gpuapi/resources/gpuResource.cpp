@@ -1,9 +1,7 @@
 
 #include "gpuResource.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GPUResource::GPUResource( GPUDevice & pGPUDevice,
@@ -39,5 +37,4 @@ namespace gpuapi
 		_mappedMemory.mappedRegion.reset();
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

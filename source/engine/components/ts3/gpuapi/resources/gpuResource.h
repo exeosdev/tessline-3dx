@@ -6,9 +6,7 @@
 
 #include "commonGPUResourceDefs.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct GPUResourceProperties
@@ -46,7 +44,6 @@ namespace gpuapi
 		return _mappedMemory;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GPU_RESOURCE_H__

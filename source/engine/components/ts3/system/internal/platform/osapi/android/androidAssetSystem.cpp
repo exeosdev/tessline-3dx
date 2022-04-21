@@ -43,7 +43,7 @@ namespace ts3::system
 
 	AssetHandle AndroidAssetLoader::_nativeOpenSubAsset( FSUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags )
 	{
-		Handle<AndroidAsset> asset = nullptr;
+		SysHandle<AndroidAsset> asset = nullptr;
 
 		auto * aAssetManager = mNativeData.aAssetManager;
 
@@ -64,7 +64,7 @@ namespace ts3::system
 		assetDirRefName.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
 		assetDirRefName.append( pDirectoryName );
 
-		Handle<AndroidAssetDirectory> assetDirectory = nullptr;
+		SysHandle<AndroidAssetDirectory> assetDirectory = nullptr;
 
 		if( auto * aAssetDir = AAssetManager_openDir( mNativeData.aAssetManager, pDirectoryName.c_str() ) )
 		{
@@ -133,7 +133,7 @@ namespace ts3::system
 
 	AssetHandle AndroidAssetDirectory::_nativeOpenAsset( std::string pAssetName, Bitmask<EAssetOpenFlags> pFlags )
 	{
-		Handle<AndroidAsset> asset = nullptr;
+		SysHandle<AndroidAsset> asset = nullptr;
 
 		FSUtilityAPI::FilePathInfo assetPathInfo;
 		assetPathInfo.directory = getDirName();

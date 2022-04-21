@@ -7,9 +7,7 @@
 #include "../DX11_prerequisites.h"
 #include <ts3/gpuapi/resources/sampler.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( DX11Sampler );
@@ -28,7 +26,6 @@ namespace gpuapi
 		static bool translateSamplerDesc( const SamplerDesc & pSamplerDesc, D3D11_SAMPLER_DESC & pOutD3D11SamplerDesc );
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX11_SAMPLER_H__

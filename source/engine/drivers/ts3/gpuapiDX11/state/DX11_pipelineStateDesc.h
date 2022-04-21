@@ -9,9 +9,7 @@
 #include <ts3/gpuapi/state/vertexDataSourceDesc.h>
 #include <ts3/gpuapi/state/graphicsPipelineStateDescriptorCache.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	class DX11GraphicsPipelineStateObject;
@@ -120,7 +118,7 @@ namespace gpuapi
 
 		DX11VertexDataSourceBinding() = default;
 
-		DX11VertexDataSourceBinding( const tag_init_empty_t & )
+		DX11VertexDataSourceBinding( const InitEmptyTag & )
 		: vertexBufferActiveBindingsNum( 0 )
 		{ }
 
@@ -159,7 +157,6 @@ namespace gpuapi
 
 	using DX11GraphicsPipelineStateDescriptorCache = GraphicsPipelineStateDescriptorCache<DX11GraphicsPSDCacheTraits>;
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX11_PIPELINE_STATE_DESC_H__

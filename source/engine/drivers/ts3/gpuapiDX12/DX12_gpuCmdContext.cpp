@@ -4,9 +4,7 @@
 #include "DX12_gpuDevice.h"
 #include "DX12_coreAPIProxy.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DX12CommandContext::DX12CommandContext( DX12GPUCmdManager & pDX12GPUCmdManager,
@@ -74,5 +72,4 @@ namespace gpuapi
 		mD3D12GraphicsCommandList->OMSetRenderTargets( _renderTargetState.rtvDescriptorsNum, rtvDescriptorArray, FALSE, dsvDescriptor );
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

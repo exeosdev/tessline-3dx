@@ -3,11 +3,20 @@
 #include "GL_commandList.h"
 #include "GL_gpuDevice.h"
 #include <ts3/gpuapi/commandContext.h>
+#include <mutex>
 
-namespace ts3
+namespace ts3::gpuapi
 {
-namespace gpuapi
-{
+
+	static void initializeOpenGLAPI()
+	{
+		static std::atomic_flag sInitFlag = { ATOMIC_FLAG_INIT };
+
+		if( !sInitFlag.test_and_set( std::memory_order_acq_rel ) )
+		{
+			::glewInit();
+		}
+	}
 
 	GLCommandSystem::GLCommandSystem( GLGPUDevice & pGLGPUDevice )
 	: CommandSystem( pGLGPUDevice )
@@ -26,6 +35,11 @@ namespace gpuapi
 			ts3DebugAssert( contextExecutionMode == ECommandExecutionMode::Direct );
 			commandContext = std::make_unique<CommandContextDirectGraphics>( *this, *commandList );
 			commandList->mSysGLRenderContext->bindForCurrentThread( *_targetSysGLSurface );
+
+			// A dirty workaround. GLEW is no longer used at the system level (now we use only
+			// the minimal set of GLX/WGL functions), so it needs to happen here. This is best
+			// to be replaced with a custom API loader/manager.
+			initializeOpenGLAPI();
 		}
 
 		if( commandContext )
@@ -159,5 +173,4 @@ namespace gpuapi
 		}
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

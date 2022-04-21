@@ -6,9 +6,7 @@
 
 #include "GL_prerequisites.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	using resource_flags_value_t = uint32 ;
@@ -94,7 +92,6 @@ namespace gpuapi
 
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_CORE_LAYER_H__

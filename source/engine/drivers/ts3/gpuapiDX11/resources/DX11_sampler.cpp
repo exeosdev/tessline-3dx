@@ -3,9 +3,7 @@
 #include "../DX11_coreAPIProxy.h"
 #include "../DX11_gpuDevice.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DX11Sampler::DX11Sampler( DX11GPUDevice & pGPUDevice, const SamplerDesc & pSamplerDesc, ComPtr<ID3D11SamplerState> pD3D11SamplerState )
@@ -61,5 +59,4 @@ namespace gpuapi
 		return true;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

@@ -129,6 +129,9 @@ namespace ts3::system
 
 		/// @override OpenGLDisplaySurface::_nativeGetSize
 		virtual FrameSize _nativeGetSize( EFrameSizeMode pSizeMode ) const override final;
+
+        /// @override OpenGLDisplaySurface::_nativeIsFullscreen
+        virtual bool _nativeIsFullscreen() const override final;
 	};
 
 	/// @brief Win32-specific implementation of the OpenGLRenderContext class.
@@ -145,7 +148,7 @@ namespace ts3::system
 		virtual void _nativeBindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface ) override final;
 
 		/// @override OpenGLRenderContext::_nativeIsCurrent
-		virtual bool _nativeIsCurrent() const override final;
+		virtual bool _nativeSysCheckIsCurrent() const override final;
 
 		/// @override OpenGLRenderContext::_nativeSysValidate
 		virtual bool _nativeSysValidate() const override final;

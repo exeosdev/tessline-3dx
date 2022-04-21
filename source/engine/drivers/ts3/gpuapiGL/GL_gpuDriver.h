@@ -7,9 +7,7 @@
 #include "GL_prerequisites.h"
 #include <ts3/gpuapi/gpuDriver.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct GLGPUDriverCreateInfo : public GPUDriverCreateInfo
@@ -32,7 +30,6 @@ namespace gpuapi
 		static system::OpenGLSystemDriverHandle initializeSysGLDriver( system::SysContextHandle pSysContext );
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_GPU_DRIVER_H__

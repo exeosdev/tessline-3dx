@@ -22,6 +22,6 @@ namespace ts3
 		StaticFont
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_RES_FONT_COMMON_H__

@@ -102,7 +102,7 @@ namespace ts3::system
 		static DisplayVideoModeDesc & getVideoModeDescInternal( DisplayVideoMode & pVideoMode );
 
 		template <typename TpAdapter, typename TpDriver>
-		Handle<TpAdapter> createAdapter( TpDriver & pDriver)
+		SysHandle<TpAdapter> createAdapter( TpDriver & pDriver)
 		{
 			auto adapterHandle = createSysObject<TpAdapter>( pDriver );
 			_registerAdapter( adapterHandle );
@@ -110,7 +110,7 @@ namespace ts3::system
 		}
 
 		template <typename TpOutput, typename TpAdapter>
-		Handle<TpOutput> createOutput( TpAdapter & pAdapter )
+		SysHandle<TpOutput> createOutput( TpAdapter & pAdapter )
 		{
 			auto outputHandle = createSysObject<TpOutput>( pAdapter );
 			_registerOutput( pAdapter, outputHandle );
@@ -118,7 +118,7 @@ namespace ts3::system
 		}
 
 		template <typename TpVideoMode, typename TpOutput>
-		Handle<TpVideoMode> createVideoMode( TpOutput & pOutput, EColorFormat pColorFormat )
+		SysHandle<TpVideoMode> createVideoMode( TpOutput & pOutput, EColorFormat pColorFormat )
 		{
 			auto videoModeHandle = createSysObject<TpVideoMode>( pOutput );
 			_registerVideoMode( pOutput, pColorFormat, videoModeHandle );

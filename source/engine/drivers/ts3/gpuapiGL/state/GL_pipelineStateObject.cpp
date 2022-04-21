@@ -5,9 +5,7 @@
 #include <ts3/gpuapiGL/resources/GL_shader.h>
 #include <ts3/gpuapi/resources/shader.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLGraphicsPipelineStateObject::GLGraphicsPipelineStateObject( GLGPUDevice & pGPUDevice,
@@ -24,8 +22,8 @@ namespace gpuapi
 
 	GLGraphicsPipelineStateObject::~GLGraphicsPipelineStateObject() = default;
 
-	Handle<GLGraphicsPipelineStateObject> GLGraphicsPipelineStateObject::create( GLGPUDevice & pGPUDevice,
-	                                                                             const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
+	GpaHandle<GLGraphicsPipelineStateObject> GLGraphicsPipelineStateObject::create( GLGPUDevice & pGPUDevice,
+	                                                                                const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
 	{
 		CommonPSOState commonPSOState;
 		if( !createCommonPSOState( pCreateInfo, commonPSOState ) )
@@ -141,5 +139,4 @@ namespace gpuapi
 		return vertexArrayObject;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

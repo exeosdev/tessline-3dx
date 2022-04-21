@@ -7,9 +7,7 @@
 #include "GL4_prerequisites.h"
 #include <ts3/gpuapi/gpuDriverAPI.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	class GL4GPUDriverInterface : public GPUDriverInterface
@@ -19,7 +17,6 @@ namespace gpuapi
 		virtual PresentationLayerHandle createScreenPresentationLayer( GPUDevice & pDevice, const PresentationLayerCreateInfo & pCreateInfo ) override final;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GL4_GRAPHICS_DRIVER_API_H__

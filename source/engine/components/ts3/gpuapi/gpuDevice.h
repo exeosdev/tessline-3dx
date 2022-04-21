@@ -8,9 +8,7 @@
 #include "displayCommon.h"
 #include "resources/commonGPUResourceDefs.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct PresentationLayerCreateInfo;
@@ -84,7 +82,6 @@ namespace gpuapi
 		Bitmask<InternalStateFlags> _internalStateFlags;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GPU_DEVICE_H__

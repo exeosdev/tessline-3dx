@@ -34,6 +34,6 @@ namespace ts3
 		return ( ( uint32 )pPixelDataLayout >> 8 ) & 0xFF;
 	}
 
-}
+} // namespace ts3
 
 #endif // __TS3_CORE_GRAPHICS_TYPES_H__

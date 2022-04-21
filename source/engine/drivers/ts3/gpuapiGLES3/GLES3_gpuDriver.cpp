@@ -3,9 +3,7 @@
 #include "GLES3_gpuDevice.h"
 #include <ts3/gpuapiGL/GL_presentationLayer.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLES3GPUDriver::GLES3GPUDriver( system::OpenGLSystemDriverHandle pSysGLDriver )
@@ -63,5 +61,4 @@ namespace gpuapi
 		return EGPUDriverID::GDIDGLES3;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

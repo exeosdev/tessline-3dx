@@ -4,9 +4,7 @@
 #ifndef __TS3DRIVER_GPUAPI_VKCOMMON_COMMON_UTILS_H__
 #define __TS3DRIVER_GPUAPI_VKCOMMON_COMMON_UTILS_H__
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 

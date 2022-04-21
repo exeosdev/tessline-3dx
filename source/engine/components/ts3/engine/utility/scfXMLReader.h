@@ -23,6 +23,6 @@ namespace ts3
 		system::FileManagerHandle _sysFileManager;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_SCF_XML_PUBLIC_H__

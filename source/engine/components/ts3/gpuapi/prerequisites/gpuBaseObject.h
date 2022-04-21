@@ -4,9 +4,7 @@
 #ifndef __TS3_GPUAPI_GPU_BASE_OBJECT_H__
 #define __TS3_GPUAPI_GPU_BASE_OBJECT_H__
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	class TS3_GPUAPI_CLASS GPUBaseObject : public GPUDeviceChildObject
@@ -16,7 +14,6 @@ namespace gpuapi
 		virtual ~GPUBaseObject();
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GPU_BASE_OBJECT_H__

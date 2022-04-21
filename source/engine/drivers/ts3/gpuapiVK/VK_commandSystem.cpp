@@ -4,9 +4,7 @@
 #include "VK_gpuDevice.h"
 #include <ts3/gpuapi/commandContext.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	VKCommandSystem::VKCommandSystem( VKGPUDevice & pVKGPUDevice )
@@ -46,5 +44,4 @@ namespace gpuapi
 		return cmdSyncObject;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

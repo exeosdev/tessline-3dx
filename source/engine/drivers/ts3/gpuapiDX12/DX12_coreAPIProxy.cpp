@@ -2,9 +2,7 @@
 #include "DX12_coreAPIProxy.h"
 #include <ts3/system/windowSystem.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ComPtr<ID3D12Debug> DX12CoreAPIProxy::initializeD3D12DebugInterface( Bitmask<GPUDriverConfigFlags> pDriverConfigFlags )
@@ -206,5 +204,4 @@ namespace gpuapi
 		return commandListType;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

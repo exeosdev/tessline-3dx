@@ -4,9 +4,7 @@
 #include "../resources/DX11_shader.h"
 #include <ts3/gpuapi/resources/shader.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DX11GraphicsPipelineStateObject::DX11GraphicsPipelineStateObject( DX11GPUDevice & pGPUDevice,
@@ -19,8 +17,8 @@ namespace gpuapi
 
 	DX11GraphicsPipelineStateObject::~DX11GraphicsPipelineStateObject() = default;
 
-	Handle<DX11GraphicsPipelineStateObject> DX11GraphicsPipelineStateObject::create( DX11GPUDevice & pGPUDevice,
-	                                                                                 const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
+	GpaHandle<DX11GraphicsPipelineStateObject> DX11GraphicsPipelineStateObject::create( DX11GPUDevice & pGPUDevice,
+	                                                                                    const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
 	{
 		CommonPSOState commonPSOState;
 		if( !createCommonPSOState( pCreateInfo, commonPSOState ) )
@@ -49,5 +47,4 @@ namespace gpuapi
 		return pipelineStateObject;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

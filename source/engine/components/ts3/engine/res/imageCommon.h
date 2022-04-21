@@ -54,6 +54,6 @@ namespace ts3
 		void swap( ImageData & pOther );
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_IMAGE_COMMON_H__

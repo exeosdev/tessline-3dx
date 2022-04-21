@@ -50,7 +50,7 @@ namespace ts3
 		DynamicByteArray sharedBuffer;
 
 		SCFVirtualFolderInfo scfRootFolderInfo {};
-		GdsCore::deserializeExternal( scfRootFolderInfo, fileReadCallback, sharedBuffer );
+		gdscore::deserializeExternal( scfRootFolderInfo, fileReadCallback, sharedBuffer );
 
 		auto & rootFolder = pIndex.initRootFolder(std::move( scfRootFolderInfo ) );
 
@@ -79,7 +79,7 @@ namespace ts3
 		scfFolderInfo.resourcesNum = static_cast<uint32>( pFolder.resourceList.size() );
 		scfFolderInfo.subFoldersNum = static_cast<uint32>( pFolder.subFolderList.size() );
 
-		GdsCore::serializeExternal( scfFolderInfo, pFileWriteCallback, pGdsCache );
+		gdscore::serializeExternal( scfFolderInfo, pFileWriteCallback, pGdsCache );
 
 		for( const auto & resource : pFolder.resourceList )
 		{
@@ -104,12 +104,12 @@ namespace ts3
 		scfResourceInfo.treeSubLevel = pResource.treeSubLevel;
 
 		const auto currentFilePtrOffset = pSysFile->getFilePointer();
-		const auto resourceEntrySize = GdsCore::evalByteSizeWithMetaData( scfResourceInfo );
+		const auto resourceEntrySize = gdscore::evalByteSizeWithMetaData( scfResourceInfo );
 
 		scfResourceInfo.dataOffset = currentFilePtrOffset + resourceEntrySize;
 		scfResourceInfo.dataSize = pResource.dataSource.byteSize;
 
-		GdsCore::serializeExternal( scfResourceInfo, pFileWriteCallback, pGdsCache );
+		gdscore::serializeExternal( scfResourceInfo, pFileWriteCallback, pGdsCache );
 
 		const auto sMaxSingleDataWriteSize = 2048;
 		
@@ -132,7 +132,7 @@ namespace ts3
 		for( uint32 resourceIndex = 0; resourceIndex < pFolder.mFolderInfo.resourcesNum; ++resourceIndex )
 		{
 			SCFResourceInfo scfResourceInfo;
-			GdsCore::deserializeExternal( scfResourceInfo, pFileReadCallback, pGdsCache );
+			gdscore::deserializeExternal( scfResourceInfo, pFileReadCallback, pGdsCache );
 
 			// The resource path is not serialized, don't forget this line.
 			scfResourceInfo.path = pFolder.mFolderInfo.path + "/" + scfResourceInfo.name;
@@ -146,7 +146,7 @@ namespace ts3
 		for( uint32 subFolderIndex = 0; subFolderIndex < pFolder.mFolderInfo.subFoldersNum; ++subFolderIndex )
 		{
 			SCFVirtualFolderInfo scfFolderInfo {};
-			GdsCore::deserializeExternal( scfFolderInfo, pFileReadCallback, pGdsCache );
+			gdscore::deserializeExternal( scfFolderInfo, pFileReadCallback, pGdsCache );
 
 			// The folder path is not serialized, don't forget this line.
 			scfFolderInfo.path = pFolder.mFolderInfo.path + "/" + scfFolderInfo.name;
@@ -162,7 +162,7 @@ namespace ts3
 
 		gds_size_t serialize( byte * pOutputBuffer, const SCFEntryInfo & pValue )
 		{
-			return GdsCore::serializeAll( pOutputBuffer,
+			return gdscore::serializeAll( pOutputBuffer,
 								 pValue.entryType,
 								 pValue.name,
 								 pValue.uid,
@@ -171,7 +171,7 @@ namespace ts3
 
 		gds_size_t deserialize( const byte * pInputData, SCFEntryInfo & pValue )
 		{
-			return GdsCore::deserializeAll( pInputData,
+			return gdscore::deserializeAll( pInputData,
 								   pValue.entryType,
 								   pValue.name,
 								   pValue.uid,
@@ -180,7 +180,7 @@ namespace ts3
 
 		gds_size_t evalByteSize( const SCFEntryInfo & pValue )
 		{
-			return GdsCore::evalByteSizeAll( pValue.entryType,
+			return gdscore::evalByteSizeAll( pValue.entryType,
 									pValue.name,
 									pValue.uid,
 									pValue.treeSubLevel );
@@ -188,7 +188,7 @@ namespace ts3
 
 		gds_size_t serialize( byte * pOutputBuffer, const SCFResourceInfo & pValue )
 		{
-			return GdsCore::serializeAll( pOutputBuffer,
+			return gdscore::serializeAll( pOutputBuffer,
 								 static_cast<const SCFEntryInfo &>( pValue ),
 								 pValue.dataOffset,
 								 pValue.dataSize );
@@ -196,7 +196,7 @@ namespace ts3
 
 		gds_size_t deserialize( const byte * pInputData, SCFResourceInfo & pValue )
 		{
-			return GdsCore::deserializeAll( pInputData,
+			return gdscore::deserializeAll( pInputData,
 								   static_cast<SCFEntryInfo &>( pValue ),
 								   pValue.dataOffset,
 								   pValue.dataSize );
@@ -204,14 +204,14 @@ namespace ts3
 
 		gds_size_t evalByteSize( const SCFResourceInfo & pValue )
 		{
-			return GdsCore::evalByteSizeAll( static_cast<const SCFEntryInfo &>( pValue ),
+			return gdscore::evalByteSizeAll( static_cast<const SCFEntryInfo &>( pValue ),
 									pValue.dataOffset,
 									pValue.dataSize );
 		}
 
 		gds_size_t serialize( byte * pOutputBuffer, const SCFVirtualFolderInfo & pValue )
 		{
-			return GdsCore::serializeAll( pOutputBuffer,
+			return gdscore::serializeAll( pOutputBuffer,
 								 static_cast<const SCFEntryInfo &>( pValue ),
 								 pValue.resourcesNum,
 								 pValue.subFoldersNum );
@@ -219,7 +219,7 @@ namespace ts3
 
 		gds_size_t deserialize( const byte * pInputData, SCFVirtualFolderInfo & pValue )
 		{
-			return GdsCore::deserializeAll( pInputData,
+			return gdscore::deserializeAll( pInputData,
 								   static_cast<SCFEntryInfo &>( pValue ),
 								   pValue.resourcesNum,
 								   pValue.subFoldersNum );
@@ -227,11 +227,11 @@ namespace ts3
 
 		gds_size_t evalByteSize( const SCFVirtualFolderInfo & pValue )
 		{
-			return GdsCore::evalByteSizeAll( static_cast<const SCFEntryInfo &>( pValue ),
+			return gdscore::evalByteSizeAll( static_cast<const SCFEntryInfo &>( pValue ),
 									pValue.resourcesNum,
 									pValue.subFoldersNum );
 		}
 
 	}
 
-}
+} // namespace ts3

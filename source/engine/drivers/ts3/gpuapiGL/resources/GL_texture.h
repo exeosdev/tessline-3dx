@@ -7,9 +7,7 @@
 #include "../objects/GL_textureObject.h"
 #include <ts3/gpuapi/resources/texture.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( GLTexture );
@@ -33,7 +31,6 @@ namespace gpuapi
 		static GLTextureHandle create( GLGPUDevice & pGLGPUDevice, const TextureCreateInfo & pCreateInfo );
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_TEXTURE_H__

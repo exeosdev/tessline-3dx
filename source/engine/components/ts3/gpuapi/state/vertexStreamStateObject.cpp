@@ -1,9 +1,7 @@
 
 #include "vertexStreamStateObject.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	VertexStreamStateObject::VertexStreamStateObject( GPUDevice & pGPUDevice )
@@ -48,5 +46,4 @@ namespace gpuapi
 		return streamStateObject;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

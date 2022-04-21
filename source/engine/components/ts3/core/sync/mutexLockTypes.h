@@ -85,7 +85,7 @@ namespace ts3
 
             }
 
-            bool checkLockOwnership() const
+            TS3_FUNC_NO_DISCARD bool checkLockOwnership() const
             {
                 return _ownsLock;
             }
@@ -105,7 +105,7 @@ namespace ts3
         class SharedLock
         {
         public:
-            SharedLock( TpMutex & pMutex )
+            explicit SharedLock( TpMutex & pMutex )
             : _mutex( &pMutex )
             , _ownsLock( false )
             {
@@ -129,10 +129,12 @@ namespace ts3
             , _ownsLock( true )
             {}
 
-            SharedLock( SharedLock && pSource )
+            SharedLock( SharedLock && pSource ) noexcept
             : _mutex( pSource._mutex )
+            , _ownsLock( pSource._ownsLock )
             {
-                pSource._mutex = nullptr;
+            	pSource._mutex = nullptr;
+            	pSource._ownsLock = false;
             }
 
             ~SharedLock()
@@ -143,7 +145,7 @@ namespace ts3
                 }
             }
 
-            SharedLock & operator=( SharedLock && pRhs )
+            SharedLock & operator=( SharedLock && pRhs ) noexcept
             {
                 SharedLock( std::move( pRhs ) ).swap( *this );
                 return *this;
@@ -176,7 +178,7 @@ namespace ts3
 
             }
 
-            bool checkLockOwnership() const
+            TS3_FUNC_NO_DISCARD bool checkLockOwnership() const
             {
                 return _ownsLock;
             }

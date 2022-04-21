@@ -4,9 +4,7 @@
 #include <ts3/gpuapiGL/GL_presentationLayer.h>
 #include <ts3/system/displaySystem.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLGPUDriver::GLGPUDriver( system::OpenGLSystemDriverHandle pSysGLDriver )
@@ -33,5 +31,4 @@ namespace gpuapi
 		return nullptr;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

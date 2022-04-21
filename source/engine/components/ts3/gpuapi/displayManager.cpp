@@ -1,9 +1,7 @@
 
 #include "displayManager.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DisplayManager::DisplayManager()
@@ -11,5 +9,4 @@ namespace gpuapi
 
 	DisplayManager::~DisplayManager() = default;
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

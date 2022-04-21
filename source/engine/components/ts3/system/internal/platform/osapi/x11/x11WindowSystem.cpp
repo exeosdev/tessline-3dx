@@ -9,8 +9,12 @@ namespace ts3::system
 	namespace platform
 	{
 
+		// Returns an array of _NET_WM_ACTION_xxx atoms for the specified frame style.
+		// This array is then used to set the ALLOWED_ACTIONS atom, which enables/disables certain window actions.
 		std::vector<Atom> _x11QueryActionTableForFrameStyle( XDisplay pDisplay, EFrameStyle pFrameStyle );
 
+		// Returns an XSizeHints structure, configured based on the specified frame style and geometry.
+		// XSizeHints enables Window Manager to properly style the window and enable/disable geometry changes.
 		XSizeHints _x11QuerySizeHintsForFrameStyle( XDisplay pDisplay, EFrameStyle pFrameStyle, const FrameGeometry & pFrameGeometry );
 
 	}
@@ -68,7 +72,7 @@ namespace ts3::system
 	}
 
 	void X11Window::_nativeUpdateGeometry( const FrameGeometry & pFrameGeometry,
-										   Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags )
+	                                       Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags )
 	{
 		return platform::x11UpdateFrameGeometry( mNativeData, pFrameGeometry, pUpdateFlags );
 	}
@@ -105,7 +109,7 @@ namespace ts3::system
 			windowSetAttributes.colormap = colormap;
 			windowSetAttributes.event_mask = windowEventMask;
 			// Mask for all attributes we want to specify (fields in XSetWindowAttributes filled above).
-			unsigned long windowSetAttributesMask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
+			const unsigned long windowSetAttributesMask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
 			// We pass initial position as (0,0) instead of the specified one, because window managers tend to do some
 			// weird stuff and this is ignored in most cases. XMoveWindow() together with XSetNormalHints() do the thing.
@@ -155,10 +159,6 @@ namespace ts3::system
 
 			auto windowSizeHints = platform::_x11QuerySizeHintsForFrameStyle( xSessionData.display, windowStyle, pCreateInfo.frameGeometry );
 
-			windowSizeHints.flags |= PPosition;
-			windowSizeHints.x = static_cast<int>( pCreateInfo.frameGeometry.position.x );
-			windowSizeHints.y = static_cast<int>( pCreateInfo.frameGeometry.position.y );
-
 			// Note, that this call must be done before the window is mapped to the screen. Otherwise, most WMs
 			// will not recognize PMinSize/PMaxSize hints, making non-resizable windows very much resizable ones.
 			XSetNormalHints( xSessionData.display, windowXID, &windowSizeHints );
@@ -169,9 +169,9 @@ namespace ts3::system
 			auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
 			
 			XMoveWindow( xSessionData.display,
-						 pWindowNativeData.windowXID,
-						 static_cast<int>( pCreateInfo.frameGeometry.position.x ),
-						 static_cast<int>( pCreateInfo.frameGeometry.position.y ) );
+			             pWindowNativeData.windowXID,
+			             static_cast<int>( pCreateInfo.frameGeometry.position.x ),
+			             static_cast<int>( pCreateInfo.frameGeometry.position.y ) );
 
 			// Another observation: if this gets called before the initial XMoveWindow(), fullscreen windows
 			// appear at a wrong position (and, thus, usually - on the wrong screen as well). Confirmed at least
@@ -180,13 +180,16 @@ namespace ts3::system
 
 			if( pCreateInfo.fullscreenMode )
 			{
+				// This works by sending a _NET_WM_STATE update event to the window.
+				// It strictly requires the window to be mapped already, so make sure
+				// this always called after XMapWindow().
 				x11SetWindowFullscreenState( pWindowNativeData, true );
 			}
 
 			Atom registeredWMProtocolArray[] =
 			{
-				xSessionData.wmpDeleteWindow,
-				xSessionData.wmpDestroyWindow
+				xSessionData.atomCache.wmProtocolDelete,
+				xSessionData.atomCache.wmProtocolDestroy
 			};
 			const auto registeredWMProtocolsNum = staticArraySize( registeredWMProtocolArray );
 
@@ -225,86 +228,23 @@ namespace ts3::system
 
 			auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
 
-			Atom wmState = XInternAtom( xSessionData.display, "_NET_WM_STATE", False );
-			Atom wmFullscreenState = XInternAtom( xSessionData.display, "_NET_WM_STATE_FULLSCREEN", False );
-
 			XEvent wmEvent;
 			memset( &wmEvent, 0, sizeof( wmEvent ) );
 			wmEvent.type = ClientMessage;
 			wmEvent.xclient.window = pWindowNativeData.windowXID;
-			wmEvent.xclient.message_type = wmState;
+			wmEvent.xclient.message_type = xSessionData.atomCache.wmState;
 			wmEvent.xclient.format = 32;
 			wmEvent.xclient.data.l[0] = pSetFullscreen ? 1 : 0;
-			wmEvent.xclient.data.l[1] = trunc_numeric_cast<long>( wmFullscreenState );
+			wmEvent.xclient.data.l[1] = trunc_numeric_cast<long>( xSessionData.atomCache.wmStateFullscreen );
 			wmEvent.xclient.data.l[2] = 0;
 
 			XSendEvent( xSessionData.display,
-						xSessionData.rootWindowXID,
-						False,
-						SubstructureRedirectMask | SubstructureNotifyMask,
-						&wmEvent );
+			            xSessionData.rootWindowXID,
+			            False,
+			            SubstructureRedirectMask | SubstructureNotifyMask,
+			            &wmEvent );
 
 			XFlush( xSessionData.display );
-		}
-
-		bool x11QueryWindowFullscreenState( const X11WindowNativeData & pWindowNativeData )
-		{
-			auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
-
-			Atom wmStateValueType = 0;
-			int wmStateValueFormat = 0;
-			unsigned long wmStateValueItemsNum = 0;
-			unsigned long wmStateValueBytesNum = 0;
-			unsigned char * wmStateValueData8 = nullptr;
-
-			const Atom wmState = XInternAtom( xSessionData.display, "_NET_WM_STATE", true );
-
-			XGetWindowProperty( xSessionData.display,
-								pWindowNativeData.windowXID,
-								wmState,
-								0,
-								0,
-								False,
-								AnyPropertyType,
-								&wmStateValueType,
-								&wmStateValueFormat,
-								&wmStateValueItemsNum,
-								&wmStateValueBytesNum,
-								&wmStateValueData8 );
-
-			const long wmStateValuesNum = trunc_numeric_cast<long>( wmStateValueBytesNum ) / 4;
-
-			XGetWindowProperty( xSessionData.display,
-								pWindowNativeData.windowXID,
-								wmState,
-								0,
-								wmStateValuesNum,
-								False,
-								XA_ATOM,
-								&wmStateValueType,
-								&wmStateValueFormat,
-								&wmStateValueItemsNum,
-								&wmStateValueBytesNum,
-								&wmStateValueData8 );
-
-			const auto * wmStateValueData32 = reinterpret_cast<unsigned long *>( wmStateValueData8 );
-
-			const Atom wmStateFullscreen = XInternAtom( xSessionData.display, "_NET_WM_STATE_FULLSCREEN", true );
-
-			bool propertyValueFound = false;
-
-			for( size_t wmStateValueIndex = 0; wmStateValueIndex < wmStateValuesNum; ++wmStateValueIndex  )
-			{
-				if( wmStateValueData32[wmStateValueIndex] == wmStateFullscreen )
-				{
-					propertyValueFound = true;
-					break;
-				}
-			}
-
-			XFree( wmStateValueData8 );
-
-			return propertyValueFound;
 		}
 
 		void x11SetFrameTitle( const X11WindowNativeData & pWindowNativeData, const std::string & pTitle )
@@ -365,16 +305,19 @@ namespace ts3::system
 			return resultFrameSize;
 		}
 
-		bool x11IsFullscreenWindow( const X11WindowNativeData & pWindowNativeData )
+		bool x11IsFullscreenWindow( XDisplay pDisplay, XWindow pWindow )
 		{
-			return x11CheckWindowPropertyValueSet( pWindowNativeData, "_NET_WM_STATE", "_NET_WM_STATE_FULLSCREEN" );
+			return x11CheckWindowPropertyValueSet( pDisplay, pWindow, "_NET_WM_STATE", "_NET_WM_STATE_FULLSCREEN" );
 		}
 
-		std::vector<Atom> x11QueryWindowPropertyValueArray( const X11WindowNativeData & pWindowNativeData,
-															const char * pPropertyName )
+		bool x11IsFullscreenWindow( const X11WindowNativeData & pWindowNativeData )
 		{
-			auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
+			auto & xSessionData = x11GetXSessionData( pWindowNativeData );
+			return x11IsFullscreenWindow( xSessionData.display, pWindowNativeData.windowXID );
+		}
 
+		std::vector<Atom> x11QueryWindowPropertyValueArray( XDisplay pDisplay, XWindow pWindow, const char * pPropertyName )
+		{
 			std::vector<Atom> wmPropertyValueArray;
 
 			Atom wmPropertyValueType = 0;
@@ -383,35 +326,35 @@ namespace ts3::system
 			unsigned long wmPropertyValueBytesNum = 0;
 			unsigned char * wmPropertyValueData8 = nullptr;
 
-			const Atom wmProperty = XInternAtom( xSessionData.display, pPropertyName, true );
+			const Atom wmProperty = XInternAtom( pDisplay, pPropertyName, true );
 
-			XGetWindowProperty( xSessionData.display,
-								pWindowNativeData.windowXID,
-								wmProperty,
-								0,
-								0,
-								False,
-								AnyPropertyType,
-								&wmPropertyValueType,
-								&wmPropertyValueFormat,
-								&wmPropertyValueItemsNum,
-								&wmPropertyValueBytesNum,
-								&wmPropertyValueData8 );
+			XGetWindowProperty( pDisplay,
+			                    pWindow,
+			                    wmProperty,
+			                    0,
+			                    0,
+			                    False,
+			                    AnyPropertyType,
+			                    &wmPropertyValueType,
+			                    &wmPropertyValueFormat,
+			                    &wmPropertyValueItemsNum,
+			                    &wmPropertyValueBytesNum,
+			                    &wmPropertyValueData8 );
 
 			const long wmPropertyValuesNum = trunc_numeric_cast<long>( wmPropertyValueBytesNum ) / 4;
 
-			XGetWindowProperty( xSessionData.display,
-								pWindowNativeData.windowXID,
-								wmProperty,
-								0,
-								wmPropertyValuesNum,
-								False,
-								XA_ATOM,
-								&wmPropertyValueType,
-								&wmPropertyValueFormat,
-								&wmPropertyValueItemsNum,
-								&wmPropertyValueBytesNum,
-								&wmPropertyValueData8 );
+			XGetWindowProperty( pDisplay,
+			                    pWindow,
+			                    wmProperty,
+			                    0,
+			                    wmPropertyValuesNum,
+			                    False,
+			                    XA_ATOM,
+			                    &wmPropertyValueType,
+			                    &wmPropertyValueFormat,
+			                    &wmPropertyValueItemsNum,
+			                    &wmPropertyValueBytesNum,
+			                    &wmPropertyValueData8 );
 
 			const auto * wmPropertyValueData32 = reinterpret_cast<unsigned long *>( wmPropertyValueData8 );
 
@@ -427,51 +370,47 @@ namespace ts3::system
 			return wmPropertyValueArray;
 		}
 
-		bool x11CheckWindowPropertyValueSet( const X11WindowNativeData & pWindowNativeData,
-											 const char * pPropertyName,
-											 const char * pValueID )
+		bool x11CheckWindowPropertyValueSet( XDisplay pDisplay, XWindow pWindow, const char * pPropertyName, const char * pValueID )
 		{
-			auto & xSessionData = platform::x11GetXSessionData( pWindowNativeData );
-
 			Atom wmPropertyValueType = 0;
 			int wmPropertyValueFormat = 0;
 			unsigned long wmPropertyValueItemsNum = 0;
 			unsigned long wmPropertyValueBytesNum = 0;
 			unsigned char * wmPropertyValueData8 = nullptr;
 
-			const Atom wmProperty = XInternAtom( xSessionData.display, pPropertyName, true );
+			const Atom wmProperty = XInternAtom( pDisplay, pPropertyName, true );
 
-			XGetWindowProperty( xSessionData.display,
-								pWindowNativeData.windowXID,
-								wmProperty,
-								0,
-								0,
-								False,
-								AnyPropertyType,
-								&wmPropertyValueType,
-								&wmPropertyValueFormat,
-								&wmPropertyValueItemsNum,
-								&wmPropertyValueBytesNum,
-								&wmPropertyValueData8 );
+			XGetWindowProperty( pDisplay,
+			                    pWindow,
+			                    wmProperty,
+			                    0,
+			                    0,
+			                    False,
+			                    AnyPropertyType,
+			                    &wmPropertyValueType,
+			                    &wmPropertyValueFormat,
+			                    &wmPropertyValueItemsNum,
+			                    &wmPropertyValueBytesNum,
+			                    &wmPropertyValueData8 );
 
 			const long wmPropertyValuesNum = trunc_numeric_cast<long>( wmPropertyValueBytesNum ) / 4;
 
-			XGetWindowProperty( xSessionData.display,
-								pWindowNativeData.windowXID,
-								wmProperty,
-								0,
-								wmPropertyValuesNum,
-								False,
-								XA_ATOM,
-								&wmPropertyValueType,
-								&wmPropertyValueFormat,
-								&wmPropertyValueItemsNum,
-								&wmPropertyValueBytesNum,
-								&wmPropertyValueData8 );
+			XGetWindowProperty( pDisplay,
+			                    pWindow,
+			                    wmProperty,
+			                    0,
+			                    wmPropertyValuesNum,
+			                    False,
+			                    XA_ATOM,
+			                    &wmPropertyValueType,
+			                    &wmPropertyValueFormat,
+			                    &wmPropertyValueItemsNum,
+			                    &wmPropertyValueBytesNum,
+			                    &wmPropertyValueData8 );
 
 			const auto * wmPropertyValueData32 = reinterpret_cast<unsigned long *>( wmPropertyValueData8 );
 
-			const Atom wmPropertyValue = XInternAtom( xSessionData.display, pValueID, true );
+			const Atom wmPropertyValue = XInternAtom( pDisplay, pValueID, true );
 
 			bool propertyValueFound = false;
 
@@ -590,12 +529,22 @@ namespace ts3::system
 		XSizeHints _x11QuerySizeHintsForFrameStyle( XDisplay pDisplay, EFrameStyle pFrameStyle, const FrameGeometry & pFrameGeometry )
 		{
 			XSizeHints windowSizeHints;
-			windowSizeHints.flags = PSize;
+
+			windowSizeHints.flags = PPosition | PSize;
+			windowSizeHints.x = static_cast<int>( pFrameGeometry.position.x );
+			windowSizeHints.y = static_cast<int>( pFrameGeometry.position.y );
 			windowSizeHints.width = static_cast<int>( pFrameGeometry.size.x );
 			windowSizeHints.height = static_cast<int>( pFrameGeometry.size.y );
 
+			// "Resizeable" style is the only style which has the dynamic resizing enabled.
 			if( pFrameStyle != EFrameStyle::Resizeable )
 			{
+				// 'PMaxSize' is the maximum allowed size of the window frame. 'PMinSize' - well, that is rather obvious.
+				// If both are set to the same value, resizing is blocked. This will cause following things:
+				// - no maximize button
+				// - no side border resizing
+				// - no corner resizing
+
 				windowSizeHints.flags |= PMaxSize;
 				windowSizeHints.max_width = windowSizeHints.width;
 				windowSizeHints.max_height = windowSizeHints.height;

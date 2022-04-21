@@ -5,7 +5,6 @@
 #define __TS3_ENGINE_SCF_COMMON_H__
 
 #include "../prerequisites.h"
-#include <ts3/core/prerequisites/enumCommon.h>
 
 namespace ts3
 {
@@ -45,6 +44,6 @@ namespace ts3
 		uint32 subFoldersNum;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_SCF_COMMON_H__

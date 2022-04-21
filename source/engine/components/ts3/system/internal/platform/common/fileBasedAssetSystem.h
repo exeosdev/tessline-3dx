@@ -9,6 +9,8 @@
 namespace ts3::system
 {
 
+	ts3SysDeclareHandle( FileAssetLoader );
+
 	namespace platform
 	{
 
@@ -74,7 +76,7 @@ namespace ts3::system
 		FileManagerHandle const mFileManager;
 
 	public:
-		explicit FileAssetDirectory( Handle<FileAssetLoader> pAssetLoader );
+		explicit FileAssetDirectory( FileAssetLoaderHandle pAssetLoader );
 		virtual ~FileAssetDirectory() noexcept;
 
 		using AssetDirectory::addAsset;

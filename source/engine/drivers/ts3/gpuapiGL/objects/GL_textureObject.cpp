@@ -2,9 +2,7 @@
 #include "GL_textureObject.h"
 #include <ts3/gpuapiGL/GL_coreAPIProxy.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLTextureObject::GLTextureObject( GLuint pHandle, const GLTextureCreateInfo & pGLCreateInfo )
@@ -422,5 +420,4 @@ namespace gpuapi
 		return 1;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

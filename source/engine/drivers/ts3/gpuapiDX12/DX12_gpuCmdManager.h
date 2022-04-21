@@ -7,9 +7,7 @@
 #include "DX12_prerequisites.h"
 #include <ts3/gpuapi/cmds/commandSystem.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	/// @brief
@@ -50,7 +48,6 @@ namespace gpuapi
 		DX12CmdContextInternalMap _availableContextMap;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX12_GPU_CMD_MANAGER_H__

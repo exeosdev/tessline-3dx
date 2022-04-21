@@ -33,8 +33,4 @@
 #include "prerequisites/gpuapiCommon.h"
 #include "prerequisites/geometryCommon.h"
 
-namespace ts3
-{
-}
-
 #endif // __TS3_ENGINE_PREREQUISITES_H__

@@ -8,9 +8,7 @@
 #include <ts3/gpuapi/commandSystem.h>
 #include <mutex>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct DX11CommandSyncData
@@ -48,7 +46,6 @@ namespace gpuapi
 		std::mutex _availableListLock;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX11_COMMAND_SYSTEM_H__

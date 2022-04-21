@@ -285,4 +285,4 @@ namespace ts3
 		return fontFacePtr;
 	}
 
-}
+} // namespace ts3

@@ -6,22 +6,19 @@
 
 #include <ts3/core/exception.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
-	class HresultErrorException : public ts3::ExternalException
+	class HresultErrorException : public UserExternalException
 	{
 	public:
-		using BaseException = ts3::ExternalException;
+		using BaseException = UserExternalException;
 
 		explicit HresultErrorException( ts3::ExceptionInfo pInfo )
 		: BaseException( std::move( pInfo ) )
 		{}
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DXCOMMON_ERROR_UTILS_H__

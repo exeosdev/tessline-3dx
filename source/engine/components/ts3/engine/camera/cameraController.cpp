@@ -207,4 +207,4 @@ namespace ts3
 		mCameraState.orientation.vRight = math::normalize( math::cross( mCameraState.orientation.vUp, mCameraState.orientation.vForward ) );
 	}
 
-}
+} // namespace ts3

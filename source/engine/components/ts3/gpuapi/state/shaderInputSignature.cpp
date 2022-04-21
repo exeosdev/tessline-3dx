@@ -2,9 +2,7 @@
 #include "shaderInputSignature.h"
 #include "../resources/shader.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct InputConstantLayoutInfo
@@ -40,12 +38,12 @@ namespace gpuapi
 
 		if( !createInputSignatureConstantLayout( pInputSignatureDesc, inputSignature ) )
 		{
-			return cvInitEmpty;
+			return CX_INIT_EMPTY;
 		}
 
 		if( !createInputSignatureDescriptorLayout( pInputSignatureDesc, inputSignature ) )
 		{
-			return cvInitEmpty;
+			return CX_INIT_EMPTY;
 		}
 
 		inputSignature.constantsNum = inputSignature.constantLayout.constantsNum;
@@ -288,5 +286,4 @@ namespace gpuapi
 		return ( dwordSizeMod == 0 ) ? trunc_numeric_cast<uint32>( dwordSize ) : trunc_numeric_cast<uint32>( dwordSize + 1 );
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

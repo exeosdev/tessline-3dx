@@ -4,9 +4,7 @@
 #include <ts3/gpuapiDX11/DX11_gpuDevice.h>
 #include <ts3/gpuapiDX11/resources/DX11_texture.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DX11RenderBuffer::DX11RenderBuffer( DX11GPUDevice & pDX11GPUDevice,
@@ -27,7 +25,7 @@ namespace gpuapi
 		return !mD3D11Texture2D;
 	}
 
-	Handle<DX11RenderBuffer> DX11RenderBuffer::create( DX11GPUDevice & pDX11GPUDevice, const RenderBufferCreateInfo & pCreateInfo )
+	GpaHandle<DX11RenderBuffer> DX11RenderBuffer::create( DX11GPUDevice & pDX11GPUDevice, const RenderBufferCreateInfo & pCreateInfo )
 	{
 		if( !validateCreateInfo( pCreateInfo ) )
 		{
@@ -63,5 +61,4 @@ namespace gpuapi
 		return renderBuffer;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

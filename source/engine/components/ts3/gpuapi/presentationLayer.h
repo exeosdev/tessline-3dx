@@ -9,9 +9,7 @@
 #include <ts3/system/eventCommon.h>
 #include <ts3/system/windowCommon.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct PresentationLayerCreateInfo
@@ -48,7 +46,6 @@ namespace gpuapi
 		virtual ts3::math::Vec2u32 queryRenderTargetSize() const = 0;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_PRESENTATION_LAYER_H__

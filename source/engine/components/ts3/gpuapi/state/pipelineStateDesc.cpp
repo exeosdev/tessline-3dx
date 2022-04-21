@@ -1,9 +1,7 @@
 
 #include "pipelineStateDesc.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	static const DepthStencilConfigDesc::DepthSettings sDepthSettingsDepthDisabled =
@@ -139,5 +137,4 @@ namespace gpuapi
 		EPrimitiveTopology::TriangleList
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

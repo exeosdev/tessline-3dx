@@ -94,7 +94,7 @@ namespace ts3::system
 		}
 
 		template <typename TpParentSysObject, typename... TpBaseTypeArgs>
-		explicit OSXNativeObject( Handle<TpParentSysObject> pParentSysObject, TpBaseTypeArgs && ...pBaseTypeArgs )
+		explicit OSXNativeObject( SysHandle<TpParentSysObject> pParentSysObject, TpBaseTypeArgs && ...pBaseTypeArgs )
 		: NativeObject<TpBaseType, TpNativeData>( pParentSysObject, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
 		{
 			this->mNativeData.setSharedData( platform::osxGetOSXSharedData( *pParentSysObject ) );

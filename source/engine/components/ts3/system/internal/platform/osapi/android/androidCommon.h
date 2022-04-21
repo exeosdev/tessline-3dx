@@ -73,21 +73,21 @@ namespace ts3::system
 	{
 	public:
 		template <typename... TpBaseTypeArgs>
-		AndroidNativeObject( SysContextHandle pSysContext, TpBaseTypeArgs && ...pBaseTypeArgs )
+		explicit AndroidNativeObject( SysContextHandle pSysContext, TpBaseTypeArgs && ...pBaseTypeArgs )
 		: TpBaseType( pSysContext, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
 		{
 			this->mNativeData.setSessionData( platform::androidGetASessionData( *pSysContext ) );
 		}
 
 		template <typename TpParentSysObject, typename... TpBaseTypeArgs>
-		AndroidNativeObject( TpParentSysObject & pParentSysObject, TpBaseTypeArgs && ...pBaseTypeArgs )
+		explicit AndroidNativeObject( TpParentSysObject & pParentSysObject, TpBaseTypeArgs && ...pBaseTypeArgs )
 		: TpBaseType( pParentSysObject, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
 		{
 			this->mNativeData.setSessionData( platform::androidGetASessionData( pParentSysObject ) );
 		}
 
 		template <typename TpParentSysObject, typename... TpBaseTypeArgs>
-		AndroidNativeObject( Handle<TpParentSysObject> pParentSysObject, TpBaseTypeArgs && ...pBaseTypeArgs )
+		explicit AndroidNativeObject( SysHandle<TpParentSysObject> pParentSysObject, TpBaseTypeArgs && ...pBaseTypeArgs )
 		: TpBaseType( pParentSysObject, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
 		{
 			this->mNativeData.setSessionData( platform::androidGetASessionData( *pParentSysObject ) );

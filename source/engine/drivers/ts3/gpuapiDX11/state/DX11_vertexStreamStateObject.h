@@ -8,9 +8,7 @@
 #include "../state/DX11_pipelineStateDesc.h"
 #include <ts3/gpuapi/state/vertexStreamStateObject.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	class DX11VertexStreamStateObject : public VertexStreamStateObject
@@ -22,11 +20,10 @@ namespace gpuapi
 		DX11VertexStreamStateObject( DX11GPUDevice & pGPUDevice,
 		                             DX11VertexDataSourceBinding pDX11VertexDataSourceBinding );
 
-		static Handle<DX11VertexStreamStateObject> create( DX11GPUDevice & pGPUDevice,
-		                                                   const VertexStreamStateObjectCreateInfo & pCreateInfo );
+		static GpaHandle<DX11VertexStreamStateObject> create( DX11GPUDevice & pGPUDevice,
+		                                                      const VertexStreamStateObjectCreateInfo & pCreateInfo );
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX11_VERTEX_STREAM_STATE_OBJECT_H__

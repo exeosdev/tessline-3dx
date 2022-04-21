@@ -7,9 +7,7 @@
 #include <ts3/math/color.h>
 
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct ViewportDesc
@@ -30,7 +28,6 @@ namespace gpuapi
 		ViewportRect vpRect;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_COMMON_TYPES_H__

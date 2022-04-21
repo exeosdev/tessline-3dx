@@ -125,8 +125,9 @@ namespace ts3::system
 		/// This is an internal function, implemented at the OS API level. Technically, it could be purely OS-specific,
 		/// but having it here gives us the ability to write the dispatching helper function below and avoid duplicating.
 		TS3_SYSTEM_API bool nativeEventTranslate( EventController & pEventController,
-												  const NativeEventType & pNativeEvent,
-												  EventObject & pOutEvent );
+		                                          const NativeEventType & pNativeEvent,
+		                                          EventObject & pOutEvent );
+
 
 		/// @brief Helper function for translating and dispatching a native event.
 		inline bool nativeEventDispatch( EventController & pEventController, const NativeEventType & pNativeEvent )

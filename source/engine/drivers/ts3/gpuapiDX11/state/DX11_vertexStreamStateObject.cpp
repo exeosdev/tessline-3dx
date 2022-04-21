@@ -2,9 +2,7 @@
 #include "DX11_vertexStreamStateObject.h"
 #include "../DX11_gpuDevice.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DX11VertexStreamStateObject::DX11VertexStreamStateObject( DX11GPUDevice & pGPUDevice,
@@ -13,8 +11,8 @@ namespace gpuapi
 	, mDX11VertexDataSourceBinding( std::move( pDX11VertexDataSourceBinding ) )
 	{}
 
-	Handle<DX11VertexStreamStateObject> DX11VertexStreamStateObject::create( DX11GPUDevice & pGPUDevice,
-	                                                                         const VertexStreamStateObjectCreateInfo & pCreateInfo )
+	GpaHandle<DX11VertexStreamStateObject> DX11VertexStreamStateObject::create( DX11GPUDevice & pGPUDevice,
+	                                                                            const VertexStreamStateObjectCreateInfo & pCreateInfo )
 	{
 		CommonSSOState commonSSOState;
 		if( !createCommonSSOState( pCreateInfo, commonSSOState ) )
@@ -34,5 +32,4 @@ namespace gpuapi
 		return vertexStreamStateObject;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

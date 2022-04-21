@@ -88,4 +88,4 @@ namespace ts3
 			   ( ( pLhs.codePointPair.first == pRhs.first ) && ( pLhs.codePointPair.second < pRhs.second ) );
 	}
 
-}
+} // namespace ts3

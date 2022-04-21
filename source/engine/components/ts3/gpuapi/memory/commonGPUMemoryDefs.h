@@ -7,9 +7,7 @@
 #include "../prerequisites.h"
 #include <ts3/core/memory/commonMemoryDefs.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
     class GPUMemoryHeap;
@@ -152,7 +150,6 @@ namespace gpuapi
 		return pMemoryFlags.isSet( mapRequestedAccessFlags );
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_COMMON_MEMORY_DEFS_H__

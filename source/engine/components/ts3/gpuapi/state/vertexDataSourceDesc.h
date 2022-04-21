@@ -6,9 +6,7 @@
 
 #include "commonGPUStateDefs.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	class GPUBuffer;
@@ -133,7 +131,7 @@ namespace gpuapi
 
 		VertexDataSourceBinding() = default;
 
-		VertexDataSourceBinding( const tag_init_empty_t & )
+		VertexDataSourceBinding( const InitEmptyTag & )
 		: vertexBufferActiveBindingsNum( 0 )
 		{}
 
@@ -145,7 +143,6 @@ namespace gpuapi
 
 	TS3_GPUAPI_API VertexDataSourceBinding createVertexDataSourceBinding( const VertexDataSourceBindingDesc & pBindingDesc );
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_PIPELINE_STATE_DESC_VERTEX_STREAM_H__

@@ -7,9 +7,7 @@
 #include "VK_prerequisites.h"
 #include <ts3/gpuapi/commandList.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	/// @brief
@@ -40,7 +38,6 @@ namespace gpuapi
 		virtual void drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset ) override;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_VKCOMMON_COMMAND_LIST_H__

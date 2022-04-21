@@ -6,9 +6,7 @@
 #include <ts3/gpuapiDX11/resources/DX11_texture.h>
 #include <ts3/stdext/memory.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DX11RenderTargetStateObject::DX11RenderTargetStateObject( DX11GPUDevice & pGPUDevice,
@@ -21,8 +19,8 @@ namespace gpuapi
 
 	DX11RenderTargetStateObject::~DX11RenderTargetStateObject() = default;
 
-	Handle<DX11RenderTargetStateObject> DX11RenderTargetStateObject::create( DX11GPUDevice & pGPUDevice,
-	                                                                         const RenderTargetStateObjectCreateInfo & pCreateInfo )
+	GpaHandle<DX11RenderTargetStateObject> DX11RenderTargetStateObject::create( DX11GPUDevice & pGPUDevice,
+	                                                                            const RenderTargetStateObjectCreateInfo & pCreateInfo )
 	{
 		RenderTargetLayout rtLayout;
 		RenderTargetResourceBinding rtResourceBinding;
@@ -296,5 +294,4 @@ namespace gpuapi
 		return d3d11TextureDSV;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

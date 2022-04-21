@@ -36,9 +36,21 @@ namespace ts3::system
 		return mDisplayManager->validateFrameGeometry( pFrameGeometry );
 	}
 
-	void WindowManager::destroyWindow( Window & pWindow ) noexcept
+	void WindowManager::releaseSystemWindow( Window & pWindow ) noexcept
 	{
-		_nativeDestroyWindow( pWindow );
+		try
+		{
+			_nativeDestroyWindow( pWindow );
+		}
+		catch( const Exception & pException )
+		{
+			( pException );
+			ts3DebugInterrupt();
+		}
+		catch( ... )
+		{
+			ts3DebugInterrupt();
+		}
 	}
 
 
@@ -114,9 +126,13 @@ namespace ts3::system
 
 	void Window::onDestroySystemObjectRequested()
 	{
-		mWindowManager->destroyWindow( *this );
-
 		EventSource::onDestroySystemObjectRequested();
+
+		// Window itself must be destroyed at the very end - it can still be an active event source!
+		// Destroying it first would make it impossible to handle the event source removal (e.g. in
+		// case of Win32, HWND would be already invalid inside EventSource::onDestroySystemObjectRequested()).
+
+		mWindowManager->releaseSystemWindow( *this );
 	}
 
 } // namespace ts3::system

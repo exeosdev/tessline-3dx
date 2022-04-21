@@ -26,13 +26,9 @@
 #include <ts3/engine/camera/cameraController.h>
 #include <ts3/engine/gpuapi/vertexFormatDefs.h>
 #include <ts3/engine/gpuapi/hwBuffer.h>
-#include <ts3/engine/resource/font.h>
-#include <ts3/engine/rcdata/fontManager.h>
+#include <ts3/engine/res/image/bitmapCommon.h>
 
-#include <ts3ext/rcsupport/fonts/fontTypeFTF.h>
-#include <ts3ext/rcsupport/images/bitmapCommon.h>
-
-#include "sysTest-gpuapi-meshDefs.h"
+#include "gpuapi01-meshDefs.h"
 
 using namespace ts3;
 using namespace ts3::gpuapi;
@@ -92,20 +88,21 @@ int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 #include <ts3/gpuapiGL4/GL4_gpuDriverAPI.h>
 #include <ts3/gpuapiDX11/DX11_gpuDriverAPI.h>
 
-#include <ts3/stdext/gdsStdCore.h>
-#include <ts3/stdext/gdsStdSTL.h>
-
 int main( int pArgc, const char ** pArgv )
 {
     const std::string sGxDriverName = "GL4";
 
-    SysContextCreateInfo sysContextCreateInfo;
-    sysContextCreateInfo.nativeParams.appExecModuleHandle = ::GetModuleHandleA( nullptr );
-    auto sysContext = createSysContext( sysContextCreateInfo );
+	SysContextCreateInfo sysContextCreateInfo;
+	platform::SysContextCreateInfoNativeParams sysContextCreateInfoNP;
+	sysContextCreateInfoNP.appExecModuleHandle = ::GetModuleHandleA( nullptr );
+	sysContextCreateInfo.nativeParams = &sysContextCreateInfoNP;
+	auto sysContext = platform::createSysContext( sysContextCreateInfo );
 
-    AssetLoaderCreateInfo aslCreateInfo;
-    aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
-    auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
+	platform::AssetLoaderCreateInfoNativeParams aslCreateInfoNP;
+	aslCreateInfoNP.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+	AssetLoaderCreateInfo aslCreateInfo;
+	aslCreateInfo.nativeParams = &aslCreateInfoNP;
+	auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
 
     GraphicsDriverState gxDriverState;
     gxDriverState.driverID = sGxDriverName;
@@ -127,10 +124,12 @@ int main( int pArgc, const char ** pArgv )
     const std::string sGxDriverName = "GL4";
 
     SysContextCreateInfo sysContextCreateInfo;
-    auto sysContext = createSysContext( sysContextCreateInfo );
+    auto sysContext = platform::createSysContext( sysContextCreateInfo );
 
-    AssetLoaderCreateInfo aslCreateInfo;\
-    aslCreateInfo.nativeParams.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+    platform::AssetLoaderCreateInfoNativeParams aslCreateInfoNP;
+    aslCreateInfoNP.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+    AssetLoaderCreateInfo aslCreateInfo;
+    aslCreateInfo.nativeParams = &aslCreateInfoNP;
     auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
 
     GraphicsDriverState gxDriverState;
@@ -159,7 +158,7 @@ int main( int pArgc, const char ** pArgv )
 
     while( waitForDisplay )
     {
-        evtController->processEventsAuto();
+        evtController->dispatchPendingEventsAuto();
     }
 
 //    evtDispatcher->setEventHandler(
@@ -183,6 +182,8 @@ int main( int pArgc, const char ** pArgv )
 //            });
 #endif
 
+	bool isFullscreen = true;
+
     evtDispatcher->setEventHandler(
             EEventCodeIndex::AppActivityQuit,
             [&runApp,&gxDriverState](const EventObject & pEvt) -> bool {
@@ -200,10 +201,16 @@ int main( int pArgc, const char ** pArgv )
             });
     evtDispatcher->setEventHandler(
             EEventCodeIndex::InputKeyboardKey,
-            [evtDispatcher,&gxDriverState](const EventObject & pEvt) -> bool {
+            [evtDispatcher,&gxDriverState,&isFullscreen](const EventObject & pEvt) -> bool {
+            	auto & keyMap = pEvt.eInputKeyboardKey.inputKeyboardState->keyStateMap;
                 if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::Escape )
                 {
                     evtDispatcher->postEventAppQuit();
+                }
+                else if( keyMap[EKeyCode::AltLeft] && keyMap[EKeyCode::Enter] )
+                {
+                	isFullscreen = !isFullscreen;
+                	gxDriverState.presentationLayer->setFullscreenMode( isFullscreen );
                 }
                 return true;
             });
@@ -506,7 +513,7 @@ int main( int pArgc, const char ** pArgv )
 
         try
         {
-            evtController->processEventsAuto();
+            evtController->dispatchPendingEventsAuto();
 
             auto ts3ViewScreen = cameraController.computeViewMatrixLH();
             gxDriverState.cmdContext->beginCommandSequence();
@@ -521,8 +528,8 @@ int main( int pArgc, const char ** pArgv )
                 gxDriverState.cmdContext->setViewport( vpDescTexture );
                 gxDriverState.cmdContext->setColorBufferClearValue(
                         ts3::math::RGBAColorU8 { 0x8F, 0x0F, 0x1F, 0xFF } );
-                gxDriverState.cmdContext->setColorBufferClearValue(
-                        ts3::math::RGBAColorU8 { 0xFF, 0xFF, 0xFF, 0xFF } );
+                //gxDriverState.cmdContext->setColorBufferClearValue(
+                //        ts3::math::RGBAColorU8 { 0xFF, 0xFF, 0xFF, 0xFF } );
                 gxDriverState.cmdContext->clearRenderTarget( ts3::gpuapi::E_RENDER_TARGET_ATTACHMENT_FLAGS_DEFAULT_C0DS );
 
                 ts3::gpuapi::GPUBufferDataUploadDesc cb0DataUploadDesc;
@@ -611,6 +618,9 @@ void initializeGraphicsDriver( SysContextHandle pSysContext, GraphicsDriverState
     pGxDriverState.device = pGxDriverState.driver->createDevice( gpuDeviceCreateInfo );
 
     PresentationLayerCreateInfo presentationLayerCreateInfo;
+    presentationLayerCreateInfo.screenRect.size.x = 1024;
+    presentationLayerCreateInfo.screenRect.size.y = 600;
+    presentationLayerCreateInfo.displayConfigFlags = 0;
     presentationLayerCreateInfo.displayConfigFlags = E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT;
     pGxDriverState.presentationLayer = pGxDriverState.driverInterface->createScreenPresentationLayer( *( pGxDriverState.device ), presentationLayerCreateInfo );
 

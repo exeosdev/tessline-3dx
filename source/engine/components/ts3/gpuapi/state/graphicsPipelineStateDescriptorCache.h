@@ -8,9 +8,7 @@
 #include <map>
 #include <unordered_map>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	// Implementation of a simple cache for graphics pipeline state descriptors used by drivers without monolithic PSOs.
@@ -238,7 +236,6 @@ namespace gpuapi
 		CachedVertexInputFormatDescriptorMap _cachedVertexInputFormatDescriptorMap;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GRAPHICS_PIPELINE_STATE_DESCRIPTOR_CACHE_H__

@@ -72,6 +72,11 @@ namespace ts3::system
 		}
 
 	protected:
+		/// @brief Implements class-specific logic for releasing system-level resources.
+		///
+		/// Base method (from SysObject class) should ALWAYS be called at the end of the class-specific one.
+		/// However, it is not mandatory to form a complete call chain for all subclasses. Classes are also
+		/// free to decide at which point a base class version should be called.
 		virtual void onDestroySystemObjectRequested();
 
 		bool setDestroyRequestFlag()
@@ -88,10 +93,23 @@ namespace ts3::system
 		AtomicBitmask<uint32> _stateMask;
     };
 
-    template <typename TpObject, typename... TpArgs>
-    inline Handle<TpObject> createSysObject( TpArgs && ...pArgs )
+    struct SysObjectDeleter
     {
-        return createDynamicInterfaceObject<TpObject>( std::forward<TpArgs>( pArgs )... );
+        void operator()( SysObject * pSysObject ) const
+        {
+            if( pSysObject )
+            {
+                pSysObject->destroySystemObject();
+
+                delete pSysObject;
+            }
+        }
+    };
+
+    template <typename TpObject, typename... TpArgs>
+    inline SysHandle<TpObject> createSysObject( TpArgs && ...pArgs )
+    {
+        return createDynamicInterfaceObjectWithDeleter<TpObject>( SysObjectDeleter{}, std::forward<TpArgs>( pArgs )... );
     }
 
 } // namespace ts3::system

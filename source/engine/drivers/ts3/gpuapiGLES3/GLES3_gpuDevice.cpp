@@ -4,9 +4,7 @@
 #include "GLES3_gpuCmdCore.h"
 #include <ts3/gpuapiGL/GL_presentationLayer.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLES3GPUDevice::GLES3GPUDevice( GLES3GPUDriver & pDriver )
@@ -25,5 +23,4 @@ namespace gpuapi
 		return gles3GPUDevice;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
