@@ -120,6 +120,6 @@ namespace ts3
 
 	ImageData loadBitmapFromMemory( const void * pData, size_t pDataSize );
 
-}
+} // namespace ts3
 
 #endif // __TS3EXT_RCSUPPORT_BITMAP_COMMON_H__

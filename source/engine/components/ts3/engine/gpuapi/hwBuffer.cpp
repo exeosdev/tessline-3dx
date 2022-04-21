@@ -12,4 +12,4 @@ namespace ts3
 
 	HWBuffer::~HWBuffer() = default;
 
-}
+} // namespace ts3

@@ -101,4 +101,4 @@ namespace ts3
 		return _rdReadCallback( pTarget, pSize, pOffset );
 	}
 
-}
+} // namespace ts3

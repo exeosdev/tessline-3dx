@@ -3,9 +3,7 @@
 #include "DX12_gpuDevice.h"
 #include <ts3/system/displayDriverNative.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DX12GPUDriver::DX12GPUDriver( system::temContext * pExfSystemContext )
@@ -46,5 +44,4 @@ namespace gpuapi
 		return DX12GPUDevice::create( *this, createInfo );
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

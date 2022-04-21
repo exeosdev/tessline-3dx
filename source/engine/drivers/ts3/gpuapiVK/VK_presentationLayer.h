@@ -7,9 +7,7 @@
 #include "VK_prerequisites.h"
 #include <ts3/gpuapi/presentationLayer.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( VKPresentationLayer );
@@ -40,7 +38,6 @@ namespace gpuapi
 		virtual ts3::math::Vec2u32 queryRenderTargetSize() const override;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_VKCOMMON_PRESENTATION_LAYER_H__

@@ -5,9 +5,7 @@
 #include <ts3/gpuapiGL/resources/GL_gpuBuffer.h>
 #include <ts3/stdext/memory.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLVertexDataSourceBinding createGLVertexDataSourceBinding( const VertexDataSourceBinding & pCommonBinding )
@@ -183,5 +181,4 @@ namespace gpuapi
 		return openglVIFDescriptor;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

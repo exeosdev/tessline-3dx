@@ -4,9 +4,7 @@
 #include "DX11_gpuDevice.h"
 #include "DX11_presentationLayer.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GPUDriverHandle DX11GPUDriverInterface::createDriver( const GPUDriverCreateInfo & pCreateInfo )
@@ -30,5 +28,4 @@ namespace gpuapi
 		return DX11ScreenPresentationLayer::create( *deviceDX11, dx11CreateInfo );
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

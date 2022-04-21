@@ -8,9 +8,7 @@
 #include <ts3/gpuapiDX/DX_coreAPIProxy.h>
 #include <ts3/gpuapi/cmds/commonCommandDefs.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct D3D12CommandListData
@@ -56,7 +54,6 @@ namespace gpuapi
 
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX12_CORE_LAYER_H__

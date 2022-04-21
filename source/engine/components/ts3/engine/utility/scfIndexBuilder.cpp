@@ -395,4 +395,4 @@ namespace ts3
 		return pLhs.name < pRhs;
 	}
 
-}
+} // namespace ts3

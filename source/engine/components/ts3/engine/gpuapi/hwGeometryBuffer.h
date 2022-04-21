@@ -44,6 +44,6 @@ namespace ts3
 		HWIndexBufferMetrics _ibMetrics;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_HARDWARE_GEOMETRY_BUFFER_H__

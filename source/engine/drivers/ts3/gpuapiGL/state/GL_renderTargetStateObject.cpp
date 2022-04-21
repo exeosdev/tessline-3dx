@@ -8,9 +8,7 @@
 #include <ts3/gpuapiGL/resources/GL_renderBuffer.h>
 #include <ts3/gpuapiGL/resources/GL_texture.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLRenderTargetStateObject::GLRenderTargetStateObject( GLGPUDevice & pGPUDevice,
@@ -91,5 +89,4 @@ namespace gpuapi
 		return openglRenderTargetSO;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

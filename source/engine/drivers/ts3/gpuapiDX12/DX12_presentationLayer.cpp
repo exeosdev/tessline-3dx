@@ -5,9 +5,7 @@
 #include "../DX12_gpuCmdManager.h"
 #include "../DX12_coreAPIProxy.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DX12ScreenPresentationLayer::DX12ScreenPresentationLayer( DX12GPUDevice & pDevice, ComPtr<IDXGISwapChain3> pDXGISwapChain3, uint32 pFrameQueueSize )
@@ -188,5 +186,4 @@ namespace gpuapi
 		return true;
 	}
 	
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

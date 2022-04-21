@@ -115,7 +115,7 @@ namespace ts3
 		}
 	};
 
-}
+} // namespace ts3
 
 #if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
 #  pragma clang diagnostic pop

@@ -8,9 +8,7 @@
 #include "state/DX11_pipelineStateController.h"
 #include <ts3/gpuapi/commandList.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	/// @brief
@@ -57,7 +55,6 @@ namespace gpuapi
 		DX11GraphicsPipelineStateController _stateController;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX11_COMMAND_LIST_H__

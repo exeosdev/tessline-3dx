@@ -3,9 +3,7 @@
 #include "../GL_gpuDevice.h"
 #include "../resources/GL_gpuBuffer.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLVertexStreamStateObject::GLVertexStreamStateObject( GLGPUDevice & pGPUDevice, GLVertexDataSourceBinding pGLVertexDataSourceBinding )
@@ -33,5 +31,4 @@ namespace gpuapi
 		return vertexStreamStateObject;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

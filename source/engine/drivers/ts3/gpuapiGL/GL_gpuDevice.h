@@ -9,9 +9,7 @@
 #include <ts3/gpuapi/gpuDevice.h>
 #include <ts3/gpuapi/state/graphicsPipelineStateDescriptorCache.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	class GLCommandContext;
@@ -72,7 +70,6 @@ namespace gpuapi
 		std::unique_ptr<GLDebugOutput> _glDebugOutput;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_GPU_DEVICE_H__

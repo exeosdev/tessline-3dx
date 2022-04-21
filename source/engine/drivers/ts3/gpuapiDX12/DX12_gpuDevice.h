@@ -7,9 +7,7 @@
 #include "DX12_prerequisites.h"
 #include <ts3/gpuapiDX/DX_gpuDevice.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct DX12GPUDeviceCreateInfo : public GPUDeviceCreateInfo
@@ -48,7 +46,6 @@ namespace gpuapi
 
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX12_GPU_DEVICE_H__

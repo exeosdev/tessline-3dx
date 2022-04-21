@@ -37,6 +37,6 @@ namespace ts3
 		void updateRotation();
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_CAMERA_CAMERA_CONTROLLER_H__

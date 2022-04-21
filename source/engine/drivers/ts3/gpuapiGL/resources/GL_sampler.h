@@ -7,9 +7,7 @@
 #include "../objects/GL_samplerObject.h"
 #include <ts3/gpuapi/resources/sampler.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( GLSampler );
@@ -29,7 +27,6 @@ namespace gpuapi
 		static bool translateSamplerDesc( const SamplerDesc & pSamplerDesc, GLSamplerState & pOutSamplerState );
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_SAMPLER_H__

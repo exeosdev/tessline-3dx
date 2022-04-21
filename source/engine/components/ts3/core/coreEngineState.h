@@ -22,6 +22,6 @@ namespace ts3
 
 	void releaseCoreEngineState( CoreEngineState * pState );
 
-}
+} // namespace ts3
 
 #endif // __TS3_CORE_CORE_ENGINE_STATE_H__

@@ -25,6 +25,6 @@ namespace ts3
 		gpuapi::CommandContext * _gpuCommandContext;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_RES_RESOURCE_LOADER_H__

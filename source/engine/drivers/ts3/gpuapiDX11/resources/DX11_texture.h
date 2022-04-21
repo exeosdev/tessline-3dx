@@ -7,9 +7,7 @@
 #include "../DX11_prerequisites.h"
 #include <ts3/gpuapi/resources/texture.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( DX11Texture );
@@ -115,7 +113,6 @@ namespace gpuapi
 		static ID3D11DeviceContext1 * getD3D11DeviceContext( void * pCommandObject );
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX11_TEXTURE_H__

@@ -60,6 +60,6 @@ namespace ts3
 		KerningInfoArray _kerningInfoArray;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_RES_FONT_H__

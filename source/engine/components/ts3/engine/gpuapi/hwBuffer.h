@@ -39,6 +39,6 @@ namespace ts3
 		HWBufferEventProxy _eventProxy;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_HARDWARE_BUFFER_H__

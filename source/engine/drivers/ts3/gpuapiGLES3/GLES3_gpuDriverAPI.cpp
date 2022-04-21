@@ -4,9 +4,7 @@
 #include "GLES3_gpuDevice.h"
 #include <ts3/gpuapiGL/GL_presentationLayer.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GPUDriverHandle GLES3GPUDriverInterface::createDriver( const GPUDriverCreateInfo & pCreateInfo )
@@ -30,5 +28,4 @@ namespace gpuapi
 		return GLScreenPresentationLayer::create( *deviceGL, openglCreateInfo );
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

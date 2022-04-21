@@ -142,6 +142,6 @@ namespace ts3
 		std::map<std::string, SCFEntry *>  _entryNameMap;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_SCF_ENTRY_H__

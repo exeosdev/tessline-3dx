@@ -43,4 +43,4 @@ namespace ts3
 		return nullptr;
 	}
 
-}
+} // namespace ts3

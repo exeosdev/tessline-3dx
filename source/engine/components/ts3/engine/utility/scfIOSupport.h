@@ -66,6 +66,6 @@ namespace ts3
 
 	}
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_SCF_IO_SUPPORT_H__

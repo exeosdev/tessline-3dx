@@ -106,6 +106,6 @@ namespace ts3
 		std::unique_ptr<PrivateWorkingData> _privateWorkingData;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_SCF_INDEX_BUILDER_H__

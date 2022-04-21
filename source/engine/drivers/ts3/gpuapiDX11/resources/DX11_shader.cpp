@@ -4,9 +4,7 @@
 #include <ts3/gpuapiDX11/DX11_gpuDevice.h>
 #include <ts3/stdext/memory.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DX11Shader::DX11Shader( DX11GPUDevice & pGPUDevice, ComPtr<ID3D11VertexShader> pD3D11VertexShader, ShaderBinary pShaderBinary )
@@ -196,5 +194,4 @@ namespace gpuapi
 		return binary;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

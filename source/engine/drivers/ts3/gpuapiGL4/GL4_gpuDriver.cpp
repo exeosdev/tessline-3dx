@@ -3,9 +3,7 @@
 #include "GL4_gpuDevice.h"
 #include <ts3/gpuapiGL/GL_presentationLayer.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GL4GPUDriver::GL4GPUDriver( system::OpenGLSystemDriverHandle pSysGLDriver )
@@ -61,5 +59,4 @@ namespace gpuapi
 		return EGPUDriverID::GDIDGL4;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

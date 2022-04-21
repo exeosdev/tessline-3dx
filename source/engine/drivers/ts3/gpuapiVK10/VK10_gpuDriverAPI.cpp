@@ -4,9 +4,7 @@
 #include "ts3/gpuapiVK/VK_gpuDevice.h"
 #include <ts3/gpuapiVK/system/VK_presentationLayer.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GPUDriverHandle VK10GPUDriverInterface::createDriver( const GPUDriverCreateInfo & pCreateInfo )
@@ -30,5 +28,4 @@ namespace gpuapi
 		return VKScreenPresentationLayer::create( deviceVK, vk10CreateInfo );
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

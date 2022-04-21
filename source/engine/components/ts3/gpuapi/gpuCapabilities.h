@@ -6,9 +6,7 @@
 
 #include "prerequisites.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	enum EGPUDeviceFeatureFlags : uint32
@@ -34,7 +32,6 @@ namespace gpuapi
 		Unknown
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GPU_CAPABILITIES_H__

@@ -8,9 +8,7 @@
 #include "renderTargetCommon.h"
 #include <ts3/gpuapi/resources/renderBuffer.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( RenderBuffer );
@@ -35,7 +33,6 @@ namespace gpuapi
 		virtual ~RenderTargetStateObject();
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_RENDER_TARGET_STATE_OBJECT_H__

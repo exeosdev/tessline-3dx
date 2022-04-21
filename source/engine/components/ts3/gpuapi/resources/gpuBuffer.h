@@ -7,9 +7,7 @@
 #include "gpuResource.h"
 #include "gpuBufferCommon.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct GPUBufferProperties : public GPUResourceProperties
@@ -51,7 +49,6 @@ namespace gpuapi
 		static bool validateBufferCreateInfo( GPUBufferCreateInfo & pCreateInfo );
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GPU_BUFFER_H__

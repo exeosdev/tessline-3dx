@@ -22,9 +22,7 @@
 #  endif
 #endif
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( GLES3CommandContext );
@@ -33,7 +31,6 @@ namespace gpuapi
 	ts3DeclareClassHandle( GLES3GPUDriver );
 	ts3DeclareClassHandle( GLPresentationLayer );
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLES3_PREREQUISITES_H__

@@ -7,9 +7,7 @@
 #include "../objects/GL_bufferObject.h"
 #include <ts3/gpuapi/resources/gpuBuffer.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( GLGPUBuffer );
@@ -51,7 +49,6 @@ namespace gpuapi
 		static bool validateBufferCreateInfo( GPUBufferCreateInfo & pCreateInfo );
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_GPU_BUFFER_H__

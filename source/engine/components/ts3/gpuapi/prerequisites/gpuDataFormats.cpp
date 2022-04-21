@@ -1,9 +1,7 @@
 
 #include "../prerequisites.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 //	TS3_EnumDefineTypeInfoGx( EBaseDataType )
@@ -155,5 +153,4 @@ namespace gpuapi
 //		TS3_EnumTypeInfoRegisterClassConstant( EVertexAttribFormat::UNKNOWN );
 //	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

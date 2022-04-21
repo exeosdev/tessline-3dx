@@ -6,9 +6,7 @@
 
 #include "commonGPUResourceDefs.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( Texture );
@@ -372,7 +370,6 @@ namespace gpuapi
 
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_TEXTURE_COMMON_H__
