@@ -261,7 +261,7 @@ namespace ts3::system
 	}
 
 
-	Handle<Win32DisplayAdapter> Win32DisplayDriver::_findAdapterByUUID( const std::string & pUUID )
+	SysHandle<Win32DisplayAdapter> Win32DisplayDriver::_findAdapterByUUID( const std::string & pUUID )
 	{
 		auto displayAdapter = findAdapter( [&pUUID]( const DisplayAdapter & pAdapter ) -> bool {
 			auto * win32Adapter = pAdapter.queryInterface<Win32DisplayAdapter>();
@@ -270,7 +270,7 @@ namespace ts3::system
 		return displayAdapter ? displayAdapter->getHandle<Win32DisplayAdapter>() : nullptr;
 	}
 
-	Handle<Win32DisplayOutput> Win32DisplayDriver::_findAdapterOutputForDisplayDeviceName( DisplayAdapter & pAdapter,
+	SysHandle<Win32DisplayOutput> Win32DisplayDriver::_findAdapterOutputForDisplayDeviceName( DisplayAdapter & pAdapter,
 	                                                                                       const char * pDeviceName )
 	{
 		auto displayOutput = pAdapter.findOutput( [pDeviceName]( const DisplayOutput & pOutput ) -> bool {
@@ -280,7 +280,7 @@ namespace ts3::system
 		return displayOutput ? displayOutput->getHandle<Win32DisplayOutput>() : nullptr;
 	}
 
-	Handle<Win32DisplayOutput> Win32DisplayDriver::_findAnyOutputForDisplayDeviceName( const char * pDeviceName )
+	SysHandle<Win32DisplayOutput> Win32DisplayDriver::_findAnyOutputForDisplayDeviceName( const char * pDeviceName )
 	{
 		for( auto & adapter : _privateData->adapterInstanceList )
 		{

@@ -7,9 +7,6 @@
 namespace ts3
 {
 
-	// Enable support for enum type info for the whole ts3:: namespace.
-	ts3TypeInfoEnableEnumSupport();
-
 	enum class EActiveState : enum_default_value_t
 	{
 		Disabled = 0,

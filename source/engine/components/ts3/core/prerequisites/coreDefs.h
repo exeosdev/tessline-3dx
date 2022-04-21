@@ -65,7 +65,7 @@ namespace ts3
 	}
 
     /// @brief Declares a namespace-scope function template for querying ts3::EnumTypeInfo for enum types.
-    #define ts3TypeInfoEnableEnumSupport() \
+    #define ts3EnableEnumTypeInfoSupport() \
         /* Template function used to retrieve an EnumTypeInfo object for an enum type. */ \
         /* Not implemented, specialized for every enum using ts3TypeInfoEnumDeclare. */  \
         template <typename TpEnum> const ::ts3::EnumTypeInfo<TpEnum> & queryEnumTypeInfo();
@@ -94,6 +94,9 @@ namespace ts3
         	/* Just call the enum-specific function. This allows moving the definition code to .cpp. */      \
         	return _typeinfo::toString##TpEnum( pValue );                                                    \
         }
+
+    // Enable support for enum type info for the whole ts3:: namespace.
+    ts3EnableEnumTypeInfoSupport();
 
 }
 

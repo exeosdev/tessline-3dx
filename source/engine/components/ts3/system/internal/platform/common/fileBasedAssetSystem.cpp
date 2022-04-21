@@ -31,7 +31,7 @@ namespace ts3::system
 
 	AssetHandle FileAssetLoader::_nativeOpenSubAsset( FSUtilityAPI::FilePathInfo pAssetPathInfo, Bitmask<EAssetOpenFlags> pFlags )
 	{
-		Handle<FileAsset> asset = nullptr;
+		SysHandle<FileAsset> asset = nullptr;
 
 		auto fileDirectoryPath = mNativeData.rootDir;
 		fileDirectoryPath.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
@@ -85,7 +85,7 @@ namespace ts3::system
 	}
 
 
-	FileAssetDirectory::FileAssetDirectory( Handle<FileAssetLoader> pAssetLoader )
+	FileAssetDirectory::FileAssetDirectory( FileAssetLoaderHandle pAssetLoader )
 	: NativeObject( pAssetLoader )
 	, mFileManager( pAssetLoader->mFileManager )
 	{}
@@ -100,7 +100,7 @@ namespace ts3::system
 
 	AssetHandle FileAssetDirectory::_nativeOpenAsset( std::string pAssetName, Bitmask<EAssetOpenFlags> pFlags )
 	{
-		Handle<FileAsset> asset = nullptr;
+		SysHandle<FileAsset> asset = nullptr;
 
 		FSUtilityAPI::FilePathInfo assetPathInfo;
 		assetPathInfo.directory = mNativeData.combinedDirPath;

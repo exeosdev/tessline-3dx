@@ -78,13 +78,13 @@ namespace ts3::system
 		virtual EColorFormat _nativeQueryDefaultSystemColorFormat() const override final;
 
 		// Returns a handle to an existing adapter with a specified UUID (DeviceKey).
-		Handle<Win32DisplayAdapter> _findAdapterByUUID( const std::string & pUUID );
+		SysHandle<Win32DisplayAdapter> _findAdapterByUUID( const std::string & pUUID );
 
 		// Returns a handle to an existing output of a specified adapter with a given output name (DeviceID);
-		Handle<Win32DisplayOutput> _findAdapterOutputForDisplayDeviceName( DisplayAdapter & pAdapter, const char * pDeviceName );
+		SysHandle<Win32DisplayOutput> _findAdapterOutputForDisplayDeviceName( DisplayAdapter & pAdapter, const char * pDeviceName );
 
 		// Returns a handle to an existing output of an existing adapter with a given output name (DeviceID);
-		Handle<Win32DisplayOutput> _findAnyOutputForDisplayDeviceName( const char * pDeviceName );
+		SysHandle<Win32DisplayOutput> _findAnyOutputForDisplayDeviceName( const char * pDeviceName );
 
 		//
 		static BOOL CALLBACK _win32MonitorEnumProc( HMONITOR pMonitorHandle, HDC pHDC, LPRECT pMonitorRect, LPARAM pUserParam );
