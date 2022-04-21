@@ -34,7 +34,7 @@ namespace gpuapi
 
 		virtual bool isNull() const override;
 
-		static Handle<GLRenderBuffer> create( GLGPUDevice & pGLGPUDevice, const RenderBufferCreateInfo & pCreateInfo );
+		static GpaHandle<GLRenderBuffer> create( GLGPUDevice & pGLGPUDevice, const RenderBufferCreateInfo & pCreateInfo );
 	};
 
 } /* namespace ts3 */

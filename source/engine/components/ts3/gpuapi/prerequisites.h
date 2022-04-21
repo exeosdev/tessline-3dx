@@ -4,7 +4,7 @@
 #ifndef __TS3_GPUAPI_PREREQUISITES_H__
 #define __TS3_GPUAPI_PREREQUISITES_H__
 
-#include <ts3/core/prerequisites.h>
+#include <ts3/core/exception.h>
 #include <ts3/core/coreEngineState.h>
 #include <ts3/core/graphicsTypes.h>
 #include <ts3/core/mathImports.h>

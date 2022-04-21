@@ -36,7 +36,7 @@ namespace gpuapi
 	};
 
 	template <typename TpClass, typename... TpArgs>
-	inline Handle<TpClass> createGPUAPIObject( TpArgs && ...pArgs )
+	inline GpaHandle<TpClass> createGPUAPIObject( TpArgs && ...pArgs )
 	{
 		return createDynamicInterfaceObject<TpClass>( std::forward<TpArgs>( pArgs )... );
 	}

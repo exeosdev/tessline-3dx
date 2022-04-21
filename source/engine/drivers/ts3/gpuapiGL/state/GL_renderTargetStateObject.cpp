@@ -23,8 +23,8 @@ namespace gpuapi
 
 	GLRenderTargetStateObject::~GLRenderTargetStateObject() = default;
 
-	Handle<GLRenderTargetStateObject> GLRenderTargetStateObject::create( GLGPUDevice & pGPUDevice,
-	                                                                     const RenderTargetStateObjectCreateInfo & pCreateInfo )
+	GpaHandle<GLRenderTargetStateObject> GLRenderTargetStateObject::create( GLGPUDevice & pGPUDevice,
+	                                                                        const RenderTargetStateObjectCreateInfo & pCreateInfo )
 	{
 		RenderTargetLayout rtLayout;
 		RenderTargetResourceBinding rtResourceBinding;

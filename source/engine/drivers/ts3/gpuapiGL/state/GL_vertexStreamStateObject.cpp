@@ -13,8 +13,8 @@ namespace gpuapi
     , mGLVertexDataSourceBinding( std::move( pGLVertexDataSourceBinding ) )
 	{}
 
-	Handle<GLVertexStreamStateObject> GLVertexStreamStateObject::create( GLGPUDevice & pGPUDevice,
-	                                                                     const VertexStreamStateObjectCreateInfo & pCreateInfo )
+	GpaHandle<GLVertexStreamStateObject> GLVertexStreamStateObject::create( GLGPUDevice & pGPUDevice,
+	                                                                        const VertexStreamStateObjectCreateInfo & pCreateInfo )
 	{
 		CommonSSOState commonSSOState;
 		if( !createCommonSSOState( pCreateInfo, commonSSOState ) )

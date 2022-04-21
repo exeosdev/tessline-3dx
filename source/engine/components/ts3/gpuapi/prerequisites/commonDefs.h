@@ -13,7 +13,7 @@ namespace ts3::gpuapi
 	using gpu_resource_id_t = uint64;
 
 	template <typename TpClass>
-	using Handle = SharedHandle<TpClass>;
+	using GpaHandle = SharedHandle<TpClass>;
 
 	enum SystemMetrics : uint32
 	{
