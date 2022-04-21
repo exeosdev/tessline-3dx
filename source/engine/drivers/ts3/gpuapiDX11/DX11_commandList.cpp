@@ -15,9 +15,7 @@
 #include <ts3/gpuapi/resources/shader.h>
 #include <ts3/gpuapi/resources/texture.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DX11CommandList::DX11CommandList( DX11CommandSystem & pDX11CommandSystem, ECommandListType pListType, ComPtr<ID3D11DeviceContext1> pD3D11DeviceContext1 )
@@ -330,5 +328,4 @@ namespace gpuapi
 		return d3d11Query;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

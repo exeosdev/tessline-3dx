@@ -269,5 +269,5 @@ namespace ts3
 		return textureCreateInfo;
 	}
 
-}
+} // namespace ts3
 

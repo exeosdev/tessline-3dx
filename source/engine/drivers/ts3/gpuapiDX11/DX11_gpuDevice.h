@@ -9,9 +9,7 @@
 #include <ts3/gpuapiDX/DX_gpuDevice.h>
 #include <ts3/gpuapi/state/graphicsPipelineStateDescriptorCache.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct DX11GPUDeviceCreateInfo : public GPUDeviceCreateInfo
@@ -69,7 +67,6 @@ namespace gpuapi
 		DX11GraphicsPipelineStateDescriptorCache _descriptorCache;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX11_GPU_DEVICE_H__

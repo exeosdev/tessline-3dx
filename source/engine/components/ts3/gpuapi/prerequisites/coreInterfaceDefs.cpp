@@ -2,9 +2,7 @@
 #include "../gpuDriver.h"
 #include "../gpuDevice.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GPUDriverChildObject::GPUDriverChildObject( GPUDriver & pGPUDriver )
@@ -21,5 +19,4 @@ namespace gpuapi
 
 	GPUDeviceChildObject::~GPUDeviceChildObject() = default;
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

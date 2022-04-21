@@ -7,9 +7,7 @@
 #include "../DX12_prerequisites.h"
 #include <ts3/gpuapiDX/system/DX_presentationLayer.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( DX12ScreenPresentationLayer );
@@ -60,7 +58,6 @@ namespace gpuapi
 		UINT _rtvDescriptorSize;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX12_PRESENTATION_LAYER_H__

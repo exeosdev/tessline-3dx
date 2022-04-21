@@ -78,6 +78,6 @@ namespace ts3
 		GPUBufferMap _gpuBufferMap;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_HARDWARE_BUFFER_MANAGER_H__

@@ -10,9 +10,7 @@
 #  define GLAPIENTRY
 #endif
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	enum class GLDebugOutputVersion : enum_default_value_t
@@ -139,7 +137,6 @@ namespace gpuapi
 
 #endif
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_DEBUG_OUTPUT_H__

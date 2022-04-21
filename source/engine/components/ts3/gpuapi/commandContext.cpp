@@ -4,9 +4,7 @@
 #include "commandSystem.h"
 #include "gpuDevice.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	const Bitmask<ECommandListFlags> CommandContext::sListFlagsCommon = E_COMMAND_LIST_FLAG_COMMAND_CLASS_COMMON_BIT;
@@ -364,5 +362,4 @@ namespace gpuapi
 		return mCommandList->drawDirectNonIndexedInstanced( pVerticesNumPerInstance, pInstancesNum, pVerticesOffset );
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

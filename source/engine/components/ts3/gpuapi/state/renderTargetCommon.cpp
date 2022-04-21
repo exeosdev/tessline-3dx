@@ -5,9 +5,7 @@
 #include <ts3/gpuapi/state/renderTargetStateObject.h>
 #include <ts3/stdext/memory.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultBGRA8 =
@@ -299,5 +297,4 @@ namespace gpuapi
 		return true;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

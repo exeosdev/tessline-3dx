@@ -6,9 +6,7 @@
 
 #include "DX_prerequisites.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct TextureDimensions;
@@ -40,7 +38,6 @@ namespace gpuapi
 
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX_CORE_LAYER_H__

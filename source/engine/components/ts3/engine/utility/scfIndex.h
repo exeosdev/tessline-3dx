@@ -55,6 +55,6 @@ namespace ts3
 		std::unordered_map<std::string, SCFEntry *> _entryByUIDMap;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_SCF_INDEX_H__

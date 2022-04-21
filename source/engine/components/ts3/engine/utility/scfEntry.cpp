@@ -405,4 +405,4 @@ namespace ts3
 		return currentEntryPtr;
 	}
 
-}
+} // namespace ts3

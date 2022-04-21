@@ -3,9 +3,7 @@
 #include "texture.h"
 #include <set>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	static bool checkColorRenderBufferFormat( ETextureFormat pFormat );
@@ -94,5 +92,4 @@ namespace gpuapi
 		return sValidDepthStencilFormats.count( pFormat ) != 0;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

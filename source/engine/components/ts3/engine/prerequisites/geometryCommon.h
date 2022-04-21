@@ -13,6 +13,6 @@ namespace ts3
 		IndexData = static_cast<enum_default_value_t>( gpuapi::EGPUBufferTarget::IndexBuffer ),
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_GEOMETRY_COMMON_H__

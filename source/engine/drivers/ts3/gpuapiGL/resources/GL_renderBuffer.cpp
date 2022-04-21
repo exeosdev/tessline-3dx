@@ -3,9 +3,7 @@
 #include <ts3/gpuapiGL/GL_coreAPIProxy.h>
 #include <ts3/gpuapiGL/GL_gpuDevice.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLRenderBuffer::GLRenderBuffer( GLGPUDevice & pGLGPUDevice,
@@ -58,5 +56,4 @@ namespace gpuapi
 		return renderBuffer;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

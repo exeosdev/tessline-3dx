@@ -2,9 +2,7 @@
 #include "../GL_prerequisites.h"
 #include "../GL_coreAPIProxy.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 #if( TS3_SYSTEM_GL_PLATFORM_TYPE == TS3_SYSTEM_GL_PLATFORM_TYPE_CORE )
@@ -461,5 +459,4 @@ namespace gpuapi
 
 #endif
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

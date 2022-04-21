@@ -8,9 +8,7 @@
 #include <ts3/gpuapi/state/pipelineStateObject.h>
 #include <ts3/gpuapiGL/objects/GL_shaderPipelineObject.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3GLDeclareOpenGLObjectHandle( GLShaderPipelineObject );
@@ -43,7 +41,6 @@ namespace gpuapi
 		static GLVertexArrayObjectHandle createVertexArrayObjectFormatOnly( const GLVertexInputFormatStateDescriptor & pVertexInputFormatDescriptor );
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_PIPELINE_STATE_OBJECT_H__

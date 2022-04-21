@@ -6,9 +6,7 @@
 
 #include "shaderCommon.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	class ShaderInterface;
@@ -25,7 +23,6 @@ namespace gpuapi
 		virtual ~Shader();
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_SHADER_H__

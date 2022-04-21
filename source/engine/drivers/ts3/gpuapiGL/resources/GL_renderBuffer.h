@@ -8,9 +8,7 @@
 #include <ts3/gpuapiGL/objects/GL_renderbufferObject.h>
 #include <ts3/gpuapiGL/objects/GL_textureObject.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	class GLRenderBuffer : public RenderBuffer
@@ -37,7 +35,6 @@ namespace gpuapi
 		static GpaHandle<GLRenderBuffer> create( GLGPUDevice & pGLGPUDevice, const RenderBufferCreateInfo & pCreateInfo );
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_RENDER_TARGET_BUFFER_H__

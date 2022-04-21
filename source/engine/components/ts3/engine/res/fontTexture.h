@@ -96,6 +96,6 @@ namespace ts3
 //		PreloadedSubDataArray _preloadedSubData;
 //	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_RES_FONT_TEXTURE_H__

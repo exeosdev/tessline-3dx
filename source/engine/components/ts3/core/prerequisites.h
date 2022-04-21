@@ -54,6 +54,6 @@ namespace ts3
 	/// @brief A dedicated instance of InitEmptyTag
 	inline constexpr InitEmptyTag CX_INIT_EMPTY {};
 
-}
+} // namespace ts3
 
 #endif // __TS3_CORE_PREREQUISITES_H__

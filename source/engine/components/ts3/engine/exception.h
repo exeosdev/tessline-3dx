@@ -32,6 +32,6 @@ namespace ts3
 			ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_ENGINE_SUBMODULE, ts3ExcCodeIID( 0x71 ) ),
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_EXCEPTION_H__

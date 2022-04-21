@@ -70,6 +70,6 @@ namespace ts3
 		uint32 indexSize;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_COMMON_GPU_DEFS_H__

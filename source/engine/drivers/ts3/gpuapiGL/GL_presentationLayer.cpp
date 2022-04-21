@@ -3,9 +3,7 @@
 #include "GL_commandList.h"
 #include "GL_gpuDevice.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	static system::OpenGLDisplaySurfaceHandle createSysGLSurface( system::OpenGLSystemDriverHandle pSysGLDriver,
@@ -117,5 +115,4 @@ namespace gpuapi
 		return mSysGLDisplaySurface->queryRenderAreaSize();
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

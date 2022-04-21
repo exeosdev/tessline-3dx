@@ -44,6 +44,6 @@ namespace ts3
 		uint32 subFoldersNum;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_SCF_COMMON_H__

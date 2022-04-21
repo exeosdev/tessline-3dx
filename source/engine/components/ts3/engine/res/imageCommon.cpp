@@ -43,4 +43,4 @@ namespace ts3
 		std::swap( sizeInBytes, pOther.sizeInBytes );
 	}
 
-}
+} // namespace ts3

@@ -161,4 +161,4 @@ namespace ts3
 		return true;
 	}
 
-}
+} // namespace ts3

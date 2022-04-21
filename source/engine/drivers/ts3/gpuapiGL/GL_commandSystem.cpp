@@ -5,9 +5,7 @@
 #include <ts3/gpuapi/commandContext.h>
 #include <mutex>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	static void initializeOpenGLAPI()
@@ -175,5 +173,4 @@ namespace gpuapi
 		}
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

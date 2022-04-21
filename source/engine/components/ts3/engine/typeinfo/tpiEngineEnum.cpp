@@ -13,4 +13,4 @@ namespace ts3
 		ts3TypeInfoEnumRegisterClassConstant( ESCFEntryType::VirtualFolder );
 	}
 
-}
+} // namespace ts3

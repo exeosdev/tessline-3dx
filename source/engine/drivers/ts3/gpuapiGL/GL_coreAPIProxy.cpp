@@ -7,9 +7,7 @@
 #include <ts3/stdext/stlHelperAlgo.h>
 #include <unordered_map>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLenum GLCoreAPIProxy::chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags )
@@ -721,5 +719,4 @@ namespace gpuapi
 		return "Unknown";
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

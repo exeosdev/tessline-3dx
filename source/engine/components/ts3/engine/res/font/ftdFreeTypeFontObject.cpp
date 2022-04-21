@@ -175,4 +175,4 @@ namespace ts3
 		return std::make_unique<FreeTypeFontObject>( ftLibrary, std::move( ftFontData ) );
 	}
 
-}
+} // namespace ts3

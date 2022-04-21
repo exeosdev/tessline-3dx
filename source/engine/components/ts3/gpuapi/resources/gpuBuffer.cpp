@@ -1,9 +1,7 @@
 
 #include "gpuBuffer.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	EGPUBufferTarget getBufferTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pBufferResourceFlags );
@@ -106,5 +104,4 @@ namespace gpuapi
 		return EGPUBufferTarget::Unknown;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

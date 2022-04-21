@@ -27,16 +27,13 @@
 #include "prerequisites/VK_constantsMap.h"
 #include "prerequisites/VK_factoryUtils.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( VKGPUDevice );
 	ts3DeclareClassHandle( VKGPUDriver );
 	ts3DeclareClassHandle( VKPresentationLayer );
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_VKCOMMON_PREREQUISITES_H__

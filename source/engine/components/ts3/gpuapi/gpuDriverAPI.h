@@ -7,9 +7,7 @@
 #include "prerequisites.h"
 #include <functional>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	struct GPUDriverCreateInfo;
@@ -34,7 +32,6 @@ namespace gpuapi
 		virtual PresentationLayerHandle createScreenPresentationLayer( GPUDevice & pDevice, const PresentationLayerCreateInfo & pCreateInfo ) = 0;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GPU_DRIVER_API_H__

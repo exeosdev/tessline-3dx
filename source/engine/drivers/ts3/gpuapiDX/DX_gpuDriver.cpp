@@ -2,9 +2,7 @@
 
 #include "DX_gpuDriver.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DXGPUDriver::DXGPUDriver( system::SysContextHandle pSysContext ) noexcept
@@ -13,5 +11,4 @@ namespace gpuapi
 
 	DXGPUDriver::~DXGPUDriver() noexcept = default;
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

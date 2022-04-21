@@ -183,4 +183,4 @@ namespace ts3
 		}
 	}
 
-}
+} // namespace ts3

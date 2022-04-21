@@ -4,9 +4,7 @@
 #include "DX12_gpuDevice.h"
 #include <ts3/gpuapiDX12/system/DX12_presentationLayer.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GPUDriverHandle DX12GPUDriverInterface::createDriver( const GPUDriverCreateInfo & pCreateInfo )
@@ -35,5 +33,4 @@ namespace gpuapi
 		return DX12ScreenPresentationLayer::create( *deviceDX12, dx12CreateInfo );
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

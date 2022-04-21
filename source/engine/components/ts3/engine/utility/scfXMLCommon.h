@@ -140,6 +140,6 @@ namespace ts3
 		XMLTree _xmlTree;
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_SCF_XML_COMMON_H__

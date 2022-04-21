@@ -7,9 +7,7 @@
 #include "../GL_prerequisites.h"
 #include <ts3/gpuapi/resources/textureCommon.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	class GLRenderbufferObject;
@@ -52,7 +50,6 @@ namespace gpuapi
 		GLenum checkActiveBindTarget( GLenum pBindTarget ) const;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_FRAMEBUFFER_OBJECT_H__

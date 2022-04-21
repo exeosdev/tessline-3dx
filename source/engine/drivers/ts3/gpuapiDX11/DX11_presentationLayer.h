@@ -7,9 +7,7 @@
 #include "DX11_prerequisites.h"
 #include <ts3/gpuapiDX/DX_presentationLayer.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( DX11ScreenPresentationLayer );
@@ -48,7 +46,6 @@ namespace gpuapi
 		ComPtr<ID3D11Texture2D> _backBufferDSTexture;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX11_PRESENTATION_LAYER_H__

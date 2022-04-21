@@ -60,6 +60,6 @@ namespace ts3
 
 	};
 
-}
+} // namespace ts3
 
 #endif // __TS3_ENGINE_CAMERA_CAMERA_COMMON_DEFS_H__

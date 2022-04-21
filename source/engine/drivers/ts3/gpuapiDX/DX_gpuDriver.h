@@ -7,9 +7,7 @@
 #include "DX_prerequisites.h"
 #include <ts3/gpuapi/gpuDriver.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	class TS3GX_DXCOMMON_CLASS DXGPUDriver : public GPUDriver
@@ -19,7 +17,6 @@ namespace gpuapi
 		virtual ~DXGPUDriver() noexcept;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DXCOMMON_GPU_DRIVER__

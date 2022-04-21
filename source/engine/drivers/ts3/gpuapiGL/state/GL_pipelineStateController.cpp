@@ -5,9 +5,7 @@
 #include "../state/GL_pipelineStateObject.h"
 #include "../state/GL_vertexStreamStateObject.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLGraphicsPipelineStateController::GLGraphicsPipelineStateController( GLGraphicsPipelineStateDescriptorCache & pDescriptorCache )
@@ -269,5 +267,4 @@ namespace gpuapi
 	#endif
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

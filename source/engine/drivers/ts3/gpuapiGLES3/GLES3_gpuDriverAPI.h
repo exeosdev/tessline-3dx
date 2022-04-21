@@ -7,9 +7,7 @@
 #include "GLES3_prerequisites.h"
 #include <ts3/gpuapi/gpuDriverAPI.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	class GLES3GPUDriverInterface : public GPUDriverInterface
@@ -19,7 +17,6 @@ namespace gpuapi
 		virtual PresentationLayerHandle createScreenPresentationLayer( GPUDevice & pDevice, const PresentationLayerCreateInfo & pCreateInfo ) override final;
 	};
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLES3_GRAPHICS_DRIVER_API_H__

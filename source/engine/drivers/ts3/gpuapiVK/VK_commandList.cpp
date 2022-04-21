@@ -6,9 +6,7 @@
 #include <ts3/gpuapi/resources/shader.h>
 #include <ts3/gpuapi/resources/texture.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	VKCommandList::VKCommandList( VKCommandSystem & pVKCommandSystem, ECommandListType pListType )
@@ -86,5 +84,4 @@ namespace gpuapi
 	{
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

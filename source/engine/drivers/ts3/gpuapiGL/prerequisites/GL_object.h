@@ -4,9 +4,7 @@
 #ifndef __TS3DRIVER_GPUAPI_GLCOMMON_OBJECT_H__
 #define __TS3DRIVER_GPUAPI_GLCOMMON_OBJECT_H__
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	constexpr GLuint cxGLObjectHandleInvalid = ts3::Limits<GLuint>::maxValue;
@@ -80,7 +78,6 @@ namespace gpuapi
 	class pObjectClass; \
 	using pObjectClass##Handle = GLObjectHandle<pObjectClass>
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_OBJECT_H__

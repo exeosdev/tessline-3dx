@@ -6,9 +6,7 @@
 #include <ts3/gpuapiDX11/resources/DX11_shader.h>
 #include <ts3/gpuapi/resources/shader.h>
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	DX11GraphicsPipelineStateController::DX11GraphicsPipelineStateController( DX11CommandList & pDX11CommandList,
@@ -142,5 +140,4 @@ namespace gpuapi
 		return _stateUpdateMask != 0;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi

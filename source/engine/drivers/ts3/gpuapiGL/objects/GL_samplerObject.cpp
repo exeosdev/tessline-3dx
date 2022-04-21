@@ -1,9 +1,7 @@
 
 #include "GL_samplerObject.h"
 
-namespace ts3
-{
-namespace gpuapi
+namespace ts3::gpuapi
 {
 
 	GLSamplerObject::GLSamplerObject( GLuint pHandle )
@@ -90,5 +88,4 @@ namespace gpuapi
 		return true;
 	}
 
-} /* namespace ts3 */
-} /* namespace gpuapi */
+} // namespace ts3::gpuapi
