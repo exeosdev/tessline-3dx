@@ -120,7 +120,7 @@ namespace gpuapi
 
 		DX11VertexDataSourceBinding() = default;
 
-		DX11VertexDataSourceBinding( const tag_init_empty_t & )
+		DX11VertexDataSourceBinding( const InitEmptyTag & )
 		: vertexBufferActiveBindingsNum( 0 )
 		{ }
 

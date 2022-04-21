@@ -528,8 +528,8 @@ int main( int pArgc, const char ** pArgv )
                 gxDriverState.cmdContext->setViewport( vpDescTexture );
                 gxDriverState.cmdContext->setColorBufferClearValue(
                         ts3::math::RGBAColorU8 { 0x8F, 0x0F, 0x1F, 0xFF } );
-                gxDriverState.cmdContext->setColorBufferClearValue(
-                        ts3::math::RGBAColorU8 { 0xFF, 0xFF, 0xFF, 0xFF } );
+                //gxDriverState.cmdContext->setColorBufferClearValue(
+                //        ts3::math::RGBAColorU8 { 0xFF, 0xFF, 0xFF, 0xFF } );
                 gxDriverState.cmdContext->clearRenderTarget( ts3::gpuapi::E_RENDER_TARGET_ATTACHMENT_FLAGS_DEFAULT_C0DS );
 
                 ts3::gpuapi::GPUBufferDataUploadDesc cb0DataUploadDesc;
@@ -621,7 +621,7 @@ void initializeGraphicsDriver( SysContextHandle pSysContext, GraphicsDriverState
     presentationLayerCreateInfo.screenRect.size.x = 1024;
     presentationLayerCreateInfo.screenRect.size.y = 600;
     presentationLayerCreateInfo.displayConfigFlags = 0;
-    // presentationLayerCreateInfo.displayConfigFlags = E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT;
+    presentationLayerCreateInfo.displayConfigFlags = E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT;
     pGxDriverState.presentationLayer = pGxDriverState.driverInterface->createScreenPresentationLayer( *( pGxDriverState.device ), presentationLayerCreateInfo );
 
     pGxDriverState.device->setPresentationLayer( pGxDriverState.presentationLayer );

@@ -21,7 +21,7 @@ namespace gpuapi
 		ShaderBindingInfo bindingInfo;
 		if( !validateGraphicsShaderBindingDesc( pBindingDesc, bindingInfo ) )
 		{
-			return cvInitEmpty;
+			return CX_INIT_EMPTY;
 		}
 
 		GraphicsShaderBinding graphicsShaderBinding;

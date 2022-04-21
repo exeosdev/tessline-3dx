@@ -18,10 +18,10 @@ namespace stdx
 	{
 
 		/// @brief Represents invalid Variant type index. Usually indicates, that incompatible type was used as a target.
-		constexpr variant_index_t invalidVariantIndex = 0;
+		constexpr variant_index_t CX_INVALID_VARIANT_INDEX = 0;
 
 		/// @brief Shared instance of `VariantTypeConvTag`. Use it to force desired overload.
-		inline constexpr VariantTypeConvTag variantTypeConv{};
+		inline constexpr VariantTypeConvTag CX_VARIANT_TYPE_CONV{};
 
 	}
 
@@ -176,33 +176,33 @@ namespace stdx
 		template <typename... _Args>
 		static variant_index_t construct( variant_index_t, void *, _Args && ... )
 		{
-			return def::invalidVariantIndex;
+			return def::CX_INVALID_VARIANT_INDEX;
 		}
 
 		template <typename _Value>
 		static variant_index_t constructConv( variant_index_t, void *, _Value && )
 		{
-			return def::invalidVariantIndex;
+			return def::CX_INVALID_VARIANT_INDEX;
 		}
 
 		static variant_index_t constructDefault( void * )
 		{
-			return def::invalidVariantIndex;
+			return def::CX_INVALID_VARIANT_INDEX;
 		}
 
 		static variant_index_t copy( variant_index_t, void *, void * )
 		{
-			return def::invalidVariantIndex;
+			return def::CX_INVALID_VARIANT_INDEX;
 		}
 
 		static variant_index_t move( variant_index_t, void *, void * )
 		{
-			return def::invalidVariantIndex;
+			return def::CX_INVALID_VARIANT_INDEX;
 		}
 
 		static variant_index_t destroy( variant_index_t, void * )
 		{
-			return def::invalidVariantIndex;
+			return def::CX_INVALID_VARIANT_INDEX;
 		}
 
 		static bool validateType( variant_index_t )
@@ -377,7 +377,7 @@ namespace stdx
 		void _release()
 		{
 			VariantProxy<_Types...>::destroy( _typeIndex, &( _storage ) );
-			_typeIndex = def::invalidVariantIndex;
+			_typeIndex = def::CX_INVALID_VARIANT_INDEX;
 		}
 
 	private:

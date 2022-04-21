@@ -133,7 +133,7 @@ namespace gpuapi
 
 		VertexDataSourceBinding() = default;
 
-		VertexDataSourceBinding( const tag_init_empty_t & )
+		VertexDataSourceBinding( const InitEmptyTag & )
 		: vertexBufferActiveBindingsNum( 0 )
 		{}
 

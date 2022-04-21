@@ -200,7 +200,7 @@ namespace gpuapi
 
 		ShaderInputSignature() = default;
 
-		ShaderInputSignature( const tag_init_empty_t & )
+		ShaderInputSignature( const InitEmptyTag & )
         : dwordSize( 0 )
 		{}
 
