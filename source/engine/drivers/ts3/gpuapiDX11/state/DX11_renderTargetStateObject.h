@@ -35,8 +35,8 @@ namespace gpuapi
 
 		virtual ~DX11RenderTargetStateObject();
 
-		static Handle<DX11RenderTargetStateObject> create( DX11GPUDevice & pGPUDevice,
-		                                                   const RenderTargetStateObjectCreateInfo & pCreateInfo );
+		static GpaHandle<DX11RenderTargetStateObject> create( DX11GPUDevice & pGPUDevice,
+		                                                      const RenderTargetStateObjectCreateInfo & pCreateInfo );
 
 	private:
 		static ComPtr<ID3D11RenderTargetView> createRTVForRenderBuffer( DX11RenderBuffer & pDX11RenderBuffer,
