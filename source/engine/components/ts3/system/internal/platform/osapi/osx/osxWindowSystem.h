@@ -34,8 +34,6 @@ namespace ts3::system
 
 		void osxCreateWindowDefaultView( OSXWindowNativeData & pWindowNativeData );
 
-		void osxCreateEventListener( OSXWindowNativeData & pWindowNativeData );
-
 		void osxSetFrameTitle( NSWindow * pNSWindow, const std::string & pTitle );
 
 		void osxUpdateFrameGeometry( NSWindow * pNSWindow, const FrameGeometry & pFrameGeometry, Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags );

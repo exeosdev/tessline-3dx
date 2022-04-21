@@ -4,16 +4,15 @@ set( TS3SAMPLES_LINK_INPUT
         )
 
 set( TS3_SAMPLE_LIST
-        #"mathTest"
         "gpuapi01"
         "sysTest"
         "test1"
         )
 
+if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
+    set( TS3_SAMPLE_LIST "${TS3_SAMPLE_LIST}" "appleCocoaTest" )
+endif()
+
 foreach( module ${TS3_SAMPLE_LIST} )
     add_subdirectory( "${module}" )
 endforeach()
-
-if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
-    add_subdirectory( "appleCocoaTest" )
-endif()

@@ -32,8 +32,6 @@ namespace ts3::system
 		struct NativeEventType : public MSG
 		{};
 
-		using Win32NativeEvent = NativeEventType;
-
 		TS3_SYSTEM_API_NODISCARD EventSource * win32FindEventSourceByHWND( Win32EventController & pEventController, HWND pHWND );
 
 		bool win32TranslateEvent( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );

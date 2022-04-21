@@ -115,8 +115,6 @@ namespace ts3::system
 					[nsWindow setTabbingMode:NSWindowTabbingModeDisallowed];
 				}
 
-				[nsWindow setOneShot:NO];
-
 				pWindowNativeData.nsWindow = nsWindow;
 				pWindowNativeData.nsTargetScreen = pTargetScreen;
 			}
@@ -143,32 +141,6 @@ namespace ts3::system
 			{
 				NSOSXWindowView * nsWindowView = [[NSOSXWindowView alloc] initForWindow:nsWindow];
 				pWindowNativeData.nsView = nsWindowView;
-			}
-			@catch( NSException * pException )
-			{
-				const auto message = [[pException reason] UTF8String];
-				ts3DebugInterrupt();
-			}
-		}
-		}
-
-		void osxCreateEventListener( OSXWindowNativeData & pWindowNativeData )
-		{
-		@autoreleasepool
-		{
-			if( ![( id )pWindowNativeData.nsWindow isKindOfClass:[NSOSXWindow class]] )
-			{
-				return;
-			}
-
-			auto * nsWindow = ( NSOSXWindow * )( pWindowNativeData.nsWindow );
-
-			@try
-			{
-				auto * nsEventListener = [[NSOSXEventListener alloc] initForNSWindow:nsWindow];
-				[nsEventListener bind];
-
-				pWindowNativeData.nsEventListener = nsEventListener;
 			}
 			@catch( NSException * pException )
 			{

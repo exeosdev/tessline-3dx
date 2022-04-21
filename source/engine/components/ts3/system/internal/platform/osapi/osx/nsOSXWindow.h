@@ -2,7 +2,7 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_NS_INTERNAL_NS_WINDOW_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_NS_INTERNAL_NS_WINDOW_H__
 
-#include "osxCommon.h"
+#include "nsCommon.h"
 #include <ts3/system/windowCommon.h>
 #import <AppKit/NSWindow.h>
 

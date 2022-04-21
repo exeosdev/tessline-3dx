@@ -128,7 +128,6 @@ namespace ts3::system
 		                                          const NativeEventType & pNativeEvent,
 		                                          EventObject & pOutEvent );
 
-
 		/// @brief Helper function for translating and dispatching a native event.
 		inline bool nativeEventDispatch( EventController & pEventController, const NativeEventType & pNativeEvent )
 		{

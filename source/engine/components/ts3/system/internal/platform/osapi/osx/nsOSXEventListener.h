@@ -2,8 +2,9 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_OSX_NS_INTERNAL_EVENT_LISTENER_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_OSX_NS_INTERNAL_EVENT_LISTENER_H__
 
-#include "osxCommon.h"
+#include "nsCommon.h"
 #include <ts3/system/eventCommon.h>
+
 #import <AppKit/NSWindow.h>
 
 /// @brief
@@ -11,11 +12,12 @@
 {
 	@public NSWindow * mNSWindow;
 	@public NSView * mNSView;
+	@public OSXEventController * mEventController;
 }
 
 -( NSOSXEventListener * ) initForNSWindow:( NSWindow * ) pNSWindow;
 
--( void ) bind;
+-( void ) bind:( OSXEventController * ) pEventController;
 -( void ) unbind;
 
 -( void ) keyDown:( NSEvent * ) pEvent;

@@ -1,6 +1,7 @@
 
 #include "nsOSXEventListener.h"
 #include "osxEventCore.h"
+#include <ts3/system/internal/eventCorePrivate.h>
 
 @implementation NSOSXEventListener
 
@@ -12,11 +13,13 @@
 	return self;
 }
 
--( void ) bind
+-( void ) bind:( OSXEventController * ) pEventController
 {
 @autoreleasepool
 {
 	ts3DebugAssert( mNSWindow != nil );
+
+	mEventController = pEventController;
 
 	if( [mNSWindow delegate] != nil )
 	{
@@ -88,6 +91,8 @@
 	{
 		[mNSView setNextResponder:nil];
 	}
+
+	mEventController = nullptr;
 }
 }
 
@@ -120,6 +125,7 @@
 
 -( void ) keyDown:( NSEvent * ) pEvent
 {
+	[super keyDown:pEvent];
 }
 
 -( void ) keyUp:( NSEvent * ) pEvent
@@ -246,6 +252,7 @@
 
 -( void ) windowWillClose:( NSNotification * ) pNotification
 {
+	nativeEventDispatch( *mEventController, platform::NativeEventType( platform::NSAppEventIDWindowWillClose, pNotification ) );
 }
 
 -( BOOL ) windowShouldClose:( id ) pSender

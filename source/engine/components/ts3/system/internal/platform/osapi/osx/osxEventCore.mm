@@ -2,6 +2,7 @@
 #include "osxEventCore.h"
 #include "nsOSXApplicationProxy.h"
 #include "nsOSXEventListener.h"
+#include "nsOSXWindow.h"
 #include <ts3/system/internal/eventCorePrivate.h>
 
 namespace ts3::system
@@ -17,14 +18,14 @@ namespace ts3::system
 	{
 	@autoreleasepool
 	{
-		auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::OSXEventSourceNativeData>();
+		auto * eventSourceNativeData =
+			pEventSource.getEventSourceNativeDataAs<platform::OSXEventSourceNativeData>();
+
 		auto * nsEventListener = ( NSOSXEventListener * )eventSourceNativeData->nsEventListener;
 
 		eventSourceNativeData->eventController = this;
 
-		// nsEventListener->mEventSourceNativeData = eventSourceNativeData;
-
-		[nsEventListener bind];
+		[nsEventListener bind:this];
 	}
 	}
 
@@ -36,13 +37,15 @@ namespace ts3::system
 	{
 		for( NSEvent * nsEvent = nullptr; ; )
 		{
-			nsEvent = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES];
+			nsEvent = [NSApp nextEventMatchingMask:NSEventMaskAny
+			                 untilDate:[NSDate distantPast]
+			                 inMode:NSDefaultRunLoopMode
+			                 dequeue:YES];
+
 			if( nsEvent == nil )
 			{
 				return false;
 			}
-
-			// DISPATCH to controller
 
 			[NSApp sendEvent:nsEvent];
 		}
@@ -54,16 +57,15 @@ namespace ts3::system
 	{
 		for( NSEvent * nsEvent = nullptr; ; )
 		{
-			nsEvent = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES];
+			nsEvent = [NSApp nextEventMatchingMask:NSEventMaskAny
+			                 untilDate:[NSDate distantFuture]
+			                 inMode:NSDefaultRunLoopMode
+			                 dequeue:YES];
+
 			if( nsEvent == nil )
 			{
 				return false;
 			}
-
-			platform::NativeEventType osxNativeEvent;
-			osxNativeEvent.nsEvent = nsEvent;
-
-			platform::nativeEventDispatch( *this, osxNativeEvent );
 
 			[NSApp sendEvent:nsEvent];
 		}
@@ -76,16 +78,33 @@ namespace ts3::system
 
 		bool nativeEventTranslate( EventController & pEventController, const NativeEventType & pNativeEvent, EventObject & pOutEvent )
 		{
-			return false;
+			auto * osxEventController = pEventController.queryInterface<OSXEventController>();
+			return osxTranslateEvent( *osxEventController, pNativeEvent, pOutEvent );
 		}
 
-		void osxInitializeEventListener( OSXEventSourceNativeData & pEventSourceNativeData )
+		EventSource * osxFindEventSourceByNSWindow( OSXEventController & pEventController, NSWindow * pNSWindow )
+		{
+			auto * eventSource = pEventController.findEventSource( [pNSWindow]( const EventSource & pEventSource ) -> bool {
+				const auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::OSXEventSourceNativeData>();
+				return eventSourceNativeData->nsWindow == pNSWindow;
+			});
+			return eventSource;
+		}
+
+		void osxCreateEventListener( OSXEventSourceNativeData & pEventSourceNativeData )
 		{
 		@autoreleasepool
 		{
+			if( ![( id )pEventSourceNativeData.nsWindow isKindOfClass:[NSOSXWindow class]] )
+			{
+				return;
+			}
+
+			auto * nsWindow = ( NSOSXWindow * )( pEventSourceNativeData.nsWindow );
+
 			@try
 			{
-				NSOSXEventListener * nsEventListener = [[NSOSXEventListener alloc] init];
+				auto * nsEventListener = [[NSOSXEventListener alloc] initForNSWindow:nsWindow];
 				pEventSourceNativeData.nsEventListener = nsEventListener;
 			}
 			@catch( NSException * pException )
@@ -94,6 +113,22 @@ namespace ts3::system
 				ts3DebugInterrupt();
 			}
 		}
+		}
+
+		bool osxTranslateEvent( OSXEventController & pEventController, const NativeEventType & pNativeEvent, EventObject & pOutEvent )
+		{
+			auto * eventSource = osxFindEventSourceByNSWindow( pEventController, pNativeEvent.nsSourceWindow );
+
+			if( pNativeEvent.nsAppEventID == NSAppEventIDWindowWillClose )
+			{
+				auto & eWindowUpdateDestroy = pOutEvent.eWindowUpdateDestroy;
+				eWindowUpdateDestroy.eventCode = E_EVENT_CODE_WINDOW_UPDATE_DESTROY;
+				eWindowUpdateDestroy.eventSource = eventSource;
+
+				return true;
+			}
+
+			return false;
 		}
 
 	}

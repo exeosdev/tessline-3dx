@@ -198,7 +198,7 @@ namespace ts3::system
 				// TODO: Some validation might be useful to check if this callback is used correctly.
 				auto * win32EventSourceState = reinterpret_cast<Win32EventSourceState *>( windowUserData );
 
-				Win32NativeEvent nativeEvent;
+				NativeEventType nativeEvent;
 				nativeEvent.hwnd = pHWND;
 				nativeEvent.message = pMessage;
 				nativeEvent.wParam = pWparam;

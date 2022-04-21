@@ -86,7 +86,6 @@ namespace ts3::system
 		bool nativeEventTranslate( EventController & pEventController, const NativeEventType & pNativeEvent, EventObject & pOutEvent )
 		{
 			auto * x11EventController = pEventController.queryInterface<X11EventController>();
-
 			return x11TranslateEvent( *x11EventController, pNativeEvent.xEvent, pOutEvent );
 		}
 
@@ -145,8 +144,6 @@ namespace ts3::system
 		bool x11TranslateEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent )
 		{
 			auto * eventSource = x11FindEventSourceByXWindow( pEventController, pXEvent.xany.window );
-
-			// printf("XEvent: %s\n", translateEventTypeName(pXEvent.type));
 
 			if( ( pXEvent.type >= KeyPress ) && ( pXEvent.type <= MotionNotify ) )
 			{

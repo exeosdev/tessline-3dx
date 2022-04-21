@@ -5,6 +5,8 @@
 #include <ts3/system/prerequisites.h>
 #include <ts3/stdext/bitmaskAtomic.h>
 #include <objc/objc.h>
+
+#import <AppKit/NSApplication.h>
 #import <CoreGraphics/CGError.h>
 
 namespace ts3::system
@@ -65,6 +67,8 @@ namespace ts3::system
 		{
 			return osxGetOSXSharedData( static_cast<OSXNativeDataCommon>( pNativeObject.mNativeData ) );
 		}
+
+		TS3_SYSTEM_API_NODISCARD bool osxCheckAppKitFrameworkVersion( NSAppKitVersion pRequiredVersion );
 
 		TS3_SYSTEM_API_NODISCARD const char * osxQueryCGErrorMessage( CGError pCGError );
 

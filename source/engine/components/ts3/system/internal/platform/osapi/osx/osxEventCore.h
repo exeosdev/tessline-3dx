@@ -16,25 +16,105 @@ namespace ts3::system
 	namespace platform
 	{
 
+		enum NSAppEventID : NSUInteger
+		{
+			NSAppEventIDNull                      = 0,
+			NSAppEventIDGenericLeftMouseDown      = NSEventTypeLeftMouseDown      ,
+			NSAppEventIDGenericLeftMouseUp        = NSEventTypeLeftMouseUp        ,
+			NSAppEventIDGenericRightMouseDown     = NSEventTypeRightMouseDown     ,
+			NSAppEventIDGenericRightMouseUp       = NSEventTypeRightMouseUp       ,
+			NSAppEventIDGenericMouseMoved         = NSEventTypeMouseMoved         ,
+			NSAppEventIDGenericLeftMouseDragged   = NSEventTypeLeftMouseDragged   ,
+			NSAppEventIDGenericRightMouseDragged  = NSEventTypeRightMouseDragged  ,
+			NSAppEventIDGenericMouseEntered       = NSEventTypeMouseEntered       ,
+			NSAppEventIDGenericMouseExited        = NSEventTypeMouseExited        ,
+			NSAppEventIDGenericKeyDown            = NSEventTypeKeyDown            ,
+			NSAppEventIDGenericKeyUp              = NSEventTypeKeyUp              ,
+			NSAppEventIDGenericFlagsChanged       = NSEventTypeFlagsChanged       ,
+			NSAppEventIDGenericAppKitDefined      = NSEventTypeAppKitDefined      ,
+			NSAppEventIDGenericSystemDefined      = NSEventTypeSystemDefined      ,
+			NSAppEventIDGenericApplicationDefined = NSEventTypeApplicationDefined ,
+			NSAppEventIDGenericPeriodic           = NSEventTypePeriodic           ,
+			NSAppEventIDGenericCursorUpdate       = NSEventTypeCursorUpdate       ,
+			NSAppEventIDGenericRotate             = NSEventTypeRotate             ,
+			NSAppEventIDGenericBeginGesture       = NSEventTypeBeginGesture       ,
+			NSAppEventIDGenericEndGesture         = NSEventTypeEndGesture         ,
+			NSAppEventIDX21                       ,
+			NSAppEventIDGenericScrollWheel        = NSEventTypeScrollWheel        ,
+			NSAppEventIDGenericTabletPoint        = NSEventTypeTabletPoint        ,
+			NSAppEventIDGenericTabletProximity    = NSEventTypeTabletProximity    ,
+			NSAppEventIDGenericOtherMouseDown     = NSEventTypeOtherMouseDown     ,
+			NSAppEventIDGenericOtherMouseUp       = NSEventTypeOtherMouseUp       ,
+			NSAppEventIDGenericOtherMouseDragged  = NSEventTypeOtherMouseDragged  ,
+			NSAppEventIDX28                       ,
+			NSAppEventIDGenericGesture            = NSEventTypeGesture            ,
+			NSAppEventIDGenericMagnify            = NSEventTypeMagnify            ,
+			NSAppEventIDGenericSwipe              = NSEventTypeSwipe              ,
+			NSAppEventIDGenericSmartMagnify       = NSEventTypeSmartMagnify       ,
+			NSAppEventIDGenericQuickLook          = NSEventTypeQuickLook          ,
+			NSAppEventIDGenericPressure           = NSEventTypePressure           ,
+			NSAppEventIDX35                       ,
+			NSAppEventIDX36                       ,
+			NSAppEventIDGenericDirectTouch        = NSEventTypeDirectTouch        ,
+			NSAppEventIDGenericChangeMode         = NSEventTypeChangeMode         ,
+
+			NSAppEventIDWindowDidExpose                  ,
+			NSAppEventIDWindowDidMove                    ,
+			NSAppEventIDWindowDidResize                  ,
+			NSAppEventIDWindowMiniaturize                ,
+			NSAppEventIDWindowDidDeminiaturize           ,
+			NSAppEventIDWindowDidBecomeKey               ,
+			NSAppEventIDWindowDidResignKey               ,
+			NSAppEventIDWindowDidChangeBackingProperties ,
+			NSAppEventIDWindowDidChangeScreenProfile     ,
+			NSAppEventIDWindowWillEnterFullScreen        ,
+			NSAppEventIDWindowDidEnterFullScreen         ,
+			NSAppEventIDWindowWillExitFullScreen         ,
+			NSAppEventIDWindowDidExitFullScreen          ,
+			NSAppEventIDWindowWillClose                  ,
+		};
+
+		static_assert( NSAppEventIDX21 == 21 );
+		static_assert( NSAppEventIDX28 == 28 );
+		static_assert( NSAppEventIDX35 == 35 );
+		static_assert( NSAppEventIDX36 == 36 );
+
 		struct OSXEventSourceNativeData : public OSXNativeDataCommon
 		{
 			id nsWindow = nil;
-
 			id nsView = nil;
-
 			id nsEventListener = nil;
-
 			OSXEventController * eventController = nullptr;
 		};
 
 		struct NativeEventType
 		{
+			NSAppEventID nsAppEventID = NSAppEventIDNull;
+
 			NSEvent * nsEvent = nil;
+
+			NSNotification * nsNotification = nil;
+
+			NSWindow * nsSourceWindow = nil;
+
+			NativeEventType( NSEvent * pNSEvent, NSWindow * pNSSourceWindow )
+			: nsAppEventID( static_cast<NSAppEventID>( [pNSEvent type] ) )
+			, nsEvent( pNSEvent )
+			, nsSourceWindow( pNSSourceWindow )
+			{}
+
+			NativeEventType( NSAppEventID pAppEventID, NSNotification * pNSNotification )
+			: nsAppEventID( pAppEventID )
+			, nsNotification( pNSNotification )
+			, nsSourceWindow( static_cast<NSWindow *>( [pNSNotification object] ) )
+			{}
 		};
 
-		void osxInitializeEventListener( OSXEventSourceNativeData & pEventSourceNativeData );
+		EventSource * osxFindEventSourceByNSWindow( OSXEventController & pEventController, NSWindow * pNSWindow );
 
-		void osxReleaseEventListener( OSXEventSourceNativeData & pEventSourceNativeData );
+		void osxCreateEventListener( OSXEventSourceNativeData & pEventSourceNativeData );
+
+		bool osxTranslateEvent( OSXEventController & pEventController, const NativeEventType & pNativeEvent, EventObject & pOutEvent );
 
 	}
 
@@ -44,7 +124,7 @@ namespace ts3::system
 		OSXEventController( SysContextHandle pSysContext );
 		virtual ~OSXEventController() noexcept;
 
-		using EventController::getEventSystemInternalConfig;
+		using EventController::getEventDispatcherConfig;
 		using EventController::getEventDispatcherInputState;
 
 	private:

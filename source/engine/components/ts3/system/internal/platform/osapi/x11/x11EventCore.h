@@ -45,8 +45,6 @@ namespace ts3::system
 			XEvent xEvent;
 		};
 
-		using X11NativeEvent = NativeEventType;
-
 		TS3_SYSTEM_API_NODISCARD EventSource * x11FindEventSourceByXWindow( X11EventController & pEventController, XWindow pWindowXID );
 
 		bool x11TranslateEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent );

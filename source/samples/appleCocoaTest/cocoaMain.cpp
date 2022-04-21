@@ -23,7 +23,19 @@ int main( int argc, const char ** argv )
 	auto ed = ev->createEventDispatcher();
 	ev->setActiveEventDispatcher( *ed );
 
-	while( true )
+	bool runApp = true;
+
+	ed->setEventHandler(
+			EEventCodeIndex::AppActivityQuit,
+			[&runApp](const EventObject & pEvt) -> bool {
+				runApp = false;
+				return true;
+			});
+
+	ev->registerPrimaryEventSource( *cwin );
+	ev->setEventSystemConfigFlags( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_QUIT_ON_PRIMARY_SOURCE_DESTROY_BIT );
+
+	while( runApp )
 	{
 		ev->dispatchPendingEventsPeek();
 	}
