@@ -5,6 +5,9 @@
 .vscode/
 .cxx/
 
+# OSX
+.DS_Store
+
 bin/
 build/
 cmake-bin-vs/
@@ -13,8 +16,6 @@ cmake-bin-vs2019/
 cmake-build-debug/
 cmake-build-release/
 out/
-
-_system.old/
 
 # IDE-specific
 *.iml
