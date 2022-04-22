@@ -30,7 +30,8 @@ namespace ts3::system
 			EvtInputGamepadAxis        eInputGamepadAxis;
 			EvtInputGamepadButton      eInputGamepadButton;
 			EvtInputGamepadState       eInputGamepadState;
-			EvtInputKeyboardKey        eInputKeyboardKey;
+			EvtInputKeyboard           eInputKeyboard;
+			EvtInputMouse              eInputMouse;
 			EvtInputMouseButton        eInputMouseButton;
 			EvtInputMouseMove          eInputMouseMove;
 			EvtInputMouseScroll        eInputMouseScroll;
@@ -59,6 +60,11 @@ namespace ts3::system
 		constexpr explicit operator bool() const
 		{
 			return ( code != E_EVENT_CODE_UNDEFINED ) && ecValidateEventCode( code );
+		}
+
+		 TS3_FUNC_NO_DISCARD constexpr EEventCategory category() const
+		{
+			return ecGetEventCodeCategory( code );
 		}
 	};
 

@@ -315,7 +315,7 @@ namespace ts3::system
 				case WM_SYSKEYDOWN:
 				{
 					auto & eInputKeyboardKey = pOutEvent.eInputKeyboardKey;
-					eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
+					eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD;
 					eInputKeyboardKey.inputKeyboardState = &inputKeyboardState;
 					eInputKeyboardKey.keyAction = EKeyActionType::Press;
 					eInputKeyboardKey.keyCode = _win32GetSysKeyCode( pMSG.wParam );
@@ -325,7 +325,7 @@ namespace ts3::system
 				case WM_SYSKEYUP:
 				{
 					auto & eInputKeyboardKey = pOutEvent.eInputKeyboardKey;
-					eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
+					eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD;
 					eInputKeyboardKey.inputKeyboardState = &inputKeyboardState;
 					eInputKeyboardKey.keyAction = EKeyActionType::Release;
 					eInputKeyboardKey.keyCode = _win32GetSysKeyCode( pMSG.wParam );

@@ -22,15 +22,18 @@
 
 -( void ) keyDown:( NSEvent * ) pEvent;
 -( void ) keyUp:( NSEvent * ) pEvent;
--( void ) mouseDown:( NSEvent * ) pEvent;
--( void ) rightMouseDown:( NSEvent * ) pEvent;
--( void ) otherMouseDown:( NSEvent * ) pEvent;
--( void ) mouseUp:( NSEvent * ) pEvent;
--( void ) rightMouseUp:( NSEvent * ) pEvent;
--( void ) otherMouseUp:( NSEvent * ) pEvent;
+
+-( void ) mouseEntered:( NSEvent * ) pEvent;
+-( void ) mouseExited:( NSEvent * ) pEvent;
 -( void ) mouseMoved:( NSEvent * ) pEvent;
+-( void ) mouseDown:( NSEvent * ) pEvent;
+-( void ) mouseUp:( NSEvent * ) pEvent;
 -( void ) mouseDragged:( NSEvent * ) pEvent;
+-( void ) rightMouseDown:( NSEvent * ) pEvent;
+-( void ) rightMouseUp:( NSEvent * ) pEvent;
 -( void ) rightMouseDragged:( NSEvent * ) pEvent;
+-( void ) otherMouseDown:( NSEvent * ) pEvent;
+-( void ) otherMouseUp:( NSEvent * ) pEvent;
 -( void ) otherMouseDragged:( NSEvent * ) pEvent;
 -( void ) scrollWheel:( NSEvent * ) pEvent;
 -( void ) touchesBeganWithEvent:( NSEvent * ) pEvent;

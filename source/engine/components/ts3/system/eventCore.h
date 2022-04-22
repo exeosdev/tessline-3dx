@@ -11,8 +11,10 @@ namespace ts3::system
 	ts3SysDeclareHandle( EventController );
 	ts3SysDeclareHandle( EventDispatcher );
 
-	struct EventDispatcherConfig;
-	struct EventDispatcherInputState;
+	struct EventSystemConfig;
+	struct EventSystemSharedState;
+	struct EvtInputKeyboard;
+	struct EvtInputMouse;
 
 	using EventSourceFindPredicate = std::function<bool( const EventSource & )>;
 	using EventSourceNativeDataFindPredicate = std::function<bool( const void * )>;
@@ -20,15 +22,27 @@ namespace ts3::system
 	/// @brief A set of flags which modify the behaviour of the event system. Used in EventController::setEventSystemConfigFlags().
 	enum EEventSystemConfigFlags : uint32
 	{
+		//
+		E_EVENT_SYSTEM_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT = 0x1,
+
 		// If set, an AppQuit event will be posted after the last event source is destroyed.
-		E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_QUIT_ON_LAST_SOURCE_DESTROY_BIT = 0x10,
+		E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_AUTO_QUIT_ON_LAST_SOURCE_DESTROY_BIT = 0x10,
 
 		// If set, an AppQuit event will be posted after the primary event source is destroyed.
 		// See EventController::registerPrimaryEventSource() and EventController::setPrimaryEventSource().
-		E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_QUIT_ON_PRIMARY_SOURCE_DESTROY_BIT = 0x20,
+		E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_AUTO_QUIT_ON_PRIMARY_SOURCE_DESTROY_BIT = 0x20,
 
 		//
 		E_EVENT_SYSTEM_CONFIG_MASK_ENABLE_AUTO_QUIT = 0x30,
+
+		//
+		E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT = 0x40,
+
+		//
+		E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT = 0x80 | E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT,
+
+		//
+		E_EVENT_SYSTEM_CONFIG_MASK_ENABLE_MOUSE_CLICK_PROCESSING = 0xC0,
 
 		// The flags below control what approach is taken to handle automatic app quit
 		// in case one of the situations above happens (last source/primary source is gone).
@@ -56,15 +70,6 @@ namespace ts3::system
 		E_EVENT_SYSTEM_CONFIG_MASK_SET_AUTO_QUIT_MODE = 0x0F00,
 
 		E_EVENT_SYSTEM_CONFIG_MASK_ALL = 0xFFFF
-	};
-	
-	enum EEventDispatcherConfigFlags : uint32
-	{
-		E_EVENT_DISPATCHER_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT = 0x0001,
-
-		E_EVENT_DISPATCHER_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT = 0x0002 | E_EVENT_DISPATCHER_CONFIG_FLAG_ENABLE_MOUSE_DOUBLE_CLICK_BIT,
-
-		E_EVENT_DISPATCHER_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT = 0x0004
 	};
 
 	/// @brief
@@ -117,7 +122,7 @@ namespace ts3::system
 		/// #
 		/// This function retrieves pending events from queues and dispatches them. If no events are currently
 		/// available, the function behaves as follows:
-		/// 1) If E_EVENT_DISPATCHER_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT is not set, this function returns immediately.
+		/// 1) If E_EVENT_SYSTEM_CONFIG_FLAG_IDLE_PROCESSING_MODE_BIT is not set, this function returns immediately.
 		/// 2) Otherwise, it blocks until a new events arrives in the system queue (just like dispatchPendingEventsWait()
 		///  would normally do).
 		uint32 dispatchPendingEventsAuto();
@@ -128,17 +133,17 @@ namespace ts3::system
 
 		uint32 dispatchPendingEventsWaitTimeout( const Microseconds & pTimeout, uint32 pLimit = CX_INT32_MAX );
 
-		void setEventSystemConfigFlags( Bitmask<EEventSystemConfigFlags> pFlags, bool pSetOrUnset = true );
-
 		void validateActiveDispatcherState() const;
 
-		TS3_FUNC_NO_DISCARD bool checkSystemConfigFlags( Bitmask<EEventSystemConfigFlags> pFlags ) const;
+		TS3_FUNC_NO_DISCARD EventSystemSharedState & getEventSystemSharedState() noexcept;
+
+		TS3_FUNC_NO_DISCARD bool checkEventSystemConfigFlags( Bitmask<EEventSystemConfigFlags> pFlags ) const;
 
 		TS3_FUNC_NO_DISCARD EventSource * findEventSource( const EventSourceFindPredicate & pPredicate ) const;
 
 		TS3_FUNC_NO_DISCARD EventSource * findEventSource( const EventSourceNativeDataFindPredicate & pPredicate ) const;
 
-		TS3_FUNC_NO_DISCARD bool checkActiveDispatcherState() const noexcept;
+		TS3_FUNC_NO_DISCARD bool isActiveDispatcherSet() const noexcept;
 
 		TS3_FUNC_NO_DISCARD size_t getRegisteredEventSourcesNum() const noexcept;
 
@@ -147,11 +152,6 @@ namespace ts3::system
 		TS3_FUNC_NO_DISCARD EventSource * getRegisteredEventSourceByIndex( size_t pIndex ) const noexcept;
 
 		TS3_FUNC_NO_DISCARD bool isEventSourceRegistered( const EventSource & pEventSource ) const noexcept;
-
-	protected:
-		EventDispatcherInputState & getEventDispatcherInputState();
-
-		const EventDispatcherConfig & getEventDispatcherConfig() const;
 
 	friendapi:
 		// Used by the EventSource class. It is called inside its destructor.
@@ -189,7 +189,7 @@ namespace ts3::system
 		bool _processLocalQueues();
 
 		// Private utility function. Sends an "AppQuit" event as a reaction to removal of the last/priority event source.
-		// See setEventSystemConfigFlags() and EEventSystemConfigFlags::E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_QUIT_ON_xxx.
+		// See setEventSystemConfigFlags() and EEventSystemConfigFlags::E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_AUTO_QUIT_ON_xxx.
 		bool _checkAndPostAppAutoQuitEvent( EEventCode pEvent, EventSource & pEventSource );
 
 		//
@@ -227,7 +227,8 @@ namespace ts3::system
 		void resetEventHandler( EEventCodeIndex pCodeIndex );
 		void resetDefaultEventHandler();
 
-		void setDispatcherConfigFlags( Bitmask<EEventDispatcherConfigFlags> pFlags, bool pSetOrUnset = true );
+		void setEventSystemConfigFlags( Bitmask<EEventSystemConfigFlags> pFlags, bool pSetOrUnset = true );
+
 		void setIdleProcessingMode( bool pIdle );
 
 		bool postEvent( EventObject pEvent );
@@ -235,13 +236,19 @@ namespace ts3::system
 		bool postEventAppQuit();
 		bool postEventAppTerminate();
 
-	friendapi:
-		EventDispatcherInputState & getInputState();
+		TS3_FUNC_NO_DISCARD bool checkEventSystemConfigFlags( Bitmask<EEventSystemConfigFlags> pFlags ) const;
 
-		const EventDispatcherConfig & getConfig() const;
+		TS3_FUNC_NO_DISCARD Bitmask<EEventSystemConfigFlags> getEventSystemConfigFlags() const;
+
+	friendapi:
+		const EventSystemConfig & getEventSystemConfig() const;
 
 	private:
 		void _preProcessEvent( EventObject & pEvent );
+
+		void _preProcessInputMouseEvent( EvtInputMouse & pInputMouseEvent );
+
+		void _preProcessInputKeyboardEvent( EvtInputKeyboard & pInputKeyboardEvent );
 
 	protected:
 		struct EventDispatcherPrivateData;

@@ -142,22 +142,18 @@ namespace ts3::system
 
 	struct EvtSharedInputKeyboardState
 	{
+		EventDispatcher *
 		KeyStateMap keyStateMap;
 	};
 
-	template <event_code_value_t tpEventCode>
-	struct EvtInputKeyboard : public EvtInput<tpEventCode>
-	{
-		//
-		const EvtSharedInputKeyboardState * inputKeyboardState;
-	};
-
-	struct EvtInputKeyboardKey : public EvtInputKeyboard<E_EVENT_CODE_INPUT_KEYBOARD_KEY>
+	struct EvtInputKeyboard : public EvtInput
 	{
 		//
 		EKeyActionType keyAction;
 		//
 		EKeyCode keyCode;
+		//
+		const EvtSharedInputKeyboardState * inputKeyboardState;
 	};
 
 } // namespace ts3::system

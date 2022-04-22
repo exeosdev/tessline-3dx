@@ -61,7 +61,7 @@ namespace ts3::system
 		InputGamepadAxis,
 		InputGamepadButton,
 		InputGamepadState,
-		InputKeyboardKey,
+		InputKeyboard,
 		InputMouseButton,
 		InputMouseMove,
 		InputMouseScroll,
@@ -87,17 +87,11 @@ namespace ts3::system
 	/// @brief
 	struct EvtBase
 	{
-	public:
 		//
 		event_code_value_t eventCode;
+
 		//
 		perf_counter_value_t timeStamp;
-
-	public:
-		explicit constexpr EvtBase( event_code_value_t pEventCode )
-		: eventCode( pEventCode )
-		, timeStamp( 0 )
-		{}
 	};
 
 
@@ -182,7 +176,7 @@ namespace ts3::system
 		E_EVENT_CODE_INPUT_GAMEPAD_BUTTON  = ecDeclareEventCodeInputGamepad( EEventCodeIndex::InputGamepadButton ),
 		E_EVENT_CODE_INPUT_GAMEPAD_STATE   = ecDeclareEventCodeInputGamepad( EEventCodeIndex::InputGamepadState ),
 
-		E_EVENT_CODE_INPUT_KEYBOARD_KEY  = ecDeclareEventCodeInputKeyboard( EEventCodeIndex::InputKeyboardKey ),
+		E_EVENT_CODE_INPUT_KEYBOARD  = ecDeclareEventCodeInputKeyboard( EEventCodeIndex::InputKeyboard ),
 
 		E_EVENT_CODE_INPUT_MOUSE_BUTTON  = ecDeclareEventCodeInputMouse( EEventCodeIndex::InputMouseButton ),
 		E_EVENT_CODE_INPUT_MOUSE_MOVE    = ecDeclareEventCodeInputMouse( EEventCodeIndex::InputMouseMove ),

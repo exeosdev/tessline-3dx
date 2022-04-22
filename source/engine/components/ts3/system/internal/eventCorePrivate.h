@@ -20,20 +20,24 @@ namespace ts3::system
 		E_EVENT_SYSTEM_INTERNAL_FLAG_APP_QUIT_REQUEST_SET_BIT = 0x010000,
 	};
 
-	struct EventDispatcherConfig
+	struct EventSystemConfig
 	{
 		// Configuration flags. Allow controlling aspects like mouse or keyboard behaviour.
-		Bitmask<EEventDispatcherConfigFlags> dispatcherConfigFlags = 0u;
+		Bitmask<EEventSystemConfigFlags> configFlags = 0u;
 
 		// Timeout (in milliseconds) after which mouse click sequence is reset.
 		duration_value_t mouseClickSequenceTimeoutMs = 100;
 	};
 
-	struct EventDispatcherInputState
+	struct EventSystemSharedState
 	{
+		const EventSystemConfig * currentEventSystemConfig = nullptr;
+
 		EvtSharedInputKeyboardState inputKeyboardState;
 
 		EvtSharedInputMouseState inputMouseState;
+
+		Bitmask<EEventSystemInternalFlags> internalStateFlags = 0u;
 	};
 
 	/// @brief Private, implementation-specific data of the EventController class.
@@ -52,13 +56,8 @@ namespace ts3::system
 		// List of all registered event sources, i.e. all windows/surfaces/views currently observed by our event system.
 		std::vector<EventSource *> eventSourceList;
 
-		// Pointer to the configuration data from currently bound dispatcher.
-		EventDispatcherInputState * currentDispatcherInputState = nullptr;
-
-		// Pointer to the configuration data from currently bound dispatcher.
-		const EventDispatcherConfig * currentDispatcherConfig = nullptr;
-
-		Bitmask<uint32> internalContollerStateFlags = 0u;
+		//
+		EventSystemSharedState sharedState;
 
 		LocalEventQueue priorityEventQueue;
 
@@ -79,29 +78,12 @@ namespace ts3::system
 			result.first = ( result.second != eventSourceList.end() );
 			return result;
 		}
-
-		TS3_FUNC_NO_DISCARD const EventDispatcherConfig & getCurrentDispatcherConfig() const
-		{
-			ts3DebugAssert( currentDispatcherConfig != nullptr );
-			return *currentDispatcherConfig;
-		}
-
-		TS3_FUNC_NO_DISCARD EventDispatcherInputState & getCurrentDispatcherInputState() const
-		{
-			ts3DebugAssert( currentDispatcherInputState != nullptr );
-			return *currentDispatcherInputState;
-		}
 	};
 
 	/// @brief Private, implementation-specific data of the EventDispatcher class.
 	struct EventDispatcher::EventDispatcherPrivateData
 	{
-		// Internal configuration of the event system. The configuration is stored per-dispatcher, so that in case
-		// of multiple instances, configuration is properly restored each time a dispatcher is set as an active one.
-		EventDispatcherConfig evtDispatcherConfig;
-
-		// Shared state
-		EventDispatcherInputState evtDispatcherInputState;
+		EventSystemConfig currentEventSystemConfig;
 
 		// A default handler. If set, it is called if there is no handler registered for a given code/category/base type.
 		EventHandler defaultHandler;

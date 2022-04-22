@@ -47,7 +47,7 @@ namespace ts3::system
 
 		TS3_SYSTEM_API_NODISCARD EventSource * x11FindEventSourceByXWindow( X11EventController & pEventController, XWindow pWindowXID );
 
-		bool x11TranslateEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent );
+		bool x11TranslateEvent( const XEvent & pXEvent, EventSystemSharedState & pSharedState, EventSource & pEventSource, EventObject & pOutEvent );
 
 	}
 
