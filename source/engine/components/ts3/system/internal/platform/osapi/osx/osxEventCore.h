@@ -97,10 +97,10 @@ namespace ts3::system
 
 			NSWindow * nsSourceWindow = nil;
 
-			NativeEventType( NSEvent * pNSEvent, NSWindow * pNSSourceWindow )
+			NativeEventType( NSEvent * pNSEvent )
 			: nsAppEventID( static_cast<NSAppEventID>( [pNSEvent type] ) )
 			, nsEvent( pNSEvent )
-			, nsSourceWindow( pNSSourceWindow )
+			, nsSourceWindow( [pNSEvent window] )
 			{}
 
 			NativeEventType( NSAppEventID pAppEventID, NSNotification * pNSNotification )
@@ -114,7 +114,12 @@ namespace ts3::system
 
 		void osxCreateEventListener( OSXEventSourceNativeData & pEventSourceNativeData );
 
-		bool osxTranslateEvent( OSXEventController & pEventController, const NativeEventType & pNativeEvent, EventObject & pOutEvent );
+		bool osxIsEventTypeInputKeyboard( NSAppEventID pEventID );
+		bool osxIsEventTypeInputMouse( NSAppEventID pEventID );
+		bool osxIsEventTypeInputOther( NSAppEventID pEventID );
+		bool osxIsEventTypeWindow( NSAppEventID pEventID );
+
+		bool osxTranslateEvent( const NativeEventType & pNativeEvent, EventSource & pEventSource, EventObject & pOutEvent );
 
 	}
 
@@ -123,9 +128,6 @@ namespace ts3::system
 	public:
 		OSXEventController( SysContextHandle pSysContext );
 		virtual ~OSXEventController() noexcept;
-
-		using EventController::getEventDispatcherConfig;
-		using EventController::getEventDispatcherInputState;
 
 	private:
 		/// @override EventController::_nativeRegisterEventSource

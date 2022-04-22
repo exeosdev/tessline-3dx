@@ -254,7 +254,7 @@ namespace ts3::system
 
 	EventSystemSharedState & EventController::getEventSystemSharedState() noexcept
 	{
-		return _privateData->sharedState;
+		return _privateData->sharedEventSystemState;
 	}
 
 	bool EventController::checkEventSystemConfigFlags( Bitmask<EEventSystemConfigFlags> pFlags ) const
@@ -594,7 +594,7 @@ namespace ts3::system
 			return false;
 		}
 
-		_preProcessEvent( pEvent );
+		// _preProcessEvent( pEvent );
 
 		pEvent.commonData.timeStamp = PerfCounter::queryCurrentStamp();
 
@@ -665,22 +665,18 @@ namespace ts3::system
 		return _privateData->currentEventSystemConfig;
 	}
 
-	void _preProcessEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent,
-	                                                   const EventDispatcherConfig & pDispatcherConfig,
-	                                                   EvtSharedInputMouseState & pInputMouseState );
-
 	void EventDispatcher::_preProcessEvent( EventObject & pEvent )
 	{
 		switch( pEvent.category() )
 		{
 			case EEventCategory::InputMouse:
 			{
-				_preProcessInputMouseEvent( pEvent.eInputMouse );
+				//_preProcessInputMouseEvent( pEvent.eInputMouse );
 				break;
 			}
 			case EEventCategory::InputKeyboard:
 			{
-				_preProcessInputKeyboardEvent( pEvent.eInputKeyboard );
+				//_preProcessInputKeyboardEvent( pEvent.eInputKeyboard );
 				break;
 			}
 			default:
@@ -690,20 +686,61 @@ namespace ts3::system
 		}
 	}
 
-	void updateEventInputMouse( EvtInputMouse & pMouseEvent, EvtSharedInputMouseState & pInputMouseState )
+	void evtUpdateEventInputMouse( EvtInputMouse & pMouseEvent, EventSystemSharedState & pEventSystemSharedState )
 	{
-		if( pInputMouseState.lastCursorPos == CX_EVENT_MOUSE_POS_INVALID )
+		if( pEventSystemSharedState.inputMouseState.lastCursorPos == CX_EVENT_MOUSE_POS_INVALID )
 		{
-			pInputMouseState.lastCursorPos = pMouseEvent.cursorPos;
+			pEventSystemSharedState.inputMouseState.lastCursorPos = pMouseEvent.cursorPos;
 		}
 	}
 
-	void updateEventInputMouseButton( EvtInputMouseButton & pMouseButtonEvent, EvtSharedInputMouseState & pInputMouseState )
+	void evtUpdateEventInputMouseButton( EvtInputMouseButton & pMouseButtonEvent, EventSystemSharedState & pEventSystemSharedState )
 	{
-		updateEventInputMouse( pMouseButtonEvent, pInputMouseState );
+		evtUpdateEventInputMouse( pMouseButtonEvent, pEventSystemSharedState );
+
+		const auto & eventSystemConfig = pEventSystemSharedState.getEventSystemConfig();
+		auto & inputMouseState = pEventSystemSharedState.inputMouseState;
+
+		if( eventSystemConfig.configFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT ) )
+		{
+			if( pMouseButtonEvent.buttonAction == EMouseButtonActionType::Click )
+			{
+				bool multiClickEventSet = false;
+
+				if( inputMouseState.lastPressButtonID == pMouseButtonEvent.buttonID )
+				{
+					auto lastClickDiff = pMouseButtonEvent.timeStamp - inputMouseState.lastPressTimestamp;
+					auto lastClickDiffMs = PerfCounter::convertToDuration<EDurationPeriod::Millisecond>( lastClickDiff );
+					if( lastClickDiffMs <= eventSystemConfig.mouseClickSequenceTimeoutMs )
+					{
+						if( inputMouseState.currentMultiClickSequenceLength == 1 )
+						{
+							pMouseButtonEvent.buttonAction = EMouseButtonActionType::DoubleClick;
+							inputMouseState.currentMultiClickSequenceLength = 2;
+							multiClickEventSet = true;
+						}
+						else if( eventSystemConfig.configFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT ) )
+						{
+							pMouseButtonEvent.buttonAction = EMouseButtonActionType::MultiClick;
+							inputMouseState.currentMultiClickSequenceLength += 1;
+							multiClickEventSet = true;
+						}
+					}
+				}
+
+				if( !multiClickEventSet )
+				{
+					// Multi-click has not been detected/updated. Possible reasons: different button ID,
+					// click timeout (mouse button clicked too slow), multi-click support is disabled.
+					inputMouseState.lastPressButtonID = pMouseButtonEvent.buttonID;
+					inputMouseState.currentMultiClickSequenceLength = 1;
+				}
+
+				inputMouseState.lastPressTimestamp = pMouseButtonEvent.timeStamp;
+			}
+		}
 
 		const auto buttonMask = ecGetMouseButtonFlagFromButtonID( pMouseButtonEvent.buttonID );
-
 		if( pMouseButtonEvent.buttonAction == EMouseButtonActionType::Click )
 		{
 			pMouseButtonEvent.buttonStateMask.set( buttonMask );
@@ -714,89 +751,15 @@ namespace ts3::system
 		}
 	}
 
-	void updateEventInputMouseMove( EvtInputMouseMove & pMouseMoveEvent, EvtSharedInputMouseState & pInputMouseState )
+	void evtUpdateEventInputMouseMove( EvtInputMouseMove & pMouseMoveEvent, EventSystemSharedState & pEventSystemSharedState )
 	{
-		updateEventInputMouse( pMouseMoveEvent, pInputMouseState );
+		evtUpdateEventInputMouse( pMouseMoveEvent, pEventSystemSharedState );
 
-		pMouseMoveEvent.movementDelta = pMouseMoveEvent.cursorPos - pInputMouseState.lastCursorPos;
+		auto & inputMouseState = pEventSystemSharedState.inputMouseState;
 
-		pInputMouseState.lastCursorPos = pMouseMoveEvent.cursorPos;
-	}
+		pMouseMoveEvent.movementDelta = pMouseMoveEvent.cursorPos - inputMouseState.lastCursorPos;
 
-	void EventDispatcher::_preProcessInputMouseEvent( EvtInputMouse & pInputMouseEvent )
-	{
-		auto & inputMouseState = _privateData->evtDispatcherInputState.inputMouseState;
-
-
-		auto & dispatcherConfig = _privateData->evtDispatcherConfig;
-
-		// For INPUT_MOUSE_BUTTON events, we may want to modify event's data depending on the input configuration.
-		// _evtImplOnInputMouseButton() checks the input config and handles, for example, multi-click sequences.
-		if( pInputMouseEvent.eventCode == E_EVENT_CODE_INPUT_MOUSE_BUTTON )
-		{
-			auto & inputMouseButtonEvent = reinterpret_cast<EvtInputMouseButton &>( pInputMouseEvent );
-
-			if( dispatcherConfig.dispatcherConfigFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT ) )
-			{
-				if( inputMouseButtonEvent.buttonAction == EMouseButtonActionType::Click )
-				{
-					_preProcessEventOnInputMouseButtonMultiClick( inputMouseButtonEvent, dispatcherConfig, inputMouseState );
-				}
-			}
-		}
-	}
-
-	void EventDispatcher::_preProcessInputKeyboardEvent( EvtInputKeyboard & pInputKeyboardEvent )
-	{
-		auto & keyboardState = _privateData->evtDispatcherInputState.inputKeyboardState;
-
-		if( pInputKeyboardEvent.keyAction == EKeyActionType::Press )
-		{
-			keyboardState.keyStateMap[pInputKeyboardEvent.keyCode] = true;
-		}
-		else if( pInputKeyboardEvent.keyAction == EKeyActionType::Release )
-		{
-			keyboardState.keyStateMap[pInputKeyboardEvent.keyCode] = false;
-		}
-	}
-
-	void _preProcessEventOnInputMouseButtonMultiClick( EvtInputMouseButton & pMouseButtonEvent,
-	                                                   const EventDispatcherConfig & pDispatcherConfig,
-	                                                   EvtSharedInputMouseState & pInputMouseState )
-	{
-		bool multiClickEventSet = false;
-
-		if( pInputMouseState.lastPressButtonID == pMouseButtonEvent.buttonID )
-		{
-			auto lastClickDiff = pMouseButtonEvent.timeStamp - pInputMouseState.lastPressTimestamp;
-			auto lastClickDiffMs = PerfCounter::convertToDuration<EDurationPeriod::Millisecond>( lastClickDiff );
-			if( lastClickDiffMs <= pDispatcherConfig.mouseClickSequenceTimeoutMs )
-			{
-				if( pInputMouseState.currentMultiClickSequenceLength == 1 )
-				{
-					pMouseButtonEvent.buttonAction = EMouseButtonActionType::DoubleClick;
-					pInputMouseState.currentMultiClickSequenceLength = 2;
-					multiClickEventSet = true;
-				}
-				else if( pDispatcherConfig.dispatcherConfigFlags.isSet( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_MOUSE_MULTI_CLICK_BIT ) )
-				{
-					pMouseButtonEvent.buttonAction = EMouseButtonActionType::MultiClick;
-					pInputMouseState.currentMultiClickSequenceLength += 1;
-					multiClickEventSet = true;
-				}
-			}
-		}
-
-		if( !multiClickEventSet )
-		{
-			// Multi-click has not been detected/updated. Possible reasons: different button ID,
-			// click timeout (mouse button clicked too slow), multi-click support is disabled.
-			pInputMouseState.lastPressButtonID = pMouseButtonEvent.buttonID;
-			pInputMouseState.currentMultiClickSequenceLength = 1;
-		}
-
-		pInputMouseState.lastPressTimestamp = pMouseButtonEvent.timeStamp;
-		pInputMouseState.lastCursorPos = pMouseButtonEvent.cursorPos;
+		inputMouseState.lastCursorPos = pMouseMoveEvent.cursorPos;
 	}
 
 } // namespace ts3::system

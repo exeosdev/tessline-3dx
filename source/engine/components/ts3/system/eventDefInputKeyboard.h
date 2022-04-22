@@ -142,7 +142,6 @@ namespace ts3::system
 
 	struct EvtSharedInputKeyboardState
 	{
-		EventDispatcher *
 		KeyStateMap keyStateMap;
 	};
 

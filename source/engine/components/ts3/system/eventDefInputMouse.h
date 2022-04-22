@@ -42,8 +42,6 @@ namespace ts3::system
 
 	struct EvtSharedInputMouseState
 	{
-		EventDispatcher * eventDispatcher = nullptr;
-
 		// Last cursor position registered by the event system.
 		MouseCursorPos lastCursorPos = CX_EVENT_MOUSE_POS_INVALID;
 

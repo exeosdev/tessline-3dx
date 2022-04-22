@@ -12,11 +12,11 @@ namespace ts3::system
 	namespace platform
 	{
 
-		bool _x11TranslateGenericEvent( const XEvent & pXEvent, EventSystemSharedState & pSharedState, EventSource & pEventSource, EventObject & pOutEvent );
+		bool _x11TranslateGenericEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent );
 		
-		bool _x11TranslateInputEvent( const XEvent & pXEvent, EventSystemSharedState & pSharedState, EventSource & pEventSource, EventObject & pOutEvent );
+		bool _x11TranslateInputEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent );
 		
-		bool _x11TranslateSystemEvent( const XEvent & pXEvent, EventSystemSharedState & pSharedState, EventSource & pEventSource, EventObject & pOutEvent );
+		bool _x11TranslateSystemEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent );
 		
 		EKeyCode _x11GetSysKeyCode( KeySym pXkeySym );
 		
@@ -80,8 +80,7 @@ namespace ts3::system
 
 			if( auto * eventSource = x11FindEventSourceByXWindow( *x11EventController, pXEvent.xany.window ) )
 			{
-				auto & sharedState = x11EventController->getEventSystemSharedState();
-				return x11TranslateEvent( pNativeEvent.xEvent, sharedState, *eventSource, pOutEvent );
+				return x11TranslateEvent( pNativeEvent.xEvent, *eventSource, pOutEvent );
 			}
 
 			return false;
@@ -139,7 +138,7 @@ namespace ts3::system
 			return "UNKNOWN";
 		}
 
-		bool x11TranslateEvent( const XEvent & pXEvent, EventSystemSharedState & pSharedState, EventSource & pEventSource, EventObject & pOutEvent )
+		bool x11TranslateEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent )
 		{
 			if( ( pXEvent.type >= KeyPress ) && ( pXEvent.type <= MotionNotify ) )
 			{
@@ -166,7 +165,7 @@ namespace ts3::system
 			return false;
 		}
 
-		bool _x11TranslateGenericEvent( const XEvent & pXEvent, EventSystemSharedState & pSharedState, EventSource & pEventSource, EventObject & pOutEvent )
+		bool _x11TranslateGenericEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent )
 		{
 			switch( pXEvent.type )
 			{
@@ -250,9 +249,9 @@ namespace ts3::system
 			return true;
 		}
 
-		bool _x11TranslateInputEventMouseButton( const XEvent & pXEvent, EventSystemSharedState & pSharedState, EventSource & pEventSource, EventObject & pOutEvent );
+		bool _x11TranslateInputEventMouseButton( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent );
 
-		bool _x11TranslateInputEvent( const XEvent & pXEvent, EventSystemSharedState & pSharedState, EventSource & pEventSource, EventObject & pOutEvent )
+		bool _x11TranslateInputEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent )
 		{
 			switch( pXEvent.type )
 			{
@@ -350,7 +349,7 @@ namespace ts3::system
 			return pOutEvent.commonData.eventCode != E_EVENT_CODE_UNDEFINED;
 		}
 
-		bool _x11TranslateInputEventMouseButton( const XEvent & pXEvent, EventSystemSharedState & pSharedState, EventSource & pEventSource, EventObject & pOutEvent )
+		bool _x11TranslateInputEventMouseButton( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent )
 		{
 			const auto x11MouseButtonID = _x11GetMouseButtonID( pXEvent.xbutton.button );
 
@@ -500,7 +499,7 @@ namespace ts3::system
 			return true;
 		}
 
-		bool _x11TranslateSystemEvent( const XEvent & pXEvent, EventSystemSharedState & pSharedState, EventSource & pEventSource, EventObject & pOutEvent )
+		bool _x11TranslateSystemEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent )
 		{
 			switch( pXEvent.type )
 			{

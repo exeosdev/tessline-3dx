@@ -246,10 +246,6 @@ namespace ts3::system
 	private:
 		void _preProcessEvent( EventObject & pEvent );
 
-		void _preProcessInputMouseEvent( EvtInputMouse & pInputMouseEvent );
-
-		void _preProcessInputKeyboardEvent( EvtInputKeyboard & pInputKeyboardEvent );
-
 	protected:
 		struct EventDispatcherPrivateData;
 		EventControllerHandle _eventControllerActiveRef;

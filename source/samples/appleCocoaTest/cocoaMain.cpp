@@ -21,6 +21,7 @@ int main( int argc, const char ** argv )
 	auto cwin = wm->createWindow( wci );
 
 	auto ed = ev->createEventDispatcher();
+	ed->setEventSystemConfigFlags( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_AUTO_QUIT_ON_PRIMARY_SOURCE_DESTROY_BIT );
 	ev->setActiveEventDispatcher( *ed );
 
 	bool runApp = true;
@@ -33,7 +34,6 @@ int main( int argc, const char ** argv )
 			});
 
 	ev->registerPrimaryEventSource( *cwin );
-	ev->setEventSystemConfigFlags( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_AUTO_QUIT_ON_PRIMARY_SOURCE_DESTROY_BIT );
 
 	while( runApp )
 	{

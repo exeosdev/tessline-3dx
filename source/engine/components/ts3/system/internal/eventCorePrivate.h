@@ -38,6 +38,12 @@ namespace ts3::system
 		EvtSharedInputMouseState inputMouseState;
 
 		Bitmask<EEventSystemInternalFlags> internalStateFlags = 0u;
+
+		TS3_FUNC_NO_DISCARD const EventSystemConfig & getEventSystemConfig() const
+		{
+			ts3DebugAssert( currentEventSystemConfig );
+			return *currentEventSystemConfig;
+		}
 	};
 
 	/// @brief Private, implementation-specific data of the EventController class.
@@ -57,7 +63,7 @@ namespace ts3::system
 		std::vector<EventSource *> eventSourceList;
 
 		//
-		EventSystemSharedState sharedState;
+		EventSystemSharedState sharedEventSystemState;
 
 		LocalEventQueue priorityEventQueue;
 
@@ -115,6 +121,10 @@ namespace ts3::system
 		{
 			EventObject eventObject;
 
+			auto & eventSystemSharedState = pEventController.getEventSystemSharedState();
+
+			eventObject.eventSystemSharedState = &eventSystemSharedState;
+
 			// Translate the input event and store the output in the temporary auto event object.
 			// The boolean result indicates whether the translation was successful (event is known).
 			if( nativeEventTranslate( pEventController, pNativeEvent, eventObject ) )
@@ -132,6 +142,10 @@ namespace ts3::system
 		}
 
 	}
+
+	void evtUpdateEventInputMouse( EvtInputMouse & pMouseEvent, EventSystemSharedState & pEventSystemSharedState );
+	void evtUpdateEventInputMouseButton( EvtInputMouseButton & pMouseButtonEvent, EventSystemSharedState & pEventSystemSharedState );
+	void evtUpdateEventInputMouseMove( EvtInputMouseMove & pMouseMoveEvent, EventSystemSharedState & pEventSystemSharedState );
 
 } // namespace ts3::system
 

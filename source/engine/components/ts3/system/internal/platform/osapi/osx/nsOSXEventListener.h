@@ -36,6 +36,10 @@
 -( void ) otherMouseUp:( NSEvent * ) pEvent;
 -( void ) otherMouseDragged:( NSEvent * ) pEvent;
 -( void ) scrollWheel:( NSEvent * ) pEvent;
+
+-( void ) tabletPoint:( NSEvent * ) pEvent;
+-( void ) tabletProximity:( NSEvent * ) pEvent;
+
 -( void ) touchesBeganWithEvent:( NSEvent * ) pEvent;
 -( void ) touchesMovedWithEvent:( NSEvent * ) pEvent;
 -( void ) touchesEndedWithEvent:( NSEvent * ) pEvent;

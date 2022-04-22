@@ -11,6 +11,8 @@
 namespace ts3::system
 {
 
+	struct EventSystemSharedState;
+
 	struct EventObject
 	{
 		union
@@ -44,6 +46,8 @@ namespace ts3::system
 			EvtWindowUpdateResize      eWindowUpdateResize;
 			EvtWindowUpdateVisibility  eWindowUpdateVisibility;
 		};
+
+		EventSystemSharedState * eventSystemSharedState = nullptr;
 
 		constexpr EventObject()
 		: code{ E_EVENT_CODE_UNDEFINED }
