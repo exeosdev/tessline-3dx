@@ -448,7 +448,7 @@ namespace ts3::system
 					pOutEvent.code = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
 					eInputMouseScroll.eventCode = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
 					eInputMouseScroll.scrollDelta.x = 0;
-					eInputMouseScroll.scrollDelta.y = static_cast<int32>( GET_WHEEL_DELTA_WPARAM( pMSG.wParam ) );
+					eInputMouseScroll.scrollDelta.y = static_cast<double>( GET_WHEEL_DELTA_WPARAM( pMSG.wParam ) ) / WHEEL_DELTA;
 					break;
 				}
 				case WM_XBUTTONDOWN:
@@ -482,8 +482,8 @@ namespace ts3::system
 				{
 					auto & eInputMouseScroll = pOutEvent.eInputMouseScroll;
 					eInputMouseScroll.eventCode = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
-					eInputMouseScroll.scrollDelta.x = static_cast<int32>( GET_WHEEL_DELTA_WPARAM( pMSG.wParam ) );
-					eInputMouseScroll.scrollDelta.y = 0;
+					eInputMouseScroll.scrollDelta.x = static_cast<double>( GET_WHEEL_DELTA_WPARAM( pMSG.wParam ) ) / WHEEL_DELTA;
+					eInputMouseScroll.scrollDelta.y = 0.0;
 					break;
 				}
 			}

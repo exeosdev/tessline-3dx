@@ -1,6 +1,5 @@
 
 #include "osxEventCore.h"
-#include "nsOSXApplicationProxy.h"
 #include "nsOSXEventListener.h"
 #include "nsOSXWindow.h"
 #include <ts3/system/internal/eventCorePrivate.h>
@@ -11,6 +10,14 @@ namespace ts3::system
 	namespace platform
 	{
 
+		enum EOSXMouseScrollEventFlags : uint32
+		{
+			E_OSX_MOUSE_SCROLL_EVENT_FLAG_SCROLLING_MODE_NORMAL_BIT = 0x01,
+			E_OSX_MOUSE_SCROLL_EVENT_FLAG_SCROLLING_MODE_PRECISE_BIT = 0x02,
+			E_OSX_MOUSE_SCROLL_EVENT_FLAG_SCROLLING_DIRECTION_NORMAL_BIT = 0x10,
+			E_OSX_MOUSE_SCROLL_EVENT_FLAG_SCROLLING_DIRECTION_INVERTED_BIT = 0x20,
+		};
+
 		bool _osxTranslateEventInputKeyboard( const NativeEventType & pNativeEvent, EventSource & pEventSource, EventObject & pOutEvent );
 
 		bool _osxTranslateEventInputMouse( const NativeEventType & pNativeEvent, EventSource & pEventSource, EventObject & pOutEvent );
@@ -18,6 +25,14 @@ namespace ts3::system
 		bool _osxTranslateEventInputOther( const NativeEventType & pNativeEvent, EventSource & pEventSource, EventObject & pOutEvent );
 
 		bool _osxTranslateEventWindow( const NativeEventType & pNativeEvent, EventSource & pEventSource, EventObject & pOutEvent );
+
+		TS3_FUNC_NO_DISCARD EMouseButtonID _osxQueryMouseButtonID( NSEvent * pNSEvent );
+
+		TS3_FUNC_NO_DISCARD math::Vec2i32 _osxQueryMouseRelativePosition( NSEvent * pNSEvent );
+
+		TS3_FUNC_NO_DISCARD EvtInputMouseMove & _osxReadMouseMoveEvent( const NativeEventType & pNativeEvent, EventObject & pOutEvent );
+
+		TS3_FUNC_NO_DISCARD Bitmask<EOSXMouseScrollEventFlags> _osxQueryMouseScrollEventFlags( const NativeEventType & pNativeEvent );
 
 	}
 
@@ -207,43 +222,6 @@ namespace ts3::system
 			return true;
 		}
 
-		EMouseButtonID _osxQueryMouseButtonID( NSEvent * pNSEvent )
-		{
-			static constexpr EMouseButtonID sMouseButtonIDArray[] =
-			{
-				/* 0 */ EMouseButtonID::Left,
-				/* 1 */ EMouseButtonID::Right,
-				/* 2 */ EMouseButtonID::Middle,
-				/* 3 */ EMouseButtonID::XB1,
-				/* 4 */ EMouseButtonID::XB2,
-			};
-			return staticArrayElement( sMouseButtonIDArray, [pNSEvent buttonNumber] );
-		}
-
-		math::Vec2i32 _osxQueryMouseRelativePosition( NSEvent * pNSEvent )
-		{
-			auto * nsSourceWindow = [pNSEvent window];
-
-			const auto & sourceViewRect = [[nsSourceWindow contentView] frame];
-
-			const auto & mouseLocation = [pNSEvent locationInWindow];
-
-			math::Vec2i32 result {
-				static_cast<int32>( std::round( mouseLocation.x ) ),
-				static_cast<int32>( std::round( sourceViewRect.size.height - mouseLocation.y ) )
-			};
-
-			return result;
-		}
-
-		EvtInputMouseMove & _osxReadMouseMoveEvent( const NativeEventType & pNativeEvent, EventObject & pOutEvent )
-		{
-			auto & eInputMouseMove = pOutEvent.eInputMouseMove;
-			eInputMouseMove.eventCode = E_EVENT_CODE_INPUT_MOUSE_MOVE;
-			eInputMouseMove.cursorPos = _osxQueryMouseRelativePosition( pNativeEvent.nsEvent );
-			return eInputMouseMove;
-		}
-
 		bool _osxTranslateEventInputMouse( const NativeEventType & pNativeEvent, EventSource & pEventSource, EventObject & pOutEvent )
 		{
 			switch( pNativeEvent.nsAppEventID )
@@ -303,9 +281,41 @@ namespace ts3::system
 				}
 				case NSAppEventIDGenericMouseEntered:
 				case NSAppEventIDGenericMouseExited:
+				{
+					break;
+				}
 				case NSAppEventIDGenericScrollWheel:
+				{
+					const auto scrollDeltaX = [pNativeEvent.nsEvent scrollingDeltaX];
+					const auto scrollDeltaY = [pNativeEvent.nsEvent scrollingDeltaY];
+
+					auto & eInputMouseScroll = pOutEvent.eInputMouseScroll;
+					eInputMouseScroll.eventCode = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
+					eInputMouseScroll.cursorPos = _osxQueryMouseRelativePosition( pNativeEvent.nsEvent );
+					eInputMouseScroll.scrollDelta.x = -scrollDeltaX;
+					eInputMouseScroll.scrollDelta.y = scrollDeltaY;
+					eInputMouseScroll.scrollDirection = EMouseScrollDirection::Normal;
+
+					const auto scrollEventMask = _osxQueryMouseScrollEventFlags( pNativeEvent );
+
+					if( scrollEventMask.isSet( E_OSX_MOUSE_SCROLL_EVENT_FLAG_SCROLLING_MODE_NORMAL_BIT ) )
+					{
+						eInputMouseScroll.scrollDelta.x *= 0.1;
+						eInputMouseScroll.scrollDelta.y *= 0.1;
+					}
+
+					if( scrollEventMask.isSet( E_OSX_MOUSE_SCROLL_EVENT_FLAG_SCROLLING_DIRECTION_INVERTED_BIT ) )
+					{
+						eInputMouseScroll.scrollDirection = EMouseScrollDirection::Inverted;
+					}
+
+					break;
+				}
 				case NSAppEventIDGenericTabletPoint:
 				case NSAppEventIDGenericTabletProximity:
+				{
+					break;
+				}
 				case NSAppEventIDGenericOtherMouseDown:
 				{
 					auto & eInputMouseButton = pOutEvent.eInputMouseButton;
@@ -339,7 +349,8 @@ namespace ts3::system
 				}
 			}
 
-			if( pOutEvent.code != E_EVENT_CODE_UNDEFINED )
+			const auto cxEnableMouseEventReporting = false;
+			if( cxEnableMouseEventReporting && ( pOutEvent.code != E_EVENT_CODE_UNDEFINED ) )
 			{
 				printf( "Mouse event (%u) at: [%d , %d]\n",
 				        (uint32)pNativeEvent.nsAppEventID,
@@ -408,6 +419,73 @@ namespace ts3::system
 			}
 
 			return true;
+		}
+
+		EMouseButtonID _osxQueryMouseButtonID( NSEvent * pNSEvent )
+		{
+			static constexpr EMouseButtonID sMouseButtonIDArray[] =
+			{
+				/* 0 */ EMouseButtonID::Left,
+				/* 1 */ EMouseButtonID::Right,
+				/* 2 */ EMouseButtonID::Middle,
+				/* 3 */ EMouseButtonID::XB1,
+				/* 4 */ EMouseButtonID::XB2,
+			};
+			return staticArrayElement( sMouseButtonIDArray, [pNSEvent buttonNumber] );
+		}
+
+		math::Vec2i32 _osxQueryMouseRelativePosition( NSEvent * pNSEvent )
+		{
+			auto * nsSourceWindow = [pNSEvent window];
+
+			const auto & sourceViewRect = [[nsSourceWindow contentView] frame];
+			const auto & mouseLocation = [pNSEvent locationInWindow];
+
+			math::Vec2i32 result {
+					static_cast<int32>( std::round( mouseLocation.x ) ),
+					static_cast<int32>( std::round( sourceViewRect.size.height - mouseLocation.y ) )
+			};
+
+			return result;
+		}
+
+		EvtInputMouseMove & _osxReadMouseMoveEvent( const NativeEventType & pNativeEvent, EventObject & pOutEvent )
+		{
+			auto & eInputMouseMove = pOutEvent.eInputMouseMove;
+			eInputMouseMove.eventCode = E_EVENT_CODE_INPUT_MOUSE_MOVE;
+			eInputMouseMove.cursorPos = _osxQueryMouseRelativePosition( pNativeEvent.nsEvent );
+			return eInputMouseMove;
+		}
+
+		Bitmask<EOSXMouseScrollEventFlags> _osxQueryMouseScrollEventFlags( const NativeEventType & pNativeEvent )
+		{
+			Bitmask<EOSXMouseScrollEventFlags> scrollEventMask = 0;
+
+			if( [pNativeEvent.nsEvent respondsToSelector:@selector(hasPreciseScrollingDeltas)] )
+			{
+				if( [pNativeEvent.nsEvent hasPreciseScrollingDeltas] )
+				{
+					scrollEventMask.set( E_OSX_MOUSE_SCROLL_EVENT_FLAG_SCROLLING_MODE_PRECISE_BIT );
+				}
+				else
+				{
+					scrollEventMask.set( E_OSX_MOUSE_SCROLL_EVENT_FLAG_SCROLLING_MODE_NORMAL_BIT );
+				}
+			}
+
+			if( [pNativeEvent.nsEvent respondsToSelector:@selector(isDirectionInvertedFromDevice)] )
+			{
+				if( [pNativeEvent.nsEvent isDirectionInvertedFromDevice] )
+				{
+					scrollEventMask.set( E_OSX_MOUSE_SCROLL_EVENT_FLAG_SCROLLING_DIRECTION_INVERTED_BIT );
+				}
+				else
+				{
+					scrollEventMask.set( E_OSX_MOUSE_SCROLL_EVENT_FLAG_SCROLLING_DIRECTION_NORMAL_BIT );
+				}
+			}
+
+			return scrollEventMask;
 		}
 
 	}

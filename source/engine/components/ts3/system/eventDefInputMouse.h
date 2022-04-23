@@ -40,6 +40,12 @@ namespace ts3::system
 		Release
 	};
 
+	enum class EMouseScrollDirection : enum_default_value_t
+	{
+		Normal = 1,
+		Inverted = 2
+	};
+
 	struct EvtSharedInputMouseState
 	{
 		// Last cursor position registered by the event system.
@@ -81,7 +87,9 @@ namespace ts3::system
 	struct EvtInputMouseScroll : public EvtInputMouse
 	{
 		//
-		math::Vec2i32 scrollDelta;
+		math::Vec2d scrollDelta;
+		//
+		EMouseScrollDirection scrollDirection;
 	};
 
 	inline constexpr EMouseButtonFlagBits ecGetMouseButtonFlagFromButtonID( EMouseButtonID pButtonID )
