@@ -36,8 +36,6 @@ namespace ts3::system
 
 		auto * nsEventListener = ( NSOSXEventListener * )eventSourceNativeData->nsEventListener;
 
-		eventSourceNativeData->eventController = this;
-
 		[nsEventListener bind:this];
 	}
 	}
@@ -209,9 +207,20 @@ namespace ts3::system
 			return true;
 		}
 
-		math::Vec2i32 _osxQueryMouseRelativePosition( NSEvent * pNSEvent )
+		EMouseButtonID _osxQueryMouseButtonID( NSEvent * pNSEvent )
 		{
-		@autoreleasepool
+			static constexpr EMouseButtonID sMouseButtonIDArray[] =
+			{
+				/* 0 */ EMouseButtonID::Left,
+				/* 1 */ EMouseButtonID::Right,
+				/* 2 */ EMouseButtonID::Middle,
+				/* 3 */ EMouseButtonID::XB1,
+				/* 4 */ EMouseButtonID::XB2,
+			};
+			return staticArrayElement( sMouseButtonIDArray, [pNSEvent buttonNumber] );
+		}
+
+		math::Vec2i32 _osxQueryMouseRelativePosition( NSEvent * pNSEvent )
 		{
 			auto * nsSourceWindow = [pNSEvent window];
 
@@ -226,6 +235,13 @@ namespace ts3::system
 
 			return result;
 		}
+
+		EvtInputMouseMove & _osxReadMouseMoveEvent( const NativeEventType & pNativeEvent, EventObject & pOutEvent )
+		{
+			auto & eInputMouseMove = pOutEvent.eInputMouseMove;
+			eInputMouseMove.eventCode = E_EVENT_CODE_INPUT_MOUSE_MOVE;
+			eInputMouseMove.cursorPos = _osxQueryMouseRelativePosition( pNativeEvent.nsEvent );
+			return eInputMouseMove;
 		}
 
 		bool _osxTranslateEventInputMouse( const NativeEventType & pNativeEvent, EventSource & pEventSource, EventObject & pOutEvent )
@@ -242,20 +258,78 @@ namespace ts3::system
 					break;
 				}
 				case NSAppEventIDGenericLeftMouseUp:
+				{
+					auto & eInputMouseButton = pOutEvent.eInputMouseButton;
+					eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
+					eInputMouseButton.buttonAction = EMouseButtonActionType::Release;
+					eInputMouseButton.buttonID = EMouseButtonID::Left;
+					eInputMouseButton.cursorPos = _osxQueryMouseRelativePosition( pNativeEvent.nsEvent );
+					break;
+				}
 				case NSAppEventIDGenericRightMouseDown:
+				{
+					auto & eInputMouseButton = pOutEvent.eInputMouseButton;
+					eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
+					eInputMouseButton.buttonAction = EMouseButtonActionType::Click;
+					eInputMouseButton.buttonID = EMouseButtonID::Right;
+					eInputMouseButton.cursorPos = _osxQueryMouseRelativePosition( pNativeEvent.nsEvent );
+					break;
+				}
 				case NSAppEventIDGenericRightMouseUp:
+				{
+					auto & eInputMouseButton = pOutEvent.eInputMouseButton;
+					eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
+					eInputMouseButton.buttonAction = EMouseButtonActionType::Release;
+					eInputMouseButton.buttonID = EMouseButtonID::Right;
+					eInputMouseButton.cursorPos = _osxQueryMouseRelativePosition( pNativeEvent.nsEvent );
+					break;
+				}
 				case NSAppEventIDGenericMouseMoved:
+				{
+					auto & eInputMouseMove = _osxReadMouseMoveEvent( pNativeEvent, pOutEvent );
+					break;
+				}
 				case NSAppEventIDGenericLeftMouseDragged:
+				{
+					auto & eInputMouseMove = _osxReadMouseMoveEvent( pNativeEvent, pOutEvent );
+					eInputMouseMove.buttonStateMask.set( E_MOUSE_BUTTON_FLAG_LEFT_BIT );
+					break;
+				}
 				case NSAppEventIDGenericRightMouseDragged:
+				{
+					auto & eInputMouseMove = _osxReadMouseMoveEvent( pNativeEvent, pOutEvent );
+					eInputMouseMove.buttonStateMask.set( E_MOUSE_BUTTON_FLAG_RIGHT_BIT );
+					break;
+				}
 				case NSAppEventIDGenericMouseEntered:
 				case NSAppEventIDGenericMouseExited:
 				case NSAppEventIDGenericScrollWheel:
 				case NSAppEventIDGenericTabletPoint:
 				case NSAppEventIDGenericTabletProximity:
 				case NSAppEventIDGenericOtherMouseDown:
+				{
+					auto & eInputMouseButton = pOutEvent.eInputMouseButton;
+					eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
+					eInputMouseButton.buttonAction = EMouseButtonActionType::Click;
+					eInputMouseButton.buttonID = _osxQueryMouseButtonID( pNativeEvent.nsEvent );
+					eInputMouseButton.cursorPos = _osxQueryMouseRelativePosition( pNativeEvent.nsEvent );
+					break;
+				}
 				case NSAppEventIDGenericOtherMouseUp:
+				{
+					auto & eInputMouseButton = pOutEvent.eInputMouseButton;
+					eInputMouseButton.eventCode = E_EVENT_CODE_INPUT_MOUSE_BUTTON;
+					eInputMouseButton.buttonAction = EMouseButtonActionType::Release;
+					eInputMouseButton.buttonID = _osxQueryMouseButtonID( pNativeEvent.nsEvent );
+					eInputMouseButton.cursorPos = _osxQueryMouseRelativePosition( pNativeEvent.nsEvent );
+					break;
+				}
 				case NSAppEventIDGenericOtherMouseDragged:
 				{
+					auto & eInputMouseMove = _osxReadMouseMoveEvent( pNativeEvent, pOutEvent );
+					const auto buttonID = _osxQueryMouseButtonID( pNativeEvent.nsEvent );
+					const auto buttonFlag = ecGetMouseButtonFlagFromButtonID( buttonID );
+					eInputMouseMove.buttonStateMask.set( buttonFlag );
 					break;
 				}
 				default:
@@ -267,7 +341,8 @@ namespace ts3::system
 
 			if( pOutEvent.code != E_EVENT_CODE_UNDEFINED )
 			{
-				printf( "Mouse event at: [%d , %d]\n",
+				printf( "Mouse event (%u) at: [%d , %d]\n",
+				        (uint32)pNativeEvent.nsAppEventID,
 				        pOutEvent.eInputMouse.cursorPos.x,
 				        pOutEvent.eInputMouse.cursorPos.y );
 			}
@@ -294,6 +369,7 @@ namespace ts3::system
 					return false;
 				}
 			}
+
 			return true;
 		}
 
