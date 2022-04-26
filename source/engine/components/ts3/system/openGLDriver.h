@@ -66,6 +66,8 @@ namespace ts3::system
 		/// This method also creates any additionally required
 		OpenGLVersionSupportInfo initializePlatform();
 
+		const OpenGLVersionSupportInfo & getVersionSupportInfo() const;
+
 		/// @brief Releases temporary init state created automatically by the library. Context must be a valid GL context.
 		/// Call this method after you have created actual display surface and context. It's not mandatory, (everything
 		/// will be released at shutdown anyway), but on some platforms this could free some extra memory and release
@@ -179,7 +181,7 @@ namespace ts3::system
         explicit OpenGLDisplaySurface( OpenGLSystemDriverHandle pGLSystemDriver, void * pNativeData );
         virtual ~OpenGLDisplaySurface() noexcept;
 
-        void clearColorBuffer();
+		void clearColorBuffer();
 
 		/// @brief
 		void swapBuffers();

@@ -20,10 +20,10 @@ namespace ts3::gpuapi
 		GLuint textureHandle = 0;
 
 		glGenTextures( 1, &textureHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		glBindTexture( pGLCreateInfo.bindTarget, textureHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		GLTextureObjectHandle openglTextureObject{ new GLTextureObject( textureHandle, pGLCreateInfo ) };
 		if( !openglTextureObject->initialize( pGLCreateInfo ) )
@@ -37,7 +37,7 @@ namespace ts3::gpuapi
 	bool GLTextureObject::release()
 	{
 		glDeleteTextures( 1, &mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return true;
 	}
@@ -45,7 +45,7 @@ namespace ts3::gpuapi
 	bool GLTextureObject::validateHandle() const
 	{
 		auto isBuffer = glIsTexture( mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return isBuffer != GL_FALSE;
 	}
@@ -82,7 +82,7 @@ namespace ts3::gpuapi
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataLayout,
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataType,
 		                 pGLUploadDesc.openglInputDataDesc.pointer );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLTextureObject::updateUpload2DArray( const GLTextureSubDataUploadDesc & pGLUploadDesc, GLenum pActiveBindTarget )
@@ -103,7 +103,7 @@ namespace ts3::gpuapi
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataLayout,
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataType,
 		                 pGLUploadDesc.openglInputDataDesc.pointer );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLTextureObject::updateUpload3D( const GLTextureSubDataUploadDesc & pGLUploadDesc, GLenum pActiveBindTarget )
@@ -124,7 +124,7 @@ namespace ts3::gpuapi
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataLayout,
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataType,
 		                 pGLUploadDesc.openglInputDataDesc.pointer );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLTextureObject::updateUploadCubeMap( const GLTextureSubDataUploadDesc & pGLUploadDesc, GLenum pActiveBindTarget )
@@ -143,7 +143,7 @@ namespace ts3::gpuapi
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataLayout,
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataType,
 		                 pGLUploadDesc.openglInputDataDesc.pointer );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	GLenum GLTextureObject::queryInternalFormat( GLenum pActiveBindTarget ) const
@@ -152,7 +152,7 @@ namespace ts3::gpuapi
 
 		GLint textureInternalFormat = 0;
 		glGetTexLevelParameteriv( textureBindTarget, 0, GL_TEXTURE_INTERNAL_FORMAT, &textureInternalFormat );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return textureInternalFormat;
 	}
@@ -166,7 +166,7 @@ namespace ts3::gpuapi
 
 	#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_COMPRESSED_BCX )
 		glGetTexLevelParameteriv( textureBindTarget, 0, GL_TEXTURE_COMPRESSED, &textureCompressedFlag );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	#endif
 
 		if( textureCompressedFlag )
@@ -174,7 +174,7 @@ namespace ts3::gpuapi
 		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_COMPRESSED_BCX )
 			GLint textureCompressedImageSize = 0;
 			glGetTexLevelParameteriv( textureBindTarget, 0, GL_TEXTURE_COMPRESSED_IMAGE_SIZE, &textureCompressedImageSize );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			textureImageSize = textureCompressedImageSize;
 		#endif
@@ -183,19 +183,19 @@ namespace ts3::gpuapi
 		{
 			GLint textureWidth = 0;
 			glGetTexLevelParameteriv( textureBindTarget, 0, GL_TEXTURE_WIDTH, &textureWidth );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			GLint textureHeight = 0;
 			glGetTexLevelParameteriv( textureBindTarget, 0, GL_TEXTURE_HEIGHT, &textureHeight );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			GLint textureDepth = 0;
 			glGetTexLevelParameteriv( textureBindTarget, 0, GL_TEXTURE_DEPTH, &textureDepth );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			GLint textureInternalFormat = 0;
 			glGetTexLevelParameteriv( textureBindTarget, 0, GL_TEXTURE_INTERNAL_FORMAT, &textureInternalFormat );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			auto internalFormatBPP = GLCoreAPIProxy::queryGLTextureInternalFormatBPP( textureInternalFormat );
 			auto texturePixelCount = textureWidth * textureHeight * textureDepth;
@@ -234,7 +234,7 @@ namespace ts3::gpuapi
 		                pGLCreateInfo.internalFormat,
 		                pGLCreateInfo.dimensions.width,
 		                pGLCreateInfo.dimensions.height );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		if( pGLCreateInfo.openglInitDataDesc )
 		{
@@ -272,7 +272,7 @@ namespace ts3::gpuapi
 		                pGLCreateInfo.dimensions.width,
 		                pGLCreateInfo.dimensions.height,
 		                pGLCreateInfo.dimensions.arraySize );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		if( pGLCreateInfo.openglInitDataDesc )
 		{
@@ -314,7 +314,7 @@ namespace ts3::gpuapi
 		                           pGLCreateInfo.dimensions.width,
 		                           pGLCreateInfo.dimensions.height,
 		                           GL_FALSE );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return true;
 	}
@@ -327,7 +327,7 @@ namespace ts3::gpuapi
 		                pGLCreateInfo.dimensions.width,
 		                pGLCreateInfo.dimensions.height,
 		                pGLCreateInfo.dimensions.depth );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		if( pGLCreateInfo.openglInitDataDesc )
 		{
@@ -368,7 +368,7 @@ namespace ts3::gpuapi
 		                pGLCreateInfo.internalFormat,
 		                pGLCreateInfo.dimensions.width,
 		                pGLCreateInfo.dimensions.height );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		if( pGLCreateInfo.openglInitDataDesc )
 		{
@@ -409,7 +409,7 @@ namespace ts3::gpuapi
 			pBindTarget = mGLTextureBindTarget;
 
 			glBindTexture( mGLTextureBindTarget, mGLHandle );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 
 		return pBindTarget;

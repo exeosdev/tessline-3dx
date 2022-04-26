@@ -1,7 +1,8 @@
 
 #include <ts3/system/displaySystem.h>
-#include <ts3/system/sysContextNative.h>
-#include <ts3/system/eventCoreNative.h>
+#include <ts3/system/sysContext.h>
+#include <ts3/system/eventCore.h>
+#include <ts3/system/eventObject.h>
 #include <ts3/system/openGLDriver.h>
 #include <ts3/system/assetSystemNative.h>
 #include <ts3/system/perfCounter.h>
@@ -127,7 +128,28 @@ int main( int pArgc, const char ** pArgv )
     auto sysContext = platform::createSysContext( sysContextCreateInfo );
 
     platform::AssetLoaderCreateInfoNativeParams aslCreateInfoNP;
-    aslCreateInfoNP.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+    aslCreateInfoNP.relativeAssetRootDir = "../../../../../../tessline-3dx/assets";
+    AssetLoaderCreateInfo aslCreateInfo;
+    aslCreateInfo.nativeParams = &aslCreateInfoNP;
+    auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
+
+    GraphicsDriverState gxDriverState;
+    gxDriverState.driverID = "GL4";
+    gxDriverState.driverInterface = std::make_unique<GL4GPUDriverInterface>();
+
+#elif( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_OSX )
+
+#include <ts3/gpuapiGL4/GL4_gpuDriverAPI.h>
+
+int main( int pArgc, const char ** pArgv )
+{
+    const std::string sGxDriverName = "GL4";
+
+    SysContextCreateInfo sysContextCreateInfo;
+    auto sysContext = platform::createSysContext( sysContextCreateInfo );
+
+    platform::AssetLoaderCreateInfoNativeParams aslCreateInfoNP;
+    aslCreateInfoNP.relativeAssetRootDir = "../../../../tessline-3dx/assets";
     AssetLoaderCreateInfo aslCreateInfo;
     aslCreateInfo.nativeParams = &aslCreateInfoNP;
     auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
@@ -200,10 +222,10 @@ int main( int pArgc, const char ** pArgv )
                 return true;
             });
     evtDispatcher->setEventHandler(
-            EEventCodeIndex::InputKeyboardKey,
+            EEventCodeIndex::InputKeyboard,
             [evtDispatcher,&gxDriverState,&isFullscreen](const EventObject & pEvt) -> bool {
-            	auto & keyMap = pEvt.eInputKeyboardKey.inputKeyboardState->keyStateMap;
-                if( pEvt.eInputKeyboardKey.keyCode == EKeyCode::Escape )
+            	auto & keyMap = pEvt.eInputKeyboard.inputKeyboardState->keyStateMap;
+                if( pEvt.eInputKeyboard.keyCode == EKeyCode::Escape )
                 {
                     evtDispatcher->postEventAppQuit();
                 }

@@ -17,10 +17,10 @@ namespace ts3::gpuapi
 		GLuint framebufferHandle = 0;
 
 		glGenFramebuffers( 1, &framebufferHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		glBindFramebuffer( GL_FRAMEBUFFER, framebufferHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		GLFramebufferObjectHandle openglFramebufferObject{ new GLFramebufferObject( framebufferHandle ) };
 		if( !openglFramebufferObject->initialize() )
@@ -34,7 +34,7 @@ namespace ts3::gpuapi
 	bool GLFramebufferObject::release()
 	{
 		glDeleteFramebuffers( 1, &mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return true;
 	}
@@ -42,7 +42,7 @@ namespace ts3::gpuapi
 	bool GLFramebufferObject::validateHandle() const
 	{
 		auto isBuffer = glIsFramebuffer( mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return isBuffer != GL_FALSE;
 	}
@@ -57,7 +57,7 @@ namespace ts3::gpuapi
 		                           GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
 		                           GL_RENDERBUFFER,
 		                           pGLRenderbuffer.mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLFramebufferObject::bindDepthStencilRenderbuffer( GLRenderbufferObject & pGLRenderbuffer,
@@ -69,7 +69,7 @@ namespace ts3::gpuapi
 		                           GL_DEPTH_STENCIL_ATTACHMENT,
 		                           GL_RENDERBUFFER,
 		                           pGLRenderbuffer.mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLFramebufferObject::bindColorTexture( uint32 pColorAttachmentIndex,
@@ -88,7 +88,7 @@ namespace ts3::gpuapi
 				                        GL_TEXTURE_2D,
 				                        pGLTexture.mGLHandle,
 				                        pSubResource.u2D.mipLevel );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_2D_ARRAY:
@@ -98,7 +98,7 @@ namespace ts3::gpuapi
 				                           pGLTexture.mGLHandle,
 				                           pSubResource.u2DArray.mipLevel,
 				                           pSubResource.u2DArray.arrayIndex );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_2D_MULTISAMPLE:
@@ -108,7 +108,7 @@ namespace ts3::gpuapi
 				                        GL_TEXTURE_2D_MULTISAMPLE,
 				                        pGLTexture.mGLHandle,
 				                        pSubResource.u2D.mipLevel );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_3D:
@@ -118,7 +118,7 @@ namespace ts3::gpuapi
 				                           pGLTexture.mGLHandle,
 				                           pSubResource.u3D.mipLevel,
 				                           pSubResource.u3D.depthLayerIndex );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_CUBE_MAP:
@@ -128,7 +128,7 @@ namespace ts3::gpuapi
 				                        GL_TEXTURE_2D,
 				                        pGLTexture.mGLHandle,
 				                        pSubResource.uCubeMap.mipLevel );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 				break;
 			}
 		}
@@ -149,7 +149,7 @@ namespace ts3::gpuapi
 				                        GL_TEXTURE_2D,
 				                        pGLTexture.mGLHandle,
 				                        pSubResource.u2D.mipLevel );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_2D_ARRAY:
@@ -159,7 +159,7 @@ namespace ts3::gpuapi
 				                           pGLTexture.mGLHandle,
 				                           pSubResource.u2DArray.mipLevel,
 				                           pSubResource.u2DArray.arrayIndex );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_2D_MULTISAMPLE:
@@ -169,7 +169,7 @@ namespace ts3::gpuapi
 				                        GL_TEXTURE_2D_MULTISAMPLE,
 				                        pGLTexture.mGLHandle,
 				                        pSubResource.u2D.mipLevel );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_3D:
@@ -179,7 +179,7 @@ namespace ts3::gpuapi
 				                           pGLTexture.mGLHandle,
 				                           pSubResource.u3D.mipLevel,
 				                           pSubResource.u3D.depthLayerIndex );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_CUBE_MAP:
@@ -189,7 +189,7 @@ namespace ts3::gpuapi
 				                        GL_TEXTURE_2D,
 				                        pGLTexture.mGLHandle,
 				                        pSubResource.uCubeMap.mipLevel );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 				break;
 			}
 		}
@@ -200,7 +200,7 @@ namespace ts3::gpuapi
 		auto framebufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
 		GLenum framebufferStatus = glCheckFramebufferStatus( framebufferBindTarget );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		if( framebufferStatus != GL_FRAMEBUFFER_COMPLETE )
 		{
@@ -245,7 +245,7 @@ namespace ts3::gpuapi
 			pBindTarget = GL_FRAMEBUFFER;
 
 			glBindFramebuffer( GL_FRAMEBUFFER, mGLHandle );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 
 		return pBindTarget;

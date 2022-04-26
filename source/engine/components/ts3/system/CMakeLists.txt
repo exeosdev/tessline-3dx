@@ -261,9 +261,7 @@ find_library(FrmLib_OpenGL OpenGL)
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
     target_link_libraries( ts3-system PUBLIC
-            #-framework AppKit
-            #-framework CoreFoundation
-            #-framework Foundation
+            dplib-glew
             ${FrmLib_AppKit}
             ${FrmLib_CoreFoundation}
             ${FrmLib_Foundation}

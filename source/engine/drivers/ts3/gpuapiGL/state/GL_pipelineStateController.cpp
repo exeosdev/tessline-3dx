@@ -97,14 +97,14 @@ namespace ts3::gpuapi
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT ) )
 			{
 				glBindVertexArray( _csGLPipelineConfig.vertexArrayObjectHandle );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT );
 			}
 
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SHADER_ANY_STAGE_BIT ) )
 			{
 				glBindProgramPipeline( _csGLPipelineConfig.shaderPipelineObjectHandle );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_SHADER_ALL_MASK );
 			}
 
@@ -121,7 +121,7 @@ namespace ts3::gpuapi
 			if( indexBufferBinding.active )
 			{
 				glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBufferBinding.buffer );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 			}
 
 		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
@@ -132,7 +132,7 @@ namespace ts3::gpuapi
 				const auto stride = vertexBufferBinding[streamIndex].stride;
 
 				glBindVertexBuffer( streamIndex, buffer, offset, stride );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 			}
 		#else
 			for( const auto & streamRange : openglVertexStreamSO->mGLVertexDataSourceBinding.vertexStreamActiveRangeList )
@@ -142,7 +142,7 @@ namespace ts3::gpuapi
 				const auto * strideRangePtr = &( vertexBufferBinding.strideArray[streamRange.firstIndex] );
 
 				glBindVertexBuffers( streamRange.firstIndex, streamRange.length, bufferRangePtr, offsetRangePtr, strideRangePtr );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 			}
 		#endif
 
@@ -157,24 +157,24 @@ namespace ts3::gpuapi
 		if( pGLBlendDescriptor.configDesc.blendState == EBlendState::Disabled )
 		{
 			glDisable( GL_BLEND );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glEnable( GL_BLEND );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			auto & blendFactor = pGLBlendDescriptor.configDesc.factor;
 			glBlendFuncSeparate( blendFactor.srcColor, blendFactor.dstColor, blendFactor.srcAlpha, blendFactor.dstAlpha );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			const auto & blendEquation = pGLBlendDescriptor.configDesc.equation;
 			glBlendEquationSeparate( blendEquation.color, blendEquation.alpha );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			const auto & blendColor = pGLBlendDescriptor.configDesc.constantFactor;
 			glBlendColor( blendColor.fpRed, blendColor.fpGreen, blendColor.fpBlue, blendColor.fpAlpha );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 	}
 
@@ -183,50 +183,50 @@ namespace ts3::gpuapi
 		if( pGLDepthStencilDescriptor.configDesc.depthTestState == EDepthTestState::Disabled )
 		{
 			glDisable( GL_DEPTH_TEST );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glEnable( GL_DEPTH_TEST );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			glDepthFunc( pGLDepthStencilDescriptor.configDesc.depthSettings.depthCompFunc );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			glDepthMask( pGLDepthStencilDescriptor.configDesc.depthSettings.writeMask ? GL_TRUE : GL_FALSE );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 
 		if( pGLDepthStencilDescriptor.configDesc.stencilTestState == EStencilTestState::Disabled )
 		{
 			glDisable( GL_STENCIL_TEST );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glEnable( GL_STENCIL_TEST );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 			{
 				const auto & frontFace = pGLDepthStencilDescriptor.configDesc.stencilSettings.frontFace;
 				glStencilFuncSeparate( GL_FRONT, frontFace.compFunc, frontFace.refValue, frontFace.readMask );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 
 				glStencilMaskSeparate( GL_FRONT, frontFace.writeMask );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 
 				glStencilOpSeparate( GL_FRONT, frontFace.opFail, frontFace.opPassDepthFail, frontFace.opPassDepthPass );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 			}
 			{
 				const auto & backFace = pGLDepthStencilDescriptor.configDesc.stencilSettings.backFace;
 				glStencilFuncSeparate( GL_FRONT, backFace.compFunc, backFace.refValue, backFace.readMask );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 
 				glStencilMaskSeparate( GL_FRONT, backFace.writeMask );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 
 				glStencilOpSeparate( GL_FRONT, backFace.opFail, backFace.opPassDepthFail, backFace.opPassDepthPass );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 			}
 		}
 	}
@@ -236,34 +236,34 @@ namespace ts3::gpuapi
 		if( pGLStateDescriptor.configDesc.scissorTestState == EScissorTestState::Disabled )
 		{
 			glDisable( GL_SCISSOR_TEST );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glEnable( GL_SCISSOR_TEST );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 
 		if( pGLStateDescriptor.configDesc.cullMode == 0 )
 		{
 			glDisable( GL_CULL_FACE );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glEnable( GL_CULL_FACE );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			glCullFace( pGLStateDescriptor.configDesc.cullMode );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 
 		glFrontFace( pGLStateDescriptor.configDesc.triangleFrontFaceOrder );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 	#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
 		glPolygonMode( GL_FRONT_AND_BACK, pGLStateDescriptor.configDesc.primitiveFillMode );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	#endif
 	}
 

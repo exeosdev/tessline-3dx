@@ -23,12 +23,12 @@ namespace ts3::gpuapi
 		if( pEnable )
 		{
 			glEnable( GL_DEBUG_OUTPUT );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glDisable( GL_DEBUG_OUTPUT );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 
 		setCallbackActive( pEnable );
@@ -249,12 +249,12 @@ namespace ts3::gpuapi
 		if( pEnable )
 		{
 			glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glDisable( GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 	}
 
@@ -323,12 +323,12 @@ namespace ts3::gpuapi
 		if( pEnable )
 		{
 			glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glDisable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 	}
 

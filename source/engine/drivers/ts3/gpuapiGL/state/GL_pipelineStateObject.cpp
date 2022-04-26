@@ -63,7 +63,7 @@ namespace ts3::gpuapi
 		ts3DebugAssert( shaderPipelineObject );
 
 		glBindProgramPipeline( shaderPipelineObject->mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		for( auto & activeStage : pShaderBinding.activeStageList )
 		{
@@ -73,7 +73,7 @@ namespace ts3::gpuapi
 		}
 
 		glBindProgramPipeline( 0 );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return shaderPipelineObject;
 	}
@@ -111,7 +111,7 @@ namespace ts3::gpuapi
 		auto vertexArrayObject = GLVertexArrayObject::create();
 
 		glBindVertexArray( vertexArrayObject->mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		for( uint32 attributeCounter = 0; attributeCounter < pVertexInputFormatDescriptor.inputFormatDesc.activeVertexAttributesNum; ++attributeCounter )
 		{
@@ -119,22 +119,22 @@ namespace ts3::gpuapi
 			ts3DebugAssert( vertexAttribute );
 
 			glEnableVertexAttribArray( vertexAttribute.attributeIndex );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			glVertexAttribFormat( vertexAttribute.attributeIndex, vertexAttribute.componentsNum, vertexAttribute.baseType, vertexAttribute.normalized, vertexAttribute.relativeOffset );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			glVertexAttribDivisor( vertexAttribute.attributeIndex, vertexAttribute.instanceRate );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			// This must be called *AFTER* glEnableVertexAttribArray and glVertexAttribFormat. TODO: documentation?
 			// Moving this up causes crash during an actual draw call on at least Quadro T2000 and RX580 (Win 10).
 			glVertexAttribBinding( vertexAttribute.attributeIndex, vertexAttribute.streamIndex );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 
 		glBindVertexArray( 0 );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return vertexArrayObject;
 	}

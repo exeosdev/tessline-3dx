@@ -21,6 +21,11 @@ namespace ts3::system
 		return _versionSupportInfo;
 	}
 
+	const OpenGLVersionSupportInfo & OpenGLSystemDriver::getVersionSupportInfo() const
+	{
+		return _versionSupportInfo;
+	}
+
 	void OpenGLSystemDriver::releaseInitState( OpenGLRenderContext & /* pGLRenderContext */ )
 	{
 		_nativeReleaseInitState();

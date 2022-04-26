@@ -2,6 +2,7 @@
 #include "osxSysContext.h"
 #include "osxAssetSystem.h"
 #include "osxDisplaySystem.h"
+#include "osxFileManager.h"
 #include "osxOpenGLDriver.h"
 #include "osxWindowSystem.h"
 #include <ts3/system/sysContextNative.h>
@@ -51,7 +52,7 @@ namespace ts3::system
 
     FileManagerHandle OSXSysContext::createFileManager()
     {
-        return nullptr;//createSysObject<OSXFileManager>( getHandle<OSXSysContext>() );
+        return createSysObject<PosixFileManager>( getHandle<OSXSysContext>() );
     }
 
     OpenGLSystemDriverHandle OSXSysContext::createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager )
@@ -78,7 +79,7 @@ namespace ts3::system
     {
         std::string executableFilePath;
 
-        //;
+        executableFilePath = "/Users/mateusz/.buildcache/cmake/source/samples/gpuapi01";
 
         return executableFilePath;
     }

@@ -219,7 +219,7 @@ namespace ts3::system
 
 	bool OSXOpenGLDisplaySurface::_nativeSysValidate() const
 	{
-		return false;
+		return true;
 	}
 
 	void OSXOpenGLDisplaySurface::_nativeResize( const FrameSize & pFrameSize, EFrameSizeMode pSizeMode )
@@ -277,7 +277,7 @@ namespace ts3::system
 
 	bool OSXOpenGLRenderContext::_nativeSysValidate() const
 	{
-		return false;
+		return true;
 	}
 
 	void OSXOpenGLRenderContext::_releaseOSXContextState()

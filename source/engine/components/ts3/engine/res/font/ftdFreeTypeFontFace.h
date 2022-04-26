@@ -5,6 +5,7 @@
 #define __TS3_ENGINE_RES_FTD_FREETYPE_FONT_FACE_H__
 
 #include "ftdFreeTypeCommon.h"
+#include <unordered_map>
 
 #include <ft2build.h>
 #include <freetype/freetype.h>

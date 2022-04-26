@@ -23,7 +23,7 @@ namespace ts3::gpuapi
 		}
 
 		auto shaderHandle = glCreateShader( pGLEShaderType );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		GLShaderObjectHandle openglShaderObject{ new GLShaderObject( shaderHandle, pGLEShaderType, shaderStageMaskBit ) };
 
@@ -57,7 +57,7 @@ namespace ts3::gpuapi
 		if( deleteStatus == GL_FALSE )
 		{
 			glDeleteShader( mGLHandle );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			return true;
 		}
@@ -77,10 +77,10 @@ namespace ts3::gpuapi
 		const auto sourceLength = static_cast<GLint>( pSourceLength );
 
 		glShaderSource( mGLHandle, 1, &sourceBuffer, &sourceLength );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		glCompileShader( mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		auto compileStatus = queryParameter( GL_COMPILE_STATUS );
 		if ( compileStatus != GL_TRUE )
@@ -102,7 +102,7 @@ namespace ts3::gpuapi
 		}
 
 		glShaderBinary( 1, &mGLHandle, pFormat, pBinary, static_cast<GLsizei>( pBinarySize ) );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return true;
 	}
@@ -112,7 +112,7 @@ namespace ts3::gpuapi
 		GLint parameterValue = GL_INVALID_VALUE;
 
 		glGetShaderiv( mGLHandle, pParameter, &parameterValue );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return parameterValue;
 	}
@@ -128,7 +128,7 @@ namespace ts3::gpuapi
 			infoLogBuffer.resize( infoLogLength );
 
 			glGetShaderInfoLog( mGLHandle, static_cast<GLsizei>( infoLogLength ), nullptr, infoLogBuffer.dataAs<GLchar>() );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			// Note: length returned by the GL includes null terminator!
 			infoLog.assign( infoLogBuffer.dataAs<GLchar>(), infoLogLength - 1 );
@@ -148,7 +148,7 @@ namespace ts3::gpuapi
 			sourceBuffer.resize( sourceLength );
 
 			glGetShaderSource( mGLHandle, static_cast<GLsizei>( sourceLength ), nullptr, sourceBuffer.dataAs<GLchar>() );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			// Note: length returned by the GL includes null terminator!
 			source.assign( sourceBuffer.dataAs<GLchar>(), sourceLength - 1 );
@@ -185,7 +185,7 @@ namespace ts3::gpuapi
 	{
 		GLint shaderBinaryFormatsNum = 0;
 		glGetIntegerv( GL_NUM_SHADER_BINARY_FORMATS, &shaderBinaryFormatsNum );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return shaderBinaryFormatsNum > 0;
 	}
@@ -194,7 +194,7 @@ namespace ts3::gpuapi
 	{
 		GLint shaderBinaryFormatsNum = 0;
 		glGetIntegerv( GL_NUM_SHADER_BINARY_FORMATS, &shaderBinaryFormatsNum );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return shaderBinaryFormatsNum > 0;
 	}
