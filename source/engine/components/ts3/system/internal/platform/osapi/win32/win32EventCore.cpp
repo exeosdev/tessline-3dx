@@ -198,7 +198,7 @@ namespace ts3::system
 				// TODO: Some validation might be useful to check if this callback is used correctly.
 				auto * win32EventSourceState = reinterpret_cast<Win32EventSourceState *>( windowUserData );
 
-				Win32NativeEvent nativeEvent;
+				NativeEventType nativeEvent;
 				nativeEvent.hwnd = pHWND;
 				nativeEvent.message = pMessage;
 				nativeEvent.wParam = pWparam;
@@ -315,7 +315,7 @@ namespace ts3::system
 				case WM_SYSKEYDOWN:
 				{
 					auto & eInputKeyboardKey = pOutEvent.eInputKeyboardKey;
-					eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
+					eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD;
 					eInputKeyboardKey.inputKeyboardState = &inputKeyboardState;
 					eInputKeyboardKey.keyAction = EKeyActionType::Press;
 					eInputKeyboardKey.keyCode = _win32GetSysKeyCode( pMSG.wParam );
@@ -325,7 +325,7 @@ namespace ts3::system
 				case WM_SYSKEYUP:
 				{
 					auto & eInputKeyboardKey = pOutEvent.eInputKeyboardKey;
-					eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
+					eInputKeyboardKey.eventCode = E_EVENT_CODE_INPUT_KEYBOARD;
 					eInputKeyboardKey.inputKeyboardState = &inputKeyboardState;
 					eInputKeyboardKey.keyAction = EKeyActionType::Release;
 					eInputKeyboardKey.keyCode = _win32GetSysKeyCode( pMSG.wParam );
@@ -448,7 +448,7 @@ namespace ts3::system
 					pOutEvent.code = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
 					eInputMouseScroll.eventCode = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
 					eInputMouseScroll.scrollDelta.x = 0;
-					eInputMouseScroll.scrollDelta.y = static_cast<int32>( GET_WHEEL_DELTA_WPARAM( pMSG.wParam ) );
+					eInputMouseScroll.scrollDelta.y = static_cast<double>( GET_WHEEL_DELTA_WPARAM( pMSG.wParam ) ) / WHEEL_DELTA;
 					break;
 				}
 				case WM_XBUTTONDOWN:
@@ -482,8 +482,8 @@ namespace ts3::system
 				{
 					auto & eInputMouseScroll = pOutEvent.eInputMouseScroll;
 					eInputMouseScroll.eventCode = E_EVENT_CODE_INPUT_MOUSE_SCROLL;
-					eInputMouseScroll.scrollDelta.x = static_cast<int32>( GET_WHEEL_DELTA_WPARAM( pMSG.wParam ) );
-					eInputMouseScroll.scrollDelta.y = 0;
+					eInputMouseScroll.scrollDelta.x = static_cast<double>( GET_WHEEL_DELTA_WPARAM( pMSG.wParam ) ) / WHEEL_DELTA;
+					eInputMouseScroll.scrollDelta.y = 0.0;
 					break;
 				}
 			}

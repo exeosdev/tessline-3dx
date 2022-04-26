@@ -94,6 +94,18 @@ namespace ts3::system
 		}
 		}
 
+		bool osxCheckAppKitFrameworkVersion( NSAppKitVersion pRequiredVersion )
+		{
+			const auto cvAppKitVersion = floor( NSAppKitVersionNumber );
+
+			if( cvAppKitVersion >= pRequiredVersion )
+			{
+				return true;
+			}
+
+			return false;
+		}
+
 		const char * osxQueryCGErrorMessage( CGError pCGError )
 		{
 			switch( pCGError )

@@ -1,6 +1,7 @@
 
 #include "nsOSXEventListener.h"
 #include "osxEventCore.h"
+#include <ts3/system/internal/eventCorePrivate.h>
 
 @implementation NSOSXEventListener
 
@@ -12,11 +13,13 @@
 	return self;
 }
 
--( void ) bind
+-( void ) bind:( OSXEventController * ) pEventController
 {
 @autoreleasepool
 {
 	ts3DebugAssert( mNSWindow != nil );
+
+	mEventController = pEventController;
 
 	if( [mNSWindow delegate] != nil )
 	{
@@ -88,6 +91,8 @@
 	{
 		[mNSView setNextResponder:nil];
 	}
+
+	mEventController = nullptr;
 }
 }
 
@@ -120,56 +125,87 @@
 
 -( void ) keyDown:( NSEvent * ) pEvent
 {
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) keyUp:( NSEvent * ) pEvent
 {
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
--( void ) mouseDown:( NSEvent * ) pEvent
+-( void ) mouseEntered:( NSEvent * ) pEvent
 {
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
--( void ) rightMouseDown:( NSEvent * ) pEvent
+-( void ) mouseExited:( NSEvent * ) pEvent
 {
-	[super rightMouseDown:pEvent];
-}
-
--( void ) otherMouseDown:( NSEvent * ) pEvent
-{
-}
-
--( void ) mouseUp:( NSEvent * ) pEvent
-{
-}
-
--( void ) rightMouseUp:( NSEvent * ) pEvent
-{
-	[super rightMouseUp:pEvent];
-}
-
--( void ) otherMouseUp:( NSEvent * ) pEvent
-{
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) mouseMoved:( NSEvent * ) pEvent
 {
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
+}
+
+-( void ) mouseDown:( NSEvent * ) pEvent
+{
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
+}
+
+-( void ) mouseUp:( NSEvent * ) pEvent
+{
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) mouseDragged:( NSEvent * ) pEvent
 {
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
+}
+
+-( void ) rightMouseDown:( NSEvent * ) pEvent
+{
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
+}
+
+-( void ) rightMouseUp:( NSEvent * ) pEvent
+{
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) rightMouseDragged:( NSEvent * ) pEvent
 {
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
+}
+
+-( void ) otherMouseDown:( NSEvent * ) pEvent
+{
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
+}
+
+-( void ) otherMouseUp:( NSEvent * ) pEvent
+{
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) otherMouseDragged:( NSEvent * ) pEvent
 {
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) scrollWheel:( NSEvent * ) pEvent
 {
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
+}
+
+-( void ) tabletPoint:( NSEvent * ) pEvent
+{
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
+}
+
+-( void ) tabletProximity:( NSEvent * ) pEvent
+{
+	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) touchesBeganWithEvent:( NSEvent * ) pEvent
@@ -246,6 +282,7 @@
 
 -( void ) windowWillClose:( NSNotification * ) pNotification
 {
+	nativeEventDispatch( *mEventController, platform::NativeEventType( platform::OSXEventIDWindowWillClose, pNotification ) );
 }
 
 -( BOOL ) windowShouldClose:( id ) pSender

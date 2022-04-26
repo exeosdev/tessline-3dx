@@ -2,6 +2,7 @@
 #include "osxSysContext.h"
 #include "osxAssetSystem.h"
 #include "osxDisplaySystem.h"
+#include "osxOpenGLDriver.h"
 #include "osxWindowSystem.h"
 #include <ts3/system/sysContextNative.h>
 #include <ts3/system/assetSystemNative.h>
@@ -60,7 +61,7 @@ namespace ts3::system
             pDisplayManager = createDisplayManager();
         }
 
-        return nullptr;//createSysObject<OSXOpenGLSystemDriver>( pDisplayManager->getHandle<OSXDisplayManager>() );
+        return createSysObject<OSXOpenGLSystemDriver>( pDisplayManager->getHandle<OSXDisplayManager>() );
     }
 
     WindowManagerHandle OSXSysContext::createWindowManager( DisplayManagerHandle pDisplayManager )

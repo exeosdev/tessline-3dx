@@ -10,5 +10,5 @@ set( TS3_TOOLS_LIST
         )
 
 foreach( module ${TS3_TOOLS_LIST} )
-    add_subdirectory( "${module}" )
+    #add_subdirectory( "${module}" )
 endforeach()

@@ -64,24 +64,32 @@ namespace ts3::system
 	};
 
 	/// @brief Flags representing attributes (properties) of visuals.
+	///
+	/// Note: some flags are mutually exclusive. If more than one is set (e.g. inside visual
+	/// configuration for a surface), they are chosen by the following priority rules:
+	/// - Buffering: TRIPLE_BUFFER > DOUBLE_BUFFER > SINGLE_BUFFER.
+	/// - If StereoDisplay and MonoDisplay are both set, MonoDisplay is used. If none is set, MonoDisplay is used.
 	enum EVisualAttribFlags : uint32
 	{
-		// Note: some flags are mutually exclusive. If both are set (e.g. inside visual
-		// configuration for a surface), they are chosen by the following priority rules:
-		// - If DoubleBuffer and SingleBuffer are both set, DoubleBuffer is used. If none is set, DoubleBuffer is used.
-		// - If StereoDisplay and MonoDisplay are both set, MonoDisplay is used. If none is set, MonoDisplay is used.
-
-		//
+		/// Visual supports legacy formats. Used forcreation of temporary GL surfaces.
 		E_VISUAL_ATTRIB_FLAG_LEGACY_BIT = 0x0001,
-		// Visual supports double buffering.
+
+		/// Visual supports double buffering.
 		E_VISUAL_ATTRIB_FLAG_DOUBLE_BUFFER_BIT = 0x0100,
-		// Visual does not support double buffering.
+
+		/// Visual does not support double buffering.
 		E_VISUAL_ATTRIB_FLAG_SINGLE_BUFFER_BIT = 0x0200,
-		// Visual is sRGB-capable.
+
+		/// Visual supports triple buffering.
+		E_VISUAL_ATTRIB_FLAG_TRIPLE_BUFFER_BIT = 0x0400,
+
+		/// Visual is sRGB-capable.
 		E_VISUAL_ATTRIB_FLAG_SRGB_CAPABLE_BIT = 0x1000,
-		// Visual has the stereoscopic display mode.
+
+		/// Visual has the stereoscopic display mode.
 		E_VISUAL_ATTRIB_FLAG_STEREO_DISPLAY_BIT = 0x0400,
-		// Visual has the classic, monoscopic display mode.
+
+		/// Visual has the classic, monoscopic display mode.
 		E_VISUAL_ATTRIB_FLAG_MONO_DISPLAY_BIT = 0x0800,
 	};
 

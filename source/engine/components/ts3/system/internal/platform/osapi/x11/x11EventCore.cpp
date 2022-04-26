@@ -12,20 +12,11 @@ namespace ts3::system
 	namespace platform
 	{
 
-		bool _x11TranslateGenericEvent( X11EventController & pEventController,
-		                                EventSource & pEventSource,
-		                                const XEvent & pXEvent,
-		                                EventObject & pOutEvent );
+		bool _x11TranslateGenericEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent );
 		
-		bool _x11TranslateInputEvent( X11EventController & pEventController,
-		                              EventSource & pEventSource,
-		                              const XEvent & pXEvent,
-		                              EventObject & pOutEvent );
+		bool _x11TranslateInputEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent );
 		
-		bool _x11TranslateSystemEvent( X11EventController & pEventController,
-		                               EventSource & pEventSource,
-		                               const XEvent & pXEvent,
-		                               EventObject & pOutEvent );
+		bool _x11TranslateSystemEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent );
 		
 		EKeyCode _x11GetSysKeyCode( KeySym pXkeySym );
 		
@@ -87,7 +78,12 @@ namespace ts3::system
 		{
 			auto * x11EventController = pEventController.queryInterface<X11EventController>();
 
-			return x11TranslateEvent( *x11EventController, pNativeEvent.xEvent, pOutEvent );
+			if( auto * eventSource = x11FindEventSourceByXWindow( *x11EventController, pXEvent.xany.window ) )
+			{
+				return x11TranslateEvent( pNativeEvent.xEvent, *eventSource, pOutEvent );
+			}
+
+			return false;
 		}
 
 		EventSource * x11FindEventSourceByXWindow( X11EventController & pEventController, XWindow pWindowXID )
@@ -142,29 +138,25 @@ namespace ts3::system
 			return "UNKNOWN";
 		}
 
-		bool x11TranslateEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent )
+		bool x11TranslateEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent )
 		{
-			auto * eventSource = x11FindEventSourceByXWindow( pEventController, pXEvent.xany.window );
-
-			// printf("XEvent: %s\n", translateEventTypeName(pXEvent.type));
-
 			if( ( pXEvent.type >= KeyPress ) && ( pXEvent.type <= MotionNotify ) )
 			{
-				if( eventSource && _x11TranslateInputEvent( pEventController, *eventSource, pXEvent, pOutEvent ) )
+				if( _x11TranslateInputEvent( pXEvent, pSharedState, pEventSource, pOutEvent ) )
 				{
 					return true;
 				}
 			}
 			else if( ( pXEvent.type >= EnterNotify ) && ( pXEvent.type <= PropertyNotify ) )
 			{
-				if( eventSource && _x11TranslateGenericEvent( pEventController, *eventSource, pXEvent, pOutEvent  ) )
+				if( _x11TranslateGenericEvent( pXEvent, pSharedState, pEventSource, pOutEvent  ) )
 				{
 					return true;
 				}
 			}
 			else
 			{
-				if( eventSource && _x11TranslateSystemEvent( pEventController, *eventSource, pXEvent, pOutEvent  ) )
+				if( _x11TranslateSystemEvent( pXEvent, pSharedState, pEventSource, pOutEvent ) )
 				{
 					return true;
 				}
@@ -173,14 +165,8 @@ namespace ts3::system
 			return false;
 		}
 
-		bool _x11TranslateGenericEvent( X11EventController & pEventController,
-		                                EventSource & pEventSource,
-		                                const XEvent & pXEvent,
-		                                EventObject & pOutEvent )
+		bool _x11TranslateGenericEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent )
 		{
-			auto & xSessionData = x11GetXSessionData( pEventController );
-			xSessionData.atomCache.wmProtocolDelete;
-
 			switch( pXEvent.type )
 			{
 				case EnterNotify:
@@ -230,10 +216,11 @@ namespace ts3::system
 
 				case PropertyNotify:
 				{
+					auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::X11EventSourceNativeData>();
+					auto & xSessionData = x11GetXSessionData( *eventSourceNativeData );
+
 					if( pXEvent.xproperty.atom == xSessionData.atomCache.wmState )
 					{
-						auto * eventSourceNativeData = pEventSource.getEventSourceNativeDataAs<platform::X11EventSourceNativeData>();
-
 						// PropertyNotify is emitted after the state has been changed.
 						// Check what is the current state of WM_STATE_FULLSCREEN.
 						const auto isFullscreenWindow = platform::x11IsFullscreenWindow( xSessionData.display, eventSourceNativeData->windowXID );
@@ -262,15 +249,9 @@ namespace ts3::system
 			return true;
 		}
 
-		bool _x11TranslateInputEventMouseButton( X11EventController & pEventController,
-		                                         const XEvent & pXEvent,
-		                                         EventObject & pOutEvent,
-		                                         EMouseButtonActionType pButtonAction );
+		bool _x11TranslateInputEventMouseButton( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent );
 
-		bool _x11TranslateInputEvent( X11EventController & pEventController,
-		                              EventSource & /* pEventSource */,
-		                              const XEvent & pXEvent,
-		                              EventObject & pOutEvent )
+		bool _x11TranslateInputEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent )
 		{
 			switch( pXEvent.type )
 			{
@@ -289,7 +270,7 @@ namespace ts3::system
 					auto keysym = XLookupKeysym( &xKey, 0 );
 					auto keycode = _x11GetSysKeyCode( keysym );
 					auto & eventData = pOutEvent.eInputKeyboardKey;
-					eventData.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
+					eventData.eventCode = E_EVENT_CODE_INPUT_KEYBOARD;
 					eventData.inputKeyboardState = &inputKeyboardState;
 					eventData.keyCode = keycode;
 					eventData.keyAction = EKeyActionType::Press;
@@ -306,7 +287,7 @@ namespace ts3::system
 					auto keysym = XLookupKeysym( &xKey, 0 );
 					auto keycode = _x11GetSysKeyCode( keysym );
 					auto & eventData = pOutEvent.eInputKeyboardKey;
-					eventData.eventCode = E_EVENT_CODE_INPUT_KEYBOARD_KEY;
+					eventData.eventCode = E_EVENT_CODE_INPUT_KEYBOARD;
 					eventData.inputKeyboardState = &inputKeyboardState;
 					eventData.keyCode = keycode;
 					eventData.keyAction = EKeyActionType::Release;
@@ -368,10 +349,7 @@ namespace ts3::system
 			return pOutEvent.commonData.eventCode != E_EVENT_CODE_UNDEFINED;
 		}
 
-		bool _x11TranslateInputEventMouseButton( X11EventController & pEventController,
-		                                         const XEvent & pXEvent,
-		                                         EventObject & pOutEvent,
-		                                         EMouseButtonActionType pButtonAction )
+		bool _x11TranslateInputEventMouseButton( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent )
 		{
 			const auto x11MouseButtonID = _x11GetMouseButtonID( pXEvent.xbutton.button );
 
@@ -521,10 +499,7 @@ namespace ts3::system
 			return true;
 		}
 
-		bool _x11TranslateSystemEvent( X11EventController & pEventController,
-		                               EventSource & pEventSource,
-		                               const XEvent & pXEvent,
-		                               EventObject & pOutEvent )
+		bool _x11TranslateSystemEvent( const XEvent & pXEvent, EventSource & pEventSource, EventObject & pOutEvent )
 		{
 			switch( pXEvent.type )
 			{

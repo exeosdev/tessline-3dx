@@ -63,6 +63,8 @@ namespace ts3::system
 		
 		virtual DisplayDriverHandle _nativeCreateDisplayDriver() override final;
 
+		virtual void _nativeQueryDefaultDisplayOffset( DisplayOffset & pOutOffset ) const override final;
+
 		virtual void _nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const override final;
 
 		virtual void _nativeQueryMinWindowSize( DisplaySize & pOutSize ) const override final;

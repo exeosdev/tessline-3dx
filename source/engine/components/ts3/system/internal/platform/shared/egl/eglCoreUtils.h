@@ -44,7 +44,7 @@ namespace ts3::system
 	};
 
 #define ts3EGLMakeErrorInfo( pEGLError ) \
-	GLErrorInfo( pEGLError, EGLCoreAPI::translateErrorCode( pEGLError ) )
+	OpenGLErrorInfo( pEGLError, EGLCoreAPI::translateErrorCode( pEGLError ) )
 
 #define ts3EGLGetLastErrorInfo() \
 	ts3EGLMakeErrorInfo( ::eglGetError() )

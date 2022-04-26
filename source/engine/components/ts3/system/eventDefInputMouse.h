@@ -40,11 +40,14 @@ namespace ts3::system
 		Release
 	};
 
+	enum class EMouseScrollDirection : enum_default_value_t
+	{
+		Normal = 1,
+		Inverted = 2
+	};
+
 	struct EvtSharedInputMouseState
 	{
-		// State of the mouse buttons. Used for motion events on systems which do not have reliable states (X11).
-		Bitmask<EMouseButtonFlagBits> buttonStateMask = 0;
-
 		// Last cursor position registered by the event system.
 		MouseCursorPos lastCursorPos = CX_EVENT_MOUSE_POS_INVALID;
 
@@ -55,44 +58,44 @@ namespace ts3::system
 		perf_counter_value_t lastPressTimestamp = 0u;
 
 		// Current sequence length, i.e. number of clicks of the same button in a row.
-		uint32 multiClickSequenceLength = 1;
+		uint32 currentMultiClickSequenceLength = 1;
 	};
 
-	template <event_code_value_t tpEventCode>
-	struct EvtInputMouse : public EvtInput<tpEventCode>
+	struct EvtInputMouse : public EvtInput
 	{
+		Bitmask<EMouseButtonFlagBits> buttonStateMask;
+
+		math::Vec2i32 cursorPos;
+
 		const EvtSharedInputMouseState * inputMouseState;
 	};
 
-	struct EvtInputMouseButton : public EvtInputMouse<E_EVENT_CODE_INPUT_MOUSE_BUTTON>
+	struct EvtInputMouseButton : public EvtInputMouse
 	{
 		//
 		EMouseButtonActionType buttonAction;
 		//
 		EMouseButtonID buttonID;
-		//
-		Bitmask<EMouseButtonFlagBits> buttonStateMask;
-		//
-		uint32 multiClickSequenceLength;
-		//
-		math::Vec2i32 cursorPos;
 	};
 
-	struct EvtInputMouseMove : public EvtInputMouse<E_EVENT_CODE_INPUT_MOUSE_MOVE>
+	struct EvtInputMouseMove : public EvtInputMouse
 	{
-		//
-		Bitmask<EMouseButtonFlagBits> buttonStateMask;
-		//
-		math::Vec2i32 cursorPos;
 		//
 		math::Vec2i32 movementDelta;
 	};
 
-	struct EvtInputMouseScroll : public EvtInputMouse<E_EVENT_CODE_INPUT_MOUSE_SCROLL>
+	struct EvtInputMouseScroll : public EvtInputMouse
 	{
 		//
-		math::Vec2i32 scrollDelta;
+		math::Vec2d scrollDelta;
+		//
+		EMouseScrollDirection scrollDirection;
 	};
+
+	inline constexpr EMouseButtonFlagBits ecGetMouseButtonFlagFromButtonID( EMouseButtonID pButtonID )
+	{
+		return static_cast<EMouseButtonFlagBits>( static_cast<uint32>( pButtonID ) & E_MOUSE_BUTTON_FLAG_ALL_BIT );
+	}
 
 } // namespace ts3::system
 

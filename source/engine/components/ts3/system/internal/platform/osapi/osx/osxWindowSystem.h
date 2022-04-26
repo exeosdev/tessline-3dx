@@ -34,7 +34,7 @@ namespace ts3::system
 
 		void osxCreateWindowDefaultView( OSXWindowNativeData & pWindowNativeData );
 
-		void osxCreateEventListener( OSXWindowNativeData & pWindowNativeData );
+		void osxSetInputWindow( OSXWindowNativeData & pWindowNativeData );
 
 		void osxSetFrameTitle( NSWindow * pNSWindow, const std::string & pTitle );
 

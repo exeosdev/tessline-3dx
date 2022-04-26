@@ -2,6 +2,8 @@
 #include "nsOSXWindow.h"
 #include "osxWindowSystem.h"
 
+#import <QuartzCore/CALayer.h>
+
 @implementation NSOSXWindow : NSWindow
 
 -( BOOL ) canBecomeKeyWindow
@@ -49,21 +51,37 @@
 
 	[super initWithFrame:windowRect];
 
+	[self setWantsLayer:YES];
+
+//	const CGFloat backgroundColor[] = { 0.12, 0.44, 0.92, 1.0 };
+//	auto * viewBackgroundColor = CGColorCreate( CGColorSpaceCreateDeviceRGB(), backgroundColor );
+//
+//	[[self layer] setBackgroundColor:viewBackgroundColor];
+
 	// Set this view as the window's main content view.
-	[mNSWindow setContentView:self];
+	[pWindow setContentView:self];
 
 	// Bind the view as the responder. All defined event handlers inside this view
 	// will get called first before (optionally) being forwarded to the window itself.
-	[mNSWindow makeFirstResponder:self];
+	[pWindow makeFirstResponder:self];
 
 	// Next responder for this view is the window.
 	// E.g. calling [super keyDown:pEvent] in the view will forward the even to the window handler.
-	[self setNextResponder:mNSWindow];
+	[self setNextResponder:pWindow];
 
 	// Enable touch events support.
-	[self setAcceptsTouchEvents:YES];
+	if( platform::osxCheckAppKitFrameworkVersion( NSAppKitVersionNumber10_12_2 ) )
+	{
+		[self setAllowedTouchTypes:NSTouchTypeMaskDirect];
+	}
+	else
+	{
+		[self setAcceptsTouchEvents:YES];
+	}
 
 	mNSWindow = pWindow;
+
+	return self;
 }
 
 -( BOOL ) acceptsFirstResponder

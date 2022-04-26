@@ -7,52 +7,47 @@
 namespace ts3::system
 {
 
-	template <event_code_value_t tpEventCode>
 	struct EvtApp : public EvtBase
 	{
-	public:
-		constexpr EvtApp()
-		: EvtBase( tpEventCode )
-		{}
 	};
 
-	struct EvtAppActivityDisplayInit : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_DISPLAY_INIT>
+	struct EvtAppActivityDisplayInit : public EvtApp
 	{
 	};
 
-	struct EvtAppActivityDisplayTerm : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_DISPLAY_TERM>
+	struct EvtAppActivityDisplayTerm : public EvtApp
 	{
 	};
 
-	struct EvtAppActivityFocusGained : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_FOCUS_GAINED>
+	struct EvtAppActivityFocusGained : public EvtApp
 	{
 	};
 
-	struct EvtAppActivityFocusLost : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_FOCUS_LOST>
+	struct EvtAppActivityFocusLost : public EvtApp
 	{
 	};
 
-	struct EvtAppActivityPause : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_PAUSE>
+	struct EvtAppActivityPause : public EvtApp
 	{
 	};
 
-	struct EvtAppActivityResume : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_RESUME>
+	struct EvtAppActivityResume : public EvtApp
 	{
 	};
 
-	struct EvtAppActivityStart : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_START>
+	struct EvtAppActivityStart : public EvtApp
 	{
 	};
 
-	struct EvtAppActivityStop : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_STOP>
+	struct EvtAppActivityStop : public EvtApp
 	{
 	};
 
-	struct EvtAppActivityQuit : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_QUIT>
+	struct EvtAppActivityQuit : public EvtApp
 	{
 	};
 
-	struct EvtAppActivityTerminate : public EvtApp<E_EVENT_CODE_APP_ACTIVITY_TERMINATE>
+	struct EvtAppActivityTerminate : public EvtApp
 	{
 	};
 

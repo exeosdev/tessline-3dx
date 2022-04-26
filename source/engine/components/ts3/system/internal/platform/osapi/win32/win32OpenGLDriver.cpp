@@ -132,7 +132,7 @@ namespace ts3::system
 		mNativeData.initState.reset();
 	}
 
-	OpenGLDisplaySurfaceHandle Win32OpenGLSystemDriver::_nativeCreateDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo )
+	OpenGLDisplaySurfaceHandle Win32OpenGLSystemDriver::_nativeCreateDisplaySurface( const OpenGLDisplaySurfaceCreateInfo & pCreateInfo )
 	{
 		auto displaySurface = createSysObject<Win32OpenGLDisplaySurface>( getHandle<Win32OpenGLSystemDriver>() );
 
@@ -144,15 +144,15 @@ namespace ts3::system
 
 		_win32CreateGLSurface( displaySurface->mNativeData, pCreateInfo.visualConfig );
 
-		if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_DISABLED_BIT ) )
+		if( pCreateInfo.flags.isSet( E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_DISABLED_BIT ) )
 		{
 			wglSwapIntervalEXT( 0 );
 		}
-		else if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT ) )
+		else if( pCreateInfo.flags.isSet( E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT ) )
 		{
 			wglSwapIntervalEXT( -1 );
 		}
-		else if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT ) )
+		else if( pCreateInfo.flags.isSet( E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT ) )
 		{
 			wglSwapIntervalEXT( 1 );
 		}
@@ -160,7 +160,7 @@ namespace ts3::system
 		::ShowWindow( displaySurface->mNativeData.hwnd, SW_SHOWNORMAL );
 
 		// TODO: Workaround to properly work with current engine's implementation. That should be turned into an explicit flag.
-		if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
+		if( pCreateInfo.flags.isSet( E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
 		{
 			::SetCapture( displaySurface->mNativeData.hwnd );
 			::ShowCursor( FALSE );
@@ -198,43 +198,43 @@ namespace ts3::system
 	}
 
 	OpenGLRenderContextHandle Win32OpenGLSystemDriver::_nativeCreateRenderContext( OpenGLDisplaySurface & pDisplaySurface,
-	                                                                               const GLRenderContextCreateInfo & pCreateInfo )
+	                                                                               const OpenGLRenderContextCreateInfo & pCreateInfo )
 	{
 		auto * win32DisplaySurface = pDisplaySurface.queryInterface<Win32OpenGLDisplaySurface>();
 
-		int contextProfile = 0;
+		int contextAPIProfile = 0;
 		Bitmask<int> contextCreateFlags = 0;
 		HGLRC shareContextHandle = nullptr;
 
-		if( pCreateInfo.contextProfile == EGLContextProfile::Core )
+		if( pCreateInfo.contextAPIProfile == EOpenGLAPIProfile::Core )
 		{
-			contextProfile = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
+			contextAPIProfile = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
 		}
-		else if( pCreateInfo.contextProfile == EGLContextProfile::Legacy )
+		else if( pCreateInfo.contextAPIProfile == EOpenGLAPIProfile::Legacy )
 		{
-			contextProfile = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
+			contextAPIProfile = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
 		}
-		else if( pCreateInfo.contextProfile == EGLContextProfile::GLES )
+		else if( pCreateInfo.contextAPIProfile == EOpenGLAPIProfile::GLES )
 		{
-			contextProfile = WGL_CONTEXT_ES_PROFILE_BIT_EXT;
+			contextAPIProfile = WGL_CONTEXT_ES_PROFILE_BIT_EXT;
 		}
 
-		if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
+		if( pCreateInfo.flags.isSet( E_OPENGL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT ) )
 		{
 			contextCreateFlags |= WGL_CONTEXT_DEBUG_BIT_ARB;
 		}
-		if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
+		if( pCreateInfo.flags.isSet( E_OPENGL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT ) )
 		{
 			contextCreateFlags |= WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
 		}
-		if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
+		if( pCreateInfo.flags.isSet( E_OPENGL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT ) )
 		{
 			if( pCreateInfo.shareContext )
 			{
 				auto * win32ShareContext = pCreateInfo.shareContext->queryInterface<Win32OpenGLRenderContext>();
 				shareContextHandle = win32ShareContext->mNativeData.contextHandle;
 			}
-			else if( pCreateInfo.flags.isSet( E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT ) )
+			else if( pCreateInfo.flags.isSet( E_OPENGL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT ) )
 			{
 				if( auto * currentWGLContext = ::wglGetCurrentContext() )
 				{
@@ -250,7 +250,7 @@ namespace ts3::system
 			// Requested OpenGL API version: minor part
 			WGL_CONTEXT_MINOR_VERSION_ARB, pCreateInfo.runtimeVersionDesc.apiVersion.minor,
 			//
-			WGL_CONTEXT_PROFILE_MASK_ARB, contextProfile,
+			WGL_CONTEXT_PROFILE_MASK_ARB, contextAPIProfile,
 			//
 			WGL_CONTEXT_FLAGS_ARB, contextCreateFlags,
 			// Terminator
@@ -306,9 +306,9 @@ namespace ts3::system
 		return {};
 	}
 
-	bool Win32OpenGLSystemDriver::_nativeIsGLAPIProfileSupported( EGLAPIProfile pGLAPIProfile ) const
+	bool Win32OpenGLSystemDriver::_nativeIsAPIClassSupported( EOpenGLAPIClass pAPIClass ) const
 	{
-		if( pGLAPIProfile == EGLAPIProfile::OpenGL )
+		if( pAPIClass == EOpenGLAPIClass::OpenGL )
 		{
 			return true;
 		}

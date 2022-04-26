@@ -4,16 +4,6 @@
 
 #include "nsCommon.h"
 #include <ts3/system/windowCommon.h>
-#import <AppKit/NSApplication.h>
-#import <AppKit/NSWindow.h>
-
-namespace ts3::system
-{
-
-	class OSXSysContext;
-	class OSXEventController;
-
-}
 
 @interface NSApplication( NSAppleMenu )
 -( void ) setAppleMenu: (NSMenu *)pMenu;

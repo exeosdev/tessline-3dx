@@ -3,17 +3,26 @@
 #define __TS3_SYSTEM_PLATFORM_OSAPI_OSX_NS_COMMON_H__
 
 #include "osxCommon.h"
-#import <AppKit/NSApplication.h>
 #import <AppKit/NSWindow.h>
+#import <AppKit/NSApplication.h>
+#import <AppKit/NSApplicationScripting.h>
 
 namespace ts3::system
 {
 
-	ts3SysDeclareHandle( OSXDisplayManager );
-	ts3SysDeclareHandle( OSXDisplayDriver );
+	ts3SysDeclareHandle( OSXDisplayManager  );
+	ts3SysDeclareHandle( OSXDisplayDriver   );
 	ts3SysDeclareHandle( OSXEventController );
-	ts3SysDeclareHandle( OSXWindowManager );
+	ts3SysDeclareHandle( OSXWindowManager   );
 
 }
+
+namespace platform = ts3::system::platform;
+
+using OSXSysContext = ts3::system::OSXSysContext;
+using OSXDisplayManager = ts3::system::OSXDisplayManager;
+using OSXDisplayDriver = ts3::system::OSXDisplayDriver;
+using OSXEventController = ts3::system::OSXEventController;
+using OSXWindowManager = ts3::system::OSXWindowManager;
 
 #endif // __TS3_SYSTEM_PLATFORM_OSAPI_OSX_NS_COMMON_H__

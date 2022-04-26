@@ -60,7 +60,7 @@ namespace ts3::system
 
 		void eglCreateCoreContext( EGLRenderContextNativeData & pEGLContextNativeData,
 		                           const EGLDisplaySurfaceNativeData & pEGLSurfaceNativeData,
-		                           const GLRenderContextCreateInfo & pCreateInfo );
+		                           const OpenGLRenderContextCreateInfo & pCreateInfo );
 
 		void eglCreateCoreContextForCurrentThread( EGLRenderContextNativeData & pEGLContextNativeData );
 

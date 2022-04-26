@@ -177,6 +177,8 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
             "internal/platform/osapi/osx/osxDisplaySystem.mm"
             "internal/platform/osapi/osx/osxEventCore.h"
             "internal/platform/osapi/osx/osxEventCore.mm"
+            "internal/platform/osapi/osx/osxOpenGLDriver.h"
+            "internal/platform/osapi/osx/osxOpenGLDriver.mm"
             "internal/platform/osapi/osx/osxSysContext.h"
             "internal/platform/osapi/osx/osxSysContext.mm"
             "internal/platform/osapi/osx/osxWindowSystem.h"
@@ -184,8 +186,6 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
             #"internal/platform/osapi/osx/osxEventCore.h"
             #"internal/platform/osapi/osx/osxEventCore.cpp"
             #"internal/platform/osapi/osx/osxFileManager.h"
-            #"internal/platform/osapi/osx/osxOpenGLDriver.h"
-            #"internal/platform/osapi/osx/osxOpenGLDriver.cpp"
             #"internal/platform/osapi/osx/osxSysContext.h"
             #"internal/platform/osapi/osx/osxSysContext.cpp"
             )
@@ -257,6 +257,7 @@ endif()
 find_library(FrmLib_AppKit AppKit)
 find_library(FrmLib_CoreFoundation CoreFoundation)
 find_library(FrmLib_Foundation Foundation)
+find_library(FrmLib_OpenGL OpenGL)
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
     target_link_libraries( ts3-system PUBLIC
@@ -266,6 +267,7 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
             ${FrmLib_AppKit}
             ${FrmLib_CoreFoundation}
             ${FrmLib_Foundation}
+            ${FrmLib_OpenGL}
             )
 endif()
 
