@@ -29,35 +29,12 @@ namespace ts3::system
 	WindowHandle OSXWindowManager::_nativeCreateWindow( WindowCreateInfo pCreateInfo )
 	{
 		auto osxDisplayManager = mDisplayManager->getHandle<OSXDisplayManager>();
-
-		NSArray * nsScreenArray = [NSScreen screens];
-		NSScreen * defaultScreen = [nsScreenArray objectAtIndex:0];
-
 		auto windowObject = createSysObject<OSXWindow>( getHandle<OSXWindowManager>() );
 
-		@try
-		{
-			platform::osxCreateWindow( windowObject->mNativeData, defaultScreen, pCreateInfo );
-
-			platform::osxCreateWindowDefaultView( windowObject->mNativeData );
-
-			platform::osxCreateEventListener( windowObject->mNativeData );
-
-			auto * nsWindow = ( NSWindow * )windowObject->mNativeData.nsWindow;
-
-			if( ![nsWindow isMiniaturized] )
-			{
-				[NSApp activateIgnoringOtherApps:YES];
-
-				[nsWindow makeKeyAndOrderFront:nil];
-				[nsWindow orderFrontRegardless];
-			}
-		}
-		@catch( NSException * pException )
-		{
-			const auto message = [[pException reason] UTF8String];
-			ts3DebugInterrupt();
-		}
+		platform::osxCreateWindow( windowObject->mNativeData, nullptr, pCreateInfo );
+		platform::osxCreateWindowDefaultView( windowObject->mNativeData );
+		platform::osxCreateEventListener( windowObject->mNativeData );
+		platform::osxSetInputWindow( windowObject->mNativeData );
 
 		return windowObject;
 	}
@@ -98,6 +75,12 @@ namespace ts3::system
 		{
 		@autoreleasepool
 		{
+			if( !pTargetScreen )
+			{
+				NSArray * nsScreenArray = [NSScreen screens];
+				pTargetScreen = [nsScreenArray objectAtIndex:0];
+			}
+
 			NSOSXWindow * nsWindow = nil;
 
 			@try
@@ -148,6 +131,17 @@ namespace ts3::system
 				ts3DebugInterrupt();
 			}
 		}
+		}
+
+		void osxSetInputWindow( OSXWindowNativeData & pWindowNativeData )
+		{
+			if( ![pWindowNativeData.nsWindow isMiniaturized] )
+			{
+				[NSApp activateIgnoringOtherApps:YES];
+
+				[pWindowNativeData.nsWindow makeKeyAndOrderFront:nil];
+				[pWindowNativeData.nsWindow orderFrontRegardless];
+			}
 		}
 
 		void osxSetFrameTitle( NSWindow * pNSWindow, const std::string & pTitle )

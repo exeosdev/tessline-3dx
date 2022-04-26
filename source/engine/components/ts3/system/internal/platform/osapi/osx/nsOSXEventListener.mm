@@ -282,7 +282,7 @@
 
 -( void ) windowWillClose:( NSNotification * ) pNotification
 {
-	nativeEventDispatch( *mEventController, platform::NativeEventType( platform::NSAppEventIDWindowWillClose, pNotification ) );
+	nativeEventDispatch( *mEventController, platform::NativeEventType( platform::OSXEventIDWindowWillClose, pNotification ) );
 }
 
 -( BOOL ) windowShouldClose:( id ) pSender

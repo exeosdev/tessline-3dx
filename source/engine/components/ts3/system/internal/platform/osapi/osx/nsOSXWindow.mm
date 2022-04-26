@@ -53,10 +53,10 @@
 
 	[self setWantsLayer:YES];
 
-	const CGFloat backgroundColor[] = { 0.12, 0.44, 0.92, 1.0 };
-	auto * viewBackgroundColor = CGColorCreate( CGColorSpaceCreateDeviceRGB(), backgroundColor );
-
-	[[self layer] setBackgroundColor:viewBackgroundColor];
+//	const CGFloat backgroundColor[] = { 0.12, 0.44, 0.92, 1.0 };
+//	auto * viewBackgroundColor = CGColorCreate( CGColorSpaceCreateDeviceRGB(), backgroundColor );
+//
+//	[[self layer] setBackgroundColor:viewBackgroundColor];
 
 	// Set this view as the window's main content view.
 	[pWindow setContentView:self];

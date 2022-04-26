@@ -28,25 +28,25 @@ namespace ts3::system
 		X11SysContext();
 		virtual ~X11SysContext() noexcept;
 
-		/// @override SysContext::createAssetLoader
+		/// @copybrief SysContext::createAssetLoader
 		virtual AssetLoaderHandle createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo ) override final;
 
-		/// @override SysContext::createDisplayManager
+		/// @copybrief SysContext::createDisplayManager
 		virtual DisplayManagerHandle createDisplayManager() override final;
 
-		/// @override SysContext::createEventController
+		/// @copybrief SysContext::createEventController
 		virtual EventControllerHandle createEventController() override final;
 
-		/// @override SysContext::createFileManager
+		/// @copybrief SysContext::createFileManager
 		virtual FileManagerHandle createFileManager() override final;
 
-		/// @override SysContext::createOpenGLSystemDriver
+		/// @copybrief SysContext::createOpenGLSystemDriver
 		virtual OpenGLSystemDriverHandle createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager ) override final;
 
-		/// @override SysContext::createWindowManager
+		/// @copybrief SysContext::createWindowManager
 		virtual WindowManagerHandle createWindowManager( DisplayManagerHandle pDisplayManager ) override final;
 
-		/// @override SysContext::queryCurrentProcessExecutableFilePath
+		/// @copybrief SysContext::queryCurrentProcessExecutableFilePath
 		virtual std::string queryCurrentProcessExecutableFilePath() const override final;
 
 	private:

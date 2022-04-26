@@ -33,22 +33,35 @@
 namespace ts3
 {
 
-	/// @brief Representation of a version in MAJOR.MINOR format.
+	/// @brief Representation of a version in 'major.minor' format.
 	union Version
 	{
 	public:
 		struct
 		{
+			/// Major component of the version number.
 			uint16 major;
+
+			/// Minor component of the version number.
 			uint16 minor;
 		};
+
+		/// 32-bit hash of the version, which is assembled by combining both uint16 components into a single 32-bit value.
 		uint32 hash;
 
 	public:
-		TS3_PCL_ATTR_NO_DISCARD std::string toString() const;
+		/// @brief Returns the string representation of the version.
+		/// @return The string representation of the version, formatted as "major.minor".
+		TS3_PCL_ATTR_NO_DISCARD std::string toString() const
+		{
+			return std::to_string( major ) + "." + std::to_string( minor );
+		}
 	};
 
+	/// @brief An invalid version constant - both major and minor components are set to UINT16_MAX.
 	inline constexpr Version CX_VERSION_INVALID{ CX_UINT16_MAX, CX_UINT16_MAX };
+
+	/// @brief An unknown version constant - both major and minor components are set to 0.
 	inline constexpr Version CX_VERSION_UNKNOWN{ 0, 0 };
 
 	inline bool operator==( const Version & pLhs, const Version & pRhs )

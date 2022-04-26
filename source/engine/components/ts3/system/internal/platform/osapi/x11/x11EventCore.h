@@ -61,16 +61,16 @@ namespace ts3::system
 		using EventController::getEventDispatcherConfig;
 
 	private:
-		/// @override EventController::_nativeRegisterEventSource
+		/// @copybrief EventController::_nativeRegisterEventSource
 		virtual void _nativeRegisterEventSource( EventSource & pEventSource ) override final;
 
-		/// @override EventController::_nativeUnregisterEventSource
+		/// @copybrief EventController::_nativeUnregisterEventSource
 		virtual void _nativeUnregisterEventSource( EventSource & pEventSource ) override final;
 
-		/// @override EventController::_nativeDispatchPendingEvents
+		/// @copybrief EventController::_nativeDispatchPendingEvents
 		virtual bool _nativeDispatchPendingEvents() override final;
 
-		/// @override EventController::_nativeDispatchPendingEventsWait
+		/// @copybrief EventController::_nativeDispatchPendingEventsWait
 		virtual bool _nativeDispatchPendingEventsWait() override final;
 	};
 

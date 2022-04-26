@@ -57,14 +57,14 @@ namespace ts3::system
 		void setRootDir( std::string pRootDir );
 
 	private:
-		/// @override AssetLoader::_nativeOpenSubAsset
+		/// @copybrief AssetLoader::_nativeOpenSubAsset
 		virtual AssetHandle _nativeOpenSubAsset( FSUtilityAPI::FilePathInfo pAssetPathInfo,
 		                                         Bitmask<EAssetOpenFlags> pFlags ) override final;
 
-		/// @override AssetLoader::_nativeOpenDirectory
+		/// @copybrief AssetLoader::_nativeOpenDirectory
 		virtual AssetDirectoryHandle _nativeOpenDirectory( std::string pDirectoryName ) override final;
 
-		/// @override AssetLoader::_nativeCheckDirectoryExists
+		/// @copybrief AssetLoader::_nativeCheckDirectoryExists
 		virtual bool _nativeCheckDirectoryExists( const std::string & pDirectoryName ) const override final;
 	};
 	
@@ -83,13 +83,13 @@ namespace ts3::system
 		using AssetDirectory::setDirName;
 		
 	private:
-		/// @override AssetDirectory::_nativeRefreshAssetList
+		/// @copybrief AssetDirectory::_nativeRefreshAssetList
 		virtual void _nativeRefreshAssetList() override final;
 
-		/// @override AssetDirectory::_nativeOpenAsset
+		/// @copybrief AssetDirectory::_nativeOpenAsset
 		virtual AssetHandle _nativeOpenAsset( std::string pAssetName, Bitmask<EAssetOpenFlags> pFlags ) override final;
 
-		/// @override AssetDirectory::_nativeCheckAssetExists
+		/// @copybrief AssetDirectory::_nativeCheckAssetExists
 		virtual bool _nativeCheckAssetExists( const std::string & pAssetName ) const override final;
 	};
 
@@ -105,13 +105,13 @@ namespace ts3::system
 		using Asset::setName;
 
 	private:
-		/// @override Asset::_nativeReadData
+		/// @copybrief Asset::_nativeReadData
 		virtual file_size_t _nativeReadData( void * pTargetBuffer, file_size_t pReadSize ) override final;
 
-		/// @override Asset::_nativeSetReadPointer
+		/// @copybrief Asset::_nativeSetReadPointer
 		virtual file_offset_t _nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos ) override final;
 
-		/// @override Asset::_nativeGetSize
+		/// @copybrief Asset::_nativeGetSize
 		virtual file_size_t _nativeGetSize() const override final;
 	};
 
