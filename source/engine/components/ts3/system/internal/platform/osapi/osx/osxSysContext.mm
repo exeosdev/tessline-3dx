@@ -79,7 +79,10 @@ namespace ts3::system
     {
         std::string executableFilePath;
 
-        executableFilePath = "/Users/mateusz/.buildcache/cmake/source/samples/gpuapi01";
+		auto * executablePath = [[NSBundle mainBundle] bundlePath];
+
+	    executableFilePath.assign( [executablePath cStringUsingEncoding: NSUTF8StringEncoding],
+	                               [executablePath lengthOfBytesUsingEncoding: NSUTF8StringEncoding] );
 
         return executableFilePath;
     }
@@ -111,8 +114,7 @@ namespace ts3::system
 
 			if( ![NSApp delegate] )
 			{
-				auto * nsAppDelegate = [[NSOSXApplicationDelegate alloc] init];
-				[nsAppDelegate setOSXSysContext:this];
+				auto * nsAppDelegate = [[NSOSXApplicationDelegate alloc] initWithSysContext:this];
 				[NSApp setDelegate:nsAppDelegate];
 
 				mNativeData.nsApplicationDelegate = nsAppDelegate;

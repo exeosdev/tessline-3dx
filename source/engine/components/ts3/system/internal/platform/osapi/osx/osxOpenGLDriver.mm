@@ -201,7 +201,7 @@ namespace ts3::system
 	void OSXOpenGLDisplaySurface::_nativeSwapBuffers()
 	{
 		auto * nsThreadLocalStorage = [NSThread currentThread].threadDictionary;
-		auto * nsContextHandle = ( NSOSXOpenGLContext * )nsThreadLocalStorage[@"NSGLCTX"];
+		auto * nsContextHandle = ( NSOSXOpenGLContext * )nsThreadLocalStorage[@"ts3OpenGLContext"];
 
 		[nsContextHandle flushBuffer];
 		[nsContextHandle updateConditional];
@@ -261,10 +261,10 @@ namespace ts3::system
 	void OSXOpenGLRenderContext::_nativeBindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface )
 	{
 		auto * osxDisplaySurface = pTargetSurface.queryInterface<OSXOpenGLDisplaySurface>();
-		auto * nsTargetView = osxDisplaySurface->mNativeData.nsView;
+		auto * nsTargetView = static_cast<NSView *>( osxDisplaySurface->mNativeData.nsView );
 
 		auto * nsThreadLocalStorage = [NSThread currentThread].threadDictionary;
-		nsThreadLocalStorage[@"NSGLCTX"] = mNativeData.nsContextHandle;
+		nsThreadLocalStorage[@"ts3OpenGLContext"] = mNativeData.nsContextHandle;
 
 		[mNativeData.nsContextHandle setView:nsTargetView];
 		[mNativeData.nsContextHandle makeCurrentContext];
@@ -277,7 +277,7 @@ namespace ts3::system
 
 	bool OSXOpenGLRenderContext::_nativeSysValidate() const
 	{
-		return true;
+		return mNativeData.nsContextHandle != nullptr;
 	}
 
 	void OSXOpenGLRenderContext::_releaseOSXContextState()

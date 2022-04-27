@@ -149,10 +149,6 @@ namespace ts3::system
 		_nativeResetContextBinding();
 	}
 
-	const Version & OpenGLSystemDriver::getSupportedRuntimeVersion() const
-	{
-	}
-
 	bool OpenGLSystemDriver::isAPIClassSupported( EOpenGLAPIClass pAPIClass ) const
 	{
 		return _nativeIsAPIClassSupported( pAPIClass );

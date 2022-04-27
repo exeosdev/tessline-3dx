@@ -65,6 +65,16 @@ if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_MSE} )
             )
 endif()
 
+if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_APPLE} )
+    set( TS3_SYSTEM_SRC_FILES
+            ${TS3_SYSTEM_SRC_FILES}
+            "metalCommon.h"
+            "metalCommon.mm"
+            "metalDriver.h"
+            "metalDriver.mm"
+            )
+endif()
+
 if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_POSIX} )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
@@ -166,6 +176,8 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
             "internal/platform/osapi/osx/nsOSXApplicationProxy.mm"
             "internal/platform/osapi/osx/nsOSXEventListener.h"
             "internal/platform/osapi/osx/nsOSXEventListener.mm"
+            "internal/platform/osapi/osx/nsOSXMetalSupport.h"
+            "internal/platform/osapi/osx/nsOSXMetalSupport.mm"
             "internal/platform/osapi/osx/nsOSXOpenGL.h"
             "internal/platform/osapi/osx/nsOSXOpenGL.mm"
             "internal/platform/osapi/osx/nsOSXWindow.h"
@@ -177,6 +189,8 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
             "internal/platform/osapi/osx/osxDisplaySystem.mm"
             "internal/platform/osapi/osx/osxEventCore.h"
             "internal/platform/osapi/osx/osxEventCore.mm"
+            "internal/platform/osapi/osx/osxMetalDriver.h"
+            "internal/platform/osapi/osx/osxMetalDriver.mm"
             "internal/platform/osapi/osx/osxOpenGLDriver.h"
             "internal/platform/osapi/osx/osxOpenGLDriver.mm"
             "internal/platform/osapi/osx/osxSysContext.h"

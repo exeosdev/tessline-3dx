@@ -14,7 +14,7 @@
 #if( TS3_BUILD_STATIC )
 #  define TS3_SYSTEM_API
 #  define TS3_SYSTEM_CLASS
-#  define TS3_SYSTEM_OBJ	extern
+#  define TS3_SYSTEM_OBJ	extern __cdecl
 #else
 #  if( TS3_SYSTEM_BUILD )
 #	define TS3_SYSTEM_API	TS3_PCL_ATTR_DLL_EXPORT

@@ -6,56 +6,38 @@
 #include <ts3/system/windowCommon.h>
 #import <AppKit/NSWindow.h>
 
-namespace ts3::system
-{
-
-	namespace platform
-	{
-
-		struct OSXWindowNativeData;
-
-	}
-
-}
-
 /// @brief
 @interface NSOSXWindow : NSWindow
-{
-	@public ts3::system::platform::OSXWindowNativeData * mWindowNativeData;
-}
 
 -( BOOL ) canBecomeKeyWindow;
 
 -( BOOL ) canBecomeMainWindow;
 
--( void ) sendEvent:( NSEvent * ) pEvent;
+-( void ) sendEvent:( NSEvent * )pEvent;
 
--( void ) doCommandBySelector:( SEL ) pSelector;
+-( void ) doCommandBySelector:( SEL )pSelector;
 
--( void ) keyDown:( NSEvent * ) pEvent;
+-( void ) keyDown:( NSEvent * )pEvent;
 
--( void ) mouseDown:( NSEvent * ) pEvent;
+-( void ) mouseDown:( NSEvent * )pEvent;
 
--( void ) rightMouseDown:( NSEvent * ) pEvent;
+-( void ) rightMouseDown:( NSEvent * )pEvent;
 
 @end
 
 
 /// @brief
 @interface NSOSXWindowView : NSView
-{
-	NSOSXWindow * mNSWindow;
-}
 
--( NSOSXWindowView * ) initForWindow:( NSOSXWindow * ) pWindow;
+-( NSOSXWindowView * ) initForWindow:( NSOSXWindow * )pWindow;
 
 -( BOOL ) acceptsFirstResponder;
 
--( void ) keyDown:( NSEvent * ) pEvent;
+-( void ) keyDown:( NSEvent * )pEvent;
 
--( void ) mouseDown:( NSEvent * ) pEvent;
+-( void ) mouseDown:( NSEvent * )pEvent;
 
--( void ) rightMouseDown:( NSEvent * ) pEvent;
+-( void ) rightMouseDown:( NSEvent * )pEvent;
 
 @end
 

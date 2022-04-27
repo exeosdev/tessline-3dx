@@ -3,8 +3,11 @@
 #define __TS3_SYSTEM_PLATFORM_OSAPI_OSX_NS_COMMON_H__
 
 #include "osxCommon.h"
+
 #import <AppKit/NSWindow.h>
 #import <AppKit/NSApplication.h>
+
+// NSApplication(NSScripting) provides [orderedWindows] property.
 #import <AppKit/NSApplicationScripting.h>
 
 namespace ts3::system

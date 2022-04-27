@@ -49,24 +49,11 @@ int main( int argc, const char ** argv )
 	ev->registerPrimaryEventSource( *ds );
 	rc->bindForCurrentThread( *ds );
 
-	uint16 localColor[] = { 64, 160, 112 };
-
 	while( runApp )
 	{
-		const float clearColor[] = {
-			localColor[0] / 255.0f,
-			localColor[1] / 255.0f,
-			localColor[2] / 255.0f,
-			1.0f
-		};
-
 		ev->dispatchPendingEventsPeek();
-		ds->clearColorBuffer( clearColor );
+		ds->clearColorBuffer();
 		ds->swapBuffers();
-
-		localColor[0] = ( localColor[0] + 4 ) % 256;
-		localColor[1] = ( localColor[1] + 4 ) % 256;
-		localColor[2] = ( localColor[2] + 4 ) % 256;
 
 	}
 
