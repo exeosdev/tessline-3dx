@@ -72,6 +72,8 @@ if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_APPLE} )
             "metalCommon.mm"
             "metalDriver.h"
             "metalDriver.mm"
+            "internal/platform/shared/mtl/mtlCommon.h"
+            "internal/platform/shared/mtl/mtlCommon.mm"
             )
 endif()
 
@@ -211,7 +213,7 @@ if( NOT "${CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG}" )
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/common/fileBasedAssetSystem.h"
             "internal/platform/common/fileBasedAssetSystem.cpp"
-            )
+            internal/platform/shared/mtl/mtlCommon.mm internal/platform/shared/mtl/mtlCommon.h)
 endif()
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )

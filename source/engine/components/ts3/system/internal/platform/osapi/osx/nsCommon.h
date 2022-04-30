@@ -2,7 +2,8 @@
 #ifndef __TS3_SYSTEM_PLATFORM_OSAPI_OSX_NS_COMMON_H__
 #define __TS3_SYSTEM_PLATFORM_OSAPI_OSX_NS_COMMON_H__
 
-#include "osxCommon.h"
+#include <ts3/system/prerequisites.h>
+#include <objc/objc.h>
 
 #import <AppKit/NSWindow.h>
 #import <AppKit/NSApplication.h>
@@ -12,6 +13,12 @@
 
 namespace ts3::system
 {
+
+    // Required to create the alias below.
+    namespace platform
+    {}
+
+    class OSXSysContext;
 
 	ts3SysDeclareHandle( OSXDisplayManager  );
 	ts3SysDeclareHandle( OSXDisplayDriver   );

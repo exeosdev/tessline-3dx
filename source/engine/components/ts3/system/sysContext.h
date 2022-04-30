@@ -20,6 +20,7 @@ namespace ts3::system
 	ts3SysDeclareHandle( DisplayManager );
 	ts3SysDeclareHandle( EventController );
 	ts3SysDeclareHandle( FileManager );
+	ts3SysDeclareHandle( MetalSystemDriver );
 	ts3SysDeclareHandle( OpenGLSystemDriver );
 	ts3SysDeclareHandle( WindowManager );
 
@@ -48,7 +49,9 @@ namespace ts3::system
 
 		virtual FileManagerHandle createFileManager() = 0;
 
-		virtual OpenGLSystemDriverHandle createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager ) = 0;
+		virtual MetalSystemDriverHandle createMetalSystemDriver( DisplayManagerHandle pDisplayManager );
+
+		virtual OpenGLSystemDriverHandle createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager );
 
 		virtual WindowManagerHandle createWindowManager( DisplayManagerHandle pDisplayManager ) = 0;
 

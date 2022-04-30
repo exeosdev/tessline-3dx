@@ -232,6 +232,7 @@ namespace ts3::system
 
 	void OSXOpenGLDisplaySurface::_nativeSetTitle( const std::string & pTitle )
 	{
+        platform::osxSetFrameTitle( mNativeData.nsWindow, pTitle );
 	}
 
 	void OSXOpenGLDisplaySurface::_nativeUpdateGeometry( const FrameGeometry & pFrameGeometry,

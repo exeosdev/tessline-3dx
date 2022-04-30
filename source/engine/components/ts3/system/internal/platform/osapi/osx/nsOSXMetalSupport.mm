@@ -18,6 +18,8 @@
 
 	mMetalLayer = caMetalLayer;
 	mNSWindow = pWindow;
+
+    return self;
 }
 }
 

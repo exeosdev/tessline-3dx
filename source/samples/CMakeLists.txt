@@ -10,7 +10,7 @@ set( TS3_SAMPLE_LIST
         )
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
-    set( TS3_SAMPLE_LIST "${TS3_SAMPLE_LIST}" "appleCocoaTest" )
+    set( TS3_SAMPLE_LIST "${TS3_SAMPLE_LIST}" "cocoa" )
 endif()
 
 foreach( module ${TS3_SAMPLE_LIST} )

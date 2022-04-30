@@ -14,16 +14,16 @@
 #if( TS3_BUILD_STATIC )
 #  define TS3_SYSTEM_API
 #  define TS3_SYSTEM_CLASS
-#  define TS3_SYSTEM_OBJ	extern __cdecl
+#  define TS3_SYSTEM_OBJ extern __cdecl
 #else
 #  if( TS3_SYSTEM_BUILD )
-#	define TS3_SYSTEM_API	TS3_PCL_ATTR_DLL_EXPORT
-#	define TS3_SYSTEM_CLASS  TS3_PCL_ATTR_DLL_EXPORT
-#	define TS3_SYSTEM_OBJ	TS3_PCL_ATTR_DLL_EXPORT
+#	define TS3_SYSTEM_API   TS3_PCL_ATTR_DLL_EXPORT
+#	define TS3_SYSTEM_CLASS TS3_PCL_ATTR_DLL_EXPORT
+#	define TS3_SYSTEM_OBJ   TS3_PCL_ATTR_DLL_EXPORT
 #  else
-#	define TS3_SYSTEM_API	TS3_PCL_ATTR_DLL_IMPORT
-#	define TS3_SYSTEM_CLASS  TS3_PCL_ATTR_DLL_IMPORT
-#	define TS3_SYSTEM_OBJ	TS3_PCL_ATTR_DLL_IMPORT
+#	define TS3_SYSTEM_API   TS3_PCL_ATTR_DLL_IMPORT
+#	define TS3_SYSTEM_CLASS TS3_PCL_ATTR_DLL_IMPORT
+#	define TS3_SYSTEM_OBJ   TS3_PCL_ATTR_DLL_IMPORT
 #  endif
 #endif
 
@@ -54,8 +54,14 @@ namespace ts3::system
 		E_EXCEPTION_CATEGORY_SYSTEM_DISPLAY = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x02 ),
 		E_EXCEPTION_CATEGORY_SYSTEM_EVENT   = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x03 ),
 		E_EXCEPTION_CATEGORY_SYSTEM_FILE    = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x04 ),
-		E_EXCEPTION_CATEGORY_SYSTEM_OPENGL  = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x05 ),
+		E_EXCEPTION_CATEGORY_SYSTEM_METAL   = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x05 ),
+		E_EXCEPTION_CATEGORY_SYSTEM_OPENGL  = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x07 ),
 		E_EXCEPTION_CATEGORY_SYSTEM_WINDOW  = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x09 ),
+	};
+
+	enum : exception_code_value_t
+	{
+		E_EXC_SYSTEM_INTERFACE_NOT_SUPPORTED = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_CORE, 0x04 ),
 	};
 
 	/// @brief Helper proxy-like base class for platform-specific types.
