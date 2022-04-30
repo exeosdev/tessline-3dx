@@ -273,7 +273,9 @@ endif()
 find_library(FrmLib_AppKit AppKit)
 find_library(FrmLib_CoreFoundation CoreFoundation)
 find_library(FrmLib_Foundation Foundation)
+find_library(FrmLib_Metal Metal)
 find_library(FrmLib_OpenGL OpenGL)
+find_library(FrmLib_QuartzCore QuartzCore)
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
     target_link_libraries( ts3-system PUBLIC
@@ -281,7 +283,9 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
             ${FrmLib_AppKit}
             ${FrmLib_CoreFoundation}
             ${FrmLib_Foundation}
+            ${FrmLib_Metal}
             ${FrmLib_OpenGL}
+            ${FrmLib_QuartzCore}
             )
 endif()
 

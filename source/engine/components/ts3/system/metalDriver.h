@@ -14,6 +14,8 @@ namespace ts3::system
 	/// @brief
 	struct MetalDisplaySurfaceCreateInfo : public WindowCreateInfo
 	{
+		/// Creation flags, describing additional surface properties.
+		Bitmask<EMetalSurfaceCreateFlags> flags = 0;
 	};
 
 	class MetalSystemDriver : public SysObject

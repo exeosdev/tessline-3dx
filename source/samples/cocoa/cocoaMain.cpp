@@ -25,13 +25,21 @@ int main( int argc, const char ** argv )
 	surfaceCreateInfo.targetAPIClass = EOpenGLAPIClass::OpenGLDesktop;
 	surfaceCreateInfo.minimumAPIVersion = gv.apiVersion;
 	//surfaceCreateInfo.flags.set( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
-	auto ds = gd->createDisplaySurface( surfaceCreateInfo );
+	//auto ds = gd->createDisplaySurface( surfaceCreateInfo );
 
 	OpenGLRenderContextCreateInfo renderContextCreateInfo;
 	renderContextCreateInfo.requestedAPIVersion = gv.apiVersion;
 	renderContextCreateInfo.contextAPIProfile = EOpenGLAPIProfile::Core;
 	renderContextCreateInfo.shareContext = nullptr;
-	auto rc = gd->createRenderContext( *ds, renderContextCreateInfo );
+	//auto rc = gd->createRenderContext( *ds, renderContextCreateInfo );
+
+	auto md = sysContext->createMetalSystemDriver( dm );
+
+	MetalDisplaySurfaceCreateInfo msurfaceCreateInfo;
+	msurfaceCreateInfo.frameGeometry.size = {800, 600 };
+	msurfaceCreateInfo.frameGeometry.style = EFrameStyle::Caption;
+	msurfaceCreateInfo.visualConfig = vsxGetDefaultVisualConfigForSysWindow();
+	auto ms = md->createDisplaySurface( msurfaceCreateInfo );
 
 	auto ed = ev->createEventDispatcher();
 	ed->setEventSystemConfigFlags( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_AUTO_QUIT_ON_PRIMARY_SOURCE_DESTROY_BIT );
@@ -46,14 +54,14 @@ int main( int argc, const char ** argv )
 			return true;
 		});
 
-	ev->registerPrimaryEventSource( *ds );
-	rc->bindForCurrentThread( *ds );
+	ev->registerPrimaryEventSource( *ms );
+	// rc->bindForCurrentThread( *ds );
 
 	while( runApp )
 	{
 		ev->dispatchPendingEventsPeek();
-		ds->clearColorBuffer();
-		ds->swapBuffers();
+		// ds->clearColorBuffer();
+		// ds->swapBuffers();
 
 	}
 

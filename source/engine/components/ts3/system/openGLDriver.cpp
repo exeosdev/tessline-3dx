@@ -1,5 +1,5 @@
 
-#include <ts3/system/openGLDriver.h>
+#include "openGLDriver.h"
 #include "displaySystem.h"
 
 namespace ts3::system

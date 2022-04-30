@@ -32,6 +32,15 @@ namespace ts3::system
 	{
     }
 
+
+	OSXMetalDisplaySurface::OSXMetalDisplaySurface( OSXMetalSystemDriverHandle pMTLSystemDriver )
+	: OSXNativeObject( std::move( pMTLSystemDriver ), &mNativeData )
+	{}
+
+	OSXMetalDisplaySurface::~OSXMetalDisplaySurface() noexcept
+	{
+	}
+	
     FrameSize OSXMetalDisplaySurface::_nativeQueryRenderAreaSize() const
     {
         const auto & drawableSize = [mNativeData.caMetalLayer drawableSize];

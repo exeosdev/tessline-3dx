@@ -3,6 +3,7 @@
 #include "osxAssetSystem.h"
 #include "osxDisplaySystem.h"
 #include "osxFileManager.h"
+#include "osxMetalDriver.h"
 #include "osxOpenGLDriver.h"
 #include "osxWindowSystem.h"
 #include <ts3/system/sysContextNative.h>
@@ -54,6 +55,16 @@ namespace ts3::system
     {
         return createSysObject<PosixFileManager>( getHandle<OSXSysContext>() );
     }
+
+	MetalSystemDriverHandle OSXSysContext::createMetalSystemDriver( DisplayManagerHandle pDisplayManager )
+	{
+		if( !pDisplayManager )
+		{
+			pDisplayManager = createDisplayManager();
+		}
+
+		return createSysObject<OSXMetalSystemDriver>( pDisplayManager->getHandle<OSXDisplayManager>() );
+	}
 
     OpenGLSystemDriverHandle OSXSysContext::createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager )
     {

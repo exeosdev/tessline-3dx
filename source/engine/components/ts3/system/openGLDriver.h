@@ -19,9 +19,9 @@ namespace ts3::system
 
 		///
 		EOpenGLAPIClass targetAPIClass;
-
 		/// Creation flags, describing additional surface properties.
 		Bitmask<EOpenGLSurfaceCreateFlags> flags = 0;
+
 	};
 
 	/// @brief Contains parameters used to specify how a GL render context should be created.
