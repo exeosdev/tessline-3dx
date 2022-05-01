@@ -56,14 +56,21 @@ namespace ts3::system
         return createSysObject<PosixFileManager>( getHandle<OSXSysContext>() );
     }
 
-	MetalSystemDriverHandle OSXSysContext::createMetalSystemDriver( DisplayManagerHandle pDisplayManager )
+	MetalSystemDriverHandle OSXSysContext::createMetalSystemDriver( DisplayManagerHandle pDisplayManager,
+	                                                                const MetalSystemDriverCreateInfo & pCreateInfo )
 	{
 		if( !pDisplayManager )
 		{
 			pDisplayManager = createDisplayManager();
 		}
 
-		return createSysObject<OSXMetalSystemDriver>( pDisplayManager->getHandle<OSXDisplayManager>() );
+		auto metalDevice = pCreateInfo.metalDevice;
+		if( !metalDevice )
+		{
+			metalDevice = MetalDevice::createDefault( pDisplayManager->mSysContext );
+		}
+
+		return createSysObject<OSXMetalSystemDriver>( pDisplayManager->getHandle<OSXDisplayManager>(), std::move( metalDevice ) );
 	}
 
     OpenGLSystemDriverHandle OSXSysContext::createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager )

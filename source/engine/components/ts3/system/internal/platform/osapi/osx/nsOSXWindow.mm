@@ -74,6 +74,8 @@
 		[self setAcceptsTouchEvents:YES];
 	}
 
+	mNSWindow = pWindow;
+
 	return self;
 }
 

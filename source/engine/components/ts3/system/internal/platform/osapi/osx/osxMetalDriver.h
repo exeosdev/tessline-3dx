@@ -4,7 +4,7 @@
 
 #include "osxWindowSystem.h"
 #include "nsOSXMetalSupport.h"
-#include <ts3/system/metalDriver.h>
+#include <ts3/system/metalNative.h>
 
 #import <Metal/MTLDevice.h>
 
@@ -39,7 +39,7 @@ namespace ts3::system
 	class OSXMetalSystemDriver : public OSXNativeObject<MetalSystemDriver, platform::OSXMetalSystemDriverNativeData>
 	{
 	public:
-		OSXMetalSystemDriver( OSXDisplayManagerHandle pDisplayManager );
+		OSXMetalSystemDriver( OSXDisplayManagerHandle pDisplayManager, MetalDeviceHandle pMetalDevice );
 		virtual ~OSXMetalSystemDriver() noexcept;
 		
 	private:
@@ -56,7 +56,7 @@ namespace ts3::system
         virtual ~OSXMetalDisplaySurface() noexcept;
 
     private:
-        /// @copybrief MetalDisplaySurface::_nativeQueryRenderAreaSize
+	    /// @copybrief MetalDisplaySurface::_nativeQueryRenderAreaSize
         virtual FrameSize _nativeQueryRenderAreaSize() const override final;
 
         /// @copybrief MetalDisplaySurface::_nativeSysValidate

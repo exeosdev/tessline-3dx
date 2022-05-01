@@ -7,9 +7,9 @@
 namespace ts3::system
 {
 
-	ts3SysDeclareHandle( DisplayManager );
-	ts3SysDeclareHandle( MetalDisplaySurface );
-	ts3SysDeclareHandle( MetalSystemDriver );
+	struct MetalDeviceData;
+	struct MetalDisplaySurfaceData;
+	struct MetalSystemDriverData;
 
 	/// @brief
 	struct MetalDisplaySurfaceCreateInfo : public WindowCreateInfo
@@ -18,13 +18,27 @@ namespace ts3::system
 		Bitmask<EMetalSurfaceCreateFlags> flags = 0;
 	};
 
+	class MetalDevice : public SysObject
+	{
+	public:
+		std::unique_ptr<MetalDeviceData> const mDeviceData;
+
+	public:
+		MetalDevice( SysContextHandle pSysContext );
+		~MetalDevice();
+
+		static MetalDeviceHandle createDefault( SysContextHandle pSysContext );
+	};
+
 	class MetalSystemDriver : public SysObject
 	{
 	public:
+		std::unique_ptr<MetalSystemDriverData> const mDriverData;
 		DisplayManagerHandle const mDisplayManager;
+		MetalDeviceHandle const mMetalDevice;
 
 	public:
-		explicit MetalSystemDriver( DisplayManagerHandle pDisplayManager );
+		explicit MetalSystemDriver( DisplayManagerHandle pDisplayManager, MetalDeviceHandle pMetalDevice );
 		virtual ~MetalSystemDriver() noexcept;
 		
 		/// @brief
@@ -42,10 +56,12 @@ namespace ts3::system
 		friend class MetalSystemDriver;
 
 	public:
-		MetalSystemDriverHandle const mGLSystemDriver;
+		std::unique_ptr<MetalDisplaySurfaceData> const mSurfaceData;
+		MetalSystemDriverHandle const mMetalDriver;
+		MetalDeviceHandle const mMetalDevice;
 
 	public:
-		explicit MetalDisplaySurface( MetalSystemDriverHandle pGLSystemDriver, void * pNativeData );
+		explicit MetalDisplaySurface( MetalSystemDriverHandle pMTLSystemDriver, void * pNativeData );
 		virtual ~MetalDisplaySurface() noexcept;
 
 		void clearColorBuffer();
@@ -92,6 +108,10 @@ namespace ts3::system
 		virtual FrameSize _nativeGetSize( EFrameSizeMode pSizeMode ) const = 0;
 
 		virtual bool _nativeIsFullscreen() const = 0;
+
+	private:
+		struct MTLDisplaySurfacePrivateData;
+		//std::unique_ptr<MTLDisplaySurfacePrivateData> _privateData;
 	};
 
 }

@@ -4,12 +4,15 @@
 
 #include "visual.h"
 #include "windowCommon.h"
+#include <objc/objc.h>
 
 namespace ts3::system
 {
 
-	class MetalDisplaySurface;
-	class MetalSystemDriver;
+	ts3SysDeclareHandle( DisplayManager );
+	ts3SysDeclareHandle( MetalDevice );
+	ts3SysDeclareHandle( MetalDisplaySurface );
+	ts3SysDeclareHandle( MetalSystemDriver );
 
 	/// @brief
 	enum EMetalSurfaceCreateFlags : uint32
@@ -25,6 +28,11 @@ namespace ts3::system
 
 		/// Enables vertical sync for the surface: swap is performed during a v-blank.
 		E_METAL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT = 0x8000,
+	};
+
+	struct MetalSystemDriverCreateInfo
+	{
+		MetalDeviceHandle metalDevice = nullptr;
 	};
 
 }

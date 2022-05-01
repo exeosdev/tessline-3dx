@@ -6,8 +6,8 @@
 namespace ts3::system
 {
 
-	OSXMetalSystemDriver::OSXMetalSystemDriver( OSXDisplayManagerHandle pDisplayManager )
-	: OSXNativeObject( std::move( pDisplayManager ) )
+	OSXMetalSystemDriver::OSXMetalSystemDriver( OSXDisplayManagerHandle pDisplayManager, MetalDeviceHandle pMetalDevice )
+	: OSXNativeObject( std::move( pDisplayManager ), std::move( pMetalDevice ) )
 	{}
 
 	OSXMetalSystemDriver::~OSXMetalSystemDriver() noexcept = default;
@@ -25,6 +25,8 @@ namespace ts3::system
         platform::osxCreateEventListener( displaySurface->mNativeData );
         platform::osxSetInputWindow( displaySurface->mNativeData );
 
+		displaySurface->mSurfaceData->caMetalLayer = displaySurface->mNativeData.caMetalLayer;
+
         return displaySurface;
 	}
 
@@ -37,9 +39,7 @@ namespace ts3::system
 	: OSXNativeObject( std::move( pMTLSystemDriver ), &mNativeData )
 	{}
 
-	OSXMetalDisplaySurface::~OSXMetalDisplaySurface() noexcept
-	{
-	}
+	OSXMetalDisplaySurface::~OSXMetalDisplaySurface() noexcept = default;
 	
     FrameSize OSXMetalDisplaySurface::_nativeQueryRenderAreaSize() const
     {
@@ -105,9 +105,11 @@ namespace ts3::system
                 auto * nsMetalView = [[NSOSXMetalView alloc] initForWindow:nsWindow];
 				auto * caMetalLayer = nsMetalView->mMetalLayer;
 
-				auto mtlPixelFormat = platform::mtlChoosePixelFormatForVisualConfig( pCreateInfo.visualConfig );
+	            const auto mtlPixelFormat = platform::mtlChoosePixelFormatForVisualConfig( pCreateInfo.visualConfig );
+	            [caMetalLayer setPixelFormat:mtlPixelFormat];
 
-				[caMetalLayer setPixelFormat:mtlPixelFormat];
+	            const auto layerRect = [nsWindow contentRectForFrameRect:[nsWindow frame]];
+	            [caMetalLayer setDrawableSize:CGSizeMake( layerRect.size.width, layerRect.size.height )];
 
                 pSurfaceNativeData.nsView = nsMetalView;
                 pSurfaceNativeData.caMetalLayer = caMetalLayer;

@@ -15,6 +15,8 @@ namespace ts3::system
 
 	}
 
+	struct MetalSystemDriverCreateInfo;
+
 	ts3SysDeclareHandle( SysContext );
 	ts3SysDeclareHandle( AssetLoader );
 	ts3SysDeclareHandle( DisplayManager );
@@ -49,7 +51,8 @@ namespace ts3::system
 
 		virtual FileManagerHandle createFileManager() = 0;
 
-		virtual MetalSystemDriverHandle createMetalSystemDriver( DisplayManagerHandle pDisplayManager );
+		virtual MetalSystemDriverHandle createMetalSystemDriver( DisplayManagerHandle pDisplayManager,
+																 const MetalSystemDriverCreateInfo & pCreateInfo );
 
 		virtual OpenGLSystemDriverHandle createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager );
 

@@ -45,7 +45,8 @@ namespace ts3::system
 		/// @copybrief SysContext::createFileManager
 		virtual FileManagerHandle createFileManager() override final;
 
-		virtual MetalSystemDriverHandle createMetalSystemDriver( DisplayManagerHandle pDisplayManager ) override final;
+		virtual MetalSystemDriverHandle createMetalSystemDriver( DisplayManagerHandle pDisplayManager,
+		                                                         const MetalSystemDriverCreateInfo & pCreateInfo ) override final;
 
 		/// @copybrief SysContext::createOpenGLSystemDriver
 		virtual OpenGLSystemDriverHandle createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager ) override final;

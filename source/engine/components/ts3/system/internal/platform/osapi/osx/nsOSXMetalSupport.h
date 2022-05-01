@@ -7,13 +7,24 @@
 #import <CoreGraphics/CGDirectDisplayMetal.h>
 #import <QuartzCore/CAMetalLayer.h>
 
-@interface NSOSXMetalView : NSView
+@protocol NSOSXMetalViewDelegate<NSObject>
+
+-( void ) drawableResize:( CGSize )pLayerSize;
+
+-( void ) renderToMetalLayer:( nonnull CAMetalLayer * )pCAMetalLayer;
+
+@end
+
+@interface NSOSXMetalView : NSOSXWindowView //NSView<CALayerDelegate>
 {
-	@public NSOSXWindow * mNSWindow;
 	@public CAMetalLayer * mMetalLayer;
 }
 
 -( NSOSXMetalView * ) initForWindow:( NSOSXWindow * )pWindow;
+
+-( BOOL ) acceptsFirstResponder;
+
+-( CALayer * ) makeBackingLayer;
 
 @end
 

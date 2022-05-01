@@ -72,6 +72,7 @@ if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_APPLE} )
             "metalCommon.mm"
             "metalDriver.h"
             "metalDriver.mm"
+            "metalNative.h"
             "internal/platform/shared/mtl/mtlCommon.h"
             "internal/platform/shared/mtl/mtlCommon.mm"
             )

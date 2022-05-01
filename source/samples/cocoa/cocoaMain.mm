@@ -33,7 +33,7 @@ int main( int argc, const char ** argv )
 	renderContextCreateInfo.shareContext = nullptr;
 	//auto rc = gd->createRenderContext( *ds, renderContextCreateInfo );
 
-	auto md = sysContext->createMetalSystemDriver( dm );
+	auto md = sysContext->createMetalSystemDriver( dm, {} );
 
 	MetalDisplaySurfaceCreateInfo msurfaceCreateInfo;
 	msurfaceCreateInfo.frameGeometry.size = {800, 600 };
@@ -60,6 +60,7 @@ int main( int argc, const char ** argv )
 	while( runApp )
 	{
 		ev->dispatchPendingEventsPeek();
+		ms->clearColorBuffer();
 		// ds->clearColorBuffer();
 		// ds->swapBuffers();
 

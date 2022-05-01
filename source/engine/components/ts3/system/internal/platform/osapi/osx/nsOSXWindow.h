@@ -28,6 +28,9 @@
 
 /// @brief
 @interface NSOSXWindowView : NSView
+{
+	@public NSOSXWindow * mNSWindow;
+}
 
 -( NSOSXWindowView * ) initForWindow:( NSOSXWindow * )pWindow;
 

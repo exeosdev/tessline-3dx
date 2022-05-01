@@ -7,20 +7,28 @@
 {
 @autoreleasepool
 {
-	const auto windowRect = [pWindow contentRectForFrameRect:[pWindow frame]];
+	[super initForWindow:pWindow];
 
-	[super initWithFrame:windowRect];
+	//
+	[self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawDuringViewResize];
 
-	auto * caMetalLayer = [CAMetalLayer layer];
+	auto * caMetalLayer = ( CAMetalLayer * )[self layer];
+	[caMetalLayer setHidden:NO];
 
-	[self setWantsLayer:YES];
-	[self setLayer: caMetalLayer];
-
-	mMetalLayer = caMetalLayer;
-	mNSWindow = pWindow;
+	mMetalLayer = ( CAMetalLayer * )[self layer];
 
     return self;
 }
+}
+
+-( BOOL ) acceptsFirstResponder
+{
+	return YES;
+}
+
+-( CALayer * ) makeBackingLayer
+{
+	return [CAMetalLayer layer];
 }
 
 @end
