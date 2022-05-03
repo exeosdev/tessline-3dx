@@ -65,6 +65,19 @@ if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_MSE} )
             )
 endif()
 
+if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_APPLE} )
+    set( TS3_SYSTEM_SRC_FILES
+            ${TS3_SYSTEM_SRC_FILES}
+            "metalCommon.h"
+            "metalCommon.mm"
+            "metalDriver.h"
+            "metalDriver.mm"
+            "metalNative.h"
+            "internal/platform/shared/mtl/mtlCommon.h"
+            "internal/platform/shared/mtl/mtlCommon.mm"
+            )
+endif()
+
 if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_POSIX} )
     set( TS3_SYSTEM_SRC_FILES
             ${TS3_SYSTEM_SRC_FILES}
@@ -166,6 +179,8 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
             "internal/platform/osapi/osx/nsOSXApplicationProxy.mm"
             "internal/platform/osapi/osx/nsOSXEventListener.h"
             "internal/platform/osapi/osx/nsOSXEventListener.mm"
+            "internal/platform/osapi/osx/nsOSXMetalSupport.h"
+            "internal/platform/osapi/osx/nsOSXMetalSupport.mm"
             "internal/platform/osapi/osx/nsOSXOpenGL.h"
             "internal/platform/osapi/osx/nsOSXOpenGL.mm"
             "internal/platform/osapi/osx/nsOSXWindow.h"
@@ -177,6 +192,8 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
             "internal/platform/osapi/osx/osxDisplaySystem.mm"
             "internal/platform/osapi/osx/osxEventCore.h"
             "internal/platform/osapi/osx/osxEventCore.mm"
+            "internal/platform/osapi/osx/osxMetalDriver.h"
+            "internal/platform/osapi/osx/osxMetalDriver.mm"
             "internal/platform/osapi/osx/osxOpenGLDriver.h"
             "internal/platform/osapi/osx/osxOpenGLDriver.mm"
             "internal/platform/osapi/osx/osxSysContext.h"
@@ -197,7 +214,7 @@ if( NOT "${CM_EBS_SYSTEM_ASSET_SYSTEM_SRC_FLAG}" )
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/common/fileBasedAssetSystem.h"
             "internal/platform/common/fileBasedAssetSystem.cpp"
-            )
+            internal/platform/shared/mtl/mtlCommon.mm internal/platform/shared/mtl/mtlCommon.h)
 endif()
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
@@ -257,17 +274,19 @@ endif()
 find_library(FrmLib_AppKit AppKit)
 find_library(FrmLib_CoreFoundation CoreFoundation)
 find_library(FrmLib_Foundation Foundation)
+find_library(FrmLib_Metal Metal)
 find_library(FrmLib_OpenGL OpenGL)
+find_library(FrmLib_QuartzCore QuartzCore)
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
     target_link_libraries( ts3-system PUBLIC
-            #-framework AppKit
-            #-framework CoreFoundation
-            #-framework Foundation
+            dplib-glew
             ${FrmLib_AppKit}
             ${FrmLib_CoreFoundation}
             ${FrmLib_Foundation}
+            ${FrmLib_Metal}
             ${FrmLib_OpenGL}
+            ${FrmLib_QuartzCore}
             )
 endif()
 

@@ -17,6 +17,10 @@ cmake-build-debug/
 cmake-build-release/
 out/
 
+# Doxygen
+html/
+latex/
+
 # IDE-specific
 *.iml
 

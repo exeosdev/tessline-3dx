@@ -52,7 +52,7 @@ namespace ts3::gpuapi
 			auto * openglCommandSyncData = static_cast<GLCommandSyncData *>( pCommandSync.syncData );
 
 			glClientWaitSync( openglCommandSyncData->openglSyncFence, 0, ts3::Limits<GLuint64>::maxValue );
-			ts3GLCheckLastResult();
+			ts3OpenGLCheckLastResult();
 
 			releaseGLCommandSyncData( pCommandSync.syncData );
 			pCommandSync.syncData = nullptr;

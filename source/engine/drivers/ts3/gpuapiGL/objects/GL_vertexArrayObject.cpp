@@ -15,7 +15,7 @@ namespace ts3::gpuapi
 		GLuint vertexArrayHandle = 0;
 
 		glGenVertexArrays( 1, &vertexArrayHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		GLVertexArrayObjectHandle openglVertexArrayObject{ new GLVertexArrayObject( vertexArrayHandle ) };
 
@@ -25,7 +25,7 @@ namespace ts3::gpuapi
 	bool GLVertexArrayObject::release()
 	{
 		glDeleteVertexArrays( 1, &mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return true;
 	}
@@ -33,7 +33,7 @@ namespace ts3::gpuapi
 	bool GLVertexArrayObject::validateHandle() const
 	{
 		auto isProgram = glIsVertexArray( mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return isProgram != GL_FALSE;
 	}

@@ -18,7 +18,7 @@ namespace ts3::system
 {
 
 	ts3SysDeclareHandle( OSXOpenGLSystemDriver );
-	ts3SysDeclareHandle( OSXOpenGLRenderContext );
+	ts3SysDeclareHandle( OSXOpenGLDisplaySurface );
 	ts3SysDeclareHandle( OSXOpenGLRenderContext );
 
 	namespace platform

@@ -1,6 +1,6 @@
 
 add_executable( ts3sample-cocoa
-        "cocoaMain.cpp" )
+        "cocoaMain.mm" )
 
 set_target_properties( ts3sample-cocoa PROPERTIES
         OUTPUT_NAME "ts3sample-cocoa" )

@@ -78,7 +78,7 @@ namespace ts3::system
 			throw 0;
 		}
 
-		const auto screenBounds = platform::osxQueryDisplayBounds( mNativeData.cgMainDisplayID );
+		const auto screenBounds = platform::osxQueryDisplayRect( mNativeData.cgMainDisplayID );
 
 		pOutOffset = screenBounds.offset;
 	}
@@ -121,7 +121,7 @@ namespace ts3::system
 	namespace platform
 	{
 
-		ScreenRect osxQueryDisplayBounds( CGDirectDisplayID pCGDisplayID )
+		ScreenRect osxQueryDisplayRect( CGDirectDisplayID pCGDisplayID )
 		{
 			ts3DebugAssert( pCGDisplayID != kCGNullDirectDisplay );
 

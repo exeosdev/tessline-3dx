@@ -8,6 +8,17 @@ namespace ts3::system
 
 	SysContext::~SysContext() noexcept = default;
 
+	MetalSystemDriverHandle SysContext::createMetalSystemDriver( DisplayManagerHandle /* pDisplayManager */,
+	                                                             const MetalSystemDriverCreateInfo & /* pCreateInfo */ )
+	{
+		ts3ThrowDesc( E_EXC_SYSTEM_INTERFACE_NOT_SUPPORTED, "Metal is not supported on the current operating system." );
+	}
+
+	OpenGLSystemDriverHandle SysContext::createOpenGLSystemDriver( DisplayManagerHandle /* pDisplayManager */ )
+	{
+		ts3ThrowDesc( E_EXC_SYSTEM_INTERFACE_NOT_SUPPORTED, "OpenGL is not supported on the current operating system." );
+	}
+
 	std::string SysContext::queryCurrentProcessExecutableDirectory() const
 	{
 		auto executableFileDirectory = queryCurrentProcessExecutableFilePath();

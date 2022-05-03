@@ -234,7 +234,7 @@ namespace ts3::gpuapi
 			ts3CaseReturn( GL_DEPTH_COMPONENT32F , 32 );
 			ts3CaseReturn( GL_DEPTH32F_STENCIL8  , 64 );
 
-		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_CORE )
+		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_DESKTOP )
 			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC1        , 4 );
 			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC1_SRGBA  , 4 );
 			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC2        , 4 );
@@ -269,6 +269,11 @@ namespace ts3::gpuapi
 			ts3CaseReturn( 7u, GL_FLOAT                          );
 			ts3CaseReturn( 8u, GL_UNSIGNED_INT_24_8              );
 			ts3CaseReturn( 9u, GL_FLOAT_32_UNSIGNED_INT_24_8_REV );
+
+			default:
+			{
+				break;
+			}
 		}
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -289,6 +294,11 @@ namespace ts3::gpuapi
 			ts3CaseReturn( EBlendFactor::SrcAlphaInv , GL_ONE_MINUS_SRC_ALPHA      );
 			ts3CaseReturn( EBlendFactor::DstColorInv , GL_ONE_MINUS_DST_COLOR      );
 			ts3CaseReturn( EBlendFactor::DstAlphaInv , GL_ONE_MINUS_DST_ALPHA      );
+
+			default:
+			{
+				break;
+			}
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -302,6 +312,11 @@ namespace ts3::gpuapi
 			ts3CaseReturn( EBlendOp::Max         , GL_MAX                   );
 			ts3CaseReturn( EBlendOp::Subtract    , GL_FUNC_SUBTRACT         );
 			ts3CaseReturn( EBlendOp::SubtractRev , GL_FUNC_REVERSE_SUBTRACT );
+
+			default:
+			{
+				break;
+			}
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -320,6 +335,11 @@ namespace ts3::gpuapi
 			ts3CaseReturn( EGPUBufferTarget::IndirectDrawBuffer     , GL_DRAW_INDIRECT_BUFFER      );
 			ts3CaseReturn( EGPUBufferTarget::TransferSourceBuffer   , GL_COPY_READ_BUFFER          );
 			ts3CaseReturn( EGPUBufferTarget::TransferTargetBuffer   , GL_COPY_WRITE_BUFFER         );
+
+			default:
+			{
+				break;
+			}
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -437,6 +457,11 @@ namespace ts3::gpuapi
 		#if( TS3GX_GL_FEATURE_SUPPORT_SHADER_TYPE_COMPUTE )
 			ts3CaseReturn( EShaderType::ComputeShader , GL_COMPUTE_SHADER );
 		#endif
+
+			default:
+			{
+				break;
+			}
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
 	}

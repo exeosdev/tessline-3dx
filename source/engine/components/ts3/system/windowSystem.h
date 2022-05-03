@@ -12,12 +12,6 @@ namespace ts3::system
 	ts3DeclareClassHandle( Window );
 	ts3DeclareClassHandle( WindowManager );
 
-	struct WindowCreateInfo
-	{
-		FrameGeometry frameGeometry = CX_FRAME_GEOMETRY_DEFAULT;
-		std::string title;
-	};
-
 	/// @brief
 	class WindowManager : public SysObject
 	{

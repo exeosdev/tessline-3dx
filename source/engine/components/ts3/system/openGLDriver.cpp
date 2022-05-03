@@ -1,5 +1,5 @@
 
-#include <ts3/system/openGLDriver.h>
+#include "openGLDriver.h"
 #include "displaySystem.h"
 
 namespace ts3::system
@@ -18,6 +18,11 @@ namespace ts3::system
 
 		_versionSupportInfo = _nativeQueryVersionSupportInfo();
 
+		return _versionSupportInfo;
+	}
+
+	const OpenGLVersionSupportInfo & OpenGLSystemDriver::getVersionSupportInfo() const
+	{
 		return _versionSupportInfo;
 	}
 
@@ -142,10 +147,6 @@ namespace ts3::system
 	void OpenGLSystemDriver::resetContextBinding()
 	{
 		_nativeResetContextBinding();
-	}
-
-	const Version & OpenGLSystemDriver::getSupportedRuntimeVersion() const
-	{
 	}
 
 	bool OpenGLSystemDriver::isAPIClassSupported( EOpenGLAPIClass pAPIClass ) const

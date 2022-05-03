@@ -6,16 +6,16 @@
 #include "windowCommon.h"
 
 /// @brief Identifies a desktop OpenGL-based platform (like Win32, GLX or MacOS).
-#define TS3_SYSTEM_GL_PLATFORM_TYPE_CORE 0x7001
+#define TS3_SYSTEM_GL_PLATFORM_TYPE_DESKTOP 0x7001
 
 /// @brief Identifies an ES-based platform (like Android or iOS).
-#define TS3_SYSTEM_GL_PLATFORM_TYPE_ES   0x7002
+#define TS3_SYSTEM_GL_PLATFORM_TYPE_ES 0x7002
 
 /// @def TS3_SYSTEM_GL_PLATFORM_TYPE
-/// @brief Defined a
+/// @brief Defined as either TS3_SYSTEM_GL_PLATFORM_TYPE_DESKTOP or TS3_SYSTEM_GL_PLATFORM_TYPE_ES, depending on the target platform.
 
 #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_DESKTOP )
-#  define TS3_SYSTEM_GL_PLATFORM_TYPE TS3_SYSTEM_GL_PLATFORM_TYPE_CORE
+#  define TS3_SYSTEM_GL_PLATFORM_TYPE TS3_SYSTEM_GL_PLATFORM_TYPE_DESKTOP
 #  include <GL/glew.h>
 #else
 #  define TS3_SYSTEM_GL_PLATFORM_TYPE TS3_SYSTEM_GL_PLATFORM_TYPE_ES
@@ -51,11 +51,16 @@ namespace ts3::system
 	/// @brief
 	enum EOpenGLSurfaceCreateFlags : uint32
 	{
-		// Specifies a full-screen surface, covering the whole screen.
-		// Ignored for mobile (iOS and Android), where fullscreen is always used.
+		/// Surface is created as a fullscreen layer/window, adjusted to the selected display dimensions.
 		E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT = 0x1000,
+
+		/// Enables adaptive sync for the surface: v-sync is performed only when the frame rate exceeds vertical frequency.
 		E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT = 0x2000,
+
+		/// Disables vertical sync for the surface: buffers are swapped immediately upon request.
 		E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_DISABLED_BIT = 0x4000,
+
+		/// Enables vertical sync for the surface: swap is performed during a v-blank.
 		E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT = 0x8000,
 	};
 

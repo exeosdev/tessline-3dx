@@ -5,7 +5,7 @@
 namespace ts3::gpuapi
 {
 
-#if( TS3_SYSTEM_GL_PLATFORM_TYPE == TS3_SYSTEM_GL_PLATFORM_TYPE_CORE )
+#if( TS3_SYSTEM_GL_PLATFORM_TYPE == TS3_SYSTEM_GL_PLATFORM_TYPE_DESKTOP )
 
 	static const size_t sEventInfoBufferSize = 1024;
 
@@ -23,12 +23,12 @@ namespace ts3::gpuapi
 		if( pEnable )
 		{
 			glEnable( GL_DEBUG_OUTPUT );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glDisable( GL_DEBUG_OUTPUT );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 
 		setCallbackActive( pEnable );
@@ -249,12 +249,12 @@ namespace ts3::gpuapi
 		if( pEnable )
 		{
 			glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glDisable( GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 	}
 
@@ -323,12 +323,12 @@ namespace ts3::gpuapi
 		if( pEnable )
 		{
 			glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glDisable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 	}
 

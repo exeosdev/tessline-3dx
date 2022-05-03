@@ -11,7 +11,7 @@ namespace ts3::gpuapi
 	{
 		try
 		{
-		    system::GLDisplaySurfaceCreateInfo surfaceCreateInfo;
+		    system::OpenGLDisplaySurfaceCreateInfo surfaceCreateInfo;
 			surfaceCreateInfo.frameGeometry.position = pPLCreateInfo.screenRect.offset;
 			surfaceCreateInfo.frameGeometry.size = pPLCreateInfo.screenRect.size;
 			surfaceCreateInfo.frameGeometry.style = system::EFrameStyle::Default;
@@ -22,8 +22,8 @@ namespace ts3::gpuapi
 			surfaceCreateInfo.runtimeVersionDesc.apiVersion.major = 3;
 			surfaceCreateInfo.runtimeVersionDesc.apiVersion.minor = 2;
 		#elif( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL43 )
-			surfaceCreateInfo.runtimeVersionDesc.apiVersion.major = 4;
-			surfaceCreateInfo.runtimeVersionDesc.apiVersion.minor = 3;
+			surfaceCreateInfo.minimumAPIVersion = pSysGLDriver->getVersionSupportInfo().apiVersion;
+			surfaceCreateInfo.targetAPIClass = system::EOpenGLAPIClass::OpenGLDesktop;
 		#elif( TS3GX_GL_TARGET == TS3GX_GL_TARGET_ES31 )
 			surfaceCreateInfo.runtimeVersionDesc.apiVersion.major = 3;
 			surfaceCreateInfo.runtimeVersionDesc.apiVersion.minor = 1;
@@ -31,16 +31,16 @@ namespace ts3::gpuapi
 
 			if( pPLCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_FULLSCREEN_BIT ) )
 			{
-				surfaceCreateInfo.flags.set( system::E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
+				surfaceCreateInfo.flags.set( system::E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT );
 			}
 
 			if( pPLCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_SYNC_MODE_ADAPTIVE_BIT ) )
 			{
-				surfaceCreateInfo.flags.set( system::E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT );
+				surfaceCreateInfo.flags.set( system::E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT );
 			}
 			else if( pPLCreateInfo.displayConfigFlags.isSet( E_DISPLAY_CONFIGURATION_FLAG_SYNC_MODE_VERTICAL_BIT ) )
 			{
-				surfaceCreateInfo.flags.set( system::E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT );
+				surfaceCreateInfo.flags.set( system::E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT );
 			}
 
 			auto sysGLSurface = pSysGLDriver->createDisplaySurface( surfaceCreateInfo );
@@ -86,10 +86,8 @@ namespace ts3::gpuapi
 
 	void GLScreenPresentationLayer::bindRenderTarget( CommandContext * pCmdContext )
 	{
-		// auto * openglCmdContext = pCmdContext->queryInterface<GLCommandContext>();
-		// openglCmdContext->mExfGLRenderContext->bindForCurrentThread( mExfGLSurface );
 		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLScreenPresentationLayer::invalidateRenderTarget( CommandContext * pCmdContext )

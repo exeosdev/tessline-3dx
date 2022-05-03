@@ -4,7 +4,6 @@
 
 #include <ts3/system/prerequisites.h>
 #include <ts3/stdext/bitmaskAtomic.h>
-#include <objc/objc.h>
 
 #import <AppKit/NSApplication.h>
 #import <CoreGraphics/CGError.h>
