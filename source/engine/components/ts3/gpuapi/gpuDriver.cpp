@@ -13,10 +13,10 @@ namespace ts3::gpuapi
 
 	EGPUDriverID GPUDriver::queryGPUDriverID() const
 	{
-		return EGPUDriverID::GDID0;
+		return EGPUDriverID::GDIUnknown;
 	}
 
-	void GPUDriver::setConfigFlags( Bitmask<GPUDriverConfigFlags> pConfigFlags )
+	void GPUDriver::setConfigFlags( Bitmask<EGPUDriverConfigFlags> pConfigFlags )
 	{
 		_configFlags = pConfigFlags;
 	}

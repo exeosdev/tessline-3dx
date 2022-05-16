@@ -17,7 +17,7 @@ namespace ts3::gpuapi
 		                                 RenderTargetLayout pRenderTargetLayout,
 		                                 GraphicsShaderBinding pShaderBinding,
 		                                 ShaderInputSignature pShaderInputSignature,
-		                                 const GraphicsPipelineStateDescriptorSet & pSeparableDescriptorSet );
+		                                 const SeparableGraphicsStateDescriptorSet & pSstateDescriptors );
 
 		virtual ~DX11GraphicsPipelineStateObject();
 

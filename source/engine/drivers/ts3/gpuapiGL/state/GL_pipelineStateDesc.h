@@ -94,7 +94,7 @@ namespace ts3::gpuapi
 				return streamIndex != cxInvalidVertexStreamIndex;
 			}
 		};
-		using GLVertexAttributeArray = std::array<GLVertexAttribute, GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM>;
+		using GLVertexAttributeArray = std::array<GLVertexAttribute, E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM>;
 		GLenum primitiveTopology;
 		uint32 activeVertexAttributesNum;
 		GLVertexAttributeArray vertexAttributeArray;
@@ -155,15 +155,15 @@ namespace ts3::gpuapi
 			GLsizei  stride;
 		};
 		using GLVertexStreamIndexArray = VertexDataSourceBinding::VertexStreamIndexArray;
-		GLVertexBufferBinding vertexBufferBinding[GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
+		GLVertexBufferBinding vertexBufferBinding[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
 		GLVertexStreamIndexArray vertexStreamActiveIndexArray;
 	#else
 		struct GLVertexBufferBinding
 		{
-			GLuint   activeArray[GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
-			GLuint   bufferArray[GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
-			GLintptr offsetArray[GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
-			GLsizei  strideArray[GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
+			GLuint   activeArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
+			GLuint   bufferArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
+			GLintptr offsetArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
+			GLsizei  strideArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
 		};
 		using GLVertexStreamRange = VertexDataSourceBinding::VertexStreamRange;
 		using GLVertexStreamRangeList = VertexDataSourceBinding::VertexStreamRangeList;

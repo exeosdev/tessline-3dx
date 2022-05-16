@@ -631,7 +631,7 @@ void initializeGraphicsDriver( SysContextHandle pSysContext, GraphicsDriverState
 {
     GPUDriverCreateInfo gpuDriverCreateInfo;
     gpuDriverCreateInfo.sysContext = pSysContext;
-    gpuDriverCreateInfo.configFlags = GPU_DRIVER_CONFIG_FLAG_ENABLE_SHADER_DEBUG_INFO_BIT;
+    gpuDriverCreateInfo.configFlags = E_GPU_DRIVER_CONFIG_FLAG_ENABLE_SHADER_DEBUG_INFO_BIT;
     pGxDriverState.driver = pGxDriverState.driverInterface->createDriver( gpuDriverCreateInfo );
 
     GPUDeviceCreateInfo gpuDeviceCreateInfo;

@@ -85,7 +85,7 @@ namespace ts3
 //
 //		const PreloadedSubDataArray & getPreloadedSubData() const;
 //
-//		bool isEmpty() const;
+//		bool empty() const;
 //
 //		bool isFull() const;
 //

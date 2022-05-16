@@ -14,7 +14,7 @@ namespace ts3::gpuapi
 	class TS3_GPUAPI_CLASS Shader : public GPUBaseObject
 	{
 	public:
-		EShaderType const mEShaderType;
+		EShaderType const mShaderType;
 		ShaderBinary const mShaderBinary;
 
 		Shader( GPUDevice & pGPUDevice, EShaderType pShaderType );

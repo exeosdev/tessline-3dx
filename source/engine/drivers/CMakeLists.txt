@@ -23,8 +23,8 @@ elseif( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
     set( _EBS_ENGINE_DRIVERS_TARGET_LIST
             "gpuapiGL"
             "gpuapiGL4"
-            # "gpuapiMTL"
-            # "gpuapiMTL3"
+            "gpuapiMTL"
+            "gpuapiMTL1"
             )
 elseif( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "iOS" )
     set( _EBS_ENGINE_DRIVERS_TARGET_LIST

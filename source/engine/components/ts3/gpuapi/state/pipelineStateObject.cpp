@@ -49,7 +49,7 @@ namespace ts3::gpuapi
 			}
 		}
 
-		auto graphicsShaderBinding = createGraphicsShaderBinding( *( pCreateInfo.shaderBindingDesc ) );
+		auto graphicsShaderBinding = GraphicsShaderBinding::createFromDesc( *( pCreateInfo.shaderBindingDesc ) );
 		if( !graphicsShaderBinding )
 		{
 			return false;
@@ -68,16 +68,6 @@ namespace ts3::gpuapi
 	}
 
 
-	SeparableGraphicsPipelineStateObject::SeparableGraphicsPipelineStateObject( GPUDevice & pGPUDevice,
-	                                                                            RenderTargetLayout pRenderTargetLayout,
-	                                                                            GraphicsShaderBinding pShaderBinding,
-	                                                                            ShaderInputSignature pShaderInputSignature,
-	                                                                            const GraphicsPipelineStateDescriptorSet & pSeparableDescriptorSet )
-	: GraphicsPipelineStateObject( pGPUDevice, std::move( pRenderTargetLayout ), std::move( pShaderInputSignature ) )
-	, mShaderBinding( std::move( pShaderBinding ) )
-	, mSeparableDescriptorSet( pSeparableDescriptorSet )
-	{}
 
-	SeparableGraphicsPipelineStateObject::~SeparableGraphicsPipelineStateObject() = default;
 
 } // namespace ts3::gpuapi

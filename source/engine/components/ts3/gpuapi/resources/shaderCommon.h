@@ -11,116 +11,45 @@ namespace ts3::gpuapi
 
 	ts3DeclareClassHandle( Shader );
 
-	enum EShaderStageIndex : uint32
+	inline constexpr uint32 ecMakeShaderType( uint32 pStageIndex )
 	{
-		E_SHADER_STAGE_INDEX_BASE_GRAPHICS,
-		E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX = E_SHADER_STAGE_INDEX_BASE_GRAPHICS,
-		E_SHADER_STAGE_INDEX_GRAPHICS_TESS_CONTROL,
-		E_SHADER_STAGE_INDEX_GRAPHICS_TESS_EVALUATION,
-		E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY,
-		E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL,
-		E_SHADER_STAGE_INDEX_MAX_GRAPHICS = E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL,
-		E_SHADER_STAGE_INDEX_BASE_COMPUTE,
-		E_SHADER_STAGE_INDEX_COMPUTE = E_SHADER_STAGE_INDEX_BASE_COMPUTE,
-		E_SHADER_STAGE_INDEX_MAX_COMPUTE = E_SHADER_STAGE_INDEX_COMPUTE,
-		E_SHADER_STAGE_INDEX_MAX = E_SHADER_STAGE_INDEX_MAX_COMPUTE
-	};
-
-	enum EShaderStageFlags : uint32
-	{
-		E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT          = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX,
-		E_SHADER_STAGE_FLAG_GRAPHICS_TESS_CONTROL_BIT    = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_TESS_CONTROL,
-		E_SHADER_STAGE_FLAG_GRAPHICS_TESS_EVALUATION_BIT = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_TESS_EVALUATION,
-		E_SHADER_STAGE_FLAG_GRAPHICS_GEOMETRY_BIT        = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY,
-		E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT           = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL,
-		E_SHADER_STAGE_FLAG_COMPUTE_BIT                  = 1u << E_SHADER_STAGE_INDEX_COMPUTE,
-		E_SHADER_STAGE_FLAGS_GRAPHICS_ALL                = 0x003F,
-		E_SHADER_STAGE_FLAGS_ALL                         = E_SHADER_STAGE_FLAGS_GRAPHICS_ALL | E_SHADER_STAGE_FLAG_COMPUTE_BIT,
-		E_SHADER_STAGE_FLAGS_NONE                        = 0
-	};
-
-	constexpr inline uint32 ecDeclareEShaderType( uint32 pStageIndex, uint32 pStageBit )
-	{
-		return ( pStageIndex << 24 ) | ( pStageBit & E_SHADER_STAGE_FLAGS_ALL );
+		return ( pStageIndex << 16 ) | ecMakeShaderStageBit( pStageIndex );
 	}
+
+	/// @brief
+	enum EShaderCreateFlags : uint32
+	{
+		E_SHADER_CREATE_FLAG_DEBUG_BIT                = 0x0001,
+		E_SHADER_CREATE_FLAG_OPTIMIZATION_DISABLE_BIT = 0x0010,
+		E_SHADER_CREATE_FLAG_OPTIMIZATION_L0_BIT      = 0x0020,
+		E_SHADER_CREATE_FLAG_OPTIMIZATION_L1_BIT      = 0x0040,
+		E_SHADER_CREATE_FLAG_OPTIMIZATION_LMAX_BIT    = 0x0080,
+		E_SHADER_CREATE_FLAGS_DEFAULT = 0
+	};
 
 	enum class EShaderType : uint32
 	{
-		VertexShader         = ecDeclareEShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX,          E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT ),
-		TessControlShader    = ecDeclareEShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_TESS_CONTROL,    E_SHADER_STAGE_FLAG_GRAPHICS_TESS_CONTROL_BIT ),
-		TessEvaluationShader = ecDeclareEShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_TESS_EVALUATION, E_SHADER_STAGE_FLAG_GRAPHICS_TESS_EVALUATION_BIT ),
-		GeometryShader       = ecDeclareEShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY,        E_SHADER_STAGE_FLAG_GRAPHICS_GEOMETRY_BIT ),
-		PixelShader          = ecDeclareEShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL,           E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT ),
-		ComputeShader        = ecDeclareEShaderType( E_SHADER_STAGE_INDEX_COMPUTE,                  E_SHADER_STAGE_FLAG_COMPUTE_BIT ),
-		Unknown              = 0
+		GSVertex         = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX           ),
+		GSTessControl    = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_TESS_CONTROL     ),
+		GSTessEvaluation = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_TESS_EVALUATION  ),
+		GSGeometry       = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY         ),
+		GSAmplification  = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_AMPLIFICATION    ),
+		GSMesh           = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_MESH             ),
+		GSPixel          = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL            ),
+		CSCompute        = ecMakeShaderType( E_SHADER_STAGE_INDEX_COMPUTE                   ),
+		Unknown          = 0
 	};
 
 	enum class EGraphicsShaderStageID : uint32
 	{
-		Vertex         = static_cast<uint32>( EShaderType::VertexShader ),
-		TessControl    = static_cast<uint32>( EShaderType::TessControlShader ),
-		TessEvaluation = static_cast<uint32>( EShaderType::TessEvaluationShader ),
-		Geometry       = static_cast<uint32>( EShaderType::GeometryShader ),
-		Pixel          = static_cast<uint32>( EShaderType::PixelShader ),
-		Unknown        = 0
-	};
-
-	constexpr inline uint32 ecGetEShaderStageIndex( EShaderType pShaderType )
-	{
-		return ( static_cast<uint32>( pShaderType ) >> 24 ) & 0xFF;
-	}
-
-	constexpr inline uint32 ecGetEShaderStageIndex( EGraphicsShaderStageID pStageID )
-	{
-		return ecGetEShaderStageIndex( static_cast<EShaderType>( pStageID ) );
-	}
-
-	constexpr inline EShaderStageFlags ecGetShaderStageMaskBit( EShaderType pShaderType )
-	{
-		return static_cast<EShaderStageFlags>( static_cast<uint32>( pShaderType ) & 0xFFFFFF );
-	}
-
-	constexpr inline EShaderStageFlags ecGetShaderStageMaskBit( EGraphicsShaderStageID pStageID )
-	{
-		return ecGetShaderStageMaskBit( static_cast<EShaderType>( pStageID ) );
-	}
-
-	constexpr inline EShaderStageFlags ecGetShaderStageMaskBit( uint32 pStageIndex )
-	{
-		return ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX ) ? static_cast<EShaderStageFlags>( 1 << pStageIndex ) : static_cast<EShaderStageFlags>( 0 );
-	}
-
-	constexpr inline bool ecIsShaderGraphics( EShaderType pShaderType )
-	{
-		return ( ecGetShaderStageMaskBit( pShaderType ) & E_SHADER_STAGE_FLAGS_GRAPHICS_ALL ) != 0;
-	}
-
-	constexpr inline EGraphicsShaderStageID ecGetEGraphicsShaderStageID( EShaderType pShaderType )
-	{
-		return ecIsShaderGraphics( pShaderType ) ? static_cast<EGraphicsShaderStageID>( pShaderType ) : EGraphicsShaderStageID::Unknown;
-	}
-
-	constexpr inline EGraphicsShaderStageID ecGetEGraphicsShaderStageIDByIndex( uint32 pStageIndex )
-	{
-		return ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX_GRAPHICS ) ?
-		       static_cast<EGraphicsShaderStageID>( ecDeclareEShaderType( pStageIndex, 1 << pStageIndex ) ) :
-		       EGraphicsShaderStageID::Unknown;
-	}
-
-	constexpr inline EShaderType ecGetEShaderTypeIDByIndex( uint32 pStageIndex )
-	{
-		return ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX ) ?
-		       static_cast<EShaderType>( ecDeclareEShaderType( pStageIndex, 1 << pStageIndex ) ) :
-		       EShaderType::Unknown;
-	}
-
-	enum EShaderCreateFlags : uint32
-	{
-		E_SHADER_CREATE_FLAG_DEBUG_BIT                = 0x0001,
-		E_SHADER_CREATE_FLAG_OPTIMIZATION_DISABLE_BIT = 0x0002,
-		E_SHADER_CREATE_FLAG_OPTIMIZATION_L0_BIT      = 0x0010,
-		E_SHADER_CREATE_FLAG_OPTIMIZATION_L1_BIT      = 0x0020,
-		E_SHADER_CREATE_FLAGS_DEFAULT = 0
+		Vertex         = static_cast<uint32>( EShaderType::GSVertex ),
+		TessControl    = static_cast<uint32>( EShaderType::GSTessControl ),
+		TessEvaluation = static_cast<uint32>( EShaderType::GSTessEvaluation ),
+		Geometry       = static_cast<uint32>( EShaderType::GSGeometry ),
+		Amplification  = static_cast<uint32>( EShaderType::GSAmplification ),
+		Mesh           = static_cast<uint32>( EShaderType::GSMesh ),
+		Pixel          = static_cast<uint32>( EShaderType::GSPixel ),
+		Unknown        = static_cast<uint32>( EShaderType::Unknown ),
 	};
 
 	struct ShaderBinary
@@ -141,7 +70,7 @@ namespace ts3::gpuapi
 			return !empty();
 		}
 
-		bool empty() const
+		TS3_FUNC_NO_DISCARD bool empty() const
 		{
 			return rawBuffer.empty() || ( rawBufferSize == 0 );
 		}
@@ -156,14 +85,58 @@ namespace ts3::gpuapi
 		const char * entryPointName = nullptr;
 	};
 
-	constexpr inline EShaderStageFlags getGraphicsShaderStageFlag( uint32 pShaderStageIndex )
+	template <typename TpEnum>
+	struct IsValidShaderTypeEnum
 	{
-		return static_cast<EShaderStageFlags>( ( 1 << pShaderStageIndex ) & E_SHADER_STAGE_FLAGS_GRAPHICS_ALL );
+		static constexpr bool sValue = std::is_same<TpEnum, EShaderType>::value || std::is_same<TpEnum, EGraphicsShaderStageID>::value;
+	};
+
+	template <typename TpGetAs = EShaderStageIndex, typename TpEnum, std::enable_if_t<IsValidShaderTypeEnum<TpEnum>::sValue, int> = 0>
+	TS3_FUNC_NO_DISCARD inline constexpr TpGetAs ecGetShaderStageIndex( TpEnum pShaderType )
+	{
+		return static_cast<TpGetAs>( ( static_cast<uint32>( pShaderType ) >> 16 ) & 0xFFFF );
 	}
 
-	constexpr inline EShaderStageFlags getGraphicsShaderStageFlag( EShaderType pShaderType )
+	template <typename TpGetAs = EShaderStageFlags, typename TpEnum, std::enable_if_t<IsValidShaderTypeEnum<TpEnum>::sValue, int> = 0>
+	TS3_FUNC_NO_DISCARD inline constexpr TpGetAs ecGetShaderStageBit( TpEnum pShaderType )
 	{
-		return getGraphicsShaderStageFlag( static_cast<uint32>( pShaderType ) );
+		return static_cast<TpGetAs>( static_cast<uint32>( pShaderType ) & 0xFFFF );
+	}
+
+	template <typename TpEnum, std::enable_if_t<IsValidShaderTypeEnum<TpEnum>::sValue, int> = 0>
+	TS3_FUNC_NO_DISCARD inline constexpr bool ecIsGraphicsShaderType( TpEnum pShaderType )
+	{
+		return ecGetShaderStageIndex( pShaderType ) <= E_SHADER_STAGE_INDEX_MAX_GRAPHICS;
+	}
+
+	template <typename TpEnum, std::enable_if_t<IsValidShaderTypeEnum<TpEnum>::sValue, int> = 0>
+	TS3_FUNC_NO_DISCARD inline constexpr bool ecIsValidShaderType( TpEnum pShaderType )
+	{
+		return ecGetShaderStageIndex( pShaderType ) <= E_SHADER_STAGE_INDEX_MAX;
+	}
+
+	TS3_FUNC_NO_DISCARD inline constexpr EGraphicsShaderStageID ecShaderTypeToGraphicsShaderStageID( EShaderType pShaderType )
+	{
+		return ecIsGraphicsShaderType( pShaderType ) ? static_cast<EGraphicsShaderStageID>( pShaderType ) : EGraphicsShaderStageID::Unknown;
+	}
+
+	TS3_FUNC_NO_DISCARD inline constexpr EShaderType ecGraphicsShaderStageIDToShaderType( EGraphicsShaderStageID pGraphicsShaderStageID )
+	{
+		return ecIsGraphicsShaderType( pGraphicsShaderStageID ) ? static_cast<EShaderType>( pGraphicsShaderStageID ) : EShaderType::Unknown;
+	}
+
+	TS3_FUNC_NO_DISCARD inline constexpr EShaderType ecGetShaderTypeFromStageIndex( uint32 pStageIndex )
+	{
+		return ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX ) ?
+		       static_cast<EShaderType>( ecMakeShaderType( pStageIndex ) ) :
+		       EShaderType::Unknown;
+	}
+
+	TS3_FUNC_NO_DISCARD inline constexpr EGraphicsShaderStageID ecGetGraphicsShaderStageIDFromStageIndex( uint32 pStageIndex )
+	{
+		return ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX_GRAPHICS ) ?
+		       static_cast<EGraphicsShaderStageID>( ecMakeShaderType( pStageIndex ) ) :
+		       EGraphicsShaderStageID::Unknown;
 	}
 
 } // namespace ts3::gpuapi

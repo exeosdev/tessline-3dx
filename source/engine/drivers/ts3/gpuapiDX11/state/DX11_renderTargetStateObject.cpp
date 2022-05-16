@@ -34,7 +34,7 @@ namespace ts3::gpuapi
 		memZero( dx11RTResourceState.colorAttachmentRTVArray );
 		dx11RTResourceState.depthStencilAttachmentDSV = nullptr;
 
-		for( uint32 colorAttachmentIndex = 0; colorAttachmentIndex < GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM; ++colorAttachmentIndex )
+		for( uint32 colorAttachmentIndex = 0; colorAttachmentIndex < E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM; ++colorAttachmentIndex )
 		{
 			auto & colorAttachmentBinding = rtResourceBinding.colorAttachmentArray[colorAttachmentIndex];
 			if( colorAttachmentBinding )

@@ -12,59 +12,86 @@ namespace ts3::gpuapi
 
 	struct GraphicsShaderBindingDesc
 	{
-		struct ShaderStageDesc
-		{
-			EGraphicsShaderStageID stageID = EGraphicsShaderStageID::Unknown;
-			Shader * shaderObject = nullptr;
-		};
-		using ShaderStageDescArray = std::array<ShaderStageDesc, GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM>;
-		ShaderStageDescArray shaderStageDescArray;
+		using ShaderList = std::array<Shader *, E_GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM>;
+		ShaderList shaderList;
 	};
 
 	struct GraphicsShaderBinding
 	{
-		struct ShaderStage
-		{
-			EGraphicsShaderStageID stageID;
-			Shader * shaderObject;
-		};
-		using ActiveStageList = std::list<ShaderStage>;
-		using BindingArray = std::array<Shader *, GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM>;
-		ActiveStageList activeStageList;
-		BindingArray bindingArray;
-		Bitmask<EShaderStageFlags> activeStagesMask;
+		using ShaderArray = std::array<Shader *, E_GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM>;
+
+		/// A fixed-size array with all supported shaders, indexed using EShaderStageIndex values.
+		ShaderArray shaderArray;
+
+		/// Number of active stages. Naturally, this is also the number of non-null entries in shaderArray.
 		uint32 activeStagesNum;
 
-		GraphicsShaderBinding() = default;
+		/// Active stage mask.
+		/// @see EShaderStageFlags
+		Bitmask<EShaderStageFlags> activeStagesMask;
 
-		GraphicsShaderBinding( const InitEmptyTag & )
-		: activeStagesMask( 0 )
-		{}
-
-		explicit operator bool() const
+		GraphicsShaderBinding()
 		{
-			return activeStagesMask.isSet( E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT );
+			reset();
 		}
 
-		Shader * operator[]( size_t pStageIndex ) const
+		TS3_GPUAPI_API void reset();
+
+		TS3_GPUAPI_API_NO_DISCARD Shader * get( uint32 pStageIndex ) const;
+
+		TS3_GPUAPI_API_NO_DISCARD bool isSet( uint32 pStageIndex ) const;
+
+		TS3_GPUAPI_API_NO_DISCARD bool isValid() const;
+
+		TS3_FUNC_NO_DISCARD Shader * get( EShaderType pShaderType ) const
 		{
-			return bindingArray.at( pStageIndex );
+			return get( ecGetShaderStageIndex( pShaderType ) );
 		}
 
-		Shader * operator[]( EShaderType pShaderType ) const
+		TS3_FUNC_NO_DISCARD Shader * get( EGraphicsShaderStageID pGraphicsShaderStageID ) const
 		{
-			auto shaderStageIndex = ecGetEShaderStageIndex( pShaderType );
-			return bindingArray.at( shaderStageIndex );
+			return get( ecGetShaderStageIndex( pGraphicsShaderStageID ) );
 		}
 
-		Shader * operator[]( EGraphicsShaderStageID pGraphicsShaderStageID ) const
+		TS3_FUNC_NO_DISCARD bool isSet( EShaderType pShaderType ) const
 		{
-			auto shaderStageIndex = ecGetEShaderStageIndex( pGraphicsShaderStageID );
-			return bindingArray.at( shaderStageIndex );
+			return isSet( ecGetShaderStageIndex( pShaderType ) );
 		}
+
+		TS3_FUNC_NO_DISCARD bool isSet( EGraphicsShaderStageID pGraphicsShaderStageID ) const
+		{
+			return isSet( ecGetShaderStageIndex( pGraphicsShaderStageID ) );
+		}
+
+		TS3_FUNC_NO_DISCARD bool empty() const
+		{
+			return ( activeStagesNum == 0 ) || activeStagesMask.empty();
+		}
+
+		TS3_FUNC_NO_DISCARD explicit operator bool() const
+		{
+			return isValid();
+		}
+
+		TS3_FUNC_NO_DISCARD Shader * operator[]( uint32 pStageIndex ) const
+		{
+			return get( pStageIndex );
+		}
+
+		TS3_FUNC_NO_DISCARD Shader * operator[]( EShaderType pShaderType ) const
+		{
+			return get( pShaderType );
+		}
+
+		TS3_FUNC_NO_DISCARD Shader * operator[]( EGraphicsShaderStageID pGraphicsShaderStageID ) const
+		{
+			return get( pGraphicsShaderStageID );
+		}
+
+		TS3_GPUAPI_API static GraphicsShaderBinding createFromDesc( const GraphicsShaderBindingDesc & pBindingDesc );
+
+		TS3_GPUAPI_API static bool validateDesc( const GraphicsShaderBindingDesc & pBindingDesc );
 	};
-
-	TS3_GPUAPI_API GraphicsShaderBinding createGraphicsShaderBinding( const GraphicsShaderBindingDesc & pBindingDesc );
 
 } // namespace ts3::gpuapi
 

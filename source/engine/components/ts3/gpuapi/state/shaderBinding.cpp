@@ -6,74 +6,90 @@
 namespace ts3::gpuapi
 {
 
-	struct ShaderBindingInfo
+	void GraphicsShaderBinding::reset()
 	{
-		using ShaderArray = std::array<Shader *, GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM>;
-		ShaderArray shaderArray;
-	};
-
-	bool validateGraphicsShaderBindingDesc( const GraphicsShaderBindingDesc & pShaderBindingDesc, ShaderBindingInfo & pBindingInfo );
-
-	GraphicsShaderBinding createGraphicsShaderBinding( const GraphicsShaderBindingDesc & pBindingDesc )
-	{
-		ShaderBindingInfo bindingInfo;
-		if( !validateGraphicsShaderBindingDesc( pBindingDesc, bindingInfo ) )
-		{
-			return CX_INIT_EMPTY;
-		}
-
-		GraphicsShaderBinding graphicsShaderBinding;
-		graphicsShaderBinding.activeStagesNum = 0;
-		graphicsShaderBinding.activeStagesMask = 0;
-		memZero( graphicsShaderBinding.bindingArray );
-
-		for( uint32 stageIndex = 0; stageIndex < GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM; ++stageIndex )
-		{
-			if( auto * shader = bindingInfo.shaderArray[stageIndex] )
-			{
-				auto graphicsStageID = ecGetEGraphicsShaderStageIDByIndex( stageIndex );
-				auto graphicsStageMaskBit = ecGetShaderStageMaskBit( graphicsStageID );
-				graphicsShaderBinding.bindingArray[stageIndex] = shader;
-				graphicsShaderBinding.activeStagesNum += 1;
-				graphicsShaderBinding.activeStageList.push_back( { graphicsStageID, shader } );
-				graphicsShaderBinding.activeStagesMask.set( graphicsStageMaskBit );
-			}
-		}
-
-		ts3DebugAssert( graphicsShaderBinding.activeStagesNum > 0 );
-		ts3DebugAssert( graphicsShaderBinding.activeStagesMask.isSet( E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT ) );
-
-		return graphicsShaderBinding;
+		shaderArray.fill( nullptr );
+		activeStagesNum = 0;
+		activeStagesMask = 0;
 	}
 
-	bool validateGraphicsShaderBindingDesc( const GraphicsShaderBindingDesc & pShaderBindingDesc, ShaderBindingInfo & pBindingInfo )
+	Shader * GraphicsShaderBinding::get( uint32 pStageIndex ) const
 	{
-		memZero( pBindingInfo.shaderArray );
+		const auto stageIndex = ecGetShaderStageIndexFromValue( pStageIndex );
+		return ( stageIndex != E_SHADER_STAGE_INDEX_INVALID ) ? shaderArray[pStageIndex] : nullptr;
+	}
 
-		for( const auto & stageDesc : pShaderBindingDesc.shaderStageDescArray )
+	bool GraphicsShaderBinding::isSet( uint32 pStageIndex ) const
+	{
+		const auto stageFlagBit = ecMakeGraphicsShaderStageBit( pStageIndex );
+		return ( stageFlagBit != 0 ) && activeStagesMask.isSet( stageFlagBit ) && shaderArray[pStageIndex];
+	}
+
+	bool GraphicsShaderBinding::isValid() const
+	{
+		return ( isSet( EShaderType::GSVertex ) || isSet( EShaderType::GSMesh ) ) && isSet( EShaderType::GSPixel );
+	}
+
+	GraphicsShaderBinding GraphicsShaderBinding::createFromDesc( const GraphicsShaderBindingDesc & pBindingDesc )
+	{
+		GraphicsShaderBinding shaderBinding{};
+
+		if( validateDesc( pBindingDesc ) )
 		{
-			if( !stageDesc.shaderObject )
+			for( auto * shaderObject : pBindingDesc.shaderList )
+			{
+				const auto graphicsStageID = ecShaderTypeToGraphicsShaderStageID( shaderObject->mShaderType );
+
+				if( graphicsStageID != EGraphicsShaderStageID::Unknown )
+				{
+					const auto graphicsStageIndex = ecGetShaderStageIndex( shaderObject->mShaderType );
+					const auto graphicsStageMaskBit = ecGetShaderStageBit( shaderObject->mShaderType );
+
+					if( shaderBinding.shaderArray[graphicsStageIndex] )
+					{
+						ts3DebugOutput( "Shader binding overwrite (two or more shaders of the same type on the list)" );
+					}
+
+					shaderBinding.shaderArray[graphicsStageIndex] = shaderObject;
+					shaderBinding.activeStagesNum += 1;
+					shaderBinding.activeStagesMask.set( graphicsStageMaskBit );
+				}
+			}
+		}
+
+		return shaderBinding;
+	}
+
+	bool GraphicsShaderBinding::validateDesc( const GraphicsShaderBindingDesc & pBindingDesc )
+	{
+		bool bindingHasVertexShader = false;
+		bool bindingHasMeshShader = false;
+		bool bindingHasPixelShader = false;
+
+		for( auto * shaderObject : pBindingDesc.shaderList )
+		{
+			if( !shaderObject || ( shaderObject->mShaderType == EShaderType::Unknown ) )
 			{
 				continue;
 			}
 
-			auto shaderObjectStageID = ecGetEGraphicsShaderStageID( stageDesc.shaderObject->mEShaderType );
-			if( shaderObjectStageID != stageDesc.stageID )
+			auto shaderObjectStageID = ecShaderTypeToGraphicsShaderStageID( shaderObject->mShaderType );
+
+			if( shaderObjectStageID == EGraphicsShaderStageID::Vertex )
 			{
-				ts3DebugInterrupt();
-				continue;
+				bindingHasVertexShader = true;
 			}
-
-			auto stageIndex = ecGetEShaderStageIndex( shaderObjectStageID );
-			pBindingInfo.shaderArray[stageIndex] = stageDesc.shaderObject;
+			else if( shaderObjectStageID == EGraphicsShaderStageID::Mesh )
+			{
+				bindingHasMeshShader = true;
+			}
+			else if( shaderObjectStageID == EGraphicsShaderStageID::Pixel )
+			{
+				bindingHasPixelShader = true;
+			}
 		}
 
-		if( !pBindingInfo.shaderArray[E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX] )
-		{
-			return false;
-		}
-
-		return true;
+		return ( bindingHasVertexShader || bindingHasMeshShader ) && bindingHasPixelShader;
 	}
 
 } // namespace ts3::gpuapi

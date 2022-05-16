@@ -39,7 +39,7 @@ namespace ts3::gpuapi
 		{
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_BLEND_BIT ) )
 			{
-				auto blendDescriptorID = _csSeparableStateDescriptorSet.blendDescriptorID;
+				auto blendDescriptorID = _separableStateDescriptorSet.blendDescriptorID;
 				const auto & blendDescriptor = _descriptorCache->getBlendDescriptor( blendDescriptorID );
 
 				mDX11CommandList->mD3D11DeviceContext1->OMSetBlendState( blendDescriptor.d3d11BlendState.Get(),
@@ -51,7 +51,7 @@ namespace ts3::gpuapi
 
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_DEPTH_STENCIL_BIT ) )
 			{
-				auto depthStencilDescriptorID = _csSeparableStateDescriptorSet.depthStencilDescriptorID;
+				auto depthStencilDescriptorID = _separableStateDescriptorSet.depthStencilDescriptorID;
 				const auto & depthStencilDescriptor = _descriptorCache->getDepthStencilDescriptor( depthStencilDescriptorID );
 
 				mDX11CommandList->mD3D11DeviceContext1->OMSetDepthStencilState( depthStencilDescriptor.d3d11DepthStencilState.Get(),
@@ -62,7 +62,7 @@ namespace ts3::gpuapi
 
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_RASTERIZER_BIT ) )
 			{
-				auto rasterizerDescriptorID = _csSeparableStateDescriptorSet.rasterizerDescriptorID;
+				auto rasterizerDescriptorID = _separableStateDescriptorSet.rasterizerDescriptorID;
 				const auto & rasterizerDescriptor = _descriptorCache->getRasterizerDescriptor( rasterizerDescriptorID );
 
 				mDX11CommandList->mD3D11DeviceContext1->RSSetState( rasterizerDescriptor.d3d11RasterizerState.Get() );
@@ -72,7 +72,7 @@ namespace ts3::gpuapi
 
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT ) )
 			{
-				auto vertexInputFormatDescriptorID = _csSeparableStateDescriptorSet.vertexInputFormatDescriptorID;
+				auto vertexInputFormatDescriptorID = _separableStateDescriptorSet.vertexInputFormatDescriptorID;
 				const auto & vertexInputFormatDescriptor = _descriptorCache->getVertexInputFormatDescriptor( vertexInputFormatDescriptorID );
 
 				mDX11CommandList->mD3D11DeviceContext1->IASetPrimitiveTopology( vertexInputFormatDescriptor.inputFormatDesc.primitiveTopology );
@@ -85,27 +85,27 @@ namespace ts3::gpuapi
 			{
 				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SHADER_VERTEX_STAGE_BIT ) )
 				{
-					auto * dx11Shader = _csSeparableShaderBinding.vertexShader->queryInterface<DX11Shader>();
+					auto * dx11Shader = _separableShaderBinding.vertexShader->queryInterface<DX11Shader>();
 					mDX11CommandList->mD3D11DeviceContext1->VSSetShader( dx11Shader->mD3D11VertexShader, nullptr, 0 );
 				}
 				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SHADER_TESS_CONTROL_STAGE_BIT ) )
 				{
-					auto * dx11Shader = _csSeparableShaderBinding.tessControlShader->queryInterface<DX11Shader>();
+					auto * dx11Shader = _separableShaderBinding.tessControlShader->queryInterface<DX11Shader>();
 					mDX11CommandList->mD3D11DeviceContext1->HSSetShader( dx11Shader->mD3D11HullShader, nullptr, 0 );
 				}
 				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SHADER_TESS_EVALUATION_STAGE_BIT ) )
 				{
-					auto * dx11Shader = _csSeparableShaderBinding.tessEvaluationShader->queryInterface<DX11Shader>();
+					auto * dx11Shader = _separableShaderBinding.tessEvaluationShader->queryInterface<DX11Shader>();
 					mDX11CommandList->mD3D11DeviceContext1->DSSetShader( dx11Shader->mD3D11DomainShader, nullptr, 0 );
 				}
 				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SHADER_GEOMETRY_STAGE_BIT ) )
 				{
-					auto * dx11Shader = _csSeparableShaderBinding.geometryShader->queryInterface<DX11Shader>();
+					auto * dx11Shader = _separableShaderBinding.geometryShader->queryInterface<DX11Shader>();
 					mDX11CommandList->mD3D11DeviceContext1->GSSetShader( dx11Shader->mD3D11GeometryShader, nullptr, 0 );
 				}
 				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SHADER_PIXEL_STAGE_BIT ) )
 				{
-					auto * dx11Shader = _csSeparableShaderBinding.pixelShader->queryInterface<DX11Shader>();
+					auto * dx11Shader = _separableShaderBinding.pixelShader->queryInterface<DX11Shader>();
 					mDX11CommandList->mD3D11DeviceContext1->PSSetShader( dx11Shader->mD3D11PixelShader, nullptr, 0 );
 				}
 				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_SHADER_ALL_MASK );

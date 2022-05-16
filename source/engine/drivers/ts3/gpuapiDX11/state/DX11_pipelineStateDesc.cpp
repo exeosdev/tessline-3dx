@@ -25,7 +25,7 @@ namespace ts3::gpuapi
 			dx11VertexDataSourceBinding.indexBufferBinding.format = dx11IBDataFormat;
 		}
 
-		for( vertex_stream_index_t vertexInputStreamIndex = 0; vertexInputStreamIndex < GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM; ++vertexInputStreamIndex )
+		for( vertex_stream_index_t vertexInputStreamIndex = 0; vertexInputStreamIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM; ++vertexInputStreamIndex )
 		{
 			const auto & vbBindingDesc = pBinding.vertexBufferBindingArray[vertexInputStreamIndex];
 			if( vbBindingDesc.bufferObject )
@@ -161,12 +161,12 @@ namespace ts3::gpuapi
 		DX11VertexInputFormatStateDescriptor dx11VIFDescriptor;
 
 		uint32 activeVertexAttributesNum = 0;
-		for( uint32 attributeIndex = 0; attributeIndex < GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
+		for( uint32 attributeIndex = 0; attributeIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
 		{
 			if( const auto & vertexAttributeDesc = pInputFormatDesc.vertexAttributeArray[attributeIndex] )
 			{
 				auto attributeRelativeOffset = vertexAttributeDesc.relativeOffset;
-				if( attributeRelativeOffset == cxVertexAttributeOffsetPackedAppend )
+				if( attributeRelativeOffset == CX_VERTEX_ATTRIBUTE_OFFSET_PACKED_APPEND )
 				{
 					attributeRelativeOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 				}

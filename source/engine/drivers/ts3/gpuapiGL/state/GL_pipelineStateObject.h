@@ -5,7 +5,7 @@
 #define __TS3DRIVER_GPUAPI_GLCOMMON_PIPELINE_STATE_OBJECT_H__
 
 #include "GL_pipelineStateDesc.h"
-#include <ts3/gpuapi/state/pipelineStateObject.h>
+#include <ts3/gpuapi/state/separablePipelineState.h>
 #include <ts3/gpuapiGL/objects/GL_shaderPipelineObject.h>
 
 namespace ts3::gpuapi
@@ -26,7 +26,7 @@ namespace ts3::gpuapi
 		                               RenderTargetLayout pRenderTargetLayout,
 		                               GraphicsShaderBinding pShaderBinding,
 		                               ShaderInputSignature pShaderInputSignature,
-		                               const GraphicsPipelineStateDescriptorSet & pSeparableDescriptorSet,
+		                               const SeparableGraphicsStateDescriptorSet & pSstateDescriptors,
 		                               GLShaderPipelineObjectHandle pGLShaderPipelineObject,
 		                               GLVertexArrayObjectHandle pGLVertexArrayObject );
 

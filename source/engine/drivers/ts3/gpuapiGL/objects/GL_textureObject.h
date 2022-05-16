@@ -50,7 +50,7 @@ namespace ts3::gpuapi
 	{
 	public:
 		TextureDimensions const mDimensions;
-		GLenum const mGLTextureBindTarget = cxGLBindTargetUnknown;
+		GLenum const mGLTextureBindTarget = CX_GL_BIND_TARGET_UNKNOWN;
 		GLenum const mGLInternalFormat;
 		GLuint const mMultisampleLevel;
 
