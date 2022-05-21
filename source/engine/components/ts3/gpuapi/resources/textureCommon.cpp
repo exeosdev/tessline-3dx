@@ -7,7 +7,7 @@ namespace ts3::gpuapi
 
 	TextureInitDataDesc::TextureInitDataDesc( TextureInitDataDesc && pSource )
 	{
-		if( !pSource.isEmpty() )
+		if( !pSource.empty() )
 		{
 			if( pSource.isArray() )
 			{
@@ -31,7 +31,7 @@ namespace ts3::gpuapi
 
 	TextureInitDataDesc::TextureInitDataDesc( const TextureInitDataDesc & pSource )
 	{
-		if( !pSource.isEmpty() )
+		if( !pSource.empty() )
 		{
 			if( pSource.isArray() )
 			{
@@ -115,7 +115,7 @@ namespace ts3::gpuapi
 		return !_subTextureInitDataArray.empty();
 	}
 
-	bool TextureInitDataDesc::isEmpty() const
+	bool TextureInitDataDesc::empty() const
 	{
 		return subTextureInitDataBasePtr == nullptr;
 	}

@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef __TS3DRIVER_GPUAPI_GLCOMMON_GPU_CMD_CONTEXT_H__
-#define __TS3DRIVER_GPUAPI_GLCOMMON_GPU_CMD_CONTEXT_H__
+#ifndef __TS3DRIVER_GPUAPI_GLCOMMON_GPU_COMMAND_LIST_H__
+#define __TS3DRIVER_GPUAPI_GLCOMMON_GPU_COMMAND_LIST_H__
 
 #include "GL_prerequisites.h"
 #include "state/GL_pipelineStateDesc.h"
@@ -54,4 +54,4 @@ namespace ts3::gpuapi
 
 } // namespace ts3::gpuapi
 
-#endif // __TS3DRIVER_GPUAPI_GLCOMMON_GPU_CMD_CONTEXT_H__
+#endif // __TS3DRIVER_GPUAPI_GLCOMMON_GPU_COMMAND_LIST_H__

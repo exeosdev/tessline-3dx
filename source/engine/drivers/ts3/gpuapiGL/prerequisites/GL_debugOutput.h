@@ -70,7 +70,7 @@ namespace ts3::gpuapi
 	};
 
 
-#if( TS3_SYSTEM_GL_PLATFORM_TYPE == TS3_SYSTEM_GL_PLATFORM_TYPE_CORE )
+#if( TS3_SYSTEM_GL_PLATFORM_TYPE == TS3_SYSTEM_GL_PLATFORM_TYPE_DESKTOP )
 
 	class GLDebugOutputAMDExt final : public GLDebugOutput
 	{

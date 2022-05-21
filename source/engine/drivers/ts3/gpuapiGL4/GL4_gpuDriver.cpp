@@ -15,8 +15,8 @@ namespace ts3::gpuapi
 	GL4GPUDriverHandle GL4GPUDriver::create( const GL4GPUDriverCreateInfo & pCreateInfo )
 	{
 		constexpr auto gl4SupportedGPUConfigFlags =
-			GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT |
-			GPU_DRIVER_CONFIG_FLAG_ENABLE_SHADER_DEBUG_INFO_BIT;
+			E_GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT |
+			E_GPU_DRIVER_CONFIG_FLAG_ENABLE_SHADER_DEBUG_INFO_BIT;
 
 		auto sysContext = pCreateInfo.sysContext;
 		if( !sysContext )
@@ -56,7 +56,7 @@ namespace ts3::gpuapi
 
 	EGPUDriverID GL4GPUDriver::queryGPUDriverID() const
 	{
-		return EGPUDriverID::GDIDGL4;
+		return EGPUDriverID::GDIOpenGLDesktop4;
 	}
 
 } // namespace ts3::gpuapi

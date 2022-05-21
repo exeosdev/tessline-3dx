@@ -69,10 +69,10 @@ namespace ts3::gpuapi
 			cmdSyncObject.syncDataReleaseFunc = releaseGLCommandSyncData;
 
 			auto syncFence = glFenceSync( GL_SYNC_GPU_COMMANDS_COMPLETE, 0 );
-			ts3GLCheckLastResult();
+			ts3OpenGLCheckLastResult();
 
 			glFlush();
-			ts3GLCheckLastResult();
+			ts3OpenGLCheckLastResult();
 
 			openglCommandSyncData->openglSyncFence = syncFence;
 		}
@@ -129,13 +129,13 @@ namespace ts3::gpuapi
 
 		try
 		{
-			system::GLRenderContextCreateInfo contextCreateInfo;
+			system::OpenGLRenderContextCreateInfo contextCreateInfo;
 			contextCreateInfo.shareContext = nullptr;
 
 		#if( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL43 )
-			contextCreateInfo.runtimeVersionDesc.apiVersion.major = 4;
-			contextCreateInfo.runtimeVersionDesc.apiVersion.minor = 3;
-			contextCreateInfo.runtimeVersionDesc.apiProfile = system::EGLAPIProfile::OpenGL;
+			contextCreateInfo.requestedAPIVersion.major = 4;
+			contextCreateInfo.requestedAPIVersion.minor = 1;
+			contextCreateInfo.contextAPIProfile = system::EOpenGLAPIProfile::Core;
 		#elif( TS3GX_GL_TARGET == TS3GX_GL_TARGET_ES31 )
 			contextCreateInfo.runtimeVersionDesc.apiVersion.major = 3;
 			contextCreateInfo.runtimeVersionDesc.apiVersion.minor = 1;
@@ -144,7 +144,7 @@ namespace ts3::gpuapi
 
 			if( pGLGPUDevice.isDebugDevice() )
 			{
-				contextCreateInfo.flags.set( system::E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT );
+				contextCreateInfo.flags.set( system::E_OPENGL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT );
 			}
 
 			sysGLRenderContext = pSysGLDisplaySurface->mGLSystemDriver->createRenderContext( *pSysGLDisplaySurface, contextCreateInfo );

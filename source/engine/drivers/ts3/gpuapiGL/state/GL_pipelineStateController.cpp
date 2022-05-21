@@ -15,256 +15,245 @@ namespace ts3::gpuapi
 
 	GLGraphicsPipelineStateController::~GLGraphicsPipelineStateController() = default;
 
-	bool GLGraphicsPipelineStateController::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
+	bool GLGraphicsPipelineStateController::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject * pGraphicsPipelineSO )
 	{
 		bool updateResult = SeparableGraphicsPipelineStateController::setGraphicsPipelineStateObject( pGraphicsPipelineSO );
 
 		if( updateResult && _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT ) )
 		{
-			auto * openglGraphicsPipelineSO = _csCommonConfig.soGraphicsPipeline->queryInterface<GLGraphicsPipelineStateObject>();
+			const auto * openglGPSO = _pendingStateObjects.graphicsPipelineSO->queryInterface<GLGraphicsPipelineStateObject>();
 
-			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT ) )
+			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT ) )
 			{
-				auto vertexInputFormatDescriptorID = _csSeparableStateDescriptorSet.vertexInputFormatDescriptorID;
-				const auto & vertexInputFormatDescriptor = _descriptorCache->getVertexInputFormatDescriptor( vertexInputFormatDescriptorID );
-
-				_csGLPipelineConfig.primitiveTopology = vertexInputFormatDescriptor.inputFormatDesc.primitiveTopology;
-				_csGLPipelineConfig.vertexArrayObjectHandle = openglGraphicsPipelineSO->mGLVertexArrayObject->mGLHandle;
+				// nothing
 			}
 
-			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SHADER_ANY_STAGE_BIT ) )
+			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_ANY_BIT ) )
 			{
-				_csGLPipelineConfig.shaderPipelineObjectHandle = openglGraphicsPipelineSO->mGLShaderPipelineObject->mGLHandle;
+				_currentGLPipelineConfig.shaderPipelineObjectHandle = openglGPSO->mGLShaderPipelineObject->mGLHandle;
 			}
 		}
 
 		return true;
 	}
 
-	bool GLGraphicsPipelineStateController::setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO )
+	bool GLGraphicsPipelineStateController::setVertexStreamStateObject( const VertexStreamStateObject * pVertexStreamSO )
 	{
 		bool updateResult = SeparableGraphicsPipelineStateController::setVertexStreamStateObject( pVertexStreamSO );
 
 		if( updateResult && _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_SO_VERTEX_STREAM_BIT ) )
 		{
-			auto * openglVertexStreamSO = _csCommonConfig.soVertexStream->queryInterface<GLVertexStreamStateObject>();
+			const auto * openglVSSO = _pendingStateObjects.vertexStreamSO->queryInterface<GLVertexStreamStateObject>();
 
-			const auto & indexBufferBinding = openglVertexStreamSO->mGLVertexDataSourceBinding.indexBufferBinding;
+			const auto & indexBufferBinding = openglVSSO->mGLVertexDataSourceBinding.indexBufferBinding;
 			if( indexBufferBinding.active )
 			{
-				_csGLPipelineConfig.indexBufferBaseOffset = indexBufferBinding.offset;
-				_csGLPipelineConfig.indexBufferDataType = indexBufferBinding.format;
-				_csGLPipelineConfig.indexBufferElementByteSize = indexBufferBinding.elementByteSize;
+				_currentGLPipelineConfig.indexBufferBaseOffset = static_cast<GLuint>( indexBufferBinding.offset );
+				_currentGLPipelineConfig.indexBufferDataType = indexBufferBinding.format;
+				_currentGLPipelineConfig.indexBufferElementByteSize = indexBufferBinding.elementByteSize;
 			}
 		}
 
 		return true;
 	}
 
-	bool GLGraphicsPipelineStateController::updatePipelineState()
+	void GLGraphicsPipelineStateController::applyPendingPipelineStateChange()
 	{
-		if( !SeparableGraphicsPipelineStateController::updatePipelineState() )
-		{
-			return false;
-		}
-
 		if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT ) )
 		{
-			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_BLEND_BIT ) )
+			const auto & pendingDescriptors = _pendingPipelineConfig.stateDescriptors;
+
+			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_BLEND_BIT ) )
 			{
-				auto blendDescriptorID = _csSeparableStateDescriptorSet.blendDescriptorID;
-				const auto & blendDescriptor = _descriptorCache->getBlendDescriptor( blendDescriptorID );
-				_setBlendState( blendDescriptor );
-				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_BLEND_BIT );
+				const auto & descriptor = _descriptorCache->getBlendDescriptor( pendingDescriptors.blendDescriptorID );
+				_setBlendState( descriptor );
 			}
 
-			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_DEPTH_STENCIL_BIT ) )
+			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_DEPTH_STENCIL_BIT ) )
 			{
-				auto depthStencilDescriptorID = _csSeparableStateDescriptorSet.depthStencilDescriptorID;
-				const auto & depthStencilDescriptor = _descriptorCache->getDepthStencilDescriptor( depthStencilDescriptorID );
-				_setDepthStencilState( depthStencilDescriptor );
-				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_DEPTH_STENCIL_BIT );
+				const auto & descriptor = _descriptorCache->getDepthStencilDescriptor( pendingDescriptors.depthStencilDescriptorID );
+				_setDepthStencilState( descriptor );
 			}
 
-			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_RASTERIZER_BIT ) )
+			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_RASTERIZER_BIT ) )
 			{
-				auto rasterizerDescriptorID = _csSeparableStateDescriptorSet.rasterizerDescriptorID;
-				const auto & rasterizerDescriptor = _descriptorCache->getRasterizerDescriptor( rasterizerDescriptorID );
-				_setRasterizerState( rasterizerDescriptor );
-				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_RASTERIZER_BIT );
+				const auto & descriptor = _descriptorCache->getRasterizerDescriptor( pendingDescriptors.rasterizerDescriptorID );
+				_setRasterizerState( descriptor );
 			}
 
-			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT ) )
+			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT ) )
 			{
-				glBindVertexArray( _csGLPipelineConfig.vertexArrayObjectHandle );
-				ts3GLHandleLastError();
-				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT );
+				const auto & descriptor = _descriptorCache->getVertexInputFormatDescriptor( pendingDescriptors.vertexInputFormatDescriptorID );
+				_setVertexInputFormatState( descriptor );
+
+				_currentGLPipelineConfig.primitiveTopology = descriptor.inputFormatDesc.primitiveTopology;
 			}
 
-			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SHADER_ANY_STAGE_BIT ) )
+			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_ANY_BIT ) )
 			{
-				glBindProgramPipeline( _csGLPipelineConfig.shaderPipelineObjectHandle );
-				ts3GLHandleLastError();
-				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_SHADER_ALL_MASK );
+				glBindProgramPipeline( _currentGLPipelineConfig.shaderPipelineObjectHandle );
+				ts3OpenGLHandleLastError();
 			}
-
-			_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT );
 		}
 
 		if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_SO_VERTEX_STREAM_BIT ) )
 		{
-			auto * openglVertexStreamSO = _csCommonConfig.soVertexStream->queryInterface<GLVertexStreamStateObject>();
+			const auto * openglVSSO = _pendingStateObjects.vertexStreamSO->queryInterface<GLVertexStreamStateObject>();
 
-			const auto & indexBufferBinding = openglVertexStreamSO->mGLVertexDataSourceBinding.indexBufferBinding;
-			const auto & vertexBufferBinding = openglVertexStreamSO->mGLVertexDataSourceBinding.vertexBufferBinding;
+			const auto & indexBufferBinding = openglVSSO->mGLVertexDataSourceBinding.indexBufferBinding;
+			const auto & vertexBufferBinding = openglVSSO->mGLVertexDataSourceBinding.vertexBufferBinding;
 
 			if( indexBufferBinding.active )
 			{
 				glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBufferBinding.buffer );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 			}
 
 		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
-			for( auto streamIndex : openglVertexStreamSO->mGLVertexDataSourceBinding.vertexStreamActiveIndexArray )
+			for( auto streamIndex : openglVSSO->mGLVertexDataSourceBinding.vertexStreamActiveIndexArray )
 			{
 				const auto buffer = vertexBufferBinding[streamIndex].buffer;
 				const auto offset = vertexBufferBinding[streamIndex].offset;
 				const auto stride = vertexBufferBinding[streamIndex].stride;
 
 				glBindVertexBuffer( streamIndex, buffer, offset, stride );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 			}
 		#else
-			for( const auto & streamRange : openglVertexStreamSO->mGLVertexDataSourceBinding.vertexStreamActiveRangeList )
+			for( const auto & streamRange : openglVSSO->mGLVertexDataSourceBinding.vertexStreamActiveRangeList )
 			{
 				const auto * bufferRangePtr = &( vertexBufferBinding.bufferArray[streamRange.firstIndex] );
 				const auto * offsetRangePtr = &( vertexBufferBinding.offsetArray[streamRange.firstIndex] );
 				const auto * strideRangePtr = &( vertexBufferBinding.strideArray[streamRange.firstIndex] );
 
 				glBindVertexBuffers( streamRange.firstIndex, streamRange.length, bufferRangePtr, offsetRangePtr, strideRangePtr );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 			}
 		#endif
-
-			_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT );
 		}
 
-		return _stateUpdateMask != 0;
+		SeparableGraphicsPipelineStateController::applyPendingPipelineStateChange();
 	}
 
-	void GLGraphicsPipelineStateController::_setBlendState( const GLBlendStateDescriptor & pGLBlendDescriptor )
+	void GLGraphicsPipelineStateController::_setBlendState( const GLBlendStateDescriptor & pGLBlendSD )
 	{
-		if( pGLBlendDescriptor.configDesc.blendState == EBlendState::Disabled )
+		if( pGLBlendSD.configDesc.blendState == EBlendState::Disabled )
 		{
 			glDisable( GL_BLEND );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glEnable( GL_BLEND );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
-			auto & blendFactor = pGLBlendDescriptor.configDesc.factor;
+			auto & blendFactor = pGLBlendSD.configDesc.factor;
 			glBlendFuncSeparate( blendFactor.srcColor, blendFactor.dstColor, blendFactor.srcAlpha, blendFactor.dstAlpha );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
-			const auto & blendEquation = pGLBlendDescriptor.configDesc.equation;
+			const auto & blendEquation = pGLBlendSD.configDesc.equation;
 			glBlendEquationSeparate( blendEquation.color, blendEquation.alpha );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
-			const auto & blendColor = pGLBlendDescriptor.configDesc.constantFactor;
+			const auto & blendColor = pGLBlendSD.configDesc.constantFactor;
 			glBlendColor( blendColor.fpRed, blendColor.fpGreen, blendColor.fpBlue, blendColor.fpAlpha );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 	}
 
-	void GLGraphicsPipelineStateController::_setDepthStencilState( const GLDepthStencilStateDescriptor & pGLDepthStencilDescriptor )
+	void GLGraphicsPipelineStateController::_setDepthStencilState( const GLDepthStencilStateDescriptor & pGLDepthStencilSD )
 	{
-		if( pGLDepthStencilDescriptor.configDesc.depthTestState == EDepthTestState::Disabled )
+		if( pGLDepthStencilSD.configDesc.depthTestState == EDepthTestState::Disabled )
 		{
 			glDisable( GL_DEPTH_TEST );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glEnable( GL_DEPTH_TEST );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
-			glDepthFunc( pGLDepthStencilDescriptor.configDesc.depthSettings.depthCompFunc );
-			ts3GLHandleLastError();
+			glDepthFunc( pGLDepthStencilSD.configDesc.depthSettings.depthCompFunc );
+			ts3OpenGLHandleLastError();
 
-			glDepthMask( pGLDepthStencilDescriptor.configDesc.depthSettings.writeMask ? GL_TRUE : GL_FALSE );
-			ts3GLHandleLastError();
+			glDepthMask( pGLDepthStencilSD.configDesc.depthSettings.writeMask ? GL_TRUE : GL_FALSE );
+			ts3OpenGLHandleLastError();
 		}
 
-		if( pGLDepthStencilDescriptor.configDesc.stencilTestState == EStencilTestState::Disabled )
+		if( pGLDepthStencilSD.configDesc.stencilTestState == EStencilTestState::Disabled )
 		{
 			glDisable( GL_STENCIL_TEST );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glEnable( GL_STENCIL_TEST );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 			{
-				const auto & frontFace = pGLDepthStencilDescriptor.configDesc.stencilSettings.frontFace;
+				const auto & frontFace = pGLDepthStencilSD.configDesc.stencilSettings.frontFace;
 				glStencilFuncSeparate( GL_FRONT, frontFace.compFunc, frontFace.refValue, frontFace.readMask );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 
 				glStencilMaskSeparate( GL_FRONT, frontFace.writeMask );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 
 				glStencilOpSeparate( GL_FRONT, frontFace.opFail, frontFace.opPassDepthFail, frontFace.opPassDepthPass );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 			}
 			{
-				const auto & backFace = pGLDepthStencilDescriptor.configDesc.stencilSettings.backFace;
+				const auto & backFace = pGLDepthStencilSD.configDesc.stencilSettings.backFace;
 				glStencilFuncSeparate( GL_FRONT, backFace.compFunc, backFace.refValue, backFace.readMask );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 
 				glStencilMaskSeparate( GL_FRONT, backFace.writeMask );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 
 				glStencilOpSeparate( GL_FRONT, backFace.opFail, backFace.opPassDepthFail, backFace.opPassDepthPass );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 			}
 		}
 	}
 
-	void GLGraphicsPipelineStateController::_setRasterizerState( const GLRasterizerStateDescriptor & pGLStateDescriptor )
+	void GLGraphicsPipelineStateController::_setRasterizerState( const GLRasterizerStateDescriptor & pGLRasterizerSD )
 	{
-		if( pGLStateDescriptor.configDesc.scissorTestState == EScissorTestState::Disabled )
+		if( pGLRasterizerSD.configDesc.scissorTestState == EScissorTestState::Disabled )
 		{
 			glDisable( GL_SCISSOR_TEST );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glEnable( GL_SCISSOR_TEST );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 
-		if( pGLStateDescriptor.configDesc.cullMode == 0 )
+		if( pGLRasterizerSD.configDesc.cullMode == 0 )
 		{
 			glDisable( GL_CULL_FACE );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
 			glEnable( GL_CULL_FACE );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
-			glCullFace( pGLStateDescriptor.configDesc.cullMode );
-			ts3GLHandleLastError();
+			glCullFace( pGLRasterizerSD.configDesc.cullMode );
+			ts3OpenGLHandleLastError();
 		}
 
-		glFrontFace( pGLStateDescriptor.configDesc.triangleFrontFaceOrder );
-		ts3GLHandleLastError();
+		glFrontFace( pGLRasterizerSD.configDesc.triangleFrontFaceOrder );
+		ts3OpenGLHandleLastError();
 
 	#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
-		glPolygonMode( GL_FRONT_AND_BACK, pGLStateDescriptor.configDesc.primitiveFillMode );
-		ts3GLHandleLastError();
+		glPolygonMode( GL_FRONT_AND_BACK, pGLRasterizerSD.configDesc.primitiveFillMode );
+		ts3OpenGLHandleLastError();
 	#endif
+	}
+	
+	void GLGraphicsPipelineStateController::_setVertexInputFormatState( const GLVertexInputFormatStateDescriptor & pGLVertexInputFormatSD )
+	{
+		glBindVertexArray( pGLVertexInputFormatSD.vertexArrayObject->mGLHandle );
+		ts3OpenGLHandleLastError();
 	}
 
 } // namespace ts3::gpuapi

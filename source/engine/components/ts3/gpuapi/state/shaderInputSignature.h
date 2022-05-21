@@ -13,18 +13,20 @@ namespace ts3::gpuapi
 
 	enum EShaderConstantAccessClass : uint32
 	{
-		AllActiveStages = 0,
-		Vertex          = static_cast<uint32>( EShaderType::VertexShader ),
-		TessControl     = static_cast<uint32>( EShaderType::TessControlShader ),
-		TessEvaluation  = static_cast<uint32>( EShaderType::TessEvaluationShader ),
-		Geometry        = static_cast<uint32>( EShaderType::GeometryShader ),
-		Pixel           = static_cast<uint32>( EShaderType::PixelShader ),
-		Compute         = static_cast<uint32>( EShaderType::ComputeShader ),
+		ACAllActive         = E_SHADER_STAGE_MASK_ALL,
+		ACGSVertex          = E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT,
+		ACGSTessControl     = E_SHADER_STAGE_FLAG_GRAPHICS_TESS_CONTROL_BIT,
+		ACGSTessEvaluation  = E_SHADER_STAGE_FLAG_GRAPHICS_TESS_EVALUATION_BIT,
+		ACGSGeometry        = E_SHADER_STAGE_FLAG_GRAPHICS_GEOMETRY_BIT,
+		ACGSAmplification   = E_SHADER_STAGE_FLAG_GRAPHICS_AMPLIFICATION_BIT,
+		ACGSMesh            = E_SHADER_STAGE_FLAG_GRAPHICS_MESH_BIT,
+		ACGSPixel           = E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT,
+		ACCSCompute         = E_SHADER_STAGE_FLAG_COMPUTE_BIT,
 	};
 
-	inline Bitmask<EShaderStageFlags> ecGetShaderConstantVisibilityStageBit( EShaderConstantAccessClass pAccessClass )
+	inline constexpr Bitmask<EShaderStageFlags> ecGetShaderConstantVisibilityStageMask( EShaderConstantAccessClass pAccessClass )
 	{
-		return ecGetShaderStageMaskBit( static_cast<EShaderType>( pAccessClass ) );
+		return static_cast<uint32>( pAccessClass );
 	}
 
 	struct ShaderInputSignatureDesc
@@ -38,7 +40,7 @@ namespace ts3::gpuapi
 
 		struct ConstantGroup
 		{
-			using ConstantList = std::array<ConstantDesc, GPU_SYSTEM_METRIC_IS_MAX_CONSTANT_GROUP_SIZE>;
+			using ConstantList = std::array<ConstantDesc, E_GPU_SYSTEM_METRIC_IS_MAX_CONSTANT_GROUP_SIZE>;
 			EShaderConstantAccessClass accessClass;
 			ConstantList constantList;
 			uint32 constantsNum = 0;
@@ -64,21 +66,21 @@ namespace ts3::gpuapi
 
 			union
 			{
-				ResourceDesc uResourceDesc{};
+				ResourceDesc uResourceDesc;
 				SamplerDesc uSamplerDesc;
 			};
 		};
 
 		struct DescriptorSet
 		{
-			using DescriptorList = std::array<DescriptorDesc, GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SET_SIZE>;
+			using DescriptorList = std::array<DescriptorDesc, E_GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SET_SIZE>;
 			EShaderInputDescriptorType descriptorType;
 			DescriptorList descriptorList;
 			uint32 descriptorsNum = 0;
 		};
 
-		using ConstantGroupArray = std::array<ConstantGroup, GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM>;
-		using DescriptorSetArray = std::array<DescriptorSet, GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM>;
+		using ConstantGroupArray = std::array<ConstantGroup, E_GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM>;
+		using DescriptorSetArray = std::array<DescriptorSet, E_GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM>;
 
 		Bitmask<EShaderStageFlags> activeShaderStagesMask;
 		ConstantGroupArray constantGroupArray;

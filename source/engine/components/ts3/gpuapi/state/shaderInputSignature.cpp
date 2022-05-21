@@ -117,13 +117,13 @@ namespace ts3::gpuapi
 			auto & constant = constantLayout.commonConstantArray.at( globalConstantIndex );
 			constant.iGlobalIndex = globalConstantIndex;
 
-			if( constant.iAccessClass == EShaderConstantAccessClass::AllActiveStages )
+			if( constant.iAccessClass == EShaderConstantAccessClass::ACAllActive )
 			{
 				constant.iVisibilityMask = pInputSignatureDesc.activeShaderStagesMask;
 			}
 			else
 			{
-				constant.iVisibilityMask = ecGetShaderConstantVisibilityStageBit( constant.iAccessClass );
+				constant.iVisibilityMask = ecGetShaderConstantVisibilityStageMask( constant.iAccessClass );
 			}
 		}
 
@@ -204,7 +204,7 @@ namespace ts3::gpuapi
 		size_t constantsNum = 0;
 		size_t totalDwordSize = 0;
 
-		if( pInputSignatureDesc.constantGroupsNum > GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM + 1 )
+		if( pInputSignatureDesc.constantGroupsNum > E_GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM + 1 )
 		{
 			ts3DebugInterrupt();
 			return false;
@@ -213,11 +213,11 @@ namespace ts3::gpuapi
 		for( uint32 inputConstantGroupIndex = 0; inputConstantGroupIndex < pInputSignatureDesc.constantGroupsNum; ++inputConstantGroupIndex )
 		{
 			const auto & constantGroupDesc = pInputSignatureDesc.constantGroupArray[inputConstantGroupIndex];
-			auto groupShaderStageBit = ecGetShaderConstantVisibilityStageBit( constantGroupDesc.accessClass );
+			auto groupShaderStageMask = ecGetShaderConstantVisibilityStageMask( constantGroupDesc.accessClass );
 
 			constantsNum += constantGroupDesc.constantsNum;
 
-			if( !pInputSignatureDesc.activeShaderStagesMask.isSet( groupShaderStageBit ) )
+			if( !pInputSignatureDesc.activeShaderStagesMask.isSet( groupShaderStageMask ) )
 			{
 				ts3DebugInterrupt();
 				return false;
@@ -231,7 +231,7 @@ namespace ts3::gpuapi
 				auto constantDwordSize = computeConstantDwordSize( constantByteSize );
 				totalDwordSize += constantDwordSize;
 
-				if( totalDwordSize > GPU_SYSTEM_METRIC_IS_MAX_DWORD_SIZE )
+				if( totalDwordSize > E_GPU_SYSTEM_METRIC_IS_MAX_DWORD_SIZE )
 				{
 					ts3DebugInterrupt();
 					return false;
@@ -251,7 +251,7 @@ namespace ts3::gpuapi
 		size_t descriptorsNum = 0;
 		size_t descriptorSetsNum = pInputSignatureDesc.descriptorSetsNum;
 
-		if( descriptorSetsNum > GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM )
+		if( descriptorSetsNum > E_GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM )
 		{
 			ts3DebugInterrupt();
 			return false;

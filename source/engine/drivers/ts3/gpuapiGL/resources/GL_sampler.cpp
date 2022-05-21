@@ -61,7 +61,7 @@ namespace ts3::gpuapi
 			GLint maxAnisotropy = 0;
 
 			glGetIntegerv( GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAnisotropy );
-			ts3GLCheckLastResult();
+			ts3OpenGLCheckLastResult();
 
 			if( pOutSamplerState.anisotropyLevel > maxAnisotropy )
 			{

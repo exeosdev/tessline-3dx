@@ -12,12 +12,10 @@ namespace ts3::gpuapi
 	                                                              RenderTargetLayout pRenderTargetLayout,
 	                                                              GraphicsShaderBinding pShaderBinding,
 	                                                              ShaderInputSignature pShaderInputSignature,
-	                                                              const GraphicsPipelineStateDescriptorSet & pSeparableDescriptorSet,
-	                                                              GLShaderPipelineObjectHandle pGLShaderPipelineObject,
-	                                                              GLVertexArrayObjectHandle pGLVertexArrayObject )
-	: SeparableGraphicsPipelineStateObject( pGPUDevice, std::move( pRenderTargetLayout ), std::move( pShaderBinding ), std::move( pShaderInputSignature ), pSeparableDescriptorSet )
+	                                                              const SeparableGraphicsStateDescriptorSet & pStateDescriptors,
+	                                                              GLShaderPipelineObjectHandle pGLShaderPipelineObject )
+	: SeparableGraphicsPipelineStateObject( pGPUDevice, std::move( pRenderTargetLayout ), std::move( pShaderBinding ), std::move( pShaderInputSignature ), pStateDescriptors )
 	, mGLShaderPipelineObject ( std::move( pGLShaderPipelineObject ) )
-	, mGLVertexArrayObject ( std::move( pGLVertexArrayObject ) )
 	{}
 
 	GLGraphicsPipelineStateObject::~GLGraphicsPipelineStateObject() = default;
@@ -31,17 +29,14 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
-		GraphicsPipelineStateDescriptorSet graphicsDescriptorSet;
-		graphicsDescriptorSet.blendDescriptorID = pGPUDevice.createBlendDescriptor( pCreateInfo.blendDesc );
-		graphicsDescriptorSet.depthStencilDescriptorID = pGPUDevice.createDepthStencilDescriptor( pCreateInfo.depthStencilDesc );
-		graphicsDescriptorSet.rasterizerDescriptorID = pGPUDevice.createRasterizerDescriptor( pCreateInfo.rasterizerDesc );
-		graphicsDescriptorSet.vertexInputFormatDescriptorID = pGPUDevice.createVertexInputFormatDescriptor( pCreateInfo.vertexInputFormatDesc );
+		SeparableGraphicsStateDescriptorSet sstateDescriptors;
+		sstateDescriptors.blendDescriptorID = pGPUDevice.createBlendDescriptor( pCreateInfo.blendDesc );
+		sstateDescriptors.depthStencilDescriptorID = pGPUDevice.createDepthStencilDescriptor( pCreateInfo.depthStencilDesc );
+		sstateDescriptors.rasterizerDescriptorID = pGPUDevice.createRasterizerDescriptor( pCreateInfo.rasterizerDesc );
+		sstateDescriptors.vertexInputFormatDescriptorID = pGPUDevice.createVertexInputFormatDescriptor( pCreateInfo.vertexInputFormatDesc );
 
-		const auto & vertexInputFormatDescriptor = pGPUDevice.getVertexInputFormatDescriptor( graphicsDescriptorSet.vertexInputFormatDescriptorID );
-
-		auto vertexArrayObject = createVertexArrayObjectFormatOnly( vertexInputFormatDescriptor );
 		auto shaderPipelineObject = createGraphicsShaderPipelineObject( commonPSOState.shaderBinding );
-		if( !vertexArrayObject || !shaderPipelineObject )
+		if( !shaderPipelineObject )
 		{
 			return nullptr;
 		}
@@ -50,9 +45,8 @@ namespace ts3::gpuapi
 		                                                                                        std::move( commonPSOState.renderTargetLayout ),
 		                                                                                        std::move( commonPSOState.shaderBinding ),
 		                                                                                        std::move( commonPSOState.shaderInputSignature ),
-		                                                                                        graphicsDescriptorSet,
-		                                                                                        std::move( shaderPipelineObject ),
-		                                                                                        std::move( vertexArrayObject ) );
+		                                                                                        sstateDescriptors,
+		                                                                                        std::move( shaderPipelineObject ) );
 		
 		return pipelineStateObject;
 	}
@@ -63,17 +57,20 @@ namespace ts3::gpuapi
 		ts3DebugAssert( shaderPipelineObject );
 
 		glBindProgramPipeline( shaderPipelineObject->mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
-		for( auto & activeStage : pShaderBinding.activeStageList )
+		for( auto * shader : pShaderBinding.shaderArray )
 		{
-			auto * openglShader = activeStage.shaderObject->queryInterface<GLShader>();
-			ts3DebugAssert( openglShader->mGLShaderProgramObject );
-			shaderPipelineObject->attachProgram( *( openglShader->mGLShaderProgramObject ) );
+			if( shader )
+			{
+				auto * openglShader = shader->queryInterface<GLShader>();
+				ts3DebugAssert( openglShader->mGLShaderProgramObject );
+				shaderPipelineObject->attachProgram( *( openglShader->mGLShaderProgramObject ) );
+			}
 		}
 
 		glBindProgramPipeline( 0 );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return shaderPipelineObject;
 	}
@@ -83,11 +80,14 @@ namespace ts3::gpuapi
 		auto shaderProgramObject = GLShaderProgramObject::create( GLShaderProgramType::Combined );
 		ts3DebugAssert( shaderProgramObject );
 
-		for( auto & activeStage : pShaderBinding.activeStageList )
+		for( auto * shader : pShaderBinding.shaderArray )
 		{
-			auto * openglShader = activeStage.shaderObject->queryInterface<GLShader>();
-			ts3DebugAssert( openglShader->mGLShaderObject );
-			shaderProgramObject->attachShader( *( openglShader->mGLShaderObject ) );
+			if( shader )
+			{
+				auto * openglShader = shader->queryInterface<GLShader>();
+				ts3DebugAssert( openglShader->mGLShaderProgramObject );
+				shaderProgramObject->attachShader( *( openglShader->mGLShaderObject ) );
+			}
 		}
 
 		if( !shaderProgramObject->link() )
@@ -104,39 +104,6 @@ namespace ts3::gpuapi
 		shaderProgramObject->detachAllShaders();
 
 		return shaderProgramObject;
-	}
-
-	GLVertexArrayObjectHandle GLGraphicsPipelineStateObject::createVertexArrayObjectFormatOnly( const GLVertexInputFormatStateDescriptor & pVertexInputFormatDescriptor )
-	{
-		auto vertexArrayObject = GLVertexArrayObject::create();
-
-		glBindVertexArray( vertexArrayObject->mGLHandle );
-		ts3GLHandleLastError();
-
-		for( uint32 attributeCounter = 0; attributeCounter < pVertexInputFormatDescriptor.inputFormatDesc.activeVertexAttributesNum; ++attributeCounter )
-		{
-			const auto & vertexAttribute = pVertexInputFormatDescriptor.inputFormatDesc.vertexAttributeArray[attributeCounter];
-			ts3DebugAssert( vertexAttribute );
-
-			glEnableVertexAttribArray( vertexAttribute.attributeIndex );
-			ts3GLHandleLastError();
-
-			glVertexAttribFormat( vertexAttribute.attributeIndex, vertexAttribute.componentsNum, vertexAttribute.baseType, vertexAttribute.normalized, vertexAttribute.relativeOffset );
-			ts3GLHandleLastError();
-
-			glVertexAttribDivisor( vertexAttribute.attributeIndex, vertexAttribute.instanceRate );
-			ts3GLHandleLastError();
-
-			// This must be called *AFTER* glEnableVertexAttribArray and glVertexAttribFormat. TODO: documentation?
-			// Moving this up causes crash during an actual draw call on at least Quadro T2000 and RX580 (Win 10).
-			glVertexAttribBinding( vertexAttribute.attributeIndex, vertexAttribute.streamIndex );
-			ts3GLHandleLastError();
-		}
-
-		glBindVertexArray( 0 );
-		ts3GLHandleLastError();
-
-		return vertexArrayObject;
 	}
 
 } // namespace ts3::gpuapi

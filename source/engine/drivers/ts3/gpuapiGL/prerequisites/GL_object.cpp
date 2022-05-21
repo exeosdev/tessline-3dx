@@ -24,7 +24,7 @@ namespace ts3::gpuapi
 	void GLObject::invalidateHandle()
 	{
 		auto & writableHandle = const_cast<GLuint &>( mGLHandle );
-		writableHandle = cxGLObjectHandleInvalid;
+		writableHandle = CX_GL_OBJECT_HANDLE_INVALID;
 	}
 
 } // namespace ts3::gpuapi

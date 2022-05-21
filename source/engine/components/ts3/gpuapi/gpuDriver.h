@@ -5,7 +5,7 @@
 #define __TS3_GPUAPI_GPU_DRIVER_H__
 
 #include "prerequisites.h"
-#include <ts3/system/sysContextNative.h>
+#include <ts3/system/sysContext.h>
 
 namespace ts3::gpuapi
 {
@@ -16,7 +16,7 @@ namespace ts3::gpuapi
 	{
 		system::SysContextHandle sysContext = nullptr;
 		system::SysContextCreateInfo sysContextCreateInfo;
-		Bitmask<GPUDriverConfigFlags> configFlags = GPU_DRIVER_CONFIG_FLAGS_DEFAULT;
+		Bitmask<EGPUDriverConfigFlags> configFlags = GPU_DRIVER_CONFIG_FLAGS_DEFAULT;
 	};
 
 	class TS3_GPUAPI_CLASS GPUDriver : public DynamicInterface
@@ -34,25 +34,25 @@ namespace ts3::gpuapi
 
 		virtual EGPUDriverID queryGPUDriverID() const = 0;
 
-		Bitmask<GPUDriverConfigFlags> getConfigFlags() const;
+		Bitmask<EGPUDriverConfigFlags> getConfigFlags() const;
 
 		bool isDebugFunctionalityRequested() const;
 
 	protected:
-		void setConfigFlags( Bitmask<GPUDriverConfigFlags> pConfigFlags );
+		void setConfigFlags( Bitmask<EGPUDriverConfigFlags> pConfigFlags );
 
 	private:
-		Bitmask<GPUDriverConfigFlags> _configFlags;
+		Bitmask<EGPUDriverConfigFlags> _configFlags;
 	};
 
-	inline Bitmask<GPUDriverConfigFlags> GPUDriver::getConfigFlags() const
+	inline Bitmask<EGPUDriverConfigFlags> GPUDriver::getConfigFlags() const
 	{
 		return _configFlags;
 	}
 
 	inline bool GPUDriver::isDebugFunctionalityRequested() const
 	{
-		return _configFlags.isSet( GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT );
+		return _configFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT );
 	}
 
 } // namespace ts3::gpuapi

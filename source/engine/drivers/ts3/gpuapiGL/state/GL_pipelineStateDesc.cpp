@@ -2,6 +2,7 @@
 #include "GL_pipelineStateDesc.h"
 #include <ts3/gpuapiGL/GL_coreAPIProxy.h>
 #include <ts3/gpuapiGL/objects/GL_bufferObject.h>
+#include <ts3/gpuapiGL/objects/GL_vertexArrayObject.h>
 #include <ts3/gpuapiGL/resources/GL_gpuBuffer.h>
 #include <ts3/stdext/memory.h>
 
@@ -27,7 +28,7 @@ namespace ts3::gpuapi
 			openglVertexDataSourceBinding.indexBufferBinding.elementByteSize = openglIBElementByteSize;
 		}
 
-		for( vertex_stream_index_t vertexInputStreamIndex = 0; vertexInputStreamIndex < GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM; ++vertexInputStreamIndex )
+		for( vertex_stream_index_t vertexInputStreamIndex = 0; vertexInputStreamIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM; ++vertexInputStreamIndex )
 		{
 			const auto & vbBindingDesc = pCommonBinding.vertexBufferBindingArray[vertexInputStreamIndex];
 			if( vbBindingDesc.bufferObject )
@@ -144,12 +145,12 @@ namespace ts3::gpuapi
 
 		uint32 activeVertexAttributesNum = 0;
 		uint64 currentAttributePackedRelativeOffset = 0;
-		for( uint32 attributeIndex = 0; attributeIndex < GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
+		for( uint32 attributeIndex = 0; attributeIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
 		{
 			if( const auto & vertexAttributeDesc = pInputFormatDesc.vertexAttributeArray[attributeIndex] )
 			{
 				auto attributeRelativeOffset = vertexAttributeDesc.relativeOffset;
-				if( attributeRelativeOffset == cxVertexAttributeOffsetPackedAppend )
+				if( attributeRelativeOffset == CX_VERTEX_ATTRIBUTE_OFFSET_PACKED_APPEND )
 				{
 					attributeRelativeOffset = currentAttributePackedRelativeOffset;
 				}
@@ -177,6 +178,34 @@ namespace ts3::gpuapi
 		openglVIFDescriptor.inputFormatDesc.activeVertexAttributesNum = activeVertexAttributesNum;
 		openglVIFDescriptor.inputDescHash = pDescHash;
 		openglVIFDescriptor.descriptorID = computePipelineStateDescriptorID( openglVIFDescriptor.inputFormatDesc );
+
+		auto vertexArrayObject = GLVertexArrayObject::create();
+
+		glBindVertexArray( vertexArrayObject->mGLHandle );
+		ts3OpenGLHandleLastError();
+
+		for( uint32 attributeCounter = 0; attributeCounter < openglVIFDescriptor.inputFormatDesc.activeVertexAttributesNum; ++attributeCounter )
+		{
+			const auto & vertexAttribute = openglVIFDescriptor.inputFormatDesc.vertexAttributeArray[attributeCounter];
+			ts3DebugAssert( vertexAttribute );
+
+			glEnableVertexAttribArray( vertexAttribute.attributeIndex );
+			ts3OpenGLHandleLastError();
+
+			glVertexAttribFormat( vertexAttribute.attributeIndex, vertexAttribute.componentsNum, vertexAttribute.baseType, vertexAttribute.normalized, vertexAttribute.relativeOffset );
+			ts3OpenGLHandleLastError();
+
+			glVertexAttribDivisor( vertexAttribute.attributeIndex, vertexAttribute.instanceRate );
+			ts3OpenGLHandleLastError();
+
+			// This must be called *AFTER* glEnableVertexAttribArray and glVertexAttribFormat. TODO: documentation?
+			// Moving this up causes crash during an actual draw call on at least Quadro T2000 and RX580 (Win 10).
+			glVertexAttribBinding( vertexAttribute.attributeIndex, vertexAttribute.streamIndex );
+			ts3OpenGLHandleLastError();
+		}
+
+		glBindVertexArray( 0 );
+		ts3OpenGLHandleLastError();
 
 		return openglVIFDescriptor;
 	}

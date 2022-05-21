@@ -58,7 +58,7 @@ namespace ts3::gpuapi
 		{
 			const GLfloat depthClearValue = renderTargetClearConfig.depthClearValue;
 			glClearBufferfv( GL_DEPTH, 0, &depthClearValue );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 			pAttachmentMask.unset( E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_BIT );
 		}
 
@@ -66,17 +66,17 @@ namespace ts3::gpuapi
 		{
 			const GLint stencilClearValue = renderTargetClearConfig.stencilClearValue;
 			glClearBufferiv( GL_STENCIL, 0, &stencilClearValue );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 			pAttachmentMask.unset( E_RENDER_TARGET_ATTACHMENT_FLAG_STENCIL_BIT );
 		}
 
-		for( uint32 colorBufferIndex = 0; ( colorBufferIndex < GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pAttachmentMask != 0 ); ++colorBufferIndex )
+		for( uint32 colorBufferIndex = 0; ( colorBufferIndex < E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pAttachmentMask != 0 ); ++colorBufferIndex )
 		{
 			auto colorBufferMask = E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_0_BIT << colorBufferIndex;
 			if( pAttachmentMask.isSet( colorBufferMask ) )
 			{
 				glClearBufferfv( GL_COLOR, colorBufferIndex, &( renderTargetClearConfig.colorClearValue.rgbaArray[0] ) );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 				pAttachmentMask.unset( colorBufferMask );
 			}
 		}
@@ -87,10 +87,10 @@ namespace ts3::gpuapi
 	void GLCommandList::setViewport( const ViewportDesc & pViewportDesc )
 	{
 		glViewport( pViewportDesc.vpRect.opX, pViewportDesc.vpRect.opY, pViewportDesc.vpRect.sizeX, pViewportDesc.vpRect.sizeY );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		glDepthRangef( pViewportDesc.depthRange.zNear, pViewportDesc.depthRange.zFar );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	bool GLCommandList::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
@@ -105,8 +105,8 @@ namespace ts3::gpuapi
 
 	bool GLCommandList::setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO )
 	{
-		const auto & commonConfig = _stateController.getCommonConfig();
-		const auto & renderTargetLayout = commonConfig.soGraphicsPipeline->mRenderTargetLayout;
+		const auto & pipelineConfig = _stateController.getCurrentPipelineConfig();
+		const auto & renderTargetLayout = _stateController.graphicsPipelineSO()->mRenderTargetLayout;
 
 		auto * openglRenderTargetSO = pRenderTargetSO.queryInterface<GLRenderTargetStateObject>();
 		if( !checkRenderTargetLayoutCompatibility( openglRenderTargetSO->mRTResourceBinding, renderTargetLayout ) )
@@ -116,15 +116,15 @@ namespace ts3::gpuapi
 		}
 
 		glBindFramebuffer( GL_FRAMEBUFFER, openglRenderTargetSO->mGLFramebufferObject->mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return true;
 	}
 
 	bool GLCommandList::setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData )
 	{
-		const auto & commonConfig = _stateController.getCommonConfig();
-		if( const auto & inputSignature = commonConfig.soGraphicsPipeline->mShaderInputSignature )
+		const auto & pipelineConfig = _stateController.getCurrentPipelineConfig();
+		if( const auto & inputSignature = pipelineConfig.soGraphicsPipeline->mShaderInputSignature )
 		{
 			const auto & constantInfo = inputSignature.getConstantInfo( pParamRefID );
 			if( constantInfo.iVisibilityMask != 0 )
@@ -150,7 +150,7 @@ namespace ts3::gpuapi
 				auto * openglBuffer = pConstantBuffer.queryInterface<GLGPUBuffer>();
 
 				glBindBufferBase( GL_UNIFORM_BUFFER, descriptorInfo.uResourceInfo.resourceBaseRegisterIndex, openglBuffer->mGLBufferObject->mGLHandle );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 
 				return true;
 			}
@@ -170,10 +170,10 @@ namespace ts3::gpuapi
 			auto * openglTexture = pTexture.queryInterface<GLTexture>();
 
 			glActiveTexture( GL_TEXTURE0 + descriptorInfo.uResourceInfo.resourceBaseRegisterIndex );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			glBindTexture( openglTexture->mGLTextureObject->mGLTextureBindTarget, openglTexture->mGLTextureObject->mGLHandle );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			return true;
 		}
@@ -193,7 +193,7 @@ namespace ts3::gpuapi
 				auto * openglSampler = pSampler.queryInterface<GLSampler>();
 
 				glBindSampler( descriptorInfo.uSamplerInfo.samplerBindingIndex, openglSampler->mGLSamplerObject->mGLHandle );
-				ts3GLHandleLastError();
+				ts3OpenGLHandleLastError();
 
 				return true;
 			}
@@ -212,7 +212,7 @@ namespace ts3::gpuapi
 		                static_cast<GLsizei>( pIndicesNum ),
 		                openglPipelineConfig.indexBufferDataType,
 		                indexDataOffset );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLCommandList::drawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset )
@@ -228,7 +228,7 @@ namespace ts3::gpuapi
 		glDrawArrays( openglPipelineConfig.primitiveTopology,
 		              static_cast<GLint>( pVerticesOffset ),
 		              static_cast<GLsizei>( pVerticesNum ) );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLCommandList::drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset )
@@ -270,10 +270,10 @@ namespace ts3::gpuapi
 			const auto * floatData = reinterpret_cast<const float *>( pData );
 			switch( pLength )
 			{
-				case 1: glUniform1fv( pUniformIndex, 1, floatData ); ts3GLHandleLastError(); break;
-				case 2: glUniform2fv( pUniformIndex, 1, floatData ); ts3GLHandleLastError(); break;
-				case 3: glUniform3fv( pUniformIndex, 1, floatData ); ts3GLHandleLastError(); break;
-				case 4: glUniform4fv( pUniformIndex, 1, floatData ); ts3GLHandleLastError(); break;
+				case 1: glUniform1fv( pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
+				case 2: glUniform2fv( pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
+				case 3: glUniform3fv( pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
+				case 4: glUniform4fv( pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
 			}
 		}
 		else if( pBaseType == EBaseDataType::Int32 )
@@ -281,10 +281,10 @@ namespace ts3::gpuapi
 			const auto * intData = reinterpret_cast<const GLint *>( pData );
 			switch( pLength )
 			{
-				case 1: glUniform1iv( pUniformIndex, 1, intData ); ts3GLHandleLastError(); break;
-				case 2: glUniform2iv( pUniformIndex, 1, intData ); ts3GLHandleLastError(); break;
-				case 3: glUniform3iv( pUniformIndex, 1, intData ); ts3GLHandleLastError(); break;
-				case 4: glUniform4iv( pUniformIndex, 1, intData ); ts3GLHandleLastError(); break;
+				case 1: glUniform1iv( pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
+				case 2: glUniform2iv( pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
+				case 3: glUniform3iv( pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
+				case 4: glUniform4iv( pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
 			}
 		}
 		else if( pBaseType == EBaseDataType::Uint32 )
@@ -292,10 +292,10 @@ namespace ts3::gpuapi
 			const auto * uintData = reinterpret_cast<const GLuint *>( pData );
 			switch( pLength )
 			{
-				case 1: glUniform1uiv( pUniformIndex, 1, uintData ); ts3GLHandleLastError(); break;
-				case 2: glUniform2uiv( pUniformIndex, 1, uintData ); ts3GLHandleLastError(); break;
-				case 3: glUniform3uiv( pUniformIndex, 1, uintData ); ts3GLHandleLastError(); break;
-				case 4: glUniform4uiv( pUniformIndex, 1, uintData ); ts3GLHandleLastError(); break;
+				case 1: glUniform1uiv( pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
+				case 2: glUniform2uiv( pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
+				case 3: glUniform3uiv( pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
+				case 4: glUniform4uiv( pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
 			}
 		}
 	}
@@ -312,10 +312,10 @@ namespace ts3::gpuapi
 			const auto * floatData = reinterpret_cast<const float *>( pData );
 			switch( pLength )
 			{
-				case 1: glProgramUniform1fv( pProgram.mGLHandle, pUniformIndex, 1, floatData ); ts3GLHandleLastError(); break;
-				case 2: glProgramUniform2fv( pProgram.mGLHandle, pUniformIndex, 1, floatData ); ts3GLHandleLastError(); break;
-				case 3: glProgramUniform3fv( pProgram.mGLHandle, pUniformIndex, 1, floatData ); ts3GLHandleLastError(); break;
-				case 4: glProgramUniform4fv( pProgram.mGLHandle, pUniformIndex, 1, floatData ); ts3GLHandleLastError(); break;
+				case 1: glProgramUniform1fv( pProgram.mGLHandle, pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
+				case 2: glProgramUniform2fv( pProgram.mGLHandle, pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
+				case 3: glProgramUniform3fv( pProgram.mGLHandle, pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
+				case 4: glProgramUniform4fv( pProgram.mGLHandle, pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
 			}
 		}
 		else if( pBaseType == EBaseDataType::Int32 )
@@ -323,10 +323,10 @@ namespace ts3::gpuapi
 			const auto * intData = reinterpret_cast<const GLint *>( pData );
 			switch( pLength )
 			{
-				case 1: glProgramUniform1iv( pProgram.mGLHandle, pUniformIndex, 1, intData ); ts3GLHandleLastError(); break;
-				case 2: glProgramUniform2iv( pProgram.mGLHandle, pUniformIndex, 1, intData ); ts3GLHandleLastError(); break;
-				case 3: glProgramUniform3iv( pProgram.mGLHandle, pUniformIndex, 1, intData ); ts3GLHandleLastError(); break;
-				case 4: glProgramUniform4iv( pProgram.mGLHandle, pUniformIndex, 1, intData ); ts3GLHandleLastError(); break;
+				case 1: glProgramUniform1iv( pProgram.mGLHandle, pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
+				case 2: glProgramUniform2iv( pProgram.mGLHandle, pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
+				case 3: glProgramUniform3iv( pProgram.mGLHandle, pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
+				case 4: glProgramUniform4iv( pProgram.mGLHandle, pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
 			}
 		}
 		else if( pBaseType == EBaseDataType::Uint32 )
@@ -334,10 +334,10 @@ namespace ts3::gpuapi
 			const auto * uintData = reinterpret_cast<const GLuint *>( pData );
 			switch( pLength )
 			{
-				case 1: glProgramUniform1uiv( pProgram.mGLHandle, pUniformIndex, 1, uintData ); ts3GLHandleLastError(); break;
-				case 2: glProgramUniform2uiv( pProgram.mGLHandle, pUniformIndex, 1, uintData ); ts3GLHandleLastError(); break;
-				case 3: glProgramUniform3uiv( pProgram.mGLHandle, pUniformIndex, 1, uintData ); ts3GLHandleLastError(); break;
-				case 4: glProgramUniform4uiv( pProgram.mGLHandle, pUniformIndex, 1, uintData ); ts3GLHandleLastError(); break;
+				case 1: glProgramUniform1uiv( pProgram.mGLHandle, pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
+				case 2: glProgramUniform2uiv( pProgram.mGLHandle, pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
+				case 3: glProgramUniform3uiv( pProgram.mGLHandle, pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
+				case 4: glProgramUniform4uiv( pProgram.mGLHandle, pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
 			}
 		}
 	}

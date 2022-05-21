@@ -17,43 +17,48 @@ namespace ts3::gpuapi
 	/// into the pipeline.
 	struct VertexDataSourceBindingDesc
 	{
-		// Describes the binding of an index buffer, used for indexed draw calls. IndexBuffer is not required
-		// and the binding may be empty. In such case, any indexed draw call executed on a context with fail.
+		/// Describes the binding of an index buffer, used for indexed draw calls. IndexBuffer is not required
+		/// and the binding may be empty. In such case, any indexed draw call executed on a context with fail.
 		struct IndexBufferBindingDesc
 		{
-			// A pointer to an existing buffer containing indices data.
-			// Buffer must have been created with the E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT bit set.
+			/// A pointer to an existing buffer containing indices data.
+			/// Buffer must have been created with the E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT bit set.
 			GPUBuffer * bufferObject = nullptr;
-			// An offset from the beginning of the buffer's storage.
+
+			/// An offset from the beginning of the buffer's storage.
 			gpu_memory_size_t dataOffset = 0;
-			// A format of the data within the bound buffer's range.
+
+			/// A format of the data within the bound buffer's range.
 			EIndexDataFormat format = EIndexDataFormat::Uint32;
 		};
 
-		// Describes the binding of one of the vertex buffers used to source vertices data during rendering.
+		/// @brief Describes the binding of one of the vertex buffers used to source vertices data during rendering.
 		struct VertexBufferBindingDesc
 		{
-			// An index of one of the vertex input streams used to stream the data during the IA stage.
-			// Must be between 0 and GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM.
+			/// An index of one of the vertex input streams used to stream the data during the IA stage.
+			/// Must be between 0 and E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM.
 			vertex_stream_index_t streamIndex = cxInvalidVertexStreamIndex;
-			// A pointer to an existing buffer containing vertices data.
-			// Buffer must have been created with the E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT bit set.
+
+			/// A pointer to an existing buffer containing vertices data.
+			/// Buffer must have been created with the E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT bit set.
 			GPUBuffer * bufferObject = nullptr;
-			// An offset from the beginning of the buffer's storage.
+
+			/// An offset from the beginning of the buffer's storage.
 			gpu_memory_size_t dataOffset = 0;
-			// Size of a single vertex instance within the buffer. Basically, it's a size of a struct
-			// used to represent vertex subdata stored in this buffer. Cannot be 0.
+
+			/// Size of a single vertex instance within the buffer. Basically, it's a size of a struct
+			/// used to represent vertex subdata stored in this buffer. Cannot be 0.
 			gpu_memory_size_t dataStride = 0;
 		};
 
-		using VertexBufferBindingDescArray = std::array<VertexBufferBindingDesc, GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM>;
+		using VertexBufferBindingDescArray = std::array<VertexBufferBindingDesc, E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM>;
 
 		// Index buffer binding. IB is not required and it is not an error if this binding represents an empty
 		// binding (buffer set to nullptr). In such case, any indexed draw call executed on a context with fail.
 		IndexBufferBindingDesc indexBufferBindingDesc;
 
 		// An array of vertex buffer bindings. This array does not have to be continuous (i.e. it may have gaps
-		// in a form of empty bindings). THis enables better flexibility in case of auto-generated bindings.
+		// in a form of empty bindings). This enables better flexibility in case of auto-generated bindings.
 		// Also, indices in this array have no connection whatsoever with Vertex Input Stream indices. In other
 		// words, it is perfectly legal to define VB binding like that:
 		// VertexDataSourceBindingDesc vbbDesc;
@@ -98,7 +103,7 @@ namespace ts3::gpuapi
 			uint32 length;
 		};
 
-		using VertexBufferBindingArray = std::array<VertexBufferBinding, GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM>;
+		using VertexBufferBindingArray = std::array<VertexBufferBinding, E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM>;
 		using VertexStreamIndexArray = std::vector<vertex_stream_index_t>;
 		using VertexStreamRangeList = std::list<VertexStreamRange>;
 

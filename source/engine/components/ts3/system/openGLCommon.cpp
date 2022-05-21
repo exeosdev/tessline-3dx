@@ -77,7 +77,7 @@ namespace ts3::system
 	{
 		static const std::unordered_map<GLenum, const char *> errorStringMap =
 		{
-		#if( TS3_SYSTEM_GL_PLATFORM_TYPE == TS3_SYSTEM_GL_PLATFORM_TYPE_CORE )
+		#if( TS3_SYSTEM_GL_PLATFORM_TYPE == TS3_SYSTEM_GL_PLATFORM_TYPE_DESKTOP )
 			{ GL_STACK_OVERFLOW  , "GL_STACK_OVERFLOW"  },
 			{ GL_STACK_UNDERFLOW , "GL_STACK_UNDERFLOW" },
 		#endif

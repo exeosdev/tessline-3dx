@@ -25,7 +25,7 @@ namespace ts3::gpuapi
 
 		void unlockMemory();
 
-		TS3_PCL_ATTR_NO_DISCARD bool isEmpty() const;
+		TS3_PCL_ATTR_NO_DISCARD bool empty() const;
 
 		TS3_PCL_ATTR_NO_DISCARD bool isMemoryLocked() const;
 

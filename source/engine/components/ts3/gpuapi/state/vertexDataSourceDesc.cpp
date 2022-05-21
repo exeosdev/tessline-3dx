@@ -53,7 +53,7 @@ namespace ts3::gpuapi
 		streamRange.firstIndex = cxInvalidVertexStreamIndex; // cxInvalidVertexStreamIndex means the range is not valid
 		streamRange.length = 0;
 
-		for( vertex_stream_index_t vertexInputStreamIndex = 0; vertexInputStreamIndex < GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM; ++vertexInputStreamIndex )
+		for( vertex_stream_index_t vertexInputStreamIndex = 0; vertexInputStreamIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM; ++vertexInputStreamIndex )
 		{
 			const auto & vbBinding =  dataSourceBinding.vertexBufferBindingArray[vertexInputStreamIndex];
 			if( vbBinding.bufferObject )
@@ -70,7 +70,7 @@ namespace ts3::gpuapi
 				++streamRange.length;
 			}
 			// This not-so-obvious if allows us to also handle the last range and avoid doing checks outside the loop.
-			if( !vbBinding.bufferObject || ( vertexInputStreamIndex + 1 == GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM ) )
+			if( !vbBinding.bufferObject || ( vertexInputStreamIndex + 1 == E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM ) )
 			{
 				// If the range is not empty, add it to the list of active ranges.
 				if( streamRange.length > 0 )
