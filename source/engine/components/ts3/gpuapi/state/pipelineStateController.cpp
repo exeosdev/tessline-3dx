@@ -11,53 +11,48 @@ namespace ts3::gpuapi
 
 	GraphicsPipelineStateController::~GraphicsPipelineStateController() = default;
 
-	void GraphicsPipelineStateController::applyPendingPipelineStateChange()
+	bool GraphicsPipelineStateController::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
 	{
-		_currentStateObjects.graphicsPipelineSO = _pendingStateObjects.graphicsPipelineSO;
-		_currentStateObjects.vertexStreamSO = _pendingStateObjects.vertexStreamSO;
-
-		_pendingStateObjects.reset();
-		_stateUpdateMask.clear();
-	}
-
-	bool GraphicsPipelineStateController::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject * pGraphicsPipelineSO )
-	{
-		bool updateResult = false;
-
-		if( pGraphicsPipelineSO != _currentStateObjects.graphicsPipelineSO )
+		if( _currentGraphicsPipelineSO != &pGraphicsPipelineSO )
 		{
-			_pendingStateObjects.graphicsPipelineSO = pGraphicsPipelineSO;
+			_currentGraphicsPipelineSO = &pGraphicsPipelineSO;
 			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT );
-
-			updateResult = true;
-		}
-		else
-		{
-			_pendingStateObjects.graphicsPipelineSO = nullptr;
-			_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT );
 		}
 
-		return updateResult;
+		return _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT );
 	}
 
-	bool GraphicsPipelineStateController::setVertexStreamStateObject( const VertexStreamStateObject * pVertexStreamSO )
+	bool GraphicsPipelineStateController::setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO )
 	{
-		bool updateResult = false;
-
-		if( pVertexStreamSO != _currentStateObjects.vertexStreamSO )
+		if( _currentVertexStreamSO != &pVertexStreamSO )
 		{
-			_pendingStateObjects.vertexStreamSO = pVertexStreamSO;
+			_currentVertexStreamSO = &pVertexStreamSO;
 			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_SO_VERTEX_STREAM_BIT );
-
-			updateResult = true;
 		}
-		else
+
+		return _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_SO_VERTEX_STREAM_BIT );
+	}
+
+	bool GraphicsPipelineStateController::resetGraphicsPipelineStateObject()
+	{
+		if( _currentGraphicsPipelineSO )
 		{
-			_pendingStateObjects.vertexStreamSO = nullptr;
-			_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_COMMON_SO_VERTEX_STREAM_BIT );
+			_currentGraphicsPipelineSO = nullptr;
+			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT );
 		}
 
-		return updateResult;
+		return _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT );
+	}
+
+	bool GraphicsPipelineStateController::resetVertexStreamStateObject()
+	{
+		if( _currentVertexStreamSO )
+		{
+			_currentVertexStreamSO = nullptr;
+			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_SO_VERTEX_STREAM_BIT );
+		}
+
+		return _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_SO_VERTEX_STREAM_BIT );
 	}
 
 } // namespace ts3::gpuapi

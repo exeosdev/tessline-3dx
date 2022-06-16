@@ -82,7 +82,7 @@ namespace ts3::gpuapi
 	{
 		struct VertexAttribute
 		{
-			vertex_attribute_index_t attributeIndex = cxInvalidVertexAttributeIndex;
+			vertex_attribute_index_t attributeIndex = CX_INVALID_VERTEX_ATTRIBUTE_INDEX;
 			vertex_stream_index_t streamIndex;
 			const char * semanticName;
 			uint32 semanticIndex;
@@ -91,7 +91,7 @@ namespace ts3::gpuapi
 			uint32 instanceRate = 0;
 			constexpr explicit operator bool() const
 			{
-				return attributeIndex != cxInvalidVertexAttributeIndex;
+				return attributeIndex != CX_INVALID_VERTEX_ATTRIBUTE_INDEX;
 			}
 		};
 		using VertexAttributeArray = std::array<VertexAttribute, E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM>;

@@ -26,36 +26,79 @@ namespace ts3::gpuapi
 	class TS3_GPUAPI_CLASS GraphicsPipelineStateController
 	{
 	public:
-		using StateDescriptorID = pipeline_state_descriptor_id_t;
-
 		GraphicsPipelineStateController();
 		virtual ~GraphicsPipelineStateController();
 
-		/// @brief
-		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject * pGraphicsPipelineSO );
+		/// @brief Binds the specified state object to the pipeline. Returns true if any change has been made.
+		/// @return True if anything has been changed or false otherwise.
+		/// @note Sub-classes should always call the base method first and check the result before doing the actual update.
+		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO );
 
-		/// @brief
-		virtual bool setVertexStreamStateObject( const VertexStreamStateObject * pVertexStreamSO );
+		/// @brief Resets the current SO to the default one. Returns true if any change has been made.
+		/// @return True if anything has been changed or false otherwise.
+		/// @note Sub-classes should always call the base method first and check the result before doing the actual update.
+		virtual bool resetGraphicsPipelineStateObject();
 
-		/// @brief
-		virtual void applyPendingPipelineStateChange();
+		/// @brief Binds the specified state object to the pipeline. Returns true if any change has been made.
+		/// @return True if anything has been changed or false otherwise.
+		/// @note Sub-classes should always call the base method first and check the result before doing the actual update.
+		virtual bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO );
+
+		/// @brief Resets the current SO to the default one. Returns true if any change has been made.
+		/// @return True if anything has been changed or false otherwise.
+		/// @note Sub-classes should always call the base method first and check the result before doing the actual update.
+		virtual bool resetVertexStreamStateObject();
+
+		/// @brief Returns true if the state update mask is not empty (some bits are set) or false otherwise.
+		TS3_FUNC_NO_DISCARD bool isStateUpdateMaskSet() const
+		{
+			return !_stateUpdateMask.empty();
+		}
+
+		template <typename TpOutputSOType = GraphicsPipelineStateObject>
+		inline const TpOutputSOType * getCurrentGraphicsPipelineSO() const noexcept
+		{
+			if( _currentGraphicsPipelineSO )
+			{
+				return reinterpret_cast<const GPUAPIObject *>( _currentGraphicsPipelineSO )->queryInterface<TpOutputSOType>();
+			}
+			return nullptr;
+		}
+
+		template <typename TpOutputSOType = GraphicsPipelineStateObject>
+		inline const TpOutputSOType & getCurrentGraphicsPipelineSORef() const
+		{
+			if( const auto * stateObject = getCurrentGraphicsPipelineSO<TpOutputSOType>() )
+			{
+				return *stateObject;
+			}
+			throw 0;
+		}
+
+		template <typename TpOutputSOType = VertexStreamStateObject>
+		inline const TpOutputSOType * getCurrentVertexStreamSO() const noexcept
+		{
+			if( _currentVertexStreamSO )
+			{
+				return reinterpret_cast<const GPUAPIObject *>( _currentVertexStreamSO )->queryInterface<TpOutputSOType>();
+			}
+			return nullptr;
+		}
+
+		template <typename TpOutputSOType = VertexStreamStateObject>
+		inline const TpOutputSOType * getCurrentVertexStreamSORef() const
+		{
+			if( const auto * stateObject = getCurrentVertexStreamSO<TpOutputSOType>() )
+			{
+				return *stateObject;
+			}
+			throw 0;
+		}
 
 	protected:
-		struct StateObjects
-		{
-			const GraphicsPipelineStateObject * graphicsPipelineSO = nullptr;
-			const VertexStreamStateObject * vertexStreamSO = nullptr;
+		const GraphicsPipelineStateObject * _currentGraphicsPipelineSO = nullptr;
 
-			void reset()
-			{
-				graphicsPipelineSO = nullptr;
-				vertexStreamSO = nullptr;
-			}
-		};
-
-		StateObjects _currentStateObjects;
-
-		StateObjects _pendingStateObjects;
+		const VertexStreamStateObject * _currentVertexStreamSO = nullptr;
 
 		Bitmask<graphics_state_update_mask_value_t> _stateUpdateMask = 0;
 	};

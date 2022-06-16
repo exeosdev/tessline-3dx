@@ -318,13 +318,20 @@ function( _ebsSysconfConfigureArch )
 endfunction()
 
 function( _ebsSysconfConfigureBuildcfg )
-    setInternal( CM_EBS_SYSCONF_TARGET_BUILDCONFIG "Debug" )
+    if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+        setInternal( CM_EBS_SYSCONF_TARGET_BUILDCONFIG "Debug" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D DEBUG=1" )
+    else()
+        setInternal( CM_EBS_SYSCONF_TARGET_BUILDCONFIG "Release" )
+    endif()
 endfunction()
 
 
 #@FunDef ebsSysconfInitialize
 #@DocStr
 function( ebsSysconfInitialize )
+    clearInternalCache()
+
     _ebsSysconfDetectHostPlatformSetup()
     _ebsSysconfDetectHostCompiler()
     _ebsSysconfDetectTargetPlatform()

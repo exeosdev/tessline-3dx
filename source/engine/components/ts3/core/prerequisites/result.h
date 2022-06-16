@@ -67,7 +67,7 @@ namespace ts3
 		}
 
 		/// @brief Returns whether the result object is empty (i.e. has no explicit code set or code is zero).
-		/// @returns True if result object is empty or false otherwise.
+		/// @return True if result object is empty or false otherwise.
 		TS3_PCL_ATTR_NO_DISCARD bool empty() const
 		{
 			return code == 0;

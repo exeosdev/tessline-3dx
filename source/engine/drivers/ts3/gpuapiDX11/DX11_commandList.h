@@ -28,11 +28,12 @@ namespace ts3::gpuapi
 
 		virtual void executeDeferredContext( CommandContextDeferred & pDeferredContext ) override;
 
-		virtual void clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask ) override;
-		virtual void setViewport( const ViewportDesc & pViewportDesc ) override;
 		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO ) override;
 		virtual bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO ) override;
 		virtual bool setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO ) override;
+
+		virtual void clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask ) override;
+		virtual void setViewport( const ViewportDesc & pViewportDesc ) override;
 		virtual bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData ) override;
 		virtual bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer ) override;
 		virtual bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture ) override;

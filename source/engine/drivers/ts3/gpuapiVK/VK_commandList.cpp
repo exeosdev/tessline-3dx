@@ -30,14 +30,6 @@ namespace ts3::gpuapi
 	{
 	}
 
-	void VKCommandList::clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask )
-	{
-	}
-
-	void VKCommandList::setViewport( const ViewportDesc & pViewportDesc )
-	{
-	}
-
 	bool VKCommandList::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
 	{
 		return true;
@@ -46,6 +38,14 @@ namespace ts3::gpuapi
 	bool VKCommandList::setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO )
 	{
 		return true;
+	}
+
+	void VKCommandList::clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask )
+	{
+	}
+
+	void VKCommandList::setViewport( const ViewportDesc & pViewportDesc )
+	{
 	}
 
 	bool VKCommandList::setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData )

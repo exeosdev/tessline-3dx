@@ -15,10 +15,10 @@ namespace ts3::gpuapi
 	class GLVertexStreamStateObject : public VertexStreamStateObject
 	{
 	public:
-		GLVertexDataSourceBinding const mGLVertexDataSourceBinding;
+		GLVertexStreamBindingDescriptor const mGLVertexStreamBindingDescriptor;
 
 	public:
-		GLVertexStreamStateObject( GLGPUDevice & pGPUDevice, GLVertexDataSourceBinding pVertexDataSourceBinding );
+		GLVertexStreamStateObject( GLGPUDevice & pGPUDevice, GLVertexStreamBindingDescriptor pVertexDataSourceBinding );
 
 		static GpaHandle<GLVertexStreamStateObject> create( GLGPUDevice & pGPUDevice,
 		                                                    const VertexStreamStateObjectCreateInfo & pCreateInfo );

@@ -9,23 +9,27 @@
 namespace ts3::gpuapi
 {
 
-	GLVertexDataSourceBinding createGLVertexDataSourceBinding( const VertexDataSourceBinding & pCommonBinding )
+	GLVertexStreamBindingDescriptor createGLVertexStreamBindingDescriptor( const VertexDataSourceBinding & pCommonBinding )
 	{
-		GLVertexDataSourceBinding openglVertexDataSourceBinding;
-		openglVertexDataSourceBinding.vertexBufferActiveBindingsNum = 0;
-		memZero( openglVertexDataSourceBinding.indexBufferBinding );
-		memZero( openglVertexDataSourceBinding.vertexBufferBinding );
+		GLVertexStreamBindingDescriptor openglVSBDescriptor;
+		openglVSBDescriptor.vertexBufferActiveBindingsNum = 0;
 
 		if( pCommonBinding.indexBufferBinding.bufferObject )
 		{
 			auto * openglIndexBuffer = pCommonBinding.indexBufferBinding.bufferObject->queryInterface<GLGPUBuffer>();
-			auto openglIBDataFormat = GLCoreAPIProxy::translateGLBaseDataType( static_cast<EBaseDataType>( pCommonBinding.indexBufferBinding.format ) );
-			auto openglIBElementByteSize = ecGetBaseDataTypeByteSize( static_cast<EBaseDataType>( pCommonBinding.indexBufferBinding.format ) );
-			openglVertexDataSourceBinding.indexBufferBinding.active = GL_TRUE;
-			openglVertexDataSourceBinding.indexBufferBinding.buffer = openglIndexBuffer->mGLBufferObject->mGLHandle;
-			openglVertexDataSourceBinding.indexBufferBinding.offset = trunc_numeric_cast<GLintptr>( pCommonBinding.indexBufferBinding.dataOffset );
-			openglVertexDataSourceBinding.indexBufferBinding.format = openglIBDataFormat;
-			openglVertexDataSourceBinding.indexBufferBinding.elementByteSize = openglIBElementByteSize;
+			auto iboDataFormat = GLCoreAPIProxy::translateGLBaseDataType( static_cast<EBaseDataType>( pCommonBinding.indexBufferBinding.format ) );
+			auto iboElementByteSize = ecGetBaseDataTypeByteSize( static_cast<EBaseDataType>( pCommonBinding.indexBufferBinding.format ) );
+			openglVSBDescriptor.indexBufferBinding.handle = openglIndexBuffer->mGLBufferObject->mGLHandle;
+			openglVSBDescriptor.indexBufferBinding.offset = trunc_numeric_cast<GLintptr>( pCommonBinding.indexBufferBinding.dataOffset );
+			openglVSBDescriptor.indexBufferBinding.format = iboDataFormat;
+			openglVSBDescriptor.indexBufferBinding.elementByteSize = iboElementByteSize;
+		}
+		else
+		{
+			openglVSBDescriptor.indexBufferBinding.handle = 0u;
+			openglVSBDescriptor.indexBufferBinding.offset = 0u;
+			openglVSBDescriptor.indexBufferBinding.format = 0u;
+			openglVSBDescriptor.indexBufferBinding.elementByteSize = 0u;
 		}
 
 		for( vertex_stream_index_t vertexInputStreamIndex = 0; vertexInputStreamIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM; ++vertexInputStreamIndex )
@@ -34,29 +38,35 @@ namespace ts3::gpuapi
 			if( vbBindingDesc.bufferObject )
 			{
 				auto * openglVertexBuffer = vbBindingDesc.bufferObject->queryInterface<GLGPUBuffer>();
+				const auto vboHandle = openglVertexBuffer->mGLBufferObject->mGLHandle;
+
 			#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
-				openglVertexDataSourceBinding.vertexBufferBinding[vertexInputStreamIndex].active = GL_TRUE;
-				openglVertexDataSourceBinding.vertexBufferBinding[vertexInputStreamIndex].buffer = openglVertexBuffer->mGLBufferObject->mGLHandle;
-				openglVertexDataSourceBinding.vertexBufferBinding[vertexInputStreamIndex].offset = vbBindingDesc.dataOffset;
-				openglVertexDataSourceBinding.vertexBufferBinding[vertexInputStreamIndex].stride = static_cast<GLsizei>( vbBindingDesc.dataStride );
-				openglVertexDataSourceBinding.vertexBufferActiveBindingsNum += 1;
+				openglVSBDescriptor.vbBindingArray[vertexInputStreamIndex].handle = vboHandle;
+				openglVSBDescriptor.vbBindingArray[vertexInputStreamIndex].offset = vbBindingDesc.dataOffset;
+				openglVSBDescriptor.vbBindingArray[vertexInputStreamIndex].stride = static_cast<GLsizei>( vbBindingDesc.dataStride );
+				openglVSBDescriptor.vbBindingArrayindingsNum += 1;
 			#else
-				openglVertexDataSourceBinding.vertexBufferBinding.activeArray[vertexInputStreamIndex] = GL_TRUE;
-				openglVertexDataSourceBinding.vertexBufferBinding.bufferArray[vertexInputStreamIndex] = openglVertexBuffer->mGLBufferObject->mGLHandle;
-				openglVertexDataSourceBinding.vertexBufferBinding.offsetArray[vertexInputStreamIndex] = trunc_numeric_cast<GLintptr>( vbBindingDesc.dataOffset );
-				openglVertexDataSourceBinding.vertexBufferBinding.strideArray[vertexInputStreamIndex] = trunc_numeric_cast<GLsizei>( vbBindingDesc.dataStride );
-				openglVertexDataSourceBinding.vertexBufferActiveBindingsNum += 1;
+				openglVSBDescriptor.vertexBuffersBinding.vbHandleArray[vertexInputStreamIndex] = vboHandle;
+				openglVSBDescriptor.vertexBuffersBinding.vbOffsetArray[vertexInputStreamIndex] = trunc_numeric_cast<GLintptr>( vbBindingDesc.dataOffset );
+				openglVSBDescriptor.vertexBuffersBinding.vbStrideArray[vertexInputStreamIndex] = trunc_numeric_cast<GLsizei>( vbBindingDesc.dataStride );
+				openglVSBDescriptor.vertexBufferActiveBindingsNum += 1;
+			#endif
+			}
+			else
+			{
+			#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
+				openglVSBDescriptor.vbBindingArray[vertexInputStreamIndex].handle = 0u;
+				openglVSBDescriptor.vbBindingArray[vertexInputStreamIndex].offset = 0u;
+				openglVSBDescriptor.vbBindingArray[vertexInputStreamIndex].stride = 0u;
+			#else
+				openglVSBDescriptor.vertexBuffersBinding.vbHandleArray[vertexInputStreamIndex] = 0u;
+				openglVSBDescriptor.vertexBuffersBinding.vbOffsetArray[vertexInputStreamIndex] = 0u;
+				openglVSBDescriptor.vertexBuffersBinding.vbStrideArray[vertexInputStreamIndex] = 0u;
 			#endif
 			}
 		}
 
-	#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
-		openglVertexDataSourceBinding.vertexStreamActiveIndexArray = pCommonBinding.vertexStreamActiveIndexArray;
-	#else
-		openglVertexDataSourceBinding.vertexStreamActiveRangeList = pCommonBinding.vertexStreamActiveRangeList;
-	#endif
-
-		return openglVertexDataSourceBinding;
+		return openglVSBDescriptor;
 	}
 
 	GLBlendStateDescriptor GLGraphicsPSDCacheTraits::createBlendDescriptor( const BlendConfigDesc & pConfigDesc,
@@ -128,10 +138,12 @@ namespace ts3::gpuapi
 		GLRasterizerStateDescriptor openglRSDescriptor;
 		
 		openglRSDescriptor.configDesc.cullMode = GLCoreAPIProxy::translateGLCullMode( pConfigDesc.cullMode );
-		openglRSDescriptor.configDesc.primitiveFillMode = GLCoreAPIProxy::translateGLPrimitiveFillMode( pConfigDesc.primitiveFillMode );
 		openglRSDescriptor.configDesc.triangleFrontFaceOrder = GLCoreAPIProxy::translateGLTriangleVerticesOrder( pConfigDesc.triangleFrontFaceOrder );
 		openglRSDescriptor.configDesc.scissorTestState = pConfigDesc.scissorTestState;
-		
+	#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
+		openglRSDescriptor.configDesc.primitiveFillMode = GLCoreAPIProxy::translateGLPrimitiveFillMode( pConfigDesc.primitiveFillMode );
+	#endif
+
 		openglRSDescriptor.inputDescHash = pDescHash;
 		openglRSDescriptor.descriptorID = computePipelineStateDescriptorID( openglRSDescriptor.configDesc );
 

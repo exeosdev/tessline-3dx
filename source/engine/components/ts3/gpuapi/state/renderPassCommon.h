@@ -10,16 +10,6 @@
 namespace ts3::gpuapi
 {
 
-	enum class EPipelineExecutionStageFlags : uint32
-	{
-		E_PIPELINE_EXECUTION_STAGE_FLAG_SHADER_VS_BIT = E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT,
-		E_PIPELINE_EXECUTION_STAGE_FLAG_SHADER_TC_BIT = E_SHADER_STAGE_FLAG_GRAPHICS_TESS_CONTROL_BIT,
-		E_PIPELINE_EXECUTION_STAGE_FLAG_SHADER_TE_BIT = E_SHADER_STAGE_FLAG_GRAPHICS_TESS_EVALUATION_BIT,
-		E_PIPELINE_EXECUTION_STAGE_FLAG_SHADER_GS_BIT = E_SHADER_STAGE_FLAG_GRAPHICS_GEOMETRY_BIT,
-		E_PIPELINE_EXECUTION_STAGE_FLAG_SHADER_PS_BIT = E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT,
-		E_PIPELINE_EXECUTION_STAGE_FLAG_IA_INDIRECT_FETCH_BIT = 1u <<
-	};
-
 	/// @brief Specifies how the contents of render pass attachments are treated at the beginning of a render pass.
 	enum class ERenderPassAttachmentLoadOp : uint32
 	{
@@ -61,6 +51,7 @@ namespace ts3::gpuapi
 	{
 		ERenderTargetAttachmentID attachmentID = ERenderTargetAttachmentID::RTUndefined;
 		ERenderPassAttachmentLoadOp loadOp;
+		ERenderPassAttachmentStoreOp storeOp;
 	};
 
 	struct RenderSubPassDependencyDesc

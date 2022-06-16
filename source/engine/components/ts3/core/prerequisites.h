@@ -46,7 +46,7 @@
 namespace ts3
 {
 
-	/// @brief Helper struct for triggering a dedicated "init-as-empty" constructor. Used whenever default ctor is not feasible.
+	/// @brief Helper struct for triggering a "empty-init" ctor. Used whenever default initialization has a different meaning.
 	struct InitEmptyTag
 	{
 	};

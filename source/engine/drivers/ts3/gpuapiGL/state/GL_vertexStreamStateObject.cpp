@@ -6,9 +6,9 @@
 namespace ts3::gpuapi
 {
 
-	GLVertexStreamStateObject::GLVertexStreamStateObject( GLGPUDevice & pGPUDevice, GLVertexDataSourceBinding pGLVertexDataSourceBinding )
+	GLVertexStreamStateObject::GLVertexStreamStateObject( GLGPUDevice & pGPUDevice, GLVertexStreamBindingDescriptor pGLVertexStreamBindingDescriptor )
     : VertexStreamStateObject( pGPUDevice )
-    , mGLVertexDataSourceBinding( std::move( pGLVertexDataSourceBinding ) )
+    , mGLVertexStreamBindingDescriptor( std::move( pGLVertexStreamBindingDescriptor ) )
 	{}
 
 	GpaHandle<GLVertexStreamStateObject> GLVertexStreamStateObject::create( GLGPUDevice & pGPUDevice,
@@ -20,14 +20,9 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
-		auto openglVertexDataSourceBinding = createGLVertexDataSourceBinding( commonSSOState.vertexDataSourceBinding );
-		if( !openglVertexDataSourceBinding )
-		{
-			return nullptr;
-		}
+		auto openglVSBDescriptor = createGLVertexStreamBindingDescriptor( commonSSOState.vertexDataSourceBinding );
+		auto vertexStreamStateObject = createDynamicInterfaceObject<GLVertexStreamStateObject>( pGPUDevice, openglVSBDescriptor );
 
-		auto vertexStreamStateObject = createDynamicInterfaceObject<GLVertexStreamStateObject>( pGPUDevice,
-		                                                                                        std::move( openglVertexDataSourceBinding ) );
 		return vertexStreamStateObject;
 	}
 

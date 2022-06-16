@@ -15,8 +15,8 @@ namespace ts3::gpuapi
 
 	struct DX11RenderTargetResourceState
 	{
-		ComPtr<ID3D11View>       colorAttachmentViewRef[GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
-		ID3D11RenderTargetView * colorAttachmentRTVArray[GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+		ComPtr<ID3D11View>       colorAttachmentViewRef[E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+		ID3D11RenderTargetView * colorAttachmentRTVArray[E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
 		ComPtr<ID3D11View>       depthStencilAttachmentViewRef;
 		ID3D11DepthStencilView * depthStencilAttachmentDSV;
 	};

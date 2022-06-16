@@ -40,23 +40,32 @@ namespace ts3::gpuapi
 		GLGraphicsPipelineStateController( GLGraphicsPipelineStateDescriptorCache & pDescriptorCache );
 		~GLGraphicsPipelineStateController();
 
-		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject * pGraphicsPipelineSO ) override;
+		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO ) override;
 
-		virtual bool setVertexStreamStateObject( const VertexStreamStateObject * pVertexStreamSO ) override;
+		virtual bool resetGraphicsPipelineStateObject() override;
 
-		TS3_FUNC_NO_DISCARD const GLPipelineConfig & getCurrentPipelineConfig() const
+		virtual bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO ) override;
+
+		virtual bool resetVertexStreamStateObject() override;
+
+		TS3_FUNC_NO_DISCARD const GLPipelineConfig & getGLPipelineConfig() const
 		{
 			return _currentGLPipelineConfig;
 		}
 
-	protected:
-		virtual void applyPendingPipelineStateChange() override;
+		static void updateGLBlendState( const GLBlendStateDescriptor & pDescriptor );
 
-	private:
-		static void _setBlendState( const GLBlendStateDescriptor & pGLBlendSD );
-		static void _setDepthStencilState( const GLDepthStencilStateDescriptor & pGLDepthStencilSD );
-		static void _setRasterizerState( const GLRasterizerStateDescriptor & pGLRasterizerSD );
-		static void _setVertexInputFormatState( const GLVertexInputFormatStateDescriptor & pGLVertexInputFormatSD );
+		static void updateGLDepthStencilState( const GLDepthStencilStateDescriptor & pDescriptor );
+
+		static void updateGLRasterizerState( const GLRasterizerStateDescriptor & pDescriptor );
+
+		static void updateGLVertexInputFormatState( const GLVertexInputFormatStateDescriptor & pDescriptor );
+
+		static void updateGLShaderBinding( const GLShaderPipelineObject & pShaderPipelineObject );
+
+		static void updateGLIndexBufferBinding( const GLIndexBufferBinding & pBinding );
+
+		static void updateGLVertexBuffersBinding( const GLVertexBuffersBinding & pBinding );
 
 	protected:
 		GLPipelineConfig _currentGLPipelineConfig;

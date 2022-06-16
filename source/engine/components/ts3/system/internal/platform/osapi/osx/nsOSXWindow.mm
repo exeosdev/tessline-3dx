@@ -53,17 +53,12 @@
 
 	[self setWantsLayer:YES];
 
-//	const CGFloat backgroundColor[] = { 0.12, 0.44, 0.92, 1.0 };
-//	auto * viewBackgroundColor = CGColorCreate( CGColorSpaceCreateDeviceRGB(), backgroundColor );
-//
-//	[[self layer] setBackgroundColor:viewBackgroundColor];
-
 	// Set this view as the window's main content view.
 	[pWindow setContentView:self];
 
 	// Bind the view as the responder. All defined event handlers inside this view
 	// will get called first before (optionally) being forwarded to the window itself.
-	[pWindow makeFirstResponder:self];
+	[pWindow makeFirstResponder:self];;
 
 	// Next responder for this view is the window.
 	// E.g. calling [super keyDown:pEvent] in the view will forward the even to the window handler.

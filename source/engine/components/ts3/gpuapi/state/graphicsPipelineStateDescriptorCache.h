@@ -28,12 +28,11 @@ namespace ts3::gpuapi
 	// Although OpenGL doesn't provide dedicated state objects like D3D does, it *does* have VAOs for VertexInputFormat
 	// state and we also reuse those. This enables us to skip binding VAO if input format remains the same between PSOs.
 
-	// This is a valid, but useless trait type for descriptor cache.
-	// Not used anywhere - just for listing all thing required for a trait to provide.
-	struct GraphicsPipelineStateDescriptorCacheTraits
+	/// @brief Dummy trait type for the descriptor cache. List all the things required for the traits to provide.
+	struct TS3_CLASS_MAYBE_UNUSED GraphicsPipelineStateDescriptorCacheTraits
 	{
 		// We need a typedefs for actual descriptors (since they are driver-specific).
-		// All five types are required to be present in a trait type.
+		// All four types are required to be present in a trait type.
 
 		using BlendDescriptorType = void;
 		using DepthStencilDescriptorType = void;
@@ -62,44 +61,6 @@ namespace ts3::gpuapi
 		{}
 	};
 
-	// Additional CreateProxy class serves as an intermediate pass-through interface for creating descriptors.
-	// It has only one purpose: to provide createDescriptor() functions with the exact same name, which allows
-	// us to have a universal _createDescriptor() method inside the cache itself.
-	template <typename TpTraits>
-	struct GraphicsPipelineStateDescriptorCacheCreateProxy
-	{
-		using BlendDescriptorType = typename TpTraits::BlendDescriptorType;
-		using DepthStencilDescriptorType = typename TpTraits::DepthStencilDescriptorType;
-		using RasterizerDescriptorType = typename TpTraits::RasterizerDescriptorType;
-		using VertexInputFormatDescriptorType = typename TpTraits::VertexInputFormatDescriptorType;
-
-		// Pass-through functions: pass the data to appropriate callbacks from the provided trait type.
-
-		template <typename... TpArgs>
-		static BlendDescriptorType createDescriptor( const BlendConfigDesc & pBlendDesc, TpArgs && ...pArgs )
-		{
-			return TpTraits::createBlendDescriptor( pBlendDesc, std::forward<TpArgs>( pArgs )... );
-		}
-
-		template <typename... TpArgs>
-		static DepthStencilDescriptorType createDescriptor( const DepthStencilConfigDesc & pDepthStencilDesc, TpArgs && ...pArgs )
-		{
-			return TpTraits::createDepthStencilDescriptor( pDepthStencilDesc, std::forward<TpArgs>( pArgs )... );
-		}
-
-		template <typename... TpArgs>
-		static RasterizerDescriptorType createDescriptor( const RasterizerConfigDesc & pRasterizerDesc, TpArgs && ...pArgs )
-		{
-			return TpTraits::createRasterizerDescriptor( pRasterizerDesc, std::forward<TpArgs>( pArgs )... );
-		}
-
-		template <typename... TpArgs>
-		static VertexInputFormatDescriptorType createDescriptor( const VertexInputFormatDesc & pVertexInputFormatDesc, TpArgs && ...pArgs )
-		{
-			return TpTraits::createVertexInputFormatDescriptor( pVertexInputFormatDesc, std::forward<TpArgs>( pArgs )... );
-		}
-	};
-
 	// The cache.
 	template <typename TpTraits>
 	class GraphicsPipelineStateDescriptorCache
@@ -114,7 +75,6 @@ namespace ts3::gpuapi
 		};
 
 		using Traits = TpTraits;
-		using CreateProxy = GraphicsPipelineStateDescriptorCacheCreateProxy<TpTraits>;
 
 		using BlendDescriptorType = typename TpTraits::BlendDescriptorType;
 		using DepthStencilDescriptorType = typename TpTraits::DepthStencilDescriptorType;
@@ -179,21 +139,29 @@ namespace ts3::gpuapi
 			CachedDescriptorType type;
 			pipeline_state_descriptor_id_t id;
 		};
+
 		// Thanks to additional pass-through createDescriptor() functions, we can have this function as a universal template.
 		// It only needs an input desc and a descriptor type-specific map where descriptors of that type are being stored.
 		template <typename TpInputDesc, typename TpDescriptorCache, typename... TpArgs>
-		pipeline_state_descriptor_id_t _createDescriptor( CachedDescriptorType pDescriptorType, const TpInputDesc & pInputDesc, TpDescriptorCache & pDescriptorCache, TpArgs && ...pArgs )
+		pipeline_state_descriptor_id_t _createDescriptor( CachedDescriptorType pDescriptorType,
+		                                                  const TpInputDesc & pInputDesc,
+		                                                  TpDescriptorCache & pDescriptorCache,
+		                                                  TpArgs && ...pArgs )
 		{
-			// First, compute a hash of the specified input desc structure. We store all those in a separate map,
-			// mapped to a descriptor (id) created from them. This allows for quick check if there is even a need
-			// to create anything.
+			// First, compute a hash of the specified input desc structure. These hashes are stored in the separate map
+			// as keys mapped to all descriptors (their IDs) created from the given desc structure. This allows us to
+			// determine if there is already a descriptor matching the specified configuration.
 			auto inputDescHash = computePipelineInputDescHash( pInputDesc );
 
+			// Get all descriptors with matching source hash. This properly handles 1:N situations, because we can
+			// produce same binary data even for two different descriptor types (and it can get worse over time).
 			auto existingDescriptorRange = _descriptorIDMap.equal_range( inputDescHash );
+
 			if( existingDescriptorRange.first != _descriptorIDMap.end() )
 			{
 				for( auto descriptorIter = existingDescriptorRange.first; descriptorIter != existingDescriptorRange.first; ++descriptorIter )
 				{
+					// Filter out descriptors with type other than the current one.
 					if( descriptorIter->second.type == pDescriptorType )
 					{
 						// Return the ID of an existing descriptor.
@@ -204,22 +172,48 @@ namespace ts3::gpuapi
 
 			// Create the descriptor. All functions inside the CreateProxy have the same name, so
 			// we just call it here and the overloading (via matching desc type) will do the rest.
-			auto descriptor = CreateProxy::createDescriptor( pInputDesc, inputDescHash, std::forward<TpArgs>( pArgs )... );
+			auto descriptor = _createDescriptorProxy( pInputDesc, inputDescHash, std::forward<TpArgs>( pArgs )... );
+
 			// Save the ID for return, descriptors are moved into the map.
-			auto descriptorID = descriptor.descriptorID;
+			const auto descriptorID = descriptor.descriptorID;
 
 			CachedDescriptorInfo descriptorInfo;
 			descriptorInfo.type = pDescriptorType;
 			descriptorInfo.id = descriptorID;
 
-			// Associate new descriptor's ID with the hash of desc structure. When the same desc
-			// config is requested later on, this descriptor will be returned instead of a new one.
-			_descriptorIDMap.insert( typename decltype( _descriptorIDMap )::value_type( inputDescHash, descriptorInfo ) );
-			// Save the actual descriptor.
+			// Associate new descriptor's ID with the hash of desc structure. When the same desc config
+			// is requested later on, this descriptor will be returned instead of creating a new one.
+			_descriptorIDMap.insert( typename decltype( _descriptorIDMap )::value_type( inputDescHash, std::move( descriptorInfo ) ) );
+
+			// Save the descriptor itself.
 			pDescriptorCache[descriptorID] = std::move( descriptor );
 
 			// Return the ID.
 			return descriptorID;
+		}
+
+		template <typename... TpArgs>
+		static BlendDescriptorType _createDescriptorProxy( const BlendConfigDesc & pBlendDesc, TpArgs && ...pArgs )
+		{
+			return TpTraits::createBlendDescriptor( pBlendDesc, std::forward<TpArgs>( pArgs )... );
+		}
+
+		template <typename... TpArgs>
+		static DepthStencilDescriptorType _createDescriptorProxy( const DepthStencilConfigDesc & pDepthStencilDesc, TpArgs && ...pArgs )
+		{
+			return TpTraits::createDepthStencilDescriptor( pDepthStencilDesc, std::forward<TpArgs>( pArgs )... );
+		}
+
+		template <typename... TpArgs>
+		static RasterizerDescriptorType _createDescriptorProxy( const RasterizerConfigDesc & pRasterizerDesc, TpArgs && ...pArgs )
+		{
+			return TpTraits::createRasterizerDescriptor( pRasterizerDesc, std::forward<TpArgs>( pArgs )... );
+		}
+
+		template <typename... TpArgs>
+		static VertexInputFormatDescriptorType _createDescriptorProxy( const VertexInputFormatDesc & pVertexInputFormatDesc, TpArgs && ...pArgs )
+		{
+			return TpTraits::createVertexInputFormatDescriptor( pVertexInputFormatDesc, std::forward<TpArgs>( pArgs )... );
 		}
 
 	private:

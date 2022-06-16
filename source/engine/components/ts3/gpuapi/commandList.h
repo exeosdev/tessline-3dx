@@ -51,11 +51,12 @@ namespace ts3::gpuapi
 		virtual void dispatchCompute( uint32 pThrGroupSizeX, uint32 pThrGroupSizeY, uint32 pThrGroupSizeZ ) {} // = 0;
 		virtual void dispatchComputeIndirect( uint32 pIndirectBufferOffset ) {} // = 0;
 
-		virtual void clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask ) = 0;
-		virtual void setViewport( const ViewportDesc & pViewportDesc ) = 0;
 		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO ) = 0;
 		virtual bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO ) = 0;
 		virtual bool setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO ) = 0;
+
+		virtual void clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask ) = 0;
+		virtual void setViewport( const ViewportDesc & pViewportDesc ) = 0;
 		virtual bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData ) = 0;
 		virtual bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer ) = 0;
 		virtual bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture ) = 0;

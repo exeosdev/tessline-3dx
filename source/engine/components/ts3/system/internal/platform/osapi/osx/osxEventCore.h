@@ -89,8 +89,8 @@ namespace ts3::system
 
 		struct OSXEventSourceNativeData : public OSXNativeDataCommon
 		{
-			id nsWindow = nil;
-			id nsView = nil;
+			NSWindow * nsWindow = nil;
+			NSView * nsView = nil;
 			id nsEventListener = nil;
 		};
 

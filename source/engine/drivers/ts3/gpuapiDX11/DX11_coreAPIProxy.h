@@ -12,7 +12,7 @@ namespace ts3::gpuapi
 
 	using resource_flags_value_t = uint32 ;
 
-	enum GPUDriverConfigFlags : uint32;
+	enum EGPUDriverConfigFlags : uint32;
 	enum ERenderTargetAttachmentFlags : uint32;
 
 	enum class EBlendFactor : enum_default_value_t;
@@ -48,7 +48,7 @@ namespace ts3::gpuapi
 		ComPtr<IDXGISwapChain1> createD3D11SwapChainForSystemWindow( DX11GPUDevice & pDX11GPUDevice,
 		                                                          void * pSysWindow /* It must be a ts3::system::Window */ );
 
-		UINT translateDX11GPUDeviceCreateFlags( Bitmask<GPUDriverConfigFlags> pDriverConfigFlags );
+		UINT translateDX11GPUDeviceCreateFlags( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags );
 
 		D3D11_BLEND translateDX11BlendFactor( EBlendFactor pBlendFactor );
 

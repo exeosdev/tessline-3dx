@@ -25,9 +25,9 @@ namespace ts3::gpuapi
 		return reinterpret_cast<DXGIGetDebugInterfaceType>( dxgiProcAddress );
 	}
 
-	ComPtr<IDXGIDebug> DXCoreAPIProxy::queryDXGIDebugInterface( Bitmask<GPUDriverConfigFlags> pDriverConfigFlags )
+	ComPtr<IDXGIDebug> DXCoreAPIProxy::queryDXGIDebugInterface( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags )
 	{
-		if( !pDriverConfigFlags.isSet( GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
+		if( !pDriverConfigFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
 		{
 			return nullptr;
 		}
@@ -54,9 +54,9 @@ namespace ts3::gpuapi
 		return dxgiDebugInterface;
 	}
 
-	ComPtr<IDXGIInfoQueue> DXCoreAPIProxy::queryDXGIDebugInfoQueue( Bitmask<GPUDriverConfigFlags> pDriverConfigFlags )
+	ComPtr<IDXGIInfoQueue> DXCoreAPIProxy::queryDXGIDebugInfoQueue( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags )
 	{
-		if( !pDriverConfigFlags.isSet( GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
+		if( !pDriverConfigFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
 		{
 			return nullptr;
 		}

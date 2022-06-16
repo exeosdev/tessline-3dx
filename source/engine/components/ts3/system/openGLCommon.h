@@ -136,7 +136,7 @@ namespace ts3::system
 	struct OpenGLErrorInfo
 	{
 	public:
-		// The error code. It will contains either a common OpenGL error
+		// The error identifier. It will contain either a common OpenGL error
 		// code (GLenum) or one of the subsystem-specific ones (AGL/EGL/GLX/WGL).
 		uint32 errorCode;
 

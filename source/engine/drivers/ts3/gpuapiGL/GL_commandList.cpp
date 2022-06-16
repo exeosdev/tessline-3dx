@@ -34,14 +34,40 @@ namespace ts3::gpuapi
 
 	void GLCommandList::endCommandSequence()
 	{
-		_stateController.resetInternalState();
-
 		CommandList::endCommandSequence();
 	}
 
 	void GLCommandList::executeDeferredContext( CommandContextDeferred & pDeferredContext )
 	{
 		ts3DebugInterrupt();
+	}
+
+	bool GLCommandList::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
+	{
+		return _stateController.setGraphicsPipelineStateObject( pGraphicsPipelineSO );
+	}
+
+	bool GLCommandList::setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO )
+	{
+		return _stateController.setVertexStreamStateObject( pVertexStreamSO );
+	}
+
+	bool GLCommandList::setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO )
+	{
+		const auto & pipelineConfig = _stateController.getCurrentPipelineConfig();
+		const auto & renderTargetLayout = _stateController.graphicsPipelineSO()->mRenderTargetLayout;
+
+		auto * openglRenderTargetSO = pRenderTargetSO.queryInterface<GLRenderTargetStateObject>();
+		if( !checkRenderTargetLayoutCompatibility( openglRenderTargetSO->mRTResourceBinding, renderTargetLayout ) )
+		{
+			ts3DebugInterrupt();
+			return false;
+		}
+
+		glBindFramebuffer( GL_FRAMEBUFFER, openglRenderTargetSO->mGLFramebufferObject->mGLHandle );
+		ts3OpenGLHandleLastError();
+
+		return true;
 	}
 
 	void GLCommandList::clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask )
@@ -93,38 +119,10 @@ namespace ts3::gpuapi
 		ts3OpenGLHandleLastError();
 	}
 
-	bool GLCommandList::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
-	{
-		return _stateController.setGraphicsPipelineStateObject( pGraphicsPipelineSO );
-	}
-
-	bool GLCommandList::setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO )
-	{
-		return _stateController.setVertexStreamStateObject( pVertexStreamSO );
-	}
-
-	bool GLCommandList::setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO )
-	{
-		const auto & pipelineConfig = _stateController.getCurrentPipelineConfig();
-		const auto & renderTargetLayout = _stateController.graphicsPipelineSO()->mRenderTargetLayout;
-
-		auto * openglRenderTargetSO = pRenderTargetSO.queryInterface<GLRenderTargetStateObject>();
-		if( !checkRenderTargetLayoutCompatibility( openglRenderTargetSO->mRTResourceBinding, renderTargetLayout ) )
-		{
-			ts3DebugInterrupt();
-			return false;
-		}
-
-		glBindFramebuffer( GL_FRAMEBUFFER, openglRenderTargetSO->mGLFramebufferObject->mGLHandle );
-		ts3OpenGLHandleLastError();
-
-		return true;
-	}
-
 	bool GLCommandList::setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData )
 	{
-		const auto & pipelineConfig = _stateController.getCurrentPipelineConfig();
-		if( const auto & inputSignature = pipelineConfig.soGraphicsPipeline->mShaderInputSignature )
+		const auto & openglGPSO = _stateController.getCurrentGraphicsPipelineSORef<GLGraphicsPipelineStateObject>();
+		if( const auto & inputSignature = openglGPSO.mShaderInputSignature )
 		{
 			const auto & constantInfo = inputSignature.getConstantInfo( pParamRefID );
 			if( constantInfo.iVisibilityMask != 0 )
@@ -138,8 +136,8 @@ namespace ts3::gpuapi
 
 	bool GLCommandList::setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer )
 	{
-		const auto & commonConfig = _stateController.getCommonConfig();
-		if( const auto & inputSignature = commonConfig.soGraphicsPipeline->mShaderInputSignature )
+		const auto & openglGPSO = _stateController.getCurrentGraphicsPipelineSORef<GLGraphicsPipelineStateObject>();
+		if( const auto & inputSignature = openglGPSO.mShaderInputSignature )
 		{
 			const auto & descriptorInfo = inputSignature.getDescriptorInfo( pParamRefID );
 			ts3DebugAssert( descriptorInfo.dDescriptorType == EShaderInputDescriptorType::Resource );
@@ -160,8 +158,8 @@ namespace ts3::gpuapi
 
 	bool GLCommandList::setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture )
 	{
-		const auto & commonConfig = _stateController.getCommonConfig();
-		if( const auto & inputSignature = commonConfig.soGraphicsPipeline->mShaderInputSignature )
+		const auto & openglGPSO = _stateController.getCurrentGraphicsPipelineSORef<GLGraphicsPipelineStateObject>();
+		if( const auto & inputSignature = openglGPSO.mShaderInputSignature )
 		{
 			const auto & descriptorInfo = inputSignature.getDescriptorInfo( pParamRefID );
 			ts3DebugAssert( descriptorInfo.dDescriptorType == EShaderInputDescriptorType::Resource );
@@ -182,8 +180,8 @@ namespace ts3::gpuapi
 
 	bool GLCommandList::setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler )
 	{
-		const auto & commonConfig = _stateController.getCommonConfig();
-		if( const auto & inputSignature = commonConfig.soGraphicsPipeline->mShaderInputSignature )
+		const auto & openglGPSO = _stateController.getCurrentGraphicsPipelineSORef<GLGraphicsPipelineStateObject>();
+		if( const auto & inputSignature = openglGPSO.mShaderInputSignature )
 		{
 			const auto & descriptorInfo = inputSignature.getDescriptorInfo( pParamRefID );
 			ts3DebugAssert( descriptorInfo.dDescriptorType == EShaderInputDescriptorType::Sampler );
@@ -235,19 +233,13 @@ namespace ts3::gpuapi
 	{
 	}
 
-	void GLCommandList::updatePipelineState()
-	{
-		_stateController.updatePipelineState();
-	}
-
 	void GLCommandList::updateShaderInputInlineConstantData( const ShaderInputParameterConstant & pConstantInfo, const void * pData )
 	{
 		auto constantBaseType = ecGetVertexAttribFormatBaseDataType( pConstantInfo.iFormat );
 		auto constantLength = ecGetVertexAttribFormatLength( pConstantInfo.iFormat );
 
-		const auto & commonConfig = _stateController.getCommonConfig();
-		auto * openglGraphicsPSO = commonConfig.soGraphicsPipeline->queryInterface<GLGraphicsPipelineStateObject>();
-		for( const auto & shaderInfo : openglGraphicsPSO->mShaderBinding.activeStageList )
+		const auto & openglGPSO = _stateController.getCurrentGraphicsPipelineSORef<GLGraphicsPipelineStateObject>();
+		for( const auto & shaderInfo : openglGPSO.mShaderBinding.activeStageList )
 		{
 			auto stageFlag = getGraphicsShaderStageFlag( static_cast<EShaderType>( shaderInfo.stageID ) );
 			if( pConstantInfo.iVisibilityMask.isSet( stageFlag ) )

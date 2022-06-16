@@ -18,9 +18,9 @@ namespace ts3::gpuapi
 
 		DXGIGetDebugInterfaceType loadDXGIDebugLegacyLoader();
 
-		ComPtr<IDXGIDebug> queryDXGIDebugInterface( Bitmask<GPUDriverConfigFlags> pDriverConfigFlags );
+		ComPtr<IDXGIDebug> queryDXGIDebugInterface( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags );
 
-		ComPtr<IDXGIInfoQueue> queryDXGIDebugInfoQueue( Bitmask<GPUDriverConfigFlags> pDriverConfigFlags );
+		ComPtr<IDXGIInfoQueue> queryDXGIDebugInfoQueue( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags );
 
 		uint32 getDXGITextureFormatBPP( DXGI_FORMAT pDXGIFormat );
 

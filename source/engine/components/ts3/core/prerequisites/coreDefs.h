@@ -16,6 +16,12 @@
 #define ts3CaseReturnStr( pCaseValue ) \
 	case pCaseValue: return #pCaseValue
 
+#define for_index( pIndexName, pInitVal, pLessThan ) \
+	for( size_t pIndexName = pInitVal; pIndexName < pLessThan; ++pIndexName )
+
+#define for_index_type( pIndexType, pIndexName, pInitVal, pLessThan ) \
+	for( pIndexType pIndexName = pInitVal; pIndexName < pLessThan; ++pIndexName )
+
 namespace ts3
 {
 
@@ -23,7 +29,7 @@ namespace ts3
 	class EnumTypeInfo;
 
 	template <typename TpTarget, typename TpSrc>
-	inline TpTarget * dynamic_cast_check( TpSrc * pSource )
+	TS3_FUNC_NO_DISCARD inline TpTarget * dynamic_cast_check( TpSrc * pSource )
 	{
 		if( auto * targetPtr = dynamic_cast<TpTarget *>( pSource ) )
 		{
@@ -34,7 +40,7 @@ namespace ts3
 	}
 
 	template <typename TpTarget, typename TpSrc>
-	inline TpTarget * dynamic_cast_throw( TpSrc * pSource )
+	TS3_FUNC_NO_DISCARD inline TpTarget * dynamic_cast_throw( TpSrc * pSource )
 	{
 		if( auto * targetPtr = dynamic_cast<TpTarget *>( pSource ) )
 		{
@@ -44,7 +50,7 @@ namespace ts3
 	}
 
 	template <typename TpTarget, typename TpSrc>
-	inline std::shared_ptr<TpTarget> dynamic_ptr_cast_check( std::shared_ptr<TpSrc> pSource )
+	TS3_FUNC_NO_DISCARD inline std::shared_ptr<TpTarget> dynamic_ptr_cast_check( std::shared_ptr<TpSrc> pSource )
 	{
 		if( auto targetPtr = std::dynamic_pointer_cast<TpTarget>( std::move( pSource ) ) )
 		{
@@ -55,7 +61,7 @@ namespace ts3
 	}
 
 	template <typename TpTarget, typename TpSrc>
-	inline std::shared_ptr<TpTarget> dynamic_ptr_cast_throw( std::shared_ptr<TpSrc> pSource )
+	TS3_FUNC_NO_DISCARD inline std::shared_ptr<TpTarget> dynamic_ptr_cast_throw( std::shared_ptr<TpSrc> pSource )
 	{
 		if( auto targetPtr = std::dynamic_pointer_cast<TpTarget>( std::move( pSource ) ) )
 		{
@@ -89,7 +95,7 @@ namespace ts3
             /* Just call the enum-specific function. This allows moving the definition code to .cpp. */      \
             return _typeinfo::queryEnumTypeInfo##TpEnum();                                                   \
         }                                                                                                    \
-        inline const std::string & toString( TpEnum pValue )                                                 \
+        TS3_FUNC_NO_DISCARD inline const std::string & toString( TpEnum pValue )                                                 \
         {                                                                                                    \
         	/* Just call the enum-specific function. This allows moving the definition code to .cpp. */      \
         	return _typeinfo::toString##TpEnum( pValue );                                                    \

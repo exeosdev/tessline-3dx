@@ -11,8 +11,8 @@ namespace ts3::gpuapi
 	                                                                  RenderTargetLayout pRenderTargetLayout,
 	                                                                  GraphicsShaderBinding pShaderBinding,
 	                                                                  ShaderInputSignature pShaderInputSignature,
-	                                                                  const GraphicsPipelineStateDescriptorSet & pSeparableDescriptorSet )
-	: SeparableGraphicsPipelineStateObject( pGPUDevice, std::move( pRenderTargetLayout ), std::move( pShaderBinding ), std::move( pShaderInputSignature ), pSeparableDescriptorSet )
+	                                                                  const SeparableGraphicsStateDescriptorSet & pStateDescriptors )
+	: SeparableGraphicsPipelineStateObject( pGPUDevice, std::move( pRenderTargetLayout ), std::move( pShaderBinding ), std::move( pShaderInputSignature ), pStateDescriptors )
 	{}
 
 	DX11GraphicsPipelineStateObject::~DX11GraphicsPipelineStateObject() = default;
@@ -32,17 +32,17 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
-		GraphicsPipelineStateDescriptorSet graphicsDescriptorSet;
-		graphicsDescriptorSet.blendDescriptorID = pGPUDevice.createBlendDescriptor( pCreateInfo.blendDesc );
-		graphicsDescriptorSet.depthStencilDescriptorID = pGPUDevice.createDepthStencilDescriptor( pCreateInfo.depthStencilDesc );
-		graphicsDescriptorSet.rasterizerDescriptorID = pGPUDevice.createRasterizerDescriptor( pCreateInfo.rasterizerDesc );
-		graphicsDescriptorSet.vertexInputFormatDescriptorID = pGPUDevice.createVertexInputFormatDescriptor( pCreateInfo.vertexInputFormatDesc, *vertexShader );
+		SeparableGraphicsStateDescriptorSet sstateDescriptors;
+		sstateDescriptors.blendDescriptorID = pGPUDevice.createBlendDescriptor( pCreateInfo.blendDesc );
+		sstateDescriptors.depthStencilDescriptorID = pGPUDevice.createDepthStencilDescriptor( pCreateInfo.depthStencilDesc );
+		sstateDescriptors.rasterizerDescriptorID = pGPUDevice.createRasterizerDescriptor( pCreateInfo.rasterizerDesc );
+		sstateDescriptors.vertexInputFormatDescriptorID = pGPUDevice.createVertexInputFormatDescriptor( pCreateInfo.vertexInputFormatDesc, *vertexShader );
 
 		auto pipelineStateObject = createDynamicInterfaceObject<DX11GraphicsPipelineStateObject>( pGPUDevice,
 		                                                                                          std::move( commonPSOState.renderTargetLayout ),
 		                                                                                          std::move( commonPSOState.shaderBinding ),
 		                                                                                          std::move( commonPSOState.shaderInputSignature ),
-		                                                                                          graphicsDescriptorSet );
+		                                                                                          sstateDescriptors );
 
 		return pipelineStateObject;
 	}

@@ -45,12 +45,14 @@ namespace ts3::gpuapi
 					const auto graphicsStageIndex = ecGetShaderStageIndex( shaderObject->mShaderType );
 					const auto graphicsStageMaskBit = ecGetShaderStageBit( shaderObject->mShaderType );
 
+					shaderBinding.shaderArray[graphicsStageIndex] = shaderObject;
+
 					if( shaderBinding.shaderArray[graphicsStageIndex] )
 					{
 						ts3DebugOutput( "Shader binding overwrite (two or more shaders of the same type on the list)" );
+						continue;
 					}
 
-					shaderBinding.shaderArray[graphicsStageIndex] = shaderObject;
 					shaderBinding.activeStagesNum += 1;
 					shaderBinding.activeStagesMask.set( graphicsStageMaskBit );
 				}

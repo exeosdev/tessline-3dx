@@ -40,7 +40,7 @@ namespace ts3::system
 		{
 		};
 
-		TS3_SYSTEM_API_NODISCARD ScreenRect osxQueryDisplayBounds( CGDirectDisplayID pCGDisplayID );
+		TS3_SYSTEM_API_NODISCARD ScreenRect osxQueryDisplayRect( CGDirectDisplayID pCGDisplayID );
 
 		TS3_SYSTEM_API_NODISCARD DisplaySize osxQueryDisplaySize( CGDirectDisplayID pCGDisplayID );
 

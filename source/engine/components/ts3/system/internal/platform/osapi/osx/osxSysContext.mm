@@ -2,6 +2,8 @@
 #include "osxSysContext.h"
 #include "osxAssetSystem.h"
 #include "osxDisplaySystem.h"
+#include "osxFileManager.h"
+#include "osxMetalDriver.h"
 #include "osxOpenGLDriver.h"
 #include "osxWindowSystem.h"
 #include <ts3/system/sysContextNative.h>
@@ -51,8 +53,25 @@ namespace ts3::system
 
     FileManagerHandle OSXSysContext::createFileManager()
     {
-        return nullptr;//createSysObject<OSXFileManager>( getHandle<OSXSysContext>() );
+        return createSysObject<PosixFileManager>( getHandle<OSXSysContext>() );
     }
+
+	MetalSystemDriverHandle OSXSysContext::createMetalSystemDriver( DisplayManagerHandle pDisplayManager,
+	                                                                const MetalSystemDriverCreateInfo & pCreateInfo )
+	{
+		if( !pDisplayManager )
+		{
+			pDisplayManager = createDisplayManager();
+		}
+
+		auto metalDevice = pCreateInfo.metalDevice;
+		if( !metalDevice )
+		{
+			metalDevice = MetalDevice::createDefault( pDisplayManager->mSysContext );
+		}
+
+		return createSysObject<OSXMetalSystemDriver>( pDisplayManager->getHandle<OSXDisplayManager>(), std::move( metalDevice ) );
+	}
 
     OpenGLSystemDriverHandle OSXSysContext::createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager )
     {
@@ -78,7 +97,10 @@ namespace ts3::system
     {
         std::string executableFilePath;
 
-        //;
+		auto * executablePath = [[NSBundle mainBundle] bundlePath];
+
+	    executableFilePath.assign( [executablePath cStringUsingEncoding: NSUTF8StringEncoding],
+	                               [executablePath lengthOfBytesUsingEncoding: NSUTF8StringEncoding] );
 
         return executableFilePath;
     }
@@ -110,8 +132,7 @@ namespace ts3::system
 
 			if( ![NSApp delegate] )
 			{
-				auto * nsAppDelegate = [[NSOSXApplicationDelegate alloc] init];
-				[nsAppDelegate setOSXSysContext:this];
+				auto * nsAppDelegate = [[NSOSXApplicationDelegate alloc] initWithSysContext:this];
 				[NSApp setDelegate:nsAppDelegate];
 
 				mNativeData.nsApplicationDelegate = nsAppDelegate;

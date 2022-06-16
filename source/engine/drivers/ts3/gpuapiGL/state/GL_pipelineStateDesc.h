@@ -73,9 +73,11 @@ namespace ts3::gpuapi
 	struct GLRasterizerConfigDesc
 	{
 		GLenum cullMode;
-		GLenum primitiveFillMode;
 		GLenum triangleFrontFaceOrder;
 		EScissorTestState scissorTestState;
+	#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
+		GLenum primitiveFillMode;
+	#endif
 	};
 
 	struct GLVertexInputFormatDesc
@@ -91,7 +93,7 @@ namespace ts3::gpuapi
 			uint32 instanceRate = 0;
 			constexpr explicit operator bool () const
 			{
-				return streamIndex != cxInvalidVertexStreamIndex;
+				return streamIndex != CX_INVALID_VERTEX_STREAM_INDEX;
 			}
 		};
 		using GLVertexAttributeArray = std::array<GLVertexAttribute, E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM>;
@@ -134,61 +136,42 @@ namespace ts3::gpuapi
 		GLVertexArrayObjectHandle vertexArrayObject;
 	};
 
-	struct GLVertexDataSourceBinding
+	struct GLVertexStreamBindingDescriptor
 	{
 		struct GLIndexBufferBinding
 		{
-			GLuint active;
-			GLuint buffer;
+			GLuint handle;
 			GLintptr offset;
 			GLenum format;
 			GLuint elementByteSize;
 		};
-		GLIndexBufferBinding indexBufferBinding;
-		uint32 vertexBufferActiveBindingsNum;
 
-	#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
-		struct GLVertexBufferBinding
-		{
-			GLuint   active;
-			GLuint   buffer;
-			GLintptr offset;
-			GLsizei  stride;
-		};
-		using GLVertexStreamIndexArray = VertexDataSourceBinding::VertexStreamIndexArray;
-		GLVertexBufferBinding vertexBufferBinding[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
-		GLVertexStreamIndexArray vertexStreamActiveIndexArray;
-	#else
-		struct GLVertexBufferBinding
-		{
-			GLuint   activeArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
-			GLuint   bufferArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
-			GLintptr offsetArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
-			GLsizei  strideArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
-		};
-		using GLVertexStreamRange = VertexDataSourceBinding::VertexStreamRange;
-		using GLVertexStreamRangeList = VertexDataSourceBinding::VertexStreamRangeList;
-		GLVertexBufferBinding vertexBufferBinding;
-		GLVertexStreamRangeList vertexStreamActiveRangeList;
-	#endif
-
-		GLVertexDataSourceBinding() = default;
-
-		GLVertexDataSourceBinding( const InitEmptyTag & )
-		: vertexBufferActiveBindingsNum( 0 )
-		{ }
-
-		explicit operator bool() const
+		struct GLVertexBuffersBinding
 		{
 		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
-			return ( vertexBufferActiveBindingsNum > 0 ) && !vertexStreamActiveIndexArray.empty();
+			struct GLVBBinding
+			{
+				GLuint   handle;
+				GLintptr offset;
+				GLsizei  stride;
+			};
+			GLVBBinding vbBindingArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
 		#else
-			return ( vertexBufferActiveBindingsNum > 0 ) && !vertexStreamActiveRangeList.empty();
+			GLuint   vbHandleArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
+			GLintptr vbOffsetArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
+			GLsizei  vbStrideArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
 		#endif
-		}
+		};
+
+		GLIndexBufferBinding indexBufferBinding;
+		GLVertexBuffersBinding vertexBuffersBinding;
+		uint32 vertexBufferActiveBindingsNum;
 	};
 
-	GLVertexDataSourceBinding createGLVertexDataSourceBinding( const VertexDataSourceBinding & pCommonBinding );
+	using GLIndexBufferBinding = GLVertexStreamBindingDescriptor::GLIndexBufferBinding;
+	using GLVertexBuffersBinding = GLVertexStreamBindingDescriptor::GLVertexBuffersBinding;
+
+	GLVertexStreamBindingDescriptor createGLVertexStreamBindingDescriptor( const VertexDataSourceBinding & pCommonBinding );
 
 	struct GLGraphicsPSDCacheTraits
 	{

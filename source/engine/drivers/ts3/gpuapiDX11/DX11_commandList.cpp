@@ -59,6 +59,35 @@ namespace ts3::gpuapi
 		mD3D11DeviceContext1->ExecuteCommandList( d3d11RecorderCommandList.Get(), FALSE );
 	}
 
+	bool DX11CommandList::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
+	{
+		return _stateController.setGraphicsPipelineStateObject( pGraphicsPipelineSO );
+	}
+
+	bool DX11CommandList::setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO )
+	{
+		return _stateController.setVertexStreamStateObject( pVertexStreamSO );
+	}
+
+	bool DX11CommandList::setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO )
+	{
+		const auto & commonConfig = _stateController.getCommonConfig();
+		const auto & renderTargetLayout = commonConfig.soGraphicsPipeline->mRenderTargetLayout;
+
+		auto * dx11RenderTargetSO = pRenderTargetSO.queryInterface<DX11RenderTargetStateObject>();
+		if( !checkRenderTargetLayoutCompatibility( dx11RenderTargetSO->mRTResourceBinding, renderTargetLayout ) )
+		{
+			ts3DebugInterrupt();
+			return false;
+		}
+
+		mD3D11DeviceContext1->OMSetRenderTargets( E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM,
+		                                          dx11RenderTargetSO->mDX11RTResourceState.colorAttachmentRTVArray,
+		                                          dx11RenderTargetSO->mDX11RTResourceState.depthStencilAttachmentDSV );
+
+		return true;
+	}
+
 	void DX11CommandList::clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask )
 	{
 		if( pAttachmentMask == 0 )
@@ -66,10 +95,10 @@ namespace ts3::gpuapi
 			return;
 		}
 
-		ComPtr<ID3D11RenderTargetView> renderTargetViewArray[GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+		ComPtr<ID3D11RenderTargetView> renderTargetViewArray[E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
 		ComPtr<ID3D11DepthStencilView> depthStencilView;
 
-		mD3D11DeviceContext1->OMGetRenderTargets( GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM,
+		mD3D11DeviceContext1->OMGetRenderTargets( E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM,
 		                                          &( renderTargetViewArray[0] ),
 		                                          depthStencilView.GetAddressOf() );
 
@@ -87,7 +116,7 @@ namespace ts3::gpuapi
 			pAttachmentMask.unset( E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_BIT | E_RENDER_TARGET_ATTACHMENT_FLAG_STENCIL_BIT );
 		}
 
-		for( uint32 colorBufferIndex = 0; ( colorBufferIndex < GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pAttachmentMask != 0 ); ++colorBufferIndex )
+		for( uint32 colorBufferIndex = 0; ( colorBufferIndex < E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pAttachmentMask != 0 ); ++colorBufferIndex )
 		{
 			auto colorBufferMask = E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_0_BIT << colorBufferIndex;
 			if( pAttachmentMask.isSet( colorBufferMask ) )
@@ -115,35 +144,6 @@ namespace ts3::gpuapi
 		viewportDesc.MaxDepth = pViewportDesc.depthRange.zFar;
 
 		mD3D11DeviceContext1->RSSetViewports( 1, &viewportDesc );
-	}
-
-	bool DX11CommandList::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
-	{
-		return _stateController.setGraphicsPipelineStateObject( pGraphicsPipelineSO );
-	}
-
-	bool DX11CommandList::setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO )
-	{
-		return _stateController.setVertexStreamStateObject( pVertexStreamSO );
-	}
-
-	bool DX11CommandList::setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO )
-	{
-		const auto & commonConfig = _stateController.getCommonConfig();
-		const auto & renderTargetLayout = commonConfig.soGraphicsPipeline->mRenderTargetLayout;
-
-		auto * dx11RenderTargetSO = pRenderTargetSO.queryInterface<DX11RenderTargetStateObject>();
-		if( !checkRenderTargetLayoutCompatibility( dx11RenderTargetSO->mRTResourceBinding, renderTargetLayout ) )
-		{
-			ts3DebugInterrupt();
-			return false;
-		}
-
-		mD3D11DeviceContext1->OMSetRenderTargets( GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM,
-		                                          dx11RenderTargetSO->mDX11RTResourceState.colorAttachmentRTVArray,
-		                                          dx11RenderTargetSO->mDX11RTResourceState.depthStencilAttachmentDSV );
-
-		return true;
 	}
 
 	bool DX11CommandList::setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData )

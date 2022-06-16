@@ -37,7 +37,7 @@ namespace ts3::gpuapi
 		{
 			/// An index of one of the vertex input streams used to stream the data during the IA stage.
 			/// Must be between 0 and E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM.
-			vertex_stream_index_t streamIndex = cxInvalidVertexStreamIndex;
+			vertex_stream_index_t streamIndex = CX_INVALID_VERTEX_STREAM_INDEX;
 
 			/// A pointer to an existing buffer containing vertices data.
 			/// Buffer must have been created with the E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT bit set.
@@ -63,7 +63,7 @@ namespace ts3::gpuapi
 		// words, it is perfectly legal to define VB binding like that:
 		// VertexDataSourceBindingDesc vbbDesc;
 		// vbbDesc.vertexBufferBindingDescArray[0] = { 11, someBuffer, 0, sizeof( Vertex1 ) }; // binds whole someBuffer to stream 11
-		// vbbDesc.vertexBufferBindingDescArray[6] = { 0, otherBuffer, 256, sizeof( Vertex2 ) }; // binds subrange of otherBuffer to stream 0
+		// vbbDesc.vertexBufferBindingDescArray[6] = { 0, otherBuffer, 256, sizeof( Vertex2 ) }; // binds a sub-range of otherBuffer to stream 0
 		VertexBufferBindingDescArray vertexBufferBindingDescArray;
 	};
 
@@ -110,7 +110,7 @@ namespace ts3::gpuapi
 		// Index buffer binding. Can be empty.
 		IndexBufferBinding indexBufferBinding;
 
-		// Number of active vertex buffers bindings.
+		// Number of active vertex buffer bindings.
 		uint32 vertexBufferActiveBindingsNum;
 
 		// Number of continuous ranges in the array of VB bindings.
@@ -124,14 +124,14 @@ namespace ts3::gpuapi
 		VertexStreamIndexArray vertexStreamActiveIndexArray;
 
 		// A list of all continuous ranges of VB bindings.
-		// An example: if we used the following binding desc:
+		// An example: if we use the following binding desc:
 		// VertexDataSourceBindingDesc vbbDesc;
 		// vbbDesc.vertexBufferBindingDescArray[0] = { 3, vBuffer1, 0, sizeof( Vertex1 ) };
 		// vbbDesc.vertexBufferBindingDescArray[1] = { 4, vBuffer2, 0, sizeof( Vertex2 ) };
 		// vbbDesc.vertexBufferBindingDescArray[2] = { 7, vBuffer3, 0, sizeof( Vertex3 ) };
 		// we would get a list of two binding ranges: { 3, 2 } and { 7, 1 }.
-		// Ranges are generated because many APIs expose an API to set continuous ranges of vertex buffers
-		// as a single function call, which yields better performance (always reduce those API calls!).
+		// Ranges are generated because APIs expose dedicated functions to set continuous ranges
+		// of VBOs in a single call, which yields better performance (always reduce those API calls!).
 		VertexStreamRangeList vertexStreamActiveRangeList;
 
 		VertexDataSourceBinding() = default;

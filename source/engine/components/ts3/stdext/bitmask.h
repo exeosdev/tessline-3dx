@@ -8,15 +8,16 @@
 namespace ts3
 {
 
-	template <typename TpIntegral>
+	template <typename TpVal>
 	class Bitmask
 	{
-		static_assert( ( std::is_integral<TpIntegral>::value || std::is_enum<TpIntegral>::value ) && !std::is_same<TpIntegral, bool>::value,
+		static_assert(
+			( std::is_integral<TpVal>::value || std::is_enum<TpVal>::value ) && !std::is_same<TpVal, bool>::value,
 			"Atomic masks are only valid for integer and enum types (but not a bool type)!" );
 
 	public:
-		using MyType = Bitmask<TpIntegral>;
-		using ValueType = typename UintTypeBySize<sizeof( TpIntegral )>::Type;
+		using MyType = Bitmask<TpVal>;
+		using ValueType = typename UintTypeBySize<sizeof( TpVal )>::Type;
 
 	public:
 		constexpr Bitmask() noexcept
@@ -35,9 +36,9 @@ namespace ts3
 			return *this;
 		}
 
-		constexpr operator TpIntegral() const
+		constexpr operator TpVal() const
 		{
-			return static_cast<TpIntegral>( _value );
+			return static_cast<TpVal>( _value );
 		}
 
 		template <typename TpBits>
@@ -111,27 +112,32 @@ namespace ts3
 			_value = 0;
 		}
 
-		ValueType get() const
+		TS3_FUNC_NO_DISCARD ValueType get() const
 		{
 			return _value;
 		}
 
 		template <typename TpBits>
-		ValueType test( TpBits pBits ) const
+		TS3_FUNC_NO_DISCARD ValueType test( TpBits pBits ) const
 		{
 			return _value & static_cast<ValueType>( pBits );
 		}
 
 		template <typename TpBits>
-		constexpr bool isSet( TpBits pBits ) const
+		TS3_FUNC_NO_DISCARD constexpr bool isSet( TpBits pBits ) const
 		{
-			return ( _value & static_cast<ValueType>( pBits ) ) == static_cast<ValueType>( pBits );
+			return ( static_cast<ValueType>( pBits ) != 0 ) && ( ( _value & static_cast<ValueType>( pBits ) ) == static_cast<ValueType>( pBits ) );
 		}
 
 		template <typename TpBits>
-		constexpr bool isSetAnyOf( TpBits pBits ) const
+		TS3_FUNC_NO_DISCARD constexpr bool isSetAnyOf( TpBits pBits ) const
 		{
 			return ( _value & static_cast<ValueType>( pBits ) ) != static_cast<ValueType>( 0 );
+		}
+
+		TS3_FUNC_NO_DISCARD constexpr bool empty() const
+		{
+			return _value == 0;
 		}
 
 		template <typename TpBits>
@@ -199,10 +205,10 @@ namespace ts3
 		ValueType  _value;
 	};
 
-	template <typename TpIntegral>
-	inline constexpr Bitmask<TpIntegral> makeBitmask( TpIntegral pValue )
+	template <typename TpVal>
+	inline constexpr Bitmask<TpVal> makeBitmask( TpVal pValue = static_cast<TpVal>( 0 ) )
 	{
-		return Bitmask<TpIntegral>( pValue );
+		return Bitmask<TpVal>( pValue );
 	}
 
 }

@@ -32,7 +32,7 @@ namespace ts3::gpuapi
 			return pDescriptor.ptr == cvD3D12CPUDescriptorPtrInvalid;
 		}
 
-		ComPtr<ID3D12Debug> initializeD3D12DebugInterface( Bitmask<GPUDriverConfigFlags> pDriverConfigFlags );
+		ComPtr<ID3D12Debug> initializeD3D12DebugInterface( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags );
 
 		ComPtr<ID3D12Device> createD3D12Device();
 

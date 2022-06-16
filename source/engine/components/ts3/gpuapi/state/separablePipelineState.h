@@ -23,6 +23,8 @@ namespace ts3::gpuapi
 		E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_RASTERIZER_BIT = 0x0400 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_ANY_BIT,
 		
 		E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT = 0x0800 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_ANY_BIT,
+
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_ALL_BITS_MASK = 0x0F00 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_ANY_BIT,
 		
 		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_VERTEX_STAGE_BIT = 0x010000 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_ANY_BIT,
 				
@@ -38,7 +40,10 @@ namespace ts3::gpuapi
 				
 		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_PIXEL_STAGE_BIT = 0x400000 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_ANY_BIT,
 				
-		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_ALL_BITS_MASK = 0x7F0000
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_ALL_BITS_MASK = 0x7F0000 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_ANY_BIT,
+
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_ALL_BITS_MASK = E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_ALL_BITS_MASK |
+		                                                  E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_ALL_BITS_MASK
 	};
 
 	/// @brief Contains a set of descriptor IDs which together describe the state of a separable graphics pipeline
@@ -117,8 +122,12 @@ namespace ts3::gpuapi
 	class TS3_GPUAPI_CLASS SeparableGraphicsPipelineStateObject : public GraphicsPipelineStateObject
 	{
 	public:
+		/// Shader bindings used by this PSO.
+		/// @see GraphicsShaderBinding
 		GraphicsShaderBinding const mShaderBinding;
 
+		/// State descriptors used by this PSO.
+		/// @see SeparableGraphicsStateDescriptorSet
 		SeparableGraphicsStateDescriptorSet const mSeparableDescriptorSet;
 
 		SeparableGraphicsPipelineStateObject( GPUDevice & pGPUDevice,
@@ -137,14 +146,27 @@ namespace ts3::gpuapi
 		SeparableGraphicsPipelineStateController();
 		virtual ~SeparableGraphicsPipelineStateController();
 
-		/// @brief
-		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject * pGraphicsPipelineSO ) override;
+		// Below methods are more concrete implementations of their base version defined in GraphicsPipelineStateController.
+		// They provide some common logic for separate pipelines which allows extra validation and state checking to be
+		// implemented only once for all separate pipelines-based APIs.
 
-		/// @brief
-		virtual bool setVertexStreamStateObject( const VertexStreamStateObject * pVertexStreamSO ) override;
+		/// @brief A more specific implementation of setGraphicsPipelineStateObject() for separable pipelines.
+		/// @see GraphicsPipelineStateController::setGraphicsPipelineStateObject
+		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO ) override;
 
-		/// @brief
-		virtual void applyPendingPipelineStateChange() override;
+		/// @brief A more specific implementation of resetGraphicsPipelineStateObject() for separable pipelines.
+		/// @see GraphicsPipelineStateController::resetGraphicsPipelineStateObject
+		virtual bool resetGraphicsPipelineStateObject() override;
+
+		TS3_FUNC_NO_DISCARD const SeparableGraphicsShaderBinding & getSeparableShaderBinding() const
+		{
+			return _currentSeparableShaderBinding;
+		}
+
+		TS3_FUNC_NO_DISCARD const SeparableGraphicsStateDescriptorSet & getSeparableStateDescriptorSet() const
+		{
+			return _currentSeparableStateDescriptors;
+		}
 
 	private:
 		Bitmask<uint64> setGraphicsPSODescriptors( const SeparableGraphicsPipelineStateObject & pSeparableGSPO );
@@ -152,21 +174,10 @@ namespace ts3::gpuapi
 		Bitmask<uint64> setGraphicsPSOShaders( const SeparableGraphicsPipelineStateObject & pSeparableGSPO );
 
 	protected:
-		struct PipelineConfig
-		{
-			SeparableGraphicsShaderBinding shaderBinding;
-			SeparableGraphicsStateDescriptorSet stateDescriptors;
-
-			void reset()
-			{
-				shaderBinding.reset();
-				stateDescriptors.reset();
-			}
-		};
-
-		PipelineConfig _currentPipelineConfig;
-		PipelineConfig _pendingPipelineConfig;
+		SeparableGraphicsShaderBinding _currentSeparableShaderBinding;
+		SeparableGraphicsStateDescriptorSet _currentSeparableStateDescriptors;
 	};
+
 } // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_SEPARABLE_PIPELINE_STATE_H__

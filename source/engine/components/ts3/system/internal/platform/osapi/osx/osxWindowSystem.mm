@@ -57,7 +57,9 @@ namespace ts3::system
 	{}
 	
 	void OSXWindow::_nativeSetTitle( const std::string & pTitle )
-	{}
+	{
+        platform::osxSetFrameTitle( mNativeData.nsWindow, pTitle );
+    }
 	
 	void OSXWindow::_nativeUpdateGeometry( const FrameGeometry & pFrameGeometry, Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags )
 	{}
@@ -156,8 +158,6 @@ namespace ts3::system
 
 			NSString * nsTitle = [[NSString alloc] initWithUTF8String:newTitle];
 			[pNSWindow setTitle:nsTitle];
-
-			[nsTitle release];
 		}
 		}
 

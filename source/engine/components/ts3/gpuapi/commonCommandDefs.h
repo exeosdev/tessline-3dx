@@ -89,6 +89,7 @@ namespace ts3::gpuapi
 		// its internal state is invalidated, and it may no longer be used for command
 		// submission. User must acquire a new context to do so.
 		Discard,
+
 		// Context is used multiple times or stored in a permanent manner. After the
 		// submission, its internal state is updated with a new data and becomes ready
 		// for further command recording/submission.
@@ -105,6 +106,7 @@ namespace ts3::gpuapi
 		// 2) Returns a non-empty CommandSync object (its operator bool() evaluates to true),
 		//    which can be used to wait for completion of all commands issued before.
 		Default,
+
 		// No sync option is provided. Commands are executed in a driver-specific manner.
 		// Only commands executed on the same device queue are guaranteed to be executed
 		// in the order of recording/submission.
