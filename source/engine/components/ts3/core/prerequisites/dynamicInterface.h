@@ -20,7 +20,7 @@ namespace ts3
 		virtual ~DynamicInterface() = default;
 
 		template <typename TpSubclass>
-		TpSubclass * getInterface()
+		TS3_FUNC_NO_DISCARD TpSubclass * getInterface()
 		{
 		#if( TS3_DEBUG )
 			return dynamic_cast_check<TpSubclass>( this );
@@ -30,7 +30,7 @@ namespace ts3
 		}
 
 		template <typename TpSubclass>
-		const TpSubclass * getInterface() const
+		TS3_FUNC_NO_DISCARD const TpSubclass * getInterface() const
 		{
 		#if( TS3_DEBUG )
 		    return dynamic_cast_check<const TpSubclass>( this );
@@ -40,27 +40,27 @@ namespace ts3
 		}
 
 		template <typename TpSubclass>
-		TpSubclass * queryInterface()
+		TS3_FUNC_NO_DISCARD TpSubclass * queryInterface()
 		{
 		#if( TS3_DEBUG )
+			return dynamic_cast_check<TpSubclass>( this );
+		#else
 			return dynamic_cast_throw<TpSubclass>( this );
-		#else
-			return static_cast<TpSubclass *>( this );
 		#endif
 		}
 
 		template <typename TpSubclass>
-		const TpSubclass * queryInterface() const
+		TS3_FUNC_NO_DISCARD const TpSubclass * queryInterface() const
 		{
 		#if( TS3_DEBUG )
-			return dynamic_cast_throw<const TpSubclass>( this );
+			return dynamic_cast_check<const TpSubclass>( this );
 		#else
-			return static_cast<const TpSubclass *>( this );
+			return dynamic_cast_throw<const TpSubclass>( this );
 		#endif
 		}
 
 		template <typename TpSubclass>
-		SharedHandle<TpSubclass> getHandle()
+		TS3_FUNC_NO_DISCARD SharedHandle<TpSubclass> getHandle()
 		{
 		#if( TS3_DEBUG )
 			return dynamic_ptr_cast_check<TpSubclass>( shared_from_this() );
@@ -70,7 +70,7 @@ namespace ts3
 		}
 
 		template <typename TpSubclass>
-		SharedHandle<TpSubclass> queryHandle()
+		TS3_FUNC_NO_DISCARD SharedHandle<TpSubclass> queryHandle()
 		{
 		#if( TS3_DEBUG )
 			return dynamic_ptr_cast_throw<TpSubclass>( shared_from_this() );
@@ -85,7 +85,7 @@ namespace ts3
 	};
 
 	template <typename TpClass, typename... TpArgs>
-	inline SharedHandle<TpClass> createDynamicInterfaceObject( TpArgs && ...pArgs )
+	TS3_FUNC_NO_DISCARD inline SharedHandle<TpClass> createDynamicInterfaceObject( TpArgs && ...pArgs )
 	{
 		auto objectHandle = std::make_shared<TpClass>( std::forward<TpArgs>( pArgs )... );
 	#if( TS3_DEBUG )
@@ -96,7 +96,7 @@ namespace ts3
 	}
 
     template <typename TpClass, typename TpDeleter, typename... TpArgs>
-    inline SharedHandle<TpClass> createDynamicInterfaceObjectWithDeleter( TpDeleter pDeleter, TpArgs && ...pArgs )
+    TS3_FUNC_NO_DISCARD inline SharedHandle<TpClass> createDynamicInterfaceObjectWithDeleter( TpDeleter pDeleter, TpArgs && ...pArgs )
     {
         auto objectHandle = std::shared_ptr<TpClass>{ new TpClass( std::forward<TpArgs>( pArgs )... ), std::forward<TpDeleter>( pDeleter ) };
     #if( TS3_DEBUG )
@@ -107,7 +107,7 @@ namespace ts3
     }
 
 	template <typename TpOutInterface, typename TpInInterface>
-	inline std::unique_ptr<TpOutInterface> moveInterfaceUniquePtr( std::unique_ptr<TpInInterface> pUPtr )
+	TS3_FUNC_NO_DISCARD inline std::unique_ptr<TpOutInterface> moveInterfaceUniquePtr( std::unique_ptr<TpInInterface> pUPtr )
 	{
 		TpOutInterface * targetPtr = pUPtr->template queryInterface<TpOutInterface>();
 		pUPtr.release();

@@ -5,6 +5,7 @@
 #define __TS3_GPUAPI_PIPELINE_STATE_CONTROLLER_H__
 
 #include "pipelineStateDesc.h"
+#include <ts3/core/exceptionUtils.h>
 
 namespace ts3::gpuapi
 {
@@ -32,76 +33,50 @@ namespace ts3::gpuapi
 	class TS3_GPUAPI_CLASS GraphicsPipelineStateController
 	{
 	public:
-		struct CommonConfig
-		{
-			const GraphicsPipelineStateObject * soGraphicsPipeline = nullptr;
-			const VertexStreamStateObject * soVertexStream = nullptr;
-		};
-
-	public:
 		GraphicsPipelineStateController();
 		virtual ~GraphicsPipelineStateController();
 
-		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO );
+		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject * pGraphicsPipelineSO );
 
-		virtual bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO );
+		bool setVertexStreamStateObject( const VertexStreamStateObject * pVertexStreamSO );
 
-		virtual void resetInternalState();
+		void resetInternalState();
 
-		const CommonConfig & getCommonConfig() const
+		TS3_FUNC_NO_DISCARD const GraphicsPipelineStateObject * getGraphicsPipelineStateObject() const noexcept
 		{
-			return _csCommonConfig;
+			return _graphicsPipelineStateObject;
+		}
+
+		TS3_FUNC_NO_DISCARD const VertexStreamStateObject * getVertexStreamStateObject() const noexcept
+		{
+			return _vertexStreamStateObject;
+		}
+
+		TS3_FUNC_NO_DISCARD const GraphicsPipelineStateObject & getGraphicsPipelineStateObjectRef() const
+		{
+			ts3ThrowIfNull( _graphicsPipelineStateObject, E_EXC_DEBUG_PLACEHOLDER );
+			return *_graphicsPipelineStateObject;
+		}
+
+		TS3_FUNC_NO_DISCARD const VertexStreamStateObject & getVertexStreamStateObjectRef() const
+		{
+			ts3ThrowIfNull( _vertexStreamStateObject, E_EXC_DEBUG_PLACEHOLDER );
+			return *_vertexStreamStateObject;
 		}
 
 	protected:
 		virtual bool updatePipelineState();
 
+		virtual bool setGraphicsPipelineStateObjectInternal( const GraphicsPipelineStateObject * pGraphicsPipelineSO );
+
+		virtual bool setVertexStreamStateObjectInternal( const VertexStreamStateObject * pVertexStreamSO );
+
 	protected:
-		CommonConfig _csCommonConfig;
+		const GraphicsPipelineStateObject * _graphicsPipelineStateObject = nullptr;
+
+		const VertexStreamStateObject * _vertexStreamStateObject = nullptr;
+
 		Bitmask<graphics_state_update_mask_value_t> _stateUpdateMask = 0;
-	};
-
-	class TS3_GPUAPI_CLASS SeparableGraphicsPipelineStateController : public GraphicsPipelineStateController
-	{
-	public:
-		struct SeparableShaderBinding
-		{
-			Shader * vertexShader = nullptr;
-			Shader * tessControlShader = nullptr;
-			Shader * tessEvaluationShader = nullptr;
-			Shader * geometryShader = nullptr;
-			Shader * pixelShader = nullptr;
-		};
-
-		struct SeparableStateDescriptorSet
-		{
-			pipeline_state_descriptor_id_t blendDescriptorID = cxInvalidPipelineStateDescriptorID;
-			pipeline_state_descriptor_id_t depthStencilDescriptorID = cxInvalidPipelineStateDescriptorID;
-			pipeline_state_descriptor_id_t rasterizerDescriptorID = cxInvalidPipelineStateDescriptorID;
-			pipeline_state_descriptor_id_t vertexInputFormatDescriptorID = cxInvalidPipelineStateDescriptorID;
-		};
-
-	public:
-		SeparableGraphicsPipelineStateController();
-		virtual ~SeparableGraphicsPipelineStateController();
-
-		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO ) override;
-
-		virtual void resetInternalState() override;
-
-		const SeparableShaderBinding & getSeparableShaderBinding() const
-		{
-			return _csSeparableShaderBinding;
-		}
-
-		const SeparableStateDescriptorSet & getSeparableStateDescriptorSet() const
-		{
-			return _csSeparableStateDescriptorSet;
-		}
-
-	protected:
-		SeparableShaderBinding _csSeparableShaderBinding;
-		SeparableStateDescriptorSet _csSeparableStateDescriptorSet;
 	};
 
 } // namespace ts3::gpuapi

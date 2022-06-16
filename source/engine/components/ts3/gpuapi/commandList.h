@@ -43,6 +43,9 @@ namespace ts3::gpuapi
 		bool updateBufferDataUpload( GPUBuffer & pBuffer, const GPUBufferDataUploadDesc & pUploadDesc );
 		bool updateBufferSubDataUpload( GPUBuffer & pBuffer, const GPUBufferSubDataUploadDesc & pUploadDesc );
 
+		virtual bool beginRenderPass();
+		virtual void endRenderPass();
+
 		virtual void executeDeferredContext( CommandContextDeferred & pDeferredContext ) = 0;
 
 		virtual void dispatchCompute( uint32 pThrGroupSizeX, uint32 pThrGroupSizeY, uint32 pThrGroupSizeZ ) {} // = 0;

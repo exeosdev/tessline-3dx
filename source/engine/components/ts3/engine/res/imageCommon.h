@@ -40,7 +40,7 @@ namespace ts3
 
 		explicit operator bool() const
 		{
-			return !isEmpty() && ( formatInfo.pixelLayout != EPixelDataLayout::Undefined );
+			return !empty() && ( formatInfo.pixelLayout != EPixelDataLayout::Undefined );
 		}
 
 		void reset();
@@ -49,7 +49,7 @@ namespace ts3
 
 		ImageData clone() const;
 
-		bool isEmpty() const;
+		bool empty() const;
 
 		void swap( ImageData & pOther );
 	};

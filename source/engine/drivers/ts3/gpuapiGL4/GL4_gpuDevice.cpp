@@ -18,7 +18,7 @@ namespace ts3::gpuapi
 		auto driverConfigFlags = pDriver.getConfigFlags();
 		auto gl4GPUDevice = createGPUAPIObject<GL4GPUDevice>( pDriver );
 
-		if( driverConfigFlags.isSet( GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
+		if( driverConfigFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
 		{
 			gl4GPUDevice->initializeGLDebugOutput();
 		}

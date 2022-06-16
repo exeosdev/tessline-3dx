@@ -8,6 +8,7 @@
 #include <ts3/core/coreEngineState.h>
 #include <ts3/core/graphicsTypes.h>
 #include <ts3/core/mathImports.h>
+#include <ts3/stdext/utilities.h>
 
 #include <memory>
 
@@ -26,6 +27,9 @@
 #    define TS3_GPUAPI_OBJ    TS3_PCL_ATTR_DLL_IMPORT
 #  endif
 #endif
+
+#define TS3_GPUAPI_API_NO_DISCARD \
+	TS3_GPUAPI_API TS3_FUNC_NO_DISCARD
 
 #include "prerequisites/commonDefs.h"
 #include "prerequisites/commonTypes.h"
@@ -75,14 +79,29 @@ namespace ts3::gpuapi
 	ts3DeclareClassHandle( GPUDriver );
 	ts3DeclareClassHandle( PresentationLayer );
 
+	enum class EGPUDriverAPI : uint32
+	{
+		DirectX = 0xD1,
+		Metal = 0xAA,
+		OpenGL = 0x77,
+		Vulkan = 0xCC,
+		Unknown = 0x00
+	};
+
+	inline constexpr uint32 ecMakeDriverID( EGPUDriverAPI pDriverAPI, uint32 pAPISubVersion )
+	{
+		return ( ( static_cast<uint32>( pDriverAPI ) & 0xFF ) << 8 ) | ( pAPISubVersion & 0xFF );
+	}
+
 	enum class EGPUDriverID : uint32
 	{
-		GDIDDX11 = 0xCD11,
-		GDIDDX12 = 0xCD12,
-		GDIDGL4 = 0xA0C4,
-		GDIDGLES3 = 0xA0E3,
-		GDIDVK1 = 0xFF01,
-		GDID0 = 0
+		GDIDirectX11      = ecMakeDriverID( EGPUDriverAPI::DirectX, 0x11 ),
+		GDIDirectX12      = ecMakeDriverID( EGPUDriverAPI::DirectX, 0x12 ),
+		GDIMetal1         = ecMakeDriverID( EGPUDriverAPI::Metal,   0x01 ),
+		GDIOpenGLDesktop4 = ecMakeDriverID( EGPUDriverAPI::OpenGL,  0xD4 ),
+		GDIOpenGLES3      = ecMakeDriverID( EGPUDriverAPI::OpenGL,  0xE3 ),
+		GDIVulkan10       = ecMakeDriverID( EGPUDriverAPI::Vulkan,  0x10 ),
+		GDIUnknown        = ecMakeDriverID( EGPUDriverAPI::Unknown, 0x00 )
 	};
 
 } // namespace ts3::gpuapi

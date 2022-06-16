@@ -21,20 +21,20 @@ namespace ts3::gpuapi
 
 		if( updateResult && _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT ) )
 		{
-			auto * openglGraphicsPipelineSO = _csCommonConfig.soGraphicsPipeline->queryInterface<GLGraphicsPipelineStateObject>();
+			auto * openglGraphicsPipelineSO = getGraphicsPipelineStateObject()->queryInterface<GLGraphicsPipelineStateObject>();
 
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT ) )
 			{
-				auto vertexInputFormatDescriptorID = _csSeparableStateDescriptorSet.vertexInputFormatDescriptorID;
+				auto vertexInputFormatDescriptorID = _separableStateDescriptorSet.vertexInputFormatDescriptorID;
 				const auto & vertexInputFormatDescriptor = _descriptorCache->getVertexInputFormatDescriptor( vertexInputFormatDescriptorID );
 
-				_csGLPipelineConfig.primitiveTopology = vertexInputFormatDescriptor.inputFormatDesc.primitiveTopology;
-				_csGLPipelineConfig.vertexArrayObjectHandle = openglGraphicsPipelineSO->mGLVertexArrayObject->mGLHandle;
+				_scGLPipelineConfig.primitiveTopology = vertexInputFormatDescriptor.inputFormatDesc.primitiveTopology;
+				_scGLPipelineConfig.vertexArrayObjectHandle = openglGraphicsPipelineSO->mGLVertexArrayObject->mGLHandle;
 			}
 
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SHADER_ANY_STAGE_BIT ) )
 			{
-				_csGLPipelineConfig.shaderPipelineObjectHandle = openglGraphicsPipelineSO->mGLShaderPipelineObject->mGLHandle;
+				_scGLPipelineConfig.shaderPipelineObjectHandle = openglGraphicsPipelineSO->mGLShaderPipelineObject->mGLHandle;
 			}
 		}
 
@@ -47,14 +47,13 @@ namespace ts3::gpuapi
 
 		if( updateResult && _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_SO_VERTEX_STREAM_BIT ) )
 		{
-			auto * openglVertexStreamSO = _csCommonConfig.soVertexStream->queryInterface<GLVertexStreamStateObject>();
-
+			const auto * openglVertexStreamSO = getVertexStreamStateObjectRef().queryInterface<GLVertexStreamStateObject>();
 			const auto & indexBufferBinding = openglVertexStreamSO->mGLVertexDataSourceBinding.indexBufferBinding;
 			if( indexBufferBinding.active )
 			{
-				_csGLPipelineConfig.indexBufferBaseOffset = indexBufferBinding.offset;
-				_csGLPipelineConfig.indexBufferDataType = indexBufferBinding.format;
-				_csGLPipelineConfig.indexBufferElementByteSize = indexBufferBinding.elementByteSize;
+				_scGLPipelineConfig.indexBufferBaseOffset = indexBufferBinding.offset;
+				_scGLPipelineConfig.indexBufferDataType = indexBufferBinding.format;
+				_scGLPipelineConfig.indexBufferElementByteSize = indexBufferBinding.elementByteSize;
 			}
 		}
 
@@ -72,7 +71,7 @@ namespace ts3::gpuapi
 		{
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_BLEND_BIT ) )
 			{
-				auto blendDescriptorID = _csSeparableStateDescriptorSet.blendDescriptorID;
+				auto blendDescriptorID = _separableStateDescriptorSet.blendDescriptorID;
 				const auto & blendDescriptor = _descriptorCache->getBlendDescriptor( blendDescriptorID );
 				_setBlendState( blendDescriptor );
 				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_BLEND_BIT );
@@ -80,7 +79,7 @@ namespace ts3::gpuapi
 
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_DEPTH_STENCIL_BIT ) )
 			{
-				auto depthStencilDescriptorID = _csSeparableStateDescriptorSet.depthStencilDescriptorID;
+				auto depthStencilDescriptorID = _separableStateDescriptorSet.depthStencilDescriptorID;
 				const auto & depthStencilDescriptor = _descriptorCache->getDepthStencilDescriptor( depthStencilDescriptorID );
 				_setDepthStencilState( depthStencilDescriptor );
 				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_DEPTH_STENCIL_BIT );
@@ -88,7 +87,7 @@ namespace ts3::gpuapi
 
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_RASTERIZER_BIT ) )
 			{
-				auto rasterizerDescriptorID = _csSeparableStateDescriptorSet.rasterizerDescriptorID;
+				auto rasterizerDescriptorID = _separableStateDescriptorSet.rasterizerDescriptorID;
 				const auto & rasterizerDescriptor = _descriptorCache->getRasterizerDescriptor( rasterizerDescriptorID );
 				_setRasterizerState( rasterizerDescriptor );
 				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_RASTERIZER_BIT );
@@ -96,14 +95,14 @@ namespace ts3::gpuapi
 
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT ) )
 			{
-				glBindVertexArray( _csGLPipelineConfig.vertexArrayObjectHandle );
+				glBindVertexArray( _scGLPipelineConfig.vertexArrayObjectHandle );
 				ts3OpenGLHandleLastError();
 				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT );
 			}
 
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SHADER_ANY_STAGE_BIT ) )
 			{
-				glBindProgramPipeline( _csGLPipelineConfig.shaderPipelineObjectHandle );
+				glBindProgramPipeline( _scGLPipelineConfig.shaderPipelineObjectHandle );
 				ts3OpenGLHandleLastError();
 				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_SHADER_ALL_MASK );
 			}

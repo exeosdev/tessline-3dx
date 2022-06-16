@@ -178,18 +178,18 @@ namespace ts3::gpuapi
 		return dxgiSwapChain1;
 	}
 
-	UINT DX11CoreAPIProxy::translateDX11GPUDeviceCreateFlags( Bitmask<GPUDriverConfigFlags> pDriverConfigFlags )
+	UINT DX11CoreAPIProxy::translateDX11GPUDeviceCreateFlags( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags )
 	{
 		Bitmask<UINT> deviceCreateFlags = 0;
-		if( pDriverConfigFlags.isSet( GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
+		if( pDriverConfigFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
 		{
 			deviceCreateFlags.set( D3D11_CREATE_DEVICE_DEBUG );
 		}
-		if( pDriverConfigFlags.isSet( GPU_DRIVER_CONFIG_FLAG_ENABLE_SHADER_DEBUG_INFO_BIT ) )
+		if( pDriverConfigFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_ENABLE_SHADER_DEBUG_INFO_BIT ) )
 		{
 			deviceCreateFlags.set( D3D11_CREATE_DEVICE_DEBUGGABLE );
 		}
-		if( pDriverConfigFlags.isSet( GPU_DRIVER_CONFIG_FLAG_DISABLE_MULTI_THREAD_ACCESS_BIT ) )
+		if( pDriverConfigFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_DISABLE_MULTI_THREAD_ACCESS_BIT ) )
 		{
 			deviceCreateFlags.set( D3D11_CREATE_DEVICE_SINGLETHREADED );
 		}

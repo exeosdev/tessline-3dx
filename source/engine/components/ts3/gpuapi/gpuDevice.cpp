@@ -10,6 +10,7 @@ namespace ts3::gpuapi
 	static const math::RGBAColorU8 sDefaultClearColorDriver0     { 0x11, 0x66, 0xCC, 0xFF };
 	static const math::RGBAColorU8 sDefaultClearColorDriverDX11  { 0x77, 0xAA, 0x5F, 0xFF };
 	static const math::RGBAColorU8 sDefaultClearColorDriverDX12  { 0x22, 0x88, 0x3F, 0xFF };
+	static const math::RGBAColorU8 sDefaultClearColorDriverMTL1  { 0xFF, 0x99, 0x66, 0xFF };
 	static const math::RGBAColorU8 sDefaultClearColorDriverGL4   { 0x55, 0x88, 0xAA, 0xFF };
 	static const math::RGBAColorU8 sDefaultClearColorDriverGLES3 { 0x7A, 0x00, 0x4D, 0xFF };
 	static const math::RGBAColorU8 sDefaultClearColorDriverVK1   { 0x8F, 0x0F, 0x1F, 0xFF };
@@ -51,19 +52,22 @@ namespace ts3::gpuapi
 	{
 		switch( mGPUDriverID )
 		{
-			case EGPUDriverID::GDIDDX11:
+			case EGPUDriverID::GDIDirectX11:
 				return sDefaultClearColorDriverDX11;
 
-			case EGPUDriverID::GDIDDX12:
+			case EGPUDriverID::GDIDirectX12:
 				return sDefaultClearColorDriverDX12;
 
-			case EGPUDriverID::GDIDGL4:
+			case EGPUDriverID::GDIMetal1:
+				return sDefaultClearColorDriverMTL1;
+
+			case EGPUDriverID::GDIOpenGLDesktop4:
 				return sDefaultClearColorDriverGL4;
 
-			case EGPUDriverID::GDIDGLES3:
+			case EGPUDriverID::GDIOpenGLES3:
 				return sDefaultClearColorDriverGLES3;
 
-			case EGPUDriverID::GDIDVK1:
+			case EGPUDriverID::GDIVulkan10:
 				return sDefaultClearColorDriverVK1;
 
 			default:

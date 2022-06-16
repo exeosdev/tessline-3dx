@@ -122,7 +122,7 @@ namespace ts3
 		return true;
 	}
 
-	bool RectAllocator::isEmpty() const
+	bool RectAllocator::empty() const
 	{
 		return _rectCounter == 0;
 	}

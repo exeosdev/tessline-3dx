@@ -15,7 +15,7 @@ namespace ts3::gpuapi
 
 	struct DX12RenderTargetState
 	{
-		using RTVDescriptorArray = std::array<D3D12_CPU_DESCRIPTOR_HANDLE, GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM>;
+		using RTVDescriptorArray = std::array<D3D12_CPU_DESCRIPTOR_HANDLE, E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM>;
 		uint32 rtvDescriptorsNum = 0;
 		RTVDescriptorArray rtvDescriptorArray;
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvDescriptor = cvD3D12CPUDescriptorEmpty;

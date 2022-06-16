@@ -34,7 +34,7 @@ namespace ts3::gpuapi
 		struct VertexBufferBindingDesc
 		{
 			// An index of one of the vertex input streams used to stream the data during the IA stage.
-			// Must be between 0 and GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM.
+			// Must be between 0 and E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM.
 			vertex_stream_index_t streamIndex = cxInvalidVertexStreamIndex;
 			// A pointer to an existing buffer containing vertices data.
 			// Buffer must have been created with the E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT bit set.
@@ -46,7 +46,7 @@ namespace ts3::gpuapi
 			gpu_memory_size_t dataStride = 0;
 		};
 
-		using VertexBufferBindingDescArray = std::array<VertexBufferBindingDesc, GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM>;
+		using VertexBufferBindingDescArray = std::array<VertexBufferBindingDesc, E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM>;
 
 		// Index buffer binding. IB is not required and it is not an error if this binding represents an empty
 		// binding (buffer set to nullptr). In such case, any indexed draw call executed on a context with fail.
@@ -98,7 +98,7 @@ namespace ts3::gpuapi
 			uint32 length;
 		};
 
-		using VertexBufferBindingArray = std::array<VertexBufferBinding, GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM>;
+		using VertexBufferBindingArray = std::array<VertexBufferBinding, E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM>;
 		using VertexStreamIndexArray = std::vector<vertex_stream_index_t>;
 		using VertexStreamRangeList = std::list<VertexStreamRange>;
 

@@ -87,7 +87,7 @@ namespace ts3::gpuapi
 				return attachmentID != ERenderTargetAttachmentID::RTUndefined;
 			}
 		};
-		using AttachmentLayoutDescArray = std::array<AttachmentLayoutDesc, GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
+		using AttachmentLayoutDescArray = std::array<AttachmentLayoutDesc, E_GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
 		AttachmentLayoutDescArray attachmentLayoutDescArray;
 	};
 
@@ -104,9 +104,9 @@ namespace ts3::gpuapi
 				return attachmentID != ERenderTargetAttachmentID::RTUndefined;
 			}
 		};
-		using AttachmentResourceBindingDescArray = std::array<AttachmentResourceBindingDesc, GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
+		using AttachmentResourceBindingDescArray = std::array<AttachmentResourceBindingDesc, E_GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
 		AttachmentResourceBindingDescArray attachmentResourceBindingDescArray;
-		uint32 activeBindingsNum = GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM;
+		uint32 activeBindingsNum = E_GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM;
 		uint32 sharedMSAALevel = 0;
 	};
 
@@ -142,7 +142,7 @@ namespace ts3::gpuapi
 		Bitmask<ERenderTargetAttachmentFlags> attachmentMask = 0;
 		uint32 colorAttachmentActiveCount = 0;
 		uint32 depthStencilAttachmentState = 0;
-		RenderTargetAttachmentLayout colorAttachmentArray[GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+		RenderTargetAttachmentLayout colorAttachmentArray[E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
 		RenderTargetAttachmentLayout depthStencilAttachment;
 	};
 
@@ -150,7 +150,7 @@ namespace ts3::gpuapi
 
 	struct RenderTargetResourceBinding
 	{
-		RenderTargetAttachmentResourceBinding colorAttachmentArray[GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+		RenderTargetAttachmentResourceBinding colorAttachmentArray[E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
 		RenderTargetAttachmentResourceBinding depthStencilAttachment;
 		TextureSize2D commonBufferSize;
 		uint32 commonMSAALevel = CX_RT_BUFFER_MSAA_LEVEL_INVALID;

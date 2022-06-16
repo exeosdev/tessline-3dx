@@ -31,7 +31,7 @@ namespace ts3
 		return imageDataClone;
 	}
 
-	bool ImageData::isEmpty() const
+	bool ImageData::empty() const
 	{
 		return pixelBuffer.empty() || ( sizeInBytes == 0 );
 	}

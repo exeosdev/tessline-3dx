@@ -23,7 +23,7 @@ namespace ts3::gpuapi
 	class GLBufferObject : public GLObject
 	{
 	public:
-		GLenum const mGLBufferBindTarget = cxGLBindTargetUnknown;
+		GLenum const mGLBufferBindTarget = CX_GL_BIND_TARGET_UNKNOWN;
 		GLuint const mSize;
 
 		GLBufferObject( GLuint pHandle, const GLBufferCreateInfo & pGLCreateInfo );

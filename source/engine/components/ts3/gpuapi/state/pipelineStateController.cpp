@@ -7,34 +7,51 @@
 namespace ts3::gpuapi
 {
 
-	GraphicsPipelineStateController::GraphicsPipelineStateController()
-	{}
+	GraphicsPipelineStateController::GraphicsPipelineStateController() = default;
 
 	GraphicsPipelineStateController::~GraphicsPipelineStateController() = default;
 
-	bool GraphicsPipelineStateController::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
+	bool GraphicsPipelineStateController::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject * pGraphicsPipelineSO )
 	{
 		bool updateResult = false;
 
-		if( &pGraphicsPipelineSO != _csCommonConfig.soGraphicsPipeline )
+		if( pGraphicsPipelineSO )
 		{
-			_csCommonConfig.soGraphicsPipeline = &pGraphicsPipelineSO;
-			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT );
-			updateResult = true;
+			// If the specified PSO pointer is not NULL, use the dedicated method for setting a valid PSO.
+			updateResult = setGraphicsPipelineStateObjectInternal( *pGraphicsPipelineSO );
+		}
+		else
+		{
+			// If NULL has been specified, use the resetting function.
+			updateResult = resetGraphicsPipelineStateObjectInternal();
+		}
+
+		if( updateResult )
+		{
+			// True is returned if anything at all has been changed in the pipeline configuration.
+			// Update the internal PSO pointer only if that is the case.
+			_graphicsPipelineStateObject = pGraphicsPipelineSO;
 		}
 
 		return updateResult;
 	}
 
-	bool GraphicsPipelineStateController::setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO )
+	bool GraphicsPipelineStateController::setVertexStreamStateObject( const VertexStreamStateObject * pVertexStreamSO )
 	{
 		bool updateResult = false;
 
-		if( &pVertexStreamSO != _csCommonConfig.soVertexStream )
+		if( pVertexStreamSO )
 		{
-			_csCommonConfig.soVertexStream = &pVertexStreamSO;
-			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_SO_VERTEX_STREAM_BIT );
-			updateResult = true;
+			updateResult = setVertexStreamStateObjectInternal( *pVertexStreamSO );
+		}
+		else
+		{
+			updateResult = resetVertexStreamStateObjectInternal();
+		}
+
+		if( updateResult )
+		{
+			_vertexStreamStateObject = pVertexStreamSO;
 		}
 
 		return updateResult;
@@ -42,8 +59,8 @@ namespace ts3::gpuapi
 
 	void GraphicsPipelineStateController::resetInternalState()
 	{
-		_csCommonConfig.soGraphicsPipeline = nullptr;
-		_csCommonConfig.soVertexStream = nullptr;
+		resetGraphicsPipelineStateObjectInternal();
+		resetVertexStreamStateObjectInternal();
 	}
 
 	bool GraphicsPipelineStateController::updatePipelineState()
@@ -51,94 +68,35 @@ namespace ts3::gpuapi
 		return _stateUpdateMask != 0;
 	}
 
-
-	SeparableGraphicsPipelineStateController::SeparableGraphicsPipelineStateController()
-	: GraphicsPipelineStateController()
-	{}
-
-	SeparableGraphicsPipelineStateController::~SeparableGraphicsPipelineStateController() = default;
-
-	bool SeparableGraphicsPipelineStateController::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
+	bool GraphicsPipelineStateController::setGraphicsPipelineStateObjectInternal( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
 	{
-		bool updateResult = GraphicsPipelineStateController::setGraphicsPipelineStateObject( pGraphicsPipelineSO );
+		bool updateResult = false;
 
-		if( updateResult && _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT ) )
+		// Mark the PSO as changed only if the one is indeed different from the one currently set.
+		if( &pGraphicsPipelineSO != _graphicsPipelineStateObject )
 		{
-			auto * separableGraphicsPipelineSO = _csCommonConfig.soGraphicsPipeline->queryInterface<SeparableGraphicsPipelineStateObject>();
-
-			auto blendStateDescriptorID = separableGraphicsPipelineSO->mSeparableDescriptorSet.blendDescriptorID;
-			if( blendStateDescriptorID != _csSeparableStateDescriptorSet.blendDescriptorID )
-			{
-				_csSeparableStateDescriptorSet.blendDescriptorID = blendStateDescriptorID;
-				_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_BLEND_BIT );
-			}
-
-			auto depthStencilDescriptorID = separableGraphicsPipelineSO->mSeparableDescriptorSet.depthStencilDescriptorID;
-			if( depthStencilDescriptorID != _csSeparableStateDescriptorSet.depthStencilDescriptorID )
-			{
-				_csSeparableStateDescriptorSet.depthStencilDescriptorID = depthStencilDescriptorID;
-				_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_DEPTH_STENCIL_BIT );
-			}
-
-			auto rasterizerDescriptorID = separableGraphicsPipelineSO->mSeparableDescriptorSet.rasterizerDescriptorID;
-			if( rasterizerDescriptorID != _csSeparableStateDescriptorSet.rasterizerDescriptorID )
-			{
-				_csSeparableStateDescriptorSet.rasterizerDescriptorID = rasterizerDescriptorID;
-				_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_RASTERIZER_BIT );
-			}
-
-			auto vertexInputFormatDescriptorID = separableGraphicsPipelineSO->mSeparableDescriptorSet.vertexInputFormatDescriptorID;
-			if( vertexInputFormatDescriptorID != _csSeparableStateDescriptorSet.vertexInputFormatDescriptorID )
-			{
-				_csSeparableStateDescriptorSet.vertexInputFormatDescriptorID = vertexInputFormatDescriptorID;
-				_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT );
-			}
-
-			auto * vertexShader = separableGraphicsPipelineSO->mShaderBinding[E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX];
-			if( vertexShader != _csSeparableShaderBinding.vertexShader )
-			{
-				_csSeparableShaderBinding.vertexShader = vertexShader;
-				_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SHADER_VERTEX_STAGE_BIT );
-			}
-
-			auto * tessControlShader = separableGraphicsPipelineSO->mShaderBinding[E_SHADER_STAGE_INDEX_GRAPHICS_TESS_CONTROL];
-			if( tessControlShader != _csSeparableShaderBinding.tessControlShader )
-			{
-				_csSeparableShaderBinding.tessControlShader = tessControlShader;
-				_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SHADER_TESS_CONTROL_STAGE_BIT );
-			}
-
-			auto * tessEvaluationShader = separableGraphicsPipelineSO->mShaderBinding[E_SHADER_STAGE_INDEX_GRAPHICS_TESS_EVALUATION];
-			if( tessEvaluationShader != _csSeparableShaderBinding.tessEvaluationShader )
-			{
-				_csSeparableShaderBinding.tessEvaluationShader = tessEvaluationShader;
-				_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SHADER_TESS_EVALUATION_STAGE_BIT );
-			}
-
-			auto * geometryShader = separableGraphicsPipelineSO->mShaderBinding[E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY];
-			if( geometryShader != _csSeparableShaderBinding.geometryShader )
-			{
-				_csSeparableShaderBinding.geometryShader = geometryShader;
-				_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SHADER_GEOMETRY_STAGE_BIT );
-			}
-
-			auto * pixelShader = separableGraphicsPipelineSO->mShaderBinding[E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL];
-			if( pixelShader != _csSeparableShaderBinding.pixelShader )
-			{
-				_csSeparableShaderBinding.pixelShader = pixelShader;
-				_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SHADER_PIXEL_STAGE_BIT );
-			}
+			// Save the new PSO, change the update mask.
+			// THis will
+			_graphicsPipelineStateObject = &pGraphicsPipelineSO;
+			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT );
+			updateResult = true;
 		}
 
 		return updateResult;
 	}
 
-	void SeparableGraphicsPipelineStateController::resetInternalState()
+	bool GraphicsPipelineStateController::setVertexStreamStateObjectInternal( const VertexStreamStateObject & pVertexStreamSO )
 	{
-		GraphicsPipelineStateController::resetInternalState();
+		bool updateResult = false;
 
-		memZero( _csSeparableShaderBinding );
-		memZero( _csSeparableStateDescriptorSet );
+		if( &pVertexStreamSO != _vertexStreamStateObject )
+		{
+			_vertexStreamStateObject = &pVertexStreamSO;
+			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_SO_VERTEX_STREAM_BIT );
+			updateResult = true;
+		}
+
+		return updateResult;
 	}
 
 } // namespace ts3::gpuapi

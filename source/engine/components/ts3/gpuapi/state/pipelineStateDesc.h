@@ -25,17 +25,9 @@ namespace ts3::gpuapi
 	using pipeline_input_desc_hash_t = ts3::HashObject<ts3::HashAlgo::FNV1A>;
 	using pipeline_state_descriptor_id_t = ts3::HashObject<ts3::HashAlgo::FNV1A>;
 
-	inline constexpr pipeline_state_descriptor_id_t cxInvalidPipelineStateDescriptorID = ts3::cvEmptyHash<ts3::HashAlgo::FNV1A>;
+	inline constexpr pipeline_state_descriptor_id_t CX_PIPELINE_STATE_DESCRIPTOR_ID_INVALID = ts3::cvEmptyHash<ts3::HashAlgo::FNV1A>;
 
-	inline constexpr gpu_memory_size_t cxVertexAttributeOffsetPackedAppend = ts3::Limits<gpu_memory_size_t>::maxValue;
-
-	struct GraphicsPipelineStateDescriptorSet
-	{
-		pipeline_state_descriptor_id_t blendDescriptorID;
-		pipeline_state_descriptor_id_t depthStencilDescriptorID;
-		pipeline_state_descriptor_id_t rasterizerDescriptorID;
-		pipeline_state_descriptor_id_t vertexInputFormatDescriptorID;
-	};
+	inline constexpr gpu_memory_size_t CX_VERTEX_ATTRIBUTE_OFFSET_PACKED_APPEND = ts3::Limits<gpu_memory_size_t>::maxValue;
 
 	struct BlendConfigDesc
 	{
@@ -102,7 +94,7 @@ namespace ts3::gpuapi
 				return attributeIndex != cxInvalidVertexAttributeIndex;
 			}
 		};
-		using VertexAttributeArray = std::array<VertexAttribute, GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM>;
+		using VertexAttributeArray = std::array<VertexAttribute, E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM>;
 		VertexAttributeArray vertexAttributeArray;
 		EPrimitiveTopology primitiveTopology;
 	};

@@ -32,7 +32,7 @@ namespace ts3::gpuapi
 	struct DX11VertexInputFormatDesc
 	{
 		using DX11VertexAttribute = D3D11_INPUT_ELEMENT_DESC;
-		using DX11VertexAttributeArray = std::array<DX11VertexAttribute, GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM>;
+		using DX11VertexAttributeArray = std::array<DX11VertexAttribute, E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM>;
 		D3D11_PRIMITIVE_TOPOLOGY primitiveTopology;
 		uint32 activeVertexAttributesNum;
 		DX11VertexAttributeArray vertexAttributeArray;
@@ -105,9 +105,9 @@ namespace ts3::gpuapi
 		};
 		struct DX11VertexBufferBinding
 		{
-			ID3D11Buffer * bufferArray[GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
-			UINT           offsetArray[GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
-			UINT           strideArray[GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
+			ID3D11Buffer * bufferArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
+			UINT           offsetArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
+			UINT           strideArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
 		};
 		using DX11VertexStreamRange = VertexDataSourceBinding::VertexStreamRange;
 		using DX11VertexStreamRangeList = VertexDataSourceBinding::VertexStreamRangeList;

@@ -70,7 +70,7 @@ namespace ts3::gpuapi
 			pAttachmentMask.unset( E_RENDER_TARGET_ATTACHMENT_FLAG_STENCIL_BIT );
 		}
 
-		for( uint32 colorBufferIndex = 0; ( colorBufferIndex < GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pAttachmentMask != 0 ); ++colorBufferIndex )
+		for( uint32 colorBufferIndex = 0; ( colorBufferIndex < E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pAttachmentMask != 0 ); ++colorBufferIndex )
 		{
 			auto colorBufferMask = E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_0_BIT << colorBufferIndex;
 			if( pAttachmentMask.isSet( colorBufferMask ) )
@@ -106,7 +106,7 @@ namespace ts3::gpuapi
 	bool GLCommandList::setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO )
 	{
 		const auto & commonConfig = _stateController.getCommonConfig();
-		const auto & renderTargetLayout = commonConfig.soGraphicsPipeline->mRenderTargetLayout;
+		const auto & renderTargetLayout = _stateController.graphicsPipelineSO()->mRenderTargetLayout;
 
 		auto * openglRenderTargetSO = pRenderTargetSO.queryInterface<GLRenderTargetStateObject>();
 		if( !checkRenderTargetLayoutCompatibility( openglRenderTargetSO->mRTResourceBinding, renderTargetLayout ) )

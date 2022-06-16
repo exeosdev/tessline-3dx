@@ -47,7 +47,7 @@ namespace ts3::gpuapi
 			auto * openglGPUDevice = mGPUDevice.queryInterface<GLGPUDevice>();
 			auto * openglDebugOutput = openglGPUDevice->getDebugOutputInterface();
 
-			if( false && openglDebugOutput )
+			if( openglDebugOutput )
 			{
 			    openglDebugOutput->enableDebugOutput( true );
 			    openglDebugOutput->enableBreakOnEvent( true );

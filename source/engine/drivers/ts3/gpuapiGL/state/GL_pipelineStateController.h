@@ -7,7 +7,7 @@
 #include "../GL_prerequisites.h"
 #include "../state/GL_pipelineStateDesc.h"
 #include "../state/GL_pipelineStateObject.h"
-#include <ts3/gpuapi/state/pipelineStateController.h>
+#include <ts3/gpuapi/state/separablePipelineState.h>
 
 namespace ts3::gpuapi
 {
@@ -24,8 +24,8 @@ namespace ts3::gpuapi
 			GLenum indexBufferDataType = 0;
 			GLuint indexBufferElementByteSize = 0;
 			GLenum primitiveTopology = 0;
-			GLuint shaderPipelineObjectHandle = cxGLObjectHandleInvalid;
-			GLuint vertexArrayObjectHandle = cxGLObjectHandleInvalid;
+			GLuint shaderPipelineObjectHandle = CX_GL_OBJECT_HANDLE_INVALID;
+			GLuint vertexArrayObjectHandle = CX_GL_OBJECT_HANDLE_INVALID;
 		};
 
 	public:
@@ -35,21 +35,21 @@ namespace ts3::gpuapi
 		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO ) override;
 		virtual bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO ) override;
 
-		const GLPipelineConfig & getGLPipelineConfig() const
+		TS3_FUNC_NO_DISCARD const GLPipelineConfig & getGLPipelineConfig() const
 		{
-			return _csGLPipelineConfig;
+			return _scGLPipelineConfig;
 		}
 
 	protected:
 		virtual bool updatePipelineState() override;
 
 	private:
-		void _setBlendState( const GLBlendStateDescriptor & pGLBlendDescriptor );
-		void _setDepthStencilState( const GLDepthStencilStateDescriptor & pGLDepthStencilDescriptor );
-		void _setRasterizerState( const GLRasterizerStateDescriptor & pGLStateDescriptor );
+		static void _setBlendState( const GLBlendStateDescriptor & pGLBlendDescriptor );
+		static void _setDepthStencilState( const GLDepthStencilStateDescriptor & pGLDepthStencilDescriptor );
+		static void _setRasterizerState( const GLRasterizerStateDescriptor & pGLStateDescriptor );
 
 	protected:
-		GLPipelineConfig _csGLPipelineConfig;
+		GLPipelineConfig _scGLPipelineConfig;
 		GLGraphicsPipelineStateDescriptorCache * _descriptorCache;
 	};
 

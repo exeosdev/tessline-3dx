@@ -12,10 +12,10 @@ namespace ts3::gpuapi
 	                                                              RenderTargetLayout pRenderTargetLayout,
 	                                                              GraphicsShaderBinding pShaderBinding,
 	                                                              ShaderInputSignature pShaderInputSignature,
-	                                                              const GraphicsPipelineStateDescriptorSet & pSeparableDescriptorSet,
+	                                                              const SeparableGraphicsStateDescriptorSet & pSstateDescriptors,
 	                                                              GLShaderPipelineObjectHandle pGLShaderPipelineObject,
 	                                                              GLVertexArrayObjectHandle pGLVertexArrayObject )
-	: SeparableGraphicsPipelineStateObject( pGPUDevice, std::move( pRenderTargetLayout ), std::move( pShaderBinding ), std::move( pShaderInputSignature ), pSeparableDescriptorSet )
+	: SeparableGraphicsPipelineStateObject( pGPUDevice, std::move( pRenderTargetLayout ), std::move( pShaderBinding ), std::move( pShaderInputSignature ), pSstateDescriptors )
 	, mGLShaderPipelineObject ( std::move( pGLShaderPipelineObject ) )
 	, mGLVertexArrayObject ( std::move( pGLVertexArrayObject ) )
 	{}
@@ -31,13 +31,13 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
-		GraphicsPipelineStateDescriptorSet graphicsDescriptorSet;
-		graphicsDescriptorSet.blendDescriptorID = pGPUDevice.createBlendDescriptor( pCreateInfo.blendDesc );
-		graphicsDescriptorSet.depthStencilDescriptorID = pGPUDevice.createDepthStencilDescriptor( pCreateInfo.depthStencilDesc );
-		graphicsDescriptorSet.rasterizerDescriptorID = pGPUDevice.createRasterizerDescriptor( pCreateInfo.rasterizerDesc );
-		graphicsDescriptorSet.vertexInputFormatDescriptorID = pGPUDevice.createVertexInputFormatDescriptor( pCreateInfo.vertexInputFormatDesc );
+		SeparableGraphicsStateDescriptorSet sstateDescriptors;
+		sstateDescriptors.blendDescriptorID = pGPUDevice.createBlendDescriptor( pCreateInfo.blendDesc );
+		sstateDescriptors.depthStencilDescriptorID = pGPUDevice.createDepthStencilDescriptor( pCreateInfo.depthStencilDesc );
+		sstateDescriptors.rasterizerDescriptorID = pGPUDevice.createRasterizerDescriptor( pCreateInfo.rasterizerDesc );
+		sstateDescriptors.vertexInputFormatDescriptorID = pGPUDevice.createVertexInputFormatDescriptor( pCreateInfo.vertexInputFormatDesc );
 
-		const auto & vertexInputFormatDescriptor = pGPUDevice.getVertexInputFormatDescriptor( graphicsDescriptorSet.vertexInputFormatDescriptorID );
+		const auto & vertexInputFormatDescriptor = pGPUDevice.getVertexInputFormatDescriptor( sstateDescriptors.vertexInputFormatDescriptorID );
 
 		auto vertexArrayObject = createVertexArrayObjectFormatOnly( vertexInputFormatDescriptor );
 		auto shaderPipelineObject = createGraphicsShaderPipelineObject( commonPSOState.shaderBinding );
@@ -50,7 +50,7 @@ namespace ts3::gpuapi
 		                                                                                        std::move( commonPSOState.renderTargetLayout ),
 		                                                                                        std::move( commonPSOState.shaderBinding ),
 		                                                                                        std::move( commonPSOState.shaderInputSignature ),
-		                                                                                        graphicsDescriptorSet,
+		                                                                                        sstateDescriptors,
 		                                                                                        std::move( shaderPipelineObject ),
 		                                                                                        std::move( vertexArrayObject ) );
 		
