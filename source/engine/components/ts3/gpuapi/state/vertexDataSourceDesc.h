@@ -37,7 +37,7 @@ namespace ts3::gpuapi
 		{
 			/// An index of one of the vertex input streams used to stream the data during the IA stage.
 			/// Must be between 0 and E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM.
-			vertex_stream_index_t streamIndex = CX_INVALID_VERTEX_STREAM_INDEX;
+			vertex_stream_index_t streamIndex = CX_VERTEX_STREAM_INDEX_INVALID;
 
 			/// A pointer to an existing buffer containing vertices data.
 			/// Buffer must have been created with the E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT bit set.
@@ -95,12 +95,6 @@ namespace ts3::gpuapi
 			GPUBuffer * bufferObject = nullptr;
 			gpu_memory_size_t dataOffset;
 			gpu_memory_size_t dataStride;
-		};
-
-		struct VertexStreamRange
-		{
-			uint32 firstIndex;
-			uint32 length;
 		};
 
 		using VertexBufferBindingArray = std::array<VertexBufferBinding, E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM>;

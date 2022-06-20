@@ -144,12 +144,6 @@ namespace ts3::gpuapi
 		return ( 1 << pStageIndex ) & E_SHADER_STAGE_MASK_ALL;
 	}
 
-	/// @brief
-	TS3_FUNC_NO_DISCARD inline constexpr EShaderStageFlags ecMakeShaderStageFlag( uint32 pStageIndex )
-	{
-		return static_cast<EShaderStageFlags>( ecMakeShaderStageBit( pStageIndex ) );
-	}
-
 	/// @brief Returns a 32-bit value which is a bit flag matching the graphics shader stage specified using its index.
 	/// @return One of E_SHADER_STAGE_FLAG_GRAPHICS_xxx values for a valid stage index or 0 otherwise, returned as uint32.
 	TS3_FUNC_NO_DISCARD inline constexpr uint32 ecMakeGraphicsShaderStageBit( uint32 pGraphicsStageIndex )

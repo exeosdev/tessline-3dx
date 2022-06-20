@@ -88,8 +88,8 @@ set( TS3_GPUAPI_SRC_FILES
         "state/shaderInputSignature.cpp"
         "state/vertexDataSourceDesc.h"
         "state/vertexDataSourceDesc.cpp"
-        "state/vertexStreamStateObject.h"
-        "state/vertexStreamStateObject.cpp"
+        "state/inputAssemblerBinding.h"
+        "state/inputAssemblerBinding.cpp"
 )
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )

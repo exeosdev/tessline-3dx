@@ -34,7 +34,7 @@ namespace ts3::gpuapi
 	using EScissorTestState = EActiveState;
 
 	constexpr vertex_attribute_index_t CX_INVALID_VERTEX_ATTRIBUTE_INDEX = Limits<vertex_attribute_index_t>::maxValue;
-	constexpr vertex_stream_index_t CX_INVALID_VERTEX_STREAM_INDEX = Limits<vertex_stream_index_t>::maxValue;
+	constexpr vertex_stream_index_t CX_VERTEX_STREAM_INDEX_INVALID = Limits<vertex_stream_index_t>::maxValue;
 
 	enum class EBlendFactor : enum_default_value_t
 	{

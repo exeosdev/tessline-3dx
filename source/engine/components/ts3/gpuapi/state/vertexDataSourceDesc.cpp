@@ -12,7 +12,7 @@ namespace ts3::gpuapi
 
 		for( const auto & vbBindingDesc : pBindingDesc.vertexBufferBindingDescArray )
 		{
-			if( vbBindingDesc.bufferObject && ( vbBindingDesc.streamIndex != CX_INVALID_VERTEX_STREAM_INDEX ) )
+			if( vbBindingDesc.bufferObject && ( vbBindingDesc.streamIndex != CX_VERTEX_STREAM_INDEX_INVALID ) )
 			{
 				dataSourceBinding.vertexBufferBindingArray[vbBindingDesc.streamIndex].bufferObject = vbBindingDesc.bufferObject;
 				dataSourceBinding.vertexBufferBindingArray[vbBindingDesc.streamIndex].dataOffset = vbBindingDesc.dataOffset;
@@ -50,7 +50,7 @@ namespace ts3::gpuapi
 		// only a single range will get produced, reducing the number of required GL API calls for binding from N to 1.
 
 		VertexDataSourceBinding::VertexStreamRange streamRange;
-		streamRange.firstIndex = CX_INVALID_VERTEX_STREAM_INDEX; // CX_INVALID_VERTEX_STREAM_INDEX means the range is not valid
+		streamRange.firstIndex = CX_VERTEX_STREAM_INDEX_INVALID; // CX_VERTEX_STREAM_INDEX_INVALID means the range is not valid
 		streamRange.length = 0;
 
 		for( vertex_stream_index_t streamIndex = 0; streamIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM; ++streamIndex )
@@ -62,7 +62,7 @@ namespace ts3::gpuapi
 				dataSourceBinding.vertexStreamActiveIndexArray.push_back( streamIndex );
 				// If the range is not valid, "open" it.
 				// Set the current stream as the first stream in the range and range size to 0.
-				if( streamRange.firstIndex == CX_INVALID_VERTEX_STREAM_INDEX )
+				if( streamRange.firstIndex == CX_VERTEX_STREAM_INDEX_INVALID )
 				{
 					streamRange.firstIndex = streamIndex;
 					streamRange.length = 0;
@@ -80,7 +80,7 @@ namespace ts3::gpuapi
 					dataSourceBinding.vertexBufferActiveRangesNum += 1;
 				}
 				// Reset the range by setting the first index to an invalid value.
-				streamRange.firstIndex = CX_INVALID_VERTEX_STREAM_INDEX;
+				streamRange.firstIndex = CX_VERTEX_STREAM_INDEX_INVALID;
 				streamRange.length = 0;
 			}
 		}
