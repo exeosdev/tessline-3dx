@@ -54,13 +54,6 @@ namespace ts3::gpuapi
 		ERenderPassAttachmentStoreOp storeOp;
 	};
 
-	struct RenderSubPassDependencyDesc
-	{
-		uint32 firstSubPassIndex = CX_UINT32_MAX;
-		uint32 secondSubPassIndex = CX_UINT32_MAX;
-
-	};
-
 
 } // namespace ts3::gpuapi
 

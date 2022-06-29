@@ -18,7 +18,7 @@ namespace ts3::gpuapi
 	enum EGPUSystemMetrics : uint32
 	{
 		E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM = 16,
-		E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM = 16,
+		E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_STREAMS_NUM = 16,
 		E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM = 8,
 		E_GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM = 9,
 		E_GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM = 8,
@@ -126,6 +126,9 @@ namespace ts3::gpuapi
 
 		/// Compute pipeline: compute shader bit.
 		E_SHADER_STAGE_FLAG_COMPUTE_BIT                  = 1u << E_SHADER_STAGE_INDEX_COMPUTE,
+
+		/// Mask with all bits for all graphics stages set.
+		E_SHADER_STAGE_MASK_GRAPHICS_REQUIRED            = 0x007F,
 
 		/// Mask with all bits for all graphics stages set.
 		E_SHADER_STAGE_MASK_GRAPHICS_ALL                 = 0x007F,

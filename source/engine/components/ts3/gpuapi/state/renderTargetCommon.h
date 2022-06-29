@@ -10,6 +10,12 @@
 namespace ts3::gpuapi
 {
 
+	struct RTAttachmentDesc
+	{
+		ERenderTargetAttachmentID attachmentID = ERenderTargetAttachmentID::RTUndefined;
+		ETextureFormat format;
+	};
+
 	ts3DeclareClassHandle( RenderBuffer );
 	ts3DeclareClassHandle( RenderTargetStateObject );
 
@@ -19,50 +25,11 @@ namespace ts3::gpuapi
 	struct RenderTargetStateObjectCreateInfo;
 
 	/// @brief
-	enum class ERenderTargetAttachmentID : enum_default_value_t
-	{
-		RTColor0,
-		RTColor1,
-		RTColor2,
-		RTColor3,
-		RTColor4,
-		RTColor5,
-		RTColor6,
-		RTColor7,
-		RTDepthStencil,
-		RTUndefined
-	};
-
-	/// @brief
 	enum class ERenderTargetResourceType : enum_default_value_t
 	{
 		RenderBuffer,
 		Texture,
 		Unknown
-	};
-
-	/// @brief A set of bit flags representing render target attachments.
-	enum ERenderTargetAttachmentFlags : uint32
-	{
-		// Note: Implementation depends on all COLOR values having consecutive bit positions!
-
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_0_BIT    = 1 << 0,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_1_BIT    = 1 << 1,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_2_BIT    = 1 << 2,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_3_BIT    = 1 << 3,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_4_BIT    = 1 << 4,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_5_BIT    = 1 << 5,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_6_BIT    = 1 << 6,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_7_BIT    = 1 << 7,
-		E_RENDER_TARGET_ATTACHMENT_MASK_COLOR_ALL      = 0x7F,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_BIT      = 1 << 8,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_STENCIL_BIT    = 1 << 9,
-		E_RENDER_TARGET_ATTACHMENT_FLAGS_DEPTH_STENCIL = E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_BIT |
-		                                                 E_RENDER_TARGET_ATTACHMENT_FLAG_STENCIL_BIT,
-		E_RENDER_TARGET_ATTACHMENT_FLAGS_DEFAULT_C0DS  = E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_0_BIT |
-		                                                 E_RENDER_TARGET_ATTACHMENT_FLAGS_DEPTH_STENCIL,
-		E_RENDER_TARGET_ATTACHMENT_MASK_ALL            = E_RENDER_TARGET_ATTACHMENT_MASK_COLOR_ALL |
-		                                                 E_RENDER_TARGET_ATTACHMENT_FLAGS_DEPTH_STENCIL,
 	};
 
 	struct RTARenderBufferRef

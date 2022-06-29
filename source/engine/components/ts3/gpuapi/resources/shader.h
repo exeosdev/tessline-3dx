@@ -9,8 +9,6 @@
 namespace ts3::gpuapi
 {
 
-	class ShaderInterface;
-
 	class TS3_GPUAPI_CLASS Shader : public GPUBaseObject
 	{
 	public:

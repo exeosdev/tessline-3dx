@@ -68,11 +68,23 @@ set( TS3_GPUAPI_SRC_FILES
         "state/commonGPUStateDefs.h"
         "state/gpuStateObject.h"
         "state/gpuStateObject.cpp"
-        "state/graphicsPipelineStateDescriptorCache.h"
+        "state/graphicsPipelineDescriptorCache.h"
+        "state/graphicsPipelineStateCommon.h"
+        "state/graphicsPipelineStateDescriptors.h"
+        "state/inputAssemblerCommon.h"
+        "state/inputAssemblerVertexFormat.h"
+        "state/inputAssemblerVertexFormat.cpp"
+        "state/inputAssemblerVertexStream.h"
+        "state/inputAssemblerVertexStream.cpp"
+        "state/graphicsPipelineDescriptor.h"
+        "state/graphicsPipelineDescriptor.cpp"
+        "state/pipelineDescriptorCache.h"
+        "state/pipelineDescriptorCache.cpp"
         "state/pipelineStateController.h"
         "state/pipelineStateController.cpp"
-        "state/pipelineStateDesc.h"
-        "state/pipelineStateDesc.cpp"
+
+        #"state/pipelineStateDesc.h"
+        #"state/pipelineStateDesc.cpp"
         "state/pipelineStateObject.h"
         "state/pipelineStateObject.cpp"
         "state/separablePipelineState.h"
@@ -86,11 +98,7 @@ set( TS3_GPUAPI_SRC_FILES
         "state/shaderBinding.cpp"
         "state/shaderInputSignature.h"
         "state/shaderInputSignature.cpp"
-        "state/vertexDataSourceDesc.h"
-        "state/vertexDataSourceDesc.cpp"
-        "state/inputAssemblerBinding.h"
-        "state/inputAssemblerBinding.cpp"
-)
+        )
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
     add_library( ts3-gpuapi STATIC ${TS3_GPUAPI_SRC_FILES} )

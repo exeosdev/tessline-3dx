@@ -16,25 +16,49 @@ namespace ts3::gpuapi
 	ts3DeclareClassHandle( GraphicsPipelineStateObject );
 	ts3DeclareClassHandle( VertexStreamStateObject );
 
-	struct GraphicsShaderBinding;
-	struct ShaderInputSignature;
-
 	struct GraphicsPipelineStateObjectCreateInfo;
 	struct VertexStreamStateObjectCreateInfo;
 
 	using shader_input_ref_id_t = uint64;
 	using shader_input_index_t = uint32;
 
-	using vertex_attribute_index_t = uint16;
-	using vertex_stream_index_t = uint16;
+	using pipeline_input_desc_hash_t = HashObject<HashAlgo::FNV1A>;
+	using pipeline_descriptor_id_t = HashObject<HashAlgo::FNV1A>;
 
-	using EBlendState = EActiveState;
-	using EDepthTestState = EActiveState;
-	using EStencilTestState = EActiveState;
-	using EScissorTestState = EActiveState;
+	/// @brief
+	enum ERenderTargetAttachmentIndex : uint32
+	{
+		E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_0,
+		E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_1,
+		E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_2,
+		E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_3,
+		E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_4,
+		E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_5,
+		E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_6,
+		E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_7,
+		E_RENDER_TARGET_ATTACHMENT_INDEX_DEPTH_STENCIL
+	};
 
-	constexpr vertex_attribute_index_t CX_INVALID_VERTEX_ATTRIBUTE_INDEX = Limits<vertex_attribute_index_t>::maxValue;
-	constexpr vertex_stream_index_t CX_VERTEX_STREAM_INDEX_INVALID = Limits<vertex_stream_index_t>::maxValue;
+	/// @brief A set of bit flags representing render target attachments.
+	enum ERenderTargetAttachmentFlags : uint32
+	{
+		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_0_BIT    = 1 << E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_0,
+		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_1_BIT    = 1 << E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_1,
+		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_2_BIT    = 1 << E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_2,
+		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_3_BIT    = 1 << E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_3,
+		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_4_BIT    = 1 << E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_4,
+		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_5_BIT    = 1 << E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_5,
+		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_6_BIT    = 1 << E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_6,
+		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_7_BIT    = 1 << E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_7,
+		E_RENDER_TARGET_ATTACHMENT_MASK_COLOR_ALL      = 0x7F,
+		E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_STENCIL  = 1 << E_RENDER_TARGET_ATTACHMENT_INDEX_DEPTH_STENCIL,
+		E_RENDER_TARGET_ATTACHMENT_MASK_ALL =
+				E_RENDER_TARGET_ATTACHMENT_MASK_COLOR_ALL |
+				E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_STENCIL,
+		E_RENDER_TARGET_ATTACHMENT_FLAGS_DEFAULT_C0DS =
+				E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_0_BIT |
+				E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_STENCIL,
+	};
 
 	enum class EBlendFactor : enum_default_value_t
 	{
@@ -100,6 +124,7 @@ namespace ts3::gpuapi
 
 	enum class EPrimitiveTopology : enum_default_value_t
 	{
+		Undefined,
 		PointList,
 		LineList,
 		LineListAdj,
@@ -109,7 +134,32 @@ namespace ts3::gpuapi
 		TriangleListAdj,
 		TriangleStrip,
 		TriangleStripAdj,
-		TesselationPatch
+		TesselationPatch,
+	};
+
+	/// @brief
+	enum class ERenderTargetAttachmentID : enum_default_value_t
+	{
+		RTColor0,
+		RTColor1,
+		RTColor2,
+		RTColor3,
+		RTColor4,
+		RTColor5,
+		RTColor6,
+		RTColor7,
+		RTDepthStencil,
+		RTUndefined
+	};
+
+	enum class EResourceUsageState : enum_default_value_t
+	{
+		Undefined,
+		CommonCopySource,
+		CommonCopyTarget,
+		RTDepthOnlyAttachment,
+		RTDepthStencilAttachment,
+		RTDepth
 	};
 
 	enum class EStencilOp : enum_default_value_t
@@ -178,11 +228,36 @@ namespace ts3::gpuapi
 		return static_cast<EShaderInputResourceClass>( ( static_cast<uint32>( pResourceType ) >> 16u ) & 0xFFFFu );
 	}
 
-	struct RenderTargetClearConfig
+	enum class GraphicsPipelineDescriptorType : enum_default_value_t
 	{
-		math::RGBAColorR32Norm colorClearValue;
-		float depthClearValue;
-		uint8 stencilClearValue;
+		/// BlendStateDescriptor
+		BlendState,
+
+		/// DepthStencilStateDescriptor
+		DepthStencilState,
+
+		/// IAVertexFormatDescriptor
+		IAVertexFormat,
+
+		/// IAVertexStreamDescriptor
+		IAVertexStream,
+
+		/// RasterizerStateDescriptor
+		RasterizerState,
+
+		/// RTAttachmentDescriptor
+		RTAttachment,
+
+		/// RTLayoutDescriptor
+		RTLayout,
+
+		/// GraphicsShaderBindingDescriptor
+		ShaderBinding,
+	};
+
+	struct PipelineDescriptorID
+	{
+		pipeline_input_desc_hash_t inputDescHash;
 	};
 
 } // namespace ts3::gpuapi

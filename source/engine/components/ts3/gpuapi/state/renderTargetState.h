@@ -10,6 +10,17 @@
 namespace ts3::gpuapi
 {
 
+	struct RTClearValue
+	{
+		math::RGBAColorR32Norm colorClearValue;
+		float depthClearValue;
+		uint8 stencilClearValue;
+	};
+
+	class RTAttachmentReference
+	{
+	};
+
 	class RTAttachmentDescriptor
 	{
 	};

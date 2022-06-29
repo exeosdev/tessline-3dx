@@ -57,7 +57,8 @@ namespace ts3::gpuapi
 	enum class EIndexDataFormat : vertex_attrib_format_value_t
 	{
 		Uint16 = static_cast<vertex_attrib_format_value_t>( EBaseDataType::Uint16 ),
-		Uint32 = static_cast<vertex_attrib_format_value_t>( EBaseDataType::Uint32 )
+		Uint32 = static_cast<vertex_attrib_format_value_t>( EBaseDataType::Uint32 ),
+		Undefined = 0
 	};
 
 	enum class ETextureFormat : gpu_pixel_format_value_t
