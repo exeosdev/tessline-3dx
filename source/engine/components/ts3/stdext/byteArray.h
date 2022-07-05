@@ -43,7 +43,7 @@ namespace ts3
 				return;
 			}
 
-			auto bufferCapacity = _dataSize - pFillOffset;
+			const auto bufferCapacity = _dataSize - pFillOffset;
 			pFillCount = getMinOf( pFillCount, bufferCapacity );
 			memFillChecked( _storageMemoryPtr + pFillOffset, bufferCapacity, pValue, pFillCount );
 		}
@@ -55,7 +55,7 @@ namespace ts3
 				return;
 			}
 
-			auto bufferCapacity = _dataSize - pSetOffset;
+			const auto bufferCapacity = _dataSize - pSetOffset;
 			pSetOffset = getMinOf( pSetOffset, bufferCapacity );
 			memCopyUnchecked( _storageMemoryPtr + pSetOffset, bufferCapacity, pData, pDataSize );
 		}
@@ -173,12 +173,12 @@ namespace ts3
 
 	inline ReadWriteMemoryView bindMemoryView( ByteArray & pByteArray )
 	{
-		return ReadWriteMemoryView( pByteArray.data(), pByteArray.size() );
+		return { pByteArray.data(), pByteArray.size() };
 	}
 
 	inline ReadOnlyMemoryView bindMemoryView( const ByteArray & pByteArray )
 	{
-		return ReadOnlyMemoryView( pByteArray.data(), pByteArray.size() );
+		return { pByteArray.data(), pByteArray.size() };
 	}
 
 	class DynamicByteArray : public ByteArray

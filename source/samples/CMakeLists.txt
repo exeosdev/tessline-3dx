@@ -4,9 +4,10 @@ set( TS3SAMPLES_LINK_INPUT
         )
 
 set( TS3_SAMPLE_LIST
-        "gpuapi01"
+        mathTest
+        #"gpuapi01"
         "sysTest"
-        "test1"
+        #"test1"
         )
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )

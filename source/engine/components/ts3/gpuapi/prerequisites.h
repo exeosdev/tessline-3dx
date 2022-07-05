@@ -72,12 +72,12 @@ namespace ts3::gpuapi
 	// Vulkan: native window + KHR swap chain + KHR present
 	class PresentationLayer;
 
-	ts3DeclareClassHandle( CommandContext );
-	ts3DeclareClassHandle( CommandSystem );
-	ts3DeclareClassHandle( DisplayManager );
-	ts3DeclareClassHandle( GPUDevice );
-	ts3DeclareClassHandle( GPUDriver );
-	ts3DeclareClassHandle( PresentationLayer );
+	ts3GpaDeclareClassHandle( CommandContext );
+	ts3GpaDeclareClassHandle( CommandSystem );
+	ts3GpaDeclareClassHandle( DisplayManager );
+	ts3GpaDeclareClassHandle( GPUDevice );
+	ts3GpaDeclareClassHandle( GPUDriver );
+	ts3GpaDeclareClassHandle( PresentationLayer );
 
 	enum class EGPUDriverAPI : uint32
 	{

@@ -5,6 +5,7 @@
 #define __TS3_GPUAPI_INPUT_ASSEMBLER_VERTEX_STREAM_H__
 
 #include "inputAssemblerCommon.h"
+#include "graphicsPipelineDescriptor.h"
 
 namespace ts3::gpuapi
 {
@@ -65,15 +66,24 @@ namespace ts3::gpuapi
 		}
 	};
 
+	/// @brief Create info struct for IAVertexStreamDescriptor.
 	struct IAVertexStreamDescriptorCreateInfo
 	{
+		/// A pointer to a buffer binding state. If it is not null, the driver will use it for descriptor creation.
+		/// If the specified  object is not valid, descriptor creation fails immediately.
+		/// @see IAVertexStreamBufferBinding
+		/// @see IAVertexFormatDescriptor::validateInputAttributeArray
 		const IAVertexStreamBufferBinding * bufferBindingState = nullptr;
+
+		/// An array with definitions of vertex buffer bindings. It is used when bufferBindingState is null.
 		ArrayView<IAVertexBufferBindingDesc> vertexBufferBindings;
+
+		/// A definition of the index buffer binding. It is used when bufferBindingState is null.
 		IAIndexBufferBinding indexBufferBinding;
 	};
 
 	/// @brief
-	class IAVertexStreamDescriptor
+	class IAVertexStreamDescriptor : public GraphicsPipelineDescriptor
 	{
 	public:
 		/// Binding mask. It contains all bits corresponding to bindings active as part of this descriptor.
@@ -81,36 +91,44 @@ namespace ts3::gpuapi
 		const Bitmask<EIAVertexStreamBindingFlags> mActiveBindingsMask;
 
 		/// Number of active vertex buffers bound to the IA stage.
-		const uint16 mVertexBufferActiveBindingsNum;
+		const uint16 mActiveVertexBufferBindingsNum;
 
 		/// Number of active vertex buffer ranges.
-		const uint16 mVertexBufferActiveRangesNum;
+		const uint16 mActiveVertexBufferRangesNum;
 
 	public:
-		IAVertexStreamDescriptor( Bitmask<EIAVertexStreamBindingFlags> pActiveBindingsMask,
-		                          uint16 pVertexBufferActiveBindingsNum,
-								  uint16 pVertexBufferActiveRangesNum );
+		IAVertexStreamDescriptor( GPUDevice & pGPUDevice,
+		                          pipeline_descriptor_id_t pDescriptorID,
+		                          IAVertexStreamBufferBinding pBufferBinding );
 
 		virtual ~IAVertexStreamDescriptor();
 
+		/// @copydoc GraphicsPipelineDescriptor::isValid
+		TS3_FUNC_NO_DISCARD bool isValid() const noexcept override final;
+
+		/// @brief
 		TS3_FUNC_NO_DISCARD bool isIndexBufferSet() const noexcept
 		{
 			return mActiveBindingsMask.isSet( E_IA_VERTEX_STREAM_BINDING_FLAG_INDEX_BUFFER );
 		}
 
+		/// @brief
 		TS3_FUNC_NO_DISCARD bool isVertexBufferSet( EIAVertexStreamVBIndex pVBIndex ) const noexcept
 		{
 			return mActiveBindingsMask.isSet( ecMakeIAVertexStreamVBFlag( pVBIndex ) );
 		}
 
-		TS3_FUNC_NO_DISCARD bool isValid() const
+		/// @brief
+		TS3_FUNC_NO_DISCARD bool isVertexBufferSet( input_assembler_index_t pVBIndex ) const noexcept
 		{
-			return ( mVertexBufferActiveBindingsNum > 0 ) && ( mVertexBufferActiveBindingsNum <= E_IA_CONSTANT_MAX_VERTEX_ATTRIBUTES_NUM );
+			return mActiveBindingsMask.isSet( ecMakeIAVertexStreamVBFlag( pVBIndex ) );
 		}
 	};
 
 	TS3_FUNC_NO_DISCARD IAVertexStreamBufferBinding createIAVertexStreamBufferBinding( const ArrayView<IAVertexBufferBindingDesc> & pVertexBufferBindings,
-	                                                                                   const IAIndexBufferBinding & pIndexBufferBinding );
+																					   const IAIndexBufferBinding & pIndexBufferBinding );
+
+	TS3_FUNC_NO_DISCARD IAVertexStreamDescriptorHandle createIAVertexStreamDescriptor( const IAVertexStreamDescriptorCreateInfo & pCreateInfo );
 
 } // namespace ts3::gpuapi
 

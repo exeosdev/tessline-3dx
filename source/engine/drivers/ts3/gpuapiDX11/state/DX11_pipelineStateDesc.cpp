@@ -25,7 +25,7 @@ namespace ts3::gpuapi
 			dx11VertexDataSourceBinding.indexBufferBinding.format = dx11IBDataFormat;
 		}
 
-		for( vertex_stream_index_t vertexInputStreamIndex = 0; vertexInputStreamIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM; ++vertexInputStreamIndex )
+		for( vertex_stream_index_t vertexInputStreamIndex = 0; vertexInputStreamIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_STREAMS_NUM; ++vertexInputStreamIndex )
 		{
 			const auto & vbBindingDesc = pBinding.vertexBufferBindingArray[vertexInputStreamIndex];
 			if( vbBindingDesc.bufferObject )

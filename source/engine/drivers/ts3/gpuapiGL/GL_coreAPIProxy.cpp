@@ -423,6 +423,7 @@ namespace ts3::gpuapi
 	{
 		switch( pTopology )
 		{
+			ts3CaseReturn( EPrimitiveTopology::Undefined        , 0u );
 			ts3CaseReturn( EPrimitiveTopology::PointList        , GL_POINTS );
 			ts3CaseReturn( EPrimitiveTopology::LineList         , GL_LINES );
 			ts3CaseReturn( EPrimitiveTopology::LineStrip        , GL_LINE_STRIP );

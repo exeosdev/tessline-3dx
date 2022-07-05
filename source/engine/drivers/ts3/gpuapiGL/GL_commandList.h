@@ -5,7 +5,7 @@
 #define __TS3DRIVER_GPUAPI_GLCOMMON_GPU_COMMAND_LIST_H__
 
 #include "GL_prerequisites.h"
-#include "state/GL_pipelineStateDesc.h"
+#include "state/GL_graphicsPipelineState.h"
 #include "state/GL_pipelineStateController.h"
 #include <ts3/gpuapi/commandList.h>
 

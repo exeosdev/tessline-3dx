@@ -5,7 +5,7 @@
 #define __TS3DRIVER_GPUAPI_GLCOMMON_PIPELINE_STATE_CONTROLLER_H__
 
 #include "../GL_prerequisites.h"
-#include "../state/GL_pipelineStateDesc.h"
+#include "../state/GL_graphicsPipelineState.h"
 #include "../state/GL_pipelineStateObject.h"
 #include <ts3/gpuapi/state/separablePipelineState.h>
 

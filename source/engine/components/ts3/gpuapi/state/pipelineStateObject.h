@@ -64,8 +64,6 @@ namespace ts3::gpuapi
 	class TS3_GPUAPI_CLASS GraphicsPipelineStateObject : public PipelineStateObject
 	{
 	public:
-		using StateDescriptorID = pipeline_state_descriptor_id_t;
-
 		RenderTargetLayout const mRenderTargetLayout;
 		ShaderInputSignature const mShaderInputSignature;
 

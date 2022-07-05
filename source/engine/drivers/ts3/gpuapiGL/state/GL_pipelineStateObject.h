@@ -4,7 +4,7 @@
 #ifndef __TS3DRIVER_GPUAPI_GLCOMMON_PIPELINE_STATE_OBJECT_H__
 #define __TS3DRIVER_GPUAPI_GLCOMMON_PIPELINE_STATE_OBJECT_H__
 
-#include "GL_pipelineStateDesc.h"
+#include "GL_graphicsPipelineState.h"
 #include <ts3/gpuapi/state/separablePipelineState.h>
 #include <ts3/gpuapiGL/objects/GL_shaderPipelineObject.h>
 

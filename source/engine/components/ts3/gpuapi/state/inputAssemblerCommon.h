@@ -9,7 +9,9 @@
 namespace ts3::gpuapi
 {
 
-	ts3DeclareClassHandle( GPUBuffer );
+	ts3GpaDeclareClassHandle( GPUBuffer );
+	ts3GpaDeclareClassHandle( IAVertexFormatDescriptor );
+	ts3GpaDeclareClassHandle( IAVertexStreamDescriptor );
 
 	/// @brief
 	using input_assembler_index_t = uint16;

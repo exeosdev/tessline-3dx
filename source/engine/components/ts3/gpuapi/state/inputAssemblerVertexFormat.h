@@ -5,6 +5,7 @@
 #define __TS3_GPUAPI_INPUT_ASSEMBLER_VERTEX_FORMAT_H__
 
 #include "inputAssemblerCommon.h"
+#include "graphicsPipelineDescriptor.h"
 
 namespace ts3::gpuapi
 {
@@ -13,19 +14,29 @@ namespace ts3::gpuapi
 	struct IAVertexInputAttributeDesc
 	{
 		/// Attribute index this definition refers to.
-		EIAVertexAttributeIndex attributeIndex;
+		EIAVertexAttributeIndex attributeIndex{ EIAVertexAttributeIndex::Undefined };
 
 		/// Attribute definition.
 		IAVertexInputAttributeInfo attributeInfo;
 	};
 
-	/// @brief
+	/// @brief A common representation of a vertex attribute array (layout/format of all active input attributes).
+	/// This is a driver-agnostic structure used by the engine to represent the vertex array part of the IA stage.
+	/// It is used to create a VertexStreamDescriptor via IAVertexStreamDescriptorCreateInfo.
+	/// @see IAVertexFormatDescriptor
+	/// @see IAVertexStreamDescriptorCreateInfo
 	struct IAVertexInputAttributeArray
 	{
 		using AttributeInfoArray = std::array<IAVertexInputAttributeInfo, E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM>;
 
+		/// A fixed array with all vertex attributes. Entry at index N corresponds to IA attribute N.
 		AttributeInfoArray attributes;
+
+		/// Bitmask with all bits corresponding to active vertex attributes.
+		/// @see EIAVertexAttributeFlags
 		Bitmask<EIAVertexAttributeFlags> activeAttributesMask{ 0 };
+
+		///
 		uint32 activeAttributesNum{ 0 };
 
 		TS3_FUNC_NO_DISCARD IAVertexInputAttributeInfo & operator[]( EIAVertexAttributeIndex pAttributeIndex ) noexcept
@@ -49,13 +60,25 @@ namespace ts3::gpuapi
 		}
 	};
 
-	struct IAVertexStreamDescriptorCreateInfo
+	/// @brief Create info struct for IAVertexFormatDescriptor.
+	struct IAVertexFormatDescriptorCreateInfo
 	{
+		/// A pointer to a vertex attribute array. If it is not null, the driver will use it for descriptor creation.
+		/// If the specified  object is not valid, descriptor creation fails immediately.
+		/// @see IAVertexInputAttributeArray
+		/// @see IAVertexFormatDescriptor::validateInputAttributeArray
 		const IAVertexInputAttributeArray * inputAttributeArray = nullptr;
+
+		/// An array with definitions of vertex attributes. It is used when inputAttributeArray is null.
+		/// @see IAVertexInputAttributeDesc
 		ArrayView<IAVertexInputAttributeDesc> inputAttributeDefinitions;
+
+		///
+		EPrimitiveTopology primitiveTopology;
 	};
 
-	class IAVertexFormatDescriptor
+	/// @brief
+	class IAVertexFormatDescriptor : public GraphicsPipelineDescriptor
 	{
 	public:
 		/// Active attributes mask. It contains all bits corresponding to attributes active as part of this descriptor.
@@ -65,22 +88,35 @@ namespace ts3::gpuapi
 		/// Number of active attributes enabled for the IA stage.
 		const uint32 mActiveAttributesNum;
 
+		///
+		const EPrimitiveTopology mPrimitiveTopology;
+
 	public:
-		IAVertexFormatDescriptor( Bitmask<EIAVertexAttributeFlags> pActiveAttributesMask, uint32 pActiveAttributesNum );
+		IAVertexFormatDescriptor( GPUDevice & pGPUDevice,
+		                          pipeline_descriptor_id_t pDescriptorID,
+		                          IAVertexInputAttributeArray pAttributeArray,
+		                          EPrimitiveTopology pPrimitiveTopology );
+
 		virtual ~IAVertexFormatDescriptor();
 
-		TS3_FUNC_NO_DISCARD bool isAttributeSet( EIAVertexAttributeIndex pAttributeIndex ) const noexcept
-		{
-			return mActiveAttributesMask.isSet( ecMakeIAVertexAttributeFlag( pAttributeIndex ) );
-		}
+		/// @brief
+		TS3_FUNC_NO_DISCARD virtual bool isValid() const noexcept override final;
 
-		TS3_FUNC_NO_DISCARD bool isValid() const
-		{
-			return ( mActiveAttributesNum > 0 ) && ( mActiveAttributesNum <= E_IA_CONSTANT_MAX_VERTEX_ATTRIBUTES_NUM );
-		}
+		TS3_FUNC_NO_DISCARD const IAVertexInputAttributeArray * getSourceAttributeArray() const noexcept;
+
+		/// @brief
+		TS3_FUNC_NO_DISCARD bool isAttributeSet( EIAVertexAttributeIndex pAttributeIndex ) const noexcept;
+
+		/// @brief
+		TS3_FUNC_NO_DISCARD static bool validateInputAttributeArray( const IAVertexInputAttributeArray & pAttributeArray ) noexcept;
+
+	private:
+		std::unique_ptr<IAVertexInputAttributeArray> _sourceAttributeArray;
 	};
 
 	TS3_FUNC_NO_DISCARD IAVertexInputAttributeArray createIAVertexInputAttributeArray( const ArrayView<IAVertexInputAttributeDesc> & pAttributeDefinitions );
+
+	TS3_FUNC_NO_DISCARD IAVertexFormatDescriptorHandle createIAVertexFormatDescriptor( const IAVertexFormatDescriptorCreateInfo & pCreateInfo );
 
 }; // namespace ts3::gpuapi
 

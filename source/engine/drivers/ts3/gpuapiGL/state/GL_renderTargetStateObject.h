@@ -4,7 +4,7 @@
 #ifndef __TS3DRIVER_GPUAPI_GLCOMMON_RENDER_TARGET_STATE_OBJECT_H__
 #define __TS3DRIVER_GPUAPI_GLCOMMON_RENDER_TARGET_STATE_OBJECT_H__
 
-#include "GL_pipelineStateDesc.h"
+#include "GL_graphicsPipelineState.h"
 #include <ts3/gpuapi/state/renderTargetStateObject.h>
 
 namespace ts3::gpuapi

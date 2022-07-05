@@ -15,6 +15,11 @@ namespace ts3::gpuapi
 	template <typename TpClass>
 	using GpaHandle = SharedHandle<TpClass>;
 
+#define ts3GpaDeclareClassHandle( pClassName ) \
+    class pClassName; \
+    using pClassName##Handle = SharedHandle<pClassName>; \
+    using pClassName##WeakHandle = WeakHandle<pClassName>
+
 	enum EGPUSystemMetrics : uint32
 	{
 		E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM = 16,

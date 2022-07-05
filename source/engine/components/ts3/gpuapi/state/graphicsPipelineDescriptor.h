@@ -12,8 +12,18 @@ namespace ts3::gpuapi
 	class GraphicsPipelineDescriptor : public GPUBaseObject
 	{
 	public:
-		GraphicsPipelineDescriptor();
+		pipeline_descriptor_id_t const mDescriptorID;
+
+		EGraphicsPipelineDescriptorType const mDescriptorType;
+
+	public:
+		explicit GraphicsPipelineDescriptor( GPUDevice & pGPUDevice,
+											 pipeline_descriptor_id_t pDescriptorID,
+											 EGraphicsPipelineDescriptorType pDescriptorType );
+
 		virtual ~GraphicsPipelineDescriptor();
+
+		TS3_FUNC_NO_DISCARD virtual bool isValid() const noexcept = 0;
 	};
 
 } // namespace ts3::gpuapi

@@ -5,9 +5,9 @@
 #define __TS3DRIVER_GPUAPI_GLCOMMON_GPU_DEVICE_H__
 
 #include "GL_coreAPIProxy.h"
-#include "state/GL_pipelineStateDesc.h"
+#include "state/GL_graphicsPipelineState.h"
 #include <ts3/gpuapi/gpuDevice.h>
-#include <ts3/gpuapi/state/graphicsPipelineStateDescriptorCache.h>
+#include <ts3/gpuapi/state/graphicsPipelineDescriptorCache.h>
 
 namespace ts3::gpuapi
 {

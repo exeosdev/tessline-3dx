@@ -8,10 +8,15 @@
 #include <ts3/math/vectorOps.h>
 #include <ts3/math/matrixUtils.h>
 
+#include <ts3/gpuapi/state/inputAssemblerVertexFormat.h>
+
 namespace math = ts3::math;
 
 int main( int argc, char ** argv )
 {
+	const auto ss1 = sizeof(ts3::gpuapi::IAVertexInputAttributeInfo);
+	const auto ss2 = sizeof(ts3::gpuapi::IAVertexInputAttributeArray);
+
 	using Vec4f = math::Vector4<float>;
 	using Mat2f = math::Matrix<float,2,2>;
 	using Mat4f = math::Matrix4xC<float,4>;

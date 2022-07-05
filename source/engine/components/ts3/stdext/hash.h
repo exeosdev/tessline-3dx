@@ -23,13 +23,13 @@ namespace ts3
 		size_t dataSize;
 
 		template <typename TpChar>
-		HashInput( const std::basic_string<TpChar> & pString )
+		explicit HashInput( const std::basic_string<TpChar> & pString )
 		: data( pString.c_str() )
 		, dataSize( pString.length() * sizeof( TpChar ) )
 		{}
 
 		template <typename Tp>
-		HashInput( const Tp & pObject )
+		explicit HashInput( const Tp & pObject )
 		: data( &pObject )
 		, dataSize( sizeof( Tp ) )
 		{}
@@ -85,14 +85,14 @@ namespace ts3
 	struct HashGen
 	{
 		template <HashAlgo tpHashAlgo>
-		static HashObject<tpHashAlgo> compute( const void * pData, size_t pDataLength )
+		TS3_FUNC_NO_DISCARD static HashObject<tpHashAlgo> compute( const void * pData, size_t pDataLength )
 		{
-			auto hashValue = HashTraits<tpHashAlgo>::compute( pData, pDataLength );
+			const auto hashValue = HashTraits<tpHashAlgo>::compute( pData, pDataLength );
 			return HashObject<tpHashAlgo>{ hashValue };
 		}
 
 		template <HashAlgo tpHashAlgo>
-		static HashObject<tpHashAlgo> compute( const HashInput & pInput )
+		TS3_FUNC_NO_DISCARD static HashObject<tpHashAlgo> compute( const HashInput & pInput )
 		{
 			return compute<tpHashAlgo>( pInput.data, pInput.dataSize );
 		}
@@ -110,14 +110,14 @@ namespace ts3
 		}
 
 		template <HashAlgo tpHashAlgo>
-		static HashObject<tpHashAlgo> update( const HashObject<tpHashAlgo> & pHash, const void * pData, size_t pDataLength )
+		TS3_FUNC_NO_DISCARD static HashObject<tpHashAlgo> update( const HashObject<tpHashAlgo> & pHash, const void * pData, size_t pDataLength )
 		{
 			auto hashValue = HashTraits<tpHashAlgo>::update( pHash.hashValue, pData, pDataLength );
 			return HashObject<tpHashAlgo>{ hashValue };
 		}
 
 		template <HashAlgo tpHashAlgo>
-		static HashObject<tpHashAlgo> update( const HashObject<tpHashAlgo> & pHash, const HashInput & pInput )
+		TS3_FUNC_NO_DISCARD static HashObject<tpHashAlgo> update( const HashObject<tpHashAlgo> & pHash, const HashInput & pInput )
 		{
 			return update( pHash, pInput.data, pInput.dataSize );
 		}
@@ -136,37 +136,37 @@ namespace ts3
 	};
 
 	template <HashAlgo tpHashAlgo>
-	constexpr inline bool operator==( const HashObject<tpHashAlgo> & pLhs, const HashObject<tpHashAlgo> & pRhs )
+	inline constexpr bool operator==( const HashObject<tpHashAlgo> & pLhs, const HashObject<tpHashAlgo> & pRhs )
 	{
 		return pLhs.hashValue == pRhs.hashValue;
 	}
 
 	template <HashAlgo tpHashAlgo>
-	constexpr inline bool operator!=( const HashObject<tpHashAlgo> & pLhs, const HashObject<tpHashAlgo> & pRhs )
+	inline constexpr bool operator!=( const HashObject<tpHashAlgo> & pLhs, const HashObject<tpHashAlgo> & pRhs )
 	{
 		return pLhs.hashValue != pRhs.hashValue;
 	}
 
 	template <HashAlgo tpHashAlgo>
-	constexpr inline bool operator<( const HashObject<tpHashAlgo> & pLhs, const HashObject<tpHashAlgo> & pRhs )
+	inline constexpr bool operator<( const HashObject<tpHashAlgo> & pLhs, const HashObject<tpHashAlgo> & pRhs )
 	{
 		return pLhs.hashValue < pRhs.hashValue;
 	}
 
 	template <HashAlgo tpHashAlgo>
-	constexpr inline bool operator<=( const HashObject<tpHashAlgo> & pLhs, const HashObject<tpHashAlgo> & pRhs )
+	inline constexpr bool operator<=( const HashObject<tpHashAlgo> & pLhs, const HashObject<tpHashAlgo> & pRhs )
 	{
 		return pLhs.hashValue <= pRhs.hashValue;
 	}
 
 	template <HashAlgo tpHashAlgo>
-	constexpr inline bool operator>( const HashObject<tpHashAlgo> & pLhs, const HashObject<tpHashAlgo> & pRhs )
+	inline constexpr bool operator>( const HashObject<tpHashAlgo> & pLhs, const HashObject<tpHashAlgo> & pRhs )
 	{
 		return pLhs.hashValue > pRhs.hashValue;
 	}
 
 	template <HashAlgo tpHashAlgo>
-	constexpr inline bool operator>=( const HashObject<tpHashAlgo> & pLhs, const HashObject<tpHashAlgo> & pRhs )
+	inline constexpr bool operator>=( const HashObject<tpHashAlgo> & pLhs, const HashObject<tpHashAlgo> & pRhs )
 	{
 		return pLhs.hashValue >= pRhs.hashValue;
 	}

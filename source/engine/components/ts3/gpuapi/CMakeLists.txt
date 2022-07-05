@@ -68,7 +68,6 @@ set( TS3_GPUAPI_SRC_FILES
         "state/commonGPUStateDefs.h"
         "state/gpuStateObject.h"
         "state/gpuStateObject.cpp"
-        "state/graphicsPipelineDescriptorCache.h"
         "state/graphicsPipelineStateCommon.h"
         "state/graphicsPipelineStateDescriptors.h"
         "state/inputAssemblerCommon.h"

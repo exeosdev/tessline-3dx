@@ -17,7 +17,6 @@ namespace ts3::gpuapi
 
 	struct ColorAttachmentBlendConfig
 	{
-		EActiveState blendActive;
 		math::RGBAColorU8 constantFactor;
 		EBlendFactor factorSrcColor;
 		EBlendFactor factorSrcAlpha;
@@ -30,6 +29,7 @@ namespace ts3::gpuapi
 
 	struct BlendConfig
 	{
+		EActiveState blendActive;
 		ColorAttachmentBlendConfig colorAttachmentConfigs[E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
 		Bitmask<EBlendFlags> flags = 0;
 	};

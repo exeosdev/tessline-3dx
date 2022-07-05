@@ -6,7 +6,6 @@
 
 #include "../memory/commonGPUMemoryDefs.h"
 #include <ts3/stdext/hash.h>
-#include <list>
 
 namespace ts3::gpuapi
 {
@@ -22,8 +21,10 @@ namespace ts3::gpuapi
 	using shader_input_ref_id_t = uint64;
 	using shader_input_index_t = uint32;
 
-	using pipeline_input_desc_hash_t = HashObject<HashAlgo::FNV1A>;
 	using pipeline_descriptor_id_t = HashObject<HashAlgo::FNV1A>;
+	using pipeline_descriptor_input_hash_t = HashObject<HashAlgo::FNV1A>;
+
+	inline constexpr auto CX_PIPELINE_DESCRIPTOR_ID_INVALID = HashObject<HashAlgo::FNV1A>{};
 
 	/// @brief
 	enum ERenderTargetAttachmentIndex : uint32
@@ -228,7 +229,7 @@ namespace ts3::gpuapi
 		return static_cast<EShaderInputResourceClass>( ( static_cast<uint32>( pResourceType ) >> 16u ) & 0xFFFFu );
 	}
 
-	enum class GraphicsPipelineDescriptorType : enum_default_value_t
+	enum class EGraphicsPipelineDescriptorType : enum_default_value_t
 	{
 		/// BlendStateDescriptor
 		BlendState,
@@ -253,11 +254,9 @@ namespace ts3::gpuapi
 
 		/// GraphicsShaderBindingDescriptor
 		ShaderBinding,
-	};
 
-	struct PipelineDescriptorID
-	{
-		pipeline_input_desc_hash_t inputDescHash;
+		///
+		Unknown
 	};
 
 } // namespace ts3::gpuapi

@@ -1,5 +1,5 @@
 
-#include "GL_pipelineStateDesc.h"
+#include "GL_graphicsPipelineState.h"
 #include <ts3/gpuapiGL/GL_coreAPIProxy.h>
 #include <ts3/gpuapiGL/objects/GL_bufferObject.h>
 #include <ts3/gpuapiGL/objects/GL_vertexArrayObject.h>
@@ -32,7 +32,7 @@ namespace ts3::gpuapi
 			openglVSBDescriptor.indexBufferBinding.elementByteSize = 0u;
 		}
 
-		for( vertex_stream_index_t vertexInputStreamIndex = 0; vertexInputStreamIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM; ++vertexInputStreamIndex )
+		for( vertex_stream_index_t vertexInputStreamIndex = 0; vertexInputStreamIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_STREAMS_NUM; ++vertexInputStreamIndex )
 		{
 			const auto & vbBindingDesc = pCommonBinding.vertexBufferBindingArray[vertexInputStreamIndex];
 			if( vbBindingDesc.bufferObject )
@@ -207,11 +207,15 @@ namespace ts3::gpuapi
 			glVertexAttribFormat( vertexAttribute.attributeIndex, vertexAttribute.componentsNum, vertexAttribute.baseType, vertexAttribute.normalized, vertexAttribute.relativeOffset );
 			ts3OpenGLHandleLastError();
 
+			// NOTE: This call implicitly modifies the binding between attribute index and vertex stream slot.
+			// Internally, it does the equivalent of:
+			// 1. glVertexBindingDivisor( attributeIndex, instanceRate );
+			// 2. glVertexAttribBinding( attributeIndex, attributeIndex );
 			glVertexAttribDivisor( vertexAttribute.attributeIndex, vertexAttribute.instanceRate );
 			ts3OpenGLHandleLastError();
 
-			// This must be called *AFTER* glEnableVertexAttribArray and glVertexAttribFormat. TODO: documentation?
-			// Moving this up causes crash during an actual draw call on at least Quadro T2000 and RX580 (Win 10).
+			// This call has to be executed after any call that implicitly modifies vertex attribute binding.
+			// One of the example is glVertexAttribDivisor() above (the actual reason of the old reported crash).
 			glVertexAttribBinding( vertexAttribute.attributeIndex, vertexAttribute.streamIndex );
 			ts3OpenGLHandleLastError();
 		}

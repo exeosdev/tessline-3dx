@@ -33,18 +33,18 @@ namespace ts3
 		using ByteType = typename ArrayViewByteType<std::is_const<Tp>::value>::Type;
 		
 		ArrayView()
-		: _beginPtr( nullptr )
+		: _dataPtr( nullptr )
 		, _size( 0 )
 		{}
 
 		ArrayView( Tp * pMemory, size_t pSize )
-		: _beginPtr( pMemory )
+		: _dataPtr( pMemory )
 		, _size( pSize )
 		{}
 
 		template <typename TpOther>
 		ArrayView( const ArrayView<TpOther> & pOther )
-		: _beginPtr( pOther.data() )
+		: _dataPtr( pOther.data() )
 		, _size( pOther.size() )
 		{}
 
@@ -60,12 +60,12 @@ namespace ts3
 
 		TS3_FUNC_NO_DISCARD ArrayView<ByteType> asByteView() const
 		{
-			return ArrayView<ByteType>{ reinterpret_cast<ByteType *>( _beginPtr ), _size * sizeof( Tp ) };
+			return ArrayView<ByteType>{ reinterpret_cast<ByteType *>( _dataPtr ), _size * sizeof( Tp ) };
 		}
 
 		TS3_FUNC_NO_DISCARD Tp * data() const
 		{
-			return _beginPtr;
+			return _dataPtr;
 		}
 
 		TS3_FUNC_NO_DISCARD size_t size() const
@@ -75,18 +75,18 @@ namespace ts3
 
 		TS3_FUNC_NO_DISCARD bool empty() const
 		{
-			return _beginPtr && ( _size > 0 );
+			return _dataPtr && ( _size > 0 );
 		}
 
 		void swap( ArrayView & pOther )
 		{
-			std::swap( _beginPtr, pOther.begin );
+			std::swap( _dataPtr, pOther._dataPtr );
 			std::swap( _size, pOther._size );
 		}
 
 	private:
 		// Pointer to the beginning of the data.
-		Tp * _beginPtr;
+		Tp * _dataPtr;
 		// Size of the data, in number of elements of the underlying type (Tp).
 		size_t _size;
 	};

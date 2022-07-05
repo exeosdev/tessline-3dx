@@ -4,9 +4,9 @@
 #ifndef __TS3DRIVER_GPUAPI_GLCOMMON_VERTEX_STREAM_STATE_OBJECT_H__
 #define __TS3DRIVER_GPUAPI_GLCOMMON_VERTEX_STREAM_STATE_OBJECT_H__
 
-#include "GL_pipelineStateDesc.h"
+#include "GL_graphicsPipelineState.h"
 #include "../objects/GL_bufferObject.h"
-#include "../state/GL_pipelineStateDesc.h"
+#include "../state/GL_graphicsPipelineState.h"
 #include <ts3/gpuapi/state/vertexStreamStateObject.h>
 
 namespace ts3::gpuapi

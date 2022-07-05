@@ -4,15 +4,21 @@
 namespace ts3::gpuapi
 {
 
-	IAVertexStreamDescriptor::IAVertexStreamDescriptor( Bitmask<EIAVertexStreamBindingFlags> pActiveBindingsMask,
-	                                                    uint16 pVertexBufferActiveBindingsNum,
-	                                                    uint16 pVertexBufferActiveRangesNum )
-	: mActiveBindingsMask( pActiveBindingsMask )
-	, mVertexBufferActiveBindingsNum( pVertexBufferActiveBindingsNum )
-	, mVertexBufferActiveRangesNum( pVertexBufferActiveRangesNum )
+	IAVertexStreamDescriptor::IAVertexStreamDescriptor( GPUDevice & pGPUDevice,
+	                                                    pipeline_descriptor_id_t pDescriptorID,
+	                                                    const IAVertexStreamBufferBinding & pBufferBinding )
+	: GraphicsPipelineDescriptor( pGPUDevice, pDescriptorID, EGraphicsPipelineDescriptorType::IAVertexStream )
+	, mActiveBindingsMask( pBufferBinding.activeBindingsMask )
+	, mActiveVertexBufferBindingsNum( trunc_numeric_cast<uint16>( pBufferBinding.activeVertexBufferBindingsNum ) )
+	, mActiveVertexBufferRangesNum( trunc_numeric_cast<uint16>( pBufferBinding.activeVertexBufferRangesNum ) )
 	{}
 
 	IAVertexStreamDescriptor::~IAVertexStreamDescriptor() = default;
+
+	bool IAVertexStreamDescriptor::isValid() const noexcept
+	{
+		return ( mActiveVertexBufferBindingsNum > 0 ) && ( mActiveVertexBufferBindingsNum <= E_IA_CONSTANT_MAX_VERTEX_ATTRIBUTES_NUM );
+	}
 
 
 	IAVertexStreamBufferBinding createIAVertexStreamBufferBinding( const ArrayView<IAVertexBufferBindingDesc> & pVertexBufferBindings,

@@ -7,7 +7,7 @@
 #include "../DX11_prerequisites.h"
 #include <ts3/gpuapi/state/pipelineStateDesc.h>
 #include <ts3/gpuapi/state/vertexDataSourceDesc.h>
-#include <ts3/gpuapi/state/graphicsPipelineStateDescriptorCache.h>
+#include <ts3/gpuapi/state/graphicsPipelineDescriptorCache.h>
 
 namespace ts3::gpuapi
 {
@@ -105,9 +105,9 @@ namespace ts3::gpuapi
 		};
 		struct DX11VertexBufferBinding
 		{
-			ID3D11Buffer * bufferArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
-			UINT           offsetArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
-			UINT           strideArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_INPUT_STREAMS_NUM];
+			ID3D11Buffer * bufferArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_STREAMS_NUM];
+			UINT           offsetArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_STREAMS_NUM];
+			UINT           strideArray[E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_STREAMS_NUM];
 		};
 		using DX11VertexStreamRange = VertexDataSourceBinding::VertexStreamRange;
 		using DX11VertexStreamRangeList = VertexDataSourceBinding::VertexStreamRangeList;
