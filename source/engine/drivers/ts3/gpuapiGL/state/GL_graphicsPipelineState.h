@@ -110,7 +110,7 @@ namespace ts3::gpuapi
 			GLuint elementByteSize;
 		};
 
-		struct GLVertexBuffersBinding
+		struct GLVertexBuffersBindings
 		{
 		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
 			struct GLVBBinding
@@ -128,12 +128,12 @@ namespace ts3::gpuapi
 		};
 
 		GLIndexBufferBinding indexBufferBinding;
-		GLVertexBuffersBinding vertexBuffersBinding;
-		uint32 vertexBufferActiveBindingsNum;
+		GLVertexBuffersBindings vertexBuffersBindings;
+		uint32 vertexBufferActiveIndicesNum;
 	};
 
 	using GLIndexBufferBinding = GLVertexStreamBindingDescriptor::GLIndexBufferBinding;
-	using GLVertexBuffersBinding = GLVertexStreamBindingDescriptor::GLVertexBuffersBinding;
+	using GLVertexBuffersBindings = GLVertexStreamBindingDescriptor::GLVertexBuffersBindings;
 
 	GLVertexStreamBindingDescriptor createGLVertexStreamBindingDescriptor( const VertexDataSourceBinding & pCommonBinding );
 

@@ -12,7 +12,7 @@ namespace ts3::gpuapi
 	GLVertexStreamBindingDescriptor createGLVertexStreamBindingDescriptor( const VertexDataSourceBinding & pCommonBinding )
 	{
 		GLVertexStreamBindingDescriptor openglVSBDescriptor;
-		openglVSBDescriptor.vertexBufferActiveBindingsNum = 0;
+		openglVSBDescriptor.vertexBufferActiveIndicesNum = 0;
 
 		if( pCommonBinding.indexBufferBinding.bufferObject )
 		{
@@ -46,10 +46,10 @@ namespace ts3::gpuapi
 				openglVSBDescriptor.vbBindingArray[vertexInputStreamIndex].stride = static_cast<GLsizei>( vbBindingDesc.dataStride );
 				openglVSBDescriptor.vbBindingArrayindingsNum += 1;
 			#else
-				openglVSBDescriptor.vertexBuffersBinding.vbHandleArray[vertexInputStreamIndex] = vboHandle;
-				openglVSBDescriptor.vertexBuffersBinding.vbOffsetArray[vertexInputStreamIndex] = trunc_numeric_cast<GLintptr>( vbBindingDesc.dataOffset );
-				openglVSBDescriptor.vertexBuffersBinding.vbStrideArray[vertexInputStreamIndex] = trunc_numeric_cast<GLsizei>( vbBindingDesc.dataStride );
-				openglVSBDescriptor.vertexBufferActiveBindingsNum += 1;
+				openglVSBDescriptor.vertexBuffersBindings.vbHandleArray[vertexInputStreamIndex] = vboHandle;
+				openglVSBDescriptor.vertexBuffersBindings.vbOffsetArray[vertexInputStreamIndex] = trunc_numeric_cast<GLintptr>( vbBindingDesc.dataOffset );
+				openglVSBDescriptor.vertexBuffersBindings.vbStrideArray[vertexInputStreamIndex] = trunc_numeric_cast<GLsizei>( vbBindingDesc.dataStride );
+				openglVSBDescriptor.vertexBufferActiveIndicesNum += 1;
 			#endif
 			}
 			else
@@ -59,9 +59,9 @@ namespace ts3::gpuapi
 				openglVSBDescriptor.vbBindingArray[vertexInputStreamIndex].offset = 0u;
 				openglVSBDescriptor.vbBindingArray[vertexInputStreamIndex].stride = 0u;
 			#else
-				openglVSBDescriptor.vertexBuffersBinding.vbHandleArray[vertexInputStreamIndex] = 0u;
-				openglVSBDescriptor.vertexBuffersBinding.vbOffsetArray[vertexInputStreamIndex] = 0u;
-				openglVSBDescriptor.vertexBuffersBinding.vbStrideArray[vertexInputStreamIndex] = 0u;
+				openglVSBDescriptor.vertexBuffersBindings.vbHandleArray[vertexInputStreamIndex] = 0u;
+				openglVSBDescriptor.vertexBuffersBindings.vbOffsetArray[vertexInputStreamIndex] = 0u;
+				openglVSBDescriptor.vertexBuffersBindings.vbStrideArray[vertexInputStreamIndex] = 0u;
 			#endif
 			}
 		}
@@ -162,7 +162,7 @@ namespace ts3::gpuapi
 			if( const auto & vertexAttributeDesc = pInputFormatDesc.vertexAttributeArray[attributeIndex] )
 			{
 				auto attributeRelativeOffset = vertexAttributeDesc.relativeOffset;
-				if( attributeRelativeOffset == CX_VERTEX_ATTRIBUTE_OFFSET_PACKED_APPEND )
+				if( attributeRelativeOffset == CX_VERTEX_ATTRIBUTE_OFFSET_APPEND )
 				{
 					attributeRelativeOffset = currentAttributePackedRelativeOffset;
 				}

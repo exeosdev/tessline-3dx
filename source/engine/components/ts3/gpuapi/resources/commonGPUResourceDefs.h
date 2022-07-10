@@ -69,7 +69,7 @@ namespace ts3::gpuapi
 		E_GPU_RESOURCE_CONTENT_FLAG_TEMPORARY_BIT  = 0x08,
 
 		// Mask with all valid CONTENT_FLAG bits set.
-		E_GPU_RESOURCE_CONTENT_MASK_ALL_BITS       = 0x0F,
+		E_GPU_RESOURCE_CONTENT_MASK_ALL            = 0x0F,
 	};
 
 	/// @brief

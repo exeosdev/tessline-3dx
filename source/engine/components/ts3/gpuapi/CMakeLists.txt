@@ -70,6 +70,7 @@ set( TS3_GPUAPI_SRC_FILES
         "state/gpuStateObject.cpp"
         "state/graphicsPipelineStateCommon.h"
         "state/graphicsPipelineStateDescriptors.h"
+        "state/graphicsPipelineStateDescriptors.cpp
         "state/inputAssemblerCommon.h"
         "state/inputAssemblerVertexFormat.h"
         "state/inputAssemblerVertexFormat.cpp"
@@ -93,8 +94,8 @@ set( TS3_GPUAPI_SRC_FILES
         "state/renderTargetCommon.cpp"
         "state/renderTargetStateObject.h"
         "state/renderTargetStateObject.cpp"
-        "state/shaderBinding.h"
-        "state/shaderBinding.cpp"
+        "state/graphicsShaderBinding.h"
+        "state/graphicsShaderBinding.cpp"
         "state/shaderInputSignature.h"
         "state/shaderInputSignature.cpp"
         )

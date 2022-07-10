@@ -11,7 +11,7 @@ namespace ts3::gpuapi
 
 	ts3DeclareClassHandle( Texture );
 
-	constexpr uint32 cxTextureMipLevelAll = ts3::Limits<uint32>::maxValue;
+	constexpr uint32 cxTextureMipLevelAll = Limits<uint32>::maxValue;
 
 	enum class ETextureDimensionClass : enum_default_value_t
 	{

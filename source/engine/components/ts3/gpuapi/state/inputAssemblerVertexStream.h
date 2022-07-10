@@ -10,49 +10,31 @@
 namespace ts3::gpuapi
 {
 
-	/// @brief Describes a single, continuous range of vertex buffer binding points in the vertex stream.
-	struct IAVertexStreamBufferRange
-	{
-		/// First index of the vertex buffer binding this range defines.
-		input_assembler_index_t firstIndex{ E_IA_CONSTANT_VERTEX_STREAM_INDEX_UNDEFINED };
-
-		/// Length of this range, i.e. number of vertex buffers within the range.
-		input_assembler_index_t length{ 0 };
-	};
-
-	/// @brief A definition of a vertex buffer binding. Associates IAVertexBufferBinding with a specific VB binding point.
-	struct IAVertexBufferBindingDesc
-	{
-		/// VB binding point index this binding refers to.
-		EIAVertexStreamVBIndex streamIndex{ EIAVertexStreamVBIndex::Undefined };
-
-		/// Binding definition.
-		IAVertexBufferBinding vbBinding;
-	};
-
 	/// @brief
 	struct IAVertexStreamBufferBinding
 	{
 		using VertexBufferBindingArray = std::array<IAVertexBufferBinding, E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_STREAMS_NUM>;
 		using VertexBufferIndexArray = std::vector<input_assembler_index_t>;
-		using VertexBufferRangeArray = std::vector<IAVertexStreamBufferRange>;
+		using VertexBufferRangeArray = std::vector<IAVertexBufferRange>;
 
 		Bitmask<EIAVertexStreamBindingFlags> activeBindingsMask{ 0 };
 		uint32 activeVertexBufferBindingsNum{ 0 };
 		uint32 activeVertexBufferRangesNum{ 0 };
 		IAIndexBufferBinding indexBufferBinding;
-		VertexBufferBindingArray vertexBufferBindings;
-		VertexBufferIndexArray vertexBufferActiveBindings;
+		VertexBufferBindingArray vertexBufferBindingArray;
+		VertexBufferIndexArray vertexBufferActiveIndices;
 		VertexBufferRangeArray vertexBufferActiveRanges;
 
-		TS3_FUNC_NO_DISCARD IAVertexBufferBinding & operator[]( EIAVertexStreamVBIndex pVBIndex ) noexcept
+		TS3_FUNC_NO_DISCARD IAVertexBufferBinding & operator[]( input_assembler_index_t pVBIndex ) noexcept
 		{
-			return vertexBufferBindings[static_cast<input_assembler_index_t>( pVBIndex )];
+			ts3DebugAssert( ecIsIAVertexStreamVBIndexValid( pVBIndex ) );
+			return vertexBufferBindingArray[pVBIndex];
 		}
 
-		TS3_FUNC_NO_DISCARD const IAVertexBufferBinding & operator[]( EIAVertexStreamVBIndex pVBIndex ) const noexcept
+		TS3_FUNC_NO_DISCARD const IAVertexBufferBinding & operator[]( input_assembler_index_t pVBIndex ) const noexcept
 		{
-			return vertexBufferBindings[static_cast<input_assembler_index_t>( pVBIndex )];
+			ts3DebugAssert( ecIsIAVertexStreamVBIndexValid( pVBIndex ) );
+			return vertexBufferBindingArray[pVBIndex];
 		}
 
 		TS3_FUNC_NO_DISCARD bool isEmpty() const noexcept
@@ -64,6 +46,16 @@ namespace ts3::gpuapi
 		{
 			return !isEmpty();
 		}
+	};
+
+	/// @brief A definition of a vertex buffer binding. Associates IAVertexBufferBinding with a specific VB binding point.
+	struct IAVertexBufferBindingDesc
+	{
+		/// VB binding point index this binding refers to.
+		input_assembler_index_t streamIndex{ E_IA_CONSTANT_VERTEX_STREAM_INDEX_UNDEFINED };
+
+		/// Binding definition.
+		IAVertexBufferBinding vbBinding;
 	};
 
 	/// @brief Create info struct for IAVertexStreamDescriptor.
@@ -97,25 +89,17 @@ namespace ts3::gpuapi
 		const uint16 mActiveVertexBufferRangesNum;
 
 	public:
-		IAVertexStreamDescriptor( GPUDevice & pGPUDevice,
-		                          pipeline_descriptor_id_t pDescriptorID,
-		                          IAVertexStreamBufferBinding pBufferBinding );
+		IAVertexStreamDescriptor(
+				GPUDevice & pGPUDevice,
+				pipeline_descriptor_id_t pDescriptorID,
+				const IAVertexStreamBufferBinding & pBufferBinding );
 
 		virtual ~IAVertexStreamDescriptor();
-
-		/// @copydoc GraphicsPipelineDescriptor::isValid
-		TS3_FUNC_NO_DISCARD bool isValid() const noexcept override final;
 
 		/// @brief
 		TS3_FUNC_NO_DISCARD bool isIndexBufferSet() const noexcept
 		{
 			return mActiveBindingsMask.isSet( E_IA_VERTEX_STREAM_BINDING_FLAG_INDEX_BUFFER );
-		}
-
-		/// @brief
-		TS3_FUNC_NO_DISCARD bool isVertexBufferSet( EIAVertexStreamVBIndex pVBIndex ) const noexcept
-		{
-			return mActiveBindingsMask.isSet( ecMakeIAVertexStreamVBFlag( pVBIndex ) );
 		}
 
 		/// @brief
@@ -125,10 +109,20 @@ namespace ts3::gpuapi
 		}
 	};
 
-	TS3_FUNC_NO_DISCARD IAVertexStreamBufferBinding createIAVertexStreamBufferBinding( const ArrayView<IAVertexBufferBindingDesc> & pVertexBufferBindings,
-																					   const IAIndexBufferBinding & pIndexBufferBinding );
+	// State Management Utils
+	namespace smu
+	{
 
-	TS3_FUNC_NO_DISCARD IAVertexStreamDescriptorHandle createIAVertexStreamDescriptor( const IAVertexStreamDescriptorCreateInfo & pCreateInfo );
+		/// @brief
+		TS3_GPUAPI_API_NO_DISCARD IAVertexStreamBufferBinding createIAVertexStreamBufferBinding(
+				const ArrayView<IAVertexBufferBindingDesc> & pVertexBufferBindings,
+				const IAIndexBufferBinding & pIndexBufferBinding );
+
+		/// @brief
+		TS3_GPUAPI_API_NO_DISCARD bool validateIAVertexStreamBufferBinding(
+				const IAVertexStreamBufferBinding & pBufferBinding ) noexcept;
+
+	}
 
 } // namespace ts3::gpuapi
 

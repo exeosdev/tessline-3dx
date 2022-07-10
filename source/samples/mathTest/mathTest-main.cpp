@@ -9,13 +9,14 @@
 #include <ts3/math/matrixUtils.h>
 
 #include <ts3/gpuapi/state/inputAssemblerVertexFormat.h>
+#include <ts3/gpuapi/state/graphicsPipelineStateCommon.h>
 
 namespace math = ts3::math;
 
 int main( int argc, char ** argv )
 {
-	const auto ss1 = sizeof(ts3::gpuapi::IAVertexInputAttributeInfo);
-	const auto ss2 = sizeof(ts3::gpuapi::IAVertexInputAttributeArray);
+	const auto ss1 = sizeof(ts3::gpuapi::BlendConfig);
+	const auto ss2 = sizeof(ts3::gpuapi::DepthStencilConfig);
 
 	using Vec4f = math::Vector4<float>;
 	using Mat2f = math::Matrix<float,2,2>;

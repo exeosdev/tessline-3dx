@@ -65,7 +65,7 @@ namespace ts3::gpuapi
 
 		static void updateGLIndexBufferBinding( const GLIndexBufferBinding & pBinding );
 
-		static void updateGLVertexBuffersBinding( const GLVertexBuffersBinding & pBinding );
+		static void updateGLVertexBuffersBindings( const GLVertexBuffersBindings & pBinding );
 
 	protected:
 		GLPipelineConfig _currentGLPipelineConfig;

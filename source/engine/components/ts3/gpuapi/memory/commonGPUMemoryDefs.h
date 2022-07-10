@@ -23,9 +23,9 @@ namespace ts3::gpuapi
     using GPUMemoryRegion = Region<gpu_memory_size_t>;
     using GPUMemoryRange = GPUMemoryRegion::Range;
 
-    inline constexpr gpu_memory_size_t CX_GPU_MEMORY_OFFSET_INVALID = ts3::Limits<gpu_memory_size_t>::maxValue;
+    inline constexpr gpu_memory_size_t CX_GPU_MEMORY_OFFSET_INVALID = Limits<gpu_memory_size_t>::maxValue;
 
-    inline constexpr gpu_memory_size_t CX_GPU_MEMORY_SIZE_MAX = ts3::Limits<gpu_memory_size_t>::maxValue;
+    inline constexpr gpu_memory_size_t CX_GPU_MEMORY_SIZE_MAX = Limits<gpu_memory_size_t>::maxValue;
 
 	/// @brief Flags representing various properties of host/device memory pools like access and heap properties.
 	enum EGPUMemoryFlags : gpu_memory_flags_value_t

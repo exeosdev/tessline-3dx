@@ -21,6 +21,7 @@ namespace ts3::gpuapi
 	enum class ECullMode : enum_default_value_t;
 	enum class EDepthWriteMask : enum_default_value_t;
 	enum class EGPUBufferTarget : enum_default_value_t;
+	enum class EIndexDataFormat : vertex_attrib_format_value_t;
 	enum class EPrimitiveFillMode : enum_default_value_t;
 	enum class EPrimitiveTopology : enum_default_value_t;
 	enum class EShaderType : uint32;
@@ -61,6 +62,8 @@ namespace ts3::gpuapi
 		GLenum translateGLCompFunc( ECompFunc pCompFunc );
 
 		GLenum translateGLCullMode( ECullMode pCullMode );
+
+		GLenum translateGLIndexDataFormat( EIndexDataFormat pIndexDataFormat );
 
 		GLenum translateGLPrimitiveFillMode( EPrimitiveFillMode pFillMode );
 

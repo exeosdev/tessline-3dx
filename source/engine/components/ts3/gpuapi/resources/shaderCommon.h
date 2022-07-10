@@ -29,14 +29,14 @@ namespace ts3::gpuapi
 
 	enum class EShaderType : uint32
 	{
-		GSVertex         = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX           ),
-		GSTessControl    = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_TESS_CONTROL     ),
-		GSTessEvaluation = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_TESS_EVALUATION  ),
-		GSGeometry       = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY         ),
-		GSAmplification  = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_AMPLIFICATION    ),
-		GSMesh           = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_MESH             ),
-		GSPixel          = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL            ),
-		CSCompute        = ecMakeShaderType( E_SHADER_STAGE_INDEX_COMPUTE                   ),
+		GSVertex         = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX          ),
+		GSTessControl    = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_TESS_CONTROL    ),
+		GSTessEvaluation = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_TESS_EVALUATION ),
+		GSGeometry       = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY        ),
+		GSAmplification  = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_AMPLIFICATION   ),
+		GSMesh           = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_MESH            ),
+		GSPixel          = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL           ),
+		CSCompute        = ecMakeShaderType( E_SHADER_STAGE_INDEX_COMPUTE                  ),
 		Unknown          = 0
 	};
 

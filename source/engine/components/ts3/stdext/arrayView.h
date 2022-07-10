@@ -53,9 +53,10 @@ namespace ts3
 		: ArrayView( &( pArray[0] ), tSize )
 		{}
 
-		explicit operator bool() const
+		void swap( ArrayView & pOther )
 		{
-			return !empty();
+			std::swap( _dataPtr, pOther._dataPtr );
+			std::swap( _size, pOther._size );
 		}
 
 		TS3_FUNC_NO_DISCARD ArrayView<ByteType> asByteView() const
@@ -78,10 +79,14 @@ namespace ts3
 			return _dataPtr && ( _size > 0 );
 		}
 
-		void swap( ArrayView & pOther )
+		explicit operator bool() const
 		{
-			std::swap( _dataPtr, pOther._dataPtr );
-			std::swap( _size, pOther._size );
+			return !empty();
+		}
+
+		TS3_FUNC_NO_DISCARD Tp & operator[]( size_t pIndex ) const
+		{
+			return _dataPtr[pIndex];
 		}
 
 	private:

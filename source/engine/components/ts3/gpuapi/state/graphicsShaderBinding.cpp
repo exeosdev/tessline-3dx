@@ -1,5 +1,5 @@
 
-#include "shaderBinding.h"
+#include "graphicsShaderBinding.h"
 #include "../resources/shader.h"
 #include <ts3/stdext/memory.h>
 

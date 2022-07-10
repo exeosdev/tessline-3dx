@@ -11,7 +11,7 @@ namespace ts3
 	{
 		struct HorizontalLayout
 		{
-			uint32 hLineAdvanceThreshold = ts3::Limits<uint32>::maxValue;
+			uint32 hLineAdvanceThreshold = Limits<uint32>::maxValue;
 			uint32 hSpacing = 0;
 		};
 		struct VerticalLayout

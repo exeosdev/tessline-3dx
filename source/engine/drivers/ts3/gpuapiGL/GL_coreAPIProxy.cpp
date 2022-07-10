@@ -407,6 +407,21 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
+	GLenum GLCoreAPIProxy::translateGLIndexDataFormat( EIndexDataFormat pIndexDataFormat )
+	{
+		switch( pIndexDataFormat )
+		{
+			ts3CaseReturn( EIndexDataFormat::Uint16, GL_UNSIGNED_SHORT );
+			ts3CaseReturn( EIndexDataFormat::Uint32, GL_UNSIGNED_INT   );
+
+			default:
+			{
+				break;
+			}
+		}
+		return GL_TS3_ERR_INVALID_PARAM;
+	}
+
 	GLenum GLCoreAPIProxy::translateGLPrimitiveFillMode( EPrimitiveFillMode pFillMode )
 	{
 	#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )

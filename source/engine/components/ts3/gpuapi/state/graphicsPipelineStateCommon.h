@@ -9,10 +9,10 @@
 namespace ts3::gpuapi
 {
 
-	enum EBlendFlags : uint32
+	enum EBlendConfigFlags : uint32
 	{
-		E_BLEND_FLAG_ENABLE_ALPHA_TO_COVERAGE_BIT = 0x01,
-		E_BLEND_FLAG_ENABLE_MRT_INDEPENDENT_BLEND_CONFIG_BIT = 0x02
+		E_BLEND_CONFIG_FLAG_ENABLE_ALPHA_TO_COVERAGE_BIT = 0x01,
+		E_BLEND_CONFIG_FLAG_ENABLE_MRT_INDEPENDENT_BLEND_CONFIG_BIT = 0x02
 	};
 
 	struct ColorAttachmentBlendConfig
@@ -31,7 +31,7 @@ namespace ts3::gpuapi
 	{
 		EActiveState blendActive;
 		ColorAttachmentBlendConfig colorAttachmentConfigs[E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
-		Bitmask<EBlendFlags> flags = 0;
+		Bitmask<EBlendConfigFlags> flags;
 	};
 
 	struct DepthStencilConfig

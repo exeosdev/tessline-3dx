@@ -18,9 +18,9 @@ namespace ts3
     using MemoryRegion = Region<memory_size_t>;
     using MemoryRange = MemoryRegion::Range;
 
-    constexpr memory_size_t CX_MEMORY_OFFSET_INVALID = ts3::Limits<memory_size_t>::maxValue;
+    constexpr memory_size_t CX_MEMORY_OFFSET_INVALID = Limits<memory_size_t>::maxValue;
 
-    constexpr memory_size_t CX_MEMORY_SIZE_MAX = ts3::Limits<memory_size_t>::maxValue;
+    constexpr memory_size_t CX_MEMORY_SIZE_MAX = Limits<memory_size_t>::maxValue;
 
 }
 

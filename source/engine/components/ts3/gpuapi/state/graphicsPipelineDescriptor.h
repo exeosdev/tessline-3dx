@@ -22,8 +22,6 @@ namespace ts3::gpuapi
 											 EGraphicsPipelineDescriptorType pDescriptorType );
 
 		virtual ~GraphicsPipelineDescriptor();
-
-		TS3_FUNC_NO_DISCARD virtual bool isValid() const noexcept = 0;
 	};
 
 } // namespace ts3::gpuapi

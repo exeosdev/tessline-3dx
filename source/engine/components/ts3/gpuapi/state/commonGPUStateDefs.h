@@ -26,8 +26,10 @@ namespace ts3::gpuapi
 
 	inline constexpr auto CX_PIPELINE_DESCRIPTOR_ID_INVALID = HashObject<HashAlgo::FNV1A>{};
 
+	inline constexpr gpu_memory_size_t CX_VERTEX_ATTRIBUTE_OFFSET_APPEND = Limits<gpu_memory_size_t>::maxValue;
+
 	/// @brief
-	enum ERenderTargetAttachmentIndex : uint32
+	enum ERenderTargetAttachmentIndex : uint8
 	{
 		E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_0,
 		E_RENDER_TARGET_ATTACHMENT_INDEX_COLOR_1,
@@ -61,7 +63,7 @@ namespace ts3::gpuapi
 				E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_STENCIL,
 	};
 
-	enum class EBlendFactor : enum_default_value_t
+	enum class EBlendFactor : uint8
 	{
 		Zero,
 		One,
@@ -77,7 +79,7 @@ namespace ts3::gpuapi
 		DstAlphaInv,
 	};
 
-	enum class EBlendOp : enum_default_value_t
+	enum class EBlendOp : uint8
 	{
 		Add,
 		Min,
@@ -86,13 +88,13 @@ namespace ts3::gpuapi
 		SubtractRev
 	};
 
-	enum class EBlendRenderTargetWriteMask : enum_default_value_t
+	enum class EBlendRenderTargetWriteMask : uint8
 	{
 		Zero = 0,
-		All = ts3::Limits<enum_default_value_t>::maxValue
+		All = Limits<uint8>::maxValue
 	};
 
-	enum class ECompFunc : enum_default_value_t
+	enum class ECompFunc : uint8
 	{
 		Never,
 		Always,
@@ -104,26 +106,26 @@ namespace ts3::gpuapi
 		LessEqual
 	};
 
-	enum class ECullMode : enum_default_value_t
+	enum class ECullMode : uint8
 	{
 		None,
 		Back,
 		Front
 	};
 
-	enum class EDepthWriteMask : enum_default_value_t
+	enum class EDepthWriteMask : uint8
 	{
 		Zero = 0,
-		All = ts3::Limits<enum_default_value_t>::maxValue
+		All = Limits<uint8>::maxValue
 	};
 
-	enum class EPrimitiveFillMode : enum_default_value_t
+	enum class EPrimitiveFillMode : uint8
 	{
 		Solid,
 		Wireframe
 	};
 
-	enum class EPrimitiveTopology : enum_default_value_t
+	enum class EPrimitiveTopology : uint8
 	{
 		Undefined,
 		PointList,
@@ -139,7 +141,7 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief
-	enum class ERenderTargetAttachmentID : enum_default_value_t
+	enum class ERenderTargetAttachmentID : uint8
 	{
 		RTColor0,
 		RTColor1,
@@ -163,7 +165,7 @@ namespace ts3::gpuapi
 		RTDepth
 	};
 
-	enum class EStencilOp : enum_default_value_t
+	enum class EStencilOp : uint8
 	{
 		Zero,
 		Keep,
@@ -175,13 +177,13 @@ namespace ts3::gpuapi
 		Invert
 	};
 
-	enum class ETriangleVerticesOrder : enum_default_value_t
+	enum class ETriangleVerticesOrder : uint8
 	{
 		Clockwise,
 		CounterClockwise
 	};
 
-	enum class EShaderInputParameterType : uint16
+	enum class EShaderInputParameterType : uint8
 	{
 		// D3D12: root constants
 		// Vulkan: push constants
@@ -193,7 +195,7 @@ namespace ts3::gpuapi
 		Sampler
 	};
 
-	enum class EShaderInputDescriptorType : uint16
+	enum class EShaderInputDescriptorType : uint8
 	{
 		// CBV/SRV/UAV
 		Resource = 1,
@@ -201,7 +203,7 @@ namespace ts3::gpuapi
 		Sampler,
 	};
 
-	enum class EShaderInputResourceClass : uint16
+	enum class EShaderInputResourceClass : uint8
 	{
 		CBV = 1,
 		SRV,
@@ -209,27 +211,27 @@ namespace ts3::gpuapi
 		Unknown = 0,
 	};
 
-	inline constexpr uint32 ecDeclareShaderInputResourceType( EShaderInputResourceClass pResourceClass, uint16 pIndex )
+	inline constexpr uint16 ecDeclareShaderInputResourceType( EShaderInputResourceClass pResourceClass, uint8 pIndex )
 	{
-		return ( ( static_cast<uint32>( pResourceClass ) << 16u ) | pIndex );
+		return ( ( static_cast<uint16>( pResourceClass ) << 8u ) | pIndex );
 	}
 
-	enum class EShaderInputResourceType : uint32
+	enum class EShaderInputResourceType : uint16
 	{
 		CBVConstantBuffer = ecDeclareShaderInputResourceType( EShaderInputResourceClass::CBV, 0 ),
 		SRVTextureBuffer  = ecDeclareShaderInputResourceType( EShaderInputResourceClass::SRV, 1 ),
 		SRVTextureImage   = ecDeclareShaderInputResourceType( EShaderInputResourceClass::SRV, 2 ),
 		UAVStorageBuffer  = ecDeclareShaderInputResourceType( EShaderInputResourceClass::UAV, 3 ),
 		UAVStorageImage   = ecDeclareShaderInputResourceType( EShaderInputResourceClass::UAV, 4 ),
-		Unknown        = 0
+		Unknown           = 0
 	};
 
 	inline constexpr EShaderInputResourceClass ecGetShaderInputResourceResourceClass( EShaderInputResourceType pResourceType )
 	{
-		return static_cast<EShaderInputResourceClass>( ( static_cast<uint32>( pResourceType ) >> 16u ) & 0xFFFFu );
+		return static_cast<EShaderInputResourceClass>( ( static_cast<uint32>( pResourceType ) >> 8u ) & 0xFFu );
 	}
 
-	enum class EGraphicsPipelineDescriptorType : enum_default_value_t
+	enum class EGraphicsPipelineDescriptorType : uint16
 	{
 		/// BlendStateDescriptor
 		BlendState,

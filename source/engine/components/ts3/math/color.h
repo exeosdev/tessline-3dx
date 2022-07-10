@@ -83,10 +83,10 @@ namespace ts3::math
 		{}
 
 		constexpr RGBAColorNorm( RGBAColor pColor )
-		: fpRed( static_cast<TpReal>( pColor.u8Red ) / static_cast<TpReal>( ts3::Limits<decltype( pColor.u8Red )>::maxValue ) )
-		, fpGreen( static_cast<TpReal>( pColor.u8Green ) / static_cast<TpReal>( ts3::Limits<decltype( pColor.u8Red )>::maxValue ) )
-		, fpBlue( static_cast<TpReal>( pColor.u8Blue ) / static_cast<TpReal>( ts3::Limits<decltype( pColor.u8Red )>::maxValue ) )
-		, fpAlpha( static_cast<TpReal>( pColor.u8Alpha ) / static_cast<TpReal>( ts3::Limits<decltype( pColor.u8Red )>::maxValue ) )
+		: fpRed( static_cast<TpReal>( pColor.u8Red ) / static_cast<TpReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
+		, fpGreen( static_cast<TpReal>( pColor.u8Green ) / static_cast<TpReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
+		, fpBlue( static_cast<TpReal>( pColor.u8Blue ) / static_cast<TpReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
+		, fpAlpha( static_cast<TpReal>( pColor.u8Alpha ) / static_cast<TpReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
 		{}
 	};
 

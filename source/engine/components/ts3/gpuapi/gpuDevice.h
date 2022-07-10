@@ -41,9 +41,14 @@ namespace ts3::gpuapi
 		ShaderHandle createShader( const ShaderCreateInfo & pCreateInfo );
 		TextureHandle createTexture( const TextureCreateInfo & pCreateInfo );
 
-		virtual GraphicsPipelineStateObjectHandle createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
-		virtual VertexStreamStateObjectHandle createVertexStreamStateObject( const VertexStreamStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
-		virtual RenderTargetStateObjectHandle createRenderTargetStateObject( const RenderTargetStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
+		virtual GraphicsPipelineStateObjectHandle createGraphicsPipelineStateObject(
+				const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
+
+		virtual VertexStreamStateObjectHandle createVertexStreamStateObject(
+				const VertexStreamStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
+
+		virtual RenderTargetStateObjectHandle createRenderTargetStateObject(
+				const RenderTargetStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
 
 		virtual void waitForCommandSync( CommandSync & pCommandSync ) = 0;
 

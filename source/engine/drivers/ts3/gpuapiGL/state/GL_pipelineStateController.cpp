@@ -80,8 +80,8 @@ namespace ts3::gpuapi
 		{
 			const auto * openglVSSO = pVertexStreamSO.queryInterface<GLVertexStreamStateObject>();
 
-			const auto & vertexBuffersBinding = openglVSSO->mGLVertexStreamBindingDescriptor.vertexBuffersBinding;
-			updateGLVertexBuffersBinding( vertexBuffersBinding );
+			const auto & vertexBuffersBindings = openglVSSO->mGLVertexStreamBindingDescriptor.vertexBuffersBindings;
+			updateGLVertexBuffersBindings( vertexBuffersBindings );
 
 			const auto & indexBufferBinding = openglVSSO->mGLVertexStreamBindingDescriptor.indexBufferBinding;
 			updateGLIndexBufferBinding( indexBufferBinding );
@@ -234,7 +234,7 @@ namespace ts3::gpuapi
 		ts3OpenGLHandleLastError();
 	}
 
-	void GLGraphicsPipelineStateController::updateGLVertexBuffersBinding( const GLVertexBuffersBinding & pBinding )
+	void GLGraphicsPipelineStateController::updateGLVertexBuffersBindings( const GLVertexBuffersBindings & pBinding )
 	{
 	#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
 		for( uint32 streamIndex = 0; streamIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_STREAMS_NUM; ++streamIndex )

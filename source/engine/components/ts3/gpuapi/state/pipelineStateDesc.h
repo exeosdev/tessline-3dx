@@ -27,7 +27,7 @@ namespace ts3::gpuapi
 
 	inline constexpr pipeline_state_descriptor_id_t CX_PIPELINE_STATE_DESCRIPTOR_ID_INVALID = ts3::cvEmptyHash<ts3::HashAlgo::FNV1A>;
 
-	inline constexpr gpu_memory_size_t CX_VERTEX_ATTRIBUTE_OFFSET_PACKED_APPEND = ts3::Limits<gpu_memory_size_t>::maxValue;
+	inline constexpr gpu_memory_size_t CX_VERTEX_ATTRIBUTE_OFFSET_APPEND = Limits<gpu_memory_size_t>::maxValue;
 
 	struct VertexInputFormatConfig
 	{

@@ -125,7 +125,7 @@ namespace ts3::gpuapi
 		BC6H_UFLOAT            = ecDeclareTextureFormat( 59, EPixelDataLayout::S3TC,         EBaseDataType::Undefined, 0,  E_GPU_DATA_FORMAT_FLAG_COMPRESSED_BIT ),
 		BC7_UNORM              = ecDeclareTextureFormat( 60, EPixelDataLayout::S3TC,         EBaseDataType::Undefined, 0,  E_GPU_DATA_FORMAT_FLAG_COMPRESSED_BIT ),
 		BC7_UNORM_SRGB         = ecDeclareTextureFormat( 61, EPixelDataLayout::S3TC,         EBaseDataType::Undefined, 0,  E_GPU_DATA_FORMAT_FLAG_COMPRESSED_SRGB ),
-		UNKNOWN                = 0
+		Undefined              = 0
 	};
 
 	enum class EVertexAttribFormat : vertex_attrib_format_value_t
@@ -169,7 +169,7 @@ namespace ts3::gpuapi
 		VEC4_SINT16_NORM = ecDeclareVertexAttribFormat( 36, EBaseDataType::Int16,   4, E_GPU_DATA_FORMAT_FLAG_SNORM ),
 		VEC4_UBYTE_NORM  = ecDeclareVertexAttribFormat( 37, EBaseDataType::Ubyte,   4, E_GPU_DATA_FORMAT_FLAG_UNORM ),
 		VEC4_UINT16_NORM = ecDeclareVertexAttribFormat( 38, EBaseDataType::Uint16,  4, E_GPU_DATA_FORMAT_FLAG_UNORM ),
-		UNKNOWN          = 0
+		Undefined        = 0
 	};
 
 	using ShaderInputConstantFormat = EVertexAttribFormat;
@@ -184,9 +184,9 @@ namespace ts3::gpuapi
 		return ( uint16 )( ( ( base_data_type_value_t )pBaseType >> 4 ) & 0xF );
 	}
 
-	inline constexpr EBaseDataType ecGetIndexDataFormatBaseDataType( EIndexDataFormat pFormat ) noexcept
+	inline constexpr uint16 ecGetIndexDataFormatByteSize( EIndexDataFormat pFormat ) noexcept
 	{
-		return static_cast< EBaseDataType >( pFormat );
+		return ecGetBaseDataTypeByteSize( static_cast<EBaseDataType>( pFormat ) );
 	}
 
 	inline constexpr EPixelDataLayout ecGetTextureFormatPixelDataLayout( ETextureFormat pFormat ) noexcept

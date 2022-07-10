@@ -19,7 +19,7 @@
 #include <ts3/gpuapi/resources/sampler.h>
 #include <ts3/gpuapi/resources/texture.h>
 #include <ts3/gpuapi/state/renderTargetStateObject.h>
-#include <ts3/gpuapi/state/shaderBinding.h>
+#include <ts3/gpuapi/state/graphicsShaderBinding.h>
 #include <ts3/gpuapi/state/shaderInputSignature.h>
 #include <ts3/gpuapi/state/pipelineStateObject.h>
 #include <ts3/gpuapi/state/vertexStreamStateObject.h>

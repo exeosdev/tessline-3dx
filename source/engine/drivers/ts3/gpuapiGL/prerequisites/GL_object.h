@@ -7,9 +7,9 @@
 namespace ts3::gpuapi
 {
 
-	inline constexpr GLuint CX_GL_OBJECT_HANDLE_INVALID = ts3::Limits<GLuint>::maxValue;
+	inline constexpr GLuint CX_GL_OBJECT_HANDLE_INVALID = Limits<GLuint>::maxValue;
 
-	inline constexpr GLenum CX_GL_BIND_TARGET_UNKNOWN = ts3::Limits<GLenum>::maxValue;
+	inline constexpr GLenum CX_GL_BIND_TARGET_UNKNOWN = Limits<GLenum>::maxValue;
 
 	enum class GLObjectBaseType : enum_default_value_t
 	{

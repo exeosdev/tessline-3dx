@@ -24,9 +24,9 @@
 namespace ts3::gpuapi
 {
 
-	constexpr GLenum cvGLInvalidValue = ts3::Limits<GLenum>::maxValue;
+	constexpr GLenum cvGLInvalidValue = Limits<GLenum>::maxValue;
 
-	constexpr GLuint cvGLInvalidProgramLocation = ts3::Limits<GLuint>::maxValue;
+	constexpr GLuint cvGLInvalidProgramLocation = Limits<GLuint>::maxValue;
 
 } // namespace ts3::gpuapi
 

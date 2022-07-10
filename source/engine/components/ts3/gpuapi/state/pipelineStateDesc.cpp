@@ -130,7 +130,7 @@ namespace ts3::gpuapi
 				"COLOR",
 				0,
 				EVertexAttribFormat::VEC4_UBYTE_NORM,
-				CX_VERTEX_ATTRIBUTE_OFFSET_PACKED_APPEND,
+				CX_VERTEX_ATTRIBUTE_OFFSET_APPEND,
 				0
 			}
 		},

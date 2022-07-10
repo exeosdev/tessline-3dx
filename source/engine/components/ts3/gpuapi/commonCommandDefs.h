@@ -33,7 +33,7 @@ namespace ts3::gpuapi
         E_DEVICE_COMMAND_QUEUE_ID_DEFAULT_COMPUTE = 1u,
         E_DEVICE_COMMAND_QUEUE_ID_DEFAULT_TRANSFER = 2u,
         E_DEVICE_COMMAND_QUEUE_ID_PRESENT = 3u,
-        E_DEVICE_COMMAND_QUEUE_ID_UNKNOWN = ts3::Limits<gpu_cmd_device_queue_id_t>::maxValue,
+        E_DEVICE_COMMAND_QUEUE_ID_UNKNOWN = Limits<gpu_cmd_device_queue_id_t>::maxValue,
     };
 
 	enum ECommandListFlags : uint32

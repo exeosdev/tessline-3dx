@@ -69,19 +69,19 @@ namespace ts3::gpuapi
 		using DX11VertexStreamRange = VertexDataSourceBinding::VertexStreamRange;
 		using DX11VertexStreamRangeList = VertexDataSourceBinding::VertexStreamRangeList;
 		DX11IndexBufferBinding indexBufferBinding;
-		uint32 vertexBufferActiveBindingsNum;
+		uint32 vertexBufferActiveIndicesNum;
 		DX11VertexBufferBinding vertexBufferBinding;
 		DX11VertexStreamRangeList vertexStreamActiveRangeList;
 
 		DX11VertexDataSourceBinding() = default;
 
 		DX11VertexDataSourceBinding( const InitEmptyTag & )
-				: vertexBufferActiveBindingsNum( 0 )
+				: vertexBufferActiveIndicesNum( 0 )
 		{ }
 
 		explicit operator bool() const
 		{
-			return ( vertexBufferActiveBindingsNum > 0 ) && !vertexStreamActiveRangeList.empty();
+			return ( vertexBufferActiveIndicesNum > 0 ) && !vertexStreamActiveRangeList.empty();
 		}
 	};
 

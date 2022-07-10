@@ -7,7 +7,7 @@
 #include "gpuStateObject.h"
 #include "pipelineStateDesc.h"
 #include "renderTargetCommon.h"
-#include "shaderBinding.h"
+#include "graphicsShaderBinding.h"
 #include "shaderInputSignature.h"
 
 namespace ts3::gpuapi
