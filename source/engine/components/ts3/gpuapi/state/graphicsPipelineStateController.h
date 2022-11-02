@@ -1,13 +1,13 @@
 
 #pragma once
 
-#ifndef __TS3_GPUAPI_PIPELINE_STATE_CONTROLLER_H__
-#define __TS3_GPUAPI_PIPELINE_STATE_CONTROLLER_H__
+#ifndef __TS3_GPUAPI_GRAPHICS_PIPELINE_STATE_CONTROLLER_H__
+#define __TS3_GPUAPI_GRAPHICS_PIPELINE_STATE_CONTROLLER_H__
 
-#include "pipelineStateDesc.h"
+#include "graphicsPipelineConfigDefs.h"
 #include <ts3/core/exceptionUtils.h>
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	using graphics_state_update_mask_value_t = uint64;
@@ -50,7 +50,7 @@ namespace ts3::gpuapi
 		virtual bool resetVertexStreamStateObject();
 
 		/// @brief Returns true if the state update mask is not empty (some bits are set) or false otherwise.
-		TS3_FUNC_NO_DISCARD bool isStateUpdateMaskSet() const
+		TS3_ATTR_NO_DISCARD bool isStateUpdateMaskSet() const
 		{
 			return !_stateUpdateMask.empty();
 		}
@@ -75,34 +75,12 @@ namespace ts3::gpuapi
 			throw 0;
 		}
 
-		template <typename TpOutputSOType = VertexStreamStateObject>
-		inline const TpOutputSOType * getCurrentVertexStreamSO() const noexcept
-		{
-			if( _currentVertexStreamSO )
-			{
-				return reinterpret_cast<const GPUAPIObject *>( _currentVertexStreamSO )->queryInterface<TpOutputSOType>();
-			}
-			return nullptr;
-		}
-
-		template <typename TpOutputSOType = VertexStreamStateObject>
-		inline const TpOutputSOType * getCurrentVertexStreamSORef() const
-		{
-			if( const auto * stateObject = getCurrentVertexStreamSO<TpOutputSOType>() )
-			{
-				return *stateObject;
-			}
-			throw 0;
-		}
-
 	protected:
 		const GraphicsPipelineStateObject * _currentGraphicsPipelineSO = nullptr;
-
-		const VertexStreamStateObject * _currentVertexStreamSO = nullptr;
 
 		Bitmask<graphics_state_update_mask_value_t> _stateUpdateMask = 0;
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
-#endif // __TS3_GPUAPI_PIPELINE_STATE_CONTROLLER_H__
+#endif // __TS3_GPUAPI_GRAPHICS_PIPELINE_STATE_CONTROLLER_H__

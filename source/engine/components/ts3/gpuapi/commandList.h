@@ -8,7 +8,7 @@
 #include "resources/gpuBufferCommon.h"
 #include "resources/samplerCommon.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	class TS3_GPUAPI_CLASS CommandList : public GPUDeviceChildObject
@@ -52,7 +52,6 @@ namespace ts3::gpuapi
 		virtual void dispatchComputeIndirect( uint32 pIndirectBufferOffset ) {} // = 0;
 
 		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO ) = 0;
-		virtual bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO ) = 0;
 		virtual bool setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO ) = 0;
 
 		virtual void clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask ) = 0;
@@ -83,6 +82,6 @@ namespace ts3::gpuapi
 		std::atomic<ListStatus> _listStatusFlag = ATOMIC_VAR_INIT( ListStatus::Available );
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_COMMAND_LIST_H__

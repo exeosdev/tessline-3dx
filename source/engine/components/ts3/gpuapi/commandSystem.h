@@ -7,7 +7,7 @@
 #include "commonCommandDefs.h"
 #include <unordered_map>
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	class TS3_GPUAPI_CLASS CommandSystem : public GPUDeviceChildObject
@@ -41,6 +41,6 @@ namespace ts3::gpuapi
 		DeviceQueueAliasMap _deviceQueueAliasMap;
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_COMMAND_SYSTEM_H__

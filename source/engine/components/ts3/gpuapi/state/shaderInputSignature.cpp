@@ -2,7 +2,7 @@
 #include "shaderInputSignature.h"
 #include "../resources/shader.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	struct InputConstantLayoutInfo
@@ -171,7 +171,7 @@ namespace ts3::gpuapi
 					descriptor.cParamType = EShaderInputParameterType::Resource;
 					descriptor.uResourceInfo.resourceArraySize = descriptorDesc.uResourceDesc.resourceArraySize;
 					descriptor.uResourceInfo.resourceType = descriptorDesc.uResourceDesc.resourceType;
-					descriptor.uResourceInfo.resourceClass = ecGetShaderInputResourceResourceClass( descriptorDesc.uResourceDesc.resourceType );
+					descriptor.uResourceInfo.resourceClass = CxDefs::getShaderInputResourceResourceClass( descriptorDesc.uResourceDesc.resourceType );
 					descriptor.uResourceInfo.resourceBaseRegisterIndex = descriptorDesc.uResourceDesc.resourceBaseRegisterIndex;
 				}
 				else if( descriptorSetDesc.descriptorType == EShaderInputDescriptorType::Sampler )
@@ -286,4 +286,4 @@ namespace ts3::gpuapi
 		return ( dwordSizeMod == 0 ) ? trunc_numeric_cast<uint32>( dwordSize ) : trunc_numeric_cast<uint32>( dwordSize + 1 );
 	}
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI

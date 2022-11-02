@@ -5,15 +5,21 @@
 #define __TS3_GPUAPI_SHADER_COMMON_H__
 
 #include "../prerequisites.h"
+#include <ts3/stdext/byteArray.h>
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	ts3DeclareClassHandle( Shader );
 
-	inline constexpr uint32 ecMakeShaderType( uint32 pStageIndex )
+	namespace CxDefs
 	{
-		return ( pStageIndex << 16 ) | ecMakeShaderStageBit( pStageIndex );
+
+		TS3_ATTR_NO_DISCARD inline constexpr uint32 makeShaderType( uint32 pStageIndex )
+		{
+			return ( pStageIndex << 16 ) | CxDefs::makeShaderStageBit( pStageIndex );
+		}
+
 	}
 
 	/// @brief
@@ -23,57 +29,51 @@ namespace ts3::gpuapi
 		E_SHADER_CREATE_FLAG_OPTIMIZATION_DISABLE_BIT = 0x0010,
 		E_SHADER_CREATE_FLAG_OPTIMIZATION_L0_BIT      = 0x0020,
 		E_SHADER_CREATE_FLAG_OPTIMIZATION_L1_BIT      = 0x0040,
-		E_SHADER_CREATE_FLAG_OPTIMIZATION_LMAX_BIT    = 0x0080,
+		E_SHADER_CREATE_FLAG_OPTIMIZATION_MAX_BIT     = 0x0080,
 		E_SHADER_CREATE_FLAGS_DEFAULT = 0
 	};
 
+	/// @brief
 	enum class EShaderType : uint32
 	{
-		GSVertex         = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX          ),
-		GSTessControl    = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_TESS_CONTROL    ),
-		GSTessEvaluation = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_TESS_EVALUATION ),
-		GSGeometry       = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY        ),
-		GSAmplification  = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_AMPLIFICATION   ),
-		GSMesh           = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_MESH            ),
-		GSPixel          = ecMakeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL           ),
-		CSCompute        = ecMakeShaderType( E_SHADER_STAGE_INDEX_COMPUTE                  ),
-		Unknown          = 0
+		GSVertex        = CxDefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX        ),
+		GSHull          = CxDefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_HULL          ),
+		GSDomain        = CxDefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_DOMAIN        ),
+		GSGeometry      = CxDefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY      ),
+		GSPixel         = CxDefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL         ),
+		CSCompute       = CxDefs::makeShaderType( E_SHADER_STAGE_INDEX_COMPUTE                ),
+		Unknown = 0,
 	};
 
-	enum class EGraphicsShaderStageID : uint32
+	struct alignas( 64 ) ShaderBinary
 	{
-		Vertex         = static_cast<uint32>( EShaderType::GSVertex ),
-		TessControl    = static_cast<uint32>( EShaderType::GSTessControl ),
-		TessEvaluation = static_cast<uint32>( EShaderType::GSTessEvaluation ),
-		Geometry       = static_cast<uint32>( EShaderType::GSGeometry ),
-		Amplification  = static_cast<uint32>( EShaderType::GSAmplification ),
-		Mesh           = static_cast<uint32>( EShaderType::GSMesh ),
-		Pixel          = static_cast<uint32>( EShaderType::GSPixel ),
-		Unknown        = static_cast<uint32>( EShaderType::Unknown ),
-	};
+		static constexpr size_t sDataBufferFixedSize = 44;
 
-	struct ShaderBinary
-	{
 		uint64 driverSpecificID;
 		uint64 driverSpecificType;
-		std::vector<byte> rawBuffer;
-		uint32 rawBufferSize;
+		uint32 dataSizeInBytes;
+		byte dataBuffer[sDataBufferFixedSize];
 
 		ShaderBinary() = default;
 
 		ShaderBinary( std::nullptr_t )
-		: rawBufferSize( 0 )
+		: dataSizeInBytes( 0 )
 		{}
 
-		explicit operator bool() const
+		TS3_ATTR_NO_DISCARD explicit operator bool() const
 		{
 			return !empty();
 		}
 
-		TS3_FUNC_NO_DISCARD bool empty() const
+		TS3_ATTR_NO_DISCARD bool empty() const
 		{
-			return rawBuffer.empty() || ( rawBufferSize == 0 );
+			return dataSizeInBytes == 0;
 		}
+
+		/// @brief Allocates a ShaderBinary object capable of storing shader binary data of the specified size.
+		/// @return An std::unique_ptr holding the created ShaderBinary.
+		/// @notes Defined in shader.cpp file.
+		TS3_GPUAPI_API_NO_DISCARD static std::unique_ptr<ShaderBinary> create( size_t pBinarySize );
 	};
 
 	struct ShaderCreateInfo
@@ -85,60 +85,46 @@ namespace ts3::gpuapi
 		const char * entryPointName = nullptr;
 	};
 
-	template <typename TpEnum>
-	struct IsValidShaderTypeEnum
+	namespace CxDefs
 	{
-		static constexpr bool sValue = std::is_same<TpEnum, EShaderType>::value || std::is_same<TpEnum, EGraphicsShaderStageID>::value;
-	};
 
-	template <typename TpGetAs = EShaderStageIndex, typename TpEnum, std::enable_if_t<IsValidShaderTypeEnum<TpEnum>::sValue, int> = 0>
-	TS3_FUNC_NO_DISCARD inline constexpr TpGetAs ecGetShaderStageIndex( TpEnum pShaderType )
-	{
-		return static_cast<TpGetAs>( ( static_cast<uint32>( pShaderType ) >> 16 ) & 0xFFFF );
+		TS3_ATTR_NO_DISCARD inline constexpr bool isShaderStageIndexValid( uint32 pStageIndex )
+		{
+			return ( pStageIndex >= E_SHADER_STAGE_INDEX_BASE ) && ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX );
+		}
+
+		TS3_ATTR_NO_DISCARD inline constexpr bool isShaderStageIndexValidGraphics( uint32 pStageIndex )
+		{
+			return ( pStageIndex >= E_SHADER_STAGE_INDEX_BASE ) && ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX_GRAPHICS );
+		}
+
+		TS3_ATTR_NO_DISCARD inline constexpr uint32 getShaderStageIndex( EShaderType pShaderType )
+		{
+			return ( static_cast<uint32>( pShaderType ) >> 16 & 0xFFFF ) - E_SHADER_STAGE_INDEX_BASE;
+		}
+
+		TS3_ATTR_NO_DISCARD inline constexpr uint32 getShaderStageBit( EShaderType pShaderType )
+		{
+			return static_cast<uint32>( pShaderType ) & 0xFFFF;
+		}
+
+		TS3_ATTR_NO_DISCARD inline constexpr bool isShaderTypeGraphics( EShaderType pShaderType )
+		{
+			return getShaderStageIndex( pShaderType ) <= E_SHADER_STAGE_INDEX_MAX_GRAPHICS;
+		}
+
+		TS3_ATTR_NO_DISCARD inline constexpr bool isShaderTypeValid( EShaderType pShaderType )
+		{
+			return getShaderStageIndex( pShaderType ) <= E_SHADER_STAGE_INDEX_MAX;
+		}
+
+		TS3_ATTR_NO_DISCARD inline constexpr EShaderType getShaderTypeFromStageIndex( uint32 pStageIndex )
+		{
+			return isShaderStageIndexValid( pStageIndex ) ? static_cast<EShaderType>( CxDefs::makeShaderType( pStageIndex ) ) : EShaderType::Unknown;
+		}
+		
 	}
 
-	template <typename TpGetAs = EShaderStageFlags, typename TpEnum, std::enable_if_t<IsValidShaderTypeEnum<TpEnum>::sValue, int> = 0>
-	TS3_FUNC_NO_DISCARD inline constexpr TpGetAs ecGetShaderStageBit( TpEnum pShaderType )
-	{
-		return static_cast<TpGetAs>( static_cast<uint32>( pShaderType ) & 0xFFFF );
-	}
-
-	template <typename TpEnum, std::enable_if_t<IsValidShaderTypeEnum<TpEnum>::sValue, int> = 0>
-	TS3_FUNC_NO_DISCARD inline constexpr bool ecIsGraphicsShaderType( TpEnum pShaderType )
-	{
-		return ecGetShaderStageIndex( pShaderType ) <= E_SHADER_STAGE_INDEX_MAX_GRAPHICS;
-	}
-
-	template <typename TpEnum, std::enable_if_t<IsValidShaderTypeEnum<TpEnum>::sValue, int> = 0>
-	TS3_FUNC_NO_DISCARD inline constexpr bool ecIsValidShaderType( TpEnum pShaderType )
-	{
-		return ecGetShaderStageIndex( pShaderType ) <= E_SHADER_STAGE_INDEX_MAX;
-	}
-
-	TS3_FUNC_NO_DISCARD inline constexpr EGraphicsShaderStageID ecShaderTypeToGraphicsShaderStageID( EShaderType pShaderType )
-	{
-		return ecIsGraphicsShaderType( pShaderType ) ? static_cast<EGraphicsShaderStageID>( pShaderType ) : EGraphicsShaderStageID::Unknown;
-	}
-
-	TS3_FUNC_NO_DISCARD inline constexpr EShaderType ecGraphicsShaderStageIDToShaderType( EGraphicsShaderStageID pGraphicsShaderStageID )
-	{
-		return ecIsGraphicsShaderType( pGraphicsShaderStageID ) ? static_cast<EShaderType>( pGraphicsShaderStageID ) : EShaderType::Unknown;
-	}
-
-	TS3_FUNC_NO_DISCARD inline constexpr EShaderType ecGetShaderTypeFromStageIndex( uint32 pStageIndex )
-	{
-		return ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX ) ?
-		       static_cast<EShaderType>( ecMakeShaderType( pStageIndex ) ) :
-		       EShaderType::Unknown;
-	}
-
-	TS3_FUNC_NO_DISCARD inline constexpr EGraphicsShaderStageID ecGetGraphicsShaderStageIDFromStageIndex( uint32 pStageIndex )
-	{
-		return ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX_GRAPHICS ) ?
-		       static_cast<EGraphicsShaderStageID>( ecMakeShaderType( pStageIndex ) ) :
-		       EGraphicsShaderStageID::Unknown;
-	}
-
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_SHADER_COMMON_H__

@@ -7,7 +7,7 @@
 #include "gpuResource.h"
 #include "gpuBufferCommon.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	struct GPUBufferProperties : public GPUResourceProperties
@@ -23,13 +23,16 @@ namespace ts3::gpuapi
 		GPUBufferProperties const mBufferProperties;
 
 	public:
-		GPUBuffer( GPUDevice & pGPUDevice,
-		           const ResourceMemoryInfo & pResourceMemory,
-		           const GPUBufferProperties & pBufferProperties );
+		GPUBuffer(
+			GPUDevice & pGPUDevice,
+			const ResourceMemoryInfo & pResourceMemory,
+			const GPUBufferProperties & pBufferProperties );
 
 		virtual ~GPUBuffer();
 
-		bool checkBufferTargetSupport( EGPUBufferTarget pBufferTarget ) const;
+		TS3_ATTR_NO_DISCARD virtual const GPUResourceProperties & getProperties() const override final;
+
+		TS3_ATTR_NO_DISCARD bool checkBufferTargetSupport( EGPUBufferTarget pBufferTarget ) const;
 
 	protected:
 		virtual bool mapRegion( void * pCommandObject, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode ) = 0;
@@ -49,6 +52,6 @@ namespace ts3::gpuapi
 		static bool validateBufferCreateInfo( GPUBufferCreateInfo & pCreateInfo );
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_GPU_BUFFER_H__

@@ -385,15 +385,15 @@ int main( int pArgc, const char ** pArgv )
     auto defaultSampler = gxDriverState.device->createSampler( samplerCreateInfo );
 
     ts3::gpuapi::VertexDataSourceBindingDesc vertexInputStreamDesc;
-    vertexInputStreamDesc.indexBufferBindingDesc = ts3gaIndexBufferBindingDesc( ibuffer.get(), 0, ts3::gpuapi::EIndexDataFormat::Uint32 );
+    vertexInputStreamDesc.indexBufferBindingDesc = ts3GAIndexBufferBindingDesc( ibuffer.get(), 0, ts3::gpuapi::EIndexDataFormat::Uint32 );
     vertexInputStreamDesc.vertexBufferBindingDescArray = {
-            ts3gaVertexBufferBindingDesc( 0, vbuffer.get(), 0, sizeof( TexturedMeshVertex ) )
+            ts3GAVertexBufferBindingDesc( 0, vbuffer.get(), 0, sizeof( TexturedMeshVertex ) )
     };
 
     ts3::gpuapi::VertexInputFormatDesc inputFormatDesc;
     inputFormatDesc.vertexAttributeArray = {
-            ts3gaVertexAttributeDesc( 0, 0, "POSITION", 0, ts3::gpuapi::EVertexAttribFormat::VEC3_FLOAT32, 0, 0 ),
-            ts3gaVertexAttributeDesc( 1, 0, "TEXCOORD", 0, ts3::gpuapi::EVertexAttribFormat::VEC2_FLOAT32, 12, 0 ),
+            ts3GAVertexAttributeDesc( 0, 0, "POSITION", 0, ts3::gpuapi::EVertexAttribFormat::VEC3_FLOAT32, 0, 0 ),
+            ts3GAVertexAttributeDesc( 1, 0, "TEXCOORD", 0, ts3::gpuapi::EVertexAttribFormat::VEC2_FLOAT32, 12, 0 ),
             };
     inputFormatDesc.primitiveTopology = ts3::gpuapi::EPrimitiveTopology::TriangleList;
 

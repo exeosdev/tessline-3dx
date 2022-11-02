@@ -3,7 +3,7 @@
 #include <ts3/system/displayDriver.h>
 #include <ts3/system/displaySystem.h>
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	SystemDisplayManager::SystemDisplayManager( system::DisplayDriver * pExfDisplayDriver )
@@ -137,4 +137,4 @@ namespace ts3::gpuapi
 		return videoModeList;
 	}
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI

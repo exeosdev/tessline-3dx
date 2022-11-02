@@ -8,7 +8,7 @@
 #include <ts3/core/sync/spinLock.h>
 #include <ts3/core/sync/syncInterface.h>
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	class GPUMemoryRef
@@ -25,9 +25,9 @@ namespace ts3::gpuapi
 
 		void unlockMemory();
 
-		TS3_PCL_ATTR_NO_DISCARD bool empty() const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD bool empty() const;
 
-		TS3_PCL_ATTR_NO_DISCARD bool isMemoryLocked() const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD bool isMemoryLocked() const;
 
 	private:
 		GPUMemoryRegion _poolSubRegion;
@@ -35,7 +35,7 @@ namespace ts3::gpuapi
 		std::atomic<uint32_t> _poolMemoryLockStatus;
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_GPU_MEMORY_POOL_H__
 

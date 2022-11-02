@@ -6,7 +6,7 @@
 
 #include "commonGPUResourceDefs.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	ts3DeclareClassHandle( GPUBuffer );
@@ -33,12 +33,12 @@ namespace ts3::gpuapi
 		E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT          = 0x010000 | E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT,
 
 		// Bind flag for using a buffer as a source for vertex data fetched during execution of all rendering commands.
-		// Such buffer is bound to the pipeline via VertexStreamStateObject.
+		// Such buffer is bound to the pipeline via TODO.
 		// Implies VERTEX_STREAM usage bit.
 		E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT            = 0x020000 | E_GPU_RESOURCE_USAGE_FLAG_VERTEX_STREAM_BIT,
 
 		// Bind flag for using a buffer as a source for index data fetched during execution of indexed rendering commands.
-		// Such buffer is bound to the pipeline via VertexStreamStateObject.
+		// Such buffer is bound to the pipeline via TODO.
 		// Implies VERTEX_STREAM usage bit.
 		E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT             = 0x040000 | E_GPU_RESOURCE_USAGE_FLAG_VERTEX_STREAM_BIT,
 
@@ -138,6 +138,6 @@ namespace ts3::gpuapi
 		Bitmask<EGPUBufferDataCopyFlags> flags = E_GPU_BUFFER_DATA_COPY_FLAGS_DEFAULT;
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_GPU_BUFFER_COMMON_H__

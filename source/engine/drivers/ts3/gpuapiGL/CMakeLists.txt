@@ -58,6 +58,8 @@ setInternal( TS3_DRIVER_GPUAPI_GLCOMMON_SRC_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_inputAssemblerVertexFormat.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_inputAssemblerVertexStream.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_inputAssemblerVertexStream.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_graphicsPipelineDescriptorFactory.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_graphicsPipelineDescriptorFactory.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_pipelineStateController.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_pipelineStateController.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_graphicsPipelineState.h"

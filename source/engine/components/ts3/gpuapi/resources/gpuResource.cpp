@@ -1,7 +1,7 @@
 
 #include "gpuResource.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	GPUResource::GPUResource( GPUDevice & pGPUDevice,
@@ -21,7 +21,7 @@ namespace ts3::gpuapi
 
 	bool GPUResource::isMapped( const GPUMemoryRegion & pRegion ) const
 	{
-		return ts3::checkRangeSubrange( _mappedMemory.mappedRegion.asRange(), pRegion.asRange() );
+		return ts3::checkRangeSubRange( _mappedMemory.mappedRegion.asRange(), pRegion.asRange() );
 	}
 
 	void GPUResource::setMappedMemory( const ResourceMappedMemory & pMappedMemory )
@@ -37,4 +37,4 @@ namespace ts3::gpuapi
 		_mappedMemory.mappedRegion.reset();
 	}
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI

@@ -2,7 +2,7 @@
 #include "textureCommon.h"
 #include <ts3/stdext/utilities.h>
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	TextureInitDataDesc::TextureInitDataDesc( TextureInitDataDesc && pSource )
@@ -456,4 +456,4 @@ namespace ts3::gpuapi
 		return true;
 	}
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI

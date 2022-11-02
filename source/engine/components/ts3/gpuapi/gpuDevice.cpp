@@ -4,7 +4,7 @@
 #include <ts3/gpuapi/gpuDriver.h>
 #include <ts3/gpuapi/presentationLayer.h>
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	static const math::RGBAColorU8 sDefaultClearColorDriver0     { 0x11, 0x66, 0xCC, 0xFF };
@@ -116,4 +116,4 @@ namespace ts3::gpuapi
 		return true;
 	}
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI

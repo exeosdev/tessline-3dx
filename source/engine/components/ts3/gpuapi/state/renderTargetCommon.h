@@ -7,8 +7,39 @@
 #include "commonGPUStateDefs.h"
 #include <ts3/gpuapi/resources/renderBuffer.h>
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
+
+	/// @brief
+	enum class ERenderTargetAttachmentID : uint16
+	{
+		RTColor0,
+		RTColor1,
+		RTColor2,
+		RTColor3,
+		RTColor4,
+		RTColor5,
+		RTColor6,
+		RTColor7,
+		RTDepthStencil,
+		RTUndefined
+	};
+
+	namespace CxDefs
+	{
+
+		///
+		constexpr auto RT_MAX_COLOR_ATTACHMENTS_NUM = static_cast<render_target_index_t>( E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM );
+
+		constexpr auto RT_ATTACHMENT_MSAA_LEVEL_INVALID = Limits<uint32>::maxValue;
+
+		/// @brief
+		inline constexpr bool isRTAttachmentIndexValid( render_target_index_t pIndex )
+		{
+			return pIndex < CxDefs::RT_MAX_COLOR_ATTACHMENTS_NUM;
+		}
+
+	}
 
 	struct RTAttachmentDesc
 	{
@@ -104,40 +135,75 @@ namespace ts3::gpuapi
 		}
 	};
 
-	struct RenderTargetLayout
+	template <typename TAttachmentInfo>
+	struct RenderTargetAttachmentsConfig
 	{
 		Bitmask<ERenderTargetAttachmentFlags> attachmentMask = 0;
 		uint32 colorAttachmentActiveCount = 0;
-		uint32 depthStencilAttachmentState = 0;
-		RenderTargetAttachmentLayout colorAttachmentArray[E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
-		RenderTargetAttachmentLayout depthStencilAttachment;
+		TAttachmentInfo colorAttachmentArray[E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+		TAttachmentInfo depthStencilAttachment;
+
+		TS3_ATTR_NO_DISCARD TAttachmentInfo & operator[]( ERenderTargetAttachmentIndex pIndex )
+		{
+			ts3DebugAssert( CxDefs::isRTAttachmentIndexValid( pIndex ) );
+			return ( pIndex == E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL ) ? depthStencilAttachment : colorAttachmentArray[pIndex];
+		}
+
+		TS3_ATTR_NO_DISCARD const TAttachmentInfo & operator[]( ERenderTargetAttachmentIndex pIndex ) const
+		{
+			ts3DebugAssert( CxDefs::isRTAttachmentIndexValid( pIndex ) );
+			return ( pIndex == E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL ) ? depthStencilAttachment : colorAttachmentArray[pIndex];
+		}
+
+		TS3_ATTR_NO_DISCARD bool depthStencilActive() const noexcept
+		{
+			return attachmentMask.isSetAnyOf( E_RT_ATTACHMENT_MASK_DEPTH_STENCIL );
+		}
+
+		TS3_ATTR_NO_DISCARD bool empty() const noexcept
+		{
+			return !attachmentMask.isSetAnyOf( E_RT_ATTACHMENT_MASK_COLOR_ALL ) || ( colorAttachmentActiveCount == 0 );
+		}
 	};
 
-	inline constexpr uint32 CX_RT_BUFFER_MSAA_LEVEL_INVALID = Limits<uint32>::maxValue;
-
-	struct RenderTargetResourceBinding
+	struct RenderTargetLayout : public RenderTargetAttachmentsConfig<RenderTargetAttachmentLayout>
 	{
-		RenderTargetAttachmentResourceBinding colorAttachmentArray[E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
-		RenderTargetAttachmentResourceBinding depthStencilAttachment;
-		TextureSize2D commonBufferSize;
-		uint32 commonMSAALevel = CX_RT_BUFFER_MSAA_LEVEL_INVALID;
 	};
 
-	TS3_GPUAPI_OBJ const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultBGRA8;
-	TS3_GPUAPI_OBJ const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultBGRA8D24S8;
-	TS3_GPUAPI_OBJ const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultRGBA8;
-	TS3_GPUAPI_OBJ const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultRGBA8D24S8;
+	struct RenderTargetResourceBinding : public RenderTargetAttachmentsConfig<RenderTargetAttachmentResourceBinding>
+	{
+		TextureSize2D commonBufferSize;
+		uint32 commonMSAALevel = CxDefs::RT_ATTACHMENT_MSAA_LEVEL_INVALID;
+	};
 
-	TS3_GPUAPI_API bool createRenderTargetLayout( const RenderTargetLayoutDesc & pRTLayoutDesc,
-	                                              RenderTargetLayout & pOutRTLayout );
+	namespace Defaults
+	{
 
-	TS3_GPUAPI_API bool createRenderTargetLayoutAndResourceBinding( const RenderTargetResourceBindingDesc & pRTResourceBindingDesc,
-	                                                                RenderTargetLayout & pOutRTLayout,
-	                                                                RenderTargetResourceBinding & pOutRTResourceBinding );
+		TS3_GPUAPI_OBJ const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8;
+		TS3_GPUAPI_OBJ const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8D24S8;
+		TS3_GPUAPI_OBJ const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8;
+		TS3_GPUAPI_OBJ const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8D24S8;
 
-	TS3_GPUAPI_API bool checkRenderTargetLayoutCompatibility( const RenderTargetResourceBinding & pRTResourceBinding,
-	                                                          const RenderTargetLayout & pRTLayout );
+	}
 
-} // namespace ts3::gpuapi
+	namespace StateMgmt
+	{
+
+		TS3_GPUAPI_API bool createRenderTargetLayout(
+				const RenderTargetLayoutDesc & pRTLayoutDesc,
+				RenderTargetLayout & pOutRTLayout );
+
+		TS3_GPUAPI_API bool createRenderTargetLayoutAndResourceBinding(
+				const RenderTargetResourceBindingDesc & pRTResourceBindingDesc,
+				RenderTargetLayout & pOutRTLayout,
+				RenderTargetResourceBinding & pOutRTResourceBinding );
+
+		TS3_GPUAPI_API_NO_DISCARD bool checkRenderTargetLayoutCompatibility(
+				const RenderTargetResourceBinding & pRTResourceBinding,
+				const RenderTargetLayout & pRTLayout );
+
+	}
+
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_RENDER_TARGET_COMMON_H__

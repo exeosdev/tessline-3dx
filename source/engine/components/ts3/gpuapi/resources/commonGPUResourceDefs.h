@@ -6,7 +6,7 @@
 
 #include "../memory/commonGPUMemoryDefs.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	ts3DeclareClassHandle( GPUResource );
@@ -26,8 +26,22 @@ namespace ts3::gpuapi
 	struct GPUBufferSubDataUploadDesc;
 
 	using resource_flags_value_t = uint32;
-	using gpu_resource_size_t = uint32;
+	using resource_id_t = uint64;
 
+	namespace CxDefs
+	{
+
+		/// A special constant which can be used for resources IDs to indicate that ID should be assigned automatically.
+		/// In most cases it is safe to assume that object address will be used as the ID (unless stated otherwise).
+		inline constexpr resource_id_t RESOURCE_ID_AUTO = Limits<uint64>::maxValue - 1;
+
+		/// An invalid resource ID. Such IDs may refer to resources which are either uninitialised, marked for deletion,
+		/// or do not yet exist in the resource management system. This ID also means "not found" in case of queries.
+		inline constexpr resource_id_t RESOURCE_ID_INVALID = Limits<uint64>::maxValue;
+
+	}
+
+	/// @brief
 	enum class EGPUResourceBaseType : enum_default_value_t
 	{
 		Buffer,
@@ -136,6 +150,17 @@ namespace ts3::gpuapi
 			E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT,
 	};
 
+	enum class EResourceUsageState : enum_default_value_t
+	{
+		Undefined,
+		CommonCopySource,
+		CommonCopyTarget,
+		RTColorAttachment,
+		RTDepthOnlyAttachment,
+		RTDepthStencilAttachment,
+		RTDepth
+	};
+
 	struct ResourceInputDataDesc
 	{
 		const void * pointer = nullptr;
@@ -154,7 +179,7 @@ namespace ts3::gpuapi
 		Bitmask<EGPUMemoryFlags> memoryFlags = E_GPU_RESOURCE_MEMORY_MASK_DEFAULT;
 	};
 
-	namespace Internal
+	namespace XImpl
 	{
 
 		template <typename TpData, bool tWritable>
@@ -172,11 +197,17 @@ namespace ts3::gpuapi
 			using Type = const TpData;
 		};
 
+		template <typename TpData, uint64 tAccessMask>
+		struct ResourceMapPtrTypeProxy2 : public ResourceMapPtrTypeProxy<TpData, tAccessMask & E_GPU_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT>
+		{
+			using Type = typename ResourceMapPtrTypeProxy<TpData, tAccessMask & E_GPU_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT>::Type;
+		};
+
 	}
 
 	template <typename TpData, uint64 tAccessMask>
-	using ResourceMapPtr = typename Internal::ResourceMapPtrTypeProxy<TpData, ( tAccessMask & E_GPU_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT ) != 0>;
+	using ResourceMapPtr = typename XImpl::ResourceMapPtrTypeProxy2<TpData, tAccessMask>::Type;
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_COMMON_RESOURCE_DEFS_H__

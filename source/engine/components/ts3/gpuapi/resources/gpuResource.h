@@ -6,7 +6,7 @@
 
 #include "commonGPUResourceDefs.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	struct GPUResourceProperties
@@ -26,10 +26,12 @@ namespace ts3::gpuapi
 
 		virtual ~GPUResource();
 
-		bool isMapped() const;
-		bool isMapped( const GPUMemoryRegion & pRegion ) const;
+		TS3_ATTR_NO_DISCARD virtual const GPUResourceProperties & getProperties() const = 0;
 
-		const ResourceMappedMemory & getMappedMemory() const;
+		TS3_ATTR_NO_DISCARD bool isMapped() const;
+		TS3_ATTR_NO_DISCARD bool isMapped( const GPUMemoryRegion & pRegion ) const;
+
+		TS3_ATTR_NO_DISCARD const ResourceMappedMemory & getMappedMemory() const;
 
 	protected:
 		void setMappedMemory( const ResourceMappedMemory & pMappedMemory );
@@ -44,6 +46,6 @@ namespace ts3::gpuapi
 		return _mappedMemory;
 	}
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_GPU_RESOURCE_H__

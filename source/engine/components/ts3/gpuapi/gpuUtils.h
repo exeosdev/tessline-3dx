@@ -6,7 +6,7 @@
 
 #include "resources/shaderCommon.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
     namespace utils
@@ -28,6 +28,6 @@ namespace ts3::gpuapi
 
     }
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_GPU_UTILS_H__

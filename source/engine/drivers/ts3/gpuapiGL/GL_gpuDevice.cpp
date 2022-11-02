@@ -14,6 +14,8 @@
 #include <ts3/gpuapi/resources/shader.h>
 #include <ts3/gpuapi/resources/texture.h>
 
+#include "state/GL_inputAssemblerVertexFormat.h"
+
 namespace ts3::gpuapi
 {
 
@@ -23,6 +25,19 @@ namespace ts3::gpuapi
 	{}
 
 	GLGPUDevice::~GLGPUDevice() = default;
+
+	IAVertexInputLayoutDescriptorHandle GLGPUDevice::createIAVertexInputLayoutDescriptor(
+			const IAVertexInputLayoutDescriptorCreateInfo & pCreateInfo ) noexcept
+	{
+		if( pCreateInfo.inputAttributeArray )
+		{
+			return smu::createGLIAVertexInputLayoutDescriptor( *( pCreateInfo.inputAttributeArray ), pCreateInfo.primitiveTopology );
+		}
+		else
+		{
+			return smu::createGLIAVertexInputLayoutDescriptor( pCreateInfo.inputAttributeDefinitions, pCreateInfo.primitiveTopology );
+		}
+	}
 
 	GraphicsPipelineStateObjectHandle GLGPUDevice::createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
 	{

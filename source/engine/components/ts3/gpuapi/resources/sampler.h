@@ -6,7 +6,7 @@
 
 #include "samplerCommon.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	class TS3_GPUAPI_CLASS Sampler : public GPUBaseObject
@@ -18,6 +18,6 @@ namespace ts3::gpuapi
 		virtual ~Sampler();
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_SAMPLER_H__

@@ -6,7 +6,7 @@
 
 #include "commonGPUMemoryDefs.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	struct GPUMemoryPoolMetrics
@@ -33,6 +33,6 @@ namespace ts3::gpuapi
 		virtual ~GPUMemoryHeap();
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_GPU_MEMORY_HEAP_H__

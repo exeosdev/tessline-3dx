@@ -4,7 +4,7 @@
 #ifndef __TS3_GPUAPI_COMMON_DEFS_H__
 #define __TS3_GPUAPI_COMMON_DEFS_H__
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	ts3EnableCustomExceptionSupport();
@@ -23,11 +23,11 @@ namespace ts3::gpuapi
 	enum EGPUSystemMetrics : uint32
 	{
 		E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM = 16,
-		E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_STREAMS_NUM = 16,
+		E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM = 16,
 		E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM = 8,
 		E_GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM = 9,
-		E_GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM = 8,
-		E_GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM = 7,
+		E_GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM = 6,
+		E_GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM = 5,
 		E_GPU_SYSTEM_METRIC_IS_MAX_CONSTANT_GROUP_SIZE = 32,
 		E_GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SET_SIZE = 16,
 		E_GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM = 4,
@@ -51,28 +51,11 @@ namespace ts3::gpuapi
 	/// @see EPipelineStageIndex
 	enum EShaderStageIndex : uint32
 	{
-		/// Index of the vertex shader stage.
 		E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX,
-
-		/// Index of the tesselation control shader stage.
-		E_SHADER_STAGE_INDEX_GRAPHICS_TESS_CONTROL,
-
-		/// Index of the tesselation evaluation shader stage.
-		E_SHADER_STAGE_INDEX_GRAPHICS_TESS_EVALUATION,
-
-		/// Index of the geometry shader stage.
+		E_SHADER_STAGE_INDEX_GRAPHICS_HULL,
+		E_SHADER_STAGE_INDEX_GRAPHICS_DOMAIN,
 		E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY,
-
-		/// Index of the amplification shader stage.
-		E_SHADER_STAGE_INDEX_GRAPHICS_AMPLIFICATION,
-
-		/// Index of the mesh shader stage.
-		E_SHADER_STAGE_INDEX_GRAPHICS_MESH,
-
-		/// Index of the pixel shader stage.
 		E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL,
-
-		/// Index of the compute shader stage.
 		E_SHADER_STAGE_INDEX_COMPUTE,
 
 		/// Base stage index, i.e. index of the first supported stage. Values below this one are not valid stage indexes.
@@ -89,13 +72,6 @@ namespace ts3::gpuapi
 		E_SHADER_STAGE_INDEX_INVALID = 0xFFFF
 	};
 
-	/// @brief Returns an EShaderStageIndex matching the specified shader stage index value.
-	/// @return Corresponding EShaderStageIndex for valid index values or E_SHADER_STAGE_INDEX_INVALID otherwise.
-	TS3_FUNC_NO_DISCARD inline constexpr EShaderStageIndex ecGetShaderStageIndexFromValue( uint32 pStageIndex )
-	{
-		return ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX ) ? static_cast<EShaderStageIndex>( pStageIndex ) : E_SHADER_STAGE_INDEX_INVALID;
-	}
-
 	/// @brief Bit flags for all supported shader stages.
 	///
 	/// Each flag is a value with a single bit set, uniquely identifying the corresponding shader stage.
@@ -108,61 +84,58 @@ namespace ts3::gpuapi
 		// 16-bit value range and have values up to 0xFFFF (no shifting is performed). In case of any alterations,
 		// update that part of the functionality accordingly (see shaderCommon.h).
 
-		/// Graphics pipeline: vertex shader bit.
-		E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT          = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX,
+		E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT   = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX,
+		E_SHADER_STAGE_FLAG_GRAPHICS_HULL_BIT     = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_HULL,
+		E_SHADER_STAGE_FLAG_GRAPHICS_DOMAIN_BIT   = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_DOMAIN,
+		E_SHADER_STAGE_FLAG_GRAPHICS_GEOMETRY_BIT = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY,
+		E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT    = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL,
+		E_SHADER_STAGE_FLAG_COMPUTE_BIT           = 1u << E_SHADER_STAGE_INDEX_COMPUTE,
 
-		/// Graphics pipeline: tesselation control shader bit.
-		E_SHADER_STAGE_FLAG_GRAPHICS_TESS_CONTROL_BIT    = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_TESS_CONTROL,
+		/// Mask with all graphics stages bits set.
+		E_SHADER_STAGE_MASK_GRAPHICS_ALL = 0x007F,
 
-		/// Graphics pipeline: tesselation evaluation shader bit.
-		E_SHADER_STAGE_FLAG_GRAPHICS_TESS_EVALUATION_BIT = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_TESS_EVALUATION,
-
-		/// Graphics pipeline: geometry shader bit
-		E_SHADER_STAGE_FLAG_GRAPHICS_GEOMETRY_BIT        = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY,
-
-		/// Graphics pipeline: amplification shader bit.
-		E_SHADER_STAGE_FLAG_GRAPHICS_AMPLIFICATION_BIT   = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_AMPLIFICATION,
-
-		/// Graphics pipeline: mesh shader bit
-		E_SHADER_STAGE_FLAG_GRAPHICS_MESH_BIT            = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_MESH,
-
-		/// Graphics pipeline: pixel shader bit.
-		E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT           = 1u << E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL,
-
-		/// Compute pipeline: compute shader bit.
-		E_SHADER_STAGE_FLAG_COMPUTE_BIT                  = 1u << E_SHADER_STAGE_INDEX_COMPUTE,
-
-		/// Mask with all bits for all graphics stages set.
-		E_SHADER_STAGE_MASK_GRAPHICS_REQUIRED            = 0x007F,
-
-		/// Mask with all bits for all graphics stages set.
-		E_SHADER_STAGE_MASK_GRAPHICS_ALL                 = 0x007F,
+		/// Mask with required stages for vertex-based shader setup (vertex shader and pixel shader).
+		E_SHADER_STAGE_MASK_GRAPHICS_REQUIRED_VERT = E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT | E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT,
 
 		/// Mask with all bits for all supported stages (for both graphics and compute) set.
-		E_SHADER_STAGE_MASK_ALL                          = E_SHADER_STAGE_MASK_GRAPHICS_ALL | E_SHADER_STAGE_FLAG_COMPUTE_BIT,
+		E_SHADER_STAGE_MASK_ALL = E_SHADER_STAGE_MASK_GRAPHICS_ALL | E_SHADER_STAGE_FLAG_COMPUTE_BIT,
 
 		/// Mask with no valid bits set (integral value is 0).
-		E_SHADER_STAGE_MASK_NONE                         = 0u,
+		E_SHADER_STAGE_MASK_NONE = 0u,
 	};
 
-	/// @brief Returns a 32-bit value which is a bit flag matching the shader stage specified using its index.
-	/// @return One of E_SHADER_STAGE_FLAG_xxx values for a valid stage index or 0 otherwise, returned as uint32.
-	TS3_FUNC_NO_DISCARD inline constexpr uint32 ecMakeShaderStageBit( uint32 pStageIndex )
-	{
-		return ( 1 << pStageIndex ) & E_SHADER_STAGE_MASK_ALL;
-	}
+	static_assert( E_SHADER_STAGE_MASK_ALL < 0xFFFF );
 
-	/// @brief Returns a 32-bit value which is a bit flag matching the graphics shader stage specified using its index.
-	/// @return One of E_SHADER_STAGE_FLAG_GRAPHICS_xxx values for a valid stage index or 0 otherwise, returned as uint32.
-	TS3_FUNC_NO_DISCARD inline constexpr uint32 ecMakeGraphicsShaderStageBit( uint32 pGraphicsStageIndex )
+	namespace CxDefs
 	{
-		return ( 1 << pGraphicsStageIndex ) & E_SHADER_STAGE_MASK_GRAPHICS_ALL;
-	}
 
-	/// @brief
-	TS3_FUNC_NO_DISCARD inline constexpr EShaderStageFlags ecMakeGraphicsShaderStageFlag( uint32 pGraphicsStageIndex )
-	{
-		return static_cast<EShaderStageFlags>( ecMakeGraphicsShaderStageBit( pGraphicsStageIndex ) );
+		/// @brief Returns an EShaderStageIndex matching the specified shader stage index value.
+		/// @return Corresponding EShaderStageIndex for valid index values or E_SHADER_STAGE_INDEX_INVALID otherwise.
+		TS3_ATTR_NO_DISCARD inline constexpr EShaderStageIndex getShaderStageIndexFromValue( uint32 pStageIndex )
+		{
+			return ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX ) ? static_cast<EShaderStageIndex>( pStageIndex ) : E_SHADER_STAGE_INDEX_INVALID;
+		}
+
+		/// @brief Returns a 32-bit value which is a bit flag matching the shader stage specified using its index.
+		/// @return One of E_SHADER_STAGE_FLAG_xxx values for a valid stage index or 0 otherwise, returned as uint32.
+		TS3_ATTR_NO_DISCARD inline constexpr uint32 makeShaderStageBit( uint32 pStageIndex )
+		{
+			return ( 1 << pStageIndex ) & E_SHADER_STAGE_MASK_ALL;
+		}
+
+		/// @brief Returns a 32-bit value which is a bit flag matching the graphics shader stage specified using its index.
+		/// @return One of E_SHADER_STAGE_FLAG_GRAPHICS_xxx values for a valid stage index or 0 otherwise, returned as uint32.
+		TS3_ATTR_NO_DISCARD inline constexpr uint32 makeGraphicsShaderStageBit( uint32 pGraphicsStageIndex )
+		{
+			return ( 1 << pGraphicsStageIndex ) & E_SHADER_STAGE_MASK_GRAPHICS_ALL;
+		}
+
+		/// @brief
+		TS3_ATTR_NO_DISCARD inline constexpr EShaderStageFlags makeGraphicsShaderStageFlag( uint32 pGraphicsStageIndex )
+		{
+			return static_cast<EShaderStageFlags>( makeGraphicsShaderStageBit( pGraphicsStageIndex ) );
+		}
+
 	}
 
 	/// @brief A set of index values for supported pipeline stages.
@@ -176,15 +149,13 @@ namespace ts3::gpuapi
 	/// EShaderStageIndex counterparts (E_SHADER_STAGE_INDEX_xxx). That of course means that are 0-based too.
 	enum EPipelineStageIndex : uint32
 	{
-		E_PIPELINE_STAGE_INDEX_SHADER_GRAPHICS_VERTEX          = E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX,
-		E_PIPELINE_STAGE_INDEX_SHADER_GRAPHICS_TESS_CONTROL    = E_SHADER_STAGE_INDEX_GRAPHICS_TESS_CONTROL,
-		E_PIPELINE_STAGE_INDEX_SHADER_GRAPHICS_TESS_EVALUATION = E_SHADER_STAGE_INDEX_GRAPHICS_TESS_EVALUATION,
-		E_PIPELINE_STAGE_INDEX_SHADER_GRAPHICS_GEOMETRY        = E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY,
-		E_PIPELINE_STAGE_INDEX_SHADER_GRAPHICS_AMPLIFICATION   = E_SHADER_STAGE_INDEX_GRAPHICS_AMPLIFICATION,
-		E_PIPELINE_STAGE_INDEX_SHADER_GRAPHICS_MESH            = E_SHADER_STAGE_INDEX_GRAPHICS_MESH,
-		E_PIPELINE_STAGE_INDEX_SHADER_GRAPHICS_PIXEL           = E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL,
-		E_PIPELINE_STAGE_INDEX_SHADER_COMPUTE                  = E_SHADER_STAGE_INDEX_COMPUTE,
-		E_PIPELINE_STAGE_INDEX_SHADER_MAX                      = E_SHADER_STAGE_INDEX_MAX,
+		E_PIPELINE_STAGE_INDEX_SHADER_GRAPHICS_VERTEX   = E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX,
+		E_PIPELINE_STAGE_INDEX_SHADER_GRAPHICS_HULL     = E_SHADER_STAGE_INDEX_GRAPHICS_HULL,
+		E_PIPELINE_STAGE_INDEX_SHADER_GRAPHICS_DOMAIN   = E_SHADER_STAGE_INDEX_GRAPHICS_DOMAIN,
+		E_PIPELINE_STAGE_INDEX_SHADER_GRAPHICS_GEOMETRY = E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY,
+		E_PIPELINE_STAGE_INDEX_SHADER_GRAPHICS_PIXEL    = E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL,
+		E_PIPELINE_STAGE_INDEX_SHADER_COMPUTE           = E_SHADER_STAGE_INDEX_COMPUTE,
+		E_PIPELINE_STAGE_INDEX_SHADER_MAX               = E_SHADER_STAGE_INDEX_MAX,
 
 		E_PIPELINE_STAGE_INDEX_GENERIC_HOST_ACCESS,
 		E_PIPELINE_STAGE_INDEX_GENERIC_RESOLVE,
@@ -208,11 +179,9 @@ namespace ts3::gpuapi
 	enum EPipelineStageFlags : uint32
 	{
 		E_PIPELINE_STAGE_FLAG_SHADER_GRAPHICS_VERTEX_BIT          = E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT,
-		E_PIPELINE_STAGE_FLAG_SHADER_GRAPHICS_TESS_CONTROL_BIT    = E_SHADER_STAGE_FLAG_GRAPHICS_TESS_CONTROL_BIT,
-		E_PIPELINE_STAGE_FLAG_SHADER_GRAPHICS_TESS_EVALUATION_BIT = E_SHADER_STAGE_FLAG_GRAPHICS_TESS_EVALUATION_BIT,
+		E_PIPELINE_STAGE_FLAG_SHADER_GRAPHICS_HULL_BIT            = E_SHADER_STAGE_FLAG_GRAPHICS_HULL_BIT,
+		E_PIPELINE_STAGE_FLAG_SHADER_GRAPHICS_DOMAIN_BIT          = E_SHADER_STAGE_FLAG_GRAPHICS_DOMAIN_BIT,
 		E_PIPELINE_STAGE_FLAG_SHADER_GRAPHICS_GEOMETRY_BIT        = E_SHADER_STAGE_FLAG_GRAPHICS_GEOMETRY_BIT,
-		E_PIPELINE_STAGE_FLAG_SHADER_GRAPHICS_AMPLIFICATION_BIT   = E_SHADER_STAGE_FLAG_GRAPHICS_AMPLIFICATION_BIT,
-		E_PIPELINE_STAGE_FLAG_SHADER_GRAPHICS_MESH_BIT            = E_SHADER_STAGE_FLAG_GRAPHICS_MESH_BIT,
 		E_PIPELINE_STAGE_FLAG_SHADER_GRAPHICS_PIXEL_BIT           = E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT,
 		E_PIPELINE_STAGE_FLAG_SHADER_COMPUTE_BIT                  = E_PIPELINE_STAGE_INDEX_SHADER_COMPUTE,
 
@@ -226,6 +195,6 @@ namespace ts3::gpuapi
 		E_PIPELINE_STAGE_FLAG_RT_COLOR_OUTPUT_BIT                 = 1 << E_PIPELINE_STAGE_INDEX_RT_COLOR_OUTPUT,
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_COMMON_DEFS_H__

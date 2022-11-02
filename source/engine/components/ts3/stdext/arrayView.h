@@ -2,7 +2,7 @@
 #ifndef __TS3_STDEXT_ARRAY_VIEW_H__
 #define __TS3_STDEXT_ARRAY_VIEW_H__
 
-#include "prerequisites.h"
+#include "utilities.h"
 
 namespace ts3
 {
@@ -134,6 +134,27 @@ namespace ts3
 	inline ArrayView<Tp> bindArrayView( Tp( &pArray )[tSize] )
 	{
 		return ArrayView<Tp>( pArray );
+	}
+
+	/// @brief Creates ArrayView that wraps specified compile time-sized array.
+	/// @tparam Tp Type of the data referenced by the view.
+	/// @tparam tSize Size of the array.
+	/// @param pArray Array to create view for.
+	/// @return ArrayView referencing specified data.
+	template <typename Tp, size_t tSize>
+	inline ArrayView<Tp> bindArrayView( std::array<Tp, tSize> & pArray )
+	{
+		return ArrayView<Tp>( pArray.data(), pArray.size() );
+	}
+	/// @brief Creates ArrayView that wraps specified compile time-sized array.
+	/// @tparam Tp Type of the data referenced by the view.
+	/// @tparam tSize Size of the array.
+	/// @param pArray Array to create view for.
+	/// @return ArrayView referencing specified data.
+	template <typename Tp, size_t tSize>
+	inline ArrayView<const Tp> bindArrayView( const std::array<Tp, tSize> & pArray )
+	{
+		return ArrayView<const Tp>( pArray.data(), pArray.size() );
 	}
 
 	using ReadOnlyMemoryView = ArrayView<const byte>;

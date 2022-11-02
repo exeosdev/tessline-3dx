@@ -1,15 +1,16 @@
 
 #include "texture.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	ETextureTarget getETextureTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pTextureResourceFlags );
 
-	Texture::Texture( GPUDevice & pGPUDevice,
-	                  const ResourceMemoryInfo & pResourceMemory,
-	                  const TextureProperties & pTextureProperties,
-	                  const TextureLayout & pTextureLayout )
+	Texture::Texture(
+			GPUDevice & pGPUDevice,
+			const ResourceMemoryInfo & pResourceMemory,
+			const TextureProperties & pTextureProperties,
+			const TextureLayout & pTextureLayout )
 	: GPUResource( pGPUDevice, EGPUResourceBaseType::Texture, pResourceMemory )
 	, mTextureProperties( pTextureProperties )
 	, mTextureLayout( pTextureLayout )
@@ -17,7 +18,12 @@ namespace ts3::gpuapi
 
 	Texture::~Texture() = default;
 
-	bool Texture::checkETextureTargetSupport( ETextureTarget pTextureTarget ) const
+	const GPUResourceProperties & Texture::getProperties() const
+	{
+		return mTextureProperties;
+	}
+
+	bool Texture::checkTextureTargetSupport( ETextureTarget pTextureTarget ) const
 	{
 		return true;
 	}
@@ -105,4 +111,4 @@ namespace ts3::gpuapi
 		return ETextureTarget::Unknown;
 	}
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI

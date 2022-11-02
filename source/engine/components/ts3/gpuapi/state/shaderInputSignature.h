@@ -8,21 +8,77 @@
 #include "../resources/shaderCommon.h"
 #include <unordered_map>
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	enum EShaderConstantAccessClass : uint32
 	{
-		ACAllActive         = E_SHADER_STAGE_MASK_ALL,
-		ACGSVertex          = E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT,
-		ACGSTessControl     = E_SHADER_STAGE_FLAG_GRAPHICS_TESS_CONTROL_BIT,
-		ACGSTessEvaluation  = E_SHADER_STAGE_FLAG_GRAPHICS_TESS_EVALUATION_BIT,
-		ACGSGeometry        = E_SHADER_STAGE_FLAG_GRAPHICS_GEOMETRY_BIT,
-		ACGSAmplification   = E_SHADER_STAGE_FLAG_GRAPHICS_AMPLIFICATION_BIT,
-		ACGSMesh            = E_SHADER_STAGE_FLAG_GRAPHICS_MESH_BIT,
-		ACGSPixel           = E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT,
-		ACCSCompute         = E_SHADER_STAGE_FLAG_COMPUTE_BIT,
+		ACAllActive  = E_SHADER_STAGE_MASK_ALL,
+		ACGSVertex   = E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT,
+		ACGSHull     = E_SHADER_STAGE_FLAG_GRAPHICS_HULL_BIT,
+		ACGSDomain   = E_SHADER_STAGE_FLAG_GRAPHICS_DOMAIN_BIT,
+		ACGSGeometry = E_SHADER_STAGE_FLAG_GRAPHICS_GEOMETRY_BIT,
+		ACGSPixel    = E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT,
+		ACCSCompute  = E_SHADER_STAGE_FLAG_COMPUTE_BIT,
 	};
+
+	enum class EShaderInputParameterType : uint16
+	{
+		// D3D12: root constants
+		// Vulkan: push constants
+		// Others: API-specific (explicit direct constants or implicit constant buffer)
+		Constant,
+		// CBV/SRV/UAV
+		Resource,
+		//
+		Sampler
+	};
+
+	enum class EShaderInputDescriptorType : uint16
+	{
+		// CBV/SRV/UAV
+		Resource = 1,
+		//
+		Sampler,
+	};
+
+	enum class EShaderInputResourceClass : uint16
+	{
+		CBV = 1,
+		SRV,
+		UAV,
+		Unknown = 0,
+	};
+
+	namespace CxDefs
+	{
+
+		inline constexpr uint16 declareShaderInputResourceType( EShaderInputResourceClass pResourceClass, uint8 pIndex )
+		{
+			return ( ( static_cast<uint16>( pResourceClass ) << 8u ) | pIndex );
+		}
+
+	}
+
+	enum class EShaderInputResourceType : uint16
+	{
+		CBVConstantBuffer = CxDefs::declareShaderInputResourceType( EShaderInputResourceClass::CBV, 0 ),
+		SRVTextureBuffer  = CxDefs::declareShaderInputResourceType( EShaderInputResourceClass::SRV, 1 ),
+		SRVTextureImage   = CxDefs::declareShaderInputResourceType( EShaderInputResourceClass::SRV, 2 ),
+		UAVStorageBuffer  = CxDefs::declareShaderInputResourceType( EShaderInputResourceClass::UAV, 3 ),
+		UAVStorageImage   = CxDefs::declareShaderInputResourceType( EShaderInputResourceClass::UAV, 4 ),
+		Unknown           = 0
+	};
+
+	namespace CxDefs
+	{
+
+		inline constexpr EShaderInputResourceClass getShaderInputResourceResourceClass( EShaderInputResourceType pResourceType )
+		{
+			return static_cast<EShaderInputResourceClass>( ( static_cast<uint32>( pResourceType ) >> 8u ) & 0xFFu );
+		}
+
+	}
 
 	inline constexpr Bitmask<EShaderStageFlags> ecGetShaderConstantVisibilityStageMask( EShaderConstantAccessClass pAccessClass )
 	{
@@ -35,7 +91,7 @@ namespace ts3::gpuapi
 		{
 			shader_input_index_t bindingIndex;
 			shader_input_ref_id_t refID;
-			ShaderInputConstantFormat format;
+			EShaderInputConstantFormat format;
 		};
 
 		struct ConstantGroup
@@ -100,7 +156,7 @@ namespace ts3::gpuapi
 	{
 		uint32 iByteSize;
 		uint32 iDwordSize;
-		ShaderInputConstantFormat iFormat;
+		EShaderInputConstantFormat iFormat;
 		shader_input_index_t iGlobalIndex;
 		shader_input_index_t iStageIndex;
 		EShaderConstantAccessClass iAccessClass;
@@ -224,6 +280,6 @@ namespace ts3::gpuapi
 
 	TS3_GPUAPI_API ShaderInputSignature createShaderInputSignature( const ShaderInputSignatureDesc & pSignatureDesc );
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_IS_H__

@@ -8,7 +8,7 @@
 #include "resources/commonGPUResourceDefs.h"
 #include "state/pipelineStateDesc.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	class CommandContext : public GPUDeviceChildObject
@@ -108,7 +108,6 @@ namespace ts3::gpuapi
 		void clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask );
 		void setViewport( const ViewportDesc & pViewportDesc );
 		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO );
-		bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO );
 		bool setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO );
 		bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
 		bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
@@ -155,7 +154,6 @@ namespace ts3::gpuapi
 		void clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask );
 		void setViewport( const ViewportDesc & pViewportDesc );
 		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO );
-		bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO );
 		bool setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO );
 		bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
 		bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
@@ -167,6 +165,6 @@ namespace ts3::gpuapi
 		void drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset );
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_GPU_CMD_CONTEXT_H__

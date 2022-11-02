@@ -1,5 +1,6 @@
 
 #include "GL_coreAPIProxy.h"
+#include <ts3/gpuapi/state/commonGPUStateDefs.h>
 #include <ts3/gpuapi/resources/gpuBufferCommon.h>
 #include <ts3/gpuapi/resources/samplerCommon.h>
 #include <ts3/gpuapi/resources/shaderCommon.h>

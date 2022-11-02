@@ -1,74 +1,107 @@
 
 #include "inputAssemblerVertexFormat.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
-	IAVertexFormatDescriptor::IAVertexFormatDescriptor(
+	IAVertexInputLayoutDescriptor::IAVertexInputLayoutDescriptor(
 			GPUDevice & pGPUDevice,
-			pipeline_descriptor_id_t pDescriptorID,
-			const IAVertexInputAttributeArray & pAttributeArray,
+			PipelineDescriptorID pDescriptorID,
+			const IAVertexInputFormat & pInputFormat,
 			EPrimitiveTopology pPrimitiveTopology )
-	: GraphicsPipelineDescriptor( pGPUDevice, pDescriptorID, EGraphicsPipelineDescriptorType::IAVertexStream )
-	, mActiveAttributesMask( pAttributeArray.activeAttributesMask )
-	, mActiveAttributesNum( pAttributeArray.activeAttributesMask )
+	: GraphicsPipelineDescriptor( pGPUDevice, pDescriptorID, EGraphicsPipelineDescriptorType::IAVertexInputLayout )
+	, mActiveAttributesMask( pInputFormat.activeAttributesMask )
+	, mActiveAttributesNum( pInputFormat.activeAttributesNum )
 	, mPrimitiveTopology( pPrimitiveTopology )
 	{}
 
-	IAVertexFormatDescriptor::~IAVertexFormatDescriptor() = default;
+	IAVertexInputLayoutDescriptor::~IAVertexInputLayoutDescriptor() = default;
 
-	bool IAVertexFormatDescriptor::isAttributeSet( input_assembler_index_t pAttributeIndex ) const noexcept
-	{
-		return mActiveAttributesMask.isSet( ecMakeIAVertexAttributeFlag( pAttributeIndex ) );
-	}
 
-	namespace smu
+	namespace StateMgmt
 	{
 
-		IAVertexInputAttributeArray createIAVertexInputAttributeArray( const ArrayView<IAVertexInputAttributeDesc> & pAttributeDefinitions ) noexcept
+		Bitmask<EIAVertexAttributeFlags> getIAVertexInputActiveAttributesMask(
+				const IAVertexAttributeInfoArray & pVertexAttributes ) noexcept
 		{
-			IAVertexInputAttributeArray vertexAttributeArray{};
+			Bitmask<EIAVertexAttributeFlags> attributesMask = 0;
 
-			for( const auto & attributeDesc : pAttributeDefinitions )
+			for( uint32 attribIndex = 0; attribIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attribIndex )
 			{
-				TS3_DEBUG_CODE({
-					if( !ecIsIAVertexAttributeIndexValid( attributeDesc.attributeIndex ) )
-					{
-					    ts3DebugOutputFmt( "Invalid IA Attribute Index: %u", static_cast<uint32>( attributeDesc.attributeIndex ) );
-					    continue;
-					}
-				})
-
-				if( ecIsIAVertexAttributeIndexValid( attributeDesc.attributeIndex ) )
+				if( pVertexAttributes[attribIndex].active() )
 				{
-					const auto attributeIndex = static_cast<input_assembler_index_t>( attributeDesc.attributeIndex );
-					const auto attributeFlag = ecMakeIAVertexAttributeFlag( attributeDesc.attributeIndex );
-
-					vertexAttributeArray.attributes[attributeIndex] = attributeDesc.attributeInfo;
-
-					if( !vertexAttributeArray.activeAttributesMask.isSet( attributeFlag ) )
-					{
-						vertexAttributeArray.activeAttributesMask.set( attributeFlag );
-						vertexAttributeArray.activeAttributesNum += 1;
-					}
+					attributesMask.set( CxDefs::makeIAVertexAttributeFlag( attribIndex ) );
 				}
 			}
 
-			return vertexAttributeArray;
+			return attributesMask;
 		}
 
-		bool validateIAVertexInputAttributeArray( const IAVertexInputAttributeArray & pAttributeArray ) noexcept
+		uint32 getIAVertexInputActiveAttributesNum( const IAVertexAttributeInfoArray & pVertexAttributes ) noexcept
 		{
+			uint32 attributesNum = 0;
+
+			for( uint32 attribIndex = 0; attribIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attribIndex )
+			{
+				if( pVertexAttributes[attribIndex].active() )
+				{
+					++attributesNum;
+				}
+			}
+
+			return attributesNum;
+		}
+
+		IAVertexInputFormat createIAVertexInputFormat(
+				const ArrayView<IAVertexInputAttributeDesc> & pAttributeDefinitions ) noexcept
+		{
+			IAVertexInputFormat vertexInputFormat{};
+
+			for( const auto & attributeDesc : pAttributeDefinitions )
+			{
+				if( !CxDefs::isIAVertexAttributeIndexValid( attributeDesc.attributeIndex ) )
+				{
+					ts3DebugOutputFmt( "Invalid IA Attribute Index: %u", attributeDesc.attributeIndex );
+					continue;
+				}
+
+				vertexInputFormat.attributes[attributeDesc.attributeIndex] = attributeDesc.attributeInfo;
+			}
+
+			vertexInputFormat.activeAttributesMask = StateMgmt::getIAVertexInputActiveAttributesMask( vertexInputFormat.attributes );
+			vertexInputFormat.activeAttributesNum = StateMgmt::getIAVertexInputActiveAttributesNum( vertexInputFormat.attributes );
+
+			return vertexInputFormat;
+		}
+
+		bool validateIAVertexInputFormat( const IAVertexInputFormat & pInputFormat ) noexcept
+		{
+			if( ( pInputFormat.activeAttributesNum == 0 ) || ( pInputFormat.activeAttributesNum > CxDefs::IA_MAX_VERTEX_ATTRIBUTES_NUM ) )
+			{
+				return false;
+			}
+
+			if( !pInputFormat.activeAttributesMask.isSetAnyOf( CxDefs::IA_VERTEX_ATTRIBUTE_MASK_ALL ) )
+			{
+				return false;
+			}
+
 			uint32 activeAttributesNum = 0u;
 
-			for( input_assembler_index_t attributeIndex = 0; attributeIndex < E_IA_CONSTANT_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
+			// Iterate over supported attribute index range.
+			for( input_assembler_index_t attributeIndex = 0; attributeIndex < CxDefs::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
 			{
-				const auto attributeFlag = ecMakeIAVertexAttributeFlag( attributeIndex );
-				if( pAttributeArray.activeAttributesMask.isSet( attributeFlag ) )
+				// Compose the bitmask value for the current index and check
+				// if that attribute is present in the activeAttributesMask.
+				const auto attributeFlag = CxDefs::makeIAVertexAttributeFlag( attributeIndex );
+
+				if( pInputFormat.activeAttributesMask.isSet( attributeFlag ) )
 				{
-					const auto & attributeInfo = pAttributeArray.attributes[attributeIndex];
-					if( !attributeInfo.isActive() )
+					const auto & attributeInfo = pInputFormat.attributes[attributeIndex];
+					if( !attributeInfo.active() )
 					{
+						// If the attribute is empty/inactive, but is present on the active attribute mask,
+						// the specified input format is considered invalid (bitmask does not match the actual state).
 						return false;
 					}
 				}
@@ -76,8 +109,10 @@ namespace ts3::gpuapi
 				++activeAttributesNum;
 			}
 
-			if( activeAttributesNum != pAttributeArray.activeAttributesNum )
+			if( activeAttributesNum != pInputFormat.activeAttributesNum )
 			{
+				// If the specified number of active attributes is different from
+				// the actual number, the attribute array is also considered invalid.
 				return false;
 			}
 
@@ -86,4 +121,4 @@ namespace ts3::gpuapi
 
 	}
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI

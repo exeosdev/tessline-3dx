@@ -4,7 +4,7 @@
 #include "commandSystem.h"
 #include "gpuDevice.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	const Bitmask<ECommandListFlags> CommandContext::sListFlagsCommon = E_COMMAND_LIST_FLAG_COMMAND_CLASS_COMMON_BIT;
@@ -181,12 +181,6 @@ namespace ts3::gpuapi
 		return mCommandList->setGraphicsPipelineStateObject( pGraphicsPipelineSO );
 	}
 
-	bool CommandContextDirectGraphics::setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO )
-	{
-		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
-		return mCommandList->setVertexStreamStateObject( pVertexStreamSO );
-	}
-
 	bool CommandContextDirectGraphics::setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
@@ -302,12 +296,6 @@ namespace ts3::gpuapi
 		return mCommandList->setGraphicsPipelineStateObject( pGraphicsPipelineSO );
 	}
 
-	bool CommandContextDeferredGraphics::setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO )
-	{
-		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
-		return mCommandList->setVertexStreamStateObject( pVertexStreamSO );
-	}
-
 	bool CommandContextDeferredGraphics::setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
@@ -362,4 +350,4 @@ namespace ts3::gpuapi
 		return mCommandList->drawDirectNonIndexedInstanced( pVerticesNumPerInstance, pInstancesNum, pVerticesOffset );
 	}
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI

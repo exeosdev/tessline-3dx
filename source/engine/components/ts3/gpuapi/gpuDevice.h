@@ -8,10 +8,13 @@
 #include "displayCommon.h"
 #include "resources/commonGPUResourceDefs.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
+	ts3GpaDeclareClassHandle( IAVertexInputLayoutDescriptor );
+
 	struct PresentationLayerCreateInfo;
+	struct IAVertexInputLayoutDescriptorCreateInfo;
 
 	enum EGPUDeviceCreateFlags : uint32
 	{
@@ -36,6 +39,9 @@ namespace ts3::gpuapi
 		explicit GPUDevice( GPUDriver & pDriver );
 		virtual ~GPUDevice();
 
+		virtual IAVertexInputLayoutDescriptor * createIAVertexInputLayoutDescriptor(
+				const IAVertexInputLayoutDescriptorCreateInfo & pCreateInfo ) noexcept = 0;
+
 		GPUBufferHandle createGPUBuffer( const GPUBufferCreateInfo & pCreateInfo );
 		SamplerHandle createSampler( const SamplerCreateInfo & pCreateInfo );
 		ShaderHandle createShader( const ShaderCreateInfo & pCreateInfo );
@@ -43,9 +49,6 @@ namespace ts3::gpuapi
 
 		virtual GraphicsPipelineStateObjectHandle createGraphicsPipelineStateObject(
 				const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
-
-		virtual VertexStreamStateObjectHandle createVertexStreamStateObject(
-				const VertexStreamStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
 
 		virtual RenderTargetStateObjectHandle createRenderTargetStateObject(
 				const RenderTargetStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
@@ -87,6 +90,6 @@ namespace ts3::gpuapi
 		Bitmask<InternalStateFlags> _internalStateFlags;
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_GPU_DEVICE_H__

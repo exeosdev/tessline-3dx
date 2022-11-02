@@ -29,7 +29,7 @@
 #endif
 
 #define TS3_GPUAPI_API_NO_DISCARD \
-	TS3_GPUAPI_API TS3_FUNC_NO_DISCARD
+	TS3_GPUAPI_API TS3_ATTR_NO_DISCARD
 
 #include "prerequisites/commonDefs.h"
 #include "prerequisites/commonTypes.h"
@@ -37,7 +37,7 @@
 #include "prerequisites/gpuBaseObject.h"
 #include "prerequisites/gpuDataFormats.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	// Same for all drivers. A top-level interface for querying capabilities and
@@ -104,6 +104,6 @@ namespace ts3::gpuapi
 		GDIUnknown        = ecMakeDriverID( EGPUDriverAPI::Unknown, 0x00 )
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_PREREQUISITES_H__

@@ -6,14 +6,14 @@
 
 #include "commonGPUMemoryDefs.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	class GPUMemoryAllocator
 	{
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_GPU_MEMORY_ALLOCATOR_H__
 

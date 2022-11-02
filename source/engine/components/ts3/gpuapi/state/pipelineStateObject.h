@@ -5,13 +5,20 @@
 #define __TS3_GPUAPI_PIPELINE_STATE_OBJECT_H__
 
 #include "gpuStateObject.h"
-#include "pipelineStateDesc.h"
+#include "graphicsPipelineState.h"
+#include "graphicsShaderLinkage.h"
+#include "inputAssemblerCommon.h"
 #include "renderTargetCommon.h"
-#include "graphicsShaderBinding.h"
 #include "shaderInputSignature.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
+
+	class BlendState;
+	class DepthStencilState;
+	class RasterizerState;
+	class IAVertexInputLayout;
+	class GraphicsShaderLinkage;
 
 	struct ComputePipelineStateObjectCreateInfo
 	{
@@ -19,13 +26,14 @@ namespace ts3::gpuapi
 
 	struct GraphicsPipelineStateObjectCreateInfo
 	{
-		BlendConfigDesc blendDesc = cvPipelineDescBlendConfigDisabled;
-		DepthStencilConfigDesc depthStencilDesc = cvPipelineDescDepthStencilConfigDisabled;
-		RasterizerConfigDesc rasterizerDesc = cvPipelineDescRasterizerConfigDefault;
-		VertexInputFormatDesc vertexInputFormatDesc = cvPipelineDescVertexInputFormatEmpty;
+		// BlendState blendState;
+		// DepthStencilState depthStencilState;
+		// RasterizerState rasterizerState;
+		// IAVertexInputLayout vertexInputLayout;
+		// ShaderLinkage shaderLinkage;
+
 		RenderTargetLayoutDesc renderTargetLayoutDesc = cvRenderTargetLayoutDescDefaultBGRA8;
 		RenderTargetLayout * renderTargetLayout = nullptr;
-		GraphicsShaderBindingDesc * shaderBindingDesc = nullptr;
 		ShaderInputSignatureDesc * shaderInputSignatureDesc = nullptr;
 	};
 
@@ -67,9 +75,10 @@ namespace ts3::gpuapi
 		RenderTargetLayout const mRenderTargetLayout;
 		ShaderInputSignature const mShaderInputSignature;
 
-		GraphicsPipelineStateObject( GPUDevice & pGPUDevice,
-		                             RenderTargetLayout pRenderTargetLayout,
-		                             ShaderInputSignature pShaderInputSignature );
+		GraphicsPipelineStateObject(
+			GPUDevice & pGPUDevice,
+			RenderTargetLayout pRenderTargetLayout,
+			ShaderInputSignature pShaderInputSignature );
 
 		virtual ~GraphicsPipelineStateObject();
 
@@ -84,11 +93,11 @@ namespace ts3::gpuapi
 		};
 
 		// Validates common state desc and produces the actual state objects expected by the PSO:
-		// - for GraphicsShaderBindingDesc, it validates the config and produces ready GraphicsShaderBinding object
+		// - for GraphicsShaderLinkageDesc, it validates the config and produces ready GraphicsShaderBinding object
 		// - for ShaderInputSignatureDesc, it validates the config and build the actual ShaderInputSignature object
 		static bool createCommonPSOState( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo, CommonPSOState & pOutputState );
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_PIPELINE_STATE_OBJECT_H__

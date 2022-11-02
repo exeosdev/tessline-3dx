@@ -1,7 +1,7 @@
 
 #include "../gpuDevice.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	GPUBaseObject::GPUBaseObject( GPUDevice & pGPUDevice )
@@ -10,4 +10,4 @@ namespace ts3::gpuapi
 
 	GPUBaseObject::~GPUBaseObject() = default;
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI

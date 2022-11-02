@@ -7,7 +7,7 @@
 #include "prerequisites.h"
 #include <ts3/system/displayCommon.h>
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	using display_system_id_t = uint64;
@@ -123,6 +123,6 @@ namespace ts3::gpuapi
 		return result;
 	}
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_DISPLAY_COMMON_H__

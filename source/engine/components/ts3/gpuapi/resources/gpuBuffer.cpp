@@ -1,19 +1,25 @@
 
 #include "gpuBuffer.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	EGPUBufferTarget getBufferTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pBufferResourceFlags );
 
-	GPUBuffer::GPUBuffer( GPUDevice & pGPUDevice,
-	                      const ResourceMemoryInfo & pResourceMemory,
-	                      const GPUBufferProperties & pBufferProperties )
+	GPUBuffer::GPUBuffer(
+			GPUDevice & pGPUDevice,
+			const ResourceMemoryInfo & pResourceMemory,
+			const GPUBufferProperties & pBufferProperties )
 	: GPUResource( pGPUDevice, EGPUResourceBaseType::Buffer, pResourceMemory )
 	, mBufferProperties( pBufferProperties )
 	{}
 
 	GPUBuffer::~GPUBuffer() = default;
+
+	const GPUResourceProperties & GPUBuffer::getProperties() const
+	{
+		return mBufferProperties;
+	}
 
 	bool GPUBuffer::checkBufferTargetSupport( EGPUBufferTarget pBufferTarget ) const
 	{
@@ -27,13 +33,13 @@ namespace ts3::gpuapi
 			return false;
 		}
 
-		if( !checkMemoryMapAccess( pMapMode, mResourceMemory.memoryFlags ) )
+		if( !GpuMem::checkMemoryMapAccess( pMapMode, mResourceMemory.memoryFlags ) )
 		{
 			return false;
 		}
 
 		const GPUMemoryRegion bufferDataRegion{ 0, mBufferProperties.byteSize };
-		if( !ts3::checkRangeSubrange( bufferDataRegion.asRange(), pRegion.asRange() ) )
+		if( !ts3::checkRangeSubRange( bufferDataRegion.asRange(), pRegion.asRange() ) )
 		{
 			return false;
 		}
@@ -104,4 +110,4 @@ namespace ts3::gpuapi
 		return EGPUBufferTarget::Unknown;
 	}
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI

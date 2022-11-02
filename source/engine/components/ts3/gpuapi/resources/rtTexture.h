@@ -7,7 +7,7 @@
 #include "gpuResource.h"
 #include "textureCommon.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	class RTTexture : public GPUResource
@@ -18,6 +18,6 @@ namespace ts3::gpuapi
 		virtual ~RTTexture();
 	};
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_RT_TEXTURE_H__

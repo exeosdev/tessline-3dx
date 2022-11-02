@@ -45,6 +45,8 @@ set( TS3_GPUAPI_SRC_FILES
         "memory/gpuMemoryRef.h"
         "memory/gpuMemoryRef.cpp"
 
+        "pdesc/pipelineDescriptorsCommon.h"
+
         "resources/commonGPUResourceDefs.h"
         "resources/gpuBuffer.h"
         "resources/gpuBuffer.cpp"
@@ -66,27 +68,30 @@ set( TS3_GPUAPI_SRC_FILES
         "resources/textureCommon.cpp"
 
         "state/commonGPUStateDefs.h"
+        "state/commonGPUStateDefs.cpp"
         "state/gpuStateObject.h"
         "state/gpuStateObject.cpp"
-        "state/graphicsPipelineStateCommon.h"
-        "state/graphicsPipelineStateDescriptors.h"
-        "state/graphicsPipelineStateDescriptors.cpp
+        "state/graphicsPipelineConfigDefs.h"
+        "state/graphicsPipelineConfigDefs.cpp"
+        "state/graphicsPipelineState.h"
+        "state/graphicsPipelineState.cpp"
         "state/inputAssemblerCommon.h"
+        "state/inputAssemblerCommon.cpp"
         "state/inputAssemblerVertexFormat.h"
         "state/inputAssemblerVertexFormat.cpp"
         "state/inputAssemblerVertexStream.h"
         "state/inputAssemblerVertexStream.cpp"
-        "state/graphicsPipelineDescriptor.h"
-        "state/graphicsPipelineDescriptor.cpp"
         "state/pipelineDescriptorCache.h"
         "state/pipelineDescriptorCache.cpp"
-        "state/pipelineStateController.h"
-        "state/pipelineStateController.cpp"
+        "state/graphicsPipelineStateController.h"
+        "state/graphicsPipelineStateController.cpp"
 
         #"state/pipelineStateDesc.h"
         #"state/pipelineStateDesc.cpp"
         "state/pipelineStateObject.h"
         "state/pipelineStateObject.cpp"
+        "state/separableGraphicsShaderLinkage.h"
+        "state/separableGraphicsShaderLinkage.cpp"
         "state/separablePipelineState.h"
         "state/separablePipelineState.cpp"
         "state/renderPassCommon.h"
@@ -94,33 +99,33 @@ set( TS3_GPUAPI_SRC_FILES
         "state/renderTargetCommon.cpp"
         "state/renderTargetStateObject.h"
         "state/renderTargetStateObject.cpp"
-        "state/graphicsShaderBinding.h"
-        "state/graphicsShaderBinding.cpp"
+        "state/graphicsShaderLinkage.h"
+        "state/graphicsShaderLinkage.cpp"
         "state/shaderInputSignature.h"
         "state/shaderInputSignature.cpp"
         )
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
-    add_library( ts3-gpuapi STATIC ${TS3_GPUAPI_SRC_FILES} )
-    target_compile_definitions( ts3-gpuapi PRIVATE
+    add_library( ts3-GpuAPI STATIC ${TS3_GPUAPI_SRC_FILES} )
+    target_compile_definitions( ts3-GpuAPI PRIVATE
             "TS3_BUILD_STATIC=1" )
 else()
-    add_library( ts3-gpuapi SHARED ${TS3_GPUAPI_SRC_FILES} )
+    add_library( ts3-GpuAPI SHARED ${TS3_GPUAPI_SRC_FILES} )
 endif()
 
-set_target_properties( ts3-gpuapi PROPERTIES
-        OUTPUT_NAME "ts3-gpuapi"
+set_target_properties( ts3-GpuAPI PROPERTIES
+        OUTPUT_NAME "ts3-GpuAPI"
         )
 
-target_compile_definitions( ts3-gpuapi PRIVATE
+target_compile_definitions( ts3-GpuAPI PRIVATE
         "TS3_GPUAPI_BUILD=1"
         )
 
-target_include_directories( ts3-gpuapi PUBLIC
+target_include_directories( ts3-GpuAPI PUBLIC
         "${TS3_INCLUDE_DIR}"
         )
 
-target_link_libraries( ts3-gpuapi PUBLIC
+target_link_libraries( ts3-GpuAPI PUBLIC
         ts3-core
         ts3-math
         )

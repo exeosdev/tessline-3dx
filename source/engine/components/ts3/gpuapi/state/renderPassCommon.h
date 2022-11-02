@@ -7,7 +7,7 @@
 #include "renderTargetCommon.h"
 #include "../resources/shaderCommon.h"
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
 	/// @brief Specifies how the contents of render pass attachments are treated at the beginning of a render pass.
@@ -55,6 +55,6 @@ namespace ts3::gpuapi
 	};
 
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
 
 #endif // __TS3_GPUAPI_RENDER_PASS_COMMON_H__

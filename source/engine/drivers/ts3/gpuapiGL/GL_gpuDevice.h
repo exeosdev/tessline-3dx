@@ -31,6 +31,9 @@ namespace ts3::gpuapi
 		explicit GLGPUDevice( GLGPUDriver & pGLGPUDriver );
 		virtual ~GLGPUDevice();
 
+		virtual IAVertexInputLayoutDescriptorHandle createIAVertexInputLayoutDescriptor(
+				const IAVertexInputLayoutDescriptorCreateInfo & pCreateInfo ) noexcept override final;
+
 		virtual GraphicsPipelineStateObjectHandle createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) override;
 		virtual VertexStreamStateObjectHandle createVertexStreamStateObject( const VertexStreamStateObjectCreateInfo & pCreateInfo ) override;
 		virtual RenderTargetStateObjectHandle createRenderTargetStateObject( const RenderTargetStateObjectCreateInfo & pCreateInfo ) override;

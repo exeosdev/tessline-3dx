@@ -3,7 +3,7 @@
 #include "gpuDevice.h"
 #include <fstream>
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
     namespace utils
@@ -57,4 +57,4 @@ namespace ts3::gpuapi
 
     }
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI

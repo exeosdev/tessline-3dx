@@ -5,62 +5,69 @@
 #include <ts3/gpuapi/state/renderTargetStateObject.h>
 #include <ts3/stdext/memory.h>
 
-namespace ts3::gpuapi
+namespace ts3::GpuAPI
 {
 
-	const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultBGRA8 =
+	namespace Defaults
 	{
-		{
-			RenderTargetLayoutDesc::AttachmentLayoutDesc
-			{
-				ERenderTargetAttachmentID::RTColor0,
-				ETextureFormat::B8G8R8A8_UNORM
-			}
-		}
-	};
 
-	const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultBGRA8D24S8 =
-	{
+		const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8 =
 		{
-			RenderTargetLayoutDesc::AttachmentLayoutDesc
+			E_RT_ATTACHMENT_FLAG_COLOR_0_BIT,
+			1,
 			{
-				ERenderTargetAttachmentID::RTColor0,
-				ETextureFormat::B8G8R8A8_UNORM
+				RenderTargetAttachmentLayout
+				{
+					ETextureFormat::BGRA8UN
+				}
+			}
+		};
+
+		const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8D24S8 =
+		{
+			E_RT_ATTACHMENT_FLAGS_DEFAULT_C0_DS,
+			1,
+			{
+				RenderTargetAttachmentLayout
+				{
+					ETextureFormat::BGRA8UN
+				},
 			},
-			RenderTargetLayoutDesc::AttachmentLayoutDesc
+			RenderTargetAttachmentLayout
 			{
-				ERenderTargetAttachmentID::RTDepthStencil,
-				ETextureFormat::D24_UNORM_S8_UINT
+				ETextureFormat::D24UNS8U
 			}
-		}
-	};
+		};
 
-	const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultRGBA8 =
-	{
+		const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8 =
 		{
-			RenderTargetLayoutDesc::AttachmentLayoutDesc
+			E_RT_ATTACHMENT_FLAG_COLOR_0_BIT,
+			1,
 			{
-				ERenderTargetAttachmentID::RTColor0,
-				ETextureFormat::R8G8B8A8_UNORM
+				RenderTargetAttachmentLayout
+				{
+					ETextureFormat::BGRA8UN
+				}
 			}
-		}
-	};
+		};
 
-	const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultRGBA8D24S8 =
-	{
+		const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8D24S8 =
 		{
-			RenderTargetLayoutDesc::AttachmentLayoutDesc
+			E_RT_ATTACHMENT_FLAGS_DEFAULT_C0_DS,
+			1,
 			{
-				ERenderTargetAttachmentID::RTColor0,
-				ETextureFormat::R8G8B8A8_UNORM
+				RenderTargetAttachmentLayout
+				{
+					ETextureFormat::RGBA8UN
+				},
 			},
-			RenderTargetLayoutDesc::AttachmentLayoutDesc
+			RenderTargetAttachmentLayout
 			{
-				ERenderTargetAttachmentID::RTDepthStencil,
-				ETextureFormat::D24_UNORM_S8_UINT
+				ETextureFormat::D24UNS8U
 			}
-		}
-	};
+		};
+	
+	}
 
 
 	bool createRenderTargetLayout( const RenderTargetLayoutDesc & pRTLayoutDesc,
@@ -77,7 +84,7 @@ namespace ts3::gpuapi
 				{
 					rtLayout.colorAttachmentArray[attachmentIndex].format = attachmentLayoutDesc.format;
 					rtLayout.colorAttachmentActiveCount += 1;
-					rtLayout.attachmentMask.set( E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_0_BIT << attachmentIndex );
+					rtLayout.attachmentMask.set( E_RT_ATTACHMENT_FLAG_COLOR_0_BIT << attachmentIndex );
 				}
 				else
 				{
@@ -138,7 +145,7 @@ namespace ts3::gpuapi
 					attachmentLayoutPtr = &( rtLayout.colorAttachmentArray[attachmentIndex] );
 					attachmentResourceBindingPtr = &( rtResourceBinding.colorAttachmentArray[attachmentIndex] );
 					rtLayout.colorAttachmentActiveCount += 1;
-					rtLayout.attachmentMask.set( E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_0_BIT << attachmentIndex );
+					rtLayout.attachmentMask.set( E_RT_ATTACHMENT_FLAG_COLOR_0_BIT << attachmentIndex );
 				}
 				else
 				{
@@ -297,4 +304,4 @@ namespace ts3::gpuapi
 		return true;
 	}
 
-} // namespace ts3::gpuapi
+} // namespace ts3::GpuAPI
