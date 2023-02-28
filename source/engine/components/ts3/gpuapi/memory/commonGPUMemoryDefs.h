@@ -7,7 +7,7 @@
 #include "../prerequisites.h"
 #include <ts3/core/memory/commonMemoryDefs.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
     class GPUMemoryHeap;
@@ -155,7 +155,7 @@ namespace ts3::GpuAPI
 	{
 
 		/// @brief Returns true if the requested memory map mode is valid for the memory with given properties (flags).
-		inline bool checkMemoryMapAccess( Bitmask<EGPUMemoryFlags> pMemoryFlags, EGPUMemoryMapMode pRequestedMapMode )
+		inline bool checkMemoryMapAccess( EGPUMemoryMapMode pRequestedMapMode, Bitmask<EGPUMemoryFlags> pMemoryFlags )
 		{
 			auto mapRequestedAccessFlags = static_cast<uint32>( pRequestedMapMode ) & E_GPU_MEMORY_MAP_FLAG_ACCESS_READ_WRITE_BIT;
 			return pMemoryFlags.isSet( mapRequestedAccessFlags );
@@ -163,6 +163,6 @@ namespace ts3::GpuAPI
 
 	}
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_COMMON_MEMORY_DEFS_H__

@@ -1,14 +1,14 @@
 
 #include "sampler.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	Sampler::Sampler( GPUDevice & pGPUDevice, const SamplerDesc & pSamplerDesc )
-	: GPUBaseObject( pGPUDevice )
+	: GPUDeviceChildObject( pGPUDevice )
 	, mSamplerDesc( pSamplerDesc )
 	{}
 
 	Sampler::~Sampler() = default;
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi

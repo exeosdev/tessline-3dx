@@ -234,12 +234,12 @@ namespace ts3
 
 		if( cxTotalSubTexturesNum == 1 )
 		{
-			textureCreateInfo.gpuTextureCreateInfo.dimensionClass = gpuapi::ETextureDimensionClass::Texture2D;
+			textureCreateInfo.gpuTextureCreateInfo.texClass = gpuapi::ETextureClass::T2D;
 			textureCreateInfo.gpuTextureCreateInfo.dimensions.arraySize = 1;
 		}
 		else
 		{
-			textureCreateInfo.gpuTextureCreateInfo.dimensionClass = gpuapi::ETextureDimensionClass::Texture2DArray;
+			textureCreateInfo.gpuTextureCreateInfo.texClass = gpuapi::ETextureClass::T2DArray;
 			textureCreateInfo.gpuTextureCreateInfo.dimensions.arraySize = cxTotalSubTexturesNum;
 		}
 

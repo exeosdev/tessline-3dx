@@ -6,46 +6,55 @@
 
 #include "commonGPUStateDefs.h"
 #include <ts3/gpuapi/resources/renderBuffer.h>
+#include <ts3/stdext/bitUtils.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
-	/// @brief
-	enum class ERenderTargetAttachmentID : uint16
+	struct RTAttachmentLayoutInfo
 	{
-		RTColor0,
-		RTColor1,
-		RTColor2,
-		RTColor3,
-		RTColor4,
-		RTColor5,
-		RTColor6,
-		RTColor7,
-		RTDepthStencil,
-		RTUndefined
+		ETextureFormat format;
+
+		/// @brief Returns true if this instance represents a valid RT attachment.
+		TS3_ATTR_NO_DISCARD bool active() const noexcept
+		{
+			return format != ETextureFormat::UNKNOWN;
+		}
 	};
 
-	namespace CxDefs
+	/// @brief Typedef for ordered, fixed-size array of layout definitions for render target attachments.
+	/// Entries are ordered according to ERTAttachmentIndex values.
+	using RTAttachmentLayoutInfoArray = std::array<RTAttachmentLayoutInfo, CxDefs::RT_MAX_COMBINED_ATTACHMENTS_NUM>;
+
+	/// @brief A definition of a vertex layout used to create a driver-specific RenderTargetLayout object.
+	struct RenderTargetLayoutDefinition
 	{
+		///
+		RTAttachmentLayoutInfoArray attachmentArray;
+	};
+
+	/// @brief
+	struct RTAttachmentLayoutIndexAssociation
+	{
+		///
+		render_target_index_t attachmentIndex;
 
 		///
-		constexpr auto RT_MAX_COLOR_ATTACHMENTS_NUM = static_cast<render_target_index_t>( E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM );
+		RTAttachmentLayoutInfo attachmentLayout;
+	};
 
-		constexpr auto RT_ATTACHMENT_MSAA_LEVEL_INVALID = Limits<uint32>::maxValue;
+	namespace StateMgmt
+	{
 
 		/// @brief
-		inline constexpr bool isRTAttachmentIndexValid( render_target_index_t pIndex )
-		{
-			return pIndex < CxDefs::RT_MAX_COLOR_ATTACHMENTS_NUM;
-		}
+		TS3_GPUAPI_API_NO_DISCARD RTAttachmentLayoutInfoArray initializeAttachmentLayoutArray(
+				const ArrayView<RTAttachmentLayoutIndexAssociation> & pLayouts ) noexcept;
 
-	}
-
-	struct RTAttachmentDesc
-	{
-		ERenderTargetAttachmentID attachmentID = ERenderTargetAttachmentID::RTUndefined;
-		ETextureFormat format;
 	};
+
+	ts3DeclareClassHandle( RenderTargetTexture );
+
+
 
 	ts3DeclareClassHandle( RenderBuffer );
 	ts3DeclareClassHandle( RenderTargetStateObject );
@@ -85,7 +94,7 @@ namespace ts3::GpuAPI
 				return attachmentID != ERenderTargetAttachmentID::RTUndefined;
 			}
 		};
-		using AttachmentLayoutDescArray = std::array<AttachmentLayoutDesc, E_GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
+		using AttachmentLayoutDescArray = std::array<AttachmentLayoutDesc, CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
 		AttachmentLayoutDescArray attachmentLayoutDescArray;
 	};
 
@@ -102,9 +111,9 @@ namespace ts3::GpuAPI
 				return attachmentID != ERenderTargetAttachmentID::RTUndefined;
 			}
 		};
-		using AttachmentResourceBindingDescArray = std::array<AttachmentResourceBindingDesc, E_GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
+		using AttachmentResourceBindingDescArray = std::array<AttachmentResourceBindingDesc, CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
 		AttachmentResourceBindingDescArray attachmentResourceBindingDescArray;
-		uint32 activeBindingsNum = E_GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM;
+		uint32 activeBindingsNum = CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM;
 		uint32 sharedMSAALevel = 0;
 	};
 
@@ -140,7 +149,7 @@ namespace ts3::GpuAPI
 	{
 		Bitmask<ERenderTargetAttachmentFlags> attachmentMask = 0;
 		uint32 colorAttachmentActiveCount = 0;
-		TAttachmentInfo colorAttachmentArray[E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+		TAttachmentInfo colorAttachmentArray[CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
 		TAttachmentInfo depthStencilAttachment;
 
 		TS3_ATTR_NO_DISCARD TAttachmentInfo & operator[]( ERenderTargetAttachmentIndex pIndex )
@@ -204,6 +213,6 @@ namespace ts3::GpuAPI
 
 	}
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_RENDER_TARGET_COMMON_H__

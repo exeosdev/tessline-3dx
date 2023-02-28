@@ -7,7 +7,7 @@
 #include "renderTargetCommon.h"
 #include <ts3/gpuapi/resources/renderBuffer.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	struct RTClearValue
@@ -25,6 +25,6 @@ namespace ts3::GpuAPI
 	{
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_INPUT_ASSEMBLER_BINDING_H__

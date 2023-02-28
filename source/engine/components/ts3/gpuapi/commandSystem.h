@@ -7,7 +7,7 @@
 #include "commonCommandDefs.h"
 #include <unordered_map>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	class TS3_GPUAPI_CLASS CommandSystem : public GPUDeviceChildObject
@@ -22,10 +22,10 @@ namespace ts3::GpuAPI
 
 		virtual CommandSync submitContext( CommandContextDirect & pContext, const CommandContextSubmitInfo & pSubmitInfo ) = 0;
 
-		template <typename TpContext>
-		std::unique_ptr<TpContext> acquireCommandContext()
+		template <typename TContext>
+		std::unique_ptr<TContext> acquireCommandContext()
 		{
-			return moveInterfaceUniquePtr<TpContext>( acquireCommandContext( TpContext::sContextType ) );
+			return moveInterfaceUniquePtr<TContext>( acquireCommandContext( TContext::sContextType ) );
 		}
 		
 		bool setQueueAlias( gpu_cmd_device_queue_id_t pAliasID, gpu_cmd_device_queue_id_t pMappedID );
@@ -41,6 +41,6 @@ namespace ts3::GpuAPI
 		DeviceQueueAliasMap _deviceQueueAliasMap;
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_COMMAND_SYSTEM_H__

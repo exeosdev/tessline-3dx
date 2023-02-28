@@ -7,7 +7,7 @@
 #include <ts3/math/color.h>
 #include <ts3/math/vector.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	struct ViewportDesc
@@ -23,6 +23,6 @@ namespace ts3::GpuAPI
 		math::Size2u size;
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_COMMON_TYPES_H__

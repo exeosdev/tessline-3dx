@@ -6,7 +6,7 @@
 
 #include "../memory/commonGPUMemoryDefs.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( GPUResource );
@@ -56,20 +56,20 @@ namespace ts3::GpuAPI
 		// times per single frame. This flag should be combined with CPU_WRITE access to enable resource
 		// mapping and effective write modes like Append or NoOverwrite. Cannot be combined with neither
 		// IMMUTABLE nor STATIC usages.
-		E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT    = 0x01,
+		E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT    = 0x1,
 
 		// Specifies immutable content which must me specified at the creation time and cannot be altered
 		// afterwards. No CPU access is allowed for resources created with this flag. Cannot be combined
 		// with DYNAMIC usage. Although IMMUTABLE|STATIC is a valid combination, this effectively causes
 		// the resource to be created as IMMUTABLE.
-		E_GPU_RESOURCE_CONTENT_FLAG_IMMUTABLE_BIT  = 0x02,
+		E_GPU_RESOURCE_CONTENT_FLAG_IMMUTABLE_BIT  = 0x2,
 
 		// Specifies static content, specified either at the creation time or afterwards via direct upload
 		// API (DMA transfer or upload heap, depending on the driver). Resources with static content are
 		// generally advised to have no CPU access specified, as this can prevent certain optimisations
 		// and reduce the performance. Cannot be combined with DYNAMIC usage. Although STATIC|IMMUTABLE
 		// is a valid combination, this effectively causes the resource to be created as IMMUTABLE.
-		E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT     = 0x04,
+		E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT     = 0x4,
 
 		// Additional flag which can be combined with all three basic usage modes. It describes a resource
 		// which will be used only temporarily (at most few frames), which can help the runtime to select
@@ -80,24 +80,36 @@ namespace ts3::GpuAPI
 		//   flags specified for the resource (like required CPU/GPU access and explicit memory preferences).
 		//   For small temporary resources, host memory can be selected due to more sophisticated allocation
 		//   strategies for avoiding the fragmentation.
-		E_GPU_RESOURCE_CONTENT_FLAG_TEMPORARY_BIT  = 0x08,
+		E_GPU_RESOURCE_CONTENT_FLAG_TEMPORARY_BIT  = 0x8,
 
 		// Mask with all valid CONTENT_FLAG bits set.
-		E_GPU_RESOURCE_CONTENT_MASK_ALL            = 0x0F,
+		E_GPU_RESOURCE_CONTENT_MASK_ALL            = 0xF,
 	};
 
 	/// @brief
 	enum EGPUResourceUsageFlags : resource_flags_value_t
 	{
-		E_GPU_RESOURCE_USAGE_FLAG_VERTEX_STREAM_BIT   = 0x0100,
+		E_GPU_RESOURCE_USAGE_FLAG_VERTEX_STREAM_BIT   = 0x0010,
 
 		// Resource can be bound to one or more shader stages as an input (read-only) resource.
 		// Can be used for both buffers and textures.
-		E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT    = 0x0200,
+		E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT    = 0x0020,
 
 		// Resource can be bound to one or more shader stages as a read/write resource supporting
 		// unordered access. Can be used for both buffers and textures.
-		E_GPU_RESOURCE_USAGE_FLAG_SHADER_UAV_BIT      = 0x0400,
+		E_GPU_RESOURCE_USAGE_FLAG_SHADER_UAV_BIT      = 0x0040,
+
+		// Resource can be used as a color attachment in the render target state. This enables writing
+		// to such resource in the pixel shader stage. RT resources require a color-compatible format.
+		E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT = 0x0100,
+
+		//
+		E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_BIT = 0x0200,
+
+		// Resource can be used as a depth/stencil attachment in the render target state. This enables
+		// writing to such resource in the pixel shader stage and using it as depth/stencil buffer in
+		// the depth and/or stencil tests. DS resources require a depth/stencil-compatible format.
+		E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT = 0x0400 | E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_BIT,
 
 		// Resource can be used as a source in transfer operations. Typical usage will be an upload
 		// resource with CPU_WRITE access, used to write the data and copy it to the target resource.
@@ -108,17 +120,26 @@ namespace ts3::GpuAPI
 		// CPU_WRITE access).
 		E_GPU_RESOURCE_USAGE_FLAG_TRANSFER_TARGET_BIT = 0x2000,
 
-		// Resource can be used as a color attachment in the render target state. This enables writing
-		// to such resource in the pixel shader stage. RT resources require a color-compatible format.
-		E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT         = 0x4000,
+		//
+		E_GPU_RESOURCE_USAGE_FLAGS_VALID_BUFFERS =
+				E_GPU_RESOURCE_USAGE_FLAG_VERTEX_STREAM_BIT |
+				E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT |
+				E_GPU_RESOURCE_USAGE_FLAG_SHADER_UAV_BIT |
+				E_GPU_RESOURCE_USAGE_FLAG_TRANSFER_SOURCE_BIT |
+				E_GPU_RESOURCE_USAGE_FLAG_TRANSFER_TARGET_BIT,
 
-		// Resource can be used as a depth/stencil attachment in the render target state. This enables
-		// writing to such resource in the pixel shader stage and using it as depth/stencil buffer in
-		// the depth and/or stencil tests. DS resources require a depth/stencil-compatible format.
-		E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT = 0x8000,
+		//
+		E_GPU_RESOURCE_USAGE_FLAGS_VALID_TEXTURES =
+				E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT |
+				E_GPU_RESOURCE_USAGE_FLAG_SHADER_UAV_BIT |
+				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT |
+				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_BIT |
+				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT |
+				E_GPU_RESOURCE_USAGE_FLAG_TRANSFER_SOURCE_BIT |
+				E_GPU_RESOURCE_USAGE_FLAG_TRANSFER_TARGET_BIT,
 
 		// Mask with all valid USAGE_FLAG bits set.
-		E_GPU_RESOURCE_USAGE_MASK_ALL      = 0xF700,
+		E_GPU_RESOURCE_USAGE_MASK_ALL      = 0xFFF0,
 	};
 
 	/// @brief A set of pre-defined memory bit masks for most common scenarios.
@@ -179,35 +200,6 @@ namespace ts3::GpuAPI
 		Bitmask<EGPUMemoryFlags> memoryFlags = E_GPU_RESOURCE_MEMORY_MASK_DEFAULT;
 	};
 
-	namespace XImpl
-	{
-
-		template <typename TpData, bool tWritable>
-		struct ResourceMapPtrTypeProxy;
-
-		template <typename TpData>
-		struct ResourceMapPtrTypeProxy<TpData, false>
-		{
-			using Type = TpData;
-		};
-
-		template <typename TpData>
-		struct ResourceMapPtrTypeProxy<TpData, true>
-		{
-			using Type = const TpData;
-		};
-
-		template <typename TpData, uint64 tAccessMask>
-		struct ResourceMapPtrTypeProxy2 : public ResourceMapPtrTypeProxy<TpData, tAccessMask & E_GPU_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT>
-		{
-			using Type = typename ResourceMapPtrTypeProxy<TpData, tAccessMask & E_GPU_MEMORY_MAP_FLAG_ACCESS_WRITE_BIT>::Type;
-		};
-
-	}
-
-	template <typename TpData, uint64 tAccessMask>
-	using ResourceMapPtr = typename XImpl::ResourceMapPtrTypeProxy2<TpData, tAccessMask>::Type;
-
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_COMMON_RESOURCE_DEFS_H__

@@ -8,7 +8,7 @@
 #include "../resources/shaderCommon.h"
 #include <unordered_map>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	enum EShaderConstantAccessClass : uint32
@@ -96,7 +96,7 @@ namespace ts3::GpuAPI
 
 		struct ConstantGroup
 		{
-			using ConstantList = std::array<ConstantDesc, E_GPU_SYSTEM_METRIC_IS_MAX_CONSTANT_GROUP_SIZE>;
+			using ConstantList = std::array<ConstantDesc, CxDefs::GPU_SYSTEM_METRIC_IS_MAX_CONSTANT_GROUP_SIZE>;
 			EShaderConstantAccessClass accessClass;
 			ConstantList constantList;
 			uint32 constantsNum = 0;
@@ -129,14 +129,14 @@ namespace ts3::GpuAPI
 
 		struct DescriptorSet
 		{
-			using DescriptorList = std::array<DescriptorDesc, E_GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SET_SIZE>;
+			using DescriptorList = std::array<DescriptorDesc, CxDefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SET_SIZE>;
 			EShaderInputDescriptorType descriptorType;
 			DescriptorList descriptorList;
 			uint32 descriptorsNum = 0;
 		};
 
-		using ConstantGroupArray = std::array<ConstantGroup, E_GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM>;
-		using DescriptorSetArray = std::array<DescriptorSet, E_GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM>;
+		using ConstantGroupArray = std::array<ConstantGroup, CxDefs::GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM>;
+		using DescriptorSetArray = std::array<DescriptorSet, CxDefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM>;
 
 		Bitmask<EShaderStageFlags> activeShaderStagesMask;
 		ConstantGroupArray constantGroupArray;
@@ -280,6 +280,6 @@ namespace ts3::GpuAPI
 
 	TS3_GPUAPI_API ShaderInputSignature createShaderInputSignature( const ShaderInputSignatureDesc & pSignatureDesc );
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_IS_H__

@@ -7,7 +7,7 @@
 #include "commonGPUResourceDefs.h"
 #include "../state/commonGPUStateDefs.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( Sampler );
@@ -72,6 +72,6 @@ namespace ts3::GpuAPI
 
 	TS3_GPUAPI_OBJ const SamplerDesc cvSamplerDescDefault;
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_SAMPLER_COMMON_H__

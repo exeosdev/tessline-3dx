@@ -2,7 +2,7 @@
 #include "../gpuDriver.h"
 #include "../gpuDevice.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	GPUDriverChildObject::GPUDriverChildObject( GPUDriver & pGPUDriver )
@@ -19,4 +19,9 @@ namespace ts3::GpuAPI
 
 	GPUDeviceChildObject::~GPUDeviceChildObject() = default;
 
-} // namespace ts3::GpuAPI
+	UniqueGPUObjectID GPUDeviceChildObject::queryObjectID() const
+	{
+		return CxDefs::GPU_OBJECT_ID_EMPTY;
+	}
+
+} // namespace ts3::gpuapi

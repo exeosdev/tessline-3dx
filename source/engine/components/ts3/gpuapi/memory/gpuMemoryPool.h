@@ -7,7 +7,7 @@
 #include "commonGPUMemoryDefs.h"
 #include <ts3/core/sync/spinLock.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	class GPUMemoryAllocator;
@@ -44,7 +44,7 @@ namespace ts3::GpuAPI
 		MemoryLock _memoryLock;
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GPU_MEMORY_POOL_H__
 

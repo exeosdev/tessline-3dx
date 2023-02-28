@@ -8,7 +8,7 @@
 #include "resources/commonGPUResourceDefs.h"
 #include "state/pipelineStateDesc.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	class CommandContext : public GPUDeviceChildObject
@@ -165,6 +165,6 @@ namespace ts3::GpuAPI
 		void drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset );
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GPU_CMD_CONTEXT_H__

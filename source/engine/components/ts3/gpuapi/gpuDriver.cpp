@@ -2,7 +2,7 @@
 #include <ts3/gpuapi/displayManager.h>
 #include <ts3/gpuapi/gpuDriver.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	GPUDriver::GPUDriver( system::SysContextHandle pSysContext ) noexcept
@@ -21,4 +21,4 @@ namespace ts3::GpuAPI
 		_configFlags = pConfigFlags;
 	}
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi

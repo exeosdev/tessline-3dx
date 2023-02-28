@@ -4,7 +4,7 @@
 #include <ts3/gpuapi/gpuDriver.h>
 #include <ts3/gpuapi/presentationLayer.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	static const math::RGBAColorU8 sDefaultClearColorDriver0     { 0x11, 0x66, 0xCC, 0xFF };
@@ -106,9 +106,9 @@ namespace ts3::GpuAPI
 		return _presentationLayer.get();
 	}
 
-	bool GPUDevice::isDebugDevice() const
+	bool GPUDevice::onGPUResourceActiveRefsZero( GPUResource & pGPUResource )
 	{
-		return _internalStateFlags.isSet( E_INTERNAL_STATE_FLAG_DEBUG_DEVICE_BIT );
+		return true;
 	}
 
 	bool GPUDevice::_drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer )
@@ -116,4 +116,4 @@ namespace ts3::GpuAPI
 		return true;
 	}
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi

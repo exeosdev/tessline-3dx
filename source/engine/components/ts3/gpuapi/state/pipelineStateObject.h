@@ -6,12 +6,12 @@
 
 #include "gpuStateObject.h"
 #include "graphicsPipelineState.h"
-#include "graphicsShaderLinkage.h"
+#include "ts3/gpuapi/descriptors/graphicsShaderLinkage.h"
 #include "inputAssemblerCommon.h"
 #include "renderTargetCommon.h"
 #include "shaderInputSignature.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	class BlendState;
@@ -42,7 +42,7 @@ namespace ts3::GpuAPI
 	/// - Compute PSO for the async compute pipeline. Required for executing Dispatch*() calls.
 	/// - Graphics PSO for the graphics/rendering pipeline. Required for executing all kind of Draw*() calls.
 	/// Both have their dedicated classes: ComputePipelineStateObject and GraphicsPipelineStateObject, respectively.
-	class TS3_GPUAPI_CLASS PipelineStateObject : public GPUStateObject
+	class TS3_GPUAPI_CLASS PipelineStateObject : public GPUDeviceChildObject
 	{
 	public:
 		PipelineStateObject( GPUDevice & pGPUDevice );
@@ -98,6 +98,6 @@ namespace ts3::GpuAPI
 		static bool createCommonPSOState( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo, CommonPSOState & pOutputState );
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_PIPELINE_STATE_OBJECT_H__

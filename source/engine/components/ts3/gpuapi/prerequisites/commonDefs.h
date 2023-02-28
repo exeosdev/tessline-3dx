@@ -4,36 +4,56 @@
 #ifndef __TS3_GPUAPI_COMMON_DEFS_H__
 #define __TS3_GPUAPI_COMMON_DEFS_H__
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	ts3EnableCustomExceptionSupport();
 	ts3EnableEnumTypeInfoSupport();
 
-	using gpu_resource_id_t = uint64;
+	template <typename TClass>
+	using GpaHandle = SharedHandle<TClass>;
 
-	template <typename TpClass>
-	using GpaHandle = SharedHandle<TpClass>;
+	using UniqueGPUObjectID = HFSIdentifier;
+	using UniqueGPUObjectName = std::string;
+
+	template <typename TStrInput>
+	inline UniqueGPUObjectID generateUniqueGPUObjectID( TStrInput && pStrInput )
+	{
+		return generateHFSIdentifier( pStrInput );
+	}
 
 #define ts3GpaDeclareClassHandle( pClassName ) \
     class pClassName; \
     using pClassName##Handle = SharedHandle<pClassName>; \
     using pClassName##WeakHandle = WeakHandle<pClassName>
 
-	enum EGPUSystemMetrics : uint32
+	namespace CxDefs
 	{
-		E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM = 16,
-		E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM = 16,
-		E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM = 8,
-		E_GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM = 9,
-		E_GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM = 6,
-		E_GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM = 5,
-		E_GPU_SYSTEM_METRIC_IS_MAX_CONSTANT_GROUP_SIZE = 32,
-		E_GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SET_SIZE = 16,
-		E_GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM = 4,
-		E_GPU_SYSTEM_METRIC_IS_MAX_DWORD_SIZE = 64,
-		E_GPU_SYSTEM_METRIC_TEXTURE_MAX_MIP_LEVELS_NUM = 16
-	};
+
+		constexpr uint32 GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM = 16;
+		constexpr uint32 GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM = 16;
+		constexpr uint32 GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM = 8;
+		constexpr uint32 GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM = 9;
+		constexpr uint32 GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM = 6;
+		constexpr uint32 GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM = 5;
+		constexpr uint32 GPU_SYSTEM_METRIC_IS_MAX_CONSTANT_GROUP_SIZE = 32;
+		constexpr uint32 GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SET_SIZE = 16;
+		constexpr uint32 GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM = 4;
+		constexpr uint32 GPU_SYSTEM_METRIC_IS_MAX_DWORD_SIZE = 64;
+		constexpr uint32 GPU_SYSTEM_METRIC_TEXTURE_MAX_MIP_LEVELS_NUM = 16;
+
+		/// A special constant which can be used for object IDs to indicate that ID should be assigned automatically.
+		/// In most cases it is safe to assume that object address will be used as the ID (unless stated otherwise).
+		inline constexpr UniqueGPUObjectID GPU_OBJECT_ID_AUTO { Limits<uint64>::maxValue };
+
+		/// An invalid object ID. Such IDs may refer to objects which are either uninitialised, marked for deletion,
+		/// or do not yet exist in the object management system. This ID also means "not found" in case of queries.
+		inline constexpr UniqueGPUObjectID GPU_OBJECT_ID_INVALID { Limits<uint64>::maxValue - 1 };
+
+		///
+		inline constexpr UniqueGPUObjectID GPU_OBJECT_ID_EMPTY { 0 };
+
+	}
 
 	enum EGPUDriverConfigFlags : uint32
 	{
@@ -106,6 +126,7 @@ namespace ts3::GpuAPI
 
 	static_assert( E_SHADER_STAGE_MASK_ALL < 0xFFFF );
 
+	/// Constant Expressions
 	namespace CxDefs
 	{
 
@@ -195,6 +216,6 @@ namespace ts3::GpuAPI
 		E_PIPELINE_STAGE_FLAG_RT_COLOR_OUTPUT_BIT                 = 1 << E_PIPELINE_STAGE_INDEX_RT_COLOR_OUTPUT,
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_COMMON_DEFS_H__

@@ -8,7 +8,7 @@
 #include "state/renderTargetCommon.h"
 #include <atomic>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	class CommandContext;
@@ -132,12 +132,12 @@ namespace ts3::GpuAPI
 	public:
 		CommandSync() = default;
 
-		CommandSync( CommandSync && pSource )
-		: syncData( pSource.syncData )
-		, syncDataReleaseFunc( pSource.syncDataReleaseFunc )
+		CommandSync( CommandSync && pSrcObject )
+		: syncData( pSrcObject.syncData )
+		, syncDataReleaseFunc( pSrcObject.syncDataReleaseFunc )
 		{
-			pSource.syncData = nullptr;
-			pSource.syncDataReleaseFunc = nullptr;
+			pSrcObject.syncData = nullptr;
+			pSrcObject.syncDataReleaseFunc = nullptr;
 		}
 
 		~CommandSync()
@@ -167,6 +167,6 @@ namespace ts3::GpuAPI
 		}
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_COMMON_COMMAND_DEFS_H__

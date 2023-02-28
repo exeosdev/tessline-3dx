@@ -2,7 +2,7 @@
 #include "separablePipelineState.h"
 #include <ts3/gpuapi/state/renderTargetCommon.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	SeparableGraphicsPipelineStateObject::SeparableGraphicsPipelineStateObject( GPUDevice & pGPUDevice,
@@ -147,4 +147,4 @@ namespace ts3::GpuAPI
 		return shadersUpdateMask;
 	}
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi

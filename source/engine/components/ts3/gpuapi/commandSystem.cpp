@@ -3,7 +3,7 @@
 #include "gpuDevice.h"
 #include <ts3/stdext/stlHelperAlgo.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	CommandSystem::CommandSystem( GPUDevice & pGPUDevice )
@@ -55,4 +55,4 @@ namespace ts3::GpuAPI
 		return resolvedID;
 	}
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi

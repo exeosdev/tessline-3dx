@@ -6,9 +6,9 @@
 
 #include "graphicsPipelineStateController.h"
 #include "pipelineStateObject.h"
-#include "separableGraphicsShaderLinkage.h"
+#include "separableGraphicsShaderBinding.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	enum EGraphicsStateUpdateSeparableFlags : graphics_state_update_mask_value_t
@@ -127,6 +127,6 @@ namespace ts3::GpuAPI
 		SeparableGraphicsStateDescriptorSet _currentSeparableStateDescriptors;
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_SEPARABLE_PIPELINE_STATE_H__

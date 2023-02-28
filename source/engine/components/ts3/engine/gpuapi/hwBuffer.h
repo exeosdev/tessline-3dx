@@ -10,8 +10,8 @@ namespace ts3
 
 	struct HWBufferEventProxy
 	{
-		template <typename TpEvent>
-		using EventEmitterType = EventEmitter<HWBuffer, TpEvent>;
+		template <typename TEvent>
+		using EventEmitterType = EventEmitter<HWBuffer, TEvent>;
 
 		using EvtLocked = Event<E_EVT_HWB_LOCKED>;
 		using EvtUnlocked = Event<E_EVT_HWB_UNLOCKED>;

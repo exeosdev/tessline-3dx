@@ -5,7 +5,7 @@
 #include <ts3/gpuapi/state/renderTargetStateObject.h>
 #include <ts3/stdext/memory.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	namespace Defaults
@@ -80,7 +80,7 @@ namespace ts3::GpuAPI
 			if( attachmentLayoutDesc )
 			{
 				auto attachmentIndex = static_cast<uint32>( attachmentLayoutDesc.attachmentID );
-				if( attachmentIndex < E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM )
+				if( attachmentIndex < CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM )
 				{
 					rtLayout.colorAttachmentArray[attachmentIndex].format = attachmentLayoutDesc.format;
 					rtLayout.colorAttachmentActiveCount += 1;
@@ -131,7 +131,7 @@ namespace ts3::GpuAPI
 			if( attachmentResourceBindingDesc )
 			{
 				auto attachmentIndex = static_cast<uint32>( attachmentResourceBindingDesc.attachmentID );
-				if( attachmentIndex >= E_GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM )
+				if( attachmentIndex >= CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM )
 				{
 					ts3DebugInterrupt();
 					return false;
@@ -140,7 +140,7 @@ namespace ts3::GpuAPI
 				RenderTargetAttachmentLayout * attachmentLayoutPtr = nullptr;
 				RenderTargetAttachmentResourceBinding * attachmentResourceBindingPtr = nullptr;
 
-				if( attachmentIndex < E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM )
+				if( attachmentIndex < CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM )
 				{
 					attachmentLayoutPtr = &( rtLayout.colorAttachmentArray[attachmentIndex] );
 					attachmentResourceBindingPtr = &( rtResourceBinding.colorAttachmentArray[attachmentIndex] );
@@ -199,7 +199,7 @@ namespace ts3::GpuAPI
 	                                           const RenderTargetLayout & pRTLayout )
 	{
 
-		for( uint32 colorAttachmentIndex = 0; colorAttachmentIndex < E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM; ++colorAttachmentIndex )
+		for( uint32 colorAttachmentIndex = 0; colorAttachmentIndex < CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM; ++colorAttachmentIndex )
 		{
 			auto & caResourceBinding = pRTResourceBinding.colorAttachmentArray[colorAttachmentIndex];
 			auto & caLayout = pRTLayout.colorAttachmentArray[colorAttachmentIndex];
@@ -296,7 +296,7 @@ namespace ts3::GpuAPI
 			return false;
 		}
 
-		if( !TextureUtils::validateTextureSubResource( textureLayout.dimensionClass, textureLayout.dimensions, pTextureRef.textureSubResource ) )
+		if( !TextureUtils::validateTextureSubResource( textureLayout.texClass, textureLayout.dimensions, pTextureRef.textureSubResource ) )
 		{
 			return false;
 		}
@@ -304,4 +304,4 @@ namespace ts3::GpuAPI
 		return true;
 	}
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi

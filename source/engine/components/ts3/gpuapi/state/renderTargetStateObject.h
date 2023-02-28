@@ -8,7 +8,7 @@
 #include "renderTargetCommon.h"
 #include <ts3/gpuapi/resources/renderBuffer.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( RenderBuffer );
@@ -19,7 +19,7 @@ namespace ts3::GpuAPI
 		RenderTargetResourceBindingDesc rtResourceBindingDesc;
 	};
 
-	class RenderTargetStateObject : public GPUStateObject
+	class RenderTargetStateObject : public GPUDeviceChildObject
 	{
 	public:
 		RenderTargetLayout const mRTLayout;
@@ -33,6 +33,6 @@ namespace ts3::GpuAPI
 		virtual ~RenderTargetStateObject();
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_RENDER_TARGET_STATE_OBJECT_H__

@@ -87,14 +87,14 @@ namespace ts3
 		                              bshLeft<uint64, 32>( gpuapi::E_GPU_MEMORY_MAP_FLAG_WRITE_APPEND_BIT ),
 	};
 
-	template <typename TpBufferUsage>
-	inline constexpr gpuapi::gpu_memory_flags_value_t ecGetHWBufferUsageGPUMemoryFlags( TpBufferUsage pBufferUsage )
+	template <typename TBufferUsage>
+	inline constexpr gpuapi::gpu_memory_flags_value_t ecGetHWBufferUsageGPUMemoryFlags( TBufferUsage pBufferUsage )
 	{
 		return static_cast<gpuapi::gpu_memory_flags_value_t>( ( ( ( hardware_buffer_flags_value_t ) pBufferUsage ) >> 32 ) & Limits<uint32>::maxValue );
 	}
 
-	template <typename TpBufferUsage>
-	inline constexpr gpuapi::resource_flags_value_t ecGetHWBufferUsageGPUResourceFlags( TpBufferUsage pBufferUsage )
+	template <typename TBufferUsage>
+	inline constexpr gpuapi::resource_flags_value_t ecGetHWBufferUsageGPUResourceFlags( TBufferUsage pBufferUsage )
 	{
 		return static_cast<gpuapi::resource_flags_value_t>( ( ( hardware_buffer_flags_value_t ) pBufferUsage ) & Limits<uint32>::maxValue );
 	}

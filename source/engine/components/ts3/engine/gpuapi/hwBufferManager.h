@@ -56,7 +56,7 @@ namespace ts3
 		HWIndexBufferHandle createIndexBufferEx( gpuapi_buffer_ref_id_t pGBUBufferRefID,
 		                                         const HWBufferCreateInfo & pHWBCreateInfo );
 
-		TS3_PCL_ATTR_NO_DISCARD GPUBufferUsageInfo getGPUBufferInfo( gpuapi_buffer_ref_id_t pGPUBufferRefID ) const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD GPUBufferUsageInfo getGPUBufferInfo( gpuapi_buffer_ref_id_t pGPUBufferRefID ) const;
 
 		static memory_align_t queryAlignmentRequirementsForBuffer( EHWBufferType pBufferType,
 		                                                           gpuapi::gpu_memory_size_t pBufferSize,

@@ -6,7 +6,7 @@
 
 #include "displayManager.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( SystemDisplayManager );
@@ -47,6 +47,6 @@ namespace ts3::GpuAPI
 		virtual VideoModeList enumVideoModeList( display_system_id_t pOutputID, system::EColorFormat pFormat ) const override;
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_SYSTEM_DISPLAY_MANAGER_H__

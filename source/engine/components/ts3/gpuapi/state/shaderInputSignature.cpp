@@ -2,7 +2,7 @@
 #include "shaderInputSignature.h"
 #include "../resources/shader.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	struct InputConstantLayoutInfo
@@ -96,7 +96,7 @@ namespace ts3::GpuAPI
 				constantParameter.cParamType = EShaderInputParameterType::Constant;
 				constantParameter.iFormat = constantDesc.format;
 				constantParameter.iStageIndex = constantDesc.bindingIndex;
-				constantParameter.iByteSize = ecGetVertexAttribFormatByteSize( constantDesc.format );
+				constantParameter.iByteSize = CxDefs::getVertexAttribFormatByteSize( constantDesc.format );
 				constantParameter.iDwordSize = computeConstantDwordSize( constantParameter.iByteSize );
 				constantParameter.iAccessClass = constantGroupDesc.accessClass;
 
@@ -204,7 +204,7 @@ namespace ts3::GpuAPI
 		size_t constantsNum = 0;
 		size_t totalDwordSize = 0;
 
-		if( pInputSignatureDesc.constantGroupsNum > E_GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM + 1 )
+		if( pInputSignatureDesc.constantGroupsNum > CxDefs::GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM + 1 )
 		{
 			ts3DebugInterrupt();
 			return false;
@@ -227,11 +227,11 @@ namespace ts3::GpuAPI
 			{
 				const auto & constantDesc = constantGroupDesc.constantList[inputConstantIndex];
 
-				auto constantByteSize = ecGetVertexAttribFormatByteSize( constantDesc.format );
+				auto constantByteSize = CxDefs::getVertexAttribFormatByteSize( constantDesc.format );
 				auto constantDwordSize = computeConstantDwordSize( constantByteSize );
 				totalDwordSize += constantDwordSize;
 
-				if( totalDwordSize > E_GPU_SYSTEM_METRIC_IS_MAX_DWORD_SIZE )
+				if( totalDwordSize > CxDefs::GPU_SYSTEM_METRIC_IS_MAX_DWORD_SIZE )
 				{
 					ts3DebugInterrupt();
 					return false;
@@ -251,7 +251,7 @@ namespace ts3::GpuAPI
 		size_t descriptorsNum = 0;
 		size_t descriptorSetsNum = pInputSignatureDesc.descriptorSetsNum;
 
-		if( descriptorSetsNum > E_GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM )
+		if( descriptorSetsNum > CxDefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM )
 		{
 			ts3DebugInterrupt();
 			return false;
@@ -286,4 +286,4 @@ namespace ts3::GpuAPI
 		return ( dwordSizeMod == 0 ) ? trunc_numeric_cast<uint32>( dwordSize ) : trunc_numeric_cast<uint32>( dwordSize + 1 );
 	}
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi

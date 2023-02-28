@@ -4,7 +4,7 @@
 #ifndef __TS3_GPUAPI_GPU_DATA_FORMATS_H__
 #define __TS3_GPUAPI_GPU_DATA_FORMATS_H__
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	using base_data_type_value_t = uint8;
@@ -41,7 +41,9 @@ namespace ts3::GpuAPI
 		E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT = 0x02,
 		E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT = 0x04,
 		E_GPU_DATA_FORMAT_FLAG_SRGB_BIT = 0x08,
-		E_GPU_DATA_FORMAT_FLAG_COMPRESSED_BIT = 0x10,
+		E_GPU_DATA_FORMAT_FLAG_DEPTH_BIT = 0x10,
+		E_GPU_DATA_FORMAT_FLAG_DEPTH_STENCIL_BIT = 0x20 | E_GPU_DATA_FORMAT_FLAG_DEPTH_BIT,
+		E_GPU_DATA_FORMAT_FLAG_COMPRESSED_BIT = 0x80,
 		E_GPU_DATA_FORMAT_FLAG_SNORM = E_GPU_DATA_FORMAT_FLAG_NORMALIZED_BIT | E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT,
 		E_GPU_DATA_FORMAT_FLAG_UNORM = E_GPU_DATA_FORMAT_FLAG_NORMALIZED_BIT | E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT,
 		E_GPU_DATA_FORMAT_FLAG_COMPRESSED_SRGB = E_GPU_DATA_FORMAT_FLAG_COMPRESSED_BIT | E_GPU_DATA_FORMAT_FLAG_SRGB_BIT,
@@ -114,10 +116,10 @@ namespace ts3::GpuAPI
 		RGB10A2U   = CxDefs::declareTextureFormat( 41, EPixelDataLayout::RGBA,  EBaseDataType::Uint32,    4,  E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
 		RGB10A2UN  = CxDefs::declareTextureFormat( 42, EPixelDataLayout::RGBA,  EBaseDataType::Float32,   4,  E_GPU_DATA_FORMAT_FLAG_UNORM ),
 		R11G11B10F = CxDefs::declareTextureFormat( 43, EPixelDataLayout::RGB,   EBaseDataType::Float32,   4,  E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
-		D16UN      = CxDefs::declareTextureFormat( 44, EPixelDataLayout::Depth, EBaseDataType::Uint16,    2,  0 ),
-		D24UNS8U   = CxDefs::declareTextureFormat( 45, EPixelDataLayout::DS,    EBaseDataType::Uint32,    4,  0 ),
-		D24UNX8    = CxDefs::declareTextureFormat( 46, EPixelDataLayout::DS,    EBaseDataType::Uint32,    4,  0 ),
-		D32F       = CxDefs::declareTextureFormat( 47, EPixelDataLayout::DS,    EBaseDataType::Float32,   4,  0 ),
+		D16UN      = CxDefs::declareTextureFormat( 44, EPixelDataLayout::Depth, EBaseDataType::Uint16,    2,  E_GPU_DATA_FORMAT_FLAG_DEPTH_BIT ),
+		D24UNS8U   = CxDefs::declareTextureFormat( 45, EPixelDataLayout::DS,    EBaseDataType::Uint32,    4,  E_GPU_DATA_FORMAT_FLAG_DEPTH_STENCIL_BIT ),
+		D24UNX8    = CxDefs::declareTextureFormat( 46, EPixelDataLayout::DS,    EBaseDataType::Uint32,    4,  E_GPU_DATA_FORMAT_FLAG_DEPTH_STENCIL_BIT ),
+		D32F       = CxDefs::declareTextureFormat( 47, EPixelDataLayout::DS,    EBaseDataType::Float32,   4,  E_GPU_DATA_FORMAT_FLAG_DEPTH_BIT ),
 		BC1        = CxDefs::declareTextureFormat( 48, EPixelDataLayout::S3TC,  EBaseDataType::Undefined, 0,  E_GPU_DATA_FORMAT_FLAG_COMPRESSED_BIT ),
 		BC1SRGB    = CxDefs::declareTextureFormat( 49, EPixelDataLayout::S3TC,  EBaseDataType::Undefined, 0,  E_GPU_DATA_FORMAT_FLAG_COMPRESSED_SRGB ),
 		BC2        = CxDefs::declareTextureFormat( 50, EPixelDataLayout::S3TC,  EBaseDataType::Undefined, 0,  E_GPU_DATA_FORMAT_FLAG_COMPRESSED_BIT ),
@@ -253,6 +255,6 @@ namespace ts3::GpuAPI
 
 	}
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GPU_DATA_FORMATS_H__

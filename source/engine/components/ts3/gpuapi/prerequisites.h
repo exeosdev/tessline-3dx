@@ -8,6 +8,7 @@
 #include <ts3/core/coreEngineState.h>
 #include <ts3/core/graphicsTypes.h>
 #include <ts3/core/mathImports.h>
+#include <ts3/core/utility/hfsIdentifier.h>
 #include <ts3/stdext/utilities.h>
 
 #include <memory>
@@ -31,13 +32,15 @@
 #define TS3_GPUAPI_API_NO_DISCARD \
 	TS3_GPUAPI_API TS3_ATTR_NO_DISCARD
 
+#define ts3driverApi( access ) access
+
 #include "prerequisites/commonDefs.h"
 #include "prerequisites/commonTypes.h"
 #include "prerequisites/coreInterfaceDefs.h"
 #include "prerequisites/gpuBaseObject.h"
 #include "prerequisites/gpuDataFormats.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	// Same for all drivers. A top-level interface for querying capabilities and
@@ -88,22 +91,27 @@ namespace ts3::GpuAPI
 		Unknown = 0x00
 	};
 
-	inline constexpr uint32 ecMakeDriverID( EGPUDriverAPI pDriverAPI, uint32 pAPISubVersion )
+	namespace CxDefs
 	{
-		return ( ( static_cast<uint32>( pDriverAPI ) & 0xFF ) << 8 ) | ( pAPISubVersion & 0xFF );
+
+		inline constexpr uint32 makeGPUDriverID( EGPUDriverAPI pDriverAPI, uint32 pAPISubVersion )
+		{
+			return ( ( static_cast<uint32>( pDriverAPI ) & 0xFF ) << 8 ) | ( pAPISubVersion & 0xFF );
+		}
+
 	}
 
 	enum class EGPUDriverID : uint32
 	{
-		GDIDirectX11      = ecMakeDriverID( EGPUDriverAPI::DirectX, 0x11 ),
-		GDIDirectX12      = ecMakeDriverID( EGPUDriverAPI::DirectX, 0x12 ),
-		GDIMetal1         = ecMakeDriverID( EGPUDriverAPI::Metal,   0x01 ),
-		GDIOpenGLDesktop4 = ecMakeDriverID( EGPUDriverAPI::OpenGL,  0xD4 ),
-		GDIOpenGLES3      = ecMakeDriverID( EGPUDriverAPI::OpenGL,  0xE3 ),
-		GDIVulkan10       = ecMakeDriverID( EGPUDriverAPI::Vulkan,  0x10 ),
-		GDIUnknown        = ecMakeDriverID( EGPUDriverAPI::Unknown, 0x00 )
+		GDIDirectX11      = CxDefs::makeGPUDriverID( EGPUDriverAPI::DirectX, 0x11 ),
+		GDIDirectX12      = CxDefs::makeGPUDriverID( EGPUDriverAPI::DirectX, 0x12 ),
+		GDIMetal1         = CxDefs::makeGPUDriverID( EGPUDriverAPI::Metal,   0x01 ),
+		GDIOpenGLDesktop4 = CxDefs::makeGPUDriverID( EGPUDriverAPI::OpenGL,  0xD4 ),
+		GDIOpenGLES3      = CxDefs::makeGPUDriverID( EGPUDriverAPI::OpenGL,  0xE3 ),
+		GDIVulkan10       = CxDefs::makeGPUDriverID( EGPUDriverAPI::Vulkan,  0x10 ),
+		GDIUnknown        = CxDefs::makeGPUDriverID( EGPUDriverAPI::Unknown, 0x00 )
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_PREREQUISITES_H__

@@ -1,7 +1,7 @@
 
 #include "samplerCommon.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	const SamplerDesc cvSamplerDescDefault =
@@ -36,4 +36,4 @@ namespace ts3::GpuAPI
 		ECompFunc::Never
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
