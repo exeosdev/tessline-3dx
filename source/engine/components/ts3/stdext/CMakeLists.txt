@@ -22,6 +22,7 @@ set( TS3_STDEXT_SRC_FILES
         "stringView.h"
         "typeTraits.h"
         "utilities.h"
+        "variant.h"
         )
 
 add_library( ts3-stdext STATIC

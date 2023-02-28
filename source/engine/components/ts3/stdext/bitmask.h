@@ -2,89 +2,89 @@
 #ifndef __TS3_STDEXT_BITMASK_H__
 #define __TS3_STDEXT_BITMASK_H__
 
+#include "bitUtils.h"
 #include "typeTraits.h"
 #include <ts3/platform/gds.h>
 
 namespace ts3
 {
 
-	template <typename TpVal>
+	template <typename TVal>
 	class Bitmask
 	{
 		static_assert(
-			( std::is_integral<TpVal>::value || std::is_enum<TpVal>::value ) && !std::is_same<TpVal, bool>::value,
+			( std::is_integral<TVal>::value || std::is_enum<TVal>::value ) && !std::is_same<TVal, bool>::value,
 			"Atomic masks are only valid for integer and enum types (but not a bool type)!" );
 
 	public:
-		using MyType = Bitmask<TpVal>;
-		using ValueType = typename UintTypeBySize<sizeof( TpVal )>::Type;
+		using MyType = Bitmask<TVal>;
+		using ValueType = typename UintTypeBySize<sizeof( TVal )>::Type;
 
 	public:
 		constexpr Bitmask() noexcept
 		: _value( 0 )
 		{}
 
-		template <typename TpBits>
-		constexpr Bitmask( TpBits pValue ) noexcept
+		template <typename TBits>
+		constexpr Bitmask( TBits pValue ) noexcept
 		: _value( static_cast<ValueType>( pValue ) )
 		{}
 
-		template <typename TpBits>
-		MyType & operator=( TpBits pValue )
+		template <typename TBits>
+		MyType & operator=( TBits pValue )
 		{
 			_value = static_cast<ValueType>( pValue );
 			return *this;
 		}
 
-		constexpr operator TpVal() const
+		constexpr operator TVal() const
 		{
-			return static_cast<TpVal>( _value );
+			return static_cast<TVal>( _value );
 		}
 
-		template <typename TpBits>
-		void store( TpBits pBits )
+		template <typename TBits>
+		MyType & store( TBits pBits )
 		{
 			_value = static_cast<ValueType>( pBits );
+			return *this;
 		}
 
-		template <typename TpBits>
-		void set( TpBits pBits )
+		template <typename TBits>
+		MyType & set( TBits pBits )
 		{
 			_value |= static_cast<ValueType>( pBits );
+			return *this;
 		}
 
-		template <typename TpBits>
-		void toggle( TpBits pBits )
+		template <typename TBits>
+		MyType & toggle( TBits pBits )
 		{
 			_value ^= static_cast<ValueType>( pBits );
+			return *this;
 		}
 
-		template <typename TpBits>
-		void unset( TpBits pBits )
+		template <typename TBits>
+		MyType & unset( TBits pBits )
 		{
 			_value &= ~static_cast<ValueType>( pBits );
+			return *this;
 		}
 
-		void invert()
+		MyType & invert()
 		{
 			_value = ~( _value );
+			return *this;
 		}
 
-		template <typename TpBits>
-		void setOrUnset( TpBits pBits, bool pSet )
+		template <typename TBits>
+		MyType & setOrUnset( TBits pBits, bool pSet )
 		{
-			if( pSet )
-			{
-				set( pBits );
-			}
-			else
-			{
-				unset( pBits );
-			}
+			pSet ? set( pBits ) : unset( pBits );
+			return *this;
 		}
 
-		template <typename TpBits>
-		bool testAndSet( TpBits pBits )
+		template <typename TBits>
+		bool testAndSet( TBits pBits )
 		{
 			if( ( _value & static_cast<ValueType>( pBits ) ) != 0 )
 			{
@@ -95,8 +95,8 @@ namespace ts3
 			return true;
 		}
 
-		template <typename TpBits>
-		bool testAndUnset( TpBits pBits )
+		template <typename TBits>
+		bool testAndUnset( TBits pBits )
 		{
 			if( ( _value & static_cast<ValueType>( pBits ) ) != static_cast<ValueType>( pBits ) )
 			{
@@ -107,96 +107,127 @@ namespace ts3
 			return true;
 		}
 
+		template <typename TBits>
+		MyType & applyAnd( TBits pBits )
+		{
+			_value &= pBits;
+			return *this;
+		}
+
+		template <typename TBits>
+		MyType & applyOr( TBits pBits )
+		{
+			_value |= pBits;
+			return *this;
+		}
+
+		template <typename TBits>
+		MyType & applyXor( TBits pBits )
+		{
+			_value ^= pBits;
+			return *this;
+		}
+
 		void clear()
 		{
 			_value = 0;
 		}
 
-		TS3_FUNC_NO_DISCARD ValueType get() const
+		TS3_ATTR_NO_DISCARD ValueType get() const
 		{
 			return _value;
 		}
 
-		template <typename TpBits>
-		TS3_FUNC_NO_DISCARD ValueType test( TpBits pBits ) const
+		template <typename TBits>
+		TS3_ATTR_NO_DISCARD ValueType test( TBits pBits ) const
 		{
 			return _value & static_cast<ValueType>( pBits );
 		}
 
-		template <typename TpBits>
-		TS3_FUNC_NO_DISCARD constexpr bool isSet( TpBits pBits ) const
+		template <typename TBits>
+		TS3_ATTR_NO_DISCARD constexpr bool isSet( TBits pBits ) const
 		{
 			return ( static_cast<ValueType>( pBits ) != 0 ) && ( ( _value & static_cast<ValueType>( pBits ) ) == static_cast<ValueType>( pBits ) );
 		}
 
-		template <typename TpBits>
-		TS3_FUNC_NO_DISCARD constexpr bool isSetAnyOf( TpBits pBits ) const
+		template <typename TBits>
+		TS3_ATTR_NO_DISCARD constexpr bool isSetAnyOf( TBits pBits ) const
 		{
 			return ( _value & static_cast<ValueType>( pBits ) ) != static_cast<ValueType>( 0 );
 		}
 
-		TS3_FUNC_NO_DISCARD constexpr bool empty() const
+		TS3_ATTR_NO_DISCARD constexpr uint16 countBits() const
+		{
+			return popCount( _value );;
+		}
+
+		TS3_ATTR_NO_DISCARD constexpr bool empty() const
 		{
 			return _value == 0;
 		}
 
-		template <typename TpBits>
-		void operator|=( TpBits pBits )
+		TS3_ATTR_NO_DISCARD static constexpr uint16 countBits( ValueType pValue )
+		{
+			return popCount( pValue );
+		}
+
+		template <typename TBits>
+		constexpr void operator|=( TBits pBits )
 		{
 			_value |= static_cast<ValueType>( pBits );
 		}
 
-		template <typename TpBits>
-		void operator&=( TpBits pBits )
+		template <typename TBits>
+		constexpr void operator&=( TBits pBits )
 		{
 			_value &= static_cast<ValueType>( pBits );
 		}
 
-		template <typename TpBits>
-		void operator^=( TpBits pBits )
+		template <typename TBits>
+		constexpr void operator^=( TBits pBits )
 		{
 			_value ^= static_cast<ValueType>( pBits );
 		}
 
-		void operator<<=( size_t pShift )
+		constexpr void operator<<=( size_t pShift )
 		{
 			_value <<= pShift;
 		}
 
-		void operator>>=( size_t pShift )
+		constexpr void operator>>=( size_t pShift )
 		{
 			_value <<= pShift;
 		}
 
-		ValueType operator~() const
+		constexpr ValueType operator~() const
 		{
 			return ~( _value );
 		}
 
-		template <typename TpBits>
-		ValueType operator|( TpBits pBits ) const
+		template <typename TBits>
+		constexpr ValueType operator|( TBits pBits ) const
 		{
 			return _value | static_cast<ValueType>( pBits );
 		}
 
-		template <typename TpBits>
-		ValueType operator&( TpBits pBits ) const
+		template <typename TBits>
+		constexpr ValueType operator&( TBits pBits ) const
 		{
 			return _value & static_cast<ValueType>( pBits );
 		}
 
-		template <typename TpBits>
-		ValueType operator^( TpBits pBits ) const
+		template <typename TBits>
+		constexpr ValueType operator^( TBits pBits ) const
 		{
 			return _value ^ static_cast<ValueType>( pBits );
 		}
 
-		ValueType operator<<( size_t pShift ) const
+		constexpr ValueType operator<<( size_t pShift ) const
 		{
 			return _value << pShift;
 		}
 
-		ValueType operator>>( size_t pShift ) const
+		constexpr ValueType operator>>( size_t pShift ) const
 		{
 			return _value >> pShift;
 		}
@@ -205,10 +236,10 @@ namespace ts3
 		ValueType  _value;
 	};
 
-	template <typename TpVal>
-	inline constexpr Bitmask<TpVal> makeBitmask( TpVal pValue = static_cast<TpVal>( 0 ) )
+	template <typename TVal, typename TInput = TVal>
+	TS3_ATTR_NO_DISCARD inline constexpr Bitmask<TVal> makeBitmask( TInput pValue = static_cast<TVal>( 0 ) )
 	{
-		return Bitmask<TpVal>( pValue );
+		return Bitmask<TVal>( pValue );
 	}
 
 }

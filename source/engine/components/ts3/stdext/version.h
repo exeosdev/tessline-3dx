@@ -52,7 +52,7 @@ namespace ts3
 	public:
 		/// @brief Returns the string representation of the version.
 		/// @return The string representation of the version, formatted as "major.minor".
-		TS3_PCL_ATTR_NO_DISCARD std::string toString() const
+		TS3_PCL_ATTR_FUNC_NO_DISCARD std::string toString() const
 		{
 			return std::to_string( major ) + "." + std::to_string( minor );
 		}

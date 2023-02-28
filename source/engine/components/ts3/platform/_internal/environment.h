@@ -411,9 +411,9 @@
 #endif
 
 #if( TS3_PCL_CPP_VERSION >= TS3_PCL_CPP_VERSION_17 )
-#  define TS3_PCL_ATTR_NO_DISCARD [[nodiscard]]
+#  define TS3_PCL_ATTR_FUNC_NO_DISCARD [[nodiscard]]
 #else
-#  define TS3_PCL_ATTR_NO_DISCARD
+#  define TS3_PCL_ATTR_FUNC_NO_DISCARD
 #endif
 
 

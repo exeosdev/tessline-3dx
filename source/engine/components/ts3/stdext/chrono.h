@@ -45,14 +45,14 @@ namespace ts3
 	};
 
 
-	template <EDurationPeriod tpPeriod>
-	using Duration = typename DurationTypeWrapper<tpPeriod>::Type;
+	template <EDurationPeriod tPeriod>
+	using Duration = typename DurationTypeWrapper<tPeriod>::Type;
 
 
-	template <EDurationPeriod tpPeriod>
+	template <EDurationPeriod tPeriod>
 	struct DurationTraits
 	{
-		using RatioType = typename DurationTypeWrapper<tpPeriod>::Type::period;
+		using RatioType = typename DurationTypeWrapper<tPeriod>::Type::period;
 
 		static constexpr std::pair<native_int, native_int> unitRatio {
 			static_cast<native_int>( RatioType::num ),

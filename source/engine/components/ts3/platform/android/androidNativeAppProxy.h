@@ -47,7 +47,7 @@
  *    respectively.
  *
  *    Your application can use the same ALooper to listen to additional
- *    file-descriptors.  They can either be callback based, or with return
+ *    file-pdesc.  They can either be callback based, or with return
  *    identifiers starting with LOOPER_ID_USER.
  *
  * 4/ Whenever you receive a LOOPER_ID_MAIN or LOOPER_ID_INPUT event,
@@ -182,8 +182,8 @@ struct AndroidAppState {
         ts3UserData[pIndex] = nullptr;
     }
 
-    template <typename TpData>
-    inline void ts3SetUserData( uint32 pIndex, TpData * pData )
+    template <typename TData>
+    inline void ts3SetUserData( uint32 pIndex, TData * pData )
     {
         assert( pIndex < CX_PLATFORM_ANDROID_APP_USER_DATA_SIZE );
         ts3UserData[pIndex] = pData;
@@ -195,11 +195,11 @@ struct AndroidAppState {
         return ts3UserData[pIndex];
     }
 
-    template <typename TpData>
-    inline TpData * ts3GetUserDataAs( uint32 pIndex )
+    template <typename TData>
+    inline TData * ts3GetUserDataAs( uint32 pIndex )
     {
         void * dataPtr = ts3GetUserData( pIndex );
-        return static_cast<TpData *>( dataPtr );
+        return static_cast<TData *>( dataPtr );
     }
 };
 

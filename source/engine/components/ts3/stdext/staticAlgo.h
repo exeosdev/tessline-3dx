@@ -8,115 +8,115 @@
 namespace ts3
 {
 
-	template <typename Tp1, typename Tp2 = Tp1>
+	template <typename T1, typename T2 = T1>
 	struct CmpEqual
 	{
-		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		constexpr bool operator()( const T1 & pLhs, const T2 & pRhs ) const
 		{
 			return pLhs == pRhs;
 		}
 	};
 
-	template <typename Tp1>
+	template <typename T1>
 	struct CmpEqualT
 	{
-		template <typename Tp2>
-		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		template <typename T2>
+		constexpr bool operator()( const T1 & pLhs, const T2 & pRhs ) const
 		{
 			return pLhs == pRhs;
 		}
 	};
 
-	template <typename Tp1, typename Tp2 = Tp1>
+	template <typename T1, typename T2 = T1>
 	struct CmpNotEqual
 	{
-		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		constexpr bool operator()( const T1 & pLhs, const T2 & pRhs ) const
 		{
 			return pLhs != pRhs;
 		}
 	};
 
-	template <typename Tp1>
+	template <typename T1>
 	struct CmpNotEqualT
 	{
-		template <typename Tp2>
-		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		template <typename T2>
+		constexpr bool operator()( const T1 & pLhs, const T2 & pRhs ) const
 		{
 			return pLhs != pRhs;
 		}
 	};
 
-	template <typename Tp1, typename Tp2 = Tp1>
+	template <typename T1, typename T2 = T1>
 	struct CmpLess
 	{
-		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		constexpr bool operator()( const T1 & pLhs, const T2 & pRhs ) const
 		{
 			return pLhs < pRhs;
 		}
 	};
 
-	template <typename Tp1>
+	template <typename T1>
 	struct CmpLessT
 	{
-		template <typename Tp2>
-		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		template <typename T2>
+		constexpr bool operator()( const T1 & pLhs, const T2 & pRhs ) const
 		{
 			return pLhs < pRhs;
 		}
 	};
 
-	template <typename Tp1, typename Tp2 = Tp1>
+	template <typename T1, typename T2 = T1>
 	struct CmpLessEqual
 	{
-		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		constexpr bool operator()( const T1 & pLhs, const T2 & pRhs ) const
 		{
 			return pLhs <= pRhs;
 		}
 	};
 
-	template <typename Tp1>
+	template <typename T1>
 	struct CmpLessEqualT
 	{
-		template <typename Tp2>
-		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		template <typename T2>
+		constexpr bool operator()( const T1 & pLhs, const T2 & pRhs ) const
 		{
 			return pLhs <= pRhs;
 		}
 	};
 
-	template <typename Tp1, typename Tp2 = Tp1>
+	template <typename T1, typename T2 = T1>
 	struct CmpGreater
 	{
-		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		constexpr bool operator()( const T1 & pLhs, const T2 & pRhs ) const
 		{
 			return pLhs > pRhs;
 		}
 	};
 
-	template <typename Tp1>
+	template <typename T1>
 	struct CmpGreaterT
 	{
-		template <typename Tp2>
-		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		template <typename T2>
+		constexpr bool operator()( const T1 & pLhs, const T2 & pRhs ) const
 		{
 			return pLhs > pRhs;
 		}
 	};
 
-	template <typename Tp1, typename Tp2 = Tp1>
+	template <typename T1, typename T2 = T1>
 	struct CmpGreaterEqual
 	{
-		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		constexpr bool operator()( const T1 & pLhs, const T2 & pRhs ) const
 		{
 			return pLhs >= pRhs;
 		}
 	};
 
-	template <typename Tp1>
+	template <typename T1>
 	struct CmpGreaterEqualT
 	{
-		template <typename Tp2>
-		constexpr bool operator()( const Tp1 & pLhs, const Tp2 & pRhs ) const
+		template <typename T2>
+		constexpr bool operator()( const T1 & pLhs, const T2 & pRhs ) const
 		{
 			return pLhs >= pRhs;
 		}
@@ -159,7 +159,7 @@ namespace ts3
 	};
 
 	template <typename... _Types>
-	struct StaticMaxSizeofTp
+	struct StaticMaxSizeofT
 	{
 		static constexpr size_t value = static_cast< size_t >( StaticMax<sizeof( _Types )...>::value );
 	};
@@ -167,11 +167,11 @@ namespace ts3
 	template <intmax_t... tValues>
 	struct StaticMaxSizeofVal
 	{
-		static constexpr size_t value = StaticMaxSizeofTp<typename IntTypeByValue<tValues>::Type...>::value;
+		static constexpr size_t value = StaticMaxSizeofT<typename IntTypeByValue<tValues>::Type...>::value;
 	};
 
 	template <typename... _Types>
-	struct StaticMaxAlignofTp
+	struct StaticMaxAlignofT
 	{
 		static constexpr size_t value = static_cast< size_t >( StaticMax<alignof( _Types )...>::value );
 	};
@@ -179,7 +179,7 @@ namespace ts3
 	template <intmax_t... tValues>
 	struct StaticMaxAlignofVal
 	{
-		static constexpr size_t value = StaticMaxAlignofTp<typename IntTypeByValue<tValues>::Type...>::value;
+		static constexpr size_t value = StaticMaxAlignofT<typename IntTypeByValue<tValues>::Type...>::value;
 	};
 
 }

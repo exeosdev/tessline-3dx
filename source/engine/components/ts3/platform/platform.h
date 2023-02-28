@@ -21,20 +21,15 @@
 #  define TS3_RELEASE_OPT_MAX 0
 #endif
 
-/// @def TS3_CLASS_MAYBE_UNUSED
+/// @def TS3_ATTR_MAYBE_UNUSED
 /// @brief Replaced with compiler-specific version (or the standard one - if supported) [[maybe_unused]] class attribute.
-#define TS3_CLASS_MAYBE_UNUSED \
+#define TS3_ATTR_MAYBE_UNUSED \
 	TS3_PCL_ATTR_MAYBE_UNUSED
 
-/// @def TS3_FUNC_MAYBE_UNUSED
-/// @brief Replaced with compiler-specific version (or the standard one - if supported) [[maybe_unused]] function attribute.
-#define TS3_FUNC_MAYBE_UNUSED \
-	TS3_PCL_ATTR_MAYBE_UNUSED
-
-/// @def TS3_FUNC_NO_DISCARD
+/// @def TS3_ATTR_NO_DISCARD
 /// @brief Replaced with compiler-specific version (or the standard one - if supported) [[nodiscard]] function attribute.
-#define TS3_FUNC_NO_DISCARD \
-	TS3_PCL_ATTR_NO_DISCARD
+#define TS3_ATTR_NO_DISCARD \
+	TS3_PCL_ATTR_FUNC_NO_DISCARD
 
 namespace ts3
 {

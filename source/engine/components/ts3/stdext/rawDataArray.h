@@ -1,0 +1,5 @@
+
+#ifndef __TS3_STDEXT_BYTE_ARRAY_H__
+#define __TS3_STDEXT_BYTE_ARRAY_H__
+
+#endif // __TS3_STDEXT_BYTE_ARRAY_H__

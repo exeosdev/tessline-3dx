@@ -10,11 +10,16 @@
 namespace ts3
 {
 
-	inline constexpr uint32 CX_MEMORY_DEFAULT_ALIGNMENT = TS3_PCL_MEMORY_BASE_ALIGNMENT;
-
 	using MemoryAllocCallback = std::function<void *( size_t )>;
 	using MemoryFreeCallback = std::function<void( void * )>;
 	using MemoryReallocCallback = std::function<void *( void *, size_t )>;
+
+	namespace CxDefs
+	{
+
+		inline constexpr uint32 MEMORY_DEFAULT_ALIGNMENT = TS3_PCL_MEMORY_BASE_ALIGNMENT;
+
+	}
 
 	struct MemoryAllocationProxy
 	{
@@ -22,7 +27,7 @@ namespace ts3
 		MemoryAllocCallback apiAlloc;
 		MemoryFreeCallback apiFree;
 		MemoryReallocCallback apiRealloc;
-		uint32 memoryAlignment = CX_MEMORY_DEFAULT_ALIGNMENT;
+		uint32 memoryAlignment = CxDefs::MEMORY_DEFAULT_ALIGNMENT;
 
 	public:
 		explicit operator bool() const
@@ -46,10 +51,10 @@ namespace ts3
 
 	extern const MemoryAllocationProxy cvDefaultMemoryAllocationProxy;
 
-	template <typename Tp>
+	template <typename TVal>
 	struct MemoryBaseSize
 	{
-		static constexpr size_t size = sizeof( Tp );
+		static constexpr size_t size = sizeof( TVal );
 	};
 
 	template <>
@@ -58,11 +63,11 @@ namespace ts3
 		static constexpr size_t size = 1;
 	};
 
-	template <typename TpSize, typename TpOffset = TpSize>
+	template <typename TSize, typename TOffset = TSize>
 	struct AlignedMemoryAllocInfo
 	{
-		Region<TpSize, TpOffset> accessibleRegion;
-		Region<TpSize, TpOffset> reservedRegion;
+		Region<TSize, TOffset> accessibleRegion;
+		Region<TSize, TOffset> reservedRegion;
 	};
 
 	inline constexpr uint64 memCheckRequestedCopySize( uint64 pBufferSize, uint64 pCopySize, uint64 pCopyOffset )
@@ -74,34 +79,34 @@ namespace ts3
 	}
 
 	///
-	/// @tparam TpValue
+	/// @tparam TValue
 	/// @param pValue
 	/// @param pAlignment
 	/// @return
-	template <typename TpValue>
-	inline constexpr TpValue memGetAlignedPowerOf2( TpValue pValue, uint32 pAlignment )
+	template <typename TValue>
+	inline constexpr TValue memGetAlignedPowerOf2( TValue pValue, uint32 pAlignment )
 	{
-		return static_cast<TpValue>( ( static_cast<uint64>( pValue ) + pAlignment ) & ( ~( static_cast<uint64>( pAlignment ) - 1 ) ) );
+		return static_cast<TValue>( ( static_cast<uint64>( pValue ) + pAlignment ) & ( ~( static_cast<uint64>( pAlignment ) - 1 ) ) );
 	}
 
 	///
-	/// @tparam TpValue
+	/// @tparam TValue
 	/// @param pValue
 	/// @param pAlignment
 	/// @return
-	template <typename TpValue>
-	inline TpValue memGetAlignedValue( TpValue pValue, uint32 pAlignment )
+	template <typename TValue>
+	inline TValue memGetAlignedValue( TValue pValue, uint32 pAlignment )
 	{
 		const auto valueAlignmentMod = pValue % pAlignment;
 		return ( valueAlignmentMod != 0 ) ? ( pValue + pAlignment - valueAlignmentMod ) : pValue;
 	}
 
-	template <typename TpSize, typename TpOffset = TpSize, typename std::enable_if<std::is_integral<TpSize>::value, int>::type = 0>
-	inline AlignedMemoryAllocInfo<TpSize, TpOffset> memComputeAlignedAllocationInfo( TpOffset pBaseAddress, TpSize pAllocationSize, uint32 pAlignment )
+	template <typename TSize, typename TOffset = TSize, typename std::enable_if<std::is_integral<TSize>::value, int>::type = 0>
+	inline AlignedMemoryAllocInfo<TSize, TOffset> memComputeAlignedAllocationInfo( TOffset pBaseAddress, TSize pAllocationSize, uint32 pAlignment )
 	{
 		const auto alignedOffset = memGetAlignedValue( pBaseAddress, pAlignment );
 
-		AlignedMemoryAllocInfo<TpSize, TpOffset> allocInfo;
+		AlignedMemoryAllocInfo<TSize, TOffset> allocInfo;
 		allocInfo.accessibleRegion.offset = alignedOffset;
 		allocInfo.accessibleRegion.size = pAllocationSize;
 		allocInfo.reservedRegion.offset = pBaseAddress;
@@ -161,11 +166,11 @@ namespace ts3
 	void memZeroUnchecked( void * pMemoryPtr, size_t pMemorySize, size_t pZeroSize );
 
 	/// @brief
-	template <typename TpDst, typename TpSrc>
-	inline void memCopy( TpDst * pDst, size_t pCapacity, const TpSrc * pSrc, size_t pCopyCount )
+	template <typename TDst, typename TSrc>
+	inline void memCopy( TDst * pDst, size_t pCapacity, const TSrc * pSrc, size_t pCopyCount )
 	{
-		const auto dstByteCapacity = MemoryBaseSize<TpDst>::size * pCapacity;
-		const auto copyByteSize = MemoryBaseSize<TpSrc>::size * pCopyCount;
+		const auto dstByteCapacity = MemoryBaseSize<TDst>::size * pCapacity;
+		const auto copyByteSize = MemoryBaseSize<TSrc>::size * pCopyCount;
 	#if( TS3_USE_RUNTIME_CHECKED_MEMORY_ROUTINES )
 		memCopyChecked( pDst, dstByteCapacity, pSrc, copyByteSize );
 	#else
@@ -174,19 +179,19 @@ namespace ts3
 	}
 
 	/// @brief
-	template <typename TpDst, typename TpSrc>
-	inline void memCopy( TpDst & pDst, const TpSrc & pSrc )
+	template <typename TDst, typename TSrc>
+	inline void memCopy( TDst & pDst, const TSrc & pSrc )
 	{
-		static_assert( sizeof( TpDst ) >= sizeof( TpSrc ) );
+		static_assert( sizeof( TDst ) >= sizeof( TSrc ) );
 		memCopy( &pDst, 1, &pSrc, 1 );
 	}
 
 	/// @brief
-	template <typename TpData>
-	inline void memFill( TpData * pMemory, size_t pCapacity, byte pFillValue, size_t pFillCount )
+	template <typename TData>
+	inline void memFill( TData * pMemory, size_t pCapacity, byte pFillValue, size_t pFillCount )
 	{
-		const auto memoryByteCapacity = MemoryBaseSize<TpData>::size * pCapacity;
-		const auto fillByteSize = MemoryBaseSize<TpData>::size * pFillCount;
+		const auto memoryByteCapacity = MemoryBaseSize<TData>::size * pCapacity;
+		const auto fillByteSize = MemoryBaseSize<TData>::size * pFillCount;
 	#if( TS3_USE_RUNTIME_CHECKED_MEMORY_ROUTINES )
 		memFillChecked( pMemory, memoryByteCapacity, pFillValue, fillByteSize );
 	#else
@@ -195,10 +200,10 @@ namespace ts3
 	}
 
 	/// @brief
-	template <typename TpData>
-	inline void memMove( TpData * pMemory, size_t pCapacity, size_t pBaseOffset, size_t pCount, ptrdiff_t pMoveOffset )
+	template <typename TData>
+	inline void memMove( TData * pMemory, size_t pCapacity, size_t pBaseOffset, size_t pCount, ptrdiff_t pMoveOffset )
 	{
-		constexpr auto elemSize = MemoryBaseSize<TpData>::size;
+		constexpr auto elemSize = MemoryBaseSize<TData>::size;
 	#if( TS3_USE_RUNTIME_CHECKED_MEMORY_ROUTINES )
 		memMoveChecked( pMemory, pCapacity * elemSize, pBaseOffset * elemSize, pCount * elemSize, pMoveOffset * elemSize );
 	#else
@@ -207,11 +212,11 @@ namespace ts3
 	}
 
 	/// @brief
-	template <typename TpData>
-	inline void memZero( TpData * pMemory, size_t pCapacity, size_t pZeroCount )
+	template <typename TData>
+	inline void memZero( TData * pMemory, size_t pCapacity, size_t pZeroCount )
 	{
-		const auto memoryByteCapacity = MemoryBaseSize<TpData>::size * pCapacity;
-		const auto zeroByteSize = MemoryBaseSize<TpData>::size * pZeroCount;
+		const auto memoryByteCapacity = MemoryBaseSize<TData>::size * pCapacity;
+		const auto zeroByteSize = MemoryBaseSize<TData>::size * pZeroCount;
 	#if( TS3_USE_RUNTIME_CHECKED_MEMORY_ROUTINES )
 		memZeroChecked( pMemory, memoryByteCapacity, zeroByteSize );
 	#else
@@ -219,34 +224,34 @@ namespace ts3
 	#endif
 	}
 
-	template <typename Tp, size_t tSize>
-	inline void memZero( Tp ( &pArray )[tSize], size_t pZeroSize = sizeof( Tp ) * tSize )
+	template <typename TVal, size_t tSize>
+	inline void memZero( TVal ( &pArray )[tSize], size_t pZeroSize = sizeof( TVal ) * tSize )
 	{
-		pZeroSize = getMinOf( pZeroSize, sizeof( Tp ) * tSize );
-		memZeroUnchecked( &( pArray[0] ), sizeof( Tp ) * tSize, pZeroSize );
+		pZeroSize = getMinOf( pZeroSize, sizeof( TVal ) * tSize );
+		memZeroUnchecked( &( pArray[0] ), sizeof( TVal ) * tSize, pZeroSize );
 	}
 
-	template <typename Tp, size_t tSize>
-	inline void memZero( std::array<Tp, tSize> & pArray, size_t pZeroSize = sizeof( Tp ) * tSize )
+	template <typename TVal, size_t tSize>
+	inline void memZero( std::array<TVal, tSize> & pArray, size_t pZeroSize = sizeof( TVal ) * tSize )
 	{
-		pZeroSize = getMinOf( pZeroSize, sizeof( Tp ) * tSize );
-		memZeroUnchecked( &pArray, sizeof( Tp ) * tSize, pZeroSize );
+		pZeroSize = getMinOf( pZeroSize, sizeof( TVal ) * tSize );
+		memZeroUnchecked( &pArray, sizeof( TVal ) * tSize, pZeroSize );
 	}
 
-	template <typename Tp>
-	inline void memZero( std::vector<Tp> & pVector, size_t pZeroOffset = 0, size_t pZeroCount = CX_MAX_SIZE )
+	template <typename TVal>
+	inline void memZero( std::vector<TVal> & pVector, size_t pZeroOffset = 0, size_t pZeroCount = CxDefs::MAX_SIZE )
 	{
 		const auto vectorSize = pVector.size();
 		pZeroCount = getMinOf( pZeroCount, vectorSize );
 		pZeroOffset = getMinOf( pZeroOffset, vectorSize - pZeroCount );
-		memZeroUnchecked( pVector.data() + pZeroOffset, sizeof( Tp ) * vectorSize, sizeof( Tp ) * pZeroCount );
+		memZeroUnchecked( pVector.data() + pZeroOffset, sizeof( TVal ) * vectorSize, sizeof( TVal ) * pZeroCount );
 	}
 
-	template <typename Tp>
-	inline void memZero( Tp & pObject, size_t pZeroSize = sizeof( Tp ) )
+	template <typename TVal>
+	inline void memZero( TVal & pObject, size_t pZeroSize = sizeof( TVal ) )
 	{
-		pZeroSize = getMinOf( pZeroSize, sizeof( Tp ) );
-		memZeroUnchecked( &pObject, sizeof( Tp ), pZeroSize );
+		pZeroSize = getMinOf( pZeroSize, sizeof( TVal ) );
+		memZeroUnchecked( &pObject, sizeof( TVal ), pZeroSize );
 	}
 
 }

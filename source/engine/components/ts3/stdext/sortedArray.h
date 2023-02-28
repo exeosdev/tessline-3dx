@@ -9,18 +9,18 @@
 namespace ts3
 {
 
-	template < typename TpValue,
-	           typename TpCompare = CmpLessT<TpValue>,
-	           typename TpAlloc = std::allocator<TpValue> >
+	template < typename TValue,
+	           typename TCompare = CmpLessT<TValue>,
+	           typename TAlloc = std::allocator<TValue> >
 	class SortedArray
 	{
 	public:
-		using SelfType = SortedArray<TpValue, TpCompare, TpAlloc>;
+		using SelfType = SortedArray<TValue, TCompare, TAlloc>;
 
-		using ValueType = TpValue;
-		using CompareType = TpCompare;
+		using ValueType = TValue;
+		using CompareType = TCompare;
 
-		using UnderlyingContainerType = std::vector<TpValue, TpAlloc>;
+		using UnderlyingContainerType = std::vector<TValue, TAlloc>;
 
 		using Iterator = typename UnderlyingContainerType::iterator;
 		using ConstIterator = typename UnderlyingContainerType::const_iterator;
@@ -37,30 +37,30 @@ namespace ts3
 		SortedArray()
 		{}
 
-		explicit SortedArray( const TpAlloc & pAllocator )
+		explicit SortedArray( const TAlloc & pAllocator )
 		: _underlyingContainer( pAllocator )
 		{}
 
-		explicit SortedArray( size_t pCapacity, const TpAlloc & pAllocator = TpAlloc() )
+		explicit SortedArray( size_t pCapacity, const TAlloc & pAllocator = TAlloc() )
 		: _underlyingContainer( pCapacity, pAllocator )
 		{}
 
-		TpValue & operator[]( size_t pIndex )
+		TValue & operator[]( size_t pIndex )
 		{
 			return _underlyingContainer[pIndex];
 		}
 
-		const TpValue & operator[]( size_t pIndex ) const
+		const TValue & operator[]( size_t pIndex ) const
 		{
 			return _underlyingContainer[pIndex];
 		}
 
-		TpValue & at( size_t pIndex )
+		TValue & at( size_t pIndex )
 		{
 			return _underlyingContainer.at( pIndex );
 		}
 
-		const TpValue & at( size_t pIndex ) const
+		const TValue & at( size_t pIndex ) const
 		{
 			return _underlyingContainer.at( pIndex );
 		}
@@ -85,98 +85,98 @@ namespace ts3
 			return _underlyingContainer.end();
 		}
 
-		TpValue & front()
+		TValue & front()
 		{
 			return _underlyingContainer.front();
 		}
 
-		const TpValue & front() const
+		const TValue & front() const
 		{
 			return _underlyingContainer.front();
 		}
 
-		TpValue & back()
+		TValue & back()
 		{
 			return _underlyingContainer.back();
 		}
 
-		const TpValue & back() const
+		const TValue & back() const
 		{
 			return _underlyingContainer.back();
 		}
 
-		Iterator insert( TpValue && pValue )
+		Iterator insert( TValue && pValue )
 		{
 			auto insertPosition = _getInsertPosition( pValue, CompareType{} );
 			auto insertIterator = _underlyingContainer.begin() + insertPosition;
 			return _underlyingContainer.insert( insertIterator, std::move( pValue ) );
 		}
 
-		Iterator insert( const TpValue & pValue )
+		Iterator insert( const TValue & pValue )
 		{
 			auto insertPosition = _getInsertPosition( pValue, CompareType{} );
 			auto insertIterator = _underlyingContainer.begin() + insertPosition;
 			return _underlyingContainer.insert( insertIterator, pValue );
 		}
 
-		Iterator find( const TpValue & pValue )
+		Iterator find( const TValue & pValue )
 		{
 			auto elementPos = _findLower( pValue, CompareType{} );
-			if( ( elementPos != CX_INVALID_POSITION ) && ( _underlyingContainer[elementPos] == pValue ) )
+			if( ( elementPos != CxDefs::INVALID_POSITION ) && ( _underlyingContainer[elementPos] == pValue ) )
 			{
 				return _underlyingContainer.begin() + elementPos;
 			}
 			return _underlyingContainer.end();
 		}
 
-		ConstIterator find( const TpValue & pValue ) const
+		ConstIterator find( const TValue & pValue ) const
 		{
 			auto elementPos = _findLower( pValue, CompareType{} );
-			if( ( elementPos != CX_INVALID_POSITION ) && ( _underlyingContainer[elementPos] == pValue ) )
+			if( ( elementPos != CxDefs::INVALID_POSITION ) && ( _underlyingContainer[elementPos] == pValue ) )
 			{
 				return _underlyingContainer.begin() + elementPos;
 			}
 			return _underlyingContainer.end();
 		}
 
-		template < typename TpRef, typename TpRefEqual = CmpEqualT<TpValue> >
-		Iterator find( const TpRef & pValue, TpRefEqual pRefEqual = TpRefEqual{} )
+		template < typename TRef, typename TRefEqual = CmpEqualT<TValue> >
+		Iterator find( const TRef & pValue, TRefEqual pRefEqual = TRefEqual{} )
 		{
 			auto elementPos = _findLower( pValue, CompareType{} );
-			if( ( elementPos != CX_INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
+			if( ( elementPos != CxDefs::INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
 			{
 				return _underlyingContainer.begin() + elementPos;
 			}
 			return _underlyingContainer.end();
 		}
 
-		template < typename TpRef, typename TpRefEqual = CmpEqualT<TpValue> >
-		ConstIterator find( const TpRef & pValue, TpRefEqual pRefEqual = TpRefEqual{} ) const
+		template < typename TRef, typename TRefEqual = CmpEqualT<TValue> >
+		ConstIterator find( const TRef & pValue, TRefEqual pRefEqual = TRefEqual{} ) const
 		{
 			auto elementPos = _findLower( pValue, CompareType{} );
-			if( ( elementPos != CX_INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
+			if( ( elementPos != CxDefs::INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
 			{
 				return _underlyingContainer.begin() + elementPos;
 			}
 			return _underlyingContainer.end();
 		}
 
-		template < typename TpRef, typename TpRefCompare = CmpLessT<TpValue>, typename TpRefEqual = CmpEqualT<TpValue> >
-		Iterator find( const TpRef & pValue, TpRefCompare pRefCompare, TpRefEqual pRefEqual )
+		template < typename TRef, typename TRefCompare = CmpLessT<TValue>, typename TRefEqual = CmpEqualT<TValue> >
+		Iterator find( const TRef & pValue, TRefCompare pRefCompare, TRefEqual pRefEqual )
 		{
 			auto elementPos = _findLower( pValue, pRefCompare );
-			if( ( elementPos != CX_INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
+			if( ( elementPos != CxDefs::INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
 			{
 				return _underlyingContainer.begin() + elementPos;
 			}
 			return _underlyingContainer.end();
 		}
 
-		template < typename TpRef, typename TpRefCompare = CmpLessT<TpValue>, typename TpRefEqual = CmpEqualT<TpValue> >
-		ConstIterator find( const TpRef & pValue, TpRefCompare pRefCompare, TpRefEqual pRefEqual ) const
+		template < typename TRef, typename TRefCompare = CmpLessT<TValue>, typename TRefEqual = CmpEqualT<TValue> >
+		ConstIterator find( const TRef & pValue, TRefCompare pRefCompare, TRefEqual pRefEqual ) const
 		{
 			auto elementPos = _findLower( pValue, pRefCompare );
-			if( ( elementPos != CX_INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
+			if( ( elementPos != CxDefs::INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
 			{
 				return _underlyingContainer.begin() + elementPos;
 			}
@@ -193,10 +193,10 @@ namespace ts3
 			return _underlyingContainer.erase( pStart, pEnd );
 		}
 
-		Iterator remove( const TpValue & pValue )
+		Iterator remove( const TValue & pValue )
 		{
 			auto rangeBeginPos = _findLower( pValue, CompareType{} );
-			if( rangeBeginPos != CX_INVALID_POSITION )
+			if( rangeBeginPos != CxDefs::INVALID_POSITION )
 			{
 				auto rangeEndPos = _findUpper( pValue, CompareType{} );
 				const auto eraseFrom = _underlyingContainer.begin() + rangeBeginPos;
@@ -206,10 +206,10 @@ namespace ts3
 			return _underlyingContainer.end();
 		}
 
-		Iterator remove( const TpValue & pLeft, const TpValue & pRight )
+		Iterator remove( const TValue & pLeft, const TValue & pRight )
 		{
 			auto rangeBeginPos = _findLower( pLeft, CompareType{} );
-			if( rangeBeginPos != CX_INVALID_POSITION )
+			if( rangeBeginPos != CxDefs::INVALID_POSITION )
 			{
 				auto rangeEndPos = _findUpper( pRight, CompareType{} );
 				if( rangeEndPos < rangeBeginPos )
@@ -223,7 +223,7 @@ namespace ts3
 			return _underlyingContainer.end();
 		}
 
-		void insertData( const std::vector<TpValue> & pValueArray )
+		void insertData( const std::vector<TValue> & pValueArray )
 		{
 			_underlyingContainer.insert( _underlyingContainer.end(), pValueArray.begin(), pValueArray.end() );
 
@@ -232,7 +232,7 @@ namespace ts3
 			           CompareType{} );
 		}
 
-		void setData( std::vector<TpValue> pValueArray )
+		void setData( std::vector<TValue> pValueArray )
 		{
 			_underlyingContainer = std::move( pValueArray );
 
@@ -267,57 +267,57 @@ namespace ts3
 		}
 
 	private:
-		template <typename TpRef, typename... TpPred>
-		size_t _getInsertPosition( const TpRef & pRefValue, TpPred... pPredicate ) const
+		template <typename TRef, typename... TPred>
+		size_t _getInsertPosition( const TRef & pRefValue, TPred... pPredicate ) const
 		{
 			auto rangeBegin = _underlyingContainer.begin();
 			auto rangeEnd = _underlyingContainer.end();
-			auto resultIter = std::lower_bound( rangeBegin, rangeEnd, pRefValue, std::forward<TpPred>( pPredicate )... );
+			auto resultIter = std::lower_bound( rangeBegin, rangeEnd, pRefValue, std::forward<TPred>( pPredicate )... );
 			return ( resultIter != rangeEnd ) ? ( resultIter - rangeBegin ) : ( rangeEnd - rangeBegin );
 		}
 
-		template <typename TpRef, typename... TpPred>
-		size_t _findLower( const TpRef & pRefValue, TpPred... pPredicate ) const
+		template <typename TRef, typename... TPred>
+		size_t _findLower( const TRef & pRefValue, TPred... pPredicate ) const
 		{
 			auto rangeBegin = _underlyingContainer.begin();
 			auto rangeEnd = _underlyingContainer.end();
-			auto resultIter = std::lower_bound( rangeBegin, rangeEnd, pRefValue, std::forward<TpPred>( pPredicate )... );
-			return ( resultIter != rangeEnd ) ? ( resultIter - rangeBegin ) : CX_INVALID_POSITION;
+			auto resultIter = std::lower_bound( rangeBegin, rangeEnd, pRefValue, std::forward<TPred>( pPredicate )... );
+			return ( resultIter != rangeEnd ) ? ( resultIter - rangeBegin ) : CxDefs::INVALID_POSITION;
 		}
 
-		template <typename TpRef, typename... TpPred>
-		size_t _findUpper( const TpRef & pRefValue, TpPred... pPredicate ) const
+		template <typename TRef, typename... TPred>
+		size_t _findUpper( const TRef & pRefValue, TPred... pPredicate ) const
 		{
 			auto rangeBegin = _underlyingContainer.begin();
 			auto rangeEnd = _underlyingContainer.end();
-			auto resultIter = std::upper_bound( rangeBegin, rangeEnd, pRefValue, std::forward<TpPred>( pPredicate )... );
-			return ( resultIter != rangeEnd ) ? ( resultIter - rangeBegin ) : CX_INVALID_POSITION;
+			auto resultIter = std::upper_bound( rangeBegin, rangeEnd, pRefValue, std::forward<TPred>( pPredicate )... );
+			return ( resultIter != rangeEnd ) ? ( resultIter - rangeBegin ) : CxDefs::INVALID_POSITION;
 		}
 
 	private:
 		UnderlyingContainerType _underlyingContainer;
 	};
 
-	template <typename TpValue, typename TpCompare, typename TpAlloc>
-	inline typename SortedArray<TpValue, TpCompare, TpAlloc>::Iterator begin( SortedArray<TpValue, TpCompare, TpAlloc> & pContainer )
+	template <typename TValue, typename TCompare, typename TAlloc>
+	inline typename SortedArray<TValue, TCompare, TAlloc>::Iterator begin( SortedArray<TValue, TCompare, TAlloc> & pContainer )
 	{
 		return pContainer.begin();
 	}
 
-	template <typename TpValue, typename TpCompare, typename TpAlloc>
-	inline typename SortedArray<TpValue, TpCompare, TpAlloc>::ConstIterator begin( const SortedArray<TpValue, TpCompare, TpAlloc> & pContainer )
+	template <typename TValue, typename TCompare, typename TAlloc>
+	inline typename SortedArray<TValue, TCompare, TAlloc>::ConstIterator begin( const SortedArray<TValue, TCompare, TAlloc> & pContainer )
 	{
 		return pContainer.begin();
 	}
 
-	template <typename TpValue, typename TpCompare, typename TpAlloc>
-	inline typename SortedArray<TpValue, TpCompare, TpAlloc>::Iterator end( SortedArray<TpValue, TpCompare, TpAlloc> & pContainer )
+	template <typename TValue, typename TCompare, typename TAlloc>
+	inline typename SortedArray<TValue, TCompare, TAlloc>::Iterator end( SortedArray<TValue, TCompare, TAlloc> & pContainer )
 	{
 		return pContainer.end();
 	}
 
-	template <typename TpValue, typename TpCompare, typename TpAlloc>
-	inline typename SortedArray<TpValue, TpCompare, TpAlloc>::ConstIterator end( const SortedArray<TpValue, TpCompare, TpAlloc> & pContainer )
+	template <typename TValue, typename TCompare, typename TAlloc>
+	inline typename SortedArray<TValue, TCompare, TAlloc>::ConstIterator end( const SortedArray<TValue, TCompare, TAlloc> & pContainer )
 	{
 		return pContainer.end();
 	}

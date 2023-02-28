@@ -2,10 +2,10 @@
 #ifndef __TS3_STDEXT_VARIANT_H__
 #define __TS3_STDEXT_VARIANT_H__
 
-#include "prerequisites.h"
+#include "staticAlgo.h"
 #include <typeinfo>
 
-namespace stdx
+namespace ts3
 {
 
 	/// @brief Type for storing the Variant type index.
@@ -14,33 +14,77 @@ namespace stdx
 	struct VariantTypeConvTag
 	{};
 
-	namespace def
-	{
+	/// @brief Represents invalid Variant type index. Usually indicates, that incompatible type was used as a target.
+	constexpr variant_index_t CX_INVALID_VARIANT_INDEX = 0;
 
-		/// @brief Represents invalid Variant type index. Usually indicates, that incompatible type was used as a target.
-		constexpr variant_index_t CX_INVALID_VARIANT_INDEX = 0;
+	/// @brief Shared instance of `VariantTypeConvTag`. Use it to force desired overload.
+	inline constexpr VariantTypeConvTag CX_VARIANT_TYPE_CONV{};
 
-		/// @brief Shared instance of `VariantTypeConvTag`. Use it to force desired overload.
-		inline constexpr VariantTypeConvTag CX_VARIANT_TYPE_CONV{};
-
-	}
-
-	template <typename _Type>
+	template <typename TVal>
 	struct VariantTypeIndex
 	{
 		static const variant_index_t value;
 	};
 
-	template <typename _Type>
-	inline const variant_index_t VariantTypeIndex<_Type>::value = typeid( _Type ).hash_code();
+	template <typename TVal>
+	inline const variant_index_t VariantTypeIndex<TVal>::value = typeid( TVal ).hash_code();
 
-	template <typename... _Types>
+	template <typename... TLst>
 	struct VariantStorage
 	{
-		static constexpr size_t size = StaticMaxSizeofTp<_Types...>::value;
-		static constexpr size_t alignment = StaticMaxAlignofTp<_Types...>::value;
+		static constexpr size_t size = StaticMaxSizeofT<TLst...>::value;
+		static constexpr size_t alignment = StaticMaxAlignofT<TLst...>::value;
 
-		using Type = typename std::aligned_storage<storageSize, storageAlignment>::type;
+		using Type = typename std::aligned_storage<size, alignment>::type;
+	};
+
+
+	template <typename TVal, typename... TRest>
+	struct VariantTypeSelector
+	{
+	};
+
+
+	template <bool tExactType, typename... TLst>
+	struct VariantSetProxy;
+
+	template <typename... TLst>
+	struct VariantSetProxy<true, TLst...>
+	{
+		template <typename TArg>
+		static variant_index_t construct( void * pStorage, TArg pArg )
+		{
+			using UnrefArg = std::remove_cv_t<TArg>;
+			new ( reinterpret_cast<UnrefArg *>( pStorage ) ) UnrefArg( std::forward<TArg>( pArg ) );
+			return VariantTypeIndex<UnrefArg>::value;
+		}
+	};
+
+	template <typename TVal, typename... TLst>
+	struct VariantSetProxy<false, TVal, TLst...>
+	{
+		template <typename... TArgs, typename std::enable_if<std::is_constructible<TVal, TArgs...>::value>>
+		static variant_index_t construct( void * pStorage, TArgs && ...pArgs )
+		{
+			new ( reinterpret_cast<TVal *>( pStorage ) ) TVal( std::forward<TArgs>( pArgs )... );
+			return VariantTypeIndex<TVal>::value;
+		}
+
+		template <typename... TArgs, typename std::enable_if<!std::is_constructible<TVal, TArgs...>::value>>
+		static variant_index_t construct( void * pStorage, TArgs && ...pArgs )
+		{
+			return VariantSetProxy<false, TLst...>::construct( pStorage, std::forward<TArgs>( pArgs )... );
+		}
+	};
+
+	template <>
+	struct VariantSetProxy<false>
+	{
+		template <typename TInput>
+		static variant_index_t construct( void * pStorage, TInput pInput )
+		{
+			return CX_INVALID_VARIANT_INDEX;
+		}
 	};
 
 
@@ -59,110 +103,135 @@ namespace stdx
 	// Performance notice: by using constexpr modifier, the if actually becomes a compile-time check. Since it's a tail
 	// recursion, each function should always end up being just a single call (false ifs should be completely removed by
 	// every decent compiler).
-	template <typename... _Types>
+	template <typename... TLst>
 	struct VariantProxy;
 
-	template <typename _Type, typename... _Rest>
-	struct VariantProxy<_Type, _Rest...>
+	template <typename TVal, typename... TRest>
+	struct VariantProxy<TVal, TRest...>
 	{
-		using RawType = typename std::remove_reference<typename std::remove_cv<_Type>::type>::type;
+//		template <typename TArg, std::enable_if_t<IsTypeOnTypeList<TArg, TVal, TRest...>::value, int>>
+//		static variant_index_t construct( void * pStorage, TArg pArg )
+//		{
+//			using Type = std::remove_cv_t<std::remove_reference_t<TArg>>;
+//			new ( reinterpret_cast<Type *>( pStorage ) ) TArg( std::forward<TArg>( pArg ) );
+//			return VariantTypeIndex<Type>::value;
+//		}
+//
+//		template <typename... TArgs, std::enable_if<std::is_constructible<TVal, TArgs...>::value, int>>
+//		static variant_index_t construct( void * pStorage, TArgs && ...pArgs )
+//		{
+//			new ( reinterpret_cast<TVal *>( pStorage ) ) TVal( std::forward<TArgs>( pArgs )... );
+//			return VariantTypeIndex<TVal>::value;
+//		}
+//
+//		template <typename... TArgs, std::enable_if<!std::is_constructible<TVal, TArgs...>::value, int>>
+//		static variant_index_t construct( void * pStorage, TArgs && ...pArgs )
+//		{
+//			return VariantProxy<TRest...>::construct( pStorage, std::forward<TArgs>( pArgs )... );
+//		}
 
-		template <typename... _Args>
-		static variant_index_t construct( const variant_index_t pTypeIndex, void * pStorage, _Args && ...pArgs )
+		template <typename... TArgs>
+		static variant_index_t construct( void * pStorage, TArgs && ...pArgs )
 		{
-			if( pTypeIndex == VariantTypeIndex<RawType>::value )
+			return VariantSetProxy<false, TVal, TRest...>::template construct<TArgs...>( pStorage, std::forward<TArgs>( pArgs )... );
+		}
+
+		template <typename... TArgs>
+		static variant_index_t construct( const variant_index_t pTypeIndex, void * pStorage, TArgs && ...pArgs )
+		{
+			if( pTypeIndex == VariantTypeIndex<TVal>::value )
 			{
-				new ( reinterpret_cast< RawType * >( pStorage ) ) _Type( std::forward<_Args>( pArgs )... );
-				return VariantTypeIndex<RawType>::value;
+				new ( reinterpret_cast< TVal * >( pStorage ) ) TVal( std::forward<TArgs>( pArgs )... );
+				return VariantTypeIndex<TVal>::value;
 			}
 			else
 			{
-				VariantProxy<_Rest...>::construct( pTypeIndex, pStorage, std::forward<_Args>( pArgs )... );
+				return VariantProxy<TRest...>::construct( pTypeIndex, pStorage, std::forward<TArgs>( pArgs )... );
 			}
 		}
 
-		template <typename _Value>
-		static variant_index_t constructConv( void * pStorage, _Value pValue )
+		template <typename TValue>
+		static variant_index_t constructConv( void * pStorage, TValue pValue )
 		{
-			if( std::is_convertible<_Value, RawType>::value )
+			if( std::is_convertible<TValue, TVal>::value )
 			{
-				new ( reinterpret_cast< RawType * >( pStorage ) ) RawType( std::forward<_Value>( pValue ) );
-				return VariantTypeIndex<RawType>::value;
+				new ( reinterpret_cast< TVal * >( pStorage ) ) TVal( std::forward<TValue>( pValue ) );
+				return VariantTypeIndex<TVal>::value;
 			}
 			else
 			{
-				VariantProxy<_Rest...>::constructConv( std::forward<_Value>( pValue ) );
+				return VariantProxy<TRest...>::constructConv( std::forward<TValue>( pValue ) );
 			}
 		}
 
 		static variant_index_t constructDefault( void * pStorage )
 		{
-			if( std::isDefault_constructible<RawType>::value )
+			if( std::is_default_constructible<TVal>::value )
 			{
-				new ( reinterpret_cast< RawType * >( pStorage ) ) RawType();
-				return VariantTypeIndex<RawType>::value;
+				new ( reinterpret_cast< TVal * >( pStorage ) ) TVal();
+				return VariantTypeIndex<TVal>::value;
 			}
 			else
 			{
-				VariantProxy<_Rest...>::constructDefault( pStorage );
+				return VariantProxy<TRest...>::constructDefault( pStorage );
 			}
 		}
 
 		static variant_index_t copy( const variant_index_t pTypeIndex, void * pStorage, void * pSource )
 		{
-			if( pTypeIndex == VariantTypeIndex<RawType>::value )
+			if( pTypeIndex == VariantTypeIndex<TVal>::value )
 			{
-				new ( reinterpret_cast< RawType * >( pStorage ) ) RawType( *( reinterpret_cast< RawType * >( pSource ) ) );
-				return VariantTypeIndex<RawType>::value;
+				new ( reinterpret_cast<TVal *>( pStorage ) ) TVal( *( reinterpret_cast< TVal * >( pSource ) ) );
+				return VariantTypeIndex<TVal>::value;
 			}
 			else
 			{
-				VariantProxy<_Rest...>::copy( pTypeIndex, pSource, pStorage );
+				return VariantProxy<TRest...>::copy( pTypeIndex, pSource, pStorage );
 			}
 		}
 
 		static variant_index_t move( const variant_index_t pTypeIndex, void * pStorage, void * pSource )
 		{
-			if( pTypeIndex == VariantTypeIndex<RawType>::value )
+			if( pTypeIndex == VariantTypeIndex<TVal>::value )
 			{
-				new ( reinterpret_cast< RawType * >( pStorage ) ) RawType( std::move( *( reinterpret_cast< RawType * >( pSource ) ) ) );
-				return VariantTypeIndex<RawType>::value;
+				new ( reinterpret_cast< TVal * >( pStorage ) ) TVal( std::move( *( reinterpret_cast< TVal * >( pSource ) ) ) );
+				return VariantTypeIndex<TVal>::value;
 			}
 			else
 			{
-				VariantProxy<_Rest...>::move( pTypeIndex, pSource, pStorage );
+				return VariantProxy<TRest...>::move( pTypeIndex, pSource, pStorage );
 			}
 		}
 
 		static variant_index_t destroy( const variant_index_t pTypeIndex, void * pStorage )
 		{
-			if( pTypeIndex == VariantTypeIndex<RawType>::value )
+			if( pTypeIndex == VariantTypeIndex<TVal>::value )
 			{
-				reinterpret_cast< RawType * >( pStorage )->~_Type();
-				return VariantTypeIndex<RawType>::value;
+				reinterpret_cast< TVal * >( pStorage )->~TVal();
+				return VariantTypeIndex<TVal>::value;
 			}
 			else
 			{
-				VariantProxy<_Rest...>::destroy( pTypeIndex, pStorage );
+				return VariantProxy<TRest...>::destroy( pTypeIndex, pStorage );
 			}
 		}
 
 		static bool validateType( const variant_index_t pTypeIndex )
 		{
-			if( pTypeIndex == VariantTypeIndex<RawType>::value )
+			if( pTypeIndex == VariantTypeIndex<TVal>::value )
 			{
 				return true;
 			}
 			else
 			{
-				return VariantProxy<_Rest...>::validateType( pTypeIndex );
+				return VariantProxy<TRest...>::validateType( pTypeIndex );
 			}
 		}
 
-		template <typename _Storage>
+		template <typename TStorage>
 		static void swap( const variant_index_t pFirstIndex, void * pFirstStorage, const variant_index_t pSecondIndex, void * pSecondStorage )
 		{
-			_Storage temporaryStorage;
+			TStorage temporaryStorage;
 
 			move( pFirstIndex, &temporaryStorage, pFirstStorage );
 			move( pSecondIndex, pFirstStorage, pSecondStorage );
@@ -173,36 +242,36 @@ namespace stdx
 	template <>
 	struct VariantProxy<>
 	{
-		template <typename... _Args>
-		static variant_index_t construct( variant_index_t, void *, _Args && ... )
+		template <typename... TArgs>
+		static variant_index_t construct( void *, TArgs && ... )
 		{
-			return def::CX_INVALID_VARIANT_INDEX;
+			return CX_INVALID_VARIANT_INDEX;
 		}
 
-		template <typename _Value>
-		static variant_index_t constructConv( variant_index_t, void *, _Value && )
+		template <typename TValue>
+		static variant_index_t constructConv( variant_index_t, void *, TValue && )
 		{
-			return def::CX_INVALID_VARIANT_INDEX;
+			return CX_INVALID_VARIANT_INDEX;
 		}
 
 		static variant_index_t constructDefault( void * )
 		{
-			return def::CX_INVALID_VARIANT_INDEX;
+			return CX_INVALID_VARIANT_INDEX;
 		}
 
 		static variant_index_t copy( variant_index_t, void *, void * )
 		{
-			return def::CX_INVALID_VARIANT_INDEX;
+			return CX_INVALID_VARIANT_INDEX;
 		}
 
 		static variant_index_t move( variant_index_t, void *, void * )
 		{
-			return def::CX_INVALID_VARIANT_INDEX;
+			return CX_INVALID_VARIANT_INDEX;
 		}
 
 		static variant_index_t destroy( variant_index_t, void * )
 		{
-			return def::CX_INVALID_VARIANT_INDEX;
+			return CX_INVALID_VARIANT_INDEX;
 		}
 
 		static bool validateType( variant_index_t )
@@ -212,54 +281,44 @@ namespace stdx
 	};
 
 
-	template <typename... _Types>
+	template <typename... TLst>
 	class Variant
 	{
+		static_assert( std::is_void<typename FirstMatchingType<std::is_reference, TLst...>::Type>::value, "No references allowed" );
+		
 	public:
-		static constexpr size_t storageSize = VariantStorage<_Types...>::size;
-		static constexpr size_t storageAlignment = VariantStorage<_Types...>::alignment;
+		static constexpr size_t storageSize = VariantStorage<TLst...>::size;
+		static constexpr size_t storageAlignment = VariantStorage<TLst...>::alignment;
 
-		using MyType = Variant<_Types...>;
-		using StorageType = typename VariantStorage<_Types...>::Type;
+		using MyType = Variant<TLst...>;
+		using StorageType = typename VariantStorage<TLst...>::Type;
 
 	public:
 		Variant()
 		{
-			_typeIndex = VariantProxy<_Types...>::constructDefault( &( _storage ) );
+			_typeIndex = VariantProxy<TLst...>::constructDefault( &( _storage ) );
 		}
 
-		Variant( Variant && pSource )
+		Variant( Variant && pSrcObject ) noexcept
 		{
-			_typeIndex = VariantProxy<_Types...>::move( pSource._typeIndex, &( _storage ), &( pSource._pStorage ) );
+			_typeIndex = VariantProxy<TLst...>::move( _typeIndex, &( _storage ), &( pSrcObject._pStorage ) );
 		}
 
-		Variant( const Variant & pSource )
+		Variant( const Variant & pSrcObject )
 		{
-			_typeIndex = VariantProxy<_Types...>::copy( pSource._typeIndex, &( _storage ), &( pSource._pStorage ) );
+			_typeIndex = VariantProxy<TLst...>::copy( _typeIndex, &( _storage ), &( pSrcObject._pStorage ) );
 		}
 
-		template <typename _Value>
-		Variant( _Value && pValue )
+		template <typename TValue>//, typename std::enable_if_t<!std::is_same<TValue, MyType>::value, int>>
+		Variant( TValue && pValue ) noexcept
 		{
-			_typeIndex = VariantProxy<_Types...>::construct( VariantTypeIndex<_Value>::value, &( _storage ), std::move( pValue ) );
+			_typeIndex = VariantProxy<TLst...>::construct( &( _storage ), std::move( pValue ) );
 		}
 
-		template <typename _Value>
-		Variant( const _Value & pValue )
+		template <typename TValue>//, typename std::enable_if_t<!std::is_same<TValue, MyType>::value, int>>
+		Variant( const TValue & pValue )
 		{
-			_typeIndex = VariantProxy<_Types...>::construct( VariantTypeIndex<_Value>::value, &( _storage ), pValue );
-		}
-
-		template <typename _Value>
-		Variant( _Value && pValue, const VariantTypeConvTag & )
-		{
-			_typeIndex = VariantProxy<_Types...>::constructConv( &( _storage ), std::move( pValue ) );
-		}
-
-		template <typename _Value>
-		Variant( const _Value & pValue, const VariantTypeConvTag & )
-		{
-			_typeIndex = VariantProxy<_Types...>::constructConv( &( _storage ), pValue );
+			_typeIndex = VariantProxy<TLst...>::construct( &( _storage ), pValue );
 		}
 
 		~Variant()
@@ -267,7 +326,7 @@ namespace stdx
 			_release();
 		}
 
-		Variant & operator=( Variant && pRhs )
+		Variant & operator=( Variant && pRhs ) noexcept
 		{
 			if( this != &pRhs )
 			{
@@ -287,82 +346,82 @@ namespace stdx
 			return *this;
 		}
 
-		template <typename _Target>
-		Variant & operator=( _Target && pRhs )
+		template <typename TTarget>
+		Variant & operator=( TTarget && pRhs )
 		{
-			_reinit<_Target>( std::move( pRhs ) );
+			_reInit<TTarget>( std::move( pRhs ) );
 			return *this;
 		}
 
-		template <typename _Target>
-		Variant & operator=( const _Target & pRhs )
+		template <typename TTarget>
+		Variant & operator=( const TTarget & pRhs )
 		{
-			_reinit<_Target>( pRhs );
+			_reInit<TTarget>( pRhs );
 			return *this;
 		}
 
-		template <typename _Target>
-		void set( _Target && pValue )
+		template <typename TTarget>
+		void set( TTarget && pValue )
 		{
-			_reinit<_Target>( std::move( pValue ) );
+			_reInit<TTarget>( std::move( pValue ) );
 		}
 
-		template <typename _Target>
-		void set( const _Target & pValue )
+		template <typename TTarget>
+		void set( const TTarget & pValue )
 		{
-			_reinit<_Target>( pValue );
+			_reInit<TTarget>( pValue );
 		}
 
-		template <typename _Target>
-		void setConv( _Target && pValue )
+		template <typename TTarget>
+		void setConv( TTarget && pValue )
 		{
-			_reinitConv<_Target>( std::move( pValue ) );
+			_reInitConv<TTarget>( std::move( pValue ) );
 		}
 
-		template <typename _Target>
-		void setConv( const _Target & pValue )
+		template <typename TTarget>
+		void setConv( const TTarget & pValue )
 		{
-			_reinitConv<_Target>( pValue );
+			_reInitConv<TTarget>( pValue );
 		}
 
-		template <typename _Target, typename... _Args>
-		void emplace( _Args &&... pArgs )
+		template <typename TTarget, typename... TArgs>
+		void emplace( TArgs &&... pArgs )
 		{
-			_reinit<_Target>( std::forward<_Args>( pArgs )... );
+			_reInit<TTarget>( std::forward<TArgs>( pArgs )... );
 		}
 
 		void swap( Variant & pOther )
 		{
-			VariantProxy<_Types...>::swap( _typeIndex, &( _storage ), pOther._typeIndex, &( pOther._storage ) );
+			VariantProxy<TLst...>::template swap<StorageType>( _typeIndex, &( _storage ), pOther._typeIndex, &( pOther._storage ) );
 			std::swap( _typeIndex, pOther._typeIndex );
 		}
 
-		template <typename _Target>
-		bool check_type() const
+		template <typename TTarget>
+		TS3_ATTR_NO_DISCARD bool checkType() const
 		{
-			return _typeIndex == VariantTypeIndex<_Target>::value;
+			return _typeIndex == VariantTypeIndex<TTarget>::value;
 		}
 
-		template <typename _Target>
-		_Target & get() const
+		template <typename TTarget>
+		TS3_ATTR_NO_DISCARD TTarget & get() const
 		{
-			_validate<_Target>();
-			return *( reinterpret_cast< _Target * >( &( _storage ) ) );
+			_validate<TTarget>();
+			return *( reinterpret_cast<TTarget *>( &( _storage ) ) );
 		}
 
 	private:
-		template <typename _Target, typename... _Args>
-		void _reinit( _Args && ...pArgs )
+		template <typename TTarget, typename... TArgs>
+		void _reInit( TArgs && ...pArgs )
 		{
-			VariantProxy<_Types...>::destroy( _typeIndex, &( _storage ) );
-			_typeIndex = VariantProxy<_Types...>::construct( VariantTypeIndex<_Target>::value, &( _storage ), std::forward<_Args>( pArgs )... );
+			VariantProxy<TLst...>::destroy( _typeIndex, &( _storage ) );
+			_typeIndex = VariantProxy<TLst...>::construct( VariantTypeIndex<TTarget>::value, &( _storage ), std::forward<TArgs>( pArgs )... );
 		}
 
-		template <typename _Value>
-		void _reinitConv( _Value pValue )
+		template <typename T>
+		void _reInitConv( T pValue )
 		{
-			VariantProxy<_Types...>::destroy( _typeIndex, &( _storage ) );
-			_typeIndex = VariantProxy<_Types...>::constructConv( &( _storage ), std::forward<_Value>( pValue ) );
+			VariantProxy<TLst...>::destroy( _typeIndex, &( _storage ) );
+			_typeIndex = VariantProxy<TLst...>::constructConv( &( _storage ), std::forward<T>( pValue ) );
 		}
 
 		template <typename T>
@@ -376,8 +435,8 @@ namespace stdx
 
 		void _release()
 		{
-			VariantProxy<_Types...>::destroy( _typeIndex, &( _storage ) );
-			_typeIndex = def::CX_INVALID_VARIANT_INDEX;
+			VariantProxy<TLst...>::destroy( _typeIndex, &( _storage ) );
+			_typeIndex = CX_INVALID_VARIANT_INDEX;
 		}
 
 	private:

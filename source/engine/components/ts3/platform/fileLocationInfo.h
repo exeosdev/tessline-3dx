@@ -40,7 +40,7 @@ namespace ts3
 		, lineNumber( pLineNumber )
 		{}
 
-		TS3_PCL_ATTR_NO_DISCARD std::string toString() const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD std::string toString() const;
 	};
 
 	inline std::string toString( const FileLocationInfo & pLocationInfo )

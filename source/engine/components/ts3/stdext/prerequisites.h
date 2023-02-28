@@ -11,17 +11,47 @@
 namespace ts3
 {
 
-	/// @brief Represents max value which can be stored in the size_t type.
-	inline constexpr size_t CX_MAX_SIZE = static_cast<size_t>( -1 );
-
-	/// @brief Represents and invalid position (e.g. in a container).
-	inline constexpr size_t CX_INVALID_POSITION = static_cast<size_t>( -1 );
-
-	template <typename TpResult, typename TpInput>
-	inline TpResult trunc_numeric_cast( TpInput pInput )
+	namespace CxDefs
 	{
-		ts3DebugAssert( pInput <= std::numeric_limits<TpResult>::max() );
-		return static_cast<TpResult>( pInput );
+
+		/// @brief Represents max value which can be stored in the size_t type.
+		inline constexpr size_t MAX_SIZE = static_cast<size_t>( -1 );
+
+		/// @brief Represents and invalid position (e.g. in a container or a continuous range).
+		inline constexpr size_t INVALID_POSITION = static_cast<size_t>( -1 );
+
+	}
+
+	template <typename TType>
+	struct ArrayDelete
+	{
+		void operator()( TType * pInputPtr ) const
+		{
+			delete[] pInputPtr;
+		}
+	};
+
+	template <typename TType>
+	struct DefaultDelete
+	{
+		void operator()( TType * pInputPtr ) const
+		{
+			delete pInputPtr;
+		}
+	};
+
+	template <typename TType>
+	struct EmptyDelete
+	{
+		void operator()( TType * ) const
+		{}
+	};
+
+	template <typename TResult, typename TInput>
+	inline TResult trunc_numeric_cast( TInput pInput )
+	{
+		ts3DebugAssert( pInput <= std::numeric_limits<TResult>::max() );
+		return static_cast<TResult>( pInput );
 	}
 
 }

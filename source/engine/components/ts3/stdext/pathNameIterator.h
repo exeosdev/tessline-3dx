@@ -44,17 +44,17 @@ namespace ts3
 			return copy;
 		}
 
-		TS3_FUNC_NO_DISCARD const std::string & name() const
+		TS3_ATTR_NO_DISCARD const std::string & name() const
 		{
 			return _currentPathComponent;
 		}
 
-		TS3_FUNC_NO_DISCARD bool empty() const
+		TS3_ATTR_NO_DISCARD bool empty() const
 		{
 			return _currentPathComponent.empty();
 		}
 
-		TS3_FUNC_NO_DISCARD bool hasNext() const
+		TS3_ATTR_NO_DISCARD bool hasNext() const
 		{
 			return !_remainingPath.empty();
 		}

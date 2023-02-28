@@ -19,12 +19,12 @@ namespace ts3
 		, _bufferLength( 0u )
 		{}
 
-		MemoryBuffer( MemoryBuffer && pSource ) noexcept
-		: _bufferBasePtr( pSource._bufferBasePtr )
-		, _bufferLength( pSource._bufferLength )
+		MemoryBuffer( MemoryBuffer && pSrcObject ) noexcept
+		: _bufferBasePtr( pSrcObject._bufferBasePtr )
+		, _bufferLength( pSrcObject._bufferLength )
 		{
-			pSource._bufferBasePtr = nullptr;
-			pSource._bufferLength = 0u;
+			pSrcObject._bufferBasePtr = nullptr;
+			pSrcObject._bufferLength = 0u;
 		}
 
 		MemoryBuffer( void * pMemory, size_t pMemorySize ) noexcept
@@ -32,58 +32,58 @@ namespace ts3
 		, _bufferLength( pMemorySize )
 		{}
 
-		TS3_PCL_ATTR_NO_DISCARD byte & operator[]( size_t pOffset ) noexcept
+		TS3_PCL_ATTR_FUNC_NO_DISCARD byte & operator[]( size_t pOffset ) noexcept
 		{
 			ts3DebugAssert( pOffset < _bufferLength );
 			return _bufferBasePtr[pOffset];
 		}
 
-		TS3_PCL_ATTR_NO_DISCARD const byte & operator[]( size_t pOffset ) const noexcept
+		TS3_PCL_ATTR_FUNC_NO_DISCARD const byte & operator[]( size_t pOffset ) const noexcept
 		{
 			ts3DebugAssert( pOffset < _bufferLength );
 			return _bufferBasePtr[pOffset];
 		}
 
-		TS3_PCL_ATTR_NO_DISCARD ReadWriteMemoryView asMemoryView() noexcept
+		TS3_PCL_ATTR_FUNC_NO_DISCARD ReadWriteMemoryView asMemoryView() noexcept
 		{
 			return bindMemoryView( _bufferBasePtr, _bufferLength );
 		}
 
-		TS3_PCL_ATTR_NO_DISCARD ReadOnlyMemoryView asMemoryView() const noexcept
+		TS3_PCL_ATTR_FUNC_NO_DISCARD ReadOnlyMemoryView asMemoryView() const noexcept
 		{
 			return bindMemoryView( _bufferBasePtr, _bufferLength );
 		}
 
-		TS3_PCL_ATTR_NO_DISCARD byte * data() noexcept
+		TS3_PCL_ATTR_FUNC_NO_DISCARD byte * data() noexcept
 		{
 			ts3DebugAssert( _bufferLength > 0 );
 			return _bufferBasePtr;
 		}
 
-		TS3_PCL_ATTR_NO_DISCARD const byte * data() const noexcept
+		TS3_PCL_ATTR_FUNC_NO_DISCARD const byte * data() const noexcept
 		{
 			ts3DebugAssert( _bufferLength > 0 );
 			return _bufferBasePtr;
 		}
 
-		TS3_PCL_ATTR_NO_DISCARD byte * data( size_t pOffset ) noexcept
+		TS3_PCL_ATTR_FUNC_NO_DISCARD byte * data( size_t pOffset ) noexcept
 		{
 			ts3DebugAssert( ( _bufferLength > 0 ) && ( pOffset < _bufferLength ) );
 			return _bufferBasePtr + pOffset;
 		}
 
-		TS3_PCL_ATTR_NO_DISCARD const byte * data( size_t pOffset ) const noexcept
+		TS3_PCL_ATTR_FUNC_NO_DISCARD const byte * data( size_t pOffset ) const noexcept
 		{
 			ts3DebugAssert( ( _bufferLength > 0 ) && ( pOffset < _bufferLength ) );
 			return _bufferBasePtr + pOffset;
 		}
 
-		TS3_PCL_ATTR_NO_DISCARD bool empty() const noexcept
+		TS3_PCL_ATTR_FUNC_NO_DISCARD bool empty() const noexcept
 		{
 			return ( _bufferBasePtr == nullptr ) && ( _bufferLength == 0 );
 		}
 
-		TS3_PCL_ATTR_NO_DISCARD size_t size() const noexcept
+		TS3_PCL_ATTR_FUNC_NO_DISCARD size_t size() const noexcept
 		{
 			return _bufferLength;
 		}
@@ -123,9 +123,9 @@ namespace ts3
 		: _allocationProxy( pAllocationProxy ? std::move( pAllocationProxy ) : MemoryAllocationProxy( cvDefaultMemoryAllocationProxy ) )
 		{}
 
-		DynamicMemoryBuffer( DynamicMemoryBuffer && pSource ) noexcept
-		: MemoryBuffer( std::move( pSource ) )
-		, _allocationProxy( std::move( pSource._allocationProxy ) )
+		DynamicMemoryBuffer( DynamicMemoryBuffer && pSrcObject ) noexcept
+		: MemoryBuffer( std::move( pSrcObject ) )
+		, _allocationProxy( std::move( pSrcObject._allocationProxy ) )
 		{}
 
 		DynamicMemoryBuffer & operator=( DynamicMemoryBuffer && pRhs ) noexcept
@@ -186,7 +186,7 @@ namespace ts3
 		pFirst.swap( pSecond );
 	}
 
-	template <size_t tpSize>
+	template <size_t tSize>
 	class FixedMemoryBuffer : public MemoryBuffer
 	{
 	public:
@@ -194,11 +194,11 @@ namespace ts3
 		FixedMemoryBuffer & operator=( const FixedMemoryBuffer & ) = delete;
 
 		FixedMemoryBuffer()
-		: MemoryBuffer( &( _storage[0] ), tpSize )
+		: MemoryBuffer( &( _storage[0] ), tSize )
 		{}
 
 	private:
-		byte _storage[tpSize];
+		byte _storage[tSize];
 	};
 
 }
