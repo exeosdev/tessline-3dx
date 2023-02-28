@@ -8,16 +8,16 @@ namespace ts3
 	using result_code_value_t = uint32;
 
 	/// @brief
-	template <typename TpValue, typename TpErrorPredicate>
+	template <typename TValue, typename TErrorPredicate>
 	struct ResultProxy
 	{
 	public:
-		using ValueType = TpValue;
-		using ErrorPredicateType = TpErrorPredicate;
+		using ValueType = TValue;
+		using ErrorPredicateType = TErrorPredicate;
 
 	public:
 		// Value of the result code.
-		TpValue code = 0u;
+		TValue code = 0u;
 
 		// A string identifying the result code. Usually - name of the code used across sources.
 		const char * codeStr;
@@ -34,9 +34,9 @@ namespace ts3
 
 		/// @brief Explicit constructor which initialises result object with a specified result code.
 		/// @param code Result code.
-		template <typename TpOtherValue>
-		explicit ResultProxy( TpOtherValue pCode )
-		: code( static_cast<TpValue>( pCode ) )
+		template <typename TOtherValue>
+		explicit ResultProxy( TOtherValue pCode )
+		: code( static_cast<TValue>( pCode ) )
 		, codeStr( CX_STR_CHAR_EMPTY )
 		, infoStr( CX_STR_CHAR_EMPTY )
 		{}
@@ -45,16 +45,16 @@ namespace ts3
 		/// @param code Result code.
 		/// @param codeStr Code string (text representation of the code, for example).
 		/// @param infoStr Additional info string.
-		template <typename TpOtherValue>
-		ResultProxy( TpOtherValue pCode, const char * pCodeStr, const char * pInfoStr = nullptr )
-		: code( static_cast<TpValue>( pCode ) )
+		template <typename TOtherValue>
+		ResultProxy( TOtherValue pCode, const char * pCodeStr, const char * pInfoStr = nullptr )
+		: code( static_cast<TValue>( pCode ) )
 		, codeStr( pCodeStr ? pCodeStr : CX_STR_CHAR_EMPTY )
 		, infoStr( pInfoStr ? pCodeStr : CX_STR_CHAR_EMPTY )
 		{}
 
 		constexpr explicit operator bool() const
 		{
-			return !TpErrorPredicate()( code );
+			return !TErrorPredicate()( code );
 		}
 
 		/// @brief Swaps two results.
@@ -68,7 +68,7 @@ namespace ts3
 
 		/// @brief Returns whether the result object is empty (i.e. has no explicit code set or code is zero).
 		/// @return True if result object is empty or false otherwise.
-		TS3_PCL_ATTR_NO_DISCARD bool empty() const
+		TS3_PCL_ATTR_FUNC_NO_DISCARD bool empty() const
 		{
 			return code == 0;
 		}
@@ -170,116 +170,116 @@ namespace ts3
 
 #endif
 
-	template <typename TpValue, typename TpErrorPredicate>
-	inline constexpr bool operator==( const ResultProxy<TpValue, TpErrorPredicate> & pLhs,
-									  const ResultProxy<TpValue, TpErrorPredicate> & pRhs )
+	template <typename TValue, typename TErrorPredicate>
+	inline constexpr bool operator==( const ResultProxy<TValue, TErrorPredicate> & pLhs,
+									  const ResultProxy<TValue, TErrorPredicate> & pRhs )
 	{
 		return pLhs.code == pRhs.code;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate, typename TpIntegral>
-	inline constexpr bool operator==( const ResultProxy<TpValue, TpErrorPredicate> & pLhs, TpIntegral pRhs )
+	template <typename TValue, typename TErrorPredicate, typename TIntegral>
+	inline constexpr bool operator==( const ResultProxy<TValue, TErrorPredicate> & pLhs, TIntegral pRhs )
 	{
 		return pLhs.code == pRhs;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate, typename TpIntegral>
-	inline constexpr bool operator==( TpIntegral pLhs, const ResultProxy<TpValue, TpErrorPredicate> & pRhs )
+	template <typename TValue, typename TErrorPredicate, typename TIntegral>
+	inline constexpr bool operator==( TIntegral pLhs, const ResultProxy<TValue, TErrorPredicate> & pRhs )
 	{
 		return pLhs == pRhs.code;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate>
-	inline constexpr bool operator!=( const ResultProxy<TpValue, TpErrorPredicate> & pLhs,
-									  const ResultProxy<TpValue, TpErrorPredicate> & pRhs )
+	template <typename TValue, typename TErrorPredicate>
+	inline constexpr bool operator!=( const ResultProxy<TValue, TErrorPredicate> & pLhs,
+									  const ResultProxy<TValue, TErrorPredicate> & pRhs )
 	{
 		return pLhs.code != pRhs.code;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate, typename TpIntegral>
-	inline constexpr bool operator!=( const ResultProxy<TpValue, TpErrorPredicate> & pLhs, TpIntegral pRhs )
+	template <typename TValue, typename TErrorPredicate, typename TIntegral>
+	inline constexpr bool operator!=( const ResultProxy<TValue, TErrorPredicate> & pLhs, TIntegral pRhs )
 	{
 		return pLhs.code != pRhs;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate, typename TpIntegral>
-	inline constexpr bool operator!=( TpIntegral pLhs, const ResultProxy<TpValue, TpErrorPredicate> & pRhs )
+	template <typename TValue, typename TErrorPredicate, typename TIntegral>
+	inline constexpr bool operator!=( TIntegral pLhs, const ResultProxy<TValue, TErrorPredicate> & pRhs )
 	{
 		return pLhs != pRhs.code;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate>
-	inline constexpr bool operator<( const ResultProxy<TpValue, TpErrorPredicate> & pLhs,
-									 const ResultProxy<TpValue, TpErrorPredicate> & pRhs )
+	template <typename TValue, typename TErrorPredicate>
+	inline constexpr bool operator<( const ResultProxy<TValue, TErrorPredicate> & pLhs,
+									 const ResultProxy<TValue, TErrorPredicate> & pRhs )
 	{
 		return pLhs.code < pRhs.code;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate, typename TpIntegral>
-	inline constexpr bool operator<( const ResultProxy<TpValue, TpErrorPredicate> & pLhs, TpIntegral pRhs )
+	template <typename TValue, typename TErrorPredicate, typename TIntegral>
+	inline constexpr bool operator<( const ResultProxy<TValue, TErrorPredicate> & pLhs, TIntegral pRhs )
 	{
 		return pLhs.code < pRhs;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate, typename TpIntegral>
-	inline constexpr bool operator<( TpIntegral pLhs, const ResultProxy<TpValue, TpErrorPredicate> & pRhs )
+	template <typename TValue, typename TErrorPredicate, typename TIntegral>
+	inline constexpr bool operator<( TIntegral pLhs, const ResultProxy<TValue, TErrorPredicate> & pRhs )
 	{
 		return pLhs < pRhs.code;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate>
-	inline constexpr bool operator<=( const ResultProxy<TpValue, TpErrorPredicate> & pLhs,
-									  const ResultProxy<TpValue, TpErrorPredicate> & pRhs )
+	template <typename TValue, typename TErrorPredicate>
+	inline constexpr bool operator<=( const ResultProxy<TValue, TErrorPredicate> & pLhs,
+									  const ResultProxy<TValue, TErrorPredicate> & pRhs )
 	{
 		return pLhs.code <= pRhs.code;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate, typename TpIntegral>
-	inline constexpr bool operator<=( const ResultProxy<TpValue, TpErrorPredicate> & pLhs, TpIntegral pRhs )
+	template <typename TValue, typename TErrorPredicate, typename TIntegral>
+	inline constexpr bool operator<=( const ResultProxy<TValue, TErrorPredicate> & pLhs, TIntegral pRhs )
 	{
 		return pLhs.code <= pRhs;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate, typename TpIntegral>
-	inline constexpr bool operator<=( TpIntegral pLhs, const ResultProxy<TpValue, TpErrorPredicate> & pRhs )
+	template <typename TValue, typename TErrorPredicate, typename TIntegral>
+	inline constexpr bool operator<=( TIntegral pLhs, const ResultProxy<TValue, TErrorPredicate> & pRhs )
 	{
 		return pLhs <= pRhs.code;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate>
-	inline constexpr bool operator>( const ResultProxy<TpValue, TpErrorPredicate> & pLhs,
-									 const ResultProxy<TpValue, TpErrorPredicate> & pRhs )
+	template <typename TValue, typename TErrorPredicate>
+	inline constexpr bool operator>( const ResultProxy<TValue, TErrorPredicate> & pLhs,
+									 const ResultProxy<TValue, TErrorPredicate> & pRhs )
 	{
 		return pLhs.code > pRhs.code;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate, typename TpIntegral>
-	inline constexpr bool operator>( const ResultProxy<TpValue, TpErrorPredicate> & pLhs, TpIntegral pRhs )
+	template <typename TValue, typename TErrorPredicate, typename TIntegral>
+	inline constexpr bool operator>( const ResultProxy<TValue, TErrorPredicate> & pLhs, TIntegral pRhs )
 	{
 		return pLhs.code > pRhs;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate, typename TpIntegral>
-	inline constexpr bool operator>( TpIntegral pLhs, const ResultProxy<TpValue, TpErrorPredicate> & pRhs )
+	template <typename TValue, typename TErrorPredicate, typename TIntegral>
+	inline constexpr bool operator>( TIntegral pLhs, const ResultProxy<TValue, TErrorPredicate> & pRhs )
 	{
 		return pLhs > pRhs.code;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate>
-	inline constexpr bool operator>=( const ResultProxy<TpValue, TpErrorPredicate> & pLhs,
-									  const ResultProxy<TpValue, TpErrorPredicate> & pRhs )
+	template <typename TValue, typename TErrorPredicate>
+	inline constexpr bool operator>=( const ResultProxy<TValue, TErrorPredicate> & pLhs,
+									  const ResultProxy<TValue, TErrorPredicate> & pRhs )
 	{
 		return pLhs.code >= pRhs.code;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate, typename TpIntegral>
-	inline constexpr bool operator>=( const ResultProxy<TpValue, TpErrorPredicate> & pLhs, TpIntegral pRhs )
+	template <typename TValue, typename TErrorPredicate, typename TIntegral>
+	inline constexpr bool operator>=( const ResultProxy<TValue, TErrorPredicate> & pLhs, TIntegral pRhs )
 	{
 		return pLhs.code >= pRhs;
 	}
 
-	template <typename TpValue, typename TpErrorPredicate, typename TpIntegral>
-	inline constexpr bool operator>=( TpIntegral pLhs, const ResultProxy<TpValue, TpErrorPredicate> & pRhs )
+	template <typename TValue, typename TErrorPredicate, typename TIntegral>
+	inline constexpr bool operator>=( TIntegral pLhs, const ResultProxy<TValue, TErrorPredicate> & pRhs )
 	{
 		return pLhs >= pRhs.code;
 	}

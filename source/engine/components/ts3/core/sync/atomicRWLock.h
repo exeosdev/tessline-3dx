@@ -62,12 +62,12 @@ namespace ts3
                 return false;
             }
 
-            TS3_FUNC_NO_DISCARD RWLockState state() const
+            TS3_ATTR_NO_DISCARD RWLockState state() const
             {
                 return _lockFlag.load( std::memory_order_acquire );
             }
 
-            TS3_FUNC_NO_DISCARD bool locked() const
+            TS3_ATTR_NO_DISCARD bool locked() const
             {
                 return state() == RWLockState::Locked;
             }

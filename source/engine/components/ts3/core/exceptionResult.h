@@ -48,29 +48,29 @@ namespace ts3
             std::rethrow_exception( localException );
         }
 
-        TS3_PCL_ATTR_NO_DISCARD bool hasException() const
+        TS3_PCL_ATTR_FUNC_NO_DISCARD bool hasException() const
         {
             return exception ? true : false;
         }
 
-        TS3_PCL_ATTR_NO_DISCARD bool hasResult() const
+        TS3_PCL_ATTR_FUNC_NO_DISCARD bool hasResult() const
         {
             return !resultCode.empty();
         }
 
-        TS3_PCL_ATTR_NO_DISCARD bool isError() const
+        TS3_PCL_ATTR_FUNC_NO_DISCARD bool isError() const
         {
             return !resultCode || exception;
         }
     };
 
     /// @brief
-    template <typename TpValue>
+    template <typename TValue>
     struct ReturnValueWrapper : public ResultWrapper
     {
     public:
         //
-        mutable TpValue value;
+        mutable TValue value;
 
     public:
         ReturnValueWrapper() = default;
@@ -79,12 +79,12 @@ namespace ts3
         : ResultWrapper( std::move( pResultWrapper ) )
         {}
 
-        TpValue & operator*() const
+        TValue & operator*() const
         {
             return value;
         }
 
-        TpValue * operator->() const
+        TValue * operator->() const
         {
             return &( value );
         }

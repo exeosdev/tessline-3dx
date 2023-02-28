@@ -18,41 +18,41 @@ namespace ts3
 	};
 
 
-	template <typename TpEnum>
+	template <typename TEnum>
 	struct EnumConstant
 	{
 		std::string name;
-		TpEnum value;
+		TEnum value;
 
-		explicit operator TpEnum() const
+		explicit operator TEnum() const
 		{
 			return value;
 		}
 	};
 
-	template <typename TpEnum>
-	using EnumConstantList = std::vector< EnumConstant<TpEnum> >;
+	template <typename TEnum>
+	using EnumConstantList = std::vector< EnumConstant<TEnum> >;
 
 
-	template <typename TpEnum>
+	template <typename TEnum>
 	class EnumConstantMap
 	{
-		friend class EnumTypeInfo<TpEnum>;
+		friend class EnumTypeInfo<TEnum>;
 
 	public:
 		constexpr EnumConstantMap() = default;
 
-		const EnumConstant<TpEnum> & operator[]( const std::string & pName ) const
+		const EnumConstant<TEnum> & operator[]( const std::string & pName ) const
 		{
 			return getByName( pName );
 		}
 
-		const EnumConstant<TpEnum> & operator[]( TpEnum pValue ) const
+		const EnumConstant<TEnum> & operator[]( TEnum pValue ) const
 		{
 			return getByValue( pValue );
 		}
 
-		const EnumConstant<TpEnum> * findByName( const std::string & pName ) const
+		const EnumConstant<TEnum> * findByName( const std::string & pName ) const
 		{
 			auto constantIter = _constantsByName.find( pName );
 			if( constantIter != _constantsByName.end() )
@@ -63,7 +63,7 @@ namespace ts3
 			return nullptr;
 		}
 
-		const EnumConstant<TpEnum> * findByValue( TpEnum pValue ) const
+		const EnumConstant<TEnum> * findByValue( TEnum pValue ) const
 		{
 			auto constantIter = _constantsByValue.find( pValue );
 			if( constantIter != _constantsByValue.end() )
@@ -74,35 +74,35 @@ namespace ts3
 			return nullptr;
 		}
 
-		const EnumConstant<TpEnum> & getByName( const std::string & pName ) const
+		const EnumConstant<TEnum> & getByName( const std::string & pName ) const
 		{
 			auto constantIndex = _constantsByName.at( pName );
 			return _constants[constantIndex];
 		}
 
-		const EnumConstant<TpEnum> & getByValue( TpEnum pValue ) const
+		const EnumConstant<TEnum> & getByValue( TEnum pValue ) const
 		{
 			auto constantIndex = _constantsByValue.at( pValue );
 			return _constants[constantIndex];
 		}
 
-		const EnumConstantList<TpEnum> & list() const
+		const EnumConstantList<TEnum> & list() const
 		{
 			return _constants;
 		}
 
-		size_t size() const
+		TS3_ATTR_NO_DISCARD size_t size() const
 		{
 			return _constants.size();
 		}
 
-		bool empty() const
+		TS3_ATTR_NO_DISCARD bool empty() const
 		{
 			return _constants.empty();
 		}
 
 	private:
-		EnumConstantMap & add( TpEnum pValue, std::string pName )
+		EnumConstantMap & add( TEnum pValue, std::string pName )
 		{
 			auto constantIndex = _constants.size();
 			auto & constantDef = _constants.emplace_back();
@@ -117,52 +117,52 @@ namespace ts3
 
 	private:
 		//
-		EnumConstantList<TpEnum> _constants;
+		EnumConstantList<TEnum> _constants;
 		//
 		std::unordered_map<std::string, size_t> _constantsByName;
 		//
-		std::unordered_map<TpEnum, size_t> _constantsByValue;
+		std::unordered_map<TEnum, size_t> _constantsByValue;
 	};
 
 
-	template <typename TpEnum>
-	inline typename EnumConstantList<TpEnum>::const_iterator begin( const EnumConstantMap<TpEnum> & pEnumConstantMap )
+	template <typename TEnum>
+	inline typename EnumConstantList<TEnum>::const_iterator begin( const EnumConstantMap<TEnum> & pEnumConstantMap )
 	{
 		return pEnumConstantMap.list().begin();
 	}
 
-	template <typename TpEnum>
-	inline typename EnumConstantList<TpEnum>::const_iterator end( const EnumConstantMap<TpEnum> & pEnumConstantMap )
+	template <typename TEnum>
+	inline typename EnumConstantList<TEnum>::const_iterator end( const EnumConstantMap<TEnum> & pEnumConstantMap )
 	{
 		return pEnumConstantMap.list().end();
 	}
 
 
-	template <typename TpEnum>
+	template <typename TEnum>
 	class EnumTypeInfoInitializer;
 
 
-	template <typename TpEnum>
+	template <typename TEnum>
 	class EnumTypeInfo
 	{
-		 friend class EnumTypeInfoInitializer<TpEnum>;
+		 friend class EnumTypeInfoInitializer<TEnum>;
 
 	public:
 		static inline const std::string sEmptyConstantName = "";
 
 	public:
-		template <typename TpInitFunction>
-		explicit EnumTypeInfo( TpInitFunction pInitFunction )
+		template <typename TInitFunction>
+		explicit EnumTypeInfo( TInitFunction pInitFunction )
 		{
 			pInitFunction( *this );
 		}
 
-		TS3_FUNC_NO_DISCARD const EnumConstantMap<TpEnum> & getConstantMap() const
+		TS3_ATTR_NO_DISCARD const EnumConstantMap<TEnum> & getConstantMap() const
 		{
 			return _constantMap;
 		}
 
-		TS3_FUNC_NO_DISCARD const std::string & getConstantName( TpEnum pValue ) const
+		TS3_ATTR_NO_DISCARD const std::string & getConstantName( TEnum pValue ) const
 		{
 			if( auto * constantDef = _constantMap.findByValue( pValue ) )
 			{
@@ -171,17 +171,17 @@ namespace ts3
 			return sEmptyConstantName;
 		}
 
-		TS3_FUNC_NO_DISCARD TpEnum getConstantValue( const std::string & pName ) const
+		TS3_ATTR_NO_DISCARD TEnum getConstantValue( const std::string & pName ) const
 		{
 			if( auto * constantDef = _constantMap.findByName( pName ) )
 			{
 				return constantDef->value;
 			}
 
-			return static_cast<TpEnum>( 0u );
+			return static_cast<TEnum>( 0u );
 		}
 
-		TS3_FUNC_NO_DISCARD const std::string & getConstantNameOrDefault( TpEnum pValue, const std::string & pDefault = "" ) const
+		TS3_ATTR_NO_DISCARD const std::string & getConstantNameOrDefault( TEnum pValue, const std::string & pDefault = "" ) const
 		{
 			if( auto * constantDef = _constantMap.findByValue( pValue ) )
 			{
@@ -190,7 +190,7 @@ namespace ts3
 			return pDefault;
 		}
 
-		TS3_FUNC_NO_DISCARD TpEnum getConstantValueOrDefault( const std::string & pName, TpEnum pDefault = static_cast<TpEnum>( 0u ) ) const
+		TS3_ATTR_NO_DISCARD TEnum getConstantValueOrDefault( const std::string & pName, TEnum pDefault = static_cast<TEnum>( 0u ) ) const
 		{
 			if( auto * constantDef = _constantMap.findByName( pName ) )
 			{
@@ -199,7 +199,7 @@ namespace ts3
 			return pDefault;
 		}
 
-		TS3_FUNC_NO_DISCARD bool isValid() const
+		TS3_ATTR_NO_DISCARD bool isValid() const
 		{
 			return !_constantMap.empty();
 		}
@@ -211,7 +211,7 @@ namespace ts3
 			return *this;
 		}
 
-		EnumTypeInfo & registerConstant( TpEnum pValue, std::string pName )
+		EnumTypeInfo & registerConstant( TEnum pValue, std::string pName )
 		{
 			_constantMap.add( pValue, std::move( pName ) );
 			return *this;
@@ -221,20 +221,20 @@ namespace ts3
 		//
 		EnumProperties _properties;
 		//
-		EnumConstantMap<TpEnum> _constantMap;
+		EnumConstantMap<TEnum> _constantMap;
 	};
 
 
-	template <typename TpEnum>
+	template <typename TEnum>
 	class EnumTypeInfoInitializer
 	{
 	public:
-		static EnumTypeInfo<TpEnum> & initialize( EnumTypeInfo<TpEnum> & pEnumTypeInfo, EnumProperties pProperties )
+		static EnumTypeInfo<TEnum> & initialize( EnumTypeInfo<TEnum> & pEnumTypeInfo, EnumProperties pProperties )
 		{
 			return pEnumTypeInfo.initialize( std::move( pProperties ) );
 		}
 
-		static EnumTypeInfo<TpEnum> & registerConstant( EnumTypeInfo<TpEnum> & pEnumTypeInfo, TpEnum pValue, std::string pName )
+		static EnumTypeInfo<TEnum> & registerConstant( EnumTypeInfo<TEnum> & pEnumTypeInfo, TEnum pValue, std::string pName )
 		{
 			return pEnumTypeInfo.registerConstant( pValue, std::move( pName ) );
 		}
@@ -243,31 +243,31 @@ namespace ts3
 
 	/// @brief Implements an enum's definition/initialization procedure.
 	/// Usage and example: see below.
-	#define ts3TypeInfoEnumDefine( TpEnum ) \
+	#define ts3TypeInfoEnumDefine( TEnum ) \
 		/* Forward declaration of an enum-specific init method which registers all constants. */ \
-		void initializeEnumTypeInfo##TpEnum( ::ts3::EnumTypeInfo<TpEnum> & ); \
+		void initializeEnumTypeInfo##TEnum( ::ts3::EnumTypeInfo<TEnum> & ); \
 		/* Here, we implement the method declared with ts3TypeInfoEnumDeclare. */ \
-		::ts3::EnumTypeInfo<TpEnum> & _typeinfo::queryEnumTypeInfo##TpEnum() \
+		::ts3::EnumTypeInfo<TEnum> & _typeinfo::queryEnumTypeInfo##TEnum() \
 		{ \
 			/* Create static EnumTypeInfo object and pass initializeEnumTypeInfoXXX function declared above. */ \
 			/* EnumTypeInfo will call this function in its ctor and pass *this as an argument for initialization. */ \
-			static ts3::EnumTypeInfo<TpEnum> enumTypeInfo{ initializeEnumTypeInfo##TpEnum }; \
+			static ts3::EnumTypeInfo<TEnum> enumTypeInfo{ initializeEnumTypeInfo##TEnum }; \
 			return enumTypeInfo; \
 		} \
-		const std::string & _typeinfo::toString##TpEnum( TpEnum pValue ) \
+		const std::string & _typeinfo::toString##TEnum( TEnum pValue ) \
 		{ \
-			return queryEnumTypeInfo##TpEnum().getConstantName( pValue ); \
+			return queryEnumTypeInfo##TEnum().getConstantName( pValue ); \
 		} \
-		void initializeEnumTypeInfo##TpEnum( ts3::EnumTypeInfo<TpEnum> & pEnumTypeInfo ) \
+		void initializeEnumTypeInfo##TEnum( ts3::EnumTypeInfo<TEnum> & pEnumTypeInfo ) \
 
 	/// @brief This is a basic initialization of the EnumTypeInfo object (pEnumTypeInfo).
-	/// This is a continuation of initializeEnumTypeInfo##TpEnum function.
+	/// This is a continuation of initializeEnumTypeInfo##TEnum function.
 	/// Usage and example: see below.
-	#define ts3TypeInfoEnumBegin( TpEnum ) \
-        using EnumInitializer = ts3::EnumTypeInfoInitializer<TpEnum>; \
+	#define ts3TypeInfoEnumBegin( TEnum ) \
+        using EnumInitializer = ts3::EnumTypeInfoInitializer<TEnum>; \
 		/* Create basic definition of an enum - currently only its name. */ \
 		ts3::EnumProperties enumProperties; \
-		enumProperties.enumName = #TpEnum; \
+		enumProperties.enumName = #TEnum; \
 		/* This is used for scoped enum constants (e.g. Color::Red). Prefix is the length of enum type name plus '::'. */ \
 		const size_t enumNamePrefixLength = enumProperties.enumName.length() + 2; ( enumNamePrefixLength ); \
 		/* Initialize the EnumTypeInfo object. */ \

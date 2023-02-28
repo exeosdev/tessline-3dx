@@ -22,38 +22,38 @@ namespace ts3
 
         struct MutexInterfaceProxyDefault
         {
-            template <typename TpMutex>
-            static void lock( TpMutex & pMutex )
+            template <typename TMutex>
+            static void lock( TMutex & pMutex )
             {
                 pMutex.lock();
             }
 
-            template <typename TpMutex>
-            static bool tryLock( TpMutex & pMutex )
+            template <typename TMutex>
+            static bool tryLock( TMutex & pMutex )
             {
                 return pMutex.tryLock();
             }
 
-            template <typename TpMutex>
-            static void unlock( TpMutex & pMutex )
+            template <typename TMutex>
+            static void unlock( TMutex & pMutex )
             {
                 pMutex.unlock();
             }
 
-            template <typename TpMutex>
-            static void lockShared( TpMutex & pMutex )
+            template <typename TMutex>
+            static void lockShared( TMutex & pMutex )
             {
                 pMutex.lockShared();
             }
 
-            template <typename TpMutex>
-            static bool tryLockShared( TpMutex & pMutex )
+            template <typename TMutex>
+            static bool tryLockShared( TMutex & pMutex )
             {
                 return pMutex.tryLockShared();
             }
 
-            template <typename TpMutex>
-            static void unlockShared( TpMutex & pMutex )
+            template <typename TMutex>
+            static void unlockShared( TMutex & pMutex )
             {
                 pMutex.unlockShared();
             }
@@ -61,45 +61,45 @@ namespace ts3
 
         struct MutexInterfaceProxyStd
         {
-            template <typename TpMutex>
-            static void lock( TpMutex & pMutex )
+            template <typename TMutex>
+            static void lock( TMutex & pMutex )
             {
                 pMutex.lock();
             }
 
-            template <typename TpMutex>
-            static bool tryLock( TpMutex & pMutex )
+            template <typename TMutex>
+            static bool tryLock( TMutex & pMutex )
             {
                 return pMutex.try_mutex();
             }
 
-            template <typename TpMutex>
-            static void unlock( TpMutex & pMutex )
+            template <typename TMutex>
+            static void unlock( TMutex & pMutex )
             {
                 pMutex.unlock();
             }
 
-            template <typename TpMutex>
-            static void lockShared( TpMutex & pMutex )
+            template <typename TMutex>
+            static void lockShared( TMutex & pMutex )
             {
                 pMutex.lock_shared();
             }
 
-            template <typename TpMutex>
-            static bool tryLockShared( TpMutex & pMutex )
+            template <typename TMutex>
+            static bool tryLockShared( TMutex & pMutex )
             {
                 return pMutex.try_mutex_shared();
             }
 
-            template <typename TpMutex>
-            static void unlockShared( TpMutex & pMutex )
+            template <typename TMutex>
+            static void unlockShared( TMutex & pMutex )
             {
                 pMutex.unlock_shared();
             }
         };
 
 
-        template <typename TpMutex>
+        template <typename TMutex>
         struct MutexInterface
         {
             using Type = MutexInterfaceProxyDefault;

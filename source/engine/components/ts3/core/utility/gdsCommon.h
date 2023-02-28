@@ -18,11 +18,11 @@ namespace ts3
 	struct GdsSerializable
 	{};
 
-	template <typename Tp>
+	template <typename TVal>
 	struct IsGdsSerializable
 	{
 
-		static inline constexpr bool sValue = std::is_base_of<GdsSerializable, Tp>::value;
+		static inline constexpr bool sValue = std::is_base_of<GdsSerializable, TVal>::value;
 	};
 
 	enum : exception_category_value_t

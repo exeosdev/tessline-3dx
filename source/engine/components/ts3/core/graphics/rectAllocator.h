@@ -36,10 +36,10 @@ namespace ts3
 
 		void reset();
 
-		TS3_PCL_ATTR_NO_DISCARD bool checkFreeSpace( const math::Vec2u32 & pRect ) const;
-        TS3_PCL_ATTR_NO_DISCARD bool empty() const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD bool checkFreeSpace( const math::Vec2u32 & pRect ) const;
+        TS3_PCL_ATTR_FUNC_NO_DISCARD bool empty() const;
 
-        TS3_PCL_ATTR_NO_DISCARD const RectAllocatorConfig & getConfig() const
+        TS3_PCL_ATTR_FUNC_NO_DISCARD const RectAllocatorConfig & getConfig() const
 		{
 			return _config;
 		}

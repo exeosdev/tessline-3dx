@@ -165,14 +165,14 @@ namespace ts3
 	using UserExternalException = ExceptionClass<ExceptionBaseType::UserExternal>;
 
 	/// @brief Specialized class for ResultWrapper exceptions. Adds ResultProxy object.
-	template <typename TpValue, typename TpErrorPredicate>
+	template <typename TValue, typename TErrorPredicate>
 	class ResultProxyException : public ExceptionClass<ExceptionBaseType::ResultProxy>
     {
     public:
-        ResultProxy<TpValue, TpErrorPredicate> mResult;
+        ResultProxy<TValue, TErrorPredicate> mResult;
 
     public:
-        ResultProxyException( ExceptionInfo pExceptionInfo, ResultProxy<TpValue, TpErrorPredicate> pResult )
+        ResultProxyException( ExceptionInfo pExceptionInfo, ResultProxy<TValue, TErrorPredicate> pResult )
         : ExceptionClass( std::move( pExceptionInfo ) )
         , mResult( pResult )
         {}
@@ -202,8 +202,8 @@ namespace ts3
 	template <>
 	struct ExceptionClassResolver<ExceptionBaseType::ResultProxy, true>
     {
-		template <typename TpValue, typename TpErrorPredicate>
-	    using Type = ResultProxyException<TpValue, TpErrorPredicate>;
+		template <typename TValue, typename TErrorPredicate>
+	    using Type = ResultProxyException<TValue, TErrorPredicate>;
     };
 
 	template <ExceptionBaseType tExceptionBaseType>
@@ -256,29 +256,29 @@ namespace ts3
             using Type = pType; \
         }
 
-	template <typename TpException, typename... TpArgs>
-	TS3_PCL_ATTR_NO_RETURN inline void throwException( ExceptionInfo pExceptionInfo, TpArgs &&... pArgs )
+	template <typename TException, typename... TArgs>
+	TS3_PCL_ATTR_NO_RETURN inline void throwException( ExceptionInfo pExceptionInfo, TArgs &&... pArgs )
 	{
-		// TpException is a class derived from ExceptionClass<ExceptionBaseType>. It contains 'baseType'
+		// TException is a class derived from ExceptionClass<ExceptionBaseType>. It contains 'baseType'
 		// member with type tag. It should match the type embedded within the code. In case of mismatch, there is
 		// either a typo (in case of manual call) or a problem with the throwException() function defined below.
-		ts3DebugAssert( TpException::mBaseType == ecGetExceptionCodeBaseType( pExceptionInfo.code ) );
+		ts3DebugAssert( TException::mBaseType == ecGetExceptionCodeBaseType( pExceptionInfo.code ) );
 
-		throw TpException( std::move( pExceptionInfo ), std::forward<TpArgs>( pArgs )... );
+		throw TException( std::move( pExceptionInfo ), std::forward<TArgs>( pArgs )... );
 	}
 
-	template <typename TpException, typename... TpArgs>
+	template <typename TException, typename... TArgs>
 	TS3_PCL_ATTR_NO_RETURN inline void throwException( exception_code_value_t pExceptionCode,
                                                        std::string pDescription,
                                                        const FileLocationInfo & pFileLocationInfo,
-                                                       TpArgs &&... pArgs )
+                                                       TArgs &&... pArgs )
 	{
 	    ExceptionInfo exceptionInfo;
 	    exceptionInfo.code = pExceptionCode;
 	    exceptionInfo.description = std::move( pDescription );
 	    exceptionInfo.fileLocationInfo = pFileLocationInfo;
 
-	    throwException<TpException>( std::move( exceptionInfo ), std::forward<TpArgs>( pArgs )... );
+	    throwException<TException>( std::move( exceptionInfo ), std::forward<TArgs>( pArgs )... );
     }
 
 } // namespace ts3

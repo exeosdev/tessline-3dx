@@ -16,17 +16,17 @@ namespace ts3
 
 	enum class EPixelDataLayout : uint32
 	{
-		Alpha        = ecDeclarePixelDataLayout( 0x1, 1 ),
-		Depth        = ecDeclarePixelDataLayout( 0x2, 1 ),
-		DepthStencil = ecDeclarePixelDataLayout( 0x3, 2 ),
-		BGR          = ecDeclarePixelDataLayout( 0x4, 3 ),
-		BGRA         = ecDeclarePixelDataLayout( 0x5, 4 ),
-		Red          = ecDeclarePixelDataLayout( 0x6, 1 ),
-		RG           = ecDeclarePixelDataLayout( 0x7, 2 ),
-		RGB          = ecDeclarePixelDataLayout( 0x8, 3 ),
-		RGBA         = ecDeclarePixelDataLayout( 0x9, 4 ),
-		S3TC         = ecDeclarePixelDataLayout( 0xA, 1 ),
-		Undefined    = 0,
+		Alpha     = ecDeclarePixelDataLayout( 0x1, 1 ),
+		Depth     = ecDeclarePixelDataLayout( 0x2, 1 ),
+		DS        = ecDeclarePixelDataLayout( 0x3, 2 ),
+		BGR       = ecDeclarePixelDataLayout( 0x4, 3 ),
+		BGRA      = ecDeclarePixelDataLayout( 0x5, 4 ),
+		Red       = ecDeclarePixelDataLayout( 0x6, 1 ),
+		RG        = ecDeclarePixelDataLayout( 0x7, 2 ),
+		RGB       = ecDeclarePixelDataLayout( 0x8, 3 ),
+		RGBA      = ecDeclarePixelDataLayout( 0x9, 4 ),
+		S3TC      = ecDeclarePixelDataLayout( 0xA, 1 ),
+		Undefined = 0,
 	};
 
 	inline constexpr uint32 ecGetPixelDataLayoutChannelsNum( EPixelDataLayout pPixelDataLayout )

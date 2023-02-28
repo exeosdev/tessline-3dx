@@ -12,10 +12,10 @@ namespace ts3
 
 	using event_code_value_t = uint32;
 
-	template <event_code_value_t tpEventCode, typename... TpEventArgs>
+	template <event_code_value_t tEventCode, typename... TEventArgs>
 	struct Event
 	{
-		static constexpr event_code_value_t eventCode = tpEventCode;
+		static constexpr event_code_value_t eventCode = tEventCode;
 	};
 
 }
