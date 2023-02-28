@@ -52,30 +52,30 @@ namespace ts3::math
 		{}
 	};
 
-	template <typename TpReal>
+	template <typename TReal>
 	union RGBAColorNorm
 	{
 	public:
-		using ValueType = TpReal;
+		using ValueType = TReal;
 
 		struct
 		{
-			TpReal fpRed;
-			TpReal fpGreen;
-			TpReal fpBlue;
-			TpReal fpAlpha;
+			TReal fpRed;
+			TReal fpGreen;
+			TReal fpBlue;
+			TReal fpAlpha;
 		};
-		TpReal rgbaArray[4];
+		TReal rgbaArray[4];
 
 	public:
 		constexpr RGBAColorNorm() noexcept
-		: fpRed( static_cast<TpReal>( 0 ) )
-		, fpGreen( static_cast<TpReal>( 0 ) )
-		, fpBlue( static_cast<TpReal>( 0 ) )
-		, fpAlpha( static_cast<TpReal>( 1 ) )
+		: fpRed( static_cast<TReal>( 0 ) )
+		, fpGreen( static_cast<TReal>( 0 ) )
+		, fpBlue( static_cast<TReal>( 0 ) )
+		, fpAlpha( static_cast<TReal>( 1 ) )
 		{}
 
-		constexpr RGBAColorNorm( TpReal pRed, TpReal pGreen, TpReal pBlue, TpReal pAlpha = static_cast<TpReal>( 1 ) ) noexcept
+		constexpr RGBAColorNorm( TReal pRed, TReal pGreen, TReal pBlue, TReal pAlpha = static_cast<TReal>( 1 ) ) noexcept
 		: fpRed( pRed )
 		, fpGreen( pGreen )
 		, fpBlue( pBlue )
@@ -83,10 +83,10 @@ namespace ts3::math
 		{}
 
 		constexpr RGBAColorNorm( RGBAColor pColor )
-		: fpRed( static_cast<TpReal>( pColor.u8Red ) / static_cast<TpReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
-		, fpGreen( static_cast<TpReal>( pColor.u8Green ) / static_cast<TpReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
-		, fpBlue( static_cast<TpReal>( pColor.u8Blue ) / static_cast<TpReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
-		, fpAlpha( static_cast<TpReal>( pColor.u8Alpha ) / static_cast<TpReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
+		: fpRed( static_cast<TReal>( pColor.u8Red ) / static_cast<TReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
+		, fpGreen( static_cast<TReal>( pColor.u8Green ) / static_cast<TReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
+		, fpBlue( static_cast<TReal>( pColor.u8Blue ) / static_cast<TReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
+		, fpAlpha( static_cast<TReal>( pColor.u8Alpha ) / static_cast<TReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
 		{}
 	};
 
@@ -104,14 +104,14 @@ namespace ts3::math
 		return pLhs.u32Code != pRhs.u32Code;
 	}
 
-	template <typename TpReal>
-	inline bool operator==( const RGBAColorNorm<TpReal> & pLhs, const RGBAColorNorm<TpReal> & pRhs )
+	template <typename TReal>
+	inline bool operator==( const RGBAColorNorm<TReal> & pLhs, const RGBAColorNorm<TReal> & pRhs )
 	{
 		return ( pLhs.fpRed == pRhs.fpRed ) && ( pLhs.fpGreen == pRhs.fpGreen ) && ( pLhs.fpBlue == pRhs.fpBlue ) && ( pLhs.fpAlpha == pRhs.fpAlpha );
 	}
 
-	template <typename TpReal>
-	inline bool operator!=( const RGBAColorNorm<TpReal> & pLhs, const RGBAColorNorm<TpReal> & pRhs )
+	template <typename TReal>
+	inline bool operator!=( const RGBAColorNorm<TReal> & pLhs, const RGBAColorNorm<TReal> & pRhs )
 	{
 		return ( pLhs.fpRed != pRhs.fpRed ) || ( pLhs.fpGreen != pRhs.fpGreen ) || ( pLhs.fpBlue != pRhs.fpBlue ) || ( pLhs.fpAlpha != pRhs.fpAlpha );
 	}

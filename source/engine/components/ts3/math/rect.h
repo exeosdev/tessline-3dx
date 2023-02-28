@@ -19,7 +19,7 @@
 namespace ts3::math
 {
 
-	template <typename TpOffset, typename TpSize>
+	template <typename TOffset, typename TSize>
 	struct Rect
 	{
 	public:
@@ -27,16 +27,16 @@ namespace ts3::math
 		{
 			struct
 			{
-				Vector2<TpOffset> offset;
-				Vector2<TpSize> size;
+				Vector2<TOffset> offset;
+				Vector2<TSize> size;
 			};
 
 			struct
 			{
-				TpOffset x;
-				TpOffset y;
-				TpSize width;
-				TpSize height;
+				TOffset x;
+				TOffset y;
+				TSize width;
+				TSize height;
 			};
 		};
 
@@ -46,41 +46,41 @@ namespace ts3::math
 		constexpr Rect( const Rect & ) = default;
 		constexpr Rect & operator=( const Rect & ) = default;
 
-		template <typename TpScalar, enable_if_scalar_t<TpScalar> = true>
-		constexpr explicit Rect( TpScalar pScalar ) noexcept
+		template <typename TScalar, enable_if_scalar_t<TScalar> = true>
+		constexpr explicit Rect( TScalar pScalar ) noexcept
 		: offset( pScalar, pScalar )
 		, size( pScalar, pScalar )
 		{}
 
-		template <typename TpScalar, enable_if_scalar_t<TpScalar> = true>
-		constexpr Rect( TpScalar pWidth, TpScalar pHeight ) noexcept
+		template <typename TScalar, enable_if_scalar_t<TScalar> = true>
+		constexpr Rect( TScalar pWidth, TScalar pHeight ) noexcept
 		: offset( 0, 0 )
 		, size( pWidth, pHeight )
 		{}
 
-		template <typename TpX, typename TpY, typename TpWidth, typename TpHeight>
-		constexpr Rect( TpX pX, TpY pY, TpWidth pWidth, TpHeight pHeight = 0 ) noexcept
+		template <typename TX, typename TY, typename TWidth, typename THeight>
+		constexpr Rect( TX pX, TY pY, TWidth pWidth, THeight pHeight = 0 ) noexcept
 		: offset( pX, pY )
 		, size( pWidth, ( pHeight == 0 ) ? pWidth : pHeight )
 		{}
 
-		template <typename Tp1, typename Tp2>
-		constexpr Rect( const Vector2<Tp1> & pOffset, const Vector2<Tp2> & pSize ) noexcept
+		template <typename T1, typename T2>
+		constexpr Rect( const Vector2<T1> & pOffset, const Vector2<T2> & pSize ) noexcept
 		: offset( pOffset )
 		, size( pSize )
 		{}
 
-		TS3_PCL_ATTR_NO_DISCARD TpSize area() const
+		TS3_PCL_ATTR_FUNC_NO_DISCARD TSize area() const
 		{
 			return width * height;
 		}
 
-		TS3_PCL_ATTR_NO_DISCARD bool isNonZero() const
+		TS3_PCL_ATTR_FUNC_NO_DISCARD bool isNonZero() const
 		{
 			return ( width != 0 ) && ( height != 0 );
 		}
 
-		TS3_PCL_ATTR_NO_DISCARD bool isZero() const
+		TS3_PCL_ATTR_FUNC_NO_DISCARD bool isZero() const
 		{
 			return ( width == 0 ) || ( height == 0 );
 		}
