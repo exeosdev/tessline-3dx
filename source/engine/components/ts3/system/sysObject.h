@@ -53,7 +53,7 @@ namespace ts3::system
 		/// - if an object should be destroyed "remotely" (e.g. custom OS-level stuff), this can be used to do that.
 		bool destroySystemObject();
 
-		TS3_FUNC_NO_DISCARD bool isStateMaskSet( Bitmask<ESysObjectStateFlags> pMask ) const
+		TS3_ATTR_NO_DISCARD bool isStateMaskSet( Bitmask<ESysObjectStateFlags> pMask ) const
 		{
 			return _stateMask.isSet( pMask );
 		}
@@ -62,12 +62,12 @@ namespace ts3::system
 		/// A positive value indicates, that destroySystemObject() has been successfully called for this object.
 		/// Since the destruction may require, for example, system events to be processed, an object may still be valid
 		/// even though the request has been already made.
-		TS3_FUNC_NO_DISCARD bool isDestroyRequestSet() const
+		TS3_ATTR_NO_DISCARD bool isDestroyRequestSet() const
 		{
 			return isStateMaskSet( E_SYS_OBJECT_STATE_FLAG_DESTROY_REQUEST_FLAG_SET_BIT );
 		}
 
-		TS3_FUNC_NO_DISCARD bool isValidSystemObject() const
+		TS3_ATTR_NO_DISCARD bool isValidSystemObject() const
 		{
 			return !isStateMaskSet( E_SYS_OBJECT_STATE_FLAG_INVALID_BIT );
 		}
@@ -107,10 +107,10 @@ namespace ts3::system
         }
     };
 
-    template <typename TpObject, typename... TpArgs>
-    inline SysHandle<TpObject> createSysObject( TpArgs && ...pArgs )
+    template <typename TObject, typename... TArgs>
+    inline SysHandle<TObject> createSysObject( TArgs && ...pArgs )
     {
-        return createDynamicInterfaceObjectWithDeleter<TpObject>( SysObjectDeleter{}, std::forward<TpArgs>( pArgs )... );
+        return createDynamicInterfaceObjectWithDeleter<TObject>( SysObjectDeleter{}, std::forward<TArgs>( pArgs )... );
     }
 
 } // namespace ts3::system

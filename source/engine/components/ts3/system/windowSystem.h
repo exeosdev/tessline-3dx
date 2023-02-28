@@ -24,13 +24,13 @@ namespace ts3::system
 		explicit WindowManager( DisplayManagerHandle pDisplayManager );
 		virtual ~WindowManager() noexcept;
 
-		TS3_FUNC_NO_DISCARD WindowHandle createWindow( WindowCreateInfo pCreateInfo );
+		TS3_ATTR_NO_DISCARD WindowHandle createWindow( WindowCreateInfo pCreateInfo );
 
-		TS3_FUNC_NO_DISCARD bool checkFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
+		TS3_ATTR_NO_DISCARD bool checkFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
 
-		TS3_FUNC_NO_DISCARD FrameGeometry validateFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
+		TS3_ATTR_NO_DISCARD FrameGeometry validateFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
 
-		TS3_FUNC_NO_DISCARD uint32 getActiveWindowsNum() const;
+		TS3_ATTR_NO_DISCARD uint32 getActiveWindowsNum() const;
 
 	friendapi:
 		// Used by the Window class.
@@ -66,11 +66,11 @@ namespace ts3::system
 		virtual void updateGeometry( const FrameGeometry & pFrameGeometry,
 		                             Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags ) override final;
 
-		TS3_FUNC_NO_DISCARD virtual FrameSize getClientAreaSize() const override final;
+		TS3_ATTR_NO_DISCARD virtual FrameSize getClientAreaSize() const override final;
 
-		TS3_FUNC_NO_DISCARD virtual FrameSize getFrameSize() const override final;
+		TS3_ATTR_NO_DISCARD virtual FrameSize getFrameSize() const override final;
 
-		TS3_FUNC_NO_DISCARD virtual bool isFullscreen() const override final;
+		TS3_ATTR_NO_DISCARD virtual bool isFullscreen() const override final;
 
 	private:
 		virtual void onDestroySystemObjectRequested() override final;

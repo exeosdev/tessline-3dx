@@ -27,7 +27,7 @@
 #  endif
 #endif
 
-#define TS3_SYSTEM_API_NODISCARD TS3_SYSTEM_API TS3_PCL_ATTR_NO_DISCARD
+#define TS3_SYSTEM_API_NODISCARD TS3_SYSTEM_API TS3_PCL_ATTR_FUNC_NO_DISCARD
 
 namespace ts3::system
 {
@@ -35,8 +35,8 @@ namespace ts3::system
 	ts3EnableCustomExceptionSupport();
 	ts3EnableEnumTypeInfoSupport();
 
-	template <typename TpObject>
-	using SysHandle = ::ts3::SharedHandle<TpObject>;
+	template <typename TObject>
+	using SysHandle = ::ts3::SharedHandle<TObject>;
 
 	/// @brief Declares the handle type for a given system class.
 	/// The handle's type name is created by appending 'Handle' suffix to a given class name.
@@ -65,8 +65,8 @@ namespace ts3::system
 	};
 
 	/// @brief Helper proxy-like base class for platform-specific types.
-	/// @tparam TpBaseType Base class to derive from.
-	/// @tparam TpNativeData Native data type with platform-specific state.
+	/// @tparam TBaseType Base class to derive from.
+	/// @tparam TNativeData Native data type with platform-specific state.
 	///
 	/// Public classes in the System component (like File, Window, GLDriver etc.) are implemented at the platform
 	/// level (Win32File, Win32Window, Win32GLDriver). These classes obviously carry some platform-specific data.
@@ -74,28 +74,28 @@ namespace ts3::system
 	/// a given base class. It enables much compact definition of platform-specific types - especially those, that
 	/// only require native data (like Adapter/Output/VideoMode from the display system) - they can be defined as a
 	/// simple typedef.
-	template <typename TpBaseType, typename TpNativeData>
-	class NativeObject : public TpBaseType
+	template <typename TBaseType, typename TNativeData>
+	class NativeObject : public TBaseType
 	{
 	public:
-		TpNativeData mNativeData;
+		TNativeData mNativeData;
 
 	public:
-		template <typename... TpBaseArgs>
-		explicit NativeObject( TpBaseArgs && ...pBaseArgs )
-		: TpBaseType( std::forward<TpBaseArgs>( pBaseArgs )... )
+		template <typename... TBaseArgs>
+		explicit NativeObject( TBaseArgs && ...pBaseArgs )
+		: TBaseType( std::forward<TBaseArgs>( pBaseArgs )... )
 		{}
 
 		virtual ~NativeObject() = default;
 	};
 
-	template <typename TpBaseType>
-	class NativeObject<TpBaseType, void> : public TpBaseType
+	template <typename TBaseType>
+	class NativeObject<TBaseType, void> : public TBaseType
 	{
 	public:
-		template <typename... TpBaseArgs>
-		explicit NativeObject( TpBaseArgs && ...pBaseArgs )
-		: TpBaseType( std::forward<TpBaseArgs>( pBaseArgs )... )
+		template <typename... TBaseArgs>
+		explicit NativeObject( TBaseArgs && ...pBaseArgs )
+		: TBaseType( std::forward<TBaseArgs>( pBaseArgs )... )
 		{}
 
 		virtual ~NativeObject() = default;

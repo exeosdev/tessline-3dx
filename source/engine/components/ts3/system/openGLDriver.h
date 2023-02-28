@@ -67,7 +67,7 @@ namespace ts3::system
 
 		/// @brief Creates a system OpenGL surface (usually - a window) with a configuration matching specified requirements.
 		/// @param pCreateInfo CreateInfo struct with a surface specification (VisualConfig, window geometry, etc.)
-		TS3_FUNC_NO_DISCARD OpenGLDisplaySurfaceHandle createDisplaySurface( const OpenGLDisplaySurfaceCreateInfo & pCreateInfo );
+		TS3_ATTR_NO_DISCARD OpenGLDisplaySurfaceHandle createDisplaySurface( const OpenGLDisplaySurfaceCreateInfo & pCreateInfo );
 
 		/// @brief Creates a OpenGLDisplaySurface object, that wraps currently bound surface for the current thread.
 		///
@@ -80,7 +80,7 @@ namespace ts3::system
 		/// @return A handle to an object representing currently bound OpenGL surface. If no surface is bound, a null is returned.
 		///
 		/// @see OpenGLDisplaySurface
-		TS3_FUNC_NO_DISCARD OpenGLDisplaySurfaceHandle createDisplaySurfaceForCurrentThread();
+		TS3_ATTR_NO_DISCARD OpenGLDisplaySurfaceHandle createDisplaySurfaceForCurrentThread();
 
 		/// @brief Creates a system OpenGL render context with a configuration matching specified requirements.
 		/// @param pSurface Surface to be used for context creation. Context can be bound to any surface compatible with this one.
@@ -88,7 +88,7 @@ namespace ts3::system
 		///
 		/// @see OpenGLDisplaySurface
 		/// @see OpenGLRenderContextCreateInfo
-		TS3_FUNC_NO_DISCARD OpenGLRenderContextHandle createRenderContext( OpenGLDisplaySurface & pSurface,
+		TS3_ATTR_NO_DISCARD OpenGLRenderContextHandle createRenderContext( OpenGLDisplaySurface & pSurface,
                                                                            const OpenGLRenderContextCreateInfo & pCreateInfo );
 
 		/// @brief Creates a OpenGLRenderContext object, that wraps currently bound context for the current thread.
@@ -97,23 +97,23 @@ namespace ts3::system
 		/// bound OpenGL render context. See description of createDisplaySurfaceForCurrentThread() for details.
 		///
 		/// @return A handle to an object representing currently bound OpenGL context. If no context is bound, a null is returned.
-		TS3_FUNC_NO_DISCARD OpenGLRenderContextHandle createRenderContextForCurrentThread();
+		TS3_ATTR_NO_DISCARD OpenGLRenderContextHandle createRenderContextForCurrentThread();
 
 		/// @brief
 		void resetContextBinding();
 
 		/// @brief
-		TS3_FUNC_NO_DISCARD std::vector<EDepthStencilFormat> querySupportedDepthStencilFormats( EColorFormat pColorFormat ) const;
+		TS3_ATTR_NO_DISCARD std::vector<EDepthStencilFormat> querySupportedDepthStencilFormats( EColorFormat pColorFormat ) const;
 
 		/// @brief
-		TS3_FUNC_NO_DISCARD std::vector<EMSAAMode> querySupportedMSAAModes( EColorFormat pColorFormat,
+		TS3_ATTR_NO_DISCARD std::vector<EMSAAMode> querySupportedMSAAModes( EColorFormat pColorFormat,
                                                                             EDepthStencilFormat pDepthStencilFormat ) const;
 
 		/// @brief
-		TS3_FUNC_NO_DISCARD bool isAPIClassSupported( EOpenGLAPIClass pAPIClass ) const;
+		TS3_ATTR_NO_DISCARD bool isAPIClassSupported( EOpenGLAPIClass pAPIClass ) const;
 
 		/// @brief
-		TS3_FUNC_NO_DISCARD bool isRenderContextBound() const;
+		TS3_ATTR_NO_DISCARD bool isRenderContextBound() const;
 
 	friendapi:
 		/// Used by the OpenGLDisplaySurface class. Releases OS-level state of the specified surface.
@@ -178,10 +178,10 @@ namespace ts3::system
 		EOpenGLAPIClass querySupportedAPIClass() const;
 
 		/// @brief
-		TS3_FUNC_NO_DISCARD FrameSize queryRenderAreaSize() const;
+		TS3_ATTR_NO_DISCARD FrameSize queryRenderAreaSize() const;
 
 		/// @brief
-		TS3_FUNC_NO_DISCARD bool sysValidate() const;
+		TS3_ATTR_NO_DISCARD bool sysValidate() const;
 
 		/// @copybrief Frame::resizeClientArea
 		virtual void resizeClientArea( const FrameSize & pSize ) override final;
@@ -200,13 +200,13 @@ namespace ts3::system
                                      Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags ) override final;
 
 		/// @copybrief Frame::getClientAreaSize
-		TS3_FUNC_NO_DISCARD virtual FrameSize getClientAreaSize() const override final;
+		TS3_ATTR_NO_DISCARD virtual FrameSize getClientAreaSize() const override final;
 
 		/// @copybrief Frame::getSize
-		TS3_FUNC_NO_DISCARD virtual FrameSize getFrameSize() const override final;
+		TS3_ATTR_NO_DISCARD virtual FrameSize getFrameSize() const override final;
 
 		/// @copybrief Frame::isFullscreen
-		TS3_FUNC_NO_DISCARD virtual bool isFullscreen() const override final;
+		TS3_ATTR_NO_DISCARD virtual bool isFullscreen() const override final;
 
 	protected:
 		virtual void onDestroySystemObjectRequested() override;
@@ -257,13 +257,13 @@ namespace ts3::system
 		void bindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface );
 
 		/// @brief
-		TS3_FUNC_NO_DISCARD bool sysCheckIsCurrent() const;
+		TS3_ATTR_NO_DISCARD bool sysCheckIsCurrent() const;
 
 		/// @brief
-		TS3_FUNC_NO_DISCARD bool sysValidate() const;
+		TS3_ATTR_NO_DISCARD bool sysValidate() const;
 
 		/// @brief
-		TS3_FUNC_NO_DISCARD OpenGLSystemVersionInfo querySystemVersionInfo() const;
+		TS3_ATTR_NO_DISCARD OpenGLSystemVersionInfo querySystemVersionInfo() const;
 
 	protected:
 		virtual void onDestroySystemObjectRequested() override;

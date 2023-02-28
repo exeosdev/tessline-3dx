@@ -39,7 +39,7 @@ namespace ts3::system
 
 		Bitmask<EEventSystemInternalFlags> internalStateFlags = 0u;
 
-		TS3_FUNC_NO_DISCARD const EventSystemConfig & getEventSystemConfig() const
+		TS3_ATTR_NO_DISCARD const EventSystemConfig & getEventSystemConfig() const
 		{
 			ts3DebugAssert( currentEventSystemConfig );
 			return *currentEventSystemConfig;
@@ -69,7 +69,7 @@ namespace ts3::system
 
 		LocalEventQueue userEventQueue;
 
-		TS3_FUNC_NO_DISCARD std::pair<bool, std::vector<EventDispatcher *>::iterator> findEventDispatcherInternal( EventDispatcher * pEventDispatcher )
+		TS3_ATTR_NO_DISCARD std::pair<bool, std::vector<EventDispatcher *>::iterator> findEventDispatcherInternal( EventDispatcher * pEventDispatcher )
 		{
 			std::pair<bool, std::vector<EventDispatcher *>::iterator> result;
 			result.second = std::find( eventDispatcherList.begin(), eventDispatcherList.end(), pEventDispatcher );
@@ -77,7 +77,7 @@ namespace ts3::system
 			return result;
 		}
 
-		TS3_FUNC_NO_DISCARD std::pair<bool, std::vector<EventSource *>::iterator> findEventSourceInternal( EventSource * pEventSource )
+		TS3_ATTR_NO_DISCARD std::pair<bool, std::vector<EventSource *>::iterator> findEventSourceInternal( EventSource * pEventSource )
 		{
 			std::pair<bool, std::vector<EventSource *>::iterator> result;
 			result.second = std::find( eventSourceList.begin(), eventSourceList.end(), pEventSource );

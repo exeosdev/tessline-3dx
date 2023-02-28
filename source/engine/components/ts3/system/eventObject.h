@@ -66,7 +66,7 @@ namespace ts3::system
 			return ( code != E_EVENT_CODE_UNDEFINED ) && ecValidateEventCode( code );
 		}
 
-		 TS3_FUNC_NO_DISCARD constexpr EEventCategory category() const
+		 TS3_ATTR_NO_DISCARD constexpr EEventCategory category() const
 		{
 			return ecGetEventCodeCategory( code );
 		}

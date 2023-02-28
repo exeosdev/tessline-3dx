@@ -10,8 +10,8 @@
 namespace ts3::system
 {
 
-	template <typename Tp>
-	using ComPtr = Microsoft::WRL::ComPtr<Tp>;
+	template <typename TVal>
+	using ComPtr = Microsoft::WRL::ComPtr<TVal>;
 
 	namespace platform
 	{

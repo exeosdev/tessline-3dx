@@ -82,7 +82,7 @@ namespace ts3::system
 		explicit EventController( SysContextHandle pSysContext );
 		virtual ~EventController() noexcept;
 
-		TS3_FUNC_NO_DISCARD EventDispatcherHandle createEventDispatcher();
+		TS3_ATTR_NO_DISCARD EventDispatcherHandle createEventDispatcher();
 
 		bool setActiveEventDispatcher( EventDispatcher & pEventDispatcher );
 
@@ -135,23 +135,23 @@ namespace ts3::system
 
 		void validateActiveDispatcherState() const;
 
-		TS3_FUNC_NO_DISCARD EventSystemSharedState & getEventSystemSharedState() noexcept;
+		TS3_ATTR_NO_DISCARD EventSystemSharedState & getEventSystemSharedState() noexcept;
 
-		TS3_FUNC_NO_DISCARD bool checkEventSystemConfigFlags( Bitmask<EEventSystemConfigFlags> pFlags ) const;
+		TS3_ATTR_NO_DISCARD bool checkEventSystemConfigFlags( Bitmask<EEventSystemConfigFlags> pFlags ) const;
 
-		TS3_FUNC_NO_DISCARD EventSource * findEventSource( const EventSourceFindPredicate & pPredicate ) const;
+		TS3_ATTR_NO_DISCARD EventSource * findEventSource( const EventSourceFindPredicate & pPredicate ) const;
 
-		TS3_FUNC_NO_DISCARD EventSource * findEventSource( const EventSourceNativeDataFindPredicate & pPredicate ) const;
+		TS3_ATTR_NO_DISCARD EventSource * findEventSource( const EventSourceNativeDataFindPredicate & pPredicate ) const;
 
-		TS3_FUNC_NO_DISCARD bool isActiveDispatcherSet() const noexcept;
+		TS3_ATTR_NO_DISCARD bool isActiveDispatcherSet() const noexcept;
 
-		TS3_FUNC_NO_DISCARD size_t getRegisteredEventSourcesNum() const noexcept;
+		TS3_ATTR_NO_DISCARD size_t getRegisteredEventSourcesNum() const noexcept;
 
-		TS3_FUNC_NO_DISCARD EventSource * getPrimaryEventSource() const noexcept;
+		TS3_ATTR_NO_DISCARD EventSource * getPrimaryEventSource() const noexcept;
 
-		TS3_FUNC_NO_DISCARD EventSource * getRegisteredEventSourceByIndex( size_t pIndex ) const noexcept;
+		TS3_ATTR_NO_DISCARD EventSource * getRegisteredEventSourceByIndex( size_t pIndex ) const noexcept;
 
-		TS3_FUNC_NO_DISCARD bool isEventSourceRegistered( const EventSource & pEventSource ) const noexcept;
+		TS3_ATTR_NO_DISCARD bool isEventSourceRegistered( const EventSource & pEventSource ) const noexcept;
 
 	friendapi:
 		// Used by the EventSource class. It is called inside its destructor.
@@ -196,10 +196,10 @@ namespace ts3::system
 		void _setInternalStateFlags( Bitmask<uint32> pFlags, bool pSetOrUnset );
 
 		//
-		TS3_FUNC_NO_DISCARD uint32 _checkInternalStateFlags( Bitmask<uint32> pFlags ) const;
+		TS3_ATTR_NO_DISCARD uint32 _checkInternalStateFlags( Bitmask<uint32> pFlags ) const;
 
 		//
-		TS3_FUNC_NO_DISCARD Bitmask<uint32> _getInternalStateFlags() const;
+		TS3_ATTR_NO_DISCARD Bitmask<uint32> _getInternalStateFlags() const;
 
 	protected:
 		struct EventControllerPrivateData;
@@ -236,9 +236,9 @@ namespace ts3::system
 		bool postEventAppQuit();
 		bool postEventAppTerminate();
 
-		TS3_FUNC_NO_DISCARD bool checkEventSystemConfigFlags( Bitmask<EEventSystemConfigFlags> pFlags ) const;
+		TS3_ATTR_NO_DISCARD bool checkEventSystemConfigFlags( Bitmask<EEventSystemConfigFlags> pFlags ) const;
 
-		TS3_FUNC_NO_DISCARD Bitmask<EEventSystemConfigFlags> getEventSystemConfigFlags() const;
+		TS3_ATTR_NO_DISCARD Bitmask<EEventSystemConfigFlags> getEventSystemConfigFlags() const;
 
 	friendapi:
 		const EventSystemConfig & getEventSystemConfig() const;

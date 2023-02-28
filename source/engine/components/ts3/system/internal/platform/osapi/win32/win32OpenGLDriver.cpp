@@ -36,8 +36,8 @@ namespace ts3::system
 		void _win32GetWGLAttribArrayForVisualConfig( const VisualConfig & pVisualConfig, int * pAttribArray );
 
 		// Useful utility. Fetches values for a set of PF attributes. Uses templated array definition to resolve the size.
-		template <size_t tSize, typename TpOutput>
-		inline bool _win32QueryPixelFormatAttributes( HDC pDisplaySurfaceDC, int pPixelFormatIndex, const int( &pAttributes )[tSize], TpOutput & pOutput )
+		template <size_t tSize, typename TOutput>
+		inline bool _win32QueryPixelFormatAttributes( HDC pDisplaySurfaceDC, int pPixelFormatIndex, const int( &pAttributes )[tSize], TOutput & pOutput )
 		{
 			BOOL result = wglGetPixelFormatAttribivARB( pDisplaySurfaceDC, pPixelFormatIndex, 0, tSize, pAttributes, &( pOutput[0] ) );
 			return result != FALSE;

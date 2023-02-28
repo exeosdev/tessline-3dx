@@ -262,15 +262,15 @@ namespace ts3::system
 		std::string toString() const;
 	};
 
-	TS3_PCL_ATTR_NO_DISCARD dsm_output_id_t dsmCreateDisplayOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex );
+	TS3_PCL_ATTR_FUNC_NO_DISCARD dsm_output_id_t dsmCreateDisplayOutputID( dsm_index_t pAdapterIndex, dsm_index_t pOutputIndex );
 
-	TS3_PCL_ATTR_NO_DISCARD dsm_video_settings_hash_t dsmComputeVideoSettingsHash( EColorFormat pFormat, const DisplayVideoSettings & pSettings );
+	TS3_PCL_ATTR_FUNC_NO_DISCARD dsm_video_settings_hash_t dsmComputeVideoSettingsHash( EColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
-	TS3_PCL_ATTR_NO_DISCARD std::string dsmGetVideoSettingsString( EColorFormat pFormat, const DisplayVideoSettings & pSettings );
+	TS3_PCL_ATTR_FUNC_NO_DISCARD std::string dsmGetVideoSettingsString( EColorFormat pFormat, const DisplayVideoSettings & pSettings );
 
-	TS3_PCL_ATTR_NO_DISCARD EDisplayAdapterVendorID dsmResolveAdapterVendorID( const std::string & pAdapterName );
+	TS3_PCL_ATTR_FUNC_NO_DISCARD EDisplayAdapterVendorID dsmResolveAdapterVendorID( const std::string & pAdapterName );
 
-	TS3_PCL_ATTR_NO_DISCARD bool dsmCheckSettingsFilterMatch( const DisplayVideoSettingsFilter & pFilter, const DisplayVideoSettings & pSettings );
+	TS3_PCL_ATTR_FUNC_NO_DISCARD bool dsmCheckSettingsFilterMatch( const DisplayVideoSettingsFilter & pFilter, const DisplayVideoSettings & pSettings );
 
 
 } // namespace ts3::system

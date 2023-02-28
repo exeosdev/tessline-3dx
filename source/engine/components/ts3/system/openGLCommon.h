@@ -130,7 +130,7 @@ namespace ts3::system
 		std::string vendorName;
 
 	public:
-		TS3_FUNC_NO_DISCARD	std::string toString() const;
+		TS3_ATTR_NO_DISCARD	std::string toString() const;
 	};
 
 	struct OpenGLErrorInfo
@@ -149,8 +149,8 @@ namespace ts3::system
 		, errorString( CX_STR_CHAR_EMPTY )
 		{}
 
-		template <typename TpGLErrorCode>
-		constexpr OpenGLErrorInfo( TpGLErrorCode pErrorCode, const char * pErrorMessage = nullptr )
+		template <typename TGLErrorCode>
+		constexpr OpenGLErrorInfo( TGLErrorCode pErrorCode, const char * pErrorMessage = nullptr )
 		: errorCode( trunc_numeric_cast<uint32>( pErrorCode ) )
 		, errorString( pErrorMessage ? CX_STR_CHAR_EMPTY : pErrorMessage )
 		{}

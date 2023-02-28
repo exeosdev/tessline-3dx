@@ -21,8 +21,8 @@ namespace ts3::system
 		EventSource * eventSource = nullptr;
 
 	public:
-		template <typename TpObject>
-		bool checkEventSource( const TpObject * pSource ) const
+		template <typename TObject>
+		bool checkEventSource( const TObject * pSource ) const
 		{
 			return static_cast<const void *>( pSource ) == eventSource;
 		}
