@@ -7,7 +7,7 @@
 #include "graphicsPipelineConfigDefs.h"
 #include <ts3/core/exceptionUtils.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	using graphics_state_update_mask_value_t = uint64;
@@ -55,20 +55,20 @@ namespace ts3::GpuAPI
 			return !_stateUpdateMask.empty();
 		}
 
-		template <typename TpOutputSOType = GraphicsPipelineStateObject>
-		inline const TpOutputSOType * getCurrentGraphicsPipelineSO() const noexcept
+		template <typename TOutputSOType = GraphicsPipelineStateObject>
+		inline const TOutputSOType * getCurrentGraphicsPipelineSO() const noexcept
 		{
 			if( _currentGraphicsPipelineSO )
 			{
-				return reinterpret_cast<const GPUAPIObject *>( _currentGraphicsPipelineSO )->queryInterface<TpOutputSOType>();
+				return reinterpret_cast<const GPUAPIObject *>( _currentGraphicsPipelineSO )->queryInterface<TOutputSOType>();
 			}
 			return nullptr;
 		}
 
-		template <typename TpOutputSOType = GraphicsPipelineStateObject>
-		inline const TpOutputSOType & getCurrentGraphicsPipelineSORef() const
+		template <typename TOutputSOType = GraphicsPipelineStateObject>
+		inline const TOutputSOType & getCurrentGraphicsPipelineSORef() const
 		{
-			if( const auto * stateObject = getCurrentGraphicsPipelineSO<TpOutputSOType>() )
+			if( const auto * stateObject = getCurrentGraphicsPipelineSO<TOutputSOType>() )
 			{
 				return *stateObject;
 			}
@@ -81,6 +81,6 @@ namespace ts3::GpuAPI
 		Bitmask<graphics_state_update_mask_value_t> _stateUpdateMask = 0;
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GRAPHICS_PIPELINE_STATE_CONTROLLER_H__

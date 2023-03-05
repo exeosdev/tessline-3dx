@@ -50,7 +50,7 @@ namespace ts3::gpuapi
 		Unknown = 0,
 	};
 
-	namespace CxDefs
+	namespace cxdefs
 	{
 
 		inline constexpr uint16 declareShaderInputResourceType( EShaderInputResourceClass pResourceClass, uint8 pIndex )
@@ -62,15 +62,15 @@ namespace ts3::gpuapi
 
 	enum class EShaderInputResourceType : uint16
 	{
-		CBVConstantBuffer = CxDefs::declareShaderInputResourceType( EShaderInputResourceClass::CBV, 0 ),
-		SRVTextureBuffer  = CxDefs::declareShaderInputResourceType( EShaderInputResourceClass::SRV, 1 ),
-		SRVTextureImage   = CxDefs::declareShaderInputResourceType( EShaderInputResourceClass::SRV, 2 ),
-		UAVStorageBuffer  = CxDefs::declareShaderInputResourceType( EShaderInputResourceClass::UAV, 3 ),
-		UAVStorageImage   = CxDefs::declareShaderInputResourceType( EShaderInputResourceClass::UAV, 4 ),
+		CBVConstantBuffer = cxdefs::declareShaderInputResourceType( EShaderInputResourceClass::CBV, 0 ),
+		SRVTextureBuffer  = cxdefs::declareShaderInputResourceType( EShaderInputResourceClass::SRV, 1 ),
+		SRVTextureImage   = cxdefs::declareShaderInputResourceType( EShaderInputResourceClass::SRV, 2 ),
+		UAVStorageBuffer  = cxdefs::declareShaderInputResourceType( EShaderInputResourceClass::UAV, 3 ),
+		UAVStorageImage   = cxdefs::declareShaderInputResourceType( EShaderInputResourceClass::UAV, 4 ),
 		Unknown           = 0
 	};
 
-	namespace CxDefs
+	namespace cxdefs
 	{
 
 		inline constexpr EShaderInputResourceClass getShaderInputResourceResourceClass( EShaderInputResourceType pResourceType )
@@ -96,7 +96,7 @@ namespace ts3::gpuapi
 
 		struct ConstantGroup
 		{
-			using ConstantList = std::array<ConstantDesc, CxDefs::GPU_SYSTEM_METRIC_IS_MAX_CONSTANT_GROUP_SIZE>;
+			using ConstantList = std::array<ConstantDesc, cxdefs::GPU_SYSTEM_METRIC_IS_MAX_CONSTANT_GROUP_SIZE>;
 			EShaderConstantAccessClass accessClass;
 			ConstantList constantList;
 			uint32 constantsNum = 0;
@@ -129,14 +129,14 @@ namespace ts3::gpuapi
 
 		struct DescriptorSet
 		{
-			using DescriptorList = std::array<DescriptorDesc, CxDefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SET_SIZE>;
+			using DescriptorList = std::array<DescriptorDesc, cxdefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SET_SIZE>;
 			EShaderInputDescriptorType descriptorType;
 			DescriptorList descriptorList;
 			uint32 descriptorsNum = 0;
 		};
 
-		using ConstantGroupArray = std::array<ConstantGroup, CxDefs::GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM>;
-		using DescriptorSetArray = std::array<DescriptorSet, CxDefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM>;
+		using ConstantGroupArray = std::array<ConstantGroup, cxdefs::GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM>;
+		using DescriptorSetArray = std::array<DescriptorSet, cxdefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM>;
 
 		Bitmask<EShaderStageFlags> activeShaderStagesMask;
 		ConstantGroupArray constantGroupArray;

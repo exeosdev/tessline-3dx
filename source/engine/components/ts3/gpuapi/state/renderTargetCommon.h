@@ -11,6 +11,13 @@
 namespace ts3::gpuapi
 {
 
+	struct RTAttachmentClearValue
+	{
+		math::RGBAColorR32Norm colorClearValue;
+		float depthClearValue;
+		uint8 stencilClearValue;
+	};
+
 	struct RTAttachmentLayoutInfo
 	{
 		ETextureFormat format;
@@ -24,7 +31,7 @@ namespace ts3::gpuapi
 
 	/// @brief Typedef for ordered, fixed-size array of layout definitions for render target attachments.
 	/// Entries are ordered according to ERTAttachmentIndex values.
-	using RTAttachmentLayoutInfoArray = std::array<RTAttachmentLayoutInfo, CxDefs::RT_MAX_COMBINED_ATTACHMENTS_NUM>;
+	using RTAttachmentLayoutInfoArray = std::array<RTAttachmentLayoutInfo, cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM>;
 
 	/// @brief A definition of a vertex layout used to create a driver-specific RenderTargetLayout object.
 	struct RenderTargetLayoutDefinition
@@ -43,7 +50,7 @@ namespace ts3::gpuapi
 		RTAttachmentLayoutInfo attachmentLayout;
 	};
 
-	namespace StateMgmt
+	namespace smutil
 	{
 
 		/// @brief
@@ -94,7 +101,7 @@ namespace ts3::gpuapi
 				return attachmentID != ERenderTargetAttachmentID::RTUndefined;
 			}
 		};
-		using AttachmentLayoutDescArray = std::array<AttachmentLayoutDesc, CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
+		using AttachmentLayoutDescArray = std::array<AttachmentLayoutDesc, cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
 		AttachmentLayoutDescArray attachmentLayoutDescArray;
 	};
 
@@ -111,9 +118,9 @@ namespace ts3::gpuapi
 				return attachmentID != ERenderTargetAttachmentID::RTUndefined;
 			}
 		};
-		using AttachmentResourceBindingDescArray = std::array<AttachmentResourceBindingDesc, CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
+		using AttachmentResourceBindingDescArray = std::array<AttachmentResourceBindingDesc, cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
 		AttachmentResourceBindingDescArray attachmentResourceBindingDescArray;
-		uint32 activeBindingsNum = CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM;
+		uint32 activeBindingsNum = cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM;
 		uint32 sharedMSAALevel = 0;
 	};
 
@@ -149,18 +156,18 @@ namespace ts3::gpuapi
 	{
 		Bitmask<ERenderTargetAttachmentFlags> attachmentMask = 0;
 		uint32 colorAttachmentActiveCount = 0;
-		TAttachmentInfo colorAttachmentArray[CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+		TAttachmentInfo colorAttachmentArray[cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
 		TAttachmentInfo depthStencilAttachment;
 
 		TS3_ATTR_NO_DISCARD TAttachmentInfo & operator[]( ERenderTargetAttachmentIndex pIndex )
 		{
-			ts3DebugAssert( CxDefs::isRTAttachmentIndexValid( pIndex ) );
+			ts3DebugAssert( cxdefs::isRTAttachmentIndexValid( pIndex ) );
 			return ( pIndex == E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL ) ? depthStencilAttachment : colorAttachmentArray[pIndex];
 		}
 
 		TS3_ATTR_NO_DISCARD const TAttachmentInfo & operator[]( ERenderTargetAttachmentIndex pIndex ) const
 		{
-			ts3DebugAssert( CxDefs::isRTAttachmentIndexValid( pIndex ) );
+			ts3DebugAssert( cxdefs::isRTAttachmentIndexValid( pIndex ) );
 			return ( pIndex == E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL ) ? depthStencilAttachment : colorAttachmentArray[pIndex];
 		}
 
@@ -182,10 +189,10 @@ namespace ts3::gpuapi
 	struct RenderTargetResourceBinding : public RenderTargetAttachmentsConfig<RenderTargetAttachmentResourceBinding>
 	{
 		TextureSize2D commonBufferSize;
-		uint32 commonMSAALevel = CxDefs::RT_ATTACHMENT_MSAA_LEVEL_INVALID;
+		uint32 commonMSAALevel = cxdefs::RT_ATTACHMENT_MSAA_LEVEL_INVALID;
 	};
 
-	namespace Defaults
+	namespace defaults
 	{
 
 		TS3_GPUAPI_OBJ const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8;
@@ -195,7 +202,7 @@ namespace ts3::gpuapi
 
 	}
 
-	namespace StateMgmt
+	namespace smutil
 	{
 
 		TS3_GPUAPI_API bool createRenderTargetLayout(

@@ -96,7 +96,7 @@ namespace ts3::gpuapi
 				constantParameter.cParamType = EShaderInputParameterType::Constant;
 				constantParameter.iFormat = constantDesc.format;
 				constantParameter.iStageIndex = constantDesc.bindingIndex;
-				constantParameter.iByteSize = CxDefs::getVertexAttribFormatByteSize( constantDesc.format );
+				constantParameter.iByteSize = cxdefs::getVertexAttribFormatByteSize( constantDesc.format );
 				constantParameter.iDwordSize = computeConstantDwordSize( constantParameter.iByteSize );
 				constantParameter.iAccessClass = constantGroupDesc.accessClass;
 
@@ -171,7 +171,7 @@ namespace ts3::gpuapi
 					descriptor.cParamType = EShaderInputParameterType::Resource;
 					descriptor.uResourceInfo.resourceArraySize = descriptorDesc.uResourceDesc.resourceArraySize;
 					descriptor.uResourceInfo.resourceType = descriptorDesc.uResourceDesc.resourceType;
-					descriptor.uResourceInfo.resourceClass = CxDefs::getShaderInputResourceResourceClass( descriptorDesc.uResourceDesc.resourceType );
+					descriptor.uResourceInfo.resourceClass = cxdefs::getShaderInputResourceResourceClass( descriptorDesc.uResourceDesc.resourceType );
 					descriptor.uResourceInfo.resourceBaseRegisterIndex = descriptorDesc.uResourceDesc.resourceBaseRegisterIndex;
 				}
 				else if( descriptorSetDesc.descriptorType == EShaderInputDescriptorType::Sampler )
@@ -204,7 +204,7 @@ namespace ts3::gpuapi
 		size_t constantsNum = 0;
 		size_t totalDwordSize = 0;
 
-		if( pInputSignatureDesc.constantGroupsNum > CxDefs::GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM + 1 )
+		if( pInputSignatureDesc.constantGroupsNum > cxdefs::GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM + 1 )
 		{
 			ts3DebugInterrupt();
 			return false;
@@ -227,11 +227,11 @@ namespace ts3::gpuapi
 			{
 				const auto & constantDesc = constantGroupDesc.constantList[inputConstantIndex];
 
-				auto constantByteSize = CxDefs::getVertexAttribFormatByteSize( constantDesc.format );
+				auto constantByteSize = cxdefs::getVertexAttribFormatByteSize( constantDesc.format );
 				auto constantDwordSize = computeConstantDwordSize( constantByteSize );
 				totalDwordSize += constantDwordSize;
 
-				if( totalDwordSize > CxDefs::GPU_SYSTEM_METRIC_IS_MAX_DWORD_SIZE )
+				if( totalDwordSize > cxdefs::GPU_SYSTEM_METRIC_IS_MAX_DWORD_SIZE )
 				{
 					ts3DebugInterrupt();
 					return false;
@@ -251,7 +251,7 @@ namespace ts3::gpuapi
 		size_t descriptorsNum = 0;
 		size_t descriptorSetsNum = pInputSignatureDesc.descriptorSetsNum;
 
-		if( descriptorSetsNum > CxDefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM )
+		if( descriptorSetsNum > cxdefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM )
 		{
 			ts3DebugInterrupt();
 			return false;

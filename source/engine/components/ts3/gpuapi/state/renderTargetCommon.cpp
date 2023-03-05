@@ -8,7 +8,7 @@
 namespace ts3::gpuapi
 {
 
-	namespace Defaults
+	namespace defaults
 	{
 
 		const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8 =
@@ -80,7 +80,7 @@ namespace ts3::gpuapi
 			if( attachmentLayoutDesc )
 			{
 				auto attachmentIndex = static_cast<uint32>( attachmentLayoutDesc.attachmentID );
-				if( attachmentIndex < CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM )
+				if( attachmentIndex < cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM )
 				{
 					rtLayout.colorAttachmentArray[attachmentIndex].format = attachmentLayoutDesc.format;
 					rtLayout.colorAttachmentActiveCount += 1;
@@ -131,7 +131,7 @@ namespace ts3::gpuapi
 			if( attachmentResourceBindingDesc )
 			{
 				auto attachmentIndex = static_cast<uint32>( attachmentResourceBindingDesc.attachmentID );
-				if( attachmentIndex >= CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM )
+				if( attachmentIndex >= cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM )
 				{
 					ts3DebugInterrupt();
 					return false;
@@ -140,7 +140,7 @@ namespace ts3::gpuapi
 				RenderTargetAttachmentLayout * attachmentLayoutPtr = nullptr;
 				RenderTargetAttachmentResourceBinding * attachmentResourceBindingPtr = nullptr;
 
-				if( attachmentIndex < CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM )
+				if( attachmentIndex < cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM )
 				{
 					attachmentLayoutPtr = &( rtLayout.colorAttachmentArray[attachmentIndex] );
 					attachmentResourceBindingPtr = &( rtResourceBinding.colorAttachmentArray[attachmentIndex] );
@@ -199,7 +199,7 @@ namespace ts3::gpuapi
 	                                           const RenderTargetLayout & pRTLayout )
 	{
 
-		for( uint32 colorAttachmentIndex = 0; colorAttachmentIndex < CxDefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM; ++colorAttachmentIndex )
+		for( uint32 colorAttachmentIndex = 0; colorAttachmentIndex < cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM; ++colorAttachmentIndex )
 		{
 			auto & caResourceBinding = pRTResourceBinding.colorAttachmentArray[colorAttachmentIndex];
 			auto & caLayout = pRTLayout.colorAttachmentArray[colorAttachmentIndex];

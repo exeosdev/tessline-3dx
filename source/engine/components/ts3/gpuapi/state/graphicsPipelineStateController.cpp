@@ -4,7 +4,7 @@
 #include "vertexStreamStateObject.h"
 #include <ts3/stdext/memory.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	GraphicsPipelineStateController::GraphicsPipelineStateController() = default;
@@ -55,4 +55,4 @@ namespace ts3::GpuAPI
 		return _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_SO_VERTEX_STREAM_BIT );
 	}
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi

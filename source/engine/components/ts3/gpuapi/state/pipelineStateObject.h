@@ -4,9 +4,7 @@
 #ifndef __TS3_GPUAPI_PIPELINE_STATE_OBJECT_H__
 #define __TS3_GPUAPI_PIPELINE_STATE_OBJECT_H__
 
-#include "gpuStateObject.h"
-#include "graphicsPipelineState.h"
-#include "ts3/gpuapi/descriptors/graphicsShaderLinkage.h"
+#include "graphicsPipelineImmutableState.h"
 #include "inputAssemblerCommon.h"
 #include "renderTargetCommon.h"
 #include "shaderInputSignature.h"

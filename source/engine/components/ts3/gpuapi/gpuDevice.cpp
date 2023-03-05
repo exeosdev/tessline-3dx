@@ -3,6 +3,7 @@
 #include <ts3/gpuapi/gpuDevice.h>
 #include <ts3/gpuapi/gpuDriver.h>
 #include <ts3/gpuapi/presentationLayer.h>
+#include <ts3/gpuapi/state/pipelineImmutableStateCache.h>
 
 namespace ts3::gpuapi
 {
@@ -48,6 +49,56 @@ namespace ts3::gpuapi
 	    return _drvCreateTexture( pCreateInfo );
 	}
 
+	BlendImmutableState * GPUDevice::createBlendImmutableState( UniqueGPUObjectName pUniqueName, const BlendDescriptor & pDescriptor )
+	{
+		if( !_immutableStateCache )
+		{
+			ts3Throw( 0 );
+		}
+
+		return _immutableStateCache->createBlendState( {std::move( pUniqueName ), pDescriptor} );
+	}
+
+	DepthStencilImmutableState * GPUDevice::createDepthStencilImmutableState( UniqueGPUObjectName pUniqueName, const DepthStencilDescriptor & pDescriptor )
+	{
+		if( !_immutableStateCache )
+		{
+			ts3Throw( 0 );
+		}
+
+		return _immutableStateCache->createDepthStencilState( {std::move( pUniqueName ), pDescriptor} );
+	}
+
+	GraphicsShaderLinkageImmutableState * GPUDevice::createGraphicsShaderLinkageImmutableState( UniqueGPUObjectName pUniqueName, const GraphicsShaderSet & pShaderSet )
+	{
+		if( !_immutableStateCache )
+		{
+			ts3Throw( 0 );
+		}
+
+		return _immutableStateCache->createShaderLinkageState( {std::move( pUniqueName ), pShaderSet} );
+	}
+
+	RasterizerImmutableState * GPUDevice::createRasterizerImmutableState( UniqueGPUObjectName pUniqueName, const RasterizerDescriptor & pDescriptor )
+	{
+		if( !_immutableStateCache )
+		{
+			ts3Throw( 0 );
+		}
+
+		return _immutableStateCache->createRasterizerState( {std::move( pUniqueName ), pDescriptor} );
+	}
+
+	VertexInputLayoutImmutableState * GPUDevice::createVertexInputLayoutImmutableState( UniqueGPUObjectName pUniqueName, const VertexInputLayoutDescriptor & pDescriptor )
+	{
+		if( !_immutableStateCache )
+		{
+			ts3Throw( 0 );
+		}
+
+		return _immutableStateCache->createVertexInputLayoutState( {std::move( pUniqueName ), pDescriptor} );
+	}
+
 	const math::RGBAColorU8 & GPUDevice::getDefaultClearColor() const
 	{
 		switch( mGPUDriverID )
@@ -76,9 +127,9 @@ namespace ts3::gpuapi
 		return sDefaultClearColorDriver0;
 	}
 
-	const RenderTargetClearConfig & GPUDevice::getDefaultRenderTargetClearConfig() const
+	const RTAttachmentClearValue & GPUDevice::getDefaultRTAttachmentClearValue() const
 	{
-		static const RenderTargetClearConfig defaultRenderTargetClearConfig =
+		static const RTAttachmentClearValue defaultRenderTargetClearConfig =
 		{
 			getDefaultClearColor(),
 			1.0f,
