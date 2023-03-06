@@ -49,54 +49,58 @@ namespace ts3::gpuapi
 	    return _drvCreateTexture( pCreateInfo );
 	}
 
-	BlendImmutableState * GPUDevice::createBlendImmutableState( UniqueGPUObjectName pUniqueName, const BlendDescriptor & pDescriptor )
+	BlendImmutableStateHandle GPUDevice::createBlendImmutableState( const BlendConfig & pConfig )
 	{
-		if( !_immutableStateCache )
-		{
-			ts3Throw( 0 );
-		}
-
-		return _immutableStateCache->createBlendState( {std::move( pUniqueName ), pDescriptor} );
+		ts3DebugAssert( _immutableStateFactory );
+		return _immutableStateFactory->createBlendState( pConfig );
 	}
 
-	DepthStencilImmutableState * GPUDevice::createDepthStencilImmutableState( UniqueGPUObjectName pUniqueName, const DepthStencilDescriptor & pDescriptor )
+	DepthStencilImmutableStateHandle GPUDevice::createDepthStencilImmutableState( const DepthStencilConfig & pConfig )
 	{
-		if( !_immutableStateCache )
-		{
-			ts3Throw( 0 );
-		}
-
-		return _immutableStateCache->createDepthStencilState( {std::move( pUniqueName ), pDescriptor} );
+		ts3DebugAssert( _immutableStateFactory );
+		return _immutableStateFactory->createDepthStencilState( pConfig );
 	}
 
-	GraphicsShaderLinkageImmutableState * GPUDevice::createGraphicsShaderLinkageImmutableState( UniqueGPUObjectName pUniqueName, const GraphicsShaderSet & pShaderSet )
+	GraphicsShaderLinkageImmutableStateHandle GPUDevice::createGraphicsShaderLinkageImmutableState( const GraphicsShaderSet & pShaderSet )
 	{
-		if( !_immutableStateCache )
-		{
-			ts3Throw( 0 );
-		}
-
-		return _immutableStateCache->createShaderLinkageState( {std::move( pUniqueName ), pShaderSet} );
+		ts3DebugAssert( _immutableStateFactory );
+		return _immutableStateFactory->createGraphicsShaderLinkageState( pShaderSet );
 	}
 
-	RasterizerImmutableState * GPUDevice::createRasterizerImmutableState( UniqueGPUObjectName pUniqueName, const RasterizerDescriptor & pDescriptor )
+	IAInputLayoutImmutableStateHandle GPUDevice::createIAInputLayoutImmutableState( const IAInputLayoutDefinition & pDefinition )
 	{
-		if( !_immutableStateCache )
-		{
-			ts3Throw( 0 );
-		}
-
-		return _immutableStateCache->createRasterizerState( {std::move( pUniqueName ), pDescriptor} );
+		ts3DebugAssert( _immutableStateFactory );
+		return _immutableStateFactory->createIAInputLayoutState( pDefinition );
 	}
 
-	VertexInputLayoutImmutableState * GPUDevice::createVertexInputLayoutImmutableState( UniqueGPUObjectName pUniqueName, const VertexInputLayoutDescriptor & pDescriptor )
+	IAVertexStreamImmutableStateHandle GPUDevice::createIAVertexStreamState( const IAVertexStreamDefinition & pDefinition )
 	{
-		if( !_immutableStateCache )
-		{
-			ts3Throw( 0 );
-		}
+		ts3DebugAssert( _immutableStateFactory );
+		return _immutableStateFactory->createIAVertexStreamState( pDefinition );
+	}
 
-		return _immutableStateCache->createVertexInputLayoutState( {std::move( pUniqueName ), pDescriptor} );
+	RasterizerImmutableStateHandle GPUDevice::createRasterizerImmutableState( const RasterizerConfig & pConfig )
+	{
+		ts3DebugAssert( _immutableStateFactory );
+		return _immutableStateFactory->createRasterizerState( pConfig );
+	}
+
+	RenderTargetLayoutImmutableStateHandle GPUDevice::createRenderTargetLayoutState( const RenderTargetLayoutConfiguration & pConfiguration )
+	{
+		ts3DebugAssert( _immutableStateFactory );
+		return _immutableStateFactory->createRenderTargetLayoutState( pConfiguration );
+	}
+
+	RenderTargetBindingImmutableStateHandle GPUDevice::createRenderTargetBindingState( const RenderTargetBindingDefinition & pDefinition )
+	{
+		ts3DebugAssert( _immutableStateFactory );
+		return _immutableStateFactory->createRenderTargetBindingState( pDefinition );
+	}
+
+	RenderPassImmutableStateHandle GPUDevice::createRenderPassState( const RenderPassConfiguration & pConfiguration )
+	{
+		ts3DebugAssert( _immutableStateFactory );
+		return _immutableStateFactory->createRenderPassState( pConfiguration );
 	}
 
 	const math::RGBAColorU8 & GPUDevice::getDefaultClearColor() const

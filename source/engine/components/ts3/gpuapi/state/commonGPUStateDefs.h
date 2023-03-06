@@ -17,6 +17,9 @@ namespace ts3::gpuapi
 	struct IAInputLayoutDefinition;
 	struct IAVertexStreamDefinition;
 	struct RasterizerConfig;
+	struct RenderTargetLayoutConfiguration;
+	struct RenderTargetBindingDefinition;
+	struct RenderPassConfiguration;
 
 	struct GraphicsPipelineStateObjectCreateInfo;
 
@@ -31,6 +34,9 @@ namespace ts3::gpuapi
 	ts3GpaDeclareClassHandle( IAInputLayoutImmutableState );
 	ts3GpaDeclareClassHandle( IAVertexStreamImmutableState );
 	ts3GpaDeclareClassHandle( RasterizerImmutableState );
+	ts3GpaDeclareClassHandle( RenderTargetLayoutImmutableState );
+	ts3GpaDeclareClassHandle( RenderTargetBindingImmutableState );
+	ts3GpaDeclareClassHandle( RenderPassImmutableState );
 
 	using pipeline_internal_state_hash_t = uint64;
 	using render_target_index_t = uint16;
@@ -42,8 +48,10 @@ namespace ts3::gpuapi
 	namespace cxdefs
 	{
 
+		///
 		constexpr auto PIPELINE_INTERNAL_STATE_ID_INVALID = 0;
 
+		///
 		constexpr auto VERTEX_ATTRIBUTE_OFFSET_APPEND = Limits<gpu_memory_size_t>::maxValue;
 
 		///

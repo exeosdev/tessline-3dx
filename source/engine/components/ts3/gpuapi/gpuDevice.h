@@ -59,11 +59,17 @@ namespace ts3::gpuapi
 		ShaderHandle createShader( const ShaderCreateInfo & pCreateInfo );
 		TextureHandle createTexture( const TextureCreateInfo & pCreateInfo );
 
-		BlendImmutableState * createBlendImmutableState( UniqueGPUObjectName pUniqueName, const BlendDescriptor & pDescriptor );
-		DepthStencilImmutableState * createDepthStencilImmutableState( UniqueGPUObjectName pUniqueName, const DepthStencilDescriptor & pDescriptor );
-		GraphicsShaderLinkageImmutableState * createGraphicsShaderLinkageImmutableState( UniqueGPUObjectName pUniqueName, const GraphicsShaderSet & pShaderSet );
-		RasterizerImmutableState * createRasterizerImmutableState( UniqueGPUObjectName pUniqueName, const RasterizerDescriptor & pDescriptor );
-		VertexInputLayoutImmutableState * createVertexInputLayoutImmutableState( UniqueGPUObjectName pUniqueName, const VertexInputLayoutDescriptor & pDescriptor );
+		BlendImmutableStateHandle createBlendImmutableState( const BlendConfig & pConfig );
+		DepthStencilImmutableStateHandle createDepthStencilImmutableState( const DepthStencilConfig & pConfig );
+		GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageImmutableState( const GraphicsShaderSet & pShaderSet );
+		IAInputLayoutImmutableStateHandle createIAInputLayoutImmutableState( const IAInputLayoutDefinition & pDefinition );
+		IAVertexStreamImmutableStateHandle createIAVertexStreamState( const IAVertexStreamDefinition & pDefinition );
+		RasterizerImmutableStateHandle createRasterizerImmutableState( const RasterizerConfig & pConfig );
+		RenderTargetLayoutImmutableStateHandle createRenderTargetLayoutState( const RenderTargetLayoutConfiguration & pConfiguration );
+		RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & pDefinition );
+		RenderPassImmutableStateHandle createRenderPassState( const RenderPassConfiguration & pConfiguration );
+
+		IAVertexStreamImmutableState * createIAVertexStreamImmutableState( const IAVertexStreamDefinition & pDefinition );
 
 		/// @brief Creates an RTT using the provided CIS.
 		/// This function will automatically create a required resource, depending on the specified layout and usage.

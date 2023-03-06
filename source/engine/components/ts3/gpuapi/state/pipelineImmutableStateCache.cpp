@@ -4,86 +4,112 @@
 namespace ts3::gpuapi
 {
 
-	PipelineImmutableStateCache::PipelineImmutableStateCache( PipelineImmutableStateFactory & pFactory );
+	PipelineImmutableStateCache2::PipelineImmutableStateCache2( PipelineImmutableStateFactory & pFactory )
+	: _stateFactory( &pFactory )
+	{}
 
-	PipelineImmutableStateCache::~PipelineImmutableStateCache() = default;
+	PipelineImmutableStateCache2::~PipelineImmutableStateCache2() = default;
 
-	BlendImmutableState * PipelineImmutableStateCache::getBlendState( const UniqueGPUObjectID & pDescriptorID ) const
+	BlendImmutableState * PipelineImmutableStateCache2::getBlendState( const UniqueGPUObjectID & pDescriptorID ) const
 	{
 		return nullptr;
 	}
 
-	BlendImmutableState * PipelineImmutableStateCache::getBlendState( const UniqueGPUObjectName & pDescriptorName ) const
+	BlendImmutableState * PipelineImmutableStateCache2::getBlendState( const UniqueGPUObjectName & pDescriptorName ) const
 	{
 		return nullptr;
 	}
 
-	DepthStencilImmutableState * PipelineImmutableStateCache::getDepthStencilState( const UniqueGPUObjectID & pDescriptorID ) const
+	DepthStencilImmutableState * PipelineImmutableStateCache2::getDepthStencilState( const UniqueGPUObjectID & pDescriptorID ) const
 	{
 		return nullptr;
 	}
 
-	DepthStencilImmutableState * PipelineImmutableStateCache::getDepthStencilState( const UniqueGPUObjectName & pDescriptorName ) const
+	DepthStencilImmutableState * PipelineImmutableStateCache2::getDepthStencilState( const UniqueGPUObjectName & pDescriptorName ) const
 	{
 		return nullptr;
 	}
 
-	GraphicsShaderLinkageImmutableState * PipelineImmutableStateCache::getGraphicsShaderLinkageState( const UniqueGPUObjectID & pDescriptorID ) const
+	GraphicsShaderLinkageImmutableState * PipelineImmutableStateCache2::getGraphicsShaderLinkageState( const UniqueGPUObjectID & pDescriptorID ) const
 	{
 		return nullptr;
 	}
 
-	GraphicsShaderLinkageImmutableState * PipelineImmutableStateCache::getGraphicsShaderLinkageState( const UniqueGPUObjectName & pDescriptorName ) const
+	GraphicsShaderLinkageImmutableState * PipelineImmutableStateCache2::getGraphicsShaderLinkageState( const UniqueGPUObjectName & pDescriptorName ) const
 	{
 		return nullptr;
 	}
 
-	IAInputLayoutImmutableState * PipelineImmutableStateCache::getIAInputLayoutState( const UniqueGPUObjectID & pDescriptorID ) const
+	IAInputLayoutImmutableState * PipelineImmutableStateCache2::getIAInputLayoutState( const UniqueGPUObjectID & pDescriptorID ) const
 	{
 		return nullptr;
 	}
 
-	IAInputLayoutImmutableState * PipelineImmutableStateCache::getIAInputLayoutState( const UniqueGPUObjectName & pDescriptorName ) const
+	IAInputLayoutImmutableState * PipelineImmutableStateCache2::getIAInputLayoutState( const UniqueGPUObjectName & pDescriptorName ) const
 	{
 		return nullptr;
 	}
 
-	RasterizerImmutableState * PipelineImmutableStateCache::getRasterizerState( const UniqueGPUObjectID & pDescriptorID ) const
+	RasterizerImmutableState * PipelineImmutableStateCache2::getRasterizerState( const UniqueGPUObjectID & pDescriptorID ) const
 	{
 		return nullptr;
 	}
 
-	RasterizerImmutableState * PipelineImmutableStateCache::getRasterizerState( const UniqueGPUObjectName & pDescriptorName ) const
+	RasterizerImmutableState * PipelineImmutableStateCache2::getRasterizerState( const UniqueGPUObjectName & pDescriptorName ) const
 	{
 		return nullptr;
 	}
 
-	BlendImmutableState * PipelineImmutableStateCache::createBlendState(
+	BlendImmutableState * PipelineImmutableStateCache2::createBlendState(
 			const PipelineImmutableStateCreateInfo<BlendConfig> & pCreateInfo )
 	{
 		return nullptr;
 	}
 
-	DepthStencilImmutableState * PipelineImmutableStateCache::createDepthStencilState(
+	DepthStencilImmutableState * PipelineImmutableStateCache2::createDepthStencilState(
 			const PipelineImmutableStateCreateInfo<DepthStencilConfig> & pCreateInfo )
 	{
 		return nullptr;
 	}
 
-	GraphicsShaderLinkageImmutableState * PipelineImmutableStateCache::createShaderLinkageState(
+	GraphicsShaderLinkageImmutableState * PipelineImmutableStateCache2::createShaderLinkageState(
 			const PipelineImmutableStateCreateInfo<GraphicsShaderSet> & pCreateInfo )
 	{
 		return nullptr;
 	}
 
-	IAInputLayoutImmutableState * PipelineImmutableStateCache::createIAInputLayoutState(
+	IAInputLayoutImmutableState * PipelineImmutableStateCache2::createIAInputLayoutState(
 			const PipelineImmutableStateCreateInfo<IAInputLayoutDefinition> & pCreateInfo )
 	{
 		return nullptr;
 	}
 
-	RasterizerImmutableState * PipelineImmutableStateCache::createRasterizerState(
+	IAVertexStreamImmutableState * PipelineImmutableStateCache2::createIAVertexStream(
+			const PipelineImmutableStateCreateInfo<IAVertexStreamDefinition> & pCreateInfo )
+	{
+		return nullptr;
+	}
+
+	RasterizerImmutableState * PipelineImmutableStateCache2::createRasterizerState(
 			const PipelineImmutableStateCreateInfo<RasterizerConfig> & pCreateInfo )
+	{
+		return nullptr;
+	}
+
+	RenderTargetLayoutImmutableState * PipelineImmutableStateCache2::createRenderTargetLayoutState(
+			const PipelineImmutableStateCreateInfo<RenderTargetLayoutConfiguration> & pCreateInfo )
+	{
+		return nullptr;
+	}
+
+	RenderTargetBindingImmutableState * PipelineImmutableStateCache2::createRenderTargetBindingState(
+			const PipelineImmutableStateCreateInfo<RenderTargetBindingDefinition> & pCreateInfo )
+	{
+		return nullptr;
+	}
+
+	RenderPassImmutableState * PipelineImmutableStateCache2::createRenderPassState(
+			const PipelineImmutableStateCreateInfo<RenderPassConfiguration> & pCreateInfo )
 	{
 		return nullptr;
 	}
