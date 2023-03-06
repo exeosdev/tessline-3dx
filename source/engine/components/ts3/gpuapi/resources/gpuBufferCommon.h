@@ -6,7 +6,7 @@
 
 #include "commonGPUResourceDefs.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( GPUBuffer );
@@ -138,6 +138,31 @@ namespace ts3::GpuAPI
 		Bitmask<EGPUBufferDataCopyFlags> flags = E_GPU_BUFFER_DATA_COPY_FLAGS_DEFAULT;
 	};
 
-} // namespace ts3::GpuAPI
+	namespace rcutil
+	{
+
+		TS3_GPUAPI_API_NO_DISCARD gpu_memory_size_t queryGPUBufferByteSize( GPUBufferHandle pGPUBuffer );
+
+		TS3_GPUAPI_API_NO_DISCARD bool checkGPUBufferRegion(
+				GPUBufferHandle pGPUBuffer,
+				gpu_memory_size_t pOffset,
+				gpu_memory_size_t pSize );
+
+		TS3_GPUAPI_API_NO_DISCARD bool checkGPUBufferRegion(
+				GPUBufferHandle pGPUBuffer,
+				const GPUMemoryRegion & pRegion );
+
+		TS3_GPUAPI_API_NO_DISCARD GPUMemoryRegion validateGPUBufferRegion(
+				GPUBufferHandle pGPUBuffer,
+				gpu_memory_size_t pOffset,
+				gpu_memory_size_t pSize );
+
+		TS3_GPUAPI_API_NO_DISCARD GPUMemoryRegion validateGPUBufferRegion(
+				GPUBufferHandle pGPUBuffer,
+				const GPUMemoryRegion & pRegion );
+
+	}
+
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GPU_BUFFER_COMMON_H__
