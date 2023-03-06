@@ -207,7 +207,7 @@ namespace ts3::gpuapi
 			ts3OpenGLHandleLastError();
 		}
 
-		glFrontFace( pGLRasterizerSD.configDesc.triangleFrontFaceOrder );
+		glFrontFace( pGLRasterizerSD.configDesc.frontFaceVerticesOrder );
 		ts3OpenGLHandleLastError();
 
 	#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
@@ -237,7 +237,7 @@ namespace ts3::gpuapi
 	void GLGraphicsPipelineStateController::updateGLVertexBuffersBindings( const GLVertexBuffersBindings & pBinding )
 	{
 	#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
-		for( uint32 streamIndex = 0; streamIndex < E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_STREAMS_NUM; ++streamIndex )
+		for( uint32 streamIndex = 0; streamIndex < cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )
 		{
 			const auto & vbBinding = pBinding.vbBindingArray[streamIndex];
 
@@ -249,7 +249,7 @@ namespace ts3::gpuapi
 		// to properly have buffer object '0' set as the source VBO (deactivating it). Doing that makes profiling
 		// and debugging a lot easier (unused buffers from previous passes did some confusion in few cases).
 
-		glBindVertexBuffers( 0u, E_GPU_SYSTEM_METRIC_IA_MAX_VERTEX_STREAMS_NUM,
+		glBindVertexBuffers( 0u, cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM,
 		                     &( pBinding.vbHandleArray[0] ),
 		                     &( pBinding.vbOffsetArray[0] ),
 		                     &( pBinding.vbStrideArray[0] ) );

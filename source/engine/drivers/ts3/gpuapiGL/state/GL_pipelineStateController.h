@@ -48,7 +48,7 @@ namespace ts3::gpuapi
 
 		virtual bool resetVertexStreamStateObject() override;
 
-		TS3_FUNC_NO_DISCARD const GLPipelineConfig & getGLPipelineConfig() const
+		TS3_ATTR_NO_DISCARD const GLPipelineConfig & getGLPipelineConfig() const
 		{
 			return _currentGLPipelineConfig;
 		}
