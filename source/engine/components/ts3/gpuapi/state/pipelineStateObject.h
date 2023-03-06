@@ -15,7 +15,7 @@ namespace ts3::gpuapi
 	class BlendState;
 	class DepthStencilState;
 	class RasterizerState;
-	class IAVertexInputLayout;
+	class IAIAInputLayout;
 	class GraphicsShaderLinkage;
 
 	struct ComputePipelineStateObjectCreateInfo
@@ -27,7 +27,7 @@ namespace ts3::gpuapi
 		// BlendState blendState;
 		// DepthStencilState depthStencilState;
 		// RasterizerState rasterizerState;
-		// IAVertexInputLayout vertexInputLayout;
+		// IAIAInputLayout vertexInputLayout;
 		// ShaderLinkage shaderLinkage;
 
 		RenderTargetLayoutDesc renderTargetLayoutDesc = cvRenderTargetLayoutDescDefaultBGRA8;

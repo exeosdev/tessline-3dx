@@ -38,6 +38,16 @@ namespace ts3::gpuapi
 		return nullptr;
 	}
 
+	IAInputLayoutImmutableState * PipelineImmutableStateCache::getIAInputLayoutState( const UniqueGPUObjectID & pDescriptorID ) const
+	{
+		return nullptr;
+	}
+
+	IAInputLayoutImmutableState * PipelineImmutableStateCache::getIAInputLayoutState( const UniqueGPUObjectName & pDescriptorName ) const
+	{
+		return nullptr;
+	}
+
 	RasterizerImmutableState * PipelineImmutableStateCache::getRasterizerState( const UniqueGPUObjectID & pDescriptorID ) const
 	{
 		return nullptr;
@@ -48,42 +58,32 @@ namespace ts3::gpuapi
 		return nullptr;
 	}
 
-	VertexInputLayoutImmutableState * PipelineImmutableStateCache::getVertexInputLayoutState( const UniqueGPUObjectID & pDescriptorID ) const
-	{
-		return nullptr;
-	}
-
-	VertexInputLayoutImmutableState * PipelineImmutableStateCache::getVertexInputLayoutState( const UniqueGPUObjectName & pDescriptorName ) const
-	{
-		return nullptr;
-	}
-
 	BlendImmutableState * PipelineImmutableStateCache::createBlendState(
-			const PipelineImmutableStateCreateInfo<BlendDescriptor> & pCreateInfo )
+			const PipelineImmutableStateCreateInfo<BlendConfig> & pCreateInfo )
 	{
 		return nullptr;
 	}
 
 	DepthStencilImmutableState * PipelineImmutableStateCache::createDepthStencilState(
-			const PipelineImmutableStateCreateInfo<DepthStencilDescriptor> & pCreateInfo )
+			const PipelineImmutableStateCreateInfo<DepthStencilConfig> & pCreateInfo )
 	{
 		return nullptr;
 	}
 
 	GraphicsShaderLinkageImmutableState * PipelineImmutableStateCache::createShaderLinkageState(
-			const PipelineImmutableStateCreateInfo<GraphicsShaderLinkageDescriptor> & pCreateInfo )
+			const PipelineImmutableStateCreateInfo<GraphicsShaderSet> & pCreateInfo )
+	{
+		return nullptr;
+	}
+
+	IAInputLayoutImmutableState * PipelineImmutableStateCache::createIAInputLayoutState(
+			const PipelineImmutableStateCreateInfo<IAInputLayoutDefinition> & pCreateInfo )
 	{
 		return nullptr;
 	}
 
 	RasterizerImmutableState * PipelineImmutableStateCache::createRasterizerState(
-			const PipelineImmutableStateCreateInfo<RasterizerDescriptor> & pCreateInfo )
-	{
-		return nullptr;
-	}
-
-	VertexInputLayoutImmutableState * PipelineImmutableStateCache::createVertexInputLayoutState(
-			const PipelineImmutableStateCreateInfo<VertexInputLayoutDescriptor> & pCreateInfo )
+			const PipelineImmutableStateCreateInfo<RasterizerConfig> & pCreateInfo )
 	{
 		return nullptr;
 	}

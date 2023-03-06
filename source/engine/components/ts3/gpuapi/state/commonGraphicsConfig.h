@@ -35,10 +35,9 @@ namespace ts3::gpuapi
 		E_DEPTH_STENCIL_MASK_ALL = 0x03,
 	};
 
-	enum EDepthStencilReadWriteMask : uint16
+	enum ERasterizerFlags : uint16
 	{
-		E_DEPTH_STENCIL_RW_MASK_ALL = Limits<uint16>::maxValue,
-		E_DEPTH_STENCIL_RW_MASK_NONE = 0
+		E_RASTERIZER_FLAG_ENABLE_SCISSOR_TEST_BIT = 0x01
 	};
 
 	enum class EBlendFactor : uint16
@@ -105,7 +104,7 @@ namespace ts3::gpuapi
 
 	/// @brief Blend configuration for a single render target attachment (texture/render buffer).
 	/// @see BlendConfig
-	struct RTAttachmentBlendSettings
+	struct RTColorAttachmentBlendSettings
 	{
 		math::RGBAColorU8 constantFactor;
 		EBlendFactor factorSrcColor;
@@ -162,25 +161,24 @@ namespace ts3::gpuapi
 		/// If ENABLE_MRT_SEPARATE_CONFIG_BIT is set, each active target uses its corresponding entry.
 		/// Otherwise, attachments[0] is used for all targets and rest of the array is ignored.
 		/// @see EBlendConfigFlags
-		RTAttachmentBlendSettings attachments[cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+		RTColorAttachmentBlendSettings attachments[cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
 	};
 
 	/// @brief
 	struct DepthStencilConfig
 	{
-		EActiveState depthTestActiveState;
+		Bitmask<EDepthStencilFlags> commonFlags = 0;
 		DepthTestSettings depthTestSettings;
-		EActiveState stencilTestActiveState;
 		StencilTestSettings stencilTestSettings;
 	};
 
 	/// @brief
 	struct RasterizerConfig
 	{
+		Bitmask<ERasterizerFlags> flags = 0;
 		ECullMode cullMode;
 		EPrimitiveFillMode primitiveFillMode;
 		ETriangleVerticesOrder frontFaceVerticesOrder;
-		EActiveState scissorTestActive;
 	};
 
 	namespace defaults
@@ -197,7 +195,7 @@ namespace ts3::gpuapi
 		/// - opAlpha:               EBlendOp::Add
 		/// - renderTargetWriteMask: E_BLEND_WRITE_MASK_ALL
 		/// @see RTAttachmentBlendConfig
-		TS3_GPUAPI_OBJ const RTAttachmentBlendSettings cvCommonRTAttachmentBlendSettingsDefault;
+		TS3_GPUAPI_OBJ const RTColorAttachmentBlendSettings cvCommonRTColorAttachmentBlendSettingsDefault;
 
 		/// @brief A default configuration for the depth test.
 		/// This default config represents default set of options used for depth testing. The config is as follows:

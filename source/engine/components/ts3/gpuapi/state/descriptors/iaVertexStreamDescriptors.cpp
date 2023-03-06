@@ -4,7 +4,7 @@
 namespace ts3::gpuapi
 {
 
-	IAVertexStreamBaseDescriptor::IAVertexStreamBaseDescriptor( const GPUBufferReference & pBufferRef )
+	IAVertexStreamBaseDescriptor::IAVertexStreamBaseDescriptor( const GPUBufferReference & pBufferRef, gpu_memory_size_t pRelativeOffset )
 	: _sourceBuffer( pBufferRef )
 	{}
 

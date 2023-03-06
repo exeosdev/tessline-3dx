@@ -238,83 +238,22 @@ namespace ts3::gpuapi
 	namespace smutil
 	{
 
-		Bitmask<EIAVertexStreamBindingFlags> getIAVertexStreamActiveBindingsMask(
-				const IAVertexBufferBindingArray & pVertexBufferBindings,
-				const IAIndexBufferBinding & pIndexBufferBinding ) noexcept
+		IAVertexBufferBindingIndexList generateActiveVertexBufferIndices(
+				const IAVertexBufferDescriptorArray & pVertexBufferDescriptors,
+				Bitmask<EIAVertexStreamBindingFlags> pBindingMask )
 		{
-			Bitmask<EIAVertexStreamBindingFlags> bindingsMask = 0;
+			constexpr auto optimalActiveIndicesNumPreAllocSize = 8u;
 
-			for( uint32 vertexBufferIndex = 0; vertexBufferIndex < cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++vertexBufferIndex )
-			{
-				if( pVertexBufferBindings[vertexBufferIndex].active() )
-				{
-					bindingsMask.set( cxdefs::makeIAVertexBufferFlag( vertexBufferIndex ) );
-				}
-			}
-
-			if( pIndexBufferBinding.active() )
-			{
-				bindingsMask.set( E_IA_VERTEX_STREAM_BINDING_FLAG_INDEX_BUFFER_BIT );
-			}
-
-			return bindingsMask;
-		}
-
-		uint32 getIAVertexBufferActiveBindingsNum( const IAVertexBufferBindingArray & pVertexBufferBindings ) noexcept
-		{
-			uint32 bindingsNum = 0;
-
-			for( uint32 vertexBufferIndex = 0; vertexBufferIndex < cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++vertexBufferIndex )
-			{
-				if( pVertexBufferBindings[vertexBufferIndex].active() )
-				{
-					++bindingsNum;
-				}
-			}
-
-			return bindingsNum;
-		}
-
-		IAVertexStreamConfiguration createIAVertexStreamConfiguration(
-				const ArrayView<IAVertexBufferBindingDesc> & pVertexBufferBindingDefinitions,
-				const IAIndexBufferBinding & pIndexBufferBindingDefinition ) noexcept
-		{
-			IAVertexStreamConfiguration vertexStreamConfig{};
-
-			for( const auto & vertexBufferBindingDesc : pVertexBufferBindingDefinitions )
-			{
-				if( !cxdefs::isIAVertexBufferIndexValid( vertexBufferBindingDesc.streamIndex ) && vertexBufferBindingDesc.vbBinding.active() )
-				{
-					ts3DebugOutputFmt( "Invalid IA Stream Index: %u", static_cast<uint32>( vertexBufferBindingDesc.streamIndex ) );
-					continue;
-				}
-
-				vertexStreamConfig.vertexBufferBindings[vertexBufferBindingDesc.streamIndex] = vertexBufferBindingDesc.vbBinding;
-			}
-
-			if( pIndexBufferBindingDefinition.active() )
-			{
-				vertexStreamConfig.indexBufferBinding = pIndexBufferBindingDefinition;
-			}
-
-			vertexStreamConfig.activeBindingsMask =
-				getIAVertexStreamActiveBindingsMask( vertexStreamConfig.vertexBufferBindings, vertexStreamConfig.indexBufferBinding );
-
-			vertexStreamConfig.activeVertexBufferBindingsNum =
-				getIAVertexBufferActiveBindingsNum( vertexStreamConfig.vertexBufferBindings );
-
-			return vertexStreamConfig;
-		}
-
-		VertexBufferIndexArray generateActiveVertexBufferIndices(
-				const IAVertexStreamConfiguration & pVertexStreamConfig ) noexcept
-		{
-			VertexBufferIndexArray vertexBufferActiveIndices;
-			vertexBufferActiveIndices.reserve( pVertexStreamConfig.activeVertexBufferBindingsNum );
+			IAVertexBufferBindingIndexList vertexBufferActiveIndices;
+			vertexBufferActiveIndices.reserve( optimalActiveIndicesNumPreAllocSize );
 
 			for( input_assembler_index_t streamIndex = 0; streamIndex < cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )
 			{
-				if( pVertexStreamConfig.vertexBufferBindings[streamIndex].active() )
+				const auto & vbDescriptor = pVertexBufferDescriptors[streamIndex];
+				const auto vbBindingFlag = cxdefs::makeIAVertexBufferFlag( streamIndex );
+				const auto vbBindingActive = pBindingMask.isSet( vbBindingFlag ) && vbDescriptor.valid();
+
+				if( vbBindingActive )
 				{
 					vertexBufferActiveIndices.push_back( streamIndex );
 				}
@@ -323,14 +262,16 @@ namespace ts3::gpuapi
 			return vertexBufferActiveIndices;
 		}
 
-		VertexBufferRangeArray generateActiveVertexBufferRanges( const IAVertexStreamConfiguration & pVertexStreamConfig ) noexcept
+		IAVertexBufferRangeList generateActiveVertexBufferRanges(
+				const IAVertexBufferDescriptorArray & pVertexBufferDescriptors,
+				Bitmask<EIAVertexStreamBindingFlags> pBindingMask )
 		{
 			// Single range is described by two uint16 values which is 4 bytes. More than 90% use cases fall
 			// into 1-3 ranges per single binding state. We pre-allocate space for 4 ranges (which is 16 bytes)
 			// to prevent from auto growing in typical cases (and few lost bytes per binding in negligible).
 			constexpr auto optimalActiveRangesNumPreAllocSize = 4u;
 
-			VertexBufferRangeArray vertexBufferActiveRanges;
+			IAVertexBufferRangeList vertexBufferActiveRanges;
 			vertexBufferActiveRanges.reserve( optimalActiveRangesNumPreAllocSize );
 
 			IAVertexBufferRange currentVBRange{};
@@ -338,9 +279,11 @@ namespace ts3::gpuapi
 
 			for( input_assembler_index_t streamIndex = 0; streamIndex < cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )
 			{
-				const auto & currentVBBinding = pVertexStreamConfig.vertexBufferBindings[streamIndex];
+				const auto & vbDescriptor = pVertexBufferDescriptors[streamIndex];
+				const auto vbBindingFlag = cxdefs::makeIAVertexBufferFlag( streamIndex );
+				const auto vbBindingActive = pBindingMask.isSet( vbBindingFlag ) && vbDescriptor.valid();
 
-				if( currentVBBinding.active() )
+				if( vbBindingActive )
 				{
 					// If the range is not valid, "open" it.
 					// Set the current stream as the first stream in the range and range size to 0.
@@ -354,7 +297,7 @@ namespace ts3::gpuapi
 					++currentVBRange.length;
 				}
 
-				if( !currentVBBinding.bufferObject || ( streamIndex + 1 == cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) )
+				if( !vbBindingActive || ( streamIndex + 1 == cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) )
 				{
 					// If the range is not empty, add it to the list of active ranges.
 					if( currentVBRange.length > 0 )
@@ -376,21 +319,6 @@ namespace ts3::gpuapi
 			}
 
 			return vertexBufferActiveRanges;
-		}
-
-		bool validateIAVertexStreamConfiguration( const IAVertexStreamConfiguration & pVertexStreamConfig ) noexcept
-		{
-			if( pVertexStreamConfig.activeVertexBufferBindingsNum > cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM )
-			{
-				return false;
-			}
-
-			if( ( pVertexStreamConfig.activeBindingsMask & cxdefs::IA_VERTEX_BUFFER_BINDING_MASK_ALL ) == 0 )
-			{
-				return false;
-			}
-
-			return true;
 		}
 
 	}

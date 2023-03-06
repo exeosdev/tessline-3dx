@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef __TS3_GPUAPI_VERTEX_INPUT_LAYOUT_IMMUTABLE_STATE_H__
-#define __TS3_GPUAPI_VERTEX_INPUT_LAYOUT_IMMUTABLE_STATE_H__
+#ifndef __TS3_GPUAPI_IA_INPUT_LAYOUT_IMMUTABLE_STATE_H__
+#define __TS3_GPUAPI_IA_INPUT_LAYOUT_IMMUTABLE_STATE_H__
 
 #include "../graphicsPipelineImmutableState.h"
 #include "../inputAssemblerCommon.h"
@@ -41,4 +41,4 @@ namespace ts3::gpuapi
 
 } // namespace ts3::gpuapi
 
-#endif // __TS3_GPUAPI_VERTEX_INPUT_LAYOUT_IMMUTABLE_STATE_H__
+#endif // __TS3_GPUAPI_IA_INPUT_LAYOUT_IMMUTABLE_STATE_H__

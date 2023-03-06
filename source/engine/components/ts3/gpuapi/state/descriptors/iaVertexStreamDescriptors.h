@@ -14,7 +14,22 @@ namespace ts3::gpuapi
 	{
 	public:
 		IAVertexStreamBaseDescriptor() = default;
-		IAVertexStreamBaseDescriptor( const GPUBufferReference & pBufferRef );
+		IAVertexStreamBaseDescriptor( const GPUBufferReference & pBufferRef, gpu_memory_size_t pRelativeOffset = 0 );
+
+		TS3_ATTR_NO_DISCARD gpu_memory_size_t dataOffset() const noexcept
+		{
+			return _sourceBuffer.getRefSubRegion().offset + _relativeOffset;
+		}
+
+		TS3_ATTR_NO_DISCARD gpu_memory_size_t relativeOffset() const noexcept
+		{
+			return _relativeOffset;
+		}
+
+		TS3_ATTR_NO_DISCARD GPUBuffer * sourceBuffer() const noexcept
+		{
+			return _sourceBuffer.getRefBuffer().get();
+		}
 
 		TS3_ATTR_NO_DISCARD bool empty() const noexcept
 		{
@@ -33,6 +48,7 @@ namespace ts3::gpuapi
 
 	private:
 		GPUBufferReference _sourceBuffer;
+		gpu_memory_size_t _relativeOffset;
 	};
 
 	class TS3_GPUAPI_API IAVertexBufferDescriptor : public IAVertexStreamBaseDescriptor
@@ -46,11 +62,16 @@ namespace ts3::gpuapi
 
 		IAVertexBufferDescriptor( const GPUBufferReference & pVertexBufferRef, gpu_memory_size_t pVertexStride );
 
+		TS3_ATTR_NO_DISCARD gpu_memory_size_t vertexStride() const noexcept
+		{
+			return _vertexStride;
+		}
+
 	private:
 		gpu_memory_size_t _vertexStride;
 	};
 
-	class TS3_GPUAPI_API IAIndexBufferDescriptor : public IAVertexStreamBaseDescriptor
+	class alignas(8) TS3_GPUAPI_API IAIndexBufferDescriptor : public IAVertexStreamBaseDescriptor
 	{
 	public:
 		IAIndexBufferDescriptor() = default;
@@ -60,6 +81,11 @@ namespace ts3::gpuapi
 		IAIndexBufferDescriptor & operator=( const IAIndexBufferDescriptor & ) = default;
 
 		IAIndexBufferDescriptor( const GPUBufferReference & pBufferRef, EIndexDataFormat pIndexFormat );
+
+		TS3_ATTR_NO_DISCARD EIndexDataFormat indexFormat() const noexcept
+		{
+			return _indexFormat;
+		}
 
 	private:
 		EIndexDataFormat _indexFormat;

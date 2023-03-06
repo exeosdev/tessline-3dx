@@ -20,6 +20,10 @@ namespace ts3::gpuapi
 		uint16 length = 0;
 	};
 
+	using IAVertexBufferBindingIndexList = std::vector<input_assembler_index_t>;
+
+	using IAVertexBufferRangeList = std::vector<IAVertexBufferRange>;
+
 	using IAVertexBufferDescriptorArray = std::array<IAVertexBufferDescriptor, cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM>;
 
 	/// @brief A definition of a vertex buffer binding. Associates IAVertexBufferBinding with a specific VB binding point.
@@ -137,48 +141,14 @@ namespace ts3::gpuapi
 	{
 
 		/// @brief
-		using VertexBufferIndexArray = std::vector<input_assembler_index_t>;
+		TS3_ATTR_NO_DISCARD IAVertexBufferBindingIndexList generateActiveVertexBufferIndices(
+				const IAVertexBufferDescriptorArray & pVertexBufferDescriptors,
+				Bitmask<EIAVertexStreamBindingFlags> pBindingMask );
 
 		/// @brief
-		using VertexBufferRangeArray = std::vector<IAVertexBufferRange>;
-
-		/// @brief
-		TS3_ATTR_NO_DISCARD static std::vector<input_assembler_index_t> generateActiveVertexBufferIndices(
-				const IAVertexBufferDescriptorArray & pIAVertexBufferDescriptors );
-
-		/// @brief
-		TS3_ATTR_NO_DISCARD static std::vector<IAVertexBufferRange> generateActiveVertexBufferRanges(
-				const IAVertexBufferDescriptorArray & pIAVertexBufferDescriptors );
-
-		/// @brief Returns a bitmask representing specified IA buffer bindings state.
-		TS3_GPUAPI_API_NO_DISCARD Bitmask<EIAVertexStreamBindingFlags> getIAVertexStreamActiveBindingsMask(
-				const IAVertexBufferBindingArray & pVertexBufferBindings,
-				const IAIndexBufferBinding & pIndexBufferBinding ) noexcept;
-
-		/// @brief Returns the number of active vertex buffer bindings.
-		TS3_GPUAPI_API_NO_DISCARD uint32 getIAVertexBufferActiveBindingsNum(
-				const IAVertexBufferBindingArray & pVertexBufferBindings ) noexcept;
-
-		/// @brief
-		TS3_GPUAPI_API_NO_DISCARD IAVertexStreamConfiguration createIAVertexStreamConfiguration(
-				const ArrayView<IAVertexBufferBindingDesc> & pVertexBufferBindingDefinitions,
-				const IAIndexBufferBinding & pIndexBufferBindingDefinition ) noexcept;
-
-		/// @brief
-		TS3_GPUAPI_API_NO_DISCARD VertexBufferIndexArray generateActiveVertexBufferIndices(
-				const IAVertexStreamConfiguration & pVertexStreamConfig ) noexcept;
-
-		/// @brief
-		TS3_GPUAPI_API_NO_DISCARD VertexBufferRangeArray generateActiveVertexBufferRanges(
-				const IAVertexStreamConfiguration & pVertexStreamConfig ) noexcept;
-
-		/// @brief
-		TS3_GPUAPI_API_NO_DISCARD bool validateIAVertexStreamConfiguration(
-				const IAVertexStreamConfiguration & pVertexStreamConfig ) noexcept;
-
-		/// @brief
-		TS3_GPUAPI_API_NO_DISCARD PipelineDescriptorHash computePipelineDescriptorHash(
-				const IAVertexInputLayoutDescriptorCreateInfo & pDescriptorCreateInfo ) noexcept;
+		TS3_ATTR_NO_DISCARD IAVertexBufferRangeList generateActiveVertexBufferRanges(
+				const IAVertexBufferDescriptorArray & pVertexBufferDescriptors,
+				Bitmask<EIAVertexStreamBindingFlags> pBindingMask );
 
 	}
 

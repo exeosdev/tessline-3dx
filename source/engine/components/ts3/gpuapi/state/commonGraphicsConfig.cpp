@@ -7,7 +7,7 @@ namespace ts3::gpuapi
 	namespace defaults
 	{
 
-		const RTAttachmentBlendSettings cvCommonRTAttachmentBlendSettingsDefault =
+		const RTColorAttachmentBlendSettings cvCommonRTColorAttachmentBlendSettingsDefault =
 		{
 			{ 0u, 0u, 0u, 0u },
 			EBlendFactor::One,
@@ -49,7 +49,7 @@ namespace ts3::gpuapi
 			E_RT_ATTACHMENT_FLAG_COLOR_0_BIT,
 			E_BLEND_CONFIG_FLAGS_DEFAULT,
 			{
-				cvCommonRTAttachmentBlendSettingsDefault
+				cvCommonRTColorAttachmentBlendSettingsDefault
 			}
 		};
 

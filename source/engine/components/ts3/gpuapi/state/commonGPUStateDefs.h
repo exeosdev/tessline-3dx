@@ -11,13 +11,13 @@
 namespace ts3::gpuapi
 {
 
-	struct GraphicsShaderSet;
-	struct GraphicsPipelineStateObjectCreateInfo;
-
 	struct BlendConfig;
 	struct DepthStencilConfig;
+	struct GraphicsShaderSet;
 	struct IAInputLayoutDefinition;
 	struct RasterizerConfig;
+
+	struct GraphicsPipelineStateObjectCreateInfo;
 
 	ts3GpaDeclareClassHandle( GPUDeviceChildObject );
 	ts3GpaDeclareClassHandle( PipelineStateObject );
@@ -27,8 +27,8 @@ namespace ts3::gpuapi
 	ts3GpaDeclareClassHandle( BlendImmutableState );
 	ts3GpaDeclareClassHandle( DepthStencilImmutableState );
 	ts3GpaDeclareClassHandle( GraphicsShaderLinkageImmutableState );
+	ts3GpaDeclareClassHandle( IAInputLayoutImmutableState );
 	ts3GpaDeclareClassHandle( RasterizerImmutableState );
-	ts3GpaDeclareClassHandle( VertexInputLayoutImmutableState );
 
 	using pipeline_internal_state_hash_t = uint64;
 	using render_target_index_t = uint16;

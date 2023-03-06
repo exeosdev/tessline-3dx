@@ -16,7 +16,8 @@ namespace ts3::gpuapi
 		DepthStencil,
 		Rasterizer,
 		ShaderLinkage,
-		VertexInputLayout,
+		IAInputLayout,
+		IAVertexStream,
 		Unknown
 	};
 
@@ -42,15 +43,15 @@ namespace ts3::gpuapi
 
 		virtual ~PipelineImmutableStateFactory() = default;
 
-		virtual BlendImmutableStateHandle createBlendState( const BlendDescriptor & pDescriptor ) = 0;
+		virtual BlendImmutableStateHandle createBlendState( const BlendConfig & pConfig ) = 0;
 
-		virtual DepthStencilImmutableStateHandle createDepthStencilState( const DepthStencilDescriptor & pDescriptor ) = 0;
+		virtual DepthStencilImmutableStateHandle createDepthStencilState( const DepthStencilConfig & pConfig ) = 0;
 
 		virtual GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageState( const GraphicsShaderSet & pShaderSet ) = 0;
 
-		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerDescriptor & pDescriptor ) = 0;
+		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & pDefinition ) = 0;
 
-		virtual VertexInputLayoutImmutableStateHandle createVertexInputLayoutState( const VertexInputLayoutDescriptor & pDescriptor ) = 0;
+		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerConfig & pConfig ) = 0;
 	};
 
 } // namespace ts3::gpuapi

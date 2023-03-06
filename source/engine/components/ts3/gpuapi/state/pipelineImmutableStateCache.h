@@ -11,19 +11,19 @@
 namespace ts3::gpuapi
 {
 
-	template <typename TDescriptor>
+	template <typename TInputDesc>
 	struct PipelineImmutableStateCreateInfo
 	{
 		UniqueGPUObjectName uniqueName;
 
-		std::reference_wrapper<const TDescriptor> descriptor;
+		std::reference_wrapper<const TInputDesc> inputDesc;
 
 		PipelineImmutableStateCreateInfo()
 		{}
 
-		PipelineImmutableStateCreateInfo( UniqueGPUObjectName pUniqueName, const TDescriptor & pDescriptor )
+		PipelineImmutableStateCreateInfo( UniqueGPUObjectName pUniqueName, const TInputDesc & pInputDesc )
 		: uniqueName( std::move( pUniqueName ) )
-		, descriptor( std::ref( pDescriptor ) )
+		, inputDesc( std::ref( pInputDesc ) )
 		{}
 	};
 
@@ -43,29 +43,29 @@ namespace ts3::gpuapi
 		GraphicsShaderLinkageImmutableState * getGraphicsShaderLinkageState( const UniqueGPUObjectID & pDescriptorID ) const;
 		GraphicsShaderLinkageImmutableState * getGraphicsShaderLinkageState( const UniqueGPUObjectName & pDescriptorName ) const;
 
+		IAInputLayoutImmutableState * getIAInputLayoutState( const UniqueGPUObjectID & pDescriptorID ) const;
+		IAInputLayoutImmutableState * getIAInputLayoutState( const UniqueGPUObjectName & pDescriptorName ) const;
+
 		RasterizerImmutableState * getRasterizerState( const UniqueGPUObjectID & pDescriptorID ) const;
 		RasterizerImmutableState * getRasterizerState( const UniqueGPUObjectName & pDescriptorName ) const;
 
-		VertexInputLayoutImmutableState * getVertexInputLayoutState( const UniqueGPUObjectID & pDescriptorID ) const;
-		VertexInputLayoutImmutableState * getVertexInputLayoutState( const UniqueGPUObjectName & pDescriptorName ) const;
+		BlendImmutableState * createBlendState( const PipelineImmutableStateCreateInfo<BlendConfig> & pCreateInfo );
 
-		BlendImmutableState * createBlendState( const PipelineImmutableStateCreateInfo<BlendDescriptor> & pCreateInfo );
-
-		DepthStencilImmutableState * createDepthStencilState( const PipelineImmutableStateCreateInfo<DepthStencilDescriptor> & pCreateInfo );
+		DepthStencilImmutableState * createDepthStencilState( const PipelineImmutableStateCreateInfo<DepthStencilConfig> & pCreateInfo );
 
 		GraphicsShaderLinkageImmutableState * createShaderLinkageState( const PipelineImmutableStateCreateInfo<GraphicsShaderSet> & pCreateInfo );
 
-		RasterizerImmutableState * createRasterizerState( const PipelineImmutableStateCreateInfo<RasterizerDescriptor> & pCreateInfo );
+		IAInputLayoutImmutableState * createIAInputLayoutState( const PipelineImmutableStateCreateInfo<IAInputLayoutDefinition> & pCreateInfo );
 
-		VertexInputLayoutImmutableState * createVertexInputLayoutState( const PipelineImmutableStateCreateInfo<VertexInputLayoutDescriptor> & pCreateInfo );
+		RasterizerImmutableState * createRasterizerState( const PipelineImmutableStateCreateInfo<RasterizerConfig> & pCreateInfo );
 
 	private:
-		BlendImmutableStateHandle _createProxy( const BlendDescriptor & pDescriptor )
+		BlendImmutableStateHandle _createProxy( const BlendConfig & pDescriptor )
 		{
 			return _stateFactory->createBlendState( pDescriptor );
 		}
 
-		DepthStencilImmutableStateHandle _createProxy( const DepthStencilDescriptor & pDescriptor )
+		DepthStencilImmutableStateHandle _createProxy( const DepthStencilConfig & pDescriptor )
 		{
 			return _stateFactory->createDepthStencilState( pDescriptor );
 		}
@@ -75,14 +75,14 @@ namespace ts3::gpuapi
 			return _stateFactory->createGraphicsShaderLinkageState( pShaderSet );
 		}
 
-		RasterizerImmutableStateHandle _createProxy( const RasterizerDescriptor & pDescriptor )
+		IAInputLayoutImmutableStateHandle _createProxy( const IAInputLayoutDefinition & pDescriptor )
 		{
-			return _stateFactory->createRasterizerState( pDescriptor );
+			return _stateFactory->createIAInputLayoutState( pDescriptor );
 		}
 
-		VertexInputLayoutImmutableStateHandle _createProxy( const VertexInputLayoutDescriptor & pDescriptor )
+		RasterizerImmutableStateHandle _createProxy( const RasterizerConfig & pDescriptor )
 		{
-			return _stateFactory->createVertexInputLayoutState( pDescriptor );
+			return _stateFactory->createRasterizerState( pDescriptor );
 		}
 
 		template <typename TState, typename TDescriptor, typename TDescriptorMap, typename... TArgs>
@@ -138,22 +138,22 @@ namespace ts3::gpuapi
 		using CachedBlendStateData = CachedStateData<BlendImmutableState>;
 		using CachedDepthStencilStateData = CachedStateData<DepthStencilImmutableState>;
 		using CachedGraphicsShaderLinkageStateData = CachedStateData<GraphicsShaderLinkageImmutableState>;
+		using CachedIAInputLayoutStateData = CachedStateData<IAInputLayoutImmutableState>;
 		using CachedRasterizerStateData = CachedStateData<RasterizerImmutableState>;
-		using CachedVertexInputLayoutStateData = CachedStateData<VertexInputLayoutImmutableState>;
 
 		using CachedBlendStateMap = std::unordered_map<cache_map_key_t, CachedBlendStateData>;
 		using CachedDepthStencilStateMap = std::unordered_map<cache_map_key_t, CachedDepthStencilStateData>;
 		using CachedGraphicsShaderLinkageStateMap = std::unordered_map<cache_map_key_t, CachedGraphicsShaderLinkageStateData>;
+		using CachedIAInputLayoutStateMap = std::unordered_map<cache_map_key_t, CachedIAInputLayoutStateData>;
 		using CachedRasterizerStateMap = std::unordered_map<cache_map_key_t, CachedRasterizerStateData>;
-		using CachedVertexInputLayoutStateMap = std::unordered_map<cache_map_key_t, CachedVertexInputLayoutStateData>;
 
 	private:
 		PipelineImmutableStateFactory * _stateFactory;
 		CachedBlendStateMap _cachedBlendStates;
 		CachedDepthStencilStateMap _cachedDepthStencilStates;
 		CachedGraphicsShaderLinkageStateMap _cachedGraphicsShaderLinkageStates;
+		CachedIAInputLayoutStateMap _cachedIAInputLayoutStateMap;
 		CachedRasterizerStateMap _cachedRasterizerStates;
-		CachedVertexInputLayoutStateMap _cachedVertexInputLayoutStates;
 	};
 
 } // namespace ts3::gpuapi
