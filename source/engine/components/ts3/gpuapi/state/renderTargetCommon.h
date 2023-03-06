@@ -11,55 +11,68 @@
 namespace ts3::gpuapi
 {
 
-	struct RTAttachmentClearValue
+	ts3DeclareClassHandle( RenderTargetTexture );
+
+	/// @brief
+	struct RenderTargetAttachmentBinding
 	{
-		math::RGBAColorR32Norm colorClearValue;
-		float depthClearValue;
-		uint8 stencilClearValue;
+		RenderTargetTextureHandle attachmentTexture;
 	};
 
-	struct RTAttachmentLayoutInfo
+	/// @brief
+	struct RenderTargetColorAttachmentBinding : public RenderTargetAttachmentBinding
+	{
+		RenderTargetTextureHandle resolveTargetTexture;
+	};
+
+	/// @brief
+	struct RenderTargetDepthStencilAttachmentBinding : public RenderTargetAttachmentBinding
+	{
+	};
+
+	using RenderTargetColorAttachmentBindingArray = std::array<RenderTargetColorAttachmentBinding, cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM>;
+
+	/// @brief
+	struct RenderTargetBindingDefinition
+	{
+		///
+		Bitmask<ERTAttachmentFlags> activeAttachmentsMask;
+		///
+		RenderTargetColorAttachmentBindingArray colorAttachments;
+		///
+		RenderTargetDepthStencilAttachmentBinding depthStencilAttachment;
+	};
+
+	/// @brief
+	struct RenderTargetAttachmentLayout
 	{
 		ETextureFormat format;
-
-		/// @brief Returns true if this instance represents a valid RT attachment.
-		TS3_ATTR_NO_DISCARD bool active() const noexcept
-		{
-			return format != ETextureFormat::UNKNOWN;
-		}
 	};
 
 	/// @brief Typedef for ordered, fixed-size array of layout definitions for render target attachments.
 	/// Entries are ordered according to ERTAttachmentIndex values.
-	using RTAttachmentLayoutInfoArray = std::array<RTAttachmentLayoutInfo, cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM>;
+	using RenderTargetColorAttachmentLayoutArray = std::array<RenderTargetAttachmentLayout, cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM>;
 
 	/// @brief A definition of a vertex layout used to create a driver-specific RenderTargetLayout object.
-	struct RenderTargetLayoutDefinition
+	struct RenderTargetLayoutConfiguration
 	{
 		///
-		RTAttachmentLayoutInfoArray attachmentArray;
+		Bitmask<ERTAttachmentFlags> activeAttachmentsMask;
+		///
+		RenderTargetColorAttachmentLayoutArray colorAttachments;
+		///
+		RenderTargetAttachmentLayout depthStencilAttachment;
 	};
 
-	/// @brief
-	struct RTAttachmentLayoutIndexAssociation
-	{
-		///
-		render_target_index_t attachmentIndex;
-
-		///
-		RTAttachmentLayoutInfo attachmentLayout;
-	};
-
-	namespace smutil
+	namespace defaults
 	{
 
-		/// @brief
-		TS3_GPUAPI_API_NO_DISCARD RTAttachmentLayoutInfoArray initializeAttachmentLayoutArray(
-				const ArrayView<RTAttachmentLayoutIndexAssociation> & pLayouts ) noexcept;
+		TS3_GPUAPI_OBJ const RenderTargetLayoutConfiguration cvRenderTargetLayoutConfigurationDefaultBGRA8;
+		TS3_GPUAPI_OBJ const RenderTargetLayoutConfiguration cvRenderTargetLayoutConfigurationDefaultBGRA8D24S8;
+		TS3_GPUAPI_OBJ const RenderTargetLayoutConfiguration cvRenderTargetLayoutConfigurationDefaultRGBA8;
+		TS3_GPUAPI_OBJ const RenderTargetLayoutConfiguration cvRenderTargetLayoutConfigurationDefaultRGBA8D24S8;
 
-	};
-
-	ts3DeclareClassHandle( RenderTargetTexture );
+	}
 
 
 

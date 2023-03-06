@@ -1,2 +1,0 @@
-
-#include "iaVertexStreamImmutableState.h"

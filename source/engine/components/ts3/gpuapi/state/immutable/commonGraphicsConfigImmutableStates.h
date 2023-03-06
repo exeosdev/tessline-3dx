@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef __TS3_GPUAPI_COMMON_GRAPHICS_IMMUTABLE_STATE_H__
-#define __TS3_GPUAPI_COMMON_GRAPHICS_IMMUTABLE_STATE_H__
+#ifndef __TS3_GPUAPI_COMMON_GRAPHICS_CONFIG_IMMUTABLE_STATES_H__
+#define __TS3_GPUAPI_COMMON_GRAPHICS_CONFIG_IMMUTABLE_STATES_H__
 
 #include "../commonGraphicsConfig.h"
 #include "../graphicsPipelineImmutableState.h"
@@ -45,4 +45,4 @@ namespace ts3::gpuapi
 
 } // namespace ts3::gpuapi
 
-#endif // __TS3_GPUAPI_COMMON_GRAPHICS_IMMUTABLE_STATE_H__
+#endif // __TS3_GPUAPI_COMMON_GRAPHICS_CONFIG_IMMUTABLE_STATES_H__

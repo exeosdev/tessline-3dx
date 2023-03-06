@@ -15,6 +15,7 @@ namespace ts3::gpuapi
 	struct DepthStencilConfig;
 	struct GraphicsShaderSet;
 	struct IAInputLayoutDefinition;
+	struct IAVertexStreamDefinition;
 	struct RasterizerConfig;
 
 	struct GraphicsPipelineStateObjectCreateInfo;
@@ -28,6 +29,7 @@ namespace ts3::gpuapi
 	ts3GpaDeclareClassHandle( DepthStencilImmutableState );
 	ts3GpaDeclareClassHandle( GraphicsShaderLinkageImmutableState );
 	ts3GpaDeclareClassHandle( IAInputLayoutImmutableState );
+	ts3GpaDeclareClassHandle( IAVertexStreamImmutableState );
 	ts3GpaDeclareClassHandle( RasterizerImmutableState );
 
 	using pipeline_internal_state_hash_t = uint64;
@@ -124,6 +126,13 @@ namespace ts3::gpuapi
 	{
 		Clockwise,
 		CounterClockwise
+	};
+
+	struct RenderTargetAttachmentClearConfig
+	{
+		math::RGBAColorR32Norm colorValue;
+		float depthValue;
+		uint8 stencilValue;
 	};
 
 } // namespace ts3::gpuapi

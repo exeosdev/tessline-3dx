@@ -1,5 +1,5 @@
 
-#include "commonGraphicsImmutableState.h"
+#include "commonGraphicsConfigImmutableStates.h"
 
 namespace ts3::gpuapi
 {

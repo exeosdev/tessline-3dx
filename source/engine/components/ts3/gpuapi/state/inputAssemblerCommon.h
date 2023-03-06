@@ -6,6 +6,7 @@
 
 #include "commonGPUStateDefs.h"
 #include "../resources/shaderCommon.h"
+#include "../resources/gpuBufferReference.h"
 
 namespace ts3::gpuapi
 {
@@ -130,6 +131,7 @@ namespace ts3::gpuapi
 	/// @brief Typedef for ordered, fixed-size array of vertex attribute definitions.
 	using IAVertexAttributeInfoArray = std::array<IAVertexAttributeInfo, cxdefs::IA_MAX_VERTEX_ATTRIBUTES_NUM>;
 
+	/// @brief
 	struct IAInputLayoutDefinition
 	{
 		IAVertexAttributeInfoArray attributeArray;
@@ -137,6 +139,35 @@ namespace ts3::gpuapi
 		Bitmask<EIAVertexAttributeFlags> activeAttributesMask;
 
 		EPrimitiveTopology primitiveTopology;
+	};
+
+	/// @brief
+	struct IAIndexBufferReference
+	{
+		GPUBufferReference sourceBuffer;
+		gpu_memory_size_t relativeOffset;
+		EIndexDataFormat indexFormat;
+	};
+
+	/// @brief
+	struct IAVertexBufferReference
+	{
+		GPUBufferReference sourceBuffer;
+		gpu_memory_size_t relativeOffset;
+		gpu_memory_size_t vertexStride;
+	};
+
+	/// @brief
+	using IAVertexBufferReferenceArray = std::array<IAVertexBufferReference, cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM>;
+
+	/// @brief
+	struct IAVertexStreamDefinition
+	{
+		IAVertexBufferReferenceArray vertexBufferReferences;
+
+		IAIndexBufferReference indexBufferReference;
+
+		Bitmask<EIAVertexStreamBindingFlags> activeBindingsMask;
 	};
 
 	// State Management Utility API

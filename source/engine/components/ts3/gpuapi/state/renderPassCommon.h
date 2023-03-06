@@ -68,6 +68,40 @@ namespace ts3::gpuapi
 		Undefined = 0
 	};
 
+	struct RenderPassAttachmentUsage
+	{
+		RenderTargetAttachmentClearConfig clearConfig;
+		ERenderPassAttachmentLoadAction renderPassLoadAction;
+		ERenderPassAttachmentStoreAction renderPassStoreAction;
+	};
+
+	struct RenderPassColorAttachmentUsage : public RenderPassAttachmentUsage
+	{
+	};
+
+	struct RenderPassDepthStencilAttachmentUsage : public RenderPassAttachmentUsage
+	{
+	};
+
+	using RenderPassColorAttachmentUsageArray = std::array<RenderPassColorAttachmentUsage, cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM>;
+
+	struct RenderPassConfiguration
+	{
+		RenderPassColorAttachmentUsageArray colorAttachments;
+
+		RenderPassDepthStencilAttachmentUsage depthStencilAttachment;
+
+		Bitmask<ERTAttachmentFlags> activeAttachmentsMask;
+	};
+
+	namespace smutil
+	{
+
+		TS3_GPUAPI_API_NO_DISCARD Bitmask<ERenderPassActionFlags> getRenderPassAttachmentActionMask(
+				const RenderPassAttachmentDesc & pAttachmentDesc );
+
+	}
+
 } // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_RENDER_PASS_COMMON_H__
