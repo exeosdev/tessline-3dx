@@ -141,19 +141,36 @@ namespace ts3::gpuapi
 		EPrimitiveTopology primitiveTopology;
 	};
 
-	/// @brief
-	struct IAIndexBufferReference
+	struct IAVertexStreamBufferReference
 	{
 		GPUBufferReference sourceBuffer;
 		gpu_memory_size_t relativeOffset;
+
+		bool empty() const noexcept
+		{
+			return sourceBuffer.empty();
+		}
+
+		explicit operator bool() const noexcept
+		{
+			return !empty();
+		}
+
+		void reset()
+		{
+			sourceBuffer.reset();
+		}
+	};
+
+	/// @brief
+	struct IAIndexBufferReference : public IAVertexStreamBufferReference
+	{
 		EIndexDataFormat indexFormat;
 	};
 
 	/// @brief
-	struct IAVertexBufferReference
+	struct IAVertexBufferReference : public IAVertexStreamBufferReference
 	{
-		GPUBufferReference sourceBuffer;
-		gpu_memory_size_t relativeOffset;
 		gpu_memory_size_t vertexStride;
 	};
 
@@ -170,6 +187,21 @@ namespace ts3::gpuapi
 		Bitmask<EIAVertexStreamBindingFlags> activeBindingsMask;
 	};
 
+	/// @brief Describes a single, continuous range of vertex buffer binding points in the vertex stream.
+	/// Used by drivers with support for range-based binding (D3D11, GL4) to reduce the number of API calls.
+	struct IAVertexBufferRange
+	{
+		/// First index of the vertex buffer binding this range defines.
+		input_assembler_index_t firstIndex = cxdefs::IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED;
+
+		/// Length of this range, i.e. number of vertex buffers within the range.
+		uint16 length = 0;
+	};
+
+	using IAVertexBufferBindingIndexList = std::vector<input_assembler_index_t>;
+
+	using IAVertexBufferRangeList = std::vector<IAVertexBufferRange>;
+
 	// State Management Utility API
 	namespace smutil
 	{
@@ -184,6 +216,8 @@ namespace ts3::gpuapi
 
 		/// @brief
 		TS3_GPUAPI_API_NO_DISCARD bool validateInputLayoutDefinition( const IAInputLayoutDefinition & pDefinition ) noexcept;
+
+		IAVertexBufferRangeList generateActiveVertexBufferRanges( const IAVertexBufferReferenceArray & pVBReferences ) noexcept;
 
 	}
 

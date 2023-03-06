@@ -71,8 +71,25 @@ namespace ts3::gpuapi
 	struct RenderPassAttachmentUsage
 	{
 		RenderTargetAttachmentClearConfig clearConfig;
-		ERenderPassAttachmentLoadAction renderPassLoadAction;
-		ERenderPassAttachmentStoreAction renderPassStoreAction;
+		ERenderPassAttachmentLoadAction renderPassLoadAction = ERenderPassAttachmentLoadAction::Undefined;
+		ERenderPassAttachmentStoreAction renderPassStoreAction = ERenderPassAttachmentStoreAction::Undefined;
+
+		void reset()
+		{
+			renderPassLoadAction = ERenderPassAttachmentLoadAction::Undefined;
+			renderPassStoreAction = ERenderPassAttachmentStoreAction::Undefined;
+		}
+
+		bool valid() const noexcept
+		{
+			return renderPassLoadAction != ERenderPassAttachmentLoadAction::Undefined &&
+			       renderPassStoreAction != ERenderPassAttachmentStoreAction::Undefined;
+		}
+
+		explicit operator bool() const noexcept
+		{
+			return valid();
+		}
 	};
 
 	struct RenderPassColorAttachmentUsage : public RenderPassAttachmentUsage

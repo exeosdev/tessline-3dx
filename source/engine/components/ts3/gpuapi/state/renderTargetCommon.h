@@ -17,6 +17,21 @@ namespace ts3::gpuapi
 	struct RenderTargetAttachmentBinding
 	{
 		RenderTargetTextureHandle attachmentTexture;
+
+		void reset()
+		{
+			attachmentTexture.reset();
+		}
+
+		bool empty() const noexcept
+		{
+			return !attachmentTexture;
+		}
+
+		explicit operator bool() const noexcept
+		{
+			return ( bool )attachmentTexture;
+		}
 	};
 
 	/// @brief
@@ -47,6 +62,21 @@ namespace ts3::gpuapi
 	struct RenderTargetAttachmentLayout
 	{
 		ETextureFormat format;
+
+		void reset()
+		{
+			format = ETextureFormat::UNKNOWN;
+		}
+
+		bool valid() const noexcept
+		{
+			return format != ETextureFormat::UNKNOWN;
+		}
+
+		explicit operator bool() const noexcept
+		{
+			return valid();
+		}
 	};
 
 	/// @brief Typedef for ordered, fixed-size array of layout definitions for render target attachments.
