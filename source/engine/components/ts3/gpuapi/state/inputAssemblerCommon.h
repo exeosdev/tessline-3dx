@@ -215,9 +215,8 @@ namespace ts3::gpuapi
 				const IAVertexAttributeInfoArray & pVertexAttributes ) noexcept;
 
 		/// @brief
-		TS3_GPUAPI_API_NO_DISCARD bool validateInputLayoutDefinition( const IAInputLayoutDefinition & pDefinition ) noexcept;
-
-		IAVertexBufferRangeList generateActiveVertexBufferRanges( const IAVertexBufferReferenceArray & pVBReferences ) noexcept;
+		TS3_GPUAPI_API_NO_DISCARD IAVertexBufferRangeList generateActiveVertexBufferRanges(
+				const IAVertexBufferReferenceArray & pVBReferences ) noexcept;
 
 	}
 

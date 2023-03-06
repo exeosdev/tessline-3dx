@@ -7,6 +7,26 @@ namespace ts3::gpuapi
 	namespace smutil
 	{
 
+		Bitmask<EIAVertexAttributeFlags> getIAVertexInputActiveAttributesMask(
+				const IAVertexAttributeInfoArray & pVertexAttributes ) noexcept
+		{
+			Bitmask<EIAVertexAttributeFlags> activeAttributesMask = 0;
+			for( uint32 attributeIndex = 0; attributeIndex < cxdefs::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
+			{
+				if( pVertexAttributes[attributeIndex].valid() )
+				{
+					activeAttributesMask.set( cxdefs::makeIAVertexAttributeFlag( attributeIndex ) );
+				}
+			}
+			return activeAttributesMask;
+		}
+
+		uint32 getIAVertexInputActiveAttributesNum( const IAVertexAttributeInfoArray & pVertexAttributes ) noexcept
+		{
+			const auto activeAttributesMask = getIAVertexInputActiveAttributesMask( pVertexAttributes );
+			return activeAttributesMask.countBits();
+		}
+
 		IAVertexBufferRangeList generateActiveVertexBufferRanges( const IAVertexBufferReferenceArray & pVBReferences ) noexcept
 		{
 			// Single range is described by two uint16 values which is 4 bytes. More than 90% use cases fall
