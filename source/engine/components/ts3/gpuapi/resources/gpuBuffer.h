@@ -5,9 +5,9 @@
 #define __TS3_GPUAPI_GPU_BUFFER_H__
 
 #include "gpuResource.h"
-#include "gpuBufferCommon.h"
+#include "gpuBufferReference.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	struct GPUBufferProperties : public GPUResourceProperties
@@ -18,6 +18,7 @@ namespace ts3::GpuAPI
 	class GPUBuffer : public GPUResource
 	{
 		friend class CommandList;
+		friend class GPUBufferReference;
 
 	public:
 		GPUBufferProperties const mBufferProperties;
@@ -34,6 +35,8 @@ namespace ts3::GpuAPI
 
 		TS3_ATTR_NO_DISCARD bool checkBufferTargetSupport( EGPUBufferTarget pBufferTarget ) const;
 
+		TS3_ATTR_NO_DISCARD GPUMemoryRegion getWholeBufferRegion() const;
+
 	protected:
 		virtual bool mapRegion( void * pCommandObject, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode ) = 0;
 
@@ -43,7 +46,7 @@ namespace ts3::GpuAPI
 
 		virtual void invalidateRegion( void * pCommandObject, const GPUMemoryRegion & pRegion ) = 0;
 
-		virtual void updateSubDataCopy( void * pCommandObject, GPUBuffer & pSource, const GPUBufferSubDataCopyDesc & pCopyDesc ) = 0;
+		virtual void updateSubDataCopy( void * pCommandObject, GPUBuffer & pSourceBuffer, const GPUBufferSubDataCopyDesc & pCopyDesc ) = 0;
 
 		virtual void updateSubDataUpload( void * pCommandObject, const GPUBufferSubDataUploadDesc & pUploadDesc ) = 0;
 
@@ -52,6 +55,6 @@ namespace ts3::GpuAPI
 		static bool validateBufferCreateInfo( GPUBufferCreateInfo & pCreateInfo );
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_GPU_BUFFER_H__

@@ -76,7 +76,7 @@ namespace ts3
         Reserved
     };
 
-	namespace CxDefs
+	namespace cxdefs
 	{
 
 
@@ -104,7 +104,7 @@ namespace ts3
     /// Used primarily by the library in the template-based mappings.
     inline constexpr bool ecIsExceptionBaseTypeValid( ExceptionBaseType pBaseType )
     {
-        return ( ( exception_base_type_value_t )( pBaseType ) > 0u ) && ( ( exception_base_type_value_t )( pBaseType ) < CxDefs::ENUM_EXCEPTION_BASE_TYPE_COUNT );
+        return ( ( exception_base_type_value_t )( pBaseType ) > 0u ) && ( ( exception_base_type_value_t )( pBaseType ) < cxdefs::ENUM_EXCEPTION_BASE_TYPE_COUNT );
     }
 
     ///
@@ -116,7 +116,7 @@ namespace ts3
     ///
     inline constexpr exception_code_value_t ecDeclareExceptionCode( exception_category_value_t pCategory, uint8 pCodeIID )
     {
-        return ( CxDefs::EXCEPTION_CODE_CONTROL_KEY | ( ( exception_code_value_t )( pCategory ) << 8 ) | pCodeIID );
+        return ( cxdefs::EXCEPTION_CODE_CONTROL_KEY | ( ( exception_code_value_t )( pCategory ) << 8 ) | pCodeIID );
     }
 
     ///
@@ -128,19 +128,19 @@ namespace ts3
     ///
     inline constexpr ExceptionBaseType ecGetExceptionCodeBaseType( exception_code_value_t pCode )
     {
-        return ( ExceptionBaseType )( ( pCode & CxDefs::EXCEPTION_CODE_BASE_TYPE_MASK ) >> 16 );
+        return ( ExceptionBaseType )( ( pCode & cxdefs::EXCEPTION_CODE_BASE_TYPE_MASK ) >> 16 );
     }
 
     ///
     inline constexpr exception_category_value_t ecGetExceptionCodeCategory( exception_code_value_t pCode )
     {
-        return ( exception_category_value_t )( ( pCode & CxDefs::EXCEPTION_CODE_CATEGORY_MASK ) >> 8 );
+        return ( exception_category_value_t )( ( pCode & cxdefs::EXCEPTION_CODE_CATEGORY_MASK ) >> 8 );
     }
 
     ///
     inline constexpr bool ecValidateExceptionCode( exception_code_value_t pCode )
     {
-        return ( pCode & CxDefs::EXCEPTION_CODE_CONTROL_KEY ) == CxDefs::EXCEPTION_CODE_CONTROL_KEY;
+        return ( pCode & cxdefs::EXCEPTION_CODE_CONTROL_KEY ) == cxdefs::EXCEPTION_CODE_CONTROL_KEY;
     }
 
 } // namespace ts3

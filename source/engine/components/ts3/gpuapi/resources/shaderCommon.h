@@ -7,17 +7,17 @@
 #include "../prerequisites.h"
 #include <ts3/stdext/byteArray.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( Shader );
 
-	namespace CxDefs
+	namespace cxdefs
 	{
 
 		TS3_ATTR_NO_DISCARD inline constexpr uint32 makeShaderType( uint32 pStageIndex )
 		{
-			return ( pStageIndex << 16 ) | CxDefs::makeShaderStageBit( pStageIndex );
+			return ( pStageIndex << 16 ) | cxdefs::makeShaderStageBit( pStageIndex );
 		}
 
 	}
@@ -36,18 +36,18 @@ namespace ts3::GpuAPI
 	/// @brief
 	enum class EShaderType : uint32
 	{
-		GSVertex        = CxDefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX        ),
-		GSHull          = CxDefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_HULL          ),
-		GSDomain        = CxDefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_DOMAIN        ),
-		GSGeometry      = CxDefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY      ),
-		GSPixel         = CxDefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL         ),
-		CSCompute       = CxDefs::makeShaderType( E_SHADER_STAGE_INDEX_COMPUTE                ),
+		GSVertex        = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX        ),
+		GSHull          = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_HULL          ),
+		GSDomain        = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_DOMAIN        ),
+		GSGeometry      = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY      ),
+		GSPixel         = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL         ),
+		CSCompute       = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_COMPUTE                ),
 		Unknown = 0,
 	};
 
-	struct alignas( 64 ) ShaderBinary
+	struct alignas( 32 ) ShaderBinary
 	{
-		static constexpr size_t sDataBufferFixedSize = 44;
+		static constexpr size_t sDataBufferFixedSize = 12;
 
 		uint64 driverSpecificID;
 		uint64 driverSpecificType;
@@ -76,16 +76,24 @@ namespace ts3::GpuAPI
 		TS3_GPUAPI_API_NO_DISCARD static std::unique_ptr<ShaderBinary> create( size_t pBinarySize );
 	};
 
+	/// @brief
 	struct ShaderCreateInfo
 	{
-		EShaderType shaderType;
+		EShaderType shaderType = EShaderType::Unknown;
+		UniqueGPUObjectName shaderName;
 		Bitmask<EShaderCreateFlags> createFlags = E_SHADER_CREATE_FLAGS_DEFAULT;
-		const void * sourceCode = nullptr;
-		size_t sourceCodeLength = 0;
+		std::unique_ptr<ShaderBinary> shaderBinary;
+		DynamicByteArray shaderSource;
+		ReadOnlyMemoryView shaderSourceView;
 		const char * entryPointName = nullptr;
+
+		explicit operator bool() const noexcept
+		{
+			return ( shaderType != EShaderType::Unknown ) && ( shaderBinary || !shaderSource.empty() );
+		}
 	};
 
-	namespace CxDefs
+	namespace cxdefs
 	{
 
 		TS3_ATTR_NO_DISCARD inline constexpr bool isShaderStageIndexValid( uint32 pStageIndex )
@@ -120,11 +128,22 @@ namespace ts3::GpuAPI
 
 		TS3_ATTR_NO_DISCARD inline constexpr EShaderType getShaderTypeFromStageIndex( uint32 pStageIndex )
 		{
-			return isShaderStageIndexValid( pStageIndex ) ? static_cast<EShaderType>( CxDefs::makeShaderType( pStageIndex ) ) : EShaderType::Unknown;
+			return isShaderStageIndexValid( pStageIndex ) ? static_cast<EShaderType>( cxdefs::makeShaderType( pStageIndex ) ) : EShaderType::Unknown;
 		}
 		
 	}
 
-} // namespace ts3::GpuAPI
+	namespace rcutil
+	{
+
+		TS3_GPUAPI_API_NO_DISCARD EShaderType getShaderObjectType( Shader & pShader );
+
+		TS3_GPUAPI_API_NO_DISCARD uint32 getShaderObjectStageIndex( Shader & pShader );
+
+		TS3_GPUAPI_API_NO_DISCARD uint32 getShaderObjectStageBit( Shader & pShader );
+
+	}
+
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_SHADER_COMMON_H__

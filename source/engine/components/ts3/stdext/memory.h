@@ -14,7 +14,7 @@ namespace ts3
 	using MemoryFreeCallback = std::function<void( void * )>;
 	using MemoryReallocCallback = std::function<void *( void *, size_t )>;
 
-	namespace CxDefs
+	namespace cxdefs
 	{
 
 		inline constexpr uint32 MEMORY_DEFAULT_ALIGNMENT = TS3_PCL_MEMORY_BASE_ALIGNMENT;
@@ -27,7 +27,7 @@ namespace ts3
 		MemoryAllocCallback apiAlloc;
 		MemoryFreeCallback apiFree;
 		MemoryReallocCallback apiRealloc;
-		uint32 memoryAlignment = CxDefs::MEMORY_DEFAULT_ALIGNMENT;
+		uint32 memoryAlignment = cxdefs::MEMORY_DEFAULT_ALIGNMENT;
 
 	public:
 		explicit operator bool() const
@@ -239,7 +239,7 @@ namespace ts3
 	}
 
 	template <typename TVal>
-	inline void memZero( std::vector<TVal> & pVector, size_t pZeroOffset = 0, size_t pZeroCount = CxDefs::MAX_SIZE )
+	inline void memZero( std::vector<TVal> & pVector, size_t pZeroOffset = 0, size_t pZeroCount = cxdefs::MAX_SIZE )
 	{
 		const auto vectorSize = pVector.size();
 		pZeroCount = getMinOf( pZeroCount, vectorSize );

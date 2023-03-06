@@ -1,25 +1,25 @@
 
-#include "textureCommon.h"
+#include "texture.h"
 #include <ts3/stdext/utilities.h>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
-	TextureInitDataDesc::TextureInitDataDesc( TextureInitDataDesc && pSource )
+	TextureInitDataDesc::TextureInitDataDesc( TextureInitDataDesc && pSrcObject )
 	{
-		if( !pSource.empty() )
+		if( !pSrcObject.empty() )
 		{
-			if( pSource.isArray() )
+			if( pSrcObject.isArray() )
 			{
-				_subTextureInitDataArray = std::move( pSource._subTextureInitDataArray );
+				_subTextureInitDataArray = std::move( pSrcObject._subTextureInitDataArray );
 				subTextureInitDataBasePtr = _subTextureInitDataArray.data();
 			}
 			else
 			{
-				_subTextureInitData = pSource._subTextureInitData;
+				_subTextureInitData = pSrcObject._subTextureInitData;
 				subTextureInitDataBasePtr = &_subTextureInitData;
 			}
-			pSource.subTextureInitDataBasePtr = nullptr;
+			pSrcObject.subTextureInitDataBasePtr = nullptr;
 		}
 	}
 
@@ -29,18 +29,18 @@ namespace ts3::GpuAPI
 		return *this;
 	}
 
-	TextureInitDataDesc::TextureInitDataDesc( const TextureInitDataDesc & pSource )
+	TextureInitDataDesc::TextureInitDataDesc( const TextureInitDataDesc & pInitData )
 	{
-		if( !pSource.empty() )
+		if( !pInitData.empty() )
 		{
-			if( pSource.isArray() )
+			if( pInitData.isArray() )
 			{
-				_subTextureInitDataArray = pSource._subTextureInitDataArray;
+				_subTextureInitDataArray = pInitData._subTextureInitDataArray;
 				subTextureInitDataBasePtr = _subTextureInitDataArray.data();
 			}
 			else
 			{
-				_subTextureInitData = pSource._subTextureInitData;
+				_subTextureInitData = pInitData._subTextureInitData;
 				subTextureInitDataBasePtr = &_subTextureInitData;
 			}
 		}
@@ -137,323 +137,42 @@ namespace ts3::GpuAPI
 	}
 
 
-	TextureDimensions TextureUtils::queryMipLevelDimensions( const TextureDimensions & pDimensions, uint32 pMipLevel )
+	namespace rcutil
 	{
-		TextureDimensions result;
-		result.arraySize = pDimensions.arraySize;
-		result.mipLevelsNum = pDimensions.mipLevelsNum;
 
-		if( pMipLevel >= pDimensions.mipLevelsNum )
-		{
-			result.width = 0;
-			result.height = 0;
-			result.depth = 0;
-		}
-		else
-		{
-			result.width = pDimensions.width;
-			result.height = pDimensions.height;
-			result.depth = pDimensions.depth;
+		static const TextureLayout sInvalidTextureLayout {
+			ETextureClass::Unknown,
+			TextureDimensions {
+				0, 0, 0, 0, 0
+			},
+			0,
+			0,
+			0,
+			ETextureFormat::UNKNOWN
+		};
 
-			for( uint32 mipLevelIndex = 0; mipLevelIndex < pMipLevel; ++mipLevelIndex )
-			{
-				result.width = getMaxOf( 1u, result.width  / 2 );
-				result.height= getMaxOf( 1u, result.height / 2 );
-				result.depth = getMaxOf( 1u, result.depth  / 2 );
-			}
+		bool checkRenderTargetTextureColorFormat( ETextureFormat pFormat ) noexcept
+		{
+			const Bitmask<uint8> pixelFormatFlags = cxdefs::getTextureFormatFlags( pFormat );
+
+			// RT textures for color attachments can have any format except for compressed
+			// formats and those specifically meant for depth/stencil attachments.
+			return !pixelFormatFlags.isSetAnyOf( E_GPU_DATA_FORMAT_FLAG_DEPTH_STENCIL_BIT | E_GPU_DATA_FORMAT_FLAG_COMPRESSED_BIT );
 		}
 
-		return result;
+		bool checkRenderTargetTextureDepthStencilFormat( ETextureFormat pFormat ) noexcept
+		{
+			const Bitmask<uint8> pixelFormatFlags = cxdefs::getTextureFormatFlags( pFormat );
+
+			// Only depth and combined depth/stencil formats are valid for depth/stencil textures.
+			return pixelFormatFlags.isSetAnyOf( E_GPU_DATA_FORMAT_FLAG_DEPTH_STENCIL_BIT );
+		}
+
+		const TextureLayout & queryTextureLayout( TextureHandle pTexture ) noexcept
+		{
+			return pTexture ? pTexture->mTextureLayout : sInvalidTextureLayout;
+		}
+
 	}
 
-	bool TextureUtils::validateTextureSubRegion( ETextureDimensionClass pDimensionClass,
-	                                             const TextureDimensions & pDimensions,
-	                                             const TextureSubRegion & pSubRegion )
-	{
-		if( pDimensionClass == ETextureDimensionClass::Texture2D )
-		{
-			if( !validateTextureSubRegion2D( pDimensions, pSubRegion ) )
-			{
-				return false;
-			}
-		}
-		else if( pDimensionClass == ETextureDimensionClass::Texture2DArray )
-		{
-			if( !validateTextureSubRegion2DArray( pDimensions, pSubRegion ) )
-			{
-				return false;
-			}
-		}
-		else if( pDimensionClass == ETextureDimensionClass::Texture2DMS )
-		{
-			if( !validateTextureSubRegion2DMS( pDimensions, pSubRegion ) )
-			{
-				return false;
-			}
-		}
-		else if( pDimensionClass == ETextureDimensionClass::Texture3D )
-		{
-			if( !validateTextureSubRegion3D( pDimensions, pSubRegion ) )
-			{
-				return false;
-			}
-		}
-		else if( pDimensionClass == ETextureDimensionClass::TextureCubeMap )
-		{
-			if( !validateTextureSubRegionCubeMap( pDimensions, pSubRegion ) )
-			{
-				return false;
-			}
-		}
-		else
-		{
-			ts3DebugInterrupt();
-			return false;
-		}
-
-		return true;
-	}
-
-	bool TextureUtils::validateTextureSubRegion2D( const TextureDimensions & pDimensions,
-	                                               const TextureSubRegion & pSubRegion )
-	{
-		if( pSubRegion.offset.u2D.mipLevel >= pDimensions.mipLevelsNum )
-		{
-			return false;
-		}
-
-		auto mipLevelDimensions = queryMipLevelDimensions( pDimensions, pSubRegion.offset.u2D.mipLevel );
-
-		if( pSubRegion.offset.u2D.x > mipLevelDimensions.width )
-		{
-			return false;
-		}
-
-		if( pSubRegion.offset.u2D.y > mipLevelDimensions.height )
-		{
-			return false;
-		}
-
-		if( pSubRegion.size.u2D.width > ( mipLevelDimensions.width - pSubRegion.offset.u2D.x ) )
-		{
-			return false;
-		}
-
-		if( pSubRegion.size.u2D.height > ( mipLevelDimensions.height - pSubRegion.offset.u2D.y ) )
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	bool TextureUtils::validateTextureSubRegion2DArray( const TextureDimensions & pDimensions,
-	                                                    const TextureSubRegion & pSubRegion )
-	{
-		if( pSubRegion.offset.u2DArray.arrayIndex >= pDimensions.arraySize )
-		{
-			return false;
-		}
-
-		if( !validateTextureSubRegion2D( pDimensions, pSubRegion ) )
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	bool TextureUtils::validateTextureSubRegion2DMS( const TextureDimensions & pDimensions,
-	                                                 const TextureSubRegion & pSubRegion )
-	{
-		if( pSubRegion.offset.u2D.mipLevel != 0 )
-		{
-			return false;
-		}
-
-		if( !validateTextureSubRegion2D( pDimensions, pSubRegion ) )
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	bool TextureUtils::validateTextureSubRegion3D( const TextureDimensions & pDimensions,
-	                                               const TextureSubRegion & pSubRegion )
-	{
-		if( pSubRegion.offset.u3D.mipLevel >= pDimensions.mipLevelsNum )
-		{
-			return false;
-		}
-
-		auto mipLevelDimensions = queryMipLevelDimensions( pDimensions, pSubRegion.offset.u3D.mipLevel );
-
-		if( pSubRegion.offset.u3D.x > mipLevelDimensions.width )
-		{
-			return false;
-		}
-
-		if( pSubRegion.offset.u3D.y > mipLevelDimensions.height )
-		{
-			return false;
-		}
-
-		if( pSubRegion.offset.u3D.z > mipLevelDimensions.depth )
-		{
-			return false;
-		}
-
-		if( pSubRegion.size.u3D.width > ( mipLevelDimensions.width - pSubRegion.offset.u3D.x ) )
-		{
-			return false;
-		}
-
-		if( pSubRegion.size.u3D.height > ( mipLevelDimensions.height - pSubRegion.offset.u3D.y ) )
-		{
-			return false;
-		}
-
-		if( pSubRegion.size.u3D.depth > ( mipLevelDimensions.depth - pSubRegion.offset.u3D.z ) )
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	bool TextureUtils::validateTextureSubRegionCubeMap( const TextureDimensions & pDimensions,
-	                                                    const TextureSubRegion & pSubRegion )
-	{
-		if( pSubRegion.offset.uCubeMap.uFaceIndex > 6 )
-		{
-			return false;
-		}
-
-		if( !validateTextureSubRegion2D( pDimensions, pSubRegion ) )
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	bool TextureUtils::validateTextureSubResource( ETextureDimensionClass pDimensionClass,
-	                                               const TextureDimensions & pDimensions,
-	                                               const TextureSubResource & pSubResource )
-	{
-		if( pDimensionClass == ETextureDimensionClass::Texture2D )
-		{
-			if( !validateTextureSubResource2D( pDimensions, pSubResource ) )
-			{
-				return false;
-			}
-		}
-		else if( pDimensionClass == ETextureDimensionClass::Texture2DArray )
-		{
-			if( !validateTextureSubResource2DArray( pDimensions, pSubResource ) )
-			{
-				return false;
-			}
-		}
-		else if( pDimensionClass == ETextureDimensionClass::Texture2DMS )
-		{
-			if( !validateTextureSubResource2DMS( pDimensions, pSubResource ) )
-			{
-				return false;
-			}
-		}
-		else if( pDimensionClass == ETextureDimensionClass::Texture3D )
-		{
-			if( !validateTextureSubResource3D( pDimensions, pSubResource ) )
-			{
-				return false;
-			}
-		}
-		else if( pDimensionClass == ETextureDimensionClass::TextureCubeMap )
-		{
-			if( !validateTextureSubResourceCubeMap( pDimensions, pSubResource ) )
-			{
-				return false;
-			}
-		}
-		else
-		{
-			ts3DebugInterrupt();
-			return false;
-		}
-
-		return true;
-	}
-
-	bool TextureUtils::validateTextureSubResource2D( const TextureDimensions & pDimensions,
-	                                                 const TextureSubResource & pSubResource )
-	{
-		if( pSubResource.u2D.mipLevel >= pDimensions.mipLevelsNum )
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	bool TextureUtils::validateTextureSubResource2DArray( const TextureDimensions & pDimensions,
-	                                                      const TextureSubResource & pSubResource )
-	{
-		if( pSubResource.u2DArray.arrayIndex >= pDimensions.arraySize )
-		{
-			return false;
-		}
-
-		if( pSubResource.u2DArray.mipLevel >= pDimensions.mipLevelsNum )
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	bool TextureUtils::validateTextureSubResource2DMS( const TextureDimensions & pDimensions,
-	                                                   const TextureSubResource & pSubResource )
-	{
-		if( pSubResource.u2D.mipLevel != 0 )
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	bool TextureUtils::validateTextureSubResource3D( const TextureDimensions & pDimensions,
-	                                                 const TextureSubResource & pSubResource )
-	{
-		if( pSubResource.u3D.depthLayerIndex >= pDimensions.depth )
-		{
-			return false;
-		}
-
-		if( pSubResource.u3D.mipLevel >= pDimensions.mipLevelsNum )
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	bool TextureUtils::validateTextureSubResourceCubeMap( const TextureDimensions & pDimensions,
-	                                                      const TextureSubResource & pSubResource )
-	{
-		if( pSubResource.uCubeMap.uFaceIndex >= 6 )
-		{
-			return false;
-		}
-
-		if( pSubResource.uCubeMap.mipLevel >= pDimensions.mipLevelsNum )
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi

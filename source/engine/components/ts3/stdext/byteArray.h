@@ -118,7 +118,7 @@ namespace ts3
 			return _dataSize;
 		}
 
-		size_t fill( byte pValue, size_t pFillCount = CxDefs::MAX_SIZE, size_t pFillOffset = 0 )
+		size_t fill( byte pValue, size_t pFillCount = cxdefs::MAX_SIZE, size_t pFillOffset = 0 )
 		{
 			if( pFillOffset >= _dataSize )
 			{
@@ -197,7 +197,7 @@ namespace ts3
 		, _internalBuffer( std::move( pSrcObject._internalBuffer ) )
 		{}
 
-		DynamicByteArray( DynamicMemoryBuffer pInternalBuffer, size_t pSize = CxDefs::MAX_SIZE )
+		DynamicByteArray( DynamicMemoryBuffer pInternalBuffer, size_t pSize = cxdefs::MAX_SIZE )
 		: _internalBuffer( std::move( pInternalBuffer ) )
 		{
 			_storageMemoryPtr = _internalBuffer.data();

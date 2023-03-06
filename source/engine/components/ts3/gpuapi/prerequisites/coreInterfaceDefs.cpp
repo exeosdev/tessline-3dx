@@ -21,7 +21,7 @@ namespace ts3::gpuapi
 
 	UniqueGPUObjectID GPUDeviceChildObject::queryObjectID() const
 	{
-		return CxDefs::GPU_OBJECT_ID_EMPTY;
+		return cxdefs::GPU_OBJECT_ID_EMPTY;
 	}
 
 } // namespace ts3::gpuapi

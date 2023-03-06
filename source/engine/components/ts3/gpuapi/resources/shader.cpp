@@ -1,11 +1,11 @@
 
 #include "shader.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	Shader::Shader( GPUDevice & pGPUDevice, EShaderType pShaderType )
-	: GPUBaseObject( pGPUDevice )
+	: GPUDeviceChildObject( pGPUDevice )
 	, mShaderType( pShaderType )
 	, mShaderBinary()
 	{}
@@ -13,9 +13,8 @@ namespace ts3::GpuAPI
 	Shader::Shader(
 			GPUDevice & pGPUDevice,
 			EShaderType pShaderType,
-			std::unique_ptr<ShaderBinary> pShaderBinary,
-			resource_id_t pShaderID )
-	: GPUBaseObject( pGPUDevice )
+			std::unique_ptr<ShaderBinary> pShaderBinary )
+	: GPUDeviceChildObject( pGPUDevice )
 	, mShaderType( pShaderType )
 	, mShaderBinary( std::move( pShaderBinary ) )
 	{}
@@ -30,4 +29,25 @@ namespace ts3::GpuAPI
 		return std::unique_ptr<ShaderBinary>{ shaderBinary };
 	}
 
-} // namespace ts3::GpuAPI
+
+	namespace rcutil
+	{
+
+		EShaderType getShaderObjectType( Shader & pShader )
+		{
+			return pShader.mShaderType;
+		}
+
+		uint32 getShaderObjectStageIndex( Shader & pShader )
+		{
+			return cxdefs::getShaderStageIndex( pShader.mShaderType );
+		}
+
+		uint32 getShaderObjectStageBit( Shader & pShader )
+		{
+			return cxdefs::getShaderStageBit( pShader.mShaderType );
+		}
+
+	}
+
+} // namespace ts3::gpuapi

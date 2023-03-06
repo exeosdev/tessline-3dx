@@ -27,7 +27,7 @@ namespace ts3::gpuapi
     using pClassName##Handle = SharedHandle<pClassName>; \
     using pClassName##WeakHandle = WeakHandle<pClassName>
 
-	namespace CxDefs
+	namespace cxdefs
 	{
 
 		constexpr uint32 GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM = 16;
@@ -63,7 +63,7 @@ namespace ts3::gpuapi
 		E_GPU_DRIVER_CONFIG_FLAG_FORCE_COMPATIBILITY_BIT          = 0x0100,
 		E_GPU_DRIVER_CONFIG_FLAG_FORCE_CORE_PROFILE_BIT           = 0x0200,
 		E_GPU_DRIVER_CONFIG_FLAG_USE_REFERENCE_DRIVER_BIT         = 0x8000,
-		GPU_DRIVER_CONFIG_FLAGS_DEFAULT                         = 0
+		GPU_DRIVER_CONFIG_FLAGS_DEFAULT                           = 0
 	};
 
 	/// @brief A set of index values for supported shader stages.
@@ -127,7 +127,7 @@ namespace ts3::gpuapi
 	static_assert( E_SHADER_STAGE_MASK_ALL < 0xFFFF );
 
 	/// Constant Expressions
-	namespace CxDefs
+	namespace cxdefs
 	{
 
 		/// @brief Returns an EShaderStageIndex matching the specified shader stage index value.

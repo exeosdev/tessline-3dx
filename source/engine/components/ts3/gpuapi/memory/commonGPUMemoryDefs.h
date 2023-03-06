@@ -23,7 +23,7 @@ namespace ts3::gpuapi
     using GPUMemoryRegion = Region<gpu_memory_size_t>;
     using GPUMemoryRange = GPUMemoryRegion::Range;
 
-	namespace CxDefs
+	namespace cxdefs
 	{
 
 		/// @brief

@@ -3,7 +3,7 @@
 #include "texture.h"
 #include <set>
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	static bool checkColorRenderBufferFormat( ETextureFormat pFormat );
@@ -11,7 +11,7 @@ namespace ts3::GpuAPI
 
 
 	RenderBuffer::RenderBuffer( GPUDevice & pGPUDevice, ERenderBufferType pRenderBufferType, const RenderBufferLayout & pRenderBufferLayout )
-	: GPUBaseObject( pGPUDevice )
+	: GPUDeviceChildObject( pGPUDevice )
 	, mERenderBufferType( pRenderBufferType )
 	, mRenderBufferLayout( pRenderBufferLayout )
 	{}
@@ -92,4 +92,4 @@ namespace ts3::GpuAPI
 		return sValidDepthStencilFormats.count( pFormat ) != 0;
 	}
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi

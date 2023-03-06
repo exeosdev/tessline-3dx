@@ -18,7 +18,7 @@ namespace ts3
     using MemoryRegion = Region<memory_size_t>;
     using MemoryRange = MemoryRegion::Range;
 
-	namespace CxDefs
+	namespace cxdefs
 	{
 
 		/// @brief Represents an invalid memory offset, expressed as the maximum value of the memory_size_t type.

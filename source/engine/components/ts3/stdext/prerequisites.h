@@ -11,7 +11,7 @@
 namespace ts3
 {
 
-	namespace CxDefs
+	namespace cxdefs
 	{
 
 		/// @brief Represents max value which can be stored in the size_t type.

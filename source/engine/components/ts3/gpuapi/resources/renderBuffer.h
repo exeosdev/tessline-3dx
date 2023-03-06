@@ -6,7 +6,7 @@
 
 #include "textureCommon.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	/// @brief
@@ -31,14 +31,17 @@ namespace ts3::GpuAPI
 	};
 
 	/// @brief
-	class TS3_GPUAPI_CLASS RenderBuffer : public GPUBaseObject
+	class TS3_GPUAPI_CLASS RenderBuffer : public GPUDeviceChildObject
 	{
 	public:
 		ERenderBufferType const mERenderBufferType;
 		RenderBufferLayout const mRenderBufferLayout;
 
 	public:
-		RenderBuffer( GPUDevice & pGPUDevice, ERenderBufferType pRenderBufferType, const RenderBufferLayout & pRenderBufferLayout );
+		RenderBuffer(
+				GPUDevice & pGPUDevice,
+				ERenderBufferType pRenderBufferType,
+				const RenderBufferLayout & pRenderBufferLayout );
 		virtual ~RenderBuffer();
 
 		virtual bool isNull() const = 0;
@@ -47,6 +50,6 @@ namespace ts3::GpuAPI
 		static bool validateCreateInfo( const RenderBufferCreateInfo & pCreateInfo );
 	};
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_RENDER_BUFFER_H__

@@ -122,7 +122,7 @@ namespace ts3
 		Iterator find( const TValue & pValue )
 		{
 			auto elementPos = _findLower( pValue, CompareType{} );
-			if( ( elementPos != CxDefs::INVALID_POSITION ) && ( _underlyingContainer[elementPos] == pValue ) )
+			if( ( elementPos != cxdefs::INVALID_POSITION ) && ( _underlyingContainer[elementPos] == pValue ) )
 			{
 				return _underlyingContainer.begin() + elementPos;
 			}
@@ -132,7 +132,7 @@ namespace ts3
 		ConstIterator find( const TValue & pValue ) const
 		{
 			auto elementPos = _findLower( pValue, CompareType{} );
-			if( ( elementPos != CxDefs::INVALID_POSITION ) && ( _underlyingContainer[elementPos] == pValue ) )
+			if( ( elementPos != cxdefs::INVALID_POSITION ) && ( _underlyingContainer[elementPos] == pValue ) )
 			{
 				return _underlyingContainer.begin() + elementPos;
 			}
@@ -143,7 +143,7 @@ namespace ts3
 		Iterator find( const TRef & pValue, TRefEqual pRefEqual = TRefEqual{} )
 		{
 			auto elementPos = _findLower( pValue, CompareType{} );
-			if( ( elementPos != CxDefs::INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
+			if( ( elementPos != cxdefs::INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
 			{
 				return _underlyingContainer.begin() + elementPos;
 			}
@@ -154,7 +154,7 @@ namespace ts3
 		ConstIterator find( const TRef & pValue, TRefEqual pRefEqual = TRefEqual{} ) const
 		{
 			auto elementPos = _findLower( pValue, CompareType{} );
-			if( ( elementPos != CxDefs::INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
+			if( ( elementPos != cxdefs::INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
 			{
 				return _underlyingContainer.begin() + elementPos;
 			}
@@ -165,7 +165,7 @@ namespace ts3
 		Iterator find( const TRef & pValue, TRefCompare pRefCompare, TRefEqual pRefEqual )
 		{
 			auto elementPos = _findLower( pValue, pRefCompare );
-			if( ( elementPos != CxDefs::INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
+			if( ( elementPos != cxdefs::INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
 			{
 				return _underlyingContainer.begin() + elementPos;
 			}
@@ -176,7 +176,7 @@ namespace ts3
 		ConstIterator find( const TRef & pValue, TRefCompare pRefCompare, TRefEqual pRefEqual ) const
 		{
 			auto elementPos = _findLower( pValue, pRefCompare );
-			if( ( elementPos != CxDefs::INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
+			if( ( elementPos != cxdefs::INVALID_POSITION ) && pRefEqual( _underlyingContainer[elementPos], pValue ) )
 			{
 				return _underlyingContainer.begin() + elementPos;
 			}
@@ -196,7 +196,7 @@ namespace ts3
 		Iterator remove( const TValue & pValue )
 		{
 			auto rangeBeginPos = _findLower( pValue, CompareType{} );
-			if( rangeBeginPos != CxDefs::INVALID_POSITION )
+			if( rangeBeginPos != cxdefs::INVALID_POSITION )
 			{
 				auto rangeEndPos = _findUpper( pValue, CompareType{} );
 				const auto eraseFrom = _underlyingContainer.begin() + rangeBeginPos;
@@ -209,7 +209,7 @@ namespace ts3
 		Iterator remove( const TValue & pLeft, const TValue & pRight )
 		{
 			auto rangeBeginPos = _findLower( pLeft, CompareType{} );
-			if( rangeBeginPos != CxDefs::INVALID_POSITION )
+			if( rangeBeginPos != cxdefs::INVALID_POSITION )
 			{
 				auto rangeEndPos = _findUpper( pRight, CompareType{} );
 				if( rangeEndPos < rangeBeginPos )
@@ -282,7 +282,7 @@ namespace ts3
 			auto rangeBegin = _underlyingContainer.begin();
 			auto rangeEnd = _underlyingContainer.end();
 			auto resultIter = std::lower_bound( rangeBegin, rangeEnd, pRefValue, std::forward<TPred>( pPredicate )... );
-			return ( resultIter != rangeEnd ) ? ( resultIter - rangeBegin ) : CxDefs::INVALID_POSITION;
+			return ( resultIter != rangeEnd ) ? ( resultIter - rangeBegin ) : cxdefs::INVALID_POSITION;
 		}
 
 		template <typename TRef, typename... TPred>
@@ -291,7 +291,7 @@ namespace ts3
 			auto rangeBegin = _underlyingContainer.begin();
 			auto rangeEnd = _underlyingContainer.end();
 			auto resultIter = std::upper_bound( rangeBegin, rangeEnd, pRefValue, std::forward<TPred>( pPredicate )... );
-			return ( resultIter != rangeEnd ) ? ( resultIter - rangeBegin ) : CxDefs::INVALID_POSITION;
+			return ( resultIter != rangeEnd ) ? ( resultIter - rangeBegin ) : cxdefs::INVALID_POSITION;
 		}
 
 	private:

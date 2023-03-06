@@ -1,7 +1,7 @@
 
 #include "gpuBuffer.h"
 
-namespace ts3::GpuAPI
+namespace ts3::gpuapi
 {
 
 	EGPUBufferTarget getBufferTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pBufferResourceFlags );
@@ -24,6 +24,11 @@ namespace ts3::GpuAPI
 	bool GPUBuffer::checkBufferTargetSupport( EGPUBufferTarget pBufferTarget ) const
 	{
 		return mBufferProperties.resourceFlags.isSet( pBufferTarget );
+	}
+
+	GPUMemoryRegion GPUBuffer::getWholeBufferRegion() const
+	{
+		return GPUMemoryRegion{ 0, mBufferProperties.byteSize };
 	}
 
 	bool GPUBuffer::validateMapRequest( const GPUMemoryRegion & pRegion, const EGPUMemoryMapMode & pMapMode )
@@ -70,7 +75,7 @@ namespace ts3::GpuAPI
 
 		if( pCreateInfo.memoryBaseAlignment == 0 )
 		{
-		    pCreateInfo.memoryBaseAlignment = CX_MEMORY_DEFAULT_ALIGNMENT;
+		    pCreateInfo.memoryBaseAlignment = ts3::cxdefs::MEMORY_DEFAULT_ALIGNMENT;
 		}
 
 		if( ( pCreateInfo.bufferSize == 0 ) && pCreateInfo.initDataDesc )
@@ -110,4 +115,4 @@ namespace ts3::GpuAPI
 		return EGPUBufferTarget::Unknown;
 	}
 
-} // namespace ts3::GpuAPI
+} // namespace ts3::gpuapi

@@ -67,7 +67,7 @@ namespace ts3::gpuapi
 		TextureReference _targetTexture;
 	};
 
-	namespace ResUtils
+	namespace rcutil
 	{
 
 		TS3_GPUAPI_API_NO_DISCARD ERenderTargetTextureType queryRenderTargetTextureType( ETextureFormat pFormat );

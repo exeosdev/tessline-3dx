@@ -28,7 +28,7 @@ namespace ts3::gpuapi
 	using resource_flags_value_t = uint32;
 	using resource_id_t = uint64;
 
-	namespace CxDefs
+	namespace cxdefs
 	{
 
 		/// A special constant which can be used for resources IDs to indicate that ID should be assigned automatically.
@@ -196,7 +196,7 @@ namespace ts3::gpuapi
 	struct ResourceCreateInfo
 	{
 		Bitmask<resource_flags_value_t> resourceFlags = 0;
-		memory_align_t memoryBaseAlignment = CX_MEMORY_DEFAULT_ALIGNMENT;
+		memory_align_t memoryBaseAlignment = ts3::cxdefs::MEMORY_DEFAULT_ALIGNMENT;
 		Bitmask<EGPUMemoryFlags> memoryFlags = E_GPU_RESOURCE_MEMORY_MASK_DEFAULT;
 	};
 
