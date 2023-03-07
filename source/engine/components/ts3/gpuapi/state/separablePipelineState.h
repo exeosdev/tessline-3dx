@@ -6,7 +6,6 @@
 
 #include "graphicsPipelineStateController.h"
 #include "pipelineStateObject.h"
-#include "separablePipelineImmutableState.h"
 
 namespace ts3::gpuapi
 {
@@ -30,13 +29,13 @@ namespace ts3::gpuapi
 		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADERS_ALL = 0x1F00 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_SHADER_LINKAGE_BIT
 	};
 
-	struct SeparableGraphicsImmutableStateSet
+	struct SeparablePSOStateSet
 	{
-		BlendImmutableStateHandle blendState;
-		DepthStencilImmutableStateHandle depthStencilState;
-		RasterizerImmutableStateHandle rasterizerState;
-		IAInputLayoutImmutableStateHandle iaInputLayoutState;
-		SeparableGraphicsShaderImmutableStateHandle shaderLinkageState;
+		const BlendImmutableState * blendState = nullptr;
+		const DepthStencilImmutableState * depthStencilState = nullptr;
+		const RasterizerImmutableState * rasterizerState = nullptr;
+		const IAInputLayoutImmutableState * iaInputLayoutState = nullptr;
+		const GraphicsShaderLinkageImmutableState * shaderLinkageState = nullptr;
 
 		void reset()
 		{
@@ -45,6 +44,24 @@ namespace ts3::gpuapi
 			rasterizerState = nullptr;
 			iaInputLayoutState = nullptr;
 			shaderLinkageState = nullptr;
+		}
+	};
+
+	struct SeparableShaderSet
+	{
+		Shader * vertexShader = nullptr;
+		Shader * hullShader = nullptr;
+		Shader * domainShader = nullptr;
+		Shader * geometryShader = nullptr;
+		Shader * pixelShader = nullptr;
+
+		void reset()
+		{
+			vertexShader = nullptr;
+			hullShader = nullptr;
+			domainShader = nullptr;
+			geometryShader = nullptr;
+			pixelShader = nullptr;
 		}
 	};
 
@@ -60,59 +77,81 @@ namespace ts3::gpuapi
 	/// single implementation for caching and general state handling which can be used by the mentioned drivers.
 	/// Additionally, separable PSOs also contain an explicit per-stage shader binding (which is part of the combined
 	/// state in monolithic PSOs). This is another thing we can handle here instead of doing it per-driver.
-	class TS3_GPUAPI_CLASS SeparableGraphicsPipelineStateObject : public GraphicsPipelineStateObject
+	class TS3_GPUAPI_CLASS GraphicsPipelineStateObjectSeparable : public GraphicsPipelineStateObject
 	{
 	public:
 		///
-		SeparableGraphicsImmutableStateSet const mSeparableStates;
+		SeparablePSOStateSet const mSeparableStates;
+
+	public:
+		GraphicsPipelineStateObjectSeparable(
+				GPUDevice & pGPUDevice,
+				RenderTargetLayout pRenderTargetLayout,
+				ShaderInputSignature pShaderInputSignature,
+				const SeparablePSOStateSet & pPSOImmutableStates );
+
+		virtual ~GraphicsPipelineStateObjectSeparable();
+	};
+
+	class TS3_GPUAPI_CLASS GraphicsPipelineStateObjectSeparableShader : public GraphicsPipelineStateObjectSeparable
+	{
+	public:
 		///
-		const GraphicsShaderSet & mShaderSet;
+		const GraphicsShaderSet & mSeparableShaders;
 
-		SeparableGraphicsPipelineStateObject( GPUDevice & pGPUDevice,
-		                                      RenderTargetLayout pRenderTargetLayout,
-		                                      ShaderInputSignature pShaderInputSignature,
-		                                      const SeparableGraphicsImmutableStateSet & pPSOImmutableStates );
+	public:
+		GraphicsPipelineStateObjectSeparableShader(
+				GPUDevice & pGPUDevice,
+				RenderTargetLayout pRenderTargetLayout,
+				ShaderInputSignature pShaderInputSignature,
+				const SeparablePSOStateSet & pPSOImmutableStates,
+				const GraphicsShaderSet & pSeparableShaders );
 
-		virtual ~SeparableGraphicsPipelineStateObject();
+		virtual ~GraphicsPipelineStateObjectSeparableShader();
 	};
 
 	/// @brief
-	class TS3_GPUAPI_CLASS SeparableGraphicsPipelineStateController : public GraphicsPipelineStateController
+	class TS3_GPUAPI_CLASS GraphicsPipelineStateControllerSeparable : public GraphicsPipelineStateController
 	{
 	public:
-		SeparableGraphicsPipelineStateController();
-		virtual ~SeparableGraphicsPipelineStateController();
+		GraphicsPipelineStateControllerSeparable();
+		virtual ~GraphicsPipelineStateControllerSeparable();
 
-		// Below methods are more concrete implementations of their base version defined in GraphicsPipelineStateController.
-		// They provide some common logic for separate pipelines which allows extra validation and state checking to be
-		// implemented only once for all separate pipelines-based APIs.
+		TS3_ATTR_NO_DISCARD const SeparablePSOStateSet & getCurrentSeparableStates() const noexcept;
 
-		/// @brief A more specific implementation of setGraphicsPipelineStateObject() for separable pipelines.
 		/// @see GraphicsPipelineStateController::setGraphicsPipelineStateObject
-		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO ) override;
+		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO ) override;
 
-		/// @brief A more specific implementation of resetGraphicsPipelineStateObject() for separable pipelines.
 		/// @see GraphicsPipelineStateController::resetGraphicsPipelineStateObject
 		virtual bool resetGraphicsPipelineStateObject() override;
 
-		TS3_ATTR_NO_DISCARD const SeparableGraphicsShaderBinding & getSeparableShaderBinding() const
-		{
-			return _currentSeparableShaderBinding;
-		}
-
-		TS3_ATTR_NO_DISCARD const SeparableGraphicsStateDescriptorSet & getSeparableStateDescriptorSet() const
-		{
-			return _currentSeparableStateDescriptors;
-		}
+	private:
+		Bitmask<uint64> setSeparablePSOStates( const GraphicsPipelineStateObjectSeparable & pGraphicsPSOSeparable );
 
 	private:
-		Bitmask<uint64> setGraphicsPSODescriptors( const SeparableGraphicsPipelineStateObject & pSeparableGSPO );
+		SeparablePSOStateSet _currentSeparableStates;
+	};
 
-		Bitmask<uint64> setGraphicsPSOShaders( const SeparableGraphicsPipelineStateObject & pSeparableGSPO );
+	/// @brief
+	class TS3_GPUAPI_CLASS GraphicsPipelineStateControllerSeparableShader : public GraphicsPipelineStateControllerSeparable
+	{
+	public:
+		GraphicsPipelineStateControllerSeparableShader();
+		virtual ~GraphicsPipelineStateControllerSeparableShader();
 
-	protected:
-		SeparableGraphicsShaderBinding _currentSeparableShaderBinding;
-		SeparableGraphicsStateDescriptorSet _currentSeparableStateDescriptors;
+		TS3_ATTR_NO_DISCARD const SeparableShaderSet & getCurrentSeparableShaders() const noexcept;
+
+		/// @see GraphicsPipelineStateController::setGraphicsPipelineStateObject
+		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO ) override;
+
+		/// @see GraphicsPipelineStateController::resetGraphicsPipelineStateObject
+		virtual bool resetGraphicsPipelineStateObject() override;
+
+	private:
+		Bitmask<uint64> setSeparableShaders( const GraphicsPipelineStateObjectSeparableShader & pGraphicsPSOSeparableShader );
+
+	private:
+		SeparableShaderSet _currentSeparableShaders;
 	};
 
 } // namespace ts3::gpuapi

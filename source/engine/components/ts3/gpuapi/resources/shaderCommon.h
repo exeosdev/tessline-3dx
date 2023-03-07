@@ -89,7 +89,7 @@ namespace ts3::gpuapi
 
 		explicit operator bool() const noexcept
 		{
-			return ( shaderType != EShaderType::Unknown ) && ( shaderBinary || !shaderSource.empty() );
+			return ( shaderType != EShaderType::Unknown ) && ( shaderBinary || !shaderSource.empty() || !shaderSourceView.empty() );
 		}
 	};
 

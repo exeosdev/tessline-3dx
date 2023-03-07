@@ -10,6 +10,7 @@ namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( Texture );
+	ts3DeclareClassHandle( RenderTargetTexture );
 
 	namespace cxdefs
 	{

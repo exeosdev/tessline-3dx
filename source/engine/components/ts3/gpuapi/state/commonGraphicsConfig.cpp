@@ -55,18 +55,17 @@ namespace ts3::gpuapi
 
 		const DepthStencilConfig cvPipelineDepthStencilConfigDefault =
 		{
-			EActiveState::Disabled,
+			0u,
 			cvCommonDepthTestSettingsDefault,
-			EActiveState::Disabled,
 			cvCommonStencilTestSettingsDefault
 		};
 
 		const RasterizerConfig cvPipelineRasterizerConfigDefault =
 		{
+			0u,
 			ECullMode::Back,
 			EPrimitiveFillMode::Solid,
 			ETriangleVerticesOrder::Clockwise,
-			EActiveState::Disabled
 		};
 
 	}

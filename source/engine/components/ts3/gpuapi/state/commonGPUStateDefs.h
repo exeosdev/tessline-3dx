@@ -20,7 +20,12 @@ namespace ts3::gpuapi
 	struct RenderTargetBindingDefinition;
 	struct RenderPassConfiguration;
 
+	struct ComputePipelineStateObjectCreateInfo;
 	struct GraphicsPipelineStateObjectCreateInfo;
+
+	class IAVertexStreamDynamicState;
+	class RenderTargetBindingDynamicState;
+	class RenderPassDynamicState;
 
 	ts3GpaDeclareClassHandle( GPUDeviceChildObject );
 	ts3GpaDeclareClassHandle( PipelineStateObject );

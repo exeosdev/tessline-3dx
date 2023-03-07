@@ -39,6 +39,7 @@ namespace ts3::gpuapi
 	class PipelineImmutableStateFactory
 	{
 	public:
+		PipelineImmutableStateFactory() = default;
 		virtual ~PipelineImmutableStateFactory() = default;
 
 		virtual BlendImmutableStateHandle createBlendState( const BlendConfig & pConfig ) = 0;
@@ -51,10 +52,40 @@ namespace ts3::gpuapi
 		virtual RenderPassImmutableStateHandle createRenderPassState( const RenderPassConfiguration & pConfiguration ) = 0;
 	};
 
+	/// @brief
+	class PipelineImmutableStateFactoryNull : public PipelineImmutableStateFactory
+	{
+	public:
+		PipelineImmutableStateFactoryNull() = default;
+		virtual ~PipelineImmutableStateFactoryNull() = default;
+
+		virtual BlendImmutableStateHandle createBlendState( const BlendConfig & ) override final;
+		virtual DepthStencilImmutableStateHandle createDepthStencilState( const DepthStencilConfig & ) override final;
+		virtual GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageState( const GraphicsShaderSet & ) override final;
+		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & ) override final;
+		virtual IAVertexStreamImmutableStateHandle createIAVertexStreamState( const IAVertexStreamDefinition & ) override final;
+		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerConfig & ) override final;
+		virtual RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & ) override final;
+		virtual RenderPassImmutableStateHandle createRenderPassState( const RenderPassConfiguration & ) override final;
+	};
+
+	/// @brief
+	class PipelineImmutableStateFactorySeparableShader : public PipelineImmutableStateFactory
+	{
+	public:
+		GPUDevice & mGPUDevice;
+
+	public:
+		PipelineImmutableStateFactorySeparableShader( GPUDevice & pGPUDevice );
+		virtual ~PipelineImmutableStateFactorySeparableShader();
+
+		virtual GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageState( const GraphicsShaderSet & pShaderSet ) override;
+	};
+
 	class PipelineImmutableStateFactoryAdapter
 	{
 	public:
-		PipelineImmutableStateFactoryAdapter( PipelineImmutableStateFactory & pFactory );
+		PipelineImmutableStateFactoryAdapter( PipelineImmutableStateFactory & pStateFactory );
 		~PipelineImmutableStateFactoryAdapter();
 
 		BlendImmutableStateHandle createState( const BlendConfig & pConfig );
@@ -68,22 +99,6 @@ namespace ts3::gpuapi
 
 	private:
 		PipelineImmutableStateFactory * _stateFactory;
-	};
-
-	/// @brief
-	class PipelineImmutableStateFactoryNull : public PipelineImmutableStateFactory
-	{
-	public:
-		virtual ~PipelineImmutableStateFactoryNull() = default;
-
-		virtual BlendImmutableStateHandle createBlendState( const BlendConfig & ) override final;
-		virtual DepthStencilImmutableStateHandle createDepthStencilState( const DepthStencilConfig & ) override final;
-		virtual GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageState( const GraphicsShaderSet & ) override final;
-		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & ) override final;
-		virtual IAVertexStreamImmutableStateHandle createIAVertexStreamState( const IAVertexStreamDefinition & ) override final;
-		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerConfig & ) override final;
-		virtual RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & ) override final;
-		virtual RenderPassImmutableStateHandle createRenderPassState( const RenderPassConfiguration & ) override final;
 	};
 
 } // namespace ts3::gpuapi

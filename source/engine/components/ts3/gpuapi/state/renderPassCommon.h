@@ -115,7 +115,7 @@ namespace ts3::gpuapi
 	{
 
 		TS3_GPUAPI_API_NO_DISCARD Bitmask<ERenderPassActionFlags> getRenderPassAttachmentActionMask(
-				const RenderPassAttachmentDesc & pAttachmentDesc );
+				const RenderPassAttachmentUsage & pAttachmentUsage );
 
 	}
 

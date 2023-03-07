@@ -4,6 +4,7 @@
 #ifndef __TS3_GPUAPI_RENDER_TARGET_TEXTURE_H__
 #define __TS3_GPUAPI_RENDER_TARGET_TEXTURE_H__
 
+#include "gpuResource.h"
 #include "textureReference.h"
 
 namespace ts3::gpuapi
@@ -29,17 +30,18 @@ namespace ts3::gpuapi
 	/// @brief
 	struct RenderTargetTextureCreateInfo
 	{
+		TextureReference targetTexture;
 		RenderTargetTextureLayout rttLayout;
 		Bitmask<ETextureBindFlags> bindFlags;
 	};
 
 	/// @brief
-	class RenderTargetTexture
+	class RenderTargetTexture : public GPUResourceWrapper
 	{
 	public:
 		ERenderTargetTextureType const mRTTextureType;
 
-		RenderTargetTextureLayout const mRTTLayout;
+		RenderTargetTextureLayout const mRTTextureLayout;
 
 	public:
 		RenderTargetTexture(
@@ -47,15 +49,19 @@ namespace ts3::gpuapi
 			ERenderTargetTextureType pRTTextureType,
 			const RenderTargetTextureLayout & pRTTextureLayout );
 
-		explicit RenderTargetTexture( TextureHandle pTargetTexture );
-
 		virtual ~RenderTargetTexture();
 
 		///
-		TS3_ATTR_NO_DISCARD TextureHandle getTargetTexture() const;
+		TS3_ATTR_NO_DISCARD TextureHandle getTargetTexture() const noexcept;
 
 		///
-		TS3_ATTR_NO_DISCARD bool isDepthStencilRenderBuffer() const;
+		TS3_ATTR_NO_DISCARD bool empty() const noexcept;
+
+		///
+		TS3_ATTR_NO_DISCARD bool isDepthStencilTexture() const noexcept;
+
+		///
+		TS3_ATTR_NO_DISCARD bool isDepthStencilRenderBuffer() const noexcept;
 
 	protected:
 		void setTargetTexture( const TextureReference & pTargetTextureRef );
@@ -72,8 +78,10 @@ namespace ts3::gpuapi
 
 		TS3_GPUAPI_API_NO_DISCARD ERenderTargetTextureType queryRenderTargetTextureType( ETextureFormat pFormat );
 
+		TS3_GPUAPI_API_NO_DISCARD RenderTargetTextureLayout queryRenderTargetTextureLayout( const TextureLayout & pTextureLayout );
+
 		TS3_GPUAPI_API_NO_DISCARD bool validateRenderTextureLayout(
-				TextureHandle pTexture,
+				TextureHandle pTargetTexture,
 				const RenderTargetTextureLayout & pRTTextureLayout );
 
 	}

@@ -27,47 +27,52 @@ namespace ts3::gpuapi
 	                                                        InputDescriptorLayoutInfo & pOutDescriptorLayoutInfo );
 	static uint32 computeConstantDwordSize( size_t pByteSize );
 
-	ShaderInputSignature createShaderInputSignature( const ShaderInputSignatureDesc & pInputSignatureDesc )
+	namespace smutil
 	{
-		ShaderInputSignature inputSignature;
-		inputSignature.dwordSize = 0;
-		inputSignature.constantsNum = 0;
-		inputSignature.descriptorsNum = 0;
-		inputSignature.descriptorSetsNum = 0;
-		inputSignature.parametersNum = 0;
 
-		if( !createInputSignatureConstantLayout( pInputSignatureDesc, inputSignature ) )
+		ShaderInputSignature createShaderInputSignature( const ShaderInputSignatureDesc & pInputSignatureDesc )
 		{
-			return CX_INIT_EMPTY;
+			ShaderInputSignature inputSignature;
+			inputSignature.dwordSize = 0;
+			inputSignature.constantsNum = 0;
+			inputSignature.descriptorsNum = 0;
+			inputSignature.descriptorSetsNum = 0;
+			inputSignature.parametersNum = 0;
+
+			if( !createInputSignatureConstantLayout( pInputSignatureDesc, inputSignature ) )
+			{
+				return CX_INIT_EMPTY;
+			}
+
+			if( !createInputSignatureDescriptorLayout( pInputSignatureDesc, inputSignature ) )
+			{
+				return CX_INIT_EMPTY;
+			}
+
+			inputSignature.constantsNum = inputSignature.constantLayout.constantsNum;
+			inputSignature.descriptorsNum = inputSignature.descriptorLayout.totalDescriptorsNum;
+			inputSignature.descriptorSetsNum = inputSignature.descriptorLayout.descriptorSetsNum;
+			inputSignature.parametersNum = inputSignature.constantsNum + inputSignature.descriptorsNum;
+			inputSignature.dwordSize = inputSignature.constantLayout.dwordSize + inputSignature.descriptorSetsNum;
+
+			uint32 globalParamIndex = 0;
+
+			for( auto & constant : inputSignature.constantLayout.commonConstantArray )
+			{
+				constant.cParamIndex = globalParamIndex++;
+				inputSignature.commonParameterList.push_back( &constant );
+				inputSignature.constantMap[constant.cRefID] = &constant;
+			}
+			for( auto & resourceDescriptor : inputSignature.descriptorLayout.commonDescriptorArray )
+			{
+				resourceDescriptor.cParamIndex = globalParamIndex++;
+				inputSignature.commonParameterList.push_back( &resourceDescriptor );
+				inputSignature.descriptorMap[resourceDescriptor.cRefID] = &resourceDescriptor;
+			}
+
+			return inputSignature;
 		}
 
-		if( !createInputSignatureDescriptorLayout( pInputSignatureDesc, inputSignature ) )
-		{
-			return CX_INIT_EMPTY;
-		}
-
-		inputSignature.constantsNum = inputSignature.constantLayout.constantsNum;
-		inputSignature.descriptorsNum = inputSignature.descriptorLayout.totalDescriptorsNum;
-		inputSignature.descriptorSetsNum = inputSignature.descriptorLayout.descriptorSetsNum;
-		inputSignature.parametersNum = inputSignature.constantsNum + inputSignature.descriptorsNum;
-		inputSignature.dwordSize = inputSignature.constantLayout.dwordSize + inputSignature.descriptorSetsNum;
-
-		uint32 globalParamIndex = 0;
-
-		for( auto & constant : inputSignature.constantLayout.commonConstantArray )
-		{
-			constant.cParamIndex = globalParamIndex++;
-			inputSignature.commonParameterList.push_back( &constant );
-			inputSignature.constantMap[constant.cRefID] = &constant;
-		}
-		for( auto & resourceDescriptor : inputSignature.descriptorLayout.commonDescriptorArray )
-		{
-			resourceDescriptor.cParamIndex = globalParamIndex++;
-			inputSignature.commonParameterList.push_back( &resourceDescriptor );
-			inputSignature.descriptorMap[resourceDescriptor.cRefID] = &resourceDescriptor;
-		}
-
-		return inputSignature;
 	}
 
 	bool createInputSignatureConstantLayout( const ShaderInputSignatureDesc & pInputSignatureDesc, ShaderInputSignature & pOutSignature )

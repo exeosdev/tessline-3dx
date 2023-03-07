@@ -98,8 +98,8 @@ namespace ts3::gpuapi
 	}
 
 
-	const Bitmask<ECommandListFlags> CommandContextDirectTransfer::sListFlagsDirectTransfer = E_COMMAND_LIST_FLAG_EXECUTION_MODE_DIRECT_BIT |
-	                                                                                         E_COMMAND_LIST_FLAG_COMMAND_CLASS_TRANSFER_BIT;
+	const Bitmask<ECommandListFlags> CommandContextDirectTransfer::sListFlagsDirectTransfer =
+			E_COMMAND_LIST_FLAG_EXECUTION_MODE_DIRECT_BIT | E_COMMAND_LIST_FLAG_COMMAND_CLASS_TRANSFER_BIT;
 
 	bool CommandContextDirectTransfer::updateBufferDataCopy( GPUBuffer & pBuffer, GPUBuffer & pSourceBuffer, const GPUBufferDataCopyDesc & pCopyDesc )
 	{
@@ -126,8 +126,8 @@ namespace ts3::gpuapi
 	}
 
 
-	const Bitmask<ECommandListFlags> CommandContextDirectCompute::sListFlagsDirectCompute = E_COMMAND_LIST_FLAG_EXECUTION_MODE_DIRECT_BIT |
-	                                                                                       E_COMMAND_LIST_FLAG_COMMAND_CLASS_COMPUTE_BIT;
+	const Bitmask<ECommandListFlags> CommandContextDirectCompute::sListFlagsDirectCompute =
+			E_COMMAND_LIST_FLAG_EXECUTION_MODE_DIRECT_BIT | E_COMMAND_LIST_FLAG_COMMAND_CLASS_COMPUTE_BIT;
 
 	void CommandContextDirectCompute::dispatchCompute( uint32 pThrGroupSizeX, uint32 pThrGroupSizeY, uint32 pThrGroupSizeZ )
 	{
@@ -142,32 +142,8 @@ namespace ts3::gpuapi
 	}
 
 
-	const Bitmask<ECommandListFlags> CommandContextDirectGraphics::sListFlagsDirectGraphics = E_COMMAND_LIST_FLAG_EXECUTION_MODE_DIRECT_BIT |
-	                                                                                         E_COMMAND_LIST_FLAG_COMMAND_CLASS_GRAPHICS_BIT;
-
-	void CommandContextDirectGraphics::setColorBufferClearValue( const math::RGBAColorR32Norm & pColorClearValue )
-	{
-		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
-		return mCommandList->setColorBufferClearValue( pColorClearValue );
-	}
-
-	void CommandContextDirectGraphics::setDepthBufferClearValue( float pDepthClearValue )
-	{
-		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
-		return mCommandList->setDepthBufferClearValue( pDepthClearValue );
-	}
-
-	void CommandContextDirectGraphics::setStencilBufferClearValue( uint8 pStencilClearValue )
-	{
-		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
-		return mCommandList->setStencilBufferClearValue( pStencilClearValue );
-	}
-
-	void CommandContextDirectGraphics::clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask )
-	{
-		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
-		return mCommandList->clearRenderTarget( pAttachmentMask );
-	}
+	const Bitmask<ECommandListFlags> CommandContextDirectGraphics::sListFlagsDirectGraphics =
+			E_COMMAND_LIST_FLAG_EXECUTION_MODE_DIRECT_BIT | E_COMMAND_LIST_FLAG_COMMAND_CLASS_GRAPHICS_BIT;
 
 	void CommandContextDirectGraphics::setViewport( const ViewportDesc & pViewportDesc )
 	{
@@ -175,16 +151,10 @@ namespace ts3::gpuapi
 		return mCommandList->setViewport( pViewportDesc );
 	}
 
-	bool CommandContextDirectGraphics::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
+	bool CommandContextDirectGraphics::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
-		return mCommandList->setGraphicsPipelineStateObject( pGraphicsPipelineSO );
-	}
-
-	bool CommandContextDirectGraphics::setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO )
-	{
-		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
-		return mCommandList->setRenderTargetStateObject( pRenderTargetSO );
+		return mCommandList->setGraphicsPipelineStateObject( pGraphicsPSO );
 	}
 
 	bool CommandContextDirectGraphics::setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData )
@@ -257,32 +227,8 @@ namespace ts3::gpuapi
 	}
 
 
-	const Bitmask<ECommandListFlags> CommandContextDeferredGraphics::sListFlagsDeferredGraphics = E_COMMAND_LIST_FLAG_EXECUTION_MODE_DEFERRED_BIT |
-	                                                                                             E_COMMAND_LIST_FLAG_COMMAND_CLASS_GRAPHICS_BIT;
-
-	void CommandContextDeferredGraphics::setColorBufferClearValue( const math::RGBAColorR32Norm & pColorClearValue )
-	{
-		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
-		return mCommandList->setColorBufferClearValue( pColorClearValue );
-	}
-
-	void CommandContextDeferredGraphics::setDepthBufferClearValue( float pDepthClearValue )
-	{
-		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
-		return mCommandList->setDepthBufferClearValue( pDepthClearValue );
-	}
-
-	void CommandContextDeferredGraphics::setStencilBufferClearValue( uint8 pStencilClearValue )
-	{
-		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
-		return mCommandList->setStencilBufferClearValue( pStencilClearValue );
-	}
-
-	void CommandContextDeferredGraphics::clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask )
-	{
-		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
-		return mCommandList->clearRenderTarget( pAttachmentMask );
-	}
+	const Bitmask<ECommandListFlags> CommandContextDeferredGraphics::sListFlagsDeferredGraphics =
+			E_COMMAND_LIST_FLAG_EXECUTION_MODE_DEFERRED_BIT | E_COMMAND_LIST_FLAG_COMMAND_CLASS_GRAPHICS_BIT;
 
 	void CommandContextDeferredGraphics::setViewport( const ViewportDesc & pViewportDesc )
 	{
@@ -290,16 +236,10 @@ namespace ts3::gpuapi
 		return mCommandList->setViewport( pViewportDesc );
 	}
 
-	bool CommandContextDeferredGraphics::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
+	bool CommandContextDeferredGraphics::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
-		return mCommandList->setGraphicsPipelineStateObject( pGraphicsPipelineSO );
-	}
-
-	bool CommandContextDeferredGraphics::setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO )
-	{
-		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
-		return mCommandList->setRenderTargetStateObject( pRenderTargetSO );
+		return mCommandList->setGraphicsPipelineStateObject( pGraphicsPSO );
 	}
 
 	bool CommandContextDeferredGraphics::setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData )

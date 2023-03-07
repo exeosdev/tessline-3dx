@@ -1,5 +1,6 @@
 
 #include "graphicsPipelineImmutableState.h"
+#include "graphicsShaderLinkageImmutableState.h"
 
 namespace ts3::gpuapi
 {
@@ -13,6 +14,77 @@ namespace ts3::gpuapi
 	EGraphicsPipelineImmutableStateType GraphicsPipelineImmutableState::queryStateType() const noexcept
 	{
 		return EGraphicsPipelineImmutableStateType::Unknown;
+	}
+
+
+	PipelineImmutableStateFactorySeparableShader::PipelineImmutableStateFactorySeparableShader( GPUDevice & pGPUDevice )
+	: mGPUDevice( pGPUDevice )
+	{}
+
+	PipelineImmutableStateFactorySeparableShader::~PipelineImmutableStateFactorySeparableShader() = default;
+
+	GraphicsShaderLinkageImmutableStateHandle PipelineImmutableStateFactorySeparableShader::createGraphicsShaderLinkageState(
+			const GraphicsShaderSet & pShaderSet )
+	{
+		if( !pShaderSet[EShaderType::GSVertex] || !pShaderSet[EShaderType::GSPixel] )
+		{
+			return nullptr;
+		}
+
+		if( !pShaderSet.validateShaders() )
+		{
+			return nullptr;
+		}
+
+		const auto stateCommonProperties = smutil::getGraphicsShaderLinkageCommonPropertiesForShaderSet( pShaderSet );
+
+		const auto shaderImmutableState = createGPUAPIObject<GraphicsShaderImmutableStateSeparable>(
+				mGPUDevice,
+				std::move( pShaderSet ),
+				stateCommonProperties );
+
+		return shaderImmutableState;
+	}
+
+
+	BlendImmutableStateHandle PipelineImmutableStateFactoryNull::createBlendState( const BlendConfig & )
+	{
+		return nullptr;
+	}
+
+	DepthStencilImmutableStateHandle PipelineImmutableStateFactoryNull::createDepthStencilState( const DepthStencilConfig & )
+	{
+		return nullptr;
+	}
+
+	GraphicsShaderLinkageImmutableStateHandle PipelineImmutableStateFactoryNull::createGraphicsShaderLinkageState( const GraphicsShaderSet & )
+	{
+		return nullptr;
+	}
+
+	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryNull::createIAInputLayoutState( const IAInputLayoutDefinition & )
+	{
+		return nullptr;
+	}
+
+	IAVertexStreamImmutableStateHandle PipelineImmutableStateFactoryNull::createIAVertexStreamState( const IAVertexStreamDefinition & )
+	{
+		return nullptr;
+	}
+
+	RasterizerImmutableStateHandle PipelineImmutableStateFactoryNull::createRasterizerState( const RasterizerConfig & )
+	{
+		return nullptr;
+	}
+
+	RenderTargetBindingImmutableStateHandle PipelineImmutableStateFactoryNull::createRenderTargetBindingState( const RenderTargetBindingDefinition & )
+	{
+		return nullptr;
+	}
+
+	RenderPassImmutableStateHandle PipelineImmutableStateFactoryNull::createRenderPassState( const RenderPassConfiguration & )
+	{
+		return nullptr;
 	}
 
 
@@ -60,47 +132,6 @@ namespace ts3::gpuapi
 	RenderPassImmutableStateHandle PipelineImmutableStateFactoryAdapter::createState( const RenderPassConfiguration & pConfiguration )
 	{
 		return _stateFactory->createRenderPassState( pConfiguration );
-	}
-
-
-	BlendImmutableStateHandle PipelineImmutableStateFactoryNull::createBlendState( const BlendConfig & )
-	{
-		return nullptr;
-	}
-
-	DepthStencilImmutableStateHandle PipelineImmutableStateFactoryNull::createDepthStencilState( const DepthStencilConfig & )
-	{
-		return nullptr;
-	}
-
-	GraphicsShaderLinkageImmutableStateHandle PipelineImmutableStateFactoryNull::createGraphicsShaderLinkageState( const GraphicsShaderSet & )
-	{
-		return nullptr;
-	}
-
-	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryNull::createIAInputLayoutState( const IAInputLayoutDefinition & )
-	{
-		return nullptr;
-	}
-
-	IAVertexStreamImmutableStateHandle PipelineImmutableStateFactoryNull::createIAVertexStreamState( const IAVertexStreamDefinition & )
-	{
-		return nullptr;
-	}
-
-	RasterizerImmutableStateHandle PipelineImmutableStateFactoryNull::createRasterizerState( const RasterizerConfig & )
-	{
-		return nullptr;
-	}
-
-	RenderTargetBindingImmutableStateHandle PipelineImmutableStateFactoryNull::createRenderTargetBindingState( const RenderTargetBindingDefinition & )
-	{
-		return nullptr;
-	}
-
-	RenderPassImmutableStateHandle PipelineImmutableStateFactoryNull::createRenderPassState( const RenderPassConfiguration & )
-	{
-		return nullptr;
 	}
 
 } // namespace ts3::gpuapi

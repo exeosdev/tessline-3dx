@@ -30,45 +30,4 @@ namespace ts3::gpuapi
 
 	GraphicsPipelineStateObject::~GraphicsPipelineStateObject() = default;
 
-	bool GraphicsPipelineStateObject::createCommonPSOState(
-			const GraphicsPipelineStateObjectCreateInfo & pCreateInfo,
-			CommonPSOState & pOutputState )
-	{
-		if( !pCreateInfo.shaderBindingDesc || !pCreateInfo.shaderInputSignatureDesc )
-		{
-			return false;
-		}
-
-		if( pCreateInfo.renderTargetLayout )
-		{
-			pOutputState.renderTargetLayout = *( pCreateInfo.renderTargetLayout );
-		}
-		else
-		{
-			if( !createRenderTargetLayout( pCreateInfo.renderTargetLayoutDesc, pOutputState.renderTargetLayout ) )
-			{
-				return false;
-			}
-		}
-
-		auto graphicsShaderBinding = GraphicsShaderBinding::createFromDesc( *( pCreateInfo.shaderBindingDesc ) );
-		if( !graphicsShaderBinding )
-		{
-			return false;
-		}
-
-		auto shaderInputSignature = createShaderInputSignature( *( pCreateInfo.shaderInputSignatureDesc ) );
-		if( !shaderInputSignature )
-		{
-			// WARN here, no shader resources specified - valid situation, but very unlikely
-		}
-
-		pOutputState.shaderInputSignature = std::move( shaderInputSignature );
-
-		return true;
-	}
-
-
-
-
 } // namespace ts3::gpuapi

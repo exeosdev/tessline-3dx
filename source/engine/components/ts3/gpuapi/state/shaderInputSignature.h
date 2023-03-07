@@ -278,7 +278,12 @@ namespace ts3::gpuapi
 		}
 	};
 
-	TS3_GPUAPI_API ShaderInputSignature createShaderInputSignature( const ShaderInputSignatureDesc & pSignatureDesc );
+	namespace smutil
+	{
+
+		TS3_GPUAPI_API ShaderInputSignature createShaderInputSignature( const ShaderInputSignatureDesc & pSignatureDesc );
+
+	}
 
 } // namespace ts3::gpuapi
 

@@ -5,43 +5,29 @@
 namespace ts3::gpuapi
 {
 
-	SeparableGraphicsPipelineStateObject::SeparableGraphicsPipelineStateObject( GPUDevice & pGPUDevice,
-	                                                                            RenderTargetLayout pRenderTargetLayout,
-	                                                                            GraphicsShaderBinding pShaderBinding,
-	                                                                            ShaderInputSignature pShaderInputSignature,
-	                                                                            const SeparableGraphicsStateDescriptorSet & pStateDescriptors )
-	: GraphicsPipelineStateObject( pGPUDevice, std::move( pRenderTargetLayout ), std::move( pShaderInputSignature ) )
-	, mShaderBinding( std::move( pShaderBinding ) )
-	, mSeparableDescriptorSet( pStateDescriptors )
-	{}
+	GraphicsPipelineStateControllerSeparable::GraphicsPipelineStateControllerSeparable() = default;
 
-	SeparableGraphicsPipelineStateObject::~SeparableGraphicsPipelineStateObject() = default;
+	GraphicsPipelineStateControllerSeparable::~GraphicsPipelineStateControllerSeparable() = default;
 
-
-	SeparableGraphicsPipelineStateController::SeparableGraphicsPipelineStateController()
-	: GraphicsPipelineStateController()
-	{}
-
-	SeparableGraphicsPipelineStateController::~SeparableGraphicsPipelineStateController() = default;
-
-	bool SeparableGraphicsPipelineStateController::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
+	const SeparablePSOStateSet & GraphicsPipelineStateControllerSeparable::getCurrentSeparableStates() const noexcept
 	{
-		// Call the base method. This will check the provided SO against the current one (and maybe some extra checks).
-		// If this returns false, it means we should skip this call and do not update anything.
-		bool updateResult = GraphicsPipelineStateController::setGraphicsPipelineStateObject( pGraphicsPipelineSO );
+		return _currentSeparableStates;
+	}
 
-		if( updateResult && _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT ) )
+	bool GraphicsPipelineStateControllerSeparable::setGraphicsPipelineStateObject(
+			const GraphicsPipelineStateObject & pGraphicsPSO )
+	{
+		bool updateResult = GraphicsPipelineStateController::setGraphicsPipelineStateObject( pGraphicsPSO );
+
+		if( updateResult && _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_PSO_BIT ) )
 		{
-			const auto * separableGPSO = pGraphicsPipelineSO.queryInterface<SeparableGraphicsPipelineStateObject>();
+			const auto * graphicsPSOSeparable = pGraphicsPSO.queryInterface<GraphicsPipelineStateObjectSeparable>();
 
-			// Update the pdesc. Returned mask is a combination of all E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_*_BIT
-			// bits for stages which has been updated. Zero means all pdesc in the PSO match those currently bound.
-			const auto descriptorsUpdateMask = setGraphicsPSODescriptors( *separableGPSO );
+			// Update the individual states. Returned mask is a combination of all E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_*_BIT
+			// bits for states which has been updated. Zero means all states in the PSO match those currently bound.
+			const auto stateUpdateMask = setSeparablePSOStates( *graphicsPSOSeparable );
 
-			// Update the shaders. This mask represents updated shader stages (just like for pdesc).
-			const auto shadersUpdateMask = setGraphicsPSOShaders( *separableGPSO );
-
-			if( descriptorsUpdateMask.empty() && shadersUpdateMask.empty() )
+			if( stateUpdateMask.empty() )
 			{
 				// It is absolutely possible to have two different PSOs that ended up having the same shaders and pdesc:
 				// for separable states we use cache to ensure each unique state combination is represented by only one
@@ -50,101 +36,153 @@ namespace ts3::gpuapi
 				// TODO: This is a rather unwanted scenario. Maybe some logging here would be accurate?
 				updateResult = false;
 
-				// Clear all bits related to separable states.
-				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_SEPARABLE_ALL_BITS_MASK );
+				// Clear all bits related to all separable states.
+				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATES_ALL );
 
-				// Clear the bit for graphics SO. There is nothing to set.
-				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT );
+				// Clear the bit for the graphics PSO itself. There is nothing to set.
+				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_COMMON_PSO_BIT );
 			}
 		}
 
 		return updateResult;
 	}
 
-	bool SeparableGraphicsPipelineStateController::resetGraphicsPipelineStateObject()
+	bool GraphicsPipelineStateControllerSeparable::resetGraphicsPipelineStateObject()
 	{
 		return GraphicsPipelineStateController::resetGraphicsPipelineStateObject();
 	}
 
-	Bitmask<uint64> SeparableGraphicsPipelineStateController::setGraphicsPSODescriptors( const SeparableGraphicsPipelineStateObject & pSeparableGSPO )
+	Bitmask<uint64> GraphicsPipelineStateControllerSeparable::setSeparablePSOStates(
+			const GraphicsPipelineStateObjectSeparable & pGraphicsPSOSeparable )
 	{
-		auto descriptorsUpdateMask = makeBitmask<uint64>( 0 );
+		auto stateUpdateMask = makeBitmask<uint64>( 0 );
 
-		const auto blendStateDescriptorID = pSeparableGSPO.mSeparableDescriptorSet.blendDescriptorID;
-		if( blendStateDescriptorID != _currentSeparableStateDescriptors.blendDescriptorID )
+		const auto * blendState = pGraphicsPSOSeparable.mSeparableStates.blendState;
+		if( blendState != _currentSeparableStates.blendState )
 		{
-			_currentSeparableStateDescriptors.blendDescriptorID = blendStateDescriptorID;
-			descriptorsUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_BLEND_BIT );
+			_currentSeparableStates.blendState = blendState;
+			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_BLEND_BIT );
 		}
 
-		const auto depthStencilDescriptorID = pSeparableGSPO.mSeparableDescriptorSet.depthStencilDescriptorID;
-		if( depthStencilDescriptorID != _currentSeparableStateDescriptors.depthStencilDescriptorID )
+		const auto * depthStencilState = pGraphicsPSOSeparable.mSeparableStates.depthStencilState;
+		if( depthStencilState != _currentSeparableStates.depthStencilState )
 		{
-			_currentSeparableStateDescriptors.depthStencilDescriptorID = depthStencilDescriptorID;
-			descriptorsUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_DEPTH_STENCIL_BIT );
+			_currentSeparableStates.depthStencilState = depthStencilState;
+			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_DEPTH_STENCIL_BIT );
 		}
 
-		const auto rasterizerDescriptorID = pSeparableGSPO.mSeparableDescriptorSet.rasterizerDescriptorID;
-		if( rasterizerDescriptorID != _currentSeparableStateDescriptors.rasterizerDescriptorID )
+		const auto * rasterizerState = pGraphicsPSOSeparable.mSeparableStates.rasterizerState;
+		if( rasterizerState != _currentSeparableStates.rasterizerState )
 		{
-			_currentSeparableStateDescriptors.rasterizerDescriptorID = rasterizerDescriptorID;
-			descriptorsUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_RASTERIZER_BIT );
+			_currentSeparableStates.rasterizerState = rasterizerState;
+			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_RASTERIZER_BIT );
 		}
 
-		const auto vertexInputFormatDescriptorID = pSeparableGSPO.mSeparableDescriptorSet.vertexInputFormatDescriptorID;
-		if( vertexInputFormatDescriptorID != _currentSeparableStateDescriptors.vertexInputFormatDescriptorID )
+		const auto * iaInputLayoutState = pGraphicsPSOSeparable.mSeparableStates.iaInputLayoutState;
+		if( iaInputLayoutState != _currentSeparableStates.iaInputLayoutState )
 		{
-			_currentSeparableStateDescriptors.vertexInputFormatDescriptorID = vertexInputFormatDescriptorID;
-			descriptorsUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_VERTEX_INPUT_FORMAT_BIT );
+			_currentSeparableStates.iaInputLayoutState = iaInputLayoutState;
+			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_IA_INPUT_LAYOUT_BIT );
 		}
 
-		_stateUpdateMask.set( descriptorsUpdateMask );
+		const auto * shaderLinkageState = pGraphicsPSOSeparable.mSeparableStates.shaderLinkageState;
+		if( shaderLinkageState != _currentSeparableStates.shaderLinkageState )
+		{
+			_currentSeparableStates.shaderLinkageState = shaderLinkageState;
+			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_SHADER_LINKAGE_BIT );
+		}
 
-		return descriptorsUpdateMask;
+		_stateUpdateMask.set( stateUpdateMask );
+
+		return stateUpdateMask;
 	}
 
-	Bitmask<uint64> SeparableGraphicsPipelineStateController::setGraphicsPSOShaders( const SeparableGraphicsPipelineStateObject & pSeparableGSPO )
+
+	GraphicsPipelineStateControllerSeparableShader::GraphicsPipelineStateControllerSeparableShader() = default;
+
+	GraphicsPipelineStateControllerSeparableShader::~GraphicsPipelineStateControllerSeparableShader() = default;
+
+	const SeparableShaderSet & GraphicsPipelineStateControllerSeparableShader::getCurrentSeparableShaders() const noexcept
 	{
-		auto shadersUpdateMask = makeBitmask<uint64>( 0 );
+		return _currentSeparableShaders;
+	}
 
-		auto * vertexShader = pSeparableGSPO.mShaderBinding[EGraphicsShaderStageID::Vertex];
-		if( vertexShader != _currentSeparableShaderBinding.vertexShader )
+	bool GraphicsPipelineStateControllerSeparableShader::setGraphicsPipelineStateObject(
+			const GraphicsPipelineStateObject & pGraphicsPSO )
+	{
+		bool updateResult = GraphicsPipelineStateControllerSeparable::setGraphicsPipelineStateObject( pGraphicsPSO );
+
+		if( updateResult && _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_SHADER_LINKAGE_BIT ) )
 		{
-			_currentSeparableShaderBinding.vertexShader = vertexShader;
-			shadersUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_VERTEX_STAGE_BIT );
+			const auto * graphicsPSOSeparableShader = pGraphicsPSO.queryInterface<GraphicsPipelineStateObjectSeparableShader>();
+
+			// Update the individual states. Returned mask is a combination of all E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_*_BIT
+			// bits for states which has been updated. Zero means all states in the PSO match those currently bound.
+			const auto stateUpdateMask = setSeparableShaders( *graphicsPSOSeparableShader );
+
+			if( stateUpdateMask.empty() )
+			{
+				updateResult = false;
+
+				// Clear all bits related to all separable shader stages.
+				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADERS_ALL );
+
+				// Clear the bit for shader linkage state.
+				_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_SHADER_LINKAGE_BIT );
+			}
 		}
 
-		auto * tessControlShader = pSeparableGSPO.mShaderBinding[EGraphicsShaderStageID::Hull];
-		if( tessControlShader != _currentSeparableShaderBinding.tessControlShader )
+		return updateResult;
+	}
+
+	bool GraphicsPipelineStateControllerSeparableShader::resetGraphicsPipelineStateObject()
+	{
+		return GraphicsPipelineStateControllerSeparable::resetGraphicsPipelineStateObject();
+	}
+
+	Bitmask<uint64> GraphicsPipelineStateControllerSeparableShader::setSeparableShaders(
+			const GraphicsPipelineStateObjectSeparableShader & pGraphicsPSOSeparableShader )
+	{
+		auto stateUpdateMask = makeBitmask<uint64>( 0 );
+
+		auto * vertexShader = pGraphicsPSOSeparableShader.mSeparableShaders[EShaderType::GSVertex];
+		if( vertexShader != _currentSeparableShaders.vertexShader )
 		{
-			_currentSeparableShaderBinding.tessControlShader = tessControlShader;
-			shadersUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_HULL_STAGE_BIT );
+			_currentSeparableShaders.vertexShader = vertexShader;
+			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_VERTEX_STAGE_BIT );
 		}
 
-		auto * tessEvaluationShader = pSeparableGSPO.mShaderBinding[EGraphicsShaderStageID::Domain];
-		if( tessEvaluationShader != _currentSeparableShaderBinding.tessEvaluationShader )
+		auto * hullShader = pGraphicsPSOSeparableShader.mSeparableShaders[EShaderType::GSHull];
+		if( hullShader != _currentSeparableShaders.hullShader )
 		{
-			_currentSeparableShaderBinding.tessEvaluationShader = tessEvaluationShader;
-			shadersUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_DOMAIN_STAGE_BIT );
+			_currentSeparableShaders.hullShader = hullShader;
+			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_HULL_STAGE_BIT );
 		}
 
-		auto * geometryShader = pSeparableGSPO.mShaderBinding[EGraphicsShaderStageID::Geometry];
-		if( geometryShader != _currentSeparableShaderBinding.geometryShader )
+		auto * domainShader = pGraphicsPSOSeparableShader.mSeparableShaders[EShaderType::GSDomain];
+		if( domainShader != _currentSeparableShaders.domainShader )
 		{
-			_currentSeparableShaderBinding.geometryShader = geometryShader;
-			shadersUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_GEOMETRY_STAGE_BIT );
+			_currentSeparableShaders.domainShader = domainShader;
+			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_DOMAIN_STAGE_BIT );
 		}
 
-		auto * pixelShader = pSeparableGSPO.mShaderBinding[EGraphicsShaderStageID::Pixel];
-		if( pixelShader != _currentSeparableShaderBinding.pixelShader )
+		auto * geometryShader = pGraphicsPSOSeparableShader.mSeparableShaders[EShaderType::GSGeometry];
+		if( geometryShader != _currentSeparableShaders.geometryShader )
 		{
-			_currentSeparableShaderBinding.pixelShader = pixelShader;
-			shadersUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_PIXEL_STAGE_BIT );
+			_currentSeparableShaders.geometryShader = geometryShader;
+			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_GEOMETRY_STAGE_BIT );
 		}
 
-		_stateUpdateMask.set( shadersUpdateMask );
+		auto * pixelShader = pGraphicsPSOSeparableShader.mSeparableShaders[EShaderType::GSPixel];
+		if( pixelShader != _currentSeparableShaders.pixelShader )
+		{
+			_currentSeparableShaders.pixelShader = pixelShader;
+			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_PIXEL_STAGE_BIT );
+		}
 
-		return shadersUpdateMask;
+		_stateUpdateMask.set( stateUpdateMask );
+
+		return stateUpdateMask;
 	}
 
 } // namespace ts3::gpuapi

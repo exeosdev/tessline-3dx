@@ -121,6 +121,16 @@ namespace ts3::gpuapi
 	    return _drvCreateTexture( pCreateInfo );
 	}
 
+	RenderTargetTextureHandle GPUDevice::createRenderTargetTexture( const RenderTargetTextureCreateInfo & pCreateInfo )
+	{
+		return _drvCreateRenderTargetTexture( pCreateInfo );
+	}
+
+	GraphicsPipelineStateObjectHandle GPUDevice::createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
+	{
+		return _drvCreateGraphicsPipelineStateObject( pCreateInfo );
+	}
+
 	BlendImmutableStateHandle GPUDevice::createBlendImmutableState( const BlendConfig & pConfig )
 	{
 		ts3DebugAssert( _immutableStateFactory );
@@ -256,6 +266,36 @@ namespace ts3::gpuapi
 	bool GPUDevice::_drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer )
 	{
 		return true;
+	}
+
+	GPUBufferHandle GPUDevice::_drvCreateGPUBuffer( const GPUBufferCreateInfo & pCreateInfo )
+	{
+		return nullptr;
+	}
+
+	SamplerHandle GPUDevice::_drvCreateSampler( const SamplerCreateInfo & pCreateInfo )
+	{
+		return nullptr;
+	}
+
+	ShaderHandle GPUDevice::_drvCreateShader( const ShaderCreateInfo & pCreateInfo )
+	{
+		return nullptr;
+	}
+
+	TextureHandle GPUDevice::_drvCreateTexture( const TextureCreateInfo & pCreateInfo )
+	{
+		return nullptr;
+	}
+
+	RenderTargetTextureHandle GPUDevice::_drvCreateRenderTargetTexture( const RenderTargetTextureCreateInfo & pCreateInfo )
+	{
+		return nullptr;
+	}
+
+	GraphicsPipelineStateObjectHandle GPUDevice::_drvCreateGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
+	{
+		return nullptr;
 	}
 
 } // namespace ts3::gpuapi

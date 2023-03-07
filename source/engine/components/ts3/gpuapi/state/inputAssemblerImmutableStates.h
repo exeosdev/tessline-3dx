@@ -37,7 +37,7 @@ namespace ts3::gpuapi
 		IAInputLayoutImmutableState( const IAInputLayoutImmutableState & ) = delete;
 		IAInputLayoutImmutableState & operator=( const IAInputLayoutImmutableState & ) = delete;
 
-		IAInputLayoutImmutableState( GPUDevice & pGPUDevice );
+		IAInputLayoutImmutableState( GPUDevice & pGPUDevice, const IAInputLayoutStateCommonProperties & pCommonProperties );
 		virtual ~IAInputLayoutImmutableState();
 
 		TS3_ATTR_NO_DISCARD virtual EGraphicsPipelineImmutableStateType queryStateType() const noexcept override final;
@@ -53,7 +53,7 @@ namespace ts3::gpuapi
 		IAVertexStreamImmutableState( const IAVertexStreamImmutableState & ) = delete;
 		IAVertexStreamImmutableState & operator=( const IAVertexStreamImmutableState & ) = delete;
 
-		IAVertexStreamImmutableState( GPUDevice & pGPUDevice );
+		IAVertexStreamImmutableState( GPUDevice & pGPUDevice, const IAVertexStreamStateCommonProperties & pCommonProperties );
 		virtual ~IAVertexStreamImmutableState();
 
 		TS3_ATTR_NO_DISCARD virtual EGraphicsPipelineImmutableStateType queryStateType() const noexcept override final;

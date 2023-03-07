@@ -13,8 +13,7 @@ namespace ts3::gpuapi
         {
             ShaderCreateInfo shaderCreateInfo;
             shaderCreateInfo.shaderType = pShaderType;
-            shaderCreateInfo.sourceCode = pSource;
-            shaderCreateInfo.sourceCodeLength = pSourceLength;
+            shaderCreateInfo.shaderSourceView = bindMemoryView( pSource, pSourceLength );
 
             if( pGPUDevice.isDebugDevice() )
             {

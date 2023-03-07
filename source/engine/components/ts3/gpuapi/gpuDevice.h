@@ -6,14 +6,12 @@
 
 #include "commonCommandDefs.h"
 #include "displayCommon.h"
-#include "resources/commonGPUResourceDefs.h"
+#include "resources/textureCommon.h"
 #include "state/graphicsShaderState.h"
 #include "state/renderPassCommon.h"
 
 namespace ts3::gpuapi
 {
-
-	ts3GpaDeclareClassHandle( IAVertexStreamDescriptorSet );
 
 	class IAIndexBufferDescriptor;
 	class IAVertexBufferDescriptor;
@@ -74,6 +72,15 @@ namespace ts3::gpuapi
 		ShaderHandle createShader( const ShaderCreateInfo & pCreateInfo );
 		TextureHandle createTexture( const TextureCreateInfo & pCreateInfo );
 
+		/// @brief Creates an RTT using the provided CIS.
+		/// This function will automatically create a required resource, depending on the specified layout and usage.
+		/// It can either be an explicit texture object which can be retrieved later or an implicit render buffer
+		/// (e.g. if the RTT is supposed to be only a depth/stencil attachment used for depth and/or stencil testing).
+		RenderTargetTextureHandle createRenderTargetTexture( const RenderTargetTextureCreateInfo & pCreateInfo );
+
+		/// @brief
+		GraphicsPipelineStateObjectHandle createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo );
+
 		BlendImmutableStateHandle createBlendImmutableState( const BlendConfig & pConfig );
 		DepthStencilImmutableStateHandle createDepthStencilImmutableState( const DepthStencilConfig & pConfig );
 		GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageImmutableState( const GraphicsShaderSet & pShaderSet );
@@ -117,30 +124,6 @@ namespace ts3::gpuapi
 
 		void resetImmutableStateCache( Bitmask<EPipelineImmutableStateTypeFlags> pResetMask = E_PIPELINE_IMMUTABLE_STATE_TYPE_MASK_ALL );
 
-		/// @brief Creates an RTT using the provided CIS.
-		/// This function will automatically create a required resource, depending on the specified layout and usage.
-		/// It can either be an explicit texture object which can be retrieved later or an implicit render buffer
-		/// (e.g. if the RTT is supposed to be only a depth/stencil attachment used for depth and/or stencil testing).
-		TextureHandle createRenderTargetTexture( const RenderTargetTextureCreateInfo & pCreateInfo );
-
-		/// @brief Creates an RTT using the specified texture object and RT binding.
-		/// @param pTexture A texture object to use as a target texture. If null, the function will fail.
-		/// @param pBindFlags Bind flags for the created RTT. If texture does not support them, the function will fail.
-		/// @return A handle to the created RTT or null if the function failed.
-		/// This function will use the texture object as the referenced texture for the created RTT. Bind flags specify
-		/// how this RTT will be used for rendering and must be compatible with the texture object.
-		TextureHandle createRenderTargetTexture( TextureHandle pTexture, Bitmask<ETextureBindFlags> pBindFlags );
-
-		IAVertexStreamDescriptorSetHandle createIAVertexStreamDescriptorSet(
-				const ArrayView<IAVertexBufferDescriptorBindingDesc> & pIAVertexBufferDescriptorBindings,
-				const IAIndexBufferDescriptor & pIAIndexBufferDescriptor );
-
-		virtual GraphicsPipelineStateObjectHandle createGraphicsPipelineStateObject(
-				const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
-
-		virtual RenderTargetStateObjectHandle createRenderTargetStateObject(
-				const RenderTargetStateObjectCreateInfo & pCreateInfo ) { return nullptr; } // = 0;
-
 		virtual void waitForCommandSync( CommandSync & pCommandSync ) = 0;
 
 		void setPresentationLayer( PresentationLayerHandle pPresentationLayer );
@@ -158,14 +141,14 @@ namespace ts3::gpuapi
 
 	ts3driverApi( private ):
 		virtual bool _drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer );
-		virtual GPUBufferHandle _drvCreateGPUBuffer( const GPUBufferCreateInfo & pCreateInfo ) { return nullptr; }
-		virtual SamplerHandle _drvCreateSampler( const SamplerCreateInfo & pCreateInfo ) { return nullptr; }
-		virtual ShaderHandle _drvCreateShader( const ShaderCreateInfo & pCreateInfo ) { return nullptr; }
-		virtual TextureHandle _drvCreateTexture( const TextureCreateInfo & pCreateInfo ) { return nullptr; }
-		virtual TextureHandle _drvCreateRenderTargetTexture( const RenderTargetTextureCreateInfo & pCreateInfo ) { return nullptr; }
+		virtual GPUBufferHandle _drvCreateGPUBuffer( const GPUBufferCreateInfo & pCreateInfo );
+		virtual SamplerHandle _drvCreateSampler( const SamplerCreateInfo & pCreateInfo );
+		virtual ShaderHandle _drvCreateShader( const ShaderCreateInfo & pCreateInfo );
+		virtual TextureHandle _drvCreateTexture( const TextureCreateInfo & pCreateInfo );
+		virtual RenderTargetTextureHandle _drvCreateRenderTargetTexture( const RenderTargetTextureCreateInfo & pCreateInfo );
+		virtual GraphicsPipelineStateObjectHandle _drvCreateGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo );
 
 	protected:
-
 		CommandSystemHandle _commandSystem;
 		PresentationLayerHandle _presentationLayer;
 

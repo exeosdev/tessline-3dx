@@ -1,5 +1,6 @@
 
 #include "renderTargetTexture.h"
+#include "texture.h"
 
 namespace ts3::gpuapi
 {
@@ -8,25 +9,32 @@ namespace ts3::gpuapi
 			GPUDevice & pGPUDevice,
 			ERenderTargetTextureType pRTTextureType,
 			const RenderTargetTextureLayout & pRTTextureLayout )
-	: GPUResource( pGPUDevice, EGPUResourceBaseType::Texture, {} )
-	{}
-
-	RenderTargetTexture::RenderTargetTexture( TextureHandle pTargetTexture )
+	: GPUResourceWrapper( pGPUDevice, EGPUResourceBaseType::Texture )
+	, mRTTextureType( pRTTextureType )
+	, mRTTextureLayout( pRTTextureLayout )
 	{}
 
 	RenderTargetTexture::~RenderTargetTexture() = default;
 
-	TextureHandle RenderTargetTexture::getTargetTexture() const
+	TextureHandle RenderTargetTexture::getTargetTexture() const noexcept
 	{
+		return _targetTexture.getRefTexture();
 	}
 
-	bool RenderTargetTexture::isDepthStencilRenderBuffer() const
+	bool RenderTargetTexture::isDepthStencilTexture() const noexcept
 	{
+		return ( mRTTextureType == ERenderTargetTextureType::RTDepth ) ||
+		       ( mRTTextureType == ERenderTargetTextureType::RTDepthStencil );
 	}
 
-	void RenderTargetTexture::setTargetTexture( TextureHandle pTargetTexture )
+	bool RenderTargetTexture::isDepthStencilRenderBuffer() const noexcept
 	{
-		_targetTexture = pTargetTexture;
+		return _targetTexture.empty() && isDepthStencilTexture();
+	}
+
+	void RenderTargetTexture::setTargetTexture( const TextureReference & pTargetTextureRef )
+	{
+		_targetTexture = pTargetTextureRef;
 	}
 
 	namespace rcutil
@@ -53,6 +61,35 @@ namespace ts3::gpuapi
 				ts3DebugAssert( rcutil::checkRenderTargetTextureColorFormat( pFormat ) );
 				return ERenderTargetTextureType::RTColor;
 			}
+		}
+
+		RenderTargetTextureLayout queryRenderTargetTextureLayout( const TextureLayout & pTextureLayout )
+		{
+			RenderTargetTextureLayout rtTextureLayout{};
+			rtTextureLayout.bufferSize.width = pTextureLayout.dimensions.width;
+			rtTextureLayout.bufferSize.height = pTextureLayout.dimensions.height;
+			rtTextureLayout.internalDataFormat = pTextureLayout.pixelFormat;
+			rtTextureLayout.msaaLevel = pTextureLayout.msaaLevel;
+
+			return rtTextureLayout;
+		}
+
+		bool validateRenderTextureLayout( TextureHandle pTargetTexture, const RenderTargetTextureLayout & pRTTextureLayout )
+		{
+			if( !pTargetTexture )
+			{
+				return false;
+			}
+
+			const auto & targetTextureLayout = pTargetTexture->mTextureLayout;
+
+			const auto layoutMatch =
+				( pRTTextureLayout.bufferSize.width == targetTextureLayout.dimensions.width ) &&
+				( pRTTextureLayout.bufferSize.height == targetTextureLayout.dimensions.height ) &&
+				( pRTTextureLayout.internalDataFormat == targetTextureLayout.pixelFormat ) &&
+				( pRTTextureLayout.msaaLevel == targetTextureLayout.msaaLevel );
+
+			return layoutMatch;
 		}
 
 	}

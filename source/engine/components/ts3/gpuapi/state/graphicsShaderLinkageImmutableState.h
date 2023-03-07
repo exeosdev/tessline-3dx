@@ -26,12 +26,11 @@ namespace ts3::gpuapi
 		GraphicsShaderLinkageImmutableState( const GraphicsShaderLinkageImmutableState & ) = delete;
 		GraphicsShaderLinkageImmutableState & operator=( const GraphicsShaderLinkageImmutableState & ) = delete;
 
-		GraphicsShaderLinkageImmutableState( GPUDevice & pGPUDevice, const GraphicsShaderLinkageCommonProperties & pCommonProperties )
-		: GraphicsPipelineImmutableState( pGPUDevice )
-		, mCommonProperties( pCommonProperties )
-		{}
+		GraphicsShaderLinkageImmutableState(
+				GPUDevice & pGPUDevice,
+				const GraphicsShaderLinkageCommonProperties & pCommonProperties );
 
-		virtual ~GraphicsShaderLinkageImmutableState() = default;
+		virtual ~GraphicsShaderLinkageImmutableState();
 
 		TS3_ATTR_NO_DISCARD bool isStageActive( uint32 pStageIndex ) const noexcept
 		{
@@ -48,6 +47,32 @@ namespace ts3::gpuapi
 			return mCommonProperties.activeStagesNum;
 		}
 	};
+
+	/// @brief
+	class GraphicsShaderImmutableStateSeparable : public GraphicsShaderLinkageImmutableState
+	{
+	public:
+		GraphicsShaderSet const mShaderSet;
+
+	public:
+		GraphicsShaderImmutableStateSeparable( const GraphicsShaderImmutableStateSeparable & ) = delete;
+		GraphicsShaderImmutableStateSeparable & operator=( const GraphicsShaderImmutableStateSeparable & ) = delete;
+
+		GraphicsShaderImmutableStateSeparable(
+				GPUDevice & pGPUDevice,
+				const GraphicsShaderSet & pShaderSet,
+				const GraphicsShaderLinkageCommonProperties & pCommonProperties );
+
+		virtual ~GraphicsShaderImmutableStateSeparable();
+	};
+
+	namespace smutil
+	{
+
+		TS3_GPUAPI_API_NO_DISCARD GraphicsShaderLinkageCommonProperties getGraphicsShaderLinkageCommonPropertiesForShaderSet(
+				const GraphicsShaderSet & pShaderSet ) noexcept;
+
+	}
 
 } // namespace ts3::gpuapi
 

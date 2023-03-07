@@ -48,9 +48,9 @@ namespace ts3::gpuapi
 
 		GraphicsShaderSet & operator=( const GraphicsShaderArray & pRhs );
 
-		TS3_ATTR_NO_DISCARD const ShaderRefType & operator[]( size_t pIndex ) const noexcept;
+		TS3_ATTR_NO_DISCARD Shader * operator[]( size_t pIndex ) const noexcept;
 
-		TS3_ATTR_NO_DISCARD const ShaderRefType & operator[]( EShaderType pShaderType ) const noexcept;
+		TS3_ATTR_NO_DISCARD Shader * operator[]( EShaderType pShaderType ) const noexcept;
 
 		TS3_ATTR_NO_DISCARD Bitmask<EShaderStageFlags> getActiveShaderStagesMask() const noexcept;
 

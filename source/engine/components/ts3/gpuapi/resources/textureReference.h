@@ -21,6 +21,8 @@ namespace ts3::gpuapi
 
 		~TextureReference();
 
+		Texture * operator->() const noexcept;
+
 		/// @brief Returns a pointer to the referenced texture. This can be null if the reference is empty().
 		TS3_ATTR_NO_DISCARD TextureHandle getRefTexture() const noexcept;
 
@@ -58,6 +60,11 @@ namespace ts3::gpuapi
 		/// The referenced sub-resource of the texture.
 		TextureSubResource _refSubResource;
 	};
+
+	inline Texture * TextureReference::operator->() const noexcept
+	{
+		return _refTextureObject.get();
+	}
 
 	inline TextureHandle TextureReference::getRefTexture() const noexcept
 	{

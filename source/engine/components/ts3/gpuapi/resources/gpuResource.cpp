@@ -5,9 +5,10 @@
 namespace ts3::gpuapi
 {
 
-	GPUResource::GPUResource( GPUDevice & pGPUDevice,
-	                          EGPUResourceBaseType pResourceBaseType,
-	                          const ResourceMemoryInfo & pResourceMemory )
+	GPUResource::GPUResource(
+			GPUDevice & pGPUDevice,
+			EGPUResourceBaseType pResourceBaseType,
+			const ResourceMemoryInfo & pResourceMemory )
 	: GPUDeviceChildObject( pGPUDevice )
 	, mResourceBaseType( pResourceBaseType )
 	, mResourceMemory( pResourceMemory )
@@ -27,7 +28,7 @@ namespace ts3::gpuapi
 
 	ref_counter_value_t GPUResource::addActiveRef()
 	{
-		_activeRefsCounter.increment();
+		return _activeRefsCounter.increment();
 	}
 
 	ref_counter_value_t GPUResource::releaseActiveRef()
@@ -38,6 +39,8 @@ namespace ts3::gpuapi
 		{
 			mGPUDevice.onGPUResourceActiveRefsZero( *this );
 		}
+
+		return activeRefNum;
 	}
 
 	void GPUResource::setMappedMemory( const ResourceMappedMemory & pMappedMemory )
@@ -51,6 +54,27 @@ namespace ts3::gpuapi
 		_mappedMemory.pointer = nullptr;
 		_mappedMemory.memoryMapFlags = 0;
 		_mappedMemory.mappedRegion.reset();
+	}
+
+
+	GPUResourceWrapper::GPUResourceWrapper(
+			GPUDevice & pGPUDevice,
+			EGPUResourceBaseType pInternalResourceBaseType )
+	: GPUDeviceChildObject( pGPUDevice )
+	, mInternalResourceBaseType( pInternalResourceBaseType )
+	, _internalResource( nullptr )
+	{}
+
+	GPUResourceWrapper::~GPUResourceWrapper() = default;
+
+	void GPUResourceWrapper::setInternalResource( GPUResource & pResource )
+	{
+		_internalResource = &pResource;
+	}
+
+	void GPUResourceWrapper::resetInternalResource()
+	{
+		_internalResource = nullptr;
 	}
 
 } // namespace ts3::gpuapi

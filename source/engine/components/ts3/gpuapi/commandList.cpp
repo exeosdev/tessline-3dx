@@ -3,6 +3,7 @@
 #include "commandSystem.h"
 #include "gpuDevice.h"
 #include "resources/gpuBuffer.h"
+#include "state/graphicsPipelineStateController.h"
 
 namespace ts3::gpuapi
 {
@@ -11,48 +12,25 @@ namespace ts3::gpuapi
 	: GPUDeviceChildObject( pCommandSystem.mGPUDevice )
 	, mCommandSystem( &pCommandSystem )
 	, mListType( pListType )
-	, _renderTargetClearConfig( mGPUDevice.getDefaultRenderTargetClearConfig() )
 	{}
 
 	CommandList::~CommandList() = default;
 
 	bool CommandList::acquireList()
 	{
-		auto listStatus = ListStatus::Available;
-		auto acquireSuccessful = _listStatusFlag.compare_exchange_strong( listStatus,
-		                                                                  ListStatus::Acquired,
-		                                                                  std::memory_order_acq_rel,
-		                                                                  std::memory_order_relaxed );
+		auto listLockStatus = false;
+		auto acquireSuccessful = _listLockStatus.compare_exchange_strong(
+			listLockStatus,
+			true,
+			std::memory_order_acq_rel,
+			std::memory_order_relaxed );
+
 		return acquireSuccessful;
 	}
 
 	void CommandList::releaseList()
 	{
-		_listStatusFlag.store( ListStatus::Available, std::memory_order_release );
-	}
-
-	void CommandList::setColorBufferClearValue( const math::RGBAColorR32Norm & pColorClearValue )
-	{
-		_renderTargetClearConfig.colorClearValue = pColorClearValue;
-	}
-
-	void CommandList::setDepthBufferClearValue( float pDepthClearValue )
-	{
-		_renderTargetClearConfig.depthClearValue = pDepthClearValue;
-	}
-
-	void CommandList::setStencilBufferClearValue( uint8 pStencilClearValue )
-	{
-		_renderTargetClearConfig.stencilClearValue = pStencilClearValue;
-	}
-
-	void CommandList::initializeClearState()
-	{
-		const auto & defaultClearColor = mGPUDevice.getDefaultClearColor();
-
-		setColorBufferClearValue( defaultClearColor );
-		setDepthBufferClearValue( 1.0f );
-		setStencilBufferClearValue( 0 );
+		_listLockStatus.store( false, std::memory_order_release );
 	}
 
 	void CommandList::beginCommandSequence()
@@ -191,6 +169,31 @@ namespace ts3::gpuapi
 		return true;
 	}
 
+	bool CommandList::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO )
+	{
+		return _pipelineStateController->setGraphicsPipelineStateObject( pGraphicsPSO );
+	}
+
+	bool CommandList::setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState )
+	{
+		return _pipelineStateController->setIAVertexStreamState( pIAVertexStreamState );
+	}
+
+	bool CommandList::setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState )
+	{
+		return _pipelineStateController->setIAVertexStreamState( pIAVertexStreamState );
+	}
+
+	bool CommandList::setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState )
+	{
+		return _pipelineStateController->setRenderTargetBindingState( pRenderTargetBindingState );
+	}
+
+	bool CommandList::setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState )
+	{
+		return _pipelineStateController->setRenderTargetBindingState( pRenderTargetBindingState );
+	}
+
 	bool CommandList::checkContextSupport( ECommandContextType pContextType ) const
 	{
 		return checkFeatureSupport( static_cast<ECommandListFlags>( pContextType ) );
@@ -204,9 +207,9 @@ namespace ts3::gpuapi
 		return commandListFlags.isSet( pListFlags & E_COMMAND_LIST_FLAGS_ALL_BITS_MASK );
 	}
 
-	const RenderTargetClearConfig & CommandList::getRenderTargetClearConfig() const
+	void CommandList::setGraphicsPipelineStateController( GraphicsPipelineStateController & pStateController )
 	{
-		return _renderTargetClearConfig;
+		_pipelineStateController = &pStateController;
 	}
 
 } // namespace ts3::gpuapi

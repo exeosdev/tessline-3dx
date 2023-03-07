@@ -42,17 +42,17 @@ namespace ts3::gpuapi
 		return *this;
 	}
 
-	const GraphicsShaderSet::ShaderRefType & GraphicsShaderSet::operator[]( size_t pIndex ) const noexcept
+	Shader * GraphicsShaderSet::operator[]( size_t pIndex ) const noexcept
 	{
 		ts3DebugAssert( cxdefs::isShaderStageIndexValid( pIndex ) );
-		return commonShaderArray[pIndex];
+		return commonShaderArray[pIndex].get();
 	}
 
-	const GraphicsShaderSet::ShaderRefType & GraphicsShaderSet::operator[]( EShaderType pShaderType ) const noexcept
+	Shader * GraphicsShaderSet::operator[]( EShaderType pShaderType ) const noexcept
 	{
 		ts3DebugAssert( cxdefs::isShaderTypeGraphics( pShaderType ) );
 		const auto stageIndex = cxdefs::getShaderStageIndex( pShaderType );
-		return commonShaderArray[stageIndex];
+		return commonShaderArray[stageIndex].get();
 	}
 
 	Bitmask<EShaderStageFlags> GraphicsShaderSet::getActiveShaderStagesMask() const noexcept

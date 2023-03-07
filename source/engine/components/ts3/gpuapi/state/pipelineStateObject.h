@@ -84,20 +84,6 @@ namespace ts3::gpuapi
 			ShaderInputSignature pShaderInputSignature );
 
 		virtual ~GraphicsPipelineStateObject();
-
-	protected:
-		// A struct for storing common state for the PSO.
-		// Created by subclasses via createCommonPSOState().
-		struct CommonPSOState
-		{
-			GraphicsShaderLinkageImmutableStateHandle shaderBinding;
-			ShaderInputSignature shaderInputSignature;
-		};
-
-		// Validates common state desc and produces the actual state objects expected by the PSO:
-		// - for GraphicsShaderLinkageDesc, it validates the config and produces ready GraphicsShaderBinding object
-		// - for ShaderInputSignatureDesc, it validates the config and build the actual ShaderInputSignature object
-		static bool createCommonPSOState( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo, CommonPSOState & pOutputState );
 	};
 
 } // namespace ts3::gpuapi
