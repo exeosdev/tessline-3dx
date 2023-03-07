@@ -6,17 +6,12 @@
 
 #include "graphicsPipelineImmutableState.h"
 #include "inputAssemblerCommon.h"
+#include "graphicsShaderState.h"
 #include "renderTargetCommon.h"
 #include "shaderInputSignature.h"
 
 namespace ts3::gpuapi
 {
-
-	class BlendState;
-	class DepthStencilState;
-	class RasterizerState;
-	class IAIAInputLayout;
-	class GraphicsShaderLinkage;
 
 	struct ComputePipelineStateObjectCreateInfo
 	{
@@ -24,14 +19,24 @@ namespace ts3::gpuapi
 
 	struct GraphicsPipelineStateObjectCreateInfo
 	{
-		// BlendState blendState;
-		// DepthStencilState depthStencilState;
-		// RasterizerState rasterizerState;
-		// IAIAInputLayout vertexInputLayout;
-		// ShaderLinkage shaderLinkage;
+		BlendConfig blendConfig;
+		BlendImmutableStateHandle blendState;
 
-		RenderTargetLayoutDesc renderTargetLayoutDesc = cvRenderTargetLayoutDescDefaultBGRA8;
+		DepthStencilConfig depthStencilConfig;
+		DepthStencilImmutableStateHandle depthStencilState;
+
+		RasterizerConfig rasterizerConfig;
+		RasterizerImmutableStateHandle rasterizerState;
+
+		GraphicsShaderSet shaderSet;
+		GraphicsShaderLinkageImmutableStateHandle shaderLinkageState;
+
+		IAInputLayoutDefinition inputLayoutDefinition;
+		IAInputLayoutImmutableStateHandle inputLayoutState;
+
 		RenderTargetLayout * renderTargetLayout = nullptr;
+		RenderTargetBindingImmutableStateHandle renderTargetBindingState;
+
 		ShaderInputSignatureDesc * shaderInputSignatureDesc = nullptr;
 	};
 
@@ -85,8 +90,7 @@ namespace ts3::gpuapi
 		// Created by subclasses via createCommonPSOState().
 		struct CommonPSOState
 		{
-			RenderTargetLayout renderTargetLayout;
-			GraphicsShaderBinding shaderBinding;
+			GraphicsShaderLinkageImmutableStateHandle shaderBinding;
 			ShaderInputSignature shaderInputSignature;
 		};
 

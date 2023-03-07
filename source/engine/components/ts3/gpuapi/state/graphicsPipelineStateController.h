@@ -4,7 +4,7 @@
 #ifndef __TS3_GPUAPI_GRAPHICS_PIPELINE_STATE_CONTROLLER_H__
 #define __TS3_GPUAPI_GRAPHICS_PIPELINE_STATE_CONTROLLER_H__
 
-#include "graphicsPipelineConfigDefs.h"
+#include "commonGPUStateDefs.h"
 #include <ts3/core/exceptionUtils.h>
 
 namespace ts3::gpuapi
@@ -15,11 +15,11 @@ namespace ts3::gpuapi
 	/// @brief Defines bit flags describing what kind of changes are pending for
 	enum EGraphicsStateUpdateCommonFlags : graphics_state_update_mask_value_t
 	{
-		E_GRAPHICS_STATE_UPDATE_COMMON_SO_GRAPHICS_PIPELINE_BIT = 0x1,
+		E_GRAPHICS_STATE_UPDATE_COMMON_STATE_PSO_BIT = 0x01,
+		E_GRAPHICS_STATE_UPDATE_COMMON_STATE_IS_VERTEX_STREAM_BIT = 0x02,
+		E_GRAPHICS_STATE_UPDATE_COMMON_STATE_IS_RENDER_TARGET_BINDING_BIT = 0x04,
 
-		E_GRAPHICS_STATE_UPDATE_COMMON_SO_VERTEX_STREAM_BIT = 0x2,
-
-		E_GRAPHICS_STATE_UPDATE_COMMON_SO_ALL_BITS_MASK = 0x3
+		E_GRAPHICS_STATE_UPDATE_COMMON_STATES_ALL = 0x07
 	};
 
 	/// @brief

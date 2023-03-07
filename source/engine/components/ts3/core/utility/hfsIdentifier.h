@@ -39,7 +39,7 @@ namespace ts3
 		: idValue( makeU64Value( pHash1.hashValue, pHash2.hashValue ) )
 		{}
 
-		explicit constexpr operator uint64() const noexcept
+		constexpr operator uint64() const noexcept
 		{
 			return idValue;
 		}

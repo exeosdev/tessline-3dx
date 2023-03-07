@@ -53,6 +53,11 @@ namespace ts3::gpuapi
 		///
 		inline constexpr UniqueGPUObjectID GPU_OBJECT_ID_EMPTY { 0 };
 
+		inline constexpr bool isUniqueGPUObjectIDValid( UniqueGPUObjectID pUniqueID ) noexcept
+		{
+			return ( pUniqueID != GPU_OBJECT_ID_INVALID ) && ( pUniqueID != GPU_OBJECT_ID_EMPTY );
+		}
+
 	}
 
 	enum EGPUDriverConfigFlags : uint32

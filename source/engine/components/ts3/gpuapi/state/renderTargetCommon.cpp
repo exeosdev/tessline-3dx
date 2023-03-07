@@ -1,12 +1,50 @@
 
 #include "renderTargetCommon.h"
-#include <ts3/gpuapi/resources/renderBuffer.h>
 #include <ts3/gpuapi/resources/texture.h>
+#include <ts3/gpuapi/resources/renderTargetTexture.h>
 #include <ts3/gpuapi/state/renderTargetStateObject.h>
 #include <ts3/stdext/memory.h>
 
 namespace ts3::gpuapi
 {
+
+	namespace smutil
+	{
+
+		RenderTargetLayout getRenderTargetLayoutForBindingDefinition(
+				const RenderTargetBindingDefinition & pBindingDefinition )
+		{
+			RenderTargetLayout rtLayout;
+			rtLayout.activeAttachmentsMask = 0;
+
+			for( uint32 colorAttachmentIndex = 0; colorAttachmentIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM; ++colorAttachmentIndex )
+			{
+				const auto attachmentBit = cxdefs::makeRTAttachmentFlag( colorAttachmentIndex );
+				if( pBindingDefinition.activeAttachmentsMask.isSet( attachmentBit ) )
+				{
+					const auto & attachmentBinding = pBindingDefinition.colorAttachments[colorAttachmentIndex];
+					if( !attachmentBinding.empty() )
+					{
+						const auto attachmentFormat = attachmentBinding.attachmentTexture->mRTTLayout.internalDataFormat;
+						rtLayout.colorAttachments[colorAttachmentIndex].format = attachmentFormat;
+						rtLayout.activeAttachmentsMask.set( attachmentBit );
+					}
+				}
+			}
+
+			if( pBindingDefinition.activeAttachmentsMask.isSet( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT ) )
+			{
+				if( !pBindingDefinition.depthStencilAttachment.empty() )
+				{
+					const auto attachmentFormat = pBindingDefinition.depthStencilAttachment.attachmentTexture->mRTTLayout.internalDataFormat;
+					rtLayout.depthStencilAttachment.format = attachmentFormat;
+					rtLayout.activeAttachmentsMask.set( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT );
+				}
+			}
+
+			return rtLayout;
+		}
+	}
 
 	namespace defaults
 	{
@@ -14,57 +52,35 @@ namespace ts3::gpuapi
 		const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8 =
 		{
 			E_RT_ATTACHMENT_FLAG_COLOR_0_BIT,
-			1,
 			{
-				RenderTargetAttachmentLayout
-				{
-					ETextureFormat::BGRA8UN
-				}
+				RenderTargetAttachmentLayout { ETextureFormat::BGRA8UN }
 			}
 		};
 
 		const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8D24S8 =
 		{
 			E_RT_ATTACHMENT_FLAGS_DEFAULT_C0_DS,
-			1,
 			{
-				RenderTargetAttachmentLayout
-				{
-					ETextureFormat::BGRA8UN
-				},
+				RenderTargetAttachmentLayout { ETextureFormat::BGRA8UN },
 			},
-			RenderTargetAttachmentLayout
-			{
-				ETextureFormat::D24UNS8U
-			}
+			RenderTargetAttachmentLayout { ETextureFormat::D24UNS8U }
 		};
 
 		const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8 =
 		{
 			E_RT_ATTACHMENT_FLAG_COLOR_0_BIT,
-			1,
 			{
-				RenderTargetAttachmentLayout
-				{
-					ETextureFormat::BGRA8UN
-				}
+				RenderTargetAttachmentLayout { ETextureFormat::RGBA8UN }
 			}
 		};
 
 		const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8D24S8 =
 		{
 			E_RT_ATTACHMENT_FLAGS_DEFAULT_C0_DS,
-			1,
 			{
-				RenderTargetAttachmentLayout
-				{
-					ETextureFormat::RGBA8UN
-				},
+				RenderTargetAttachmentLayout { ETextureFormat::RGBA8UN },
 			},
-			RenderTargetAttachmentLayout
-			{
-				ETextureFormat::D24UNS8U
-			}
+			RenderTargetAttachmentLayout { ETextureFormat::D24UNS8U }
 		};
 	
 	}

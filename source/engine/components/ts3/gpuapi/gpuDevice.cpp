@@ -7,7 +7,7 @@
 
 namespace ts3::gpuapi
 {
-
+	
 	static const math::RGBAColorU8 sDefaultClearColorDriver0     { 0x11, 0x66, 0xCC, 0xFF };
 	static const math::RGBAColorU8 sDefaultClearColorDriverDX11  { 0x77, 0xAA, 0x5F, 0xFF };
 	static const math::RGBAColorU8 sDefaultClearColorDriverDX12  { 0x22, 0x88, 0x3F, 0xFF };
@@ -16,6 +16,14 @@ namespace ts3::gpuapi
 	static const math::RGBAColorU8 sDefaultClearColorDriverGLES3 { 0x7A, 0x00, 0x4D, 0xFF };
 	static const math::RGBAColorU8 sDefaultClearColorDriverVK1   { 0x8F, 0x0F, 0x1F, 0xFF };
 
+	enum EGPUDeviceInternalStateFlags : uint32
+	{
+		E_GPU_DEVICE_INTERNAL_STATE_FLAG_DEBUG_DEVICE_BIT = 0x0001,
+		E_GPU_DEVICE_INTERNAL_STATE_FLAG_MULTI_THREAD_ACCESS_BIT = 0x0002,
+		E_GPU_DEVICE_INTERNAL_STATE_FLAG_ENABLE_RESOURCE_ACTIVE_REFS_TRACKING_BIT = 0x0008
+	};
+
+	
 	GPUDevice::GPUDevice( GPUDriver & pDriver )
 	: GPUDriverChildObject( pDriver )
 	, mGPUDriverID( pDriver.queryGPUDriverID() )
@@ -23,11 +31,75 @@ namespace ts3::gpuapi
 	{
 		if( pDriver.isDebugFunctionalityRequested() )
 		{
-			_internalStateFlags.set( E_INTERNAL_STATE_FLAG_DEBUG_DEVICE_BIT );
+			_internalStateFlags.set( E_GPU_DEVICE_INTERNAL_STATE_FLAG_DEBUG_DEVICE_BIT );
 		}
 	}
 
 	GPUDevice::~GPUDevice() = default;
+
+	bool GPUDevice::isDebugDevice() const noexcept
+	{
+		return _internalStateFlags.isSet( E_GPU_DEVICE_INTERNAL_STATE_FLAG_DEBUG_DEVICE_BIT );
+	}
+
+	bool GPUDevice::isMultiThreadAccessSupported() const noexcept
+	{
+		return _internalStateFlags.isSet( E_GPU_DEVICE_INTERNAL_STATE_FLAG_MULTI_THREAD_ACCESS_BIT );
+	}
+
+	bool GPUDevice::isResourceActiveRefsTrackingEnabled() const noexcept
+	{
+		return _internalStateFlags.isSet( E_GPU_DEVICE_INTERNAL_STATE_FLAG_ENABLE_RESOURCE_ACTIVE_REFS_TRACKING_BIT );
+	}
+
+	CommandSystem * GPUDevice::getCommandSystem() const noexcept
+	{
+		return _commandSystem.get();
+	}
+
+	PresentationLayer * GPUDevice::getPresentationLayer() const noexcept
+	{
+		return _presentationLayer.get();
+	}
+
+	const math::RGBAColorU8 & GPUDevice::getDefaultClearColor() const noexcept
+	{
+		switch( mGPUDriverID )
+		{
+			case EGPUDriverID::GDIDirectX11:
+				return sDefaultClearColorDriverDX11;
+
+			case EGPUDriverID::GDIDirectX12:
+				return sDefaultClearColorDriverDX12;
+
+			case EGPUDriverID::GDIMetal1:
+				return sDefaultClearColorDriverMTL1;
+
+			case EGPUDriverID::GDIOpenGLDesktop4:
+				return sDefaultClearColorDriverGL4;
+
+			case EGPUDriverID::GDIOpenGLES3:
+				return sDefaultClearColorDriverGLES3;
+
+			case EGPUDriverID::GDIVulkan10:
+				return sDefaultClearColorDriverVK1;
+
+			default:
+				break;
+		}
+		return sDefaultClearColorDriver0;
+	}
+
+	const RenderTargetAttachmentClearConfig & GPUDevice::getDefaultClearConfig() const noexcept
+	{
+		static const RenderTargetAttachmentClearConfig sDefaultClearConfig =
+		{
+			getDefaultClearColor(),
+			1.0f,
+			0
+		};
+		return sDefaultClearConfig;
+	}
 
 	GPUBufferHandle GPUDevice::createGPUBuffer( const GPUBufferCreateInfo & pCreateInfo )
 	{
@@ -73,7 +145,7 @@ namespace ts3::gpuapi
 		return _immutableStateFactory->createIAInputLayoutState( pDefinition );
 	}
 
-	IAVertexStreamImmutableStateHandle GPUDevice::createIAVertexStreamState( const IAVertexStreamDefinition & pDefinition )
+	IAVertexStreamImmutableStateHandle GPUDevice::createIAVertexStreamImmutableState( const IAVertexStreamDefinition & pDefinition )
 	{
 		ts3DebugAssert( _immutableStateFactory );
 		return _immutableStateFactory->createIAVertexStreamState( pDefinition );
@@ -85,61 +157,86 @@ namespace ts3::gpuapi
 		return _immutableStateFactory->createRasterizerState( pConfig );
 	}
 
-	RenderTargetLayoutImmutableStateHandle GPUDevice::createRenderTargetLayoutState( const RenderTargetLayoutConfiguration & pConfiguration )
-	{
-		ts3DebugAssert( _immutableStateFactory );
-		return _immutableStateFactory->createRenderTargetLayoutState( pConfiguration );
-	}
-
-	RenderTargetBindingImmutableStateHandle GPUDevice::createRenderTargetBindingState( const RenderTargetBindingDefinition & pDefinition )
+	RenderTargetBindingImmutableStateHandle GPUDevice::createRenderTargetBindingImmutableState( const RenderTargetBindingDefinition & pDefinition )
 	{
 		ts3DebugAssert( _immutableStateFactory );
 		return _immutableStateFactory->createRenderTargetBindingState( pDefinition );
 	}
 
-	RenderPassImmutableStateHandle GPUDevice::createRenderPassState( const RenderPassConfiguration & pConfiguration )
+	RenderPassImmutableStateHandle GPUDevice::createRenderPassImmutableState( const RenderPassConfiguration & pConfiguration )
 	{
 		ts3DebugAssert( _immutableStateFactory );
 		return _immutableStateFactory->createRenderPassState( pConfiguration );
 	}
 
-	const math::RGBAColorU8 & GPUDevice::getDefaultClearColor() const
+	BlendImmutableStateHandle GPUDevice::createBlendImmutableStateCached(
+			const UniqueGPUObjectName & pUniqueName,
+			const BlendConfig & pConfig )
 	{
-		switch( mGPUDriverID )
-		{
-			case EGPUDriverID::GDIDirectX11:
-				return sDefaultClearColorDriverDX11;
-
-			case EGPUDriverID::GDIDirectX12:
-				return sDefaultClearColorDriverDX12;
-
-			case EGPUDriverID::GDIMetal1:
-				return sDefaultClearColorDriverMTL1;
-
-			case EGPUDriverID::GDIOpenGLDesktop4:
-				return sDefaultClearColorDriverGL4;
-
-			case EGPUDriverID::GDIOpenGLES3:
-				return sDefaultClearColorDriverGLES3;
-
-			case EGPUDriverID::GDIVulkan10:
-				return sDefaultClearColorDriverVK1;
-
-			default:
-				break;
-		}
-		return sDefaultClearColorDriver0;
+		ts3DebugAssert( _immutableStateCache );
+		return _immutableStateCache->createState<BlendImmutableState>( pUniqueName, pConfig );
 	}
 
-	const RTAttachmentClearValue & GPUDevice::getDefaultRTAttachmentClearValue() const
+	DepthStencilImmutableStateHandle GPUDevice::createDepthStencilImmutableStateCached(
+			const UniqueGPUObjectName & pUniqueName,
+			const DepthStencilConfig & pConfig )
 	{
-		static const RTAttachmentClearValue defaultRenderTargetClearConfig =
-		{
-			getDefaultClearColor(),
-			1.0f,
-			0
-		};
-		return defaultRenderTargetClearConfig;
+		ts3DebugAssert( _immutableStateCache );
+		return _immutableStateCache->createState<DepthStencilImmutableState>( pUniqueName, pConfig );
+	}
+
+	GraphicsShaderLinkageImmutableStateHandle GPUDevice::createGraphicsShaderLinkageImmutableStateCached(
+			const UniqueGPUObjectName & pUniqueName,
+			const GraphicsShaderSet & pShaderSet )
+	{
+		ts3DebugAssert( _immutableStateCache );
+		return _immutableStateCache->createState<GraphicsShaderLinkageImmutableState>( pUniqueName, pShaderSet );
+	}
+
+	IAInputLayoutImmutableStateHandle GPUDevice::createIAInputLayoutImmutableStateCached(
+			const UniqueGPUObjectName & pUniqueName,
+			const IAInputLayoutDefinition & pDefinition )
+	{
+		ts3DebugAssert( _immutableStateCache );
+		return _immutableStateCache->createState<IAInputLayoutImmutableState>( pUniqueName, pDefinition );
+	}
+
+	IAVertexStreamImmutableStateHandle GPUDevice::createIAVertexStreamImmutableStateCached(
+			const UniqueGPUObjectName & pUniqueName,
+			const IAVertexStreamDefinition & pDefinition )
+	{
+		ts3DebugAssert( _immutableStateCache );
+		return _immutableStateCache->createState<IAVertexStreamImmutableState>( pUniqueName, pDefinition );
+	}
+
+	RasterizerImmutableStateHandle GPUDevice::createRasterizerImmutableStateCached(
+			const UniqueGPUObjectName & pUniqueName,
+			const RasterizerConfig & pConfig )
+	{
+		ts3DebugAssert( _immutableStateCache );
+		return _immutableStateCache->createState<RasterizerImmutableState>( pUniqueName, pConfig );
+	}
+
+	RenderTargetBindingImmutableStateHandle GPUDevice::createRenderTargetBindingImmutableStateCached(
+			const UniqueGPUObjectName & pUniqueName,
+			const RenderTargetBindingDefinition & pDefinition )
+	{
+		ts3DebugAssert( _immutableStateCache );
+		return _immutableStateCache->createState<RenderTargetBindingImmutableState>( pUniqueName, pDefinition );
+	}
+
+	RenderPassImmutableStateHandle GPUDevice::createRenderPassImmutableStateCached(
+			const UniqueGPUObjectName & pUniqueName,
+			const RenderPassConfiguration & pConfiguration )
+	{
+		ts3DebugAssert( _immutableStateCache );
+		return _immutableStateCache->createState<RenderPassImmutableState>( pUniqueName, pConfiguration );
+	}
+
+	void GPUDevice::resetImmutableStateCache( Bitmask<EPipelineImmutableStateTypeFlags> pResetMask )
+	{
+		ts3DebugAssert( _immutableStateCache );
+		_immutableStateCache->reset( pResetMask );
 	}
 
 	void GPUDevice::setPresentationLayer( PresentationLayerHandle pPresentationLayer )
@@ -149,16 +246,6 @@ namespace ts3::gpuapi
 			return;
 		}
 		_presentationLayer = pPresentationLayer;
-	}
-
-	CommandSystem * GPUDevice::getCommandSystem() const
-	{
-		return _commandSystem.get();
-	}
-
-	PresentationLayer * GPUDevice::getPresentationLayer() const
-	{
-		return _presentationLayer.get();
 	}
 
 	bool GPUDevice::onGPUResourceActiveRefsZero( GPUResource & pGPUResource )

@@ -30,18 +30,13 @@ namespace ts3::gpuapi
 	struct PipelineImmutableStateCreateInfo
 	{
 		/// A unique name given to an immutable state object.
-		UniqueGPUObjectName uniqueName;
+		UniqueGPUObjectID uniqueID = cxdefs::GPU_OBJECT_ID_INVALID;
+
+		/// A unique name given to an immutable state object.
+		RefWrapper<const UniqueGPUObjectName> uniqueName;
 
 		/// Data needed to initialize the state. Different for every state type.
-		std::reference_wrapper<const TInputDesc> inputDesc;
-
-		PipelineImmutableStateCreateInfo()
-		{}
-
-		PipelineImmutableStateCreateInfo( UniqueGPUObjectName pUniqueName, const TInputDesc & pInputDesc )
-		: uniqueName( std::move( pUniqueName ) )
-		, inputDesc( std::ref( pInputDesc ) )
-		{}
+		RefWrapper<const TInputDesc> inputDesc;
 	};
 
 	/// @brief A "sub-cache" used by the actual cache. Manages single state type.
@@ -52,37 +47,38 @@ namespace ts3::gpuapi
 		PipelineImmutableStateSubCache( PipelineImmutableStateFactory & pFactory );
 		~PipelineImmutableStateSubCache() = default;
 
-		TS3_ATTR_NO_DISCARD TState * getState( const UniqueGPUObjectID & pStateObjectID ) const
+		TS3_ATTR_NO_DISCARD GpaHandle<TState> getState( const UniqueGPUObjectID & pStateObjectID ) const
 		{
 			const auto existingStateRef = _cachedStates.find( pStateObjectID.asValue() );
 
 			if( existingStateRef != _cachedStates.end() )
 			{
 				const auto & cachedStateData = existingStateRef->second;
-				return cachedStateData.immutableStateObject.get();
+				return cachedStateData.immutableStateObject;
 			}
 
 			return nullptr;
 		}
 
-		TS3_ATTR_NO_DISCARD TState * getState( const UniqueGPUObjectName & pStateObjectName ) const
+		TS3_ATTR_NO_DISCARD GpaHandle<TState> getState( const UniqueGPUObjectName & pStateObjectName ) const
 		{
 			const auto uniqueID = generateUniqueGPUObjectID( pStateObjectName );
 			return getState( uniqueID );
 		}
 
 		template <typename TCreateData, typename... TArgs>
-		TState * createState( const PipelineImmutableStateCreateInfo<TCreateData> & pCreateInfo, TArgs && ...pArgs )
+		GpaHandle<TState> createState( PipelineImmutableStateCreateInfo<TCreateData> pCreateInfo, TArgs && ...pArgs )
 		{
-			UniqueGPUObjectID stateUniqueID{};
-
 			const auto controlInputHash = hashCompute<EHashAlgo::FNV1A64>( pCreateInfo.inputDesc.get() );
 
-			if( !pCreateInfo.uniqueName.empty() )
+			if( ( pCreateInfo.uniqueID == cxdefs::GPU_OBJECT_ID_AUTO ) && !pCreateInfo.uniqueName->empty() )
 			{
-				stateUniqueID = generateUniqueGPUObjectID( pCreateInfo.uniqueName );
+				pCreateInfo.uniqueID = generateUniqueGPUObjectID( pCreateInfo.uniqueName );
+			}
 
-				const auto existingStateRef = _cachedStates.find( stateUniqueID.asValue() );
+			if( cxdefs::isUniqueGPUObjectIDValid( pCreateInfo.uniqueID ) )
+			{
+				const auto existingStateRef = _cachedStates.find( pCreateInfo.uniqueID.asValue() );
 				if( existingStateRef != _cachedStates.end() )
 				{
 					const auto & cachedStateData = existingStateRef->second;
@@ -95,7 +91,7 @@ namespace ts3::gpuapi
 
 					const auto & stateHandle = cachedStateData.immutableStateObject;
 					// Return the pointer to the existing state.
-					return stateHandle.get();
+					return stateHandle;
 				}
 			}
 
@@ -106,19 +102,18 @@ namespace ts3::gpuapi
 				return nullptr;
 			}
 
-			if( pCreateInfo.uniqueName.empty() )
+			if( !cxdefs::isUniqueGPUObjectIDValid( pCreateInfo.uniqueID ) )
 			{
-				const auto uniqueName = std::to_string( reinterpret_cast<ptrdiff_t>( newImmutableState.get() ) );
-				stateUniqueID = generateUniqueGPUObjectID( uniqueName );
+				pCreateInfo.uniqueID.idValue = reinterpret_cast<uint64>( newImmutableState.get() );
 			}
 
 			CachedStateData cachedStateData{};
 			cachedStateData.controlInputHash = controlInputHash;
 			cachedStateData.immutableStateObject = newImmutableState;
 
-			_cachedStates[stateUniqueID] = std::move( cachedStateData );
+			_cachedStates[pCreateInfo.uniqueID] = std::move( cachedStateData );
 
-			return newImmutableState.get();
+			return newImmutableState;
 		}
 
 		void reset()
@@ -158,30 +153,42 @@ namespace ts3::gpuapi
 		, ts3GpaStateSubCacheInit( IAInputLayout, pFactory )
 		, ts3GpaStateSubCacheInit( IAVertexStream, pFactory )
 		, ts3GpaStateSubCacheInit( Rasterizer, pFactory )
-		, ts3GpaStateSubCacheInit( RenderTargetLayout, pFactory )
 		, ts3GpaStateSubCacheInit( RenderTargetBinding, pFactory )
 		, ts3GpaStateSubCacheInit( RenderPass, pFactory )
 		{}
 
 		template <typename TState>
-		TS3_ATTR_NO_DISCARD TState * getState( const UniqueGPUObjectID & pStateObjectID ) const
+		TS3_ATTR_NO_DISCARD GpaHandle<TState> getState( const UniqueGPUObjectID & pStateObjectID ) const
 		{
 			auto & subCache = _subCacheProxy<TState>();
 			return subCache.getState( pStateObjectID );
 		}
 
 		template <typename TState>
-		TS3_ATTR_NO_DISCARD TState * getState( const UniqueGPUObjectName & pStateObjectName ) const
+		TS3_ATTR_NO_DISCARD GpaHandle<TState> getState( const UniqueGPUObjectName & pStateObjectName ) const
 		{
 			auto & subCache = _subCacheProxy<TState>();
 			return subCache.getState( pStateObjectName );
 		}
 
-		template <typename TState, typename TCreateData, typename... TArgs>
-		TState * createState( const PipelineImmutableStateCreateInfo<TCreateData> & pCreateInfo, TArgs && ...pArgs )
+		template <typename TState, typename TInputDesc, typename... TArgs>
+		GpaHandle<TState> createState( UniqueGPUObjectID pUniqueID, const TInputDesc & pInputDesc, TArgs && ...pArgs )
 		{
+			PipelineImmutableStateCreateInfo<TInputDesc> createInfo{};
+			createInfo.uniqueID = pUniqueID;
+			createInfo.inputDesc = std::ref( pInputDesc );
 			auto & subCache = _subCacheProxy<TState>();
-			return subCache.createState( pCreateInfo, std::forward<TArgs>( pArgs )... );
+			return subCache.createState( std::move( createInfo ), std::forward<TArgs>( pArgs )... );
+		}
+
+		template <typename TState, typename TInputDesc, typename... TArgs>
+		GpaHandle<TState> createState( const UniqueGPUObjectName & pUniqueName, const TInputDesc & pInputDesc, TArgs && ...pArgs )
+		{
+			PipelineImmutableStateCreateInfo<TInputDesc> createInfo{};
+			createInfo.uniqueName = std::ref( pUniqueName );
+			createInfo.inputDesc = std::ref( pInputDesc );
+			auto & subCache = _subCacheProxy<TState>();
+			return subCache.createState( std::move( createInfo ), std::forward<TArgs>( pArgs )... );
 		}
 
 		template <typename TState>
@@ -189,6 +196,33 @@ namespace ts3::gpuapi
 		{
 			auto & subCache = _subCacheProxy<TState>();
 			return subCache.reset();
+		}
+
+		void reset( Bitmask<EPipelineImmutableStateTypeFlags> pResetMask = E_PIPELINE_IMMUTABLE_STATE_TYPE_MASK_ALL )
+		{
+			if( pResetMask.isSet( E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_BLEND_BIT ) )
+				_stateSubCacheBlend.reset();
+
+			if( pResetMask.isSet( E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_DEPTH_STENCIL_BIT ) )
+				_stateSubCacheDepthStencil.reset();
+
+			if( pResetMask.isSet( E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_GRAPHICS_SHADER_LINKAGE_BIT ) )
+				_stateSubCacheGraphicsShaderLinkage.reset();
+
+			if( pResetMask.isSet( E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_IA_INPUT_LAYOUT_BIT ) )
+				_stateSubCacheIAInputLayout.reset();
+
+			if( pResetMask.isSet( E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_IA_VERTEX_STREAM_BIT ) )
+				_stateSubCacheIAVertexStream.reset();
+
+			if( pResetMask.isSet( E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_RASTERIZER_BIT ) )
+				_stateSubCacheRasterizer.reset();
+
+			if( pResetMask.isSet( E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_RENDER_TARGET_BINDING_BIT ) )
+				_stateSubCacheRenderTargetBinding.reset();
+
+			if( pResetMask.isSet( E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_RENDER_PASS_BIT ) )
+				_stateSubCacheRenderPass.reset();
 		}
 
 	private:
@@ -202,7 +236,6 @@ namespace ts3::gpuapi
 		ts3GpaStateSubCacheDeclare( IAInputLayout );
 		ts3GpaStateSubCacheDeclare( IAVertexStream );
 		ts3GpaStateSubCacheDeclare( Rasterizer );
-		ts3GpaStateSubCacheDeclare( RenderTargetLayout );
 		ts3GpaStateSubCacheDeclare( RenderTargetBinding );
 		ts3GpaStateSubCacheDeclare( RenderPass );
 	};
@@ -213,7 +246,6 @@ namespace ts3::gpuapi
 	ts3GpaStateSubCacheDefineProxy( IAInputLayout );
 	ts3GpaStateSubCacheDefineProxy( IAVertexStream );
 	ts3GpaStateSubCacheDefineProxy( Rasterizer );
-	ts3GpaStateSubCacheDefineProxy( RenderTargetLayout );
 	ts3GpaStateSubCacheDefineProxy( RenderTargetBinding );
 	ts3GpaStateSubCacheDefineProxy( RenderPass );
 

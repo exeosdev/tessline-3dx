@@ -6,49 +6,45 @@
 
 #include "graphicsPipelineStateController.h"
 #include "pipelineStateObject.h"
-#include "separableGraphicsShaderBinding.h"
+#include "separablePipelineImmutableState.h"
 
 namespace ts3::gpuapi
 {
 
 	enum EGraphicsStateUpdateSeparableFlags : graphics_state_update_mask_value_t
 	{
-		E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_BLEND_STATE_BIT = 0x01,
-		E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_DEPTH_STENCIL_STATE_BIT = 0x02,
-		E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_RASTERIZER_STATE_BIT = 0x04,
-		E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_IA_INPUT_LAYOUT_BIT = 0x08,
-		E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_SHADER_LINKAGE_BIT = 0x10,
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_BLEND_BIT = 0x01,
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_DEPTH_STENCIL_BIT = 0x02,
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_RASTERIZER_BIT = 0x04,
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_IA_INPUT_LAYOUT_BIT = 0x08,
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_SHADER_LINKAGE_BIT = 0x10,
 
-		E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_ALL_BITS_MASK = 0x1F,
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATES_ALL = 0x1F,
 		
-		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_VERTEX_STAGE_BIT = 0x0100 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_SHADER_LINKAGE_BIT,
-		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_HULL_STAGE_BIT = 0x0200 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_SHADER_LINKAGE_BIT,
-		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_DOMAIN_STAGE_BIT = 0x0400 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_SHADER_LINKAGE_BIT,
-		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_GEOMETRY_STAGE_BIT = 0x0800 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_SHADER_LINKAGE_BIT,
-		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_PIXEL_STAGE_BIT = 0x1000 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_SHADER_LINKAGE_BIT,
-		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_ALL_BITS_MASK = 0x1F00 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_DESCRIPTOR_SHADER_LINKAGE_BIT
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_VERTEX_STAGE_BIT = 0x0100 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_SHADER_LINKAGE_BIT,
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_HULL_STAGE_BIT = 0x0200 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_SHADER_LINKAGE_BIT,
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_DOMAIN_STAGE_BIT = 0x0400 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_SHADER_LINKAGE_BIT,
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_GEOMETRY_STAGE_BIT = 0x0800 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_SHADER_LINKAGE_BIT,
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADER_PIXEL_STAGE_BIT = 0x1000 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_SHADER_LINKAGE_BIT,
+
+		E_GRAPHICS_STATE_UPDATE_SEPARABLE_SHADERS_ALL = 0x1F00 | E_GRAPHICS_STATE_UPDATE_SEPARABLE_STATE_SHADER_LINKAGE_BIT
 	};
 
-	/// @brief
-	struct SeparableGraphicsStateDescriptorSet
+	struct SeparableGraphicsImmutableStateSet
 	{
-		BlendStateDescriptor * blendState = nullptr;
-
-		DepthStencilStateDescriptor * depthStencilState = nullptr;
-
-		RasterizerStateDescriptor * rasterizerState = nullptr;
-
-		IAIAInputLayoutDescriptor * vertexInputLayout = nullptr;
-
-		SeparableGraphicsShaderLinkageDescriptor * graphicsShaderLinkage = nullptr;
+		BlendImmutableStateHandle blendState;
+		DepthStencilImmutableStateHandle depthStencilState;
+		RasterizerImmutableStateHandle rasterizerState;
+		IAInputLayoutImmutableStateHandle iaInputLayoutState;
+		SeparableGraphicsShaderImmutableStateHandle shaderLinkageState;
 
 		void reset()
 		{
 			blendState = nullptr;
 			depthStencilState = nullptr;
 			rasterizerState = nullptr;
-			vertexInputLayout = nullptr;
-			graphicsShaderLinkage = nullptr;
+			iaInputLayoutState = nullptr;
+			shaderLinkageState = nullptr;
 		}
 	};
 
@@ -67,14 +63,15 @@ namespace ts3::gpuapi
 	class TS3_GPUAPI_CLASS SeparableGraphicsPipelineStateObject : public GraphicsPipelineStateObject
 	{
 	public:
-		/// Shader bindings used by this PSO.
-		/// @see GraphicsShaderBinding
-		SeparableGraphicsStateDescriptorSet const mDescriptorSet;
+		///
+		SeparableGraphicsImmutableStateSet const mSeparableStates;
+		///
+		const GraphicsShaderSet & mShaderSet;
 
 		SeparableGraphicsPipelineStateObject( GPUDevice & pGPUDevice,
 		                                      RenderTargetLayout pRenderTargetLayout,
 		                                      ShaderInputSignature pShaderInputSignature,
-		                                      const SeparableGraphicsStateDescriptorSet & pStateDescriptors );
+		                                      const SeparableGraphicsImmutableStateSet & pPSOImmutableStates );
 
 		virtual ~SeparableGraphicsPipelineStateObject();
 	};

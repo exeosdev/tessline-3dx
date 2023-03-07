@@ -1,6 +1,5 @@
 
 #include "separablePipelineImmutableState.h"
-#include "../descriptors/graphicsShaderLinkageDescriptor.h"
 #include <ts3/gpuapi/resources/shader.h>
 
 namespace ts3::gpuapi
@@ -15,6 +14,12 @@ namespace ts3::gpuapi
 
 	SeparableGraphicsShaderImmutableState::~SeparableGraphicsShaderImmutableState() = default;
 
+
+	SeparablePipelineImmutableStateFactory::SeparablePipelineImmutableStateFactory( GPUDevice & pGPUDevice )
+	: mGPUDevice( pGPUDevice )
+	{}
+
+	SeparablePipelineImmutableStateFactory::~SeparablePipelineImmutableStateFactory() = default;
 
 	GraphicsShaderLinkageImmutableStateHandle SeparablePipelineImmutableStateFactory::createGraphicsShaderLinkageState(
 			const GraphicsShaderSet & pShaderSet )

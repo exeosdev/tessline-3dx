@@ -8,6 +8,7 @@
 #include "displayCommon.h"
 #include "resources/commonGPUResourceDefs.h"
 #include "state/graphicsShaderState.h"
+#include "state/renderPassCommon.h"
 
 namespace ts3::gpuapi
 {
@@ -54,6 +55,20 @@ namespace ts3::gpuapi
 		explicit GPUDevice( GPUDriver & pDriver );
 		virtual ~GPUDevice();
 
+		TS3_ATTR_NO_DISCARD bool isDebugDevice() const noexcept;
+
+		TS3_ATTR_NO_DISCARD bool isMultiThreadAccessSupported() const noexcept;
+
+		TS3_ATTR_NO_DISCARD bool isResourceActiveRefsTrackingEnabled() const noexcept;
+
+		TS3_ATTR_NO_DISCARD CommandSystem * getCommandSystem() const noexcept;
+
+		TS3_ATTR_NO_DISCARD PresentationLayer * getPresentationLayer() const noexcept;
+
+		TS3_ATTR_NO_DISCARD const math::RGBAColorU8 & getDefaultClearColor() const noexcept;
+
+		TS3_ATTR_NO_DISCARD const RenderTargetAttachmentClearConfig & getDefaultClearConfig() const noexcept;
+
 		GPUBufferHandle createGPUBuffer( const GPUBufferCreateInfo & pCreateInfo );
 		SamplerHandle createSampler( const SamplerCreateInfo & pCreateInfo );
 		ShaderHandle createShader( const ShaderCreateInfo & pCreateInfo );
@@ -63,13 +78,44 @@ namespace ts3::gpuapi
 		DepthStencilImmutableStateHandle createDepthStencilImmutableState( const DepthStencilConfig & pConfig );
 		GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageImmutableState( const GraphicsShaderSet & pShaderSet );
 		IAInputLayoutImmutableStateHandle createIAInputLayoutImmutableState( const IAInputLayoutDefinition & pDefinition );
-		IAVertexStreamImmutableStateHandle createIAVertexStreamState( const IAVertexStreamDefinition & pDefinition );
+		IAVertexStreamImmutableStateHandle createIAVertexStreamImmutableState( const IAVertexStreamDefinition & pDefinition );
 		RasterizerImmutableStateHandle createRasterizerImmutableState( const RasterizerConfig & pConfig );
-		RenderTargetLayoutImmutableStateHandle createRenderTargetLayoutState( const RenderTargetLayoutConfiguration & pConfiguration );
-		RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & pDefinition );
-		RenderPassImmutableStateHandle createRenderPassState( const RenderPassConfiguration & pConfiguration );
+		RenderTargetBindingImmutableStateHandle createRenderTargetBindingImmutableState( const RenderTargetBindingDefinition & pDefinition );
+		RenderPassImmutableStateHandle createRenderPassImmutableState( const RenderPassConfiguration & pConfiguration );
 
-		IAVertexStreamImmutableState * createIAVertexStreamImmutableState( const IAVertexStreamDefinition & pDefinition );
+		BlendImmutableStateHandle createBlendImmutableStateCached(
+				const UniqueGPUObjectName & pUniqueName,
+				const BlendConfig & pConfig );
+
+		DepthStencilImmutableStateHandle createDepthStencilImmutableStateCached(
+				const UniqueGPUObjectName & pUniqueName,
+				const DepthStencilConfig & pConfig );
+
+		GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageImmutableStateCached(
+				const UniqueGPUObjectName & pUniqueName,
+				const GraphicsShaderSet & pShaderSet );
+
+		IAInputLayoutImmutableStateHandle createIAInputLayoutImmutableStateCached(
+				const UniqueGPUObjectName & pUniqueName,
+				const IAInputLayoutDefinition & pDefinition );
+
+		IAVertexStreamImmutableStateHandle createIAVertexStreamImmutableStateCached(
+				const UniqueGPUObjectName & pUniqueName,
+				const IAVertexStreamDefinition & pDefinition );
+
+		RasterizerImmutableStateHandle createRasterizerImmutableStateCached(
+				const UniqueGPUObjectName & pUniqueName,
+				const RasterizerConfig & pConfig );
+
+		RenderTargetBindingImmutableStateHandle createRenderTargetBindingImmutableStateCached(
+				const UniqueGPUObjectName & pUniqueName,
+				const RenderTargetBindingDefinition & pDefinition );
+
+		RenderPassImmutableStateHandle createRenderPassImmutableStateCached(
+				const UniqueGPUObjectName & pUniqueName,
+				const RenderPassConfiguration & pConfiguration );
+
+		void resetImmutableStateCache( Bitmask<EPipelineImmutableStateTypeFlags> pResetMask = E_PIPELINE_IMMUTABLE_STATE_TYPE_MASK_ALL );
 
 		/// @brief Creates an RTT using the provided CIS.
 		/// This function will automatically create a required resource, depending on the specified layout and usage.
@@ -97,20 +143,7 @@ namespace ts3::gpuapi
 
 		virtual void waitForCommandSync( CommandSync & pCommandSync ) = 0;
 
-		const math::RGBAColorU8 & getDefaultClearColor() const;
-		const RTAttachmentClearValue & getDefaultRTAttachmentClearValue() const;
-
 		void setPresentationLayer( PresentationLayerHandle pPresentationLayer );
-
-		TS3_ATTR_NO_DISCARD CommandSystem * getCommandSystem() const;
-
-		TS3_ATTR_NO_DISCARD PresentationLayer * getPresentationLayer() const;
-
-		TS3_ATTR_NO_DISCARD bool isDebugDevice() const noexcept;
-
-		TS3_ATTR_NO_DISCARD bool isMultiThreadAccessSupported() const noexcept;
-
-		TS3_ATTR_NO_DISCARD bool isResourceActiveRefsTrackingEnabled() const noexcept;
 
 	protected:
         /// @brief API-level initialization of the command system. Called by the parent driver when a device is created.
@@ -132,12 +165,6 @@ namespace ts3::gpuapi
 		virtual TextureHandle _drvCreateRenderTargetTexture( const RenderTargetTextureCreateInfo & pCreateInfo ) { return nullptr; }
 
 	protected:
-		enum InternalStateFlags : uint32
-		{
-			E_INTERNAL_STATE_FLAG_DEBUG_DEVICE_BIT = 0x0001,
-			E_INTERNAL_STATE_FLAG_MULTI_THREAD_ACCESS_BIT = 0x0002,
-			E_INTERNAL_STATE_FLAG_ENABLE_RESOURCE_ACTIVE_REFS_TRACKING_BIT = 0x0008
-		};
 
 		CommandSystemHandle _commandSystem;
 		PresentationLayerHandle _presentationLayer;
@@ -150,23 +177,8 @@ namespace ts3::gpuapi
 		/// Requires PipelineImmutableStateFactory to be specified when created.
 		std::unique_ptr<PipelineImmutableStateCache> _immutableStateCache;
 
-		Bitmask<InternalStateFlags> _internalStateFlags;
+		Bitmask<uint32> _internalStateFlags;
 	};
-
-	inline bool GPUDevice::isDebugDevice() const noexcept
-	{
-		return _internalStateFlags.isSet( E_INTERNAL_STATE_FLAG_DEBUG_DEVICE_BIT );
-	}
-
-	inline bool GPUDevice::isMultiThreadAccessSupported() const noexcept
-	{
-		return _internalStateFlags.isSet( E_INTERNAL_STATE_FLAG_MULTI_THREAD_ACCESS_BIT );
-	}
-
-	inline bool GPUDevice::isResourceActiveRefsTrackingEnabled() const noexcept
-	{
-		return _internalStateFlags.isSet( E_INTERNAL_STATE_FLAG_ENABLE_RESOURCE_ACTIVE_REFS_TRACKING_BIT );
-	}
 
 } // namespace ts3::gpuapi
 

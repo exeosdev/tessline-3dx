@@ -52,11 +52,6 @@ namespace ts3::gpuapi
 		return _stateFactory->createRasterizerState( pConfig );
 	}
 
-	RenderTargetLayoutImmutableStateHandle PipelineImmutableStateFactoryAdapter::createState( const RenderTargetLayoutConfiguration & pConfiguration )
-	{
-		return _stateFactory->createRenderTargetLayoutState( pConfiguration );
-	}
-
 	RenderTargetBindingImmutableStateHandle PipelineImmutableStateFactoryAdapter::createState( const RenderTargetBindingDefinition & pDefinition )
 	{
 		return _stateFactory->createRenderTargetBindingState( pDefinition );
@@ -94,11 +89,6 @@ namespace ts3::gpuapi
 	}
 
 	RasterizerImmutableStateHandle PipelineImmutableStateFactoryNull::createRasterizerState( const RasterizerConfig & )
-	{
-		return nullptr;
-	}
-
-	RenderTargetLayoutImmutableStateHandle PipelineImmutableStateFactoryNull::createRenderTargetLayoutState( const RenderTargetLayoutConfiguration & )
 	{
 		return nullptr;
 	}

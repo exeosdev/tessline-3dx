@@ -17,7 +17,6 @@ namespace ts3::gpuapi
 	struct IAInputLayoutDefinition;
 	struct IAVertexStreamDefinition;
 	struct RasterizerConfig;
-	struct RenderTargetLayoutConfiguration;
 	struct RenderTargetBindingDefinition;
 	struct RenderPassConfiguration;
 
@@ -34,7 +33,6 @@ namespace ts3::gpuapi
 	ts3GpaDeclareClassHandle( IAInputLayoutImmutableState );
 	ts3GpaDeclareClassHandle( IAVertexStreamImmutableState );
 	ts3GpaDeclareClassHandle( RasterizerImmutableState );
-	ts3GpaDeclareClassHandle( RenderTargetLayoutImmutableState );
 	ts3GpaDeclareClassHandle( RenderTargetBindingImmutableState );
 	ts3GpaDeclareClassHandle( RenderPassImmutableState );
 
@@ -49,7 +47,7 @@ namespace ts3::gpuapi
 	{
 
 		///
-		constexpr auto PIPELINE_INTERNAL_STATE_ID_INVALID = 0;
+		constexpr auto PIPELINE_INTERNAL_STATE_ID_INVALID = 0u;
 
 		///
 		constexpr auto VERTEX_ATTRIBUTE_OFFSET_APPEND = Limits<gpu_memory_size_t>::maxValue;
@@ -62,6 +60,9 @@ namespace ts3::gpuapi
 
 		///
 		constexpr auto RT_ATTACHMENT_MSAA_LEVEL_INVALID = Limits<uint32>::maxValue;
+
+		///
+		constexpr auto PIPELINE_IMMUTABLE_STATE_TYPES_NUM = 8u;
 
 		/// @brief
 		inline constexpr uint32 makeRTAttachmentFlag( render_target_index_t pAttachmentIndex )
@@ -76,6 +77,19 @@ namespace ts3::gpuapi
 		}
 
 	}
+
+	enum EPipelineImmutableStateTypeFlags : uint32
+	{
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_BLEND_BIT = 0x0001,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_DEPTH_STENCIL_BIT = 0x0002,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_GRAPHICS_SHADER_LINKAGE_BIT = 0x0008,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_IA_INPUT_LAYOUT_BIT = 0x0010,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_IA_VERTEX_STREAM_BIT = 0x0020,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_RASTERIZER_BIT = 0x0004,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_RENDER_TARGET_BINDING_BIT = 0x0040,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_RENDER_PASS_BIT = 0x0080,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_MASK_ALL = 0x00FF,
+	};
 
 	/// @brief
 	enum ERTAttachmentIndex : render_target_index_t

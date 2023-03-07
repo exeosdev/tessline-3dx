@@ -4,8 +4,8 @@
 #ifndef __TS3_GPUAPI_INPUT_ASSEMBLER_IMMUTABLE_STATES_H__
 #define __TS3_GPUAPI_INPUT_ASSEMBLER_IMMUTABLE_STATES_H__
 
-#include "../graphicsPipelineImmutableState.h"
-#include "../inputAssemblerCommon.h"
+#include "graphicsPipelineImmutableState.h"
+#include "inputAssemblerCommon.h"
 
 namespace ts3::gpuapi
 {

@@ -6,6 +6,7 @@
 #include <ts3/stdext/arrayView.h>
 #include <ts3/stdext/bitmask.h>
 #include <ts3/stdext/bitUtils.h>
+#include <ts3/stdext/refWrapper.h>
 #include <ts3/stdext/staticLimits.h>
 
 #if( TS3_BUILD_STATIC )

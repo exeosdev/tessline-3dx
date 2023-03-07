@@ -19,9 +19,10 @@ namespace ts3::gpuapi
 	ComputePipelineStateObject::~ComputePipelineStateObject() = default;
 
 
-	GraphicsPipelineStateObject::GraphicsPipelineStateObject( GPUDevice & pGPUDevice,
-	                                                          RenderTargetLayout pRenderTargetLayout,
-	                                                          ShaderInputSignature pShaderInputSignature )
+	GraphicsPipelineStateObject::GraphicsPipelineStateObject(
+			GPUDevice & pGPUDevice,
+			RenderTargetLayout pRenderTargetLayout,
+			ShaderInputSignature pShaderInputSignature )
 	: PipelineStateObject( pGPUDevice )
 	, mRenderTargetLayout( std::move( pRenderTargetLayout ) )
 	, mShaderInputSignature( std::move( pShaderInputSignature ) )
@@ -29,8 +30,9 @@ namespace ts3::gpuapi
 
 	GraphicsPipelineStateObject::~GraphicsPipelineStateObject() = default;
 
-	bool GraphicsPipelineStateObject::createCommonPSOState( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo,
-	                                                        CommonPSOState & pOutputState )
+	bool GraphicsPipelineStateObject::createCommonPSOState(
+			const GraphicsPipelineStateObjectCreateInfo & pCreateInfo,
+			CommonPSOState & pOutputState )
 	{
 		if( !pCreateInfo.shaderBindingDesc || !pCreateInfo.shaderInputSignatureDesc )
 		{
@@ -61,7 +63,6 @@ namespace ts3::gpuapi
 			// WARN here, no shader resources specified - valid situation, but very unlikely
 		}
 
-		pOutputState.shaderBinding = std::move( graphicsShaderBinding );
 		pOutputState.shaderInputSignature = std::move( shaderInputSignature );
 
 		return true;

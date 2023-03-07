@@ -18,7 +18,6 @@ namespace ts3::gpuapi
 		IAInputLayout,
 		IAVertexStream,
 		Rasterizer,
-		RenderTargetLayout,
 		RenderTargetBinding,
 		RenderPass,
 		Unknown
@@ -48,7 +47,6 @@ namespace ts3::gpuapi
 		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & pDefinition ) = 0;
 		virtual IAVertexStreamImmutableStateHandle createIAVertexStreamState( const IAVertexStreamDefinition & pDefinition ) = 0;
 		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerConfig & pConfig ) = 0;
-		virtual RenderTargetLayoutImmutableStateHandle createRenderTargetLayoutState( const RenderTargetLayoutConfiguration & pConfiguration ) = 0;
 		virtual RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & pDefinition ) = 0;
 		virtual RenderPassImmutableStateHandle createRenderPassState( const RenderPassConfiguration & pConfiguration ) = 0;
 	};
@@ -65,7 +63,6 @@ namespace ts3::gpuapi
 		IAInputLayoutImmutableStateHandle createState( const IAInputLayoutDefinition & pDefinition );
 		IAVertexStreamImmutableStateHandle createState( const IAVertexStreamDefinition & pDefinition );
 		RasterizerImmutableStateHandle createState( const RasterizerConfig & pConfig );
-		RenderTargetLayoutImmutableStateHandle createState( const RenderTargetLayoutConfiguration & pConfiguration );
 		RenderTargetBindingImmutableStateHandle createState( const RenderTargetBindingDefinition & pDefinition );
 		RenderPassImmutableStateHandle createState( const RenderPassConfiguration & pConfiguration );
 
@@ -85,7 +82,6 @@ namespace ts3::gpuapi
 		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & ) override final;
 		virtual IAVertexStreamImmutableStateHandle createIAVertexStreamState( const IAVertexStreamDefinition & ) override final;
 		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerConfig & ) override final;
-		virtual RenderTargetLayoutImmutableStateHandle createRenderTargetLayoutState( const RenderTargetLayoutConfiguration & ) override final;
 		virtual RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & ) override final;
 		virtual RenderPassImmutableStateHandle createRenderPassState( const RenderPassConfiguration & ) override final;
 	};

@@ -9,6 +9,8 @@
 namespace ts3::gpuapi
 {
 
+	ts3GpaDeclareClassHandle( SeparableGraphicsShaderImmutableState );
+
 	/// @brief
 	class SeparableGraphicsShaderImmutableState : public GraphicsShaderLinkageImmutableState
 	{
@@ -31,6 +33,12 @@ namespace ts3::gpuapi
 	class SeparablePipelineImmutableStateFactory : public PipelineImmutableStateFactory
 	{
 	public:
+		GPUDevice & mGPUDevice;
+
+	public:
+		SeparablePipelineImmutableStateFactory( GPUDevice & pGPUDevice );
+		virtual ~SeparablePipelineImmutableStateFactory();
+
 		virtual GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageState( const GraphicsShaderSet & pShaderSet ) override;
 	};
 
