@@ -4,8 +4,8 @@
 #ifndef __TS3_GPUAPI_COMMON_GRAPHICS_CONFIG_IMMUTABLE_STATES_H__
 #define __TS3_GPUAPI_COMMON_GRAPHICS_CONFIG_IMMUTABLE_STATES_H__
 
-#include "../commonGraphicsConfig.h"
-#include "../graphicsPipelineImmutableState.h"
+#include "commonGraphicsConfig.h"
+#include "graphicsPipelineImmutableState.h"
 
 namespace ts3::gpuapi
 {

@@ -4,7 +4,7 @@
 #ifndef __TS3_GPUAPI_INPUT_ASSEMBLER_DYNAMIC_STATES_H__
 #define __TS3_GPUAPI_INPUT_ASSEMBLER_DYNAMIC_STATES_H__
 
-#include "../inputAssemblerCommon.h"
+#include "inputAssemblerCommon.h"
 
 namespace ts3::gpuapi
 {

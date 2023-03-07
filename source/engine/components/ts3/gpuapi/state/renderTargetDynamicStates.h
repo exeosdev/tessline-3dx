@@ -4,7 +4,7 @@
 #ifndef __TS3_GPUAPI_RENDER_TARGET_DYNAMIC_STATES_H__
 #define __TS3_GPUAPI_RENDER_TARGET_DYNAMIC_STATES_H__
 
-#include "../renderPassCommon.h"
+#include "renderPassCommon.h"
 
 namespace ts3::gpuapi
 {
