@@ -84,7 +84,7 @@ namespace ts3::gpuapi
 		E_SHADER_STAGE_INDEX_COMPUTE,
 
 		/// Base stage index, i.e. index of the first supported stage. Values below this one are not valid stage indexes.
-		/// To compute a zero-based index, subtract this from a valid stage index or use ecGetShaderStageAbsoluteIndex().
+		/// To compute a zero-based index, subtract this from a valid stage index or use cxdefs::getShaderStageAbsoluteIndex().
 		E_SHADER_STAGE_INDEX_BASE = E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX,
 
 		/// Index of the last graphics stage. Used to verify if a specified index is a valid graphics stage index.
@@ -105,7 +105,7 @@ namespace ts3::gpuapi
 	/// @see EShaderStageIndex
 	enum EShaderStageFlags : uint32
 	{
-		// Note: ecDeclareShaderType() and other enum utility functions assume, that shader-related bits will fit
+		// Note: cxdefs::declareShaderType() and other enum utility functions assume, that shader-related bits will fit
 		// 16-bit value range and have values up to 0xFFFF (no shifting is performed). In case of any alterations,
 		// update that part of the functionality accordingly (see shaderCommon.h).
 

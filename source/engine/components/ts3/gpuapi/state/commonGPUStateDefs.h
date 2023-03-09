@@ -25,7 +25,7 @@ namespace ts3::gpuapi
 
 	class IAVertexStreamDynamicState;
 	class RenderTargetBindingDynamicState;
-	class RenderPassDynamicState;
+	class RenderPassConfigurationDynamicState;
 
 	ts3GpaDeclareClassHandle( GPUDeviceChildObject );
 	ts3GpaDeclareClassHandle( PipelineStateObject );
@@ -39,7 +39,7 @@ namespace ts3::gpuapi
 	ts3GpaDeclareClassHandle( IAVertexStreamImmutableState );
 	ts3GpaDeclareClassHandle( RasterizerImmutableState );
 	ts3GpaDeclareClassHandle( RenderTargetBindingImmutableState );
-	ts3GpaDeclareClassHandle( RenderPassImmutableState );
+	ts3GpaDeclareClassHandle( RenderPassConfigurationImmutableState );
 
 	using pipeline_internal_state_hash_t = uint64;
 	using render_target_index_t = uint16;

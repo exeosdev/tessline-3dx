@@ -87,28 +87,33 @@ namespace ts3
 	constexpr result_code_value_t CX_RESULT_CODE_CATEGORY_MASK = 0x0000FF00;
 	constexpr result_code_value_t CX_RESULT_CODE_IID_MASK      = 0x000000FF;
 
-	///
-	inline constexpr result_code_value_t ecDeclareResultCode( EResultCodeType pType, uint8 pCategory, uint8 pIID )
+	namespace cxdefs
 	{
-		return ( CX_RESULT_CODE_CONTROL_KEY | ( ( result_code_value_t )( pType ) << 16 ) | ( ( result_code_value_t )( pCategory ) << 8 ) | pIID );
-	}
 
-	///
-	inline constexpr EResultCodeType ecGetResultCodeType( result_code_value_t pResultCode )
-	{
-		return ( EResultCodeType )( ( pResultCode & CX_RESULT_CODE_TYPE_MASK ) >> 16 );
-	}
+		///
+		inline constexpr result_code_value_t declareResultCode( EResultCodeType pType, uint8 pCategory, uint8 pIID )
+		{
+			return ( CX_RESULT_CODE_CONTROL_KEY | ( ( result_code_value_t )( pType ) << 16 ) | ( ( result_code_value_t )( pCategory ) << 8 ) | pIID );
+		}
 
-	///
-	inline constexpr uint8 ecGetResultCodeCategory( result_code_value_t pResultCode )
-	{
-		return ( uint8 )( ( pResultCode & CX_RESULT_CODE_CATEGORY_MASK ) >> 8 );
-	}
+		///
+		inline constexpr EResultCodeType getResultCodeType( result_code_value_t pResultCode )
+		{
+			return ( EResultCodeType )( ( pResultCode & CX_RESULT_CODE_TYPE_MASK ) >> 16 );
+		}
 
-	///
-	inline constexpr bool ecValidateResultCode( result_code_value_t pResultCode )
-	{
-		return ( pResultCode & CX_RESULT_CODE_CONTROL_KEY ) == CX_RESULT_CODE_CONTROL_KEY;
+		///
+		inline constexpr uint8 getResultCodeCategory( result_code_value_t pResultCode )
+		{
+			return ( uint8 )( ( pResultCode & CX_RESULT_CODE_CATEGORY_MASK ) >> 8 );
+		}
+
+		///
+		inline constexpr bool validateResultCode( result_code_value_t pResultCode )
+		{
+			return ( pResultCode & CX_RESULT_CODE_CONTROL_KEY ) == CX_RESULT_CODE_CONTROL_KEY;
+		}
+
 	}
 
 	enum : uint8
@@ -118,14 +123,14 @@ namespace ts3
 	
 	enum : result_code_value_t
 	{
-		E_RESULT_CODE_GENERIC_SUCCESS = ecDeclareResultCode( EResultCodeType::Success, E_RESULT_CATEGORY_GENERIC, 0 )
+		E_RESULT_CODE_GENERIC_SUCCESS = cxdefs::declareResultCode( EResultCodeType::Success, E_RESULT_CATEGORY_GENERIC, 0 )
 	};
 
 	struct ResultCodeErrorPredicate
 	{
 		constexpr bool operator()( result_code_value_t pResultCode ) const
 		{
-			return ecGetResultCodeType( pResultCode ) == EResultCodeType::Error;
+			return cxdefs::getResultCodeType( pResultCode ) == EResultCodeType::Error;
 		}
 	};
 

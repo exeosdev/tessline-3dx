@@ -44,7 +44,10 @@ namespace ts3::gpuapi
 	class PipelineImmutableStateSubCache
 	{
 	public:
-		PipelineImmutableStateSubCache( PipelineImmutableStateFactory & pFactory );
+		PipelineImmutableStateSubCache( PipelineImmutableStateFactory & pFactory )
+		: _stateFactoryAdapter( pFactory )
+		{}
+
 		~PipelineImmutableStateSubCache() = default;
 
 		TS3_ATTR_NO_DISCARD GpaHandle<TState> getState( const UniqueGPUObjectID & pStateObjectID ) const
@@ -146,15 +149,19 @@ namespace ts3::gpuapi
 	class PipelineImmutableStateCache
 	{
 	public:
+		PipelineImmutableStateFactory & mStateFactory;
+
+	public:
 		PipelineImmutableStateCache( PipelineImmutableStateFactory & pFactory )
-		: ts3GpaStateSubCacheInit( Blend, pFactory )
-		, ts3GpaStateSubCacheInit( DepthStencil, pFactory )
-		, ts3GpaStateSubCacheInit( GraphicsShaderLinkage, pFactory )
-		, ts3GpaStateSubCacheInit( IAInputLayout, pFactory )
-		, ts3GpaStateSubCacheInit( IAVertexStream, pFactory )
-		, ts3GpaStateSubCacheInit( Rasterizer, pFactory )
-		, ts3GpaStateSubCacheInit( RenderTargetBinding, pFactory )
-		, ts3GpaStateSubCacheInit( RenderPass, pFactory )
+		: mStateFactory( pFactory )
+		, ts3GpaStateSubCacheInit( Blend, mStateFactory )
+		, ts3GpaStateSubCacheInit( DepthStencil, mStateFactory )
+		, ts3GpaStateSubCacheInit( GraphicsShaderLinkage, mStateFactory )
+		, ts3GpaStateSubCacheInit( IAInputLayout, mStateFactory )
+		, ts3GpaStateSubCacheInit( IAVertexStream, mStateFactory )
+		, ts3GpaStateSubCacheInit( Rasterizer, mStateFactory )
+		, ts3GpaStateSubCacheInit( RenderTargetBinding, mStateFactory )
+		, ts3GpaStateSubCacheInit( RenderPassConfiguration, mStateFactory )
 		{}
 
 		template <typename TState>
@@ -222,7 +229,7 @@ namespace ts3::gpuapi
 				_stateSubCacheRenderTargetBinding.reset();
 
 			if( pResetMask.isSet( E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_RENDER_PASS_BIT ) )
-				_stateSubCacheRenderPass.reset();
+				_stateSubCacheRenderPassConfiguration.reset();
 		}
 
 	private:
@@ -237,7 +244,7 @@ namespace ts3::gpuapi
 		ts3GpaStateSubCacheDeclare( IAVertexStream );
 		ts3GpaStateSubCacheDeclare( Rasterizer );
 		ts3GpaStateSubCacheDeclare( RenderTargetBinding );
-		ts3GpaStateSubCacheDeclare( RenderPass );
+		ts3GpaStateSubCacheDeclare( RenderPassConfiguration );
 	};
 
 	ts3GpaStateSubCacheDefineProxy( Blend );
@@ -247,7 +254,7 @@ namespace ts3::gpuapi
 	ts3GpaStateSubCacheDefineProxy( IAVertexStream );
 	ts3GpaStateSubCacheDefineProxy( Rasterizer );
 	ts3GpaStateSubCacheDefineProxy( RenderTargetBinding );
-	ts3GpaStateSubCacheDefineProxy( RenderPass );
+	ts3GpaStateSubCacheDefineProxy( RenderPassConfiguration );
 
 } // namespace ts3::gpuapi
 

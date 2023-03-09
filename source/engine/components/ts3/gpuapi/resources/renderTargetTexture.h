@@ -31,6 +31,7 @@ namespace ts3::gpuapi
 	struct RenderTargetTextureCreateInfo
 	{
 		TextureReference targetTexture;
+		ERenderTargetTextureType rttType;
 		RenderTargetTextureLayout rttLayout;
 		Bitmask<ETextureBindFlags> bindFlags;
 	};
@@ -52,7 +53,10 @@ namespace ts3::gpuapi
 		virtual ~RenderTargetTexture();
 
 		///
-		TS3_ATTR_NO_DISCARD TextureHandle getTargetTexture() const noexcept;
+		TS3_ATTR_NO_DISCARD const TextureReference & getTargetTextureRef() const noexcept;
+
+		///
+		TS3_ATTR_NO_DISCARD GPUDeviceChildObject * getInternalRenderBuffer() const noexcept;
 
 		///
 		TS3_ATTR_NO_DISCARD bool empty() const noexcept;
@@ -66,11 +70,16 @@ namespace ts3::gpuapi
 	protected:
 		void setTargetTexture( const TextureReference & pTargetTextureRef );
 
+		void setInternalRenderBuffer( GpaHandle<GPUDeviceChildObject> pInternalRenderBuffer );
+
 	private:
 		/// Internal texture used by this RTT. Can be null, if this is a write-only depth-stencil
 		/// RTT (created solely for the purpose of an off-screen depth/stencil testing).
 		/// In particular, this is null always when isDepthStencilRenderBuffer() returns true.
 		TextureReference _targetTexture;
+
+		///
+		GpaHandle<GPUDeviceChildObject> _internalRenderBuffer;
 	};
 
 	namespace rcutil

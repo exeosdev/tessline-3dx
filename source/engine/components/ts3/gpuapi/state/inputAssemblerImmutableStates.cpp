@@ -33,4 +33,26 @@ namespace ts3::gpuapi
 		return EGraphicsPipelineImmutableStateType::IAVertexStream;
 	}
 
+	namespace smutil
+	{
+
+		IAInputLayoutStateCommonProperties getIAInputLayoutStateCommonProperties(
+				const IAInputLayoutDefinition & pInputLayoutDefinition )
+		{
+			IAInputLayoutStateCommonProperties properties{};
+			properties.activeAttributesMask = pInputLayoutDefinition.activeAttributesMask;
+			properties.primitiveTopology = pInputLayoutDefinition.primitiveTopology;
+			properties.activeAttributesNum = popCount( pInputLayoutDefinition.activeAttributesMask );
+			return properties;
+		}
+
+		IAVertexStreamStateCommonProperties getIAVertexStreamStateCommonProperties(
+				const IAVertexStreamDefinition & pVertexStreamDefinition )
+		{
+			IAVertexStreamStateCommonProperties properties{};
+			return properties;
+		}
+
+	}
+
 }

@@ -134,10 +134,8 @@ namespace ts3::gpuapi
 	/// @brief
 	struct IAInputLayoutDefinition
 	{
-		IAVertexAttributeInfoArray attributeArray;
-
 		Bitmask<EIAVertexAttributeFlags> activeAttributesMask;
-
+		IAVertexAttributeInfoArray attributeArray;
 		EPrimitiveTopology primitiveTopology;
 	};
 
@@ -151,6 +149,11 @@ namespace ts3::gpuapi
 			return sourceBuffer.empty();
 		}
 
+		gpu_memory_size_t dataOffset() const noexcept
+		{
+			return sourceBuffer.getRefSubRegion().offset + relativeOffset;
+		}
+
 		explicit operator bool() const noexcept
 		{
 			return !empty();
@@ -159,6 +162,7 @@ namespace ts3::gpuapi
 		void reset()
 		{
 			sourceBuffer.reset();
+			relativeOffset = 0;
 		}
 	};
 
@@ -180,11 +184,9 @@ namespace ts3::gpuapi
 	/// @brief
 	struct IAVertexStreamDefinition
 	{
-		IAVertexBufferReferenceArray vertexBufferReferences;
-
-		IAIndexBufferReference indexBufferReference;
-
 		Bitmask<EIAVertexStreamBindingFlags> activeBindingsMask;
+		IAVertexBufferReferenceArray vertexBufferReferences;
+		IAIndexBufferReference indexBufferReference;
 	};
 
 	/// @brief Describes a single, continuous range of vertex buffer binding points in the vertex stream.

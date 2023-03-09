@@ -78,11 +78,11 @@ namespace ts3::gpuapi
 			return static_cast<EShaderInputResourceClass>( ( static_cast<uint32>( pResourceType ) >> 8u ) & 0xFFu );
 		}
 
-	}
+		inline constexpr Bitmask<EShaderStageFlags> getShaderConstantVisibilityStageMask( EShaderConstantAccessClass pAccessClass )
+		{
+			return static_cast<uint32>( pAccessClass );
+		}
 
-	inline constexpr Bitmask<EShaderStageFlags> ecGetShaderConstantVisibilityStageMask( EShaderConstantAccessClass pAccessClass )
-	{
-		return static_cast<uint32>( pAccessClass );
 	}
 
 	struct ShaderInputSignatureDesc

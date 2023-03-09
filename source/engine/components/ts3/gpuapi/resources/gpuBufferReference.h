@@ -23,6 +23,8 @@ namespace ts3::gpuapi
 		GPUBufferReference( GPUBufferHandle pGPUBuffer, const GPUMemoryRegion & pReferencedSubRegion );
 		GPUBufferReference( GPUBufferHandle pGPUBuffer, gpu_memory_size_t pOffset, gpu_memory_size_t pSize = cxdefs::GPU_MEMORY_SIZE_MAX );
 
+		GPUBuffer * operator->() const noexcept;
+
 		/// @brief Returns a pointer to the referenced GPU buffer. This can be null if the reference is empty().
 		TS3_ATTR_NO_DISCARD GPUBufferHandle getRefBuffer() const noexcept;
 
@@ -59,6 +61,11 @@ namespace ts3::gpuapi
 		/// Size can be GPU_MEMORY_SIZE_MAX - it means the whole remaining region (starting at offset) is referenced.
 		GPUMemoryRegion _refSubRegion;
 	};
+
+	inline GPUBuffer * GPUBufferReference::operator->() const noexcept
+	{
+		return _refBufferObject.get();
+	}
 
 	inline GPUBufferHandle GPUBufferReference::getRefBuffer() const noexcept
 	{

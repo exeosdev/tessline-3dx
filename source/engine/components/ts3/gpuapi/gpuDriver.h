@@ -28,18 +28,24 @@ namespace ts3::gpuapi
 		explicit GPUDriver( system::SysContextHandle pSysContext ) noexcept;
 		virtual ~GPUDriver() noexcept;
 
-		virtual DisplayManagerHandle createDefaultDisplayManager() = 0;
-
-		virtual GPUDeviceHandle createDevice( const GPUDeviceCreateInfo & pCreateInfo ) = 0;
-
 		virtual EGPUDriverID queryGPUDriverID() const = 0;
 
 		Bitmask<EGPUDriverConfigFlags> getConfigFlags() const;
 
 		bool isDebugFunctionalityRequested() const;
 
+		DisplayManagerHandle createDefaultDisplayManager();
+
+		GPUDeviceHandle createDevice( const GPUDeviceCreateInfo & pCreateInfo );
+
 	protected:
 		void setConfigFlags( Bitmask<EGPUDriverConfigFlags> pConfigFlags );
+
+	private:
+		virtual DisplayManagerHandle _drvCreateDefaultDisplayManager() = 0;
+
+		virtual GPUDeviceHandle _drvCreateDevice( const GPUDeviceCreateInfo & pCreateInfo ) = 0;
+
 
 	private:
 		Bitmask<EGPUDriverConfigFlags> _configFlags;

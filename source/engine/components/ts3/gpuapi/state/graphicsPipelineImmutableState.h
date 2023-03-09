@@ -19,7 +19,7 @@ namespace ts3::gpuapi
 		IAVertexStream,
 		Rasterizer,
 		RenderTargetBinding,
-		RenderPass,
+		RenderPassConfiguration,
 		Unknown
 	};
 
@@ -49,7 +49,7 @@ namespace ts3::gpuapi
 		virtual IAVertexStreamImmutableStateHandle createIAVertexStreamState( const IAVertexStreamDefinition & pDefinition ) = 0;
 		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerConfig & pConfig ) = 0;
 		virtual RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & pDefinition ) = 0;
-		virtual RenderPassImmutableStateHandle createRenderPassState( const RenderPassConfiguration & pConfiguration ) = 0;
+		virtual RenderPassConfigurationImmutableStateHandle createRenderPassState( const RenderPassConfiguration & pConfiguration ) = 0;
 	};
 
 	/// @brief
@@ -66,7 +66,7 @@ namespace ts3::gpuapi
 		virtual IAVertexStreamImmutableStateHandle createIAVertexStreamState( const IAVertexStreamDefinition & ) override final;
 		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerConfig & ) override final;
 		virtual RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & ) override final;
-		virtual RenderPassImmutableStateHandle createRenderPassState( const RenderPassConfiguration & ) override final;
+		virtual RenderPassConfigurationImmutableStateHandle createRenderPassState( const RenderPassConfiguration & ) override final;
 	};
 
 	/// @brief
@@ -95,7 +95,7 @@ namespace ts3::gpuapi
 		IAVertexStreamImmutableStateHandle createState( const IAVertexStreamDefinition & pDefinition );
 		RasterizerImmutableStateHandle createState( const RasterizerConfig & pConfig );
 		RenderTargetBindingImmutableStateHandle createState( const RenderTargetBindingDefinition & pDefinition );
-		RenderPassImmutableStateHandle createState( const RenderPassConfiguration & pConfiguration );
+		RenderPassConfigurationImmutableStateHandle createState( const RenderPassConfiguration & pConfiguration );
 
 	private:
 		PipelineImmutableStateFactory * _stateFactory;

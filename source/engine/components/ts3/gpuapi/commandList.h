@@ -17,10 +17,20 @@ namespace ts3::gpuapi
 	{
 	public:
 		CommandSystem * const mCommandSystem = nullptr;
-		ECommandListType const mListType;
+		ECommandListType const mListType = ECommandListType::Undefined;
 
-		CommandList( CommandSystem & pCommandSystem, ECommandListType pListType );
+		CommandList(
+			CommandSystem & pCommandSystem,
+			ECommandListType pListType,
+			GraphicsPipelineStateController & pPipelineStateController );
+
 		virtual ~CommandList();
+
+		TS3_ATTR_NO_DISCARD bool checkContextSupport( ECommandContextType pContextType ) const noexcept;
+
+		TS3_ATTR_NO_DISCARD bool checkFeatureSupport( Bitmask<ECommandListFlags> pListFlags ) const noexcept;
+
+		TS3_ATTR_NO_DISCARD bool isRenderPassActive() const noexcept;
 
 		bool acquireList();
 		void releaseList();
@@ -40,10 +50,10 @@ namespace ts3::gpuapi
 		bool updateBufferDataUpload( GPUBuffer & pBuffer, const GPUBufferDataUploadDesc & pUploadDesc );
 		bool updateBufferSubDataUpload( GPUBuffer & pBuffer, const GPUBufferSubDataUploadDesc & pUploadDesc );
 
-		virtual bool beginRenderPass( const RenderPassImmutableState & pRenderPassState ) = 0;
-		virtual bool beginRenderPass( const RenderPassDynamicState & pRenderPassState ) = 0;
+		virtual bool beginRenderPass( const RenderPassConfigurationImmutableState & pRenderPassState );
+		virtual bool beginRenderPass( const RenderPassConfigurationDynamicState & pRenderPassState );
 
-		virtual void endRenderPass() = 0;
+		virtual void endRenderPass();
 
 		virtual void executeDeferredContext( CommandContextDeferred & pDeferredContext ) = 0;
 
@@ -67,14 +77,10 @@ namespace ts3::gpuapi
 		virtual void drawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset ) = 0;
 		virtual void drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset ) = 0;
 
-		bool checkContextSupport( ECommandContextType pContextType ) const;
-		bool checkFeatureSupport( Bitmask<ECommandListFlags> pListFlags ) const;
-
-	protected:
-		void setGraphicsPipelineStateController( GraphicsPipelineStateController & pStateController );
-
 	private:
 		std::atomic<bool> _listLockStatus = ATOMIC_VAR_INIT( false );
+
+		Bitmask<uint32> _internalStateMask;
 
 		GraphicsPipelineStateController * _pipelineStateController = nullptr;
 	};

@@ -1244,7 +1244,7 @@ namespace ts3
 		if( totalByteSize > 0 )
 		{
 			// Resize the output buffer.
-			pOutputBuffer.resize( trunc_numeric_cast<size_t>( totalByteSize ) );
+			pOutputBuffer.resize( numeric_cast<size_t>( totalByteSize ) );
 
 			// Serialize the data into the buffer. This is the call to the actual, value-specific serialize().
 			serialize( pOutputBuffer.data(), pValue );
@@ -1262,7 +1262,7 @@ namespace ts3
 
 		if( totalByteSize > 0 )
 		{
-			pOutputBuffer.resize( trunc_numeric_cast<size_t>( totalByteSize ) );
+			pOutputBuffer.resize( numeric_cast<size_t>( totalByteSize ) );
 			serializeWithMetaData( pOutputBuffer.data(), pValue );
 		}
 
@@ -1358,7 +1358,7 @@ namespace ts3
 
 		// MetaData contains information about the size. ::outputBlockSize is the size of the whole data block
 		// (i.e. MetaData + ObjectData). Resize the buffer so we can read the remaining object data now.
-		pReadBuffer.resize( trunc_numeric_cast<size_t>( metaData.outputBlockSize ) );
+		pReadBuffer.resize( numeric_cast<size_t>( metaData.outputBlockSize ) );
 
 		// Read the object data. Save it after the MetaData (hence the offset), so we have a full representation.
 		const auto objectDataReadSize = pReadCallback( pReadBuffer.data() + metaDataSize, metaData.objectDataSize );

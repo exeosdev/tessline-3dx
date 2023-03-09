@@ -48,7 +48,7 @@ namespace ts3
 	};
 
 	template <typename TResult, typename TInput>
-	inline TResult trunc_numeric_cast( TInput pInput )
+	inline TResult numeric_cast( TInput pInput )
 	{
 		ts3DebugAssert( pInput <= std::numeric_limits<TResult>::max() );
 		return static_cast<TResult>( pInput );

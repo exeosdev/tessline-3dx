@@ -59,6 +59,17 @@ namespace ts3::gpuapi
 		TS3_ATTR_NO_DISCARD virtual EGraphicsPipelineImmutableStateType queryStateType() const noexcept override final;
 	};
 
+	namespace smutil
+	{
+
+		TS3_GPUAPI_API_NO_DISCARD IAInputLayoutStateCommonProperties getIAInputLayoutStateCommonProperties(
+				const IAInputLayoutDefinition & pInputLayoutDefinition );
+
+		TS3_GPUAPI_API_NO_DISCARD IAVertexStreamStateCommonProperties getIAVertexStreamStateCommonProperties(
+				const IAVertexStreamDefinition & pVertexStreamDefinition );
+
+	}
+
 } // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_INPUT_ASSEMBLER_IMMUTABLE_STATES_H__

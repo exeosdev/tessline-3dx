@@ -310,7 +310,7 @@ namespace std
 	{
 		size_t operator()( const ts3::HashObject<tHashAlgo> & pHashObject ) const noexcept
 		{
-			return ts3::trunc_numeric_cast<size_t>( pHashObject.hashValue );
+			return ts3::numeric_cast<size_t>( pHashObject.hashValue );
 		}
 	};
 

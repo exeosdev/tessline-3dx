@@ -10,16 +10,18 @@
 namespace ts3::gpuapi
 {
 
+	class PipelineImmutableStateFactory;
+
 	using graphics_state_update_mask_value_t = uint64;
 
 	/// @brief Defines bit flags describing what kind of changes are pending for
 	enum EGraphicsStateUpdateCommonFlags : graphics_state_update_mask_value_t
 	{
-		E_GRAPHICS_STATE_UPDATE_COMMON_PSO_BIT = 0x01,
-		E_GRAPHICS_STATE_UPDATE_COMMON_VERTEX_STREAM_BIT = 0x02,
-		E_GRAPHICS_STATE_UPDATE_COMMON_RENDER_TARGET_BINDING_BIT = 0x04,
+		E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_PSO_BIT = 0x01,
+		E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_VERTEX_STREAM_BIT = 0x02,
+		E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_RENDER_TARGET_BINDING_BIT = 0x04,
 
-		E_GRAPHICS_STATE_UPDATE_COMMON_STATES_ALL = 0x07
+		E_GRAPHICS_STATE_UPDATE_MASK_COMMON_ALL = 0x07
 	};
 
 	/// @brief
@@ -28,6 +30,8 @@ namespace ts3::gpuapi
 	public:
 		GraphicsPipelineStateController();
 		virtual ~GraphicsPipelineStateController();
+
+		virtual void applyPipelineStateChanges() = 0;
 
 		/// @brief Binds the specified state object to the pipeline. Returns true if any change has been made.
 		/// @return True if anything has been changed or false otherwise.
@@ -39,12 +43,12 @@ namespace ts3::gpuapi
 		/// @note Sub-classes should always call the base method first and check the result before doing the actual update.
 		virtual bool resetGraphicsPipelineStateObject();
 
-		virtual bool setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState );
 		virtual bool setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState );
+		virtual bool setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState );
 		virtual bool resetIAVertexStreamState();
 
-		virtual bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
 		virtual bool setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState );
+		virtual bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
 		virtual bool resetRenderTargetBindingState();
 
 		/// @brief Returns true if the state update mask is not empty (some bits are set) or false otherwise.
@@ -72,6 +76,10 @@ namespace ts3::gpuapi
 			}
 			ts3Throw( 0 );
 		}
+
+		static const IAVertexStreamImmutableState * sIAVertexStreamImmutableStateDynamic;
+
+		static const RenderTargetBindingImmutableState * sRenderTargetBindingImmutableStateDynamic;
 
 	protected:
 		struct CurrentCommonState

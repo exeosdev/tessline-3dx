@@ -19,18 +19,21 @@ namespace ts3::gpuapi
 		RenderTargetBindingImmutableState( const RenderTargetBindingImmutableState & ) = delete;
 		RenderTargetBindingImmutableState & operator=( const RenderTargetBindingImmutableState & ) = delete;
 
-		RenderTargetBindingImmutableState( GPUDevice & pGPUDevice, const RenderTargetLayout & pRenderTargetLayout );
+		RenderTargetBindingImmutableState(
+				GPUDevice & pGPUDevice,
+				const RenderTargetLayout & pRenderTargetLayout );
+
 		virtual ~RenderTargetBindingImmutableState();
 	};
 
-	class RenderPassImmutableState : public GraphicsPipelineImmutableState
+	class RenderPassConfigurationImmutableState : public GraphicsPipelineImmutableState
 	{
 	public:
-		RenderPassImmutableState( const RenderPassImmutableState & ) = delete;
-		RenderPassImmutableState & operator=( const RenderPassImmutableState & ) = delete;
+		RenderPassConfigurationImmutableState( const RenderPassConfigurationImmutableState & ) = delete;
+		RenderPassConfigurationImmutableState & operator=( const RenderPassConfigurationImmutableState & ) = delete;
 
-		RenderPassImmutableState( GPUDevice & pGPUDevice );
-		virtual ~RenderPassImmutableState();
+		RenderPassConfigurationImmutableState( GPUDevice & pGPUDevice );
+		virtual ~RenderPassConfigurationImmutableState();
 	};
 
 } // namespace ts3::gpuapi

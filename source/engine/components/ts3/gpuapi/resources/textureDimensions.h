@@ -127,15 +127,45 @@ namespace ts3::gpuapi
 		uint32 height;
 	};
 
+	inline constexpr bool operator==( const TextureSize2D & pLhs, const TextureSize2D & pRhs ) noexcept
+	{
+		return ( pLhs.width == pRhs.width ) && ( pLhs.height == pRhs.height );
+	}
+
+	inline constexpr bool operator!=( const TextureSize2D & pLhs, const TextureSize2D & pRhs ) noexcept
+	{
+		return ( pLhs.width != pRhs.width ) || ( pLhs.height != pRhs.height );
+	}
+
 	struct TextureSize2DArray : public TextureSize2D
 	{
 		uint32 arraySize;
 	};
 
+	inline constexpr bool operator==( const TextureSize2DArray & pLhs, const TextureSize2DArray & pRhs ) noexcept
+	{
+		return ( pLhs.width == pRhs.width ) && ( pLhs.height == pRhs.height ) && ( pLhs.arraySize == pRhs.arraySize );
+	}
+
+	inline constexpr bool operator!=( const TextureSize2DArray & pLhs, const TextureSize2DArray & pRhs ) noexcept
+	{
+		return ( pLhs.width != pRhs.width ) || ( pLhs.height != pRhs.height ) || ( pLhs.arraySize != pRhs.arraySize );
+	}
+
 	struct TextureSize3D : public TextureSize2D
 	{
 		uint32 depth;
 	};
+
+	inline constexpr bool operator==( const TextureSize3D & pLhs, const TextureSize3D & pRhs ) noexcept
+	{
+		return ( pLhs.width == pRhs.width ) && ( pLhs.height == pRhs.height ) && ( pLhs.depth == pRhs.depth );
+	}
+
+	inline constexpr bool operator!=( const TextureSize3D & pLhs, const TextureSize3D & pRhs ) noexcept
+	{
+		return ( pLhs.width != pRhs.width ) || ( pLhs.height != pRhs.height ) || ( pLhs.depth != pRhs.depth );
+	}
 
 	struct TextureSizeCubeMap : public TextureSize2D
 	{

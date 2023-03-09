@@ -1,6 +1,7 @@
 
 #include <ts3/gpuapi/displayManager.h>
 #include <ts3/gpuapi/gpuDriver.h>
+#include <ts3/gpuapi/gpuDevice.h>
 
 namespace ts3::gpuapi
 {
@@ -14,6 +15,24 @@ namespace ts3::gpuapi
 	EGPUDriverID GPUDriver::queryGPUDriverID() const
 	{
 		return EGPUDriverID::GDIUnknown;
+	}
+
+	DisplayManagerHandle GPUDriver::createDefaultDisplayManager()
+	{
+		return nullptr;
+	}
+
+	GPUDeviceHandle GPUDriver::createDevice( const GPUDeviceCreateInfo & pCreateInfo )
+	{
+		auto gpuDevice = _drvCreateDevice( pCreateInfo );
+		if( !gpuDevice )
+		{
+			return nullptr;
+		}
+
+		gpuDevice->initializeCommandSystem();
+
+		return gpuDevice;
 	}
 
 	void GPUDriver::setConfigFlags( Bitmask<EGPUDriverConfigFlags> pConfigFlags )

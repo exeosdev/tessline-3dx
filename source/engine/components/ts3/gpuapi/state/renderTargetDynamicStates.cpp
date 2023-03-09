@@ -33,7 +33,7 @@ namespace ts3::gpuapi
 		_renderTargetBindingDefinition = pDefinition;
 	}
 
-	RenderTargetColorAttachmentBinding & RenderTargetBindingDynamicState::setColorAttachmentBinding( render_target_index_t pIndex )
+	RenderTargetAttachmentBinding & RenderTargetBindingDynamicState::setColorAttachmentBinding( render_target_index_t pIndex )
 	{
 		ts3DebugAssert( cxdefs::isRTAttachmentIndexValid( pIndex ) );
 		_renderTargetBindingDefinition.activeAttachmentsMask.set( cxdefs::makeRTAttachmentFlag( pIndex ) );
@@ -42,7 +42,7 @@ namespace ts3::gpuapi
 
 	void RenderTargetBindingDynamicState::setColorAttachmentBinding(
 			render_target_index_t pIndex,
-			const RenderTargetColorAttachmentBinding & pRPCAttachmentBinding )
+			const RenderTargetAttachmentBinding & pRPCAttachmentBinding )
 	{
 		_setColorAttachmentBindings( pIndex, 1, &pRPCAttachmentBinding );
 	}
@@ -56,19 +56,19 @@ namespace ts3::gpuapi
 	void RenderTargetBindingDynamicState::setColorAttachmentBindings(
 			uint32 pFirstIndex,
 			uint32 pCount,
-			const RenderTargetColorAttachmentBinding * pRPCAttachmentBindings )
+			const RenderTargetAttachmentBinding * pRPCAttachmentBindings )
 	{
 		_setColorAttachmentBindings( pFirstIndex, pCount, pRPCAttachmentBindings );
 	}
 
-	RenderTargetDepthStencilAttachmentBinding & RenderTargetBindingDynamicState::setDepthStencilAttachmentBinding()
+	RenderTargetAttachmentBinding & RenderTargetBindingDynamicState::setDepthStencilAttachmentBinding()
 	{
 		_renderTargetBindingDefinition.activeAttachmentsMask.set( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT );
 		return _renderTargetBindingDefinition.depthStencilAttachment;
 	}
 
 	void RenderTargetBindingDynamicState::setDepthStencilAttachmentBinding(
-			const RenderTargetDepthStencilAttachmentBinding & pRPDSAttachmentBinding )
+			const RenderTargetAttachmentBinding & pRPDSAttachmentBinding )
 	{
 		_renderTargetBindingDefinition.activeAttachmentsMask.setOrUnset( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT, !pRPDSAttachmentBinding.empty() );
 		_renderTargetBindingDefinition.depthStencilAttachment = pRPDSAttachmentBinding;
@@ -104,7 +104,7 @@ namespace ts3::gpuapi
 	void RenderTargetBindingDynamicState::_setColorAttachmentBindings(
 			uint32 pFirstIndex,
 			uint32 pCount,
-			const RenderTargetColorAttachmentBinding * pRPCAttachmentBindings )
+			const RenderTargetAttachmentBinding * pRPCAttachmentBindings )
 	{
 		for( uint32 caIndex = pFirstIndex; ( caIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pCount != 0 ); ++caIndex, --pCount )
 		{
@@ -129,107 +129,107 @@ namespace ts3::gpuapi
 	}
 
 
-	RenderPassDynamicState::RenderPassDynamicState()
+	RenderPassConfigurationDynamicState::RenderPassConfigurationDynamicState()
 	{}
 
-	RenderPassDynamicState::RenderPassDynamicState( const RenderPassConfiguration & pConfiguration )
+	RenderPassConfigurationDynamicState::RenderPassConfigurationDynamicState( const RenderPassConfiguration & pConfiguration )
 	: _renderPassConfiguration( pConfiguration )
 	{}
 
-	RenderPassDynamicState::~RenderPassDynamicState() = default;
+	RenderPassConfigurationDynamicState::~RenderPassConfigurationDynamicState() = default;
 
-	bool RenderPassDynamicState::empty() const noexcept
+	bool RenderPassConfigurationDynamicState::empty() const noexcept
 	{
 		return _renderPassConfiguration.activeAttachmentsMask.empty();
 	}
 
-	uint32 RenderPassDynamicState::countActiveColorAttachments() const noexcept
+	uint32 RenderPassConfigurationDynamicState::countActiveColorAttachments() const noexcept
 	{
 		return popCount( _renderPassConfiguration.activeAttachmentsMask & E_RT_ATTACHMENT_MASK_COLOR_ALL );
 	}
 
-	const RenderPassConfiguration & RenderPassDynamicState::getRenderPassConfiguration() const noexcept
+	const RenderPassConfiguration & RenderPassConfigurationDynamicState::getRenderPassConfiguration() const noexcept
 	{
 		return _renderPassConfiguration;
 	}
 
-	void RenderPassDynamicState::assign( const RenderPassConfiguration & pConfiguration )
+	void RenderPassConfigurationDynamicState::assign( const RenderPassConfiguration & pConfiguration )
 	{
 		_renderPassConfiguration = pConfiguration;
 	}
 
-	RenderPassColorAttachmentUsage & RenderPassDynamicState::setColorAttachmentUsage( render_target_index_t pIndex )
+	RenderPassAttachmentConfig & RenderPassConfigurationDynamicState::setColorAttachmentUsage( render_target_index_t pIndex )
 	{
 		ts3DebugAssert( cxdefs::isRTAttachmentIndexValid( pIndex ) );
 		_renderPassConfiguration.activeAttachmentsMask.set( cxdefs::makeRTAttachmentFlag( pIndex ) );
 		return _renderPassConfiguration.colorAttachments[pIndex];
 	}
 
-	void RenderPassDynamicState::setColorAttachmentUsage(
+	void RenderPassConfigurationDynamicState::setColorAttachmentUsage(
 			render_target_index_t pIndex,
-			const RenderPassColorAttachmentUsage & pRPCAttachmentUsage )
+			const RenderPassAttachmentConfig & pRPCAttachmentUsage )
 	{
 		_setColorAttachmentUsages( pIndex, 1, &pRPCAttachmentUsage );
 	}
 
-	void RenderPassDynamicState::setColorAttachmentUsages(
-			const RenderPassColorAttachmentUsageArray & pRPCAttachmentUsages )
+	void RenderPassConfigurationDynamicState::setColorAttachmentUsages(
+			const RenderPassColorAttachmentConfigArray & pRPCAttachmentUsages )
 	{
 		_setColorAttachmentUsages( 0, pRPCAttachmentUsages.size(), pRPCAttachmentUsages.data() );
 	}
 
-	void RenderPassDynamicState::setColorAttachmentBindings(
+	void RenderPassConfigurationDynamicState::setColorAttachmentBindings(
 			uint32 pFirstIndex,
 			uint32 pCount,
-			const RenderPassColorAttachmentUsage * pRPCAttachmentUsages )
+			const RenderPassAttachmentConfig * pRPCAttachmentUsages )
 	{
 		_setColorAttachmentUsages( pFirstIndex, pCount, pRPCAttachmentUsages );
 	}
 
-	RenderPassDepthStencilAttachmentUsage & RenderPassDynamicState::setDepthStencilAttachmentUsage()
+	RenderPassAttachmentConfig & RenderPassConfigurationDynamicState::setDepthStencilAttachmentUsage()
 	{
 		_renderPassConfiguration.activeAttachmentsMask.set( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT );
 		return _renderPassConfiguration.depthStencilAttachment;
 	}
 
-	void RenderPassDynamicState::setDepthStencilAttachmentUsage(
-			const RenderPassDepthStencilAttachmentUsage & pRPDSAttachmentUsage )
+	void RenderPassConfigurationDynamicState::setDepthStencilAttachmentUsage(
+			const RenderPassAttachmentConfig & pRPDSAttachmentUsage )
 	{
-		_renderPassConfiguration.activeAttachmentsMask.setOrUnset( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT, pRPDSAttachmentUsage.valid() );
+		_renderPassConfiguration.activeAttachmentsMask.setOrUnset( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT, !pRPDSAttachmentUsage.empty() );
 		_renderPassConfiguration.depthStencilAttachment = pRPDSAttachmentUsage;
 	}
 
-	void RenderPassDynamicState::resetColorAttachmentUsage( render_target_index_t pIndex )
+	void RenderPassConfigurationDynamicState::resetColorAttachmentUsage( render_target_index_t pIndex )
 	{
 		_resetColorAttachmentUsages( pIndex, 1 );
 	}
 
-	void RenderPassDynamicState::resetColorAttachmentUsages( uint32 pFirstIndex, uint32 pCount )
+	void RenderPassConfigurationDynamicState::resetColorAttachmentUsages( uint32 pFirstIndex, uint32 pCount )
 	{
 		_resetColorAttachmentUsages( pFirstIndex, pCount );
 	}
 
-	void RenderPassDynamicState::resetColorAttachmentUsages()
+	void RenderPassConfigurationDynamicState::resetColorAttachmentUsages()
 	{
 		_resetColorAttachmentUsages( 0, cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM );
 	}
 
-	void RenderPassDynamicState::resetDepthStencilAttachmentUsage()
+	void RenderPassConfigurationDynamicState::resetDepthStencilAttachmentUsage()
 	{
 		_renderPassConfiguration.activeAttachmentsMask.unset( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT );
 		_renderPassConfiguration.depthStencilAttachment.reset();
 	}
 
-	void RenderPassDynamicState::resetAllAttachmentUsages()
+	void RenderPassConfigurationDynamicState::resetAllAttachmentUsages()
 	{
 		resetColorAttachmentUsages();
 		resetDepthStencilAttachmentUsage();
 	}
 
-	void RenderPassDynamicState::_setColorAttachmentUsages(
+	void RenderPassConfigurationDynamicState::_setColorAttachmentUsages(
 			uint32 pFirstIndex,
 			uint32 pCount,
-			const RenderPassColorAttachmentUsage * pRPCAttachmentUsages )
+			const RenderPassAttachmentConfig * pRPCAttachmentUsages )
 	{
 		for( uint32 caIndex = pFirstIndex; ( caIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pCount != 0 ); ++caIndex, --pCount )
 		{
@@ -238,11 +238,11 @@ namespace ts3::gpuapi
 			const auto colorAttachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
 
 			_renderPassConfiguration.colorAttachments[caIndex] = sourceCAUsage;
-			_renderPassConfiguration.activeAttachmentsMask.setOrUnset( colorAttachmentBit, sourceCAUsage.valid() );
+			_renderPassConfiguration.activeAttachmentsMask.setOrUnset( colorAttachmentBit, !sourceCAUsage.empty() );
 		}
 	}
 
-	void RenderPassDynamicState::_resetColorAttachmentUsages( uint32 pFirstIndex, uint32 pCount )
+	void RenderPassConfigurationDynamicState::_resetColorAttachmentUsages( uint32 pFirstIndex, uint32 pCount )
 	{
 		for( uint32 caIndex = pFirstIndex; ( caIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pCount != 0 ); ++caIndex, --pCount )
 		{

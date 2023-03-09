@@ -6,19 +6,29 @@
 namespace ts3::gpuapi
 {
 
+	const IAVertexStreamImmutableState * GraphicsPipelineStateController::sIAVertexStreamImmutableStateDynamic =
+			reinterpret_cast<const IAVertexStreamImmutableState *>( Limits<uintptr_t>::maxValue );
+
+	const RenderTargetBindingImmutableState * GraphicsPipelineStateController::sRenderTargetBindingImmutableStateDynamic =
+			reinterpret_cast<const RenderTargetBindingImmutableState *>( Limits<uintptr_t>::maxValue );
+
+
 	GraphicsPipelineStateController::GraphicsPipelineStateController() = default;
 
 	GraphicsPipelineStateController::~GraphicsPipelineStateController() = default;
+
+	void GraphicsPipelineStateController::applyPipelineStateChanges()
+	{}
 
 	bool GraphicsPipelineStateController::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO )
 	{
 		if( _currentCommonState.graphicsPSO != &pGraphicsPSO )
 		{
 			_currentCommonState.graphicsPSO = &pGraphicsPSO;
-			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_PSO_BIT );
+			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_PSO_BIT );
 		}
 
-		return _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_PSO_BIT );
+		return _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_PSO_BIT );
 	}
 
 	bool GraphicsPipelineStateController::resetGraphicsPipelineStateObject()
@@ -26,10 +36,17 @@ namespace ts3::gpuapi
 		if( _currentCommonState.graphicsPSO )
 		{
 			_currentCommonState.graphicsPSO = nullptr;
-			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_PSO_BIT );
+			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_PSO_BIT );
 		}
 
-		return _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_PSO_BIT );
+		return _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_PSO_BIT );
+	}
+
+	bool GraphicsPipelineStateController::setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState )
+	{
+		_currentCommonState.iaVertexStreamState = sIAVertexStreamImmutableStateDynamic;
+		_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_VERTEX_STREAM_BIT );
+		return true;
 	}
 
 	bool GraphicsPipelineStateController::setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState )
@@ -37,23 +54,23 @@ namespace ts3::gpuapi
 		if( _currentCommonState.iaVertexStreamState != &pIAVertexStreamState )
 		{
 			_currentCommonState.iaVertexStreamState = &pIAVertexStreamState;
-			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_VERTEX_STREAM_BIT );
+			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_VERTEX_STREAM_BIT );
 		}
 
-		return _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_VERTEX_STREAM_BIT );
-	}
-
-	bool GraphicsPipelineStateController::setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState )
-	{
-		_currentCommonState.iaVertexStreamState = nullptr;
-		_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_VERTEX_STREAM_BIT );
-		return true;
+		return _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_VERTEX_STREAM_BIT );
 	}
 
 	bool GraphicsPipelineStateController::resetIAVertexStreamState()
 	{
 		_currentCommonState.iaVertexStreamState = nullptr;
-		_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_VERTEX_STREAM_BIT );
+		_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_VERTEX_STREAM_BIT );
+		return true;
+	}
+
+	bool GraphicsPipelineStateController::setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState )
+	{
+		_currentCommonState.renderTargetBindingState = sRenderTargetBindingImmutableStateDynamic;
+		_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_RENDER_TARGET_BINDING_BIT );
 		return true;
 	}
 
@@ -62,23 +79,16 @@ namespace ts3::gpuapi
 		if( _currentCommonState.renderTargetBindingState != &pRenderTargetBindingState )
 		{
 			_currentCommonState.renderTargetBindingState = &pRenderTargetBindingState;
-			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_RENDER_TARGET_BINDING_BIT );
+			_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_RENDER_TARGET_BINDING_BIT );
 		}
 
-		return _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_COMMON_RENDER_TARGET_BINDING_BIT );
-	}
-
-	bool GraphicsPipelineStateController::setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState )
-	{
-		_currentCommonState.renderTargetBindingState = nullptr;
-		_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_RENDER_TARGET_BINDING_BIT );
-		return true;
+		return _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_RENDER_TARGET_BINDING_BIT );
 	}
 
 	bool GraphicsPipelineStateController::resetRenderTargetBindingState()
 	{
 		_currentCommonState.renderTargetBindingState = nullptr;
-		_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_COMMON_RENDER_TARGET_BINDING_BIT );
+		_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_RENDER_TARGET_BINDING_BIT );
 		return true;
 	}
 

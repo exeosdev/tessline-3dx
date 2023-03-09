@@ -28,7 +28,7 @@ namespace ts3
 	enum : exception_category_value_t
 	{
 		E_EXCEPTION_CATEGORY_FRAMEWORK_CORE_GDS =
-			ecDeclareExceptionCategory( ExceptionBaseType::FrameworkCore, ts3ExcCategoryIID( 0x7C ) ),
+			cxdefs::declareExceptionCategory( ExceptionBaseType::FrameworkCore, ts3ExcCategoryIID( 0x7C ) ),
 	};
 
 	class CoreGdsException : public FrameworkCoreException
@@ -44,7 +44,7 @@ namespace ts3
 	enum : exception_code_value_t
 	{
 		E_EXC_CORE_GDS =
-			ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_FRAMEWORK_CORE_GDS, ts3ExcCodeIID( 0x71 ) ),
+			cxdefs::declareExceptionCode( E_EXCEPTION_CATEGORY_FRAMEWORK_CORE_GDS, ts3ExcCodeIID( 0x71 ) ),
 	};
 
 } // namespace ts3

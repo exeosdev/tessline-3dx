@@ -14,6 +14,7 @@ set( TS3_STDEXT_SRC_FILES
         "memoryBuffer.h"
         "pathNameIterator.h"
         "range.h"
+        "refWrapper.h"
         "sortedArray.h"
         "staticAlgo.h"
         "staticLimits.h"

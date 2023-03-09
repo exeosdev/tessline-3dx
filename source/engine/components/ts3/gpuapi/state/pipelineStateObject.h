@@ -20,24 +20,24 @@ namespace ts3::gpuapi
 	struct GraphicsPipelineStateObjectCreateInfo
 	{
 		BlendConfig blendConfig;
-		BlendImmutableStateHandle blendState;
+		mutable BlendImmutableStateHandle blendState;
 
 		DepthStencilConfig depthStencilConfig;
-		DepthStencilImmutableStateHandle depthStencilState;
+		mutable DepthStencilImmutableStateHandle depthStencilState;
 
 		RasterizerConfig rasterizerConfig;
-		RasterizerImmutableStateHandle rasterizerState;
+		mutable RasterizerImmutableStateHandle rasterizerState;
 
 		GraphicsShaderSet shaderSet;
-		GraphicsShaderLinkageImmutableStateHandle shaderLinkageState;
+		mutable GraphicsShaderLinkageImmutableStateHandle shaderLinkageState;
 
 		IAInputLayoutDefinition inputLayoutDefinition;
-		IAInputLayoutImmutableStateHandle inputLayoutState;
+		mutable IAInputLayoutImmutableStateHandle inputLayoutState;
 
 		RenderTargetLayout * renderTargetLayout = nullptr;
-		RenderTargetBindingImmutableStateHandle renderTargetBindingState;
 
 		ShaderInputSignatureDesc * shaderInputSignatureDesc = nullptr;
+		mutable ShaderInputSignature shaderInputSignature;
 	};
 
 	/// @brief A monolithic state object, containing subset of a certain GPU pipeline state.

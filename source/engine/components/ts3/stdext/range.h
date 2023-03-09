@@ -181,7 +181,7 @@ namespace ts3
 		const auto maxRegionSize = pSizeLimit - validOffset;
 		const auto regionSize = getMinOf( pSize, maxRegionSize );
 
-		return { trunc_numeric_cast<TOffset>( validOffset ), trunc_numeric_cast<TSize>( regionSize ) };
+		return { numeric_cast<TOffset>( validOffset ), numeric_cast<TSize>( regionSize ) };
 	}
 
 	template <typename TOffset, typename TSize, typename TLimit>

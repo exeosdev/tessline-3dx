@@ -82,7 +82,7 @@ namespace ts3::gpuapi
 		return nullptr;
 	}
 
-	RenderPassImmutableStateHandle PipelineImmutableStateFactoryNull::createRenderPassState( const RenderPassConfiguration & )
+	RenderPassConfigurationImmutableStateHandle PipelineImmutableStateFactoryNull::createRenderPassState( const RenderPassConfiguration & )
 	{
 		return nullptr;
 	}
@@ -129,7 +129,7 @@ namespace ts3::gpuapi
 		return _stateFactory->createRenderTargetBindingState( pDefinition );
 	}
 
-	RenderPassImmutableStateHandle PipelineImmutableStateFactoryAdapter::createState( const RenderPassConfiguration & pConfiguration )
+	RenderPassConfigurationImmutableStateHandle PipelineImmutableStateFactoryAdapter::createState( const RenderPassConfiguration & pConfiguration )
 	{
 		return _stateFactory->createRenderPassState( pConfiguration );
 	}

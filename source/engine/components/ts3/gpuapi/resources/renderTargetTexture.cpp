@@ -16,9 +16,14 @@ namespace ts3::gpuapi
 
 	RenderTargetTexture::~RenderTargetTexture() = default;
 
-	TextureHandle RenderTargetTexture::getTargetTexture() const noexcept
+	const TextureReference & RenderTargetTexture::getTargetTextureRef() const noexcept
 	{
-		return _targetTexture.getRefTexture();
+		return _targetTexture;
+	}
+
+	GPUDeviceChildObject * RenderTargetTexture::getInternalRenderBuffer() const noexcept
+	{
+		return _internalRenderBuffer.get();
 	}
 
 	bool RenderTargetTexture::isDepthStencilTexture() const noexcept
@@ -35,6 +40,11 @@ namespace ts3::gpuapi
 	void RenderTargetTexture::setTargetTexture( const TextureReference & pTargetTextureRef )
 	{
 		_targetTexture = pTargetTextureRef;
+	}
+
+	void RenderTargetTexture::setInternalRenderBuffer( GpaHandle<GPUDeviceChildObject> pInternalRenderBuffer )
+	{
+		_internalRenderBuffer = pInternalRenderBuffer;
 	}
 
 	namespace rcutil

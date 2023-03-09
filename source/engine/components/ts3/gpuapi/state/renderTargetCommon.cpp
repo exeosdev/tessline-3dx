@@ -7,80 +7,192 @@
 namespace ts3::gpuapi
 {
 
+	void RenderTargetBindingDefinition::resetAttachmentsFlags() noexcept
+	{
+		attachmentActionResolveMask = 0;
+
+		for(  uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++caIndex )
+		{
+			const auto colorAttachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
+			if( activeAttachmentsMask.isSet( colorAttachmentBit ) )
+			{
+				const auto & attachmentBinding = colorAttachments[caIndex];
+				if( !attachmentBinding )
+				{
+					activeAttachmentsMask.unset( colorAttachmentBit );
+				}
+				else
+				{
+					if( attachmentBinding.resolveTexture )
+					{
+						attachmentActionResolveMask.set( colorAttachmentBit );
+					}
+				}
+			}
+		}
+	}
+
+
 	namespace smutil
 	{
 
-		RenderTargetLayout getRenderTargetLayoutForBindingDefinition(
+		const RenderTargetAttachmentBinding * getRenderTargetBindingDefinitionFirstTarget(
 				const RenderTargetBindingDefinition & pBindingDefinition )
 		{
-			RenderTargetLayout rtLayout;
-			rtLayout.activeAttachmentsMask = 0;
+			const RenderTargetAttachmentBinding * firstBinding = nullptr;
 
-			for( uint32 colorAttachmentIndex = 0; colorAttachmentIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM; ++colorAttachmentIndex )
+			for( const auto & colorAttachmentBinding : pBindingDefinition.colorAttachments )
 			{
-				const auto attachmentBit = cxdefs::makeRTAttachmentFlag( colorAttachmentIndex );
-				if( pBindingDefinition.activeAttachmentsMask.isSet( attachmentBit ) )
+				if( colorAttachmentBinding )
 				{
-					const auto & attachmentBinding = pBindingDefinition.colorAttachments[colorAttachmentIndex];
-					if( !attachmentBinding.empty() )
+					firstBinding = &colorAttachmentBinding;
+					break;
+				}
+			}
+
+			if( !firstBinding && pBindingDefinition.depthStencilAttachment )
+			{
+				firstBinding = &( pBindingDefinition.depthStencilAttachment );
+			}
+
+			return firstBinding;
+		}
+
+		bool validateRenderTargetBindingDefinition( const RenderTargetBindingDefinition & pBindingDefinition )
+		{
+			const auto * firstBinding = getRenderTargetBindingDefinitionFirstTarget( pBindingDefinition );
+			if( !firstBinding )
+			{
+				return false;
+			}
+
+			const auto & commonImageLayout = firstBinding->attachmentTexture->mRTTextureLayout;
+
+			for(  uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++caIndex )
+			{
+				const auto colorAttachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
+				if( pBindingDefinition.activeAttachmentsMask.isSet( colorAttachmentBit ) )
+				{
+					const auto & attachmentBinding = pBindingDefinition.colorAttachments[caIndex];
+					if( !attachmentBinding )
 					{
-						const auto attachmentFormat = attachmentBinding.attachmentTexture->mRTTextureLayout.internalDataFormat;
-						rtLayout.colorAttachments[colorAttachmentIndex].format = attachmentFormat;
-						rtLayout.activeAttachmentsMask.set( attachmentBit );
+						return false;
+					}
+					const auto & textureLayout = attachmentBinding.attachmentTexture->mRTTextureLayout;
+					if( textureLayout.bufferSize != commonImageLayout.bufferSize )
+					{
+						return false;
+					}
+					if( textureLayout.msaaLevel != commonImageLayout.msaaLevel )
+					{
+						return false;
+					}
+					if( pBindingDefinition.attachmentActionResolveMask.isSet( colorAttachmentBit ) && !attachmentBinding.resolveTexture )
+					{
+						return false;
 					}
 				}
 			}
 
-			if( pBindingDefinition.activeAttachmentsMask.isSet( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT ) )
+			return true;
+		}
+
+		RenderTargetLayout getRenderTargetLayoutForBindingDefinition(
+				const RenderTargetBindingDefinition & pBindingDefinition )
+		{
+			const auto * firstBinding = getRenderTargetBindingDefinitionFirstTarget( pBindingDefinition );
+			if( !firstBinding )
 			{
-				if( !pBindingDefinition.depthStencilAttachment.empty() )
+				return {};
+			}
+
+			const auto & commonLayout = firstBinding->attachmentTexture->mRTTextureLayout;
+
+			RenderTargetLayout renderTargetLayout{};
+			renderTargetLayout.activeAttachmentsMask = 0;
+			renderTargetLayout.sharedImageSize = commonLayout.bufferSize;
+			renderTargetLayout.sharedMSAALevel = commonLayout.msaaLevel;
+
+			for( uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++caIndex )
+			{
+				const auto attachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
+				if( pBindingDefinition.activeAttachmentsMask.isSet( attachmentBit ) )
 				{
-					const auto attachmentFormat = pBindingDefinition.depthStencilAttachment.attachmentTexture->mRTTextureLayout.internalDataFormat;
-					rtLayout.depthStencilAttachment.format = attachmentFormat;
-					rtLayout.activeAttachmentsMask.set( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT );
+					const auto & attachmentBinding = pBindingDefinition.colorAttachments[caIndex];
+					if( attachmentBinding.empty() )
+					{
+						return {};
+					}
+
+					const auto & caTexture = attachmentBinding.attachmentTexture;
+					const auto & caLayout = caTexture->mRTTextureLayout;
+
+					if( ( caLayout.bufferSize != commonLayout.bufferSize ) || ( caLayout.msaaLevel != commonLayout.msaaLevel ) )
+					{
+						return {};
+					}
+
+					renderTargetLayout.colorAttachments[caIndex].format = caLayout.internalDataFormat;
+					renderTargetLayout.activeAttachmentsMask.set( attachmentBit );
 				}
 			}
 
-			return rtLayout;
+			return renderTargetLayout;
 		}
 	}
 
 	namespace defaults
 	{
 
-		const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8 =
+		RenderTargetLayout getRenderTargetLayoutDefaultBGRA8()
 		{
-			E_RT_ATTACHMENT_FLAG_COLOR_0_BIT,
-			{
-				RenderTargetAttachmentLayout { ETextureFormat::BGRA8UN }
-			}
-		};
+			RenderTargetLayout rtLayout{};
+			rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAG_COLOR_0_BIT;
+			rtLayout.sharedImageSize = cxdefs::RENDER_TARGET_LAYOUT_IMAGE_SIZE_UNDEFINED;
+			rtLayout.sharedMSAALevel = cxdefs::RENDER_TARGET_LAYOUT_MSAA_LEVEL_UNDEFINED;
+			rtLayout.colorAttachments[0].format = ETextureFormat::BGRA8UN;
+			return rtLayout;
+		}
 
-		const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8D24S8 =
+		RenderTargetLayout getRenderTargetLayoutDefaultBGRA8D24S8()
 		{
-			E_RT_ATTACHMENT_FLAGS_DEFAULT_C0_DS,
-			{
-				RenderTargetAttachmentLayout { ETextureFormat::BGRA8UN },
-			},
-			RenderTargetAttachmentLayout { ETextureFormat::D24UNS8U }
-		};
+			RenderTargetLayout rtLayout{};
+			rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAG_COLOR_0_BIT | E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT;
+			rtLayout.sharedImageSize = cxdefs::RENDER_TARGET_LAYOUT_IMAGE_SIZE_UNDEFINED;
+			rtLayout.sharedMSAALevel = cxdefs::RENDER_TARGET_LAYOUT_MSAA_LEVEL_UNDEFINED;
+			rtLayout.colorAttachments[0].format = ETextureFormat::BGRA8UN;
+			rtLayout.depthStencilAttachment.format = ETextureFormat::D24UNS8U;
+			return rtLayout;
+		}
 
-		const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8 =
+		RenderTargetLayout getRenderTargetLayoutDefaultRGBA8()
 		{
-			E_RT_ATTACHMENT_FLAG_COLOR_0_BIT,
-			{
-				RenderTargetAttachmentLayout { ETextureFormat::RGBA8UN }
-			}
-		};
+			RenderTargetLayout rtLayout{};
+			rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAG_COLOR_0_BIT;
+			rtLayout.sharedImageSize = cxdefs::RENDER_TARGET_LAYOUT_IMAGE_SIZE_UNDEFINED;
+			rtLayout.sharedMSAALevel = cxdefs::RENDER_TARGET_LAYOUT_MSAA_LEVEL_UNDEFINED;
+			rtLayout.colorAttachments[0].format = ETextureFormat::RGBA8UN;
+			return rtLayout;
+		}
 
-		const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8D24S8 =
+		RenderTargetLayout getRenderTargetLayoutDefaultRGBA8D24S8()
 		{
-			E_RT_ATTACHMENT_FLAGS_DEFAULT_C0_DS,
-			{
-				RenderTargetAttachmentLayout { ETextureFormat::RGBA8UN },
-			},
-			RenderTargetAttachmentLayout { ETextureFormat::D24UNS8U }
-		};
+			RenderTargetLayout rtLayout{};
+			rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAG_COLOR_0_BIT | E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT;
+			rtLayout.sharedImageSize = cxdefs::RENDER_TARGET_LAYOUT_IMAGE_SIZE_UNDEFINED;
+			rtLayout.sharedMSAALevel = cxdefs::RENDER_TARGET_LAYOUT_MSAA_LEVEL_UNDEFINED;
+			rtLayout.colorAttachments[0].format = ETextureFormat::RGBA8UN;
+			rtLayout.depthStencilAttachment.format = ETextureFormat::D24UNS8U;
+			return rtLayout;
+		}
+
+		const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8 = getRenderTargetLayoutDefaultBGRA8();
+
+		const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8D24S8 = getRenderTargetLayoutDefaultBGRA8D24S8();
+
+		const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8 = getRenderTargetLayoutDefaultRGBA8();
+
+		const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8D24S8 = getRenderTargetLayoutDefaultRGBA8D24S8();
 	
 	}
 
@@ -88,7 +200,7 @@ namespace ts3::gpuapi
 //	bool createRenderTargetLayout( const RenderTargetLayoutDesc & pRTLayoutDesc,
 //	                               RenderTargetLayout & pOutRTLayout )
 //	{
-//		RenderTargetLayout rtLayout;
+//		RenderTargetLayout renderTargetLayout;
 //
 //		for( const auto & attachmentLayoutDesc : pRTLayoutDesc.attachmentLayoutDescArray )
 //		{
@@ -97,24 +209,24 @@ namespace ts3::gpuapi
 //				auto attachmentIndex = static_cast<uint32>( attachmentLayoutDesc.attachmentID );
 //				if( attachmentIndex < cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM )
 //				{
-//					rtLayout.colorAttachmentArray[attachmentIndex].format = attachmentLayoutDesc.format;
-//					rtLayout.colorAttachmentActiveCount += 1;
-//					rtLayout.attachmentMask.set( E_RT_ATTACHMENT_FLAG_COLOR_0_BIT << attachmentIndex );
+//					renderTargetLayout.colorAttachmentArray[attachmentIndex].format = attachmentLayoutDesc.format;
+//					renderTargetLayout.colorAttachmentActiveCount += 1;
+//					renderTargetLayout.attachmentMask.set( E_RT_ATTACHMENT_FLAG_COLOR_0_BIT << attachmentIndex );
 //				}
 //				else
 //				{
-//					rtLayout.depthStencilAttachment.format = attachmentLayoutDesc.format;
-//					rtLayout.attachmentMask.set( E_RENDER_TARGET_ATTACHMENT_FLAGS_DEPTH_STENCIL );
+//					renderTargetLayout.depthStencilAttachment.format = attachmentLayoutDesc.format;
+//					renderTargetLayout.attachmentMask.set( E_RENDER_TARGET_ATTACHMENT_FLAGS_DEPTH_STENCIL );
 //				}
 //			}
 //		}
 //
-//		if( rtLayout.attachmentMask == 0 )
+//		if( renderTargetLayout.attachmentMask == 0 )
 //		{
 //			return false;
 //		}
 //
-//		memCopy( pOutRTLayout, rtLayout );
+//		memCopy( pOutRTLayout, renderTargetLayout );
 //
 //		return true;
 //	}
@@ -133,12 +245,12 @@ namespace ts3::gpuapi
 //	                                                 RenderTargetLayout & pOutRTLayout,
 //	                                                 RenderTargetResourceBinding & pOutRTResourceBinding )
 //	{
-//		RenderTargetLayout rtLayout;
+//		RenderTargetLayout renderTargetLayout;
 //		RenderTargetResourceBinding rtResourceBinding;
 //
 //		for( const auto & attachmentResourceBindingDesc : pRTResourceBindingDesc.attachmentResourceBindingDescArray )
 //		{
-//			if( rtLayout.colorAttachmentActiveCount + rtLayout.depthStencilAttachmentState == pRTResourceBindingDesc.activeBindingsNum )
+//			if( renderTargetLayout.colorAttachmentActiveCount + renderTargetLayout.depthStencilAttachmentState == pRTResourceBindingDesc.activeBindingsNum )
 //			{
 //				break;
 //			}
@@ -157,16 +269,16 @@ namespace ts3::gpuapi
 //
 //				if( attachmentIndex < cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM )
 //				{
-//					attachmentLayoutPtr = &( rtLayout.colorAttachmentArray[attachmentIndex] );
+//					attachmentLayoutPtr = &( renderTargetLayout.colorAttachmentArray[attachmentIndex] );
 //					attachmentResourceBindingPtr = &( rtResourceBinding.colorAttachmentArray[attachmentIndex] );
-//					rtLayout.colorAttachmentActiveCount += 1;
-//					rtLayout.attachmentMask.set( E_RT_ATTACHMENT_FLAG_COLOR_0_BIT << attachmentIndex );
+//					renderTargetLayout.colorAttachmentActiveCount += 1;
+//					renderTargetLayout.attachmentMask.set( E_RT_ATTACHMENT_FLAG_COLOR_0_BIT << attachmentIndex );
 //				}
 //				else
 //				{
-//					attachmentLayoutPtr = &( rtLayout.depthStencilAttachment );
+//					attachmentLayoutPtr = &( renderTargetLayout.depthStencilAttachment );
 //					attachmentResourceBindingPtr = &( rtResourceBinding.depthStencilAttachment );
-//					rtLayout.attachmentMask.set( E_RENDER_TARGET_ATTACHMENT_FLAGS_DEPTH_STENCIL );
+//					renderTargetLayout.attachmentMask.set( E_RENDER_TARGET_ATTACHMENT_FLAGS_DEPTH_STENCIL );
 //				}
 //
 //				if( attachmentResourceBindingDesc.attachmentResourceType == ERenderTargetResourceType::RenderBuffer )
@@ -199,12 +311,12 @@ namespace ts3::gpuapi
 //			}
 //		}
 //
-//		if( rtLayout.attachmentMask == 0 )
+//		if( renderTargetLayout.attachmentMask == 0 )
 //		{
 //			return false;
 //		}
 //
-//		memCopy( pOutRTLayout, rtLayout );
+//		memCopy( pOutRTLayout, renderTargetLayout );
 //		memCopy( pOutRTResourceBinding, rtResourceBinding );
 //
 //		return true;
@@ -214,10 +326,10 @@ namespace ts3::gpuapi
 //	                                           const RenderTargetLayout & pRTLayout )
 //	{
 //
-//		for( uint32 colorAttachmentIndex = 0; colorAttachmentIndex < cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM; ++colorAttachmentIndex )
+//		for( uint32 caIndex = 0; caIndex < cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM; ++caIndex )
 //		{
-//			auto & caResourceBinding = pRTResourceBinding.colorAttachmentArray[colorAttachmentIndex];
-//			auto & caLayout = pRTLayout.colorAttachmentArray[colorAttachmentIndex];
+//			auto & caResourceBinding = pRTResourceBinding.colorAttachmentArray[caIndex];
+//			auto & caLayout = pRTLayout.colorAttachmentArray[caIndex];
 //
 //			if( ( caResourceBinding && !caLayout ) || ( !caResourceBinding && caLayout ) )
 //			{

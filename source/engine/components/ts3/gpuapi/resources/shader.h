@@ -22,15 +22,15 @@ namespace ts3::gpuapi
 		Shader( GPUDevice & pGPUDevice, EShaderType pShaderType, std::unique_ptr<ShaderBinary> pShaderBinary );
 		virtual ~Shader();
 
-		virtual ResultCode compileFromSource( const void * pSource, size_t pSourceLength ) = 0;
-
-		virtual ResultCode compileFromSource(
-				const void * pSource,
-				size_t pSourceLength,
-				const std::string & pOptions,
-				Bitmask<uint64> pFlags ) = 0;
-
-		virtual ResultCode loadPrecompiledBinary( const void * pBinary, size_t pBinaryLength ) = 0;
+//		virtual ResultCode compileFromSource( const void * pSource, size_t pSourceLength ) = 0;
+//
+//		virtual ResultCode compileFromSource(
+//				const void * pSource,
+//				size_t pSourceLength,
+//				const std::string & pOptions,
+//				Bitmask<uint64> pFlags ) = 0;
+//
+//		virtual ResultCode loadPrecompiledBinary( const void * pBinary, size_t pBinaryLength ) = 0;
 	};
 
 } // namespace ts3::gpuapi

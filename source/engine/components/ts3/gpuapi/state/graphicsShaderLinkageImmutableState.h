@@ -12,8 +12,11 @@ namespace ts3::gpuapi
 
 	struct GraphicsShaderLinkageCommonProperties
 	{
+		struct ActiveStageInfo
+		{};
 		Bitmask<EShaderStageFlags> activeStagesMask;
 		uint32 activeStagesNum;
+
 	};
 
 	/// @brief

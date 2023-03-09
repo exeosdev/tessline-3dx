@@ -8,13 +8,40 @@
 namespace ts3::gpuapi
 {
 
-	CommandList::CommandList( CommandSystem & pCommandSystem, ECommandListType pListType )
+	enum ECommandListInternalStateFlags : uint32
+	{
+		E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT = 0x01
+	};
+
+	CommandList::CommandList(
+			CommandSystem & pCommandSystem,
+			ECommandListType pListType,
+			GraphicsPipelineStateController & pPipelineStateController )
 	: GPUDeviceChildObject( pCommandSystem.mGPUDevice )
 	, mCommandSystem( &pCommandSystem )
 	, mListType( pListType )
+	, _pipelineStateController( &pPipelineStateController )
 	{}
 
 	CommandList::~CommandList() = default;
+
+	bool CommandList::checkContextSupport( ECommandContextType pContextType ) const noexcept
+	{
+		return checkFeatureSupport( static_cast<ECommandListFlags>( pContextType ) );
+	}
+
+	bool CommandList::checkFeatureSupport( Bitmask<ECommandListFlags> pListFlags ) const noexcept
+	{
+		// Command list type (its value) is basically a bitwise OR of all supported bits.
+		Bitmask<ECommandListFlags> commandListFlags = static_cast<ECommandListFlags>( mListType );
+		// Check if the specified command classes and/or execution type matches those supported by the list.
+		return commandListFlags.isSet( pListFlags & E_COMMAND_LIST_FLAGS_ALL );
+	}
+
+	bool CommandList::isRenderPassActive() const noexcept
+	{
+		return _internalStateMask.isSet( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
+	}
 
 	bool CommandList::acquireList()
 	{
@@ -169,6 +196,33 @@ namespace ts3::gpuapi
 		return true;
 	}
 
+	bool CommandList::beginRenderPass( const RenderPassConfigurationImmutableState & pRenderPassState )
+	{
+		if( isRenderPassActive() )
+		{
+			return false;
+		}
+		_internalStateMask.set( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
+		_pipelineStateController->applyPipelineStateChanges();
+		return true;
+	}
+	
+	bool CommandList::beginRenderPass( const RenderPassConfigurationDynamicState & pRenderPassState )
+	{
+		if( isRenderPassActive() )
+		{
+			return false;
+		}
+		_internalStateMask.set( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
+		_pipelineStateController->applyPipelineStateChanges();
+		return true;
+	}
+
+	void CommandList::endRenderPass()
+	{
+		_internalStateMask.unset( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
+	}
+
 	bool CommandList::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO )
 	{
 		return _pipelineStateController->setGraphicsPipelineStateObject( pGraphicsPSO );
@@ -192,24 +246,6 @@ namespace ts3::gpuapi
 	bool CommandList::setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState )
 	{
 		return _pipelineStateController->setRenderTargetBindingState( pRenderTargetBindingState );
-	}
-
-	bool CommandList::checkContextSupport( ECommandContextType pContextType ) const
-	{
-		return checkFeatureSupport( static_cast<ECommandListFlags>( pContextType ) );
-	}
-
-	bool CommandList::checkFeatureSupport( Bitmask<ECommandListFlags> pListFlags ) const
-	{
-		// Command list type (its value) is basically a bitwise OR of all supported bits.
-		Bitmask<ECommandListFlags> commandListFlags = static_cast<ECommandListFlags>( mListType );
-		// Check if the specified command classes and/or execution type matches those supported by the list.
-		return commandListFlags.isSet( pListFlags & E_COMMAND_LIST_FLAGS_ALL_BITS_MASK );
-	}
-
-	void CommandList::setGraphicsPipelineStateController( GraphicsPipelineStateController & pStateController )
-	{
-		_pipelineStateController = &pStateController;
 	}
 
 } // namespace ts3::gpuapi

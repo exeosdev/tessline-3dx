@@ -28,16 +28,17 @@ namespace ts3::gpuapi
 		E_BLEND_WRITE_MASK_ALL = 0xF,
 	};
 
-	enum EDepthStencilFlags : uint16
+	enum EDepthStencilConfigFlags : uint16
 	{
-		E_DEPTH_STENCIL_FLAG_ENABLE_DEPTH_TEST_BIT = 0x01,
-		E_DEPTH_STENCIL_FLAG_ENABLE_STENCIL_TEST_BIT = 0x02,
-		E_DEPTH_STENCIL_MASK_ALL = 0x03,
+		E_DEPTH_STENCIL_CONFIG_FLAG_ENABLE_DEPTH_TEST_BIT = 0x01,
+		E_DEPTH_STENCIL_CONFIG_FLAG_ENABLE_STENCIL_TEST_BIT = 0x02,
+		E_DEPTH_STENCIL_CONFIG_MASK_ALL = 0x03,
 	};
 
-	enum ERasterizerFlags : uint16
+	enum ERasterizerConfigFlags : uint16
 	{
-		E_RASTERIZER_FLAG_ENABLE_SCISSOR_TEST_BIT = 0x01
+		E_RASTERIZER_CONFIG_FLAG_ENABLE_SCISSOR_TEST_BIT = 0x01,
+		E_RASTERIZER_CONFIG_MASK_ALL = 0x01
 	};
 
 	enum class EBlendFactor : uint16
@@ -167,7 +168,7 @@ namespace ts3::gpuapi
 	/// @brief
 	struct DepthStencilConfig
 	{
-		Bitmask<EDepthStencilFlags> commonFlags = 0;
+		Bitmask<EDepthStencilConfigFlags> commonFlags = 0;
 		DepthTestSettings depthTestSettings;
 		StencilTestSettings stencilTestSettings;
 	};
@@ -175,7 +176,7 @@ namespace ts3::gpuapi
 	/// @brief
 	struct RasterizerConfig
 	{
-		Bitmask<ERasterizerFlags> flags = 0;
+		Bitmask<ERasterizerConfigFlags> flags = 0;
 		ECullMode cullMode;
 		EPrimitiveFillMode primitiveFillMode;
 		ETriangleVerticesOrder frontFaceVerticesOrder;

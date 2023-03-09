@@ -58,10 +58,15 @@ namespace ts3
 		: ArrayView( pInitList.data(), pInitList.size() )
 		{}
 
-		void swap( ArrayView & pOther )
+		explicit operator bool() const
 		{
-			std::swap( _dataPtr, pOther._dataPtr );
-			std::swap( _size, pOther._size );
+			return !empty();
+		}
+
+		TS3_ATTR_NO_DISCARD TVal & operator[](size_t pIndex) const
+		{
+			ts3DebugAssert( pIndex < _size );
+			return _dataPtr[pIndex];
 		}
 
 		TS3_ATTR_NO_DISCARD ArrayView<ByteType> asByteView() const
@@ -84,14 +89,10 @@ namespace ts3
 			return _dataPtr && ( _size > 0 );
 		}
 
-		explicit operator bool() const
+		void swap( ArrayView & pOther )
 		{
-			return !empty();
-		}
-
-		TS3_ATTR_NO_DISCARD TVal & operator[]( size_t pIndex ) const
-		{
-			return _dataPtr[pIndex];
+			std::swap( _dataPtr, pOther._dataPtr );
+			std::swap( _size, pOther._size );
 		}
 
 	private:
@@ -203,6 +204,16 @@ namespace ts3
 	inline ReadWriteMemoryView bindMemoryView( TVal * pMemory, size_t pSize )
 	{
 		return ReadWriteMemoryView( reinterpret_cast<byte *>( pMemory ), pSize * sizeof( TVal ) );
+	}
+
+	inline ReadOnlyMemoryView bindMemoryView( const void * pMemory, size_t pByteLength )
+	{
+		return ReadOnlyMemoryView( reinterpret_cast<const byte *>( pMemory ), pByteLength );
+	}
+
+	inline ReadWriteMemoryView bindMemoryView( void * pMemory, size_t pByteLength )
+	{
+		return ReadWriteMemoryView( reinterpret_cast<byte *>( pMemory ), pByteLength );
 	}
 
 }

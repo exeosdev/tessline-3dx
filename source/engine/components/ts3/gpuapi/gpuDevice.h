@@ -44,6 +44,7 @@ namespace ts3::gpuapi
 
 	class TS3_GPUAPI_CLASS GPUDevice : public GPUDriverChildObject
 	{
+		friend class GPUDriver;
 		friend class GPUResource;
 
 	public:
@@ -59,7 +60,9 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD bool isResourceActiveRefsTrackingEnabled() const noexcept;
 
-		TS3_ATTR_NO_DISCARD CommandSystem * getCommandSystem() const noexcept;
+		TS3_ATTR_NO_DISCARD CommandSystem & getCommandSystem() const noexcept;
+
+		TS3_ATTR_NO_DISCARD PipelineImmutableStateFactory & getPipelineStateFactory() const noexcept;
 
 		TS3_ATTR_NO_DISCARD PresentationLayer * getPresentationLayer() const noexcept;
 
@@ -88,7 +91,7 @@ namespace ts3::gpuapi
 		IAVertexStreamImmutableStateHandle createIAVertexStreamImmutableState( const IAVertexStreamDefinition & pDefinition );
 		RasterizerImmutableStateHandle createRasterizerImmutableState( const RasterizerConfig & pConfig );
 		RenderTargetBindingImmutableStateHandle createRenderTargetBindingImmutableState( const RenderTargetBindingDefinition & pDefinition );
-		RenderPassImmutableStateHandle createRenderPassImmutableState( const RenderPassConfiguration & pConfiguration );
+		RenderPassConfigurationImmutableStateHandle createRenderPassConfigurationImmutableState( const RenderPassConfiguration & pConfiguration );
 
 		BlendImmutableStateHandle createBlendImmutableStateCached(
 				const UniqueGPUObjectName & pUniqueName,
@@ -118,35 +121,36 @@ namespace ts3::gpuapi
 				const UniqueGPUObjectName & pUniqueName,
 				const RenderTargetBindingDefinition & pDefinition );
 
-		RenderPassImmutableStateHandle createRenderPassImmutableStateCached(
+		RenderPassConfigurationImmutableStateHandle createRenderPassConfigurationImmutableStateCached(
 				const UniqueGPUObjectName & pUniqueName,
 				const RenderPassConfiguration & pConfiguration );
 
 		void resetImmutableStateCache( Bitmask<EPipelineImmutableStateTypeFlags> pResetMask = E_PIPELINE_IMMUTABLE_STATE_TYPE_MASK_ALL );
 
-		virtual void waitForCommandSync( CommandSync & pCommandSync ) = 0;
-
 		void setPresentationLayer( PresentationLayerHandle pPresentationLayer );
 
+		virtual void waitForCommandSync( CommandSync & pCommandSync ) = 0;
+
 	protected:
-        /// @brief API-level initialization of the command system. Called by the parent driver when a device is created.
-		virtual void initializeCommandSystem() = 0;
-
-		/// @brief API-level initialization of the state factory. Called by the parent driver when a device is created.
-		virtual void initializeImmutableStateFactory() = 0;
-
 		virtual bool onGPUResourceActiveRefsZero( GPUResource & pGPUResource );
 
-		void setImmutableStateFactory( std::unique_ptr<PipelineImmutableStateFactory> pFactory );
+		void setImmutableStateCache( PipelineImmutableStateCache & pStateCache );
+
+	private:
+		/// @brief API-level initialization of the command system. Called by the parent driver when a device is created.
+		virtual void initializeCommandSystem() = 0;
 
 	ts3driverApi( private ):
 		virtual bool _drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer );
+
 		virtual GPUBufferHandle _drvCreateGPUBuffer( const GPUBufferCreateInfo & pCreateInfo );
 		virtual SamplerHandle _drvCreateSampler( const SamplerCreateInfo & pCreateInfo );
 		virtual ShaderHandle _drvCreateShader( const ShaderCreateInfo & pCreateInfo );
 		virtual TextureHandle _drvCreateTexture( const TextureCreateInfo & pCreateInfo );
 		virtual RenderTargetTextureHandle _drvCreateRenderTargetTexture( const RenderTargetTextureCreateInfo & pCreateInfo );
-		virtual GraphicsPipelineStateObjectHandle _drvCreateGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo );
+
+		virtual GraphicsPipelineStateObjectHandle _drvCreateGraphicsPipelineStateObject(
+				const GraphicsPipelineStateObjectCreateInfo & pCreateInfo );
 
 	protected:
 		CommandSystemHandle _commandSystem;
@@ -154,11 +158,11 @@ namespace ts3::gpuapi
 
 		/// Factory used to create immutable states. Set by the actual driver class during initialization.
 		/// This decouples the state creation from the GPUDevice class so it's easier to manage and extend.
-		std::unique_ptr<PipelineImmutableStateFactory> _immutableStateFactory;
+		PipelineImmutableStateFactory * _immutableStateFactoryPtr = nullptr;
 
 		/// Immutable state cache. Holds created states and enables re-using them across all APIs.
 		/// Requires PipelineImmutableStateFactory to be specified when created.
-		std::unique_ptr<PipelineImmutableStateCache> _immutableStateCache;
+		PipelineImmutableStateCache * _immutableStateCachePtr = nullptr;
 
 		Bitmask<uint32> _internalStateFlags;
 	};
