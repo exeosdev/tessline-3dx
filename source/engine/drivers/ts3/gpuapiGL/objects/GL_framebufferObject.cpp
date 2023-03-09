@@ -47,35 +47,40 @@ namespace ts3::gpuapi
 		return isBuffer != GL_FALSE;
 	}
 
-	void GLFramebufferObject::bindColorRenderbuffer( uint32 pColorAttachmentIndex,
-	                                               GLRenderbufferObject & pGLRenderbuffer,
-	                                               GLenum pActiveBindTarget )
+	void GLFramebufferObject::bindColorRenderbuffer(
+			uint32 pColorAttachmentIndex,
+			GLRenderbufferObject & pGLRenderbuffer,
+			GLenum pActiveBindTarget )
 	{
 		auto framebufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
-		glFramebufferRenderbuffer( framebufferBindTarget,
-		                           GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
-		                           GL_RENDERBUFFER,
-		                           pGLRenderbuffer.mGLHandle );
+		glFramebufferRenderbuffer(
+				framebufferBindTarget,
+				GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
+				GL_RENDERBUFFER,
+				pGLRenderbuffer.mGLHandle );
 		ts3OpenGLHandleLastError();
 	}
 
-	void GLFramebufferObject::bindDepthStencilRenderbuffer( GLRenderbufferObject & pGLRenderbuffer,
-	                                                        GLenum pActiveBindTarget )
+	void GLFramebufferObject::bindDepthStencilRenderbuffer(
+			GLRenderbufferObject & pGLRenderbuffer,
+			GLenum pActiveBindTarget )
 	{
 		auto framebufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
-		glFramebufferRenderbuffer( framebufferBindTarget,
-		                           GL_DEPTH_STENCIL_ATTACHMENT,
-		                           GL_RENDERBUFFER,
-		                           pGLRenderbuffer.mGLHandle );
+		glFramebufferRenderbuffer(
+				framebufferBindTarget,
+				GL_DEPTH_STENCIL_ATTACHMENT,
+				GL_RENDERBUFFER,
+				pGLRenderbuffer.mGLHandle );
 		ts3OpenGLHandleLastError();
 	}
 
-	void GLFramebufferObject::bindColorTexture( uint32 pColorAttachmentIndex,
-	                                            GLTextureObject & pGLTexture,
-	                                            const TextureSubResource & pSubResource,
-	                                            GLenum pActiveBindTarget )
+	void GLFramebufferObject::bindColorTexture(
+			uint32 pColorAttachmentIndex,
+			GLTextureObject & pGLTexture,
+			const TextureSubResource & pSubResource,
+			GLenum pActiveBindTarget )
 	{
 		auto framebufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
@@ -83,60 +88,66 @@ namespace ts3::gpuapi
 		{
 			case GL_TEXTURE_2D:
 			{
-				glFramebufferTexture2D( framebufferBindTarget,
-				                        GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
-				                        GL_TEXTURE_2D,
-				                        pGLTexture.mGLHandle,
-				                        pSubResource.u2D.mipLevel );
+				glFramebufferTexture2D(
+						framebufferBindTarget,
+						GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
+						GL_TEXTURE_2D,
+						pGLTexture.mGLHandle,
+						pSubResource.uSubRes2D.mipLevel );
 				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_2D_ARRAY:
 			{
-				glFramebufferTextureLayer( framebufferBindTarget,
-				                           GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
-				                           pGLTexture.mGLHandle,
-				                           pSubResource.u2DArray.mipLevel,
-				                           pSubResource.u2DArray.arrayIndex );
+				glFramebufferTextureLayer(
+						framebufferBindTarget,
+						GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
+						pGLTexture.mGLHandle,
+						pSubResource.uSubRes2DArray.mipLevel,
+						pSubResource.uSubRes2DArray.arrayIndex );
 				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_2D_MULTISAMPLE:
 			{
-				glFramebufferTexture2D( framebufferBindTarget,
-				                        GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
-				                        GL_TEXTURE_2D_MULTISAMPLE,
-				                        pGLTexture.mGLHandle,
-				                        pSubResource.u2D.mipLevel );
+				glFramebufferTexture2D(
+						framebufferBindTarget,
+						GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
+						GL_TEXTURE_2D_MULTISAMPLE,
+						pGLTexture.mGLHandle,
+						pSubResource.uSubRes2D.mipLevel );
 				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_3D:
 			{
-				glFramebufferTextureLayer( framebufferBindTarget,
-				                           GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
-				                           pGLTexture.mGLHandle,
-				                           pSubResource.u3D.mipLevel,
-				                           pSubResource.u3D.depthLayerIndex );
+				glFramebufferTextureLayer(
+						framebufferBindTarget,
+						GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
+						pGLTexture.mGLHandle,
+						pSubResource.uSubRes3D.mipLevel,
+						pSubResource.uSubRes3D.depthLayerIndex );
 				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_CUBE_MAP:
 			{
-				glFramebufferTexture2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + pSubResource.uCubeMap.uFaceIndex,
-				                        GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
-				                        GL_TEXTURE_2D,
-				                        pGLTexture.mGLHandle,
-				                        pSubResource.uCubeMap.mipLevel );
+				glFramebufferTexture2D(
+						GL_TEXTURE_CUBE_MAP_POSITIVE_X + pSubResource.uSubResCubeMap.faceIndex,
+						GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
+						GL_TEXTURE_2D,
+						pGLTexture.mGLHandle,
+						pSubResource.uSubResCubeMap.mipLevel );
 				ts3OpenGLHandleLastError();
 				break;
 			}
 		}
 	}
 
-	void GLFramebufferObject::bindDepthStencilTexture( GLTextureObject & pGLTexture,
-	                                                   const TextureSubResource & pSubResource,
-	                                                   GLenum pActiveBindTarget )
+	void GLFramebufferObject::bindDepthStencilTexture(
+			GLTextureObject & pGLTexture,
+			const TextureSubResource & pSubResource,
+			GLenum pActiveBindTarget )
 	{
 		auto framebufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
@@ -144,51 +155,56 @@ namespace ts3::gpuapi
 		{
 			case GL_TEXTURE_2D:
 			{
-				glFramebufferTexture2D( framebufferBindTarget,
-				                        GL_DEPTH_STENCIL_ATTACHMENT,
-				                        GL_TEXTURE_2D,
-				                        pGLTexture.mGLHandle,
-				                        pSubResource.u2D.mipLevel );
+				glFramebufferTexture2D(
+						framebufferBindTarget,
+						GL_DEPTH_STENCIL_ATTACHMENT,
+						GL_TEXTURE_2D,
+						pGLTexture.mGLHandle,
+						pSubResource.uSubRes2D.mipLevel );
 				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_2D_ARRAY:
 			{
-				glFramebufferTextureLayer( framebufferBindTarget,
-				                           GL_DEPTH_STENCIL_ATTACHMENT,
-				                           pGLTexture.mGLHandle,
-				                           pSubResource.u2DArray.mipLevel,
-				                           pSubResource.u2DArray.arrayIndex );
+				glFramebufferTextureLayer(
+						framebufferBindTarget,
+						GL_DEPTH_STENCIL_ATTACHMENT,
+						pGLTexture.mGLHandle,
+						pSubResource.uSubRes2DArray.mipLevel,
+						pSubResource.uSubRes2DArray.arrayIndex );
 				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_2D_MULTISAMPLE:
 			{
-				glFramebufferTexture2D( framebufferBindTarget,
-				                        GL_DEPTH_STENCIL_ATTACHMENT,
-				                        GL_TEXTURE_2D_MULTISAMPLE,
-				                        pGLTexture.mGLHandle,
-				                        pSubResource.u2D.mipLevel );
+				glFramebufferTexture2D(
+						framebufferBindTarget,
+						GL_DEPTH_STENCIL_ATTACHMENT,
+						GL_TEXTURE_2D_MULTISAMPLE,
+						pGLTexture.mGLHandle,
+						pSubResource.uSubRes2D.mipLevel );
 				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_3D:
 			{
-				glFramebufferTextureLayer( framebufferBindTarget,
-				                           GL_DEPTH_STENCIL_ATTACHMENT,
-				                           pGLTexture.mGLHandle,
-				                           pSubResource.u3D.mipLevel,
-				                           pSubResource.u3D.depthLayerIndex );
+				glFramebufferTextureLayer(
+						framebufferBindTarget,
+						GL_DEPTH_STENCIL_ATTACHMENT,
+						pGLTexture.mGLHandle,
+						pSubResource.uSubRes3D.mipLevel,
+						pSubResource.uSubRes3D.depthLayerIndex );
 				ts3OpenGLHandleLastError();
 				break;
 			}
 			case GL_TEXTURE_CUBE_MAP:
 			{
-				glFramebufferTexture2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + pSubResource.uCubeMap.uFaceIndex,
-				                        GL_DEPTH_STENCIL_ATTACHMENT,
-				                        GL_TEXTURE_2D,
-				                        pGLTexture.mGLHandle,
-				                        pSubResource.uCubeMap.mipLevel );
+				glFramebufferTexture2D(
+						GL_TEXTURE_CUBE_MAP_POSITIVE_X + pSubResource.uSubResCubeMap.faceIndex,
+						GL_DEPTH_STENCIL_ATTACHMENT,
+						GL_TEXTURE_2D,
+						pGLTexture.mGLHandle,
+						pSubResource.uSubResCubeMap.mipLevel );
 				ts3OpenGLHandleLastError();
 				break;
 			}

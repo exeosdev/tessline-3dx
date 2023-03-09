@@ -7,15 +7,15 @@
 namespace ts3::gpuapi
 {
 
-	inline constexpr GLuint CX_GL_OBJECT_HANDLE_INVALID = Limits<GLuint>::maxValue;
+	constexpr auto CX_GL_OBJECT_HANDLE_INVALID = Limits<GLuint>::maxValue;
 
-	inline constexpr GLenum CX_GL_BIND_TARGET_UNKNOWN = Limits<GLenum>::maxValue;
+	constexpr auto CX_GL_BIND_TARGET_UNKNOWN = Limits<GLenum>::maxValue;
 
 	enum class GLObjectBaseType : enum_default_value_t
 	{
 		// Type for buffer objects (glGenBuffers).
 		Buffer,
-		// Type for framebuffer objects (glGenFamebuffers).
+		// Type for framebuffer objects (glGenFramebuffers).
 		Framebuffer,
 		// Type for buffer objects (glGenRenderbuffers).
 		Renderbuffer,
@@ -71,13 +71,13 @@ namespace ts3::gpuapi
 		}
 	};
 
-	template <typename TpObject>
-	using GLObjectHandle = std::unique_ptr<TpObject, GLObjectDeleter>;
+	template <typename TObject>
+	using GLObjectHandle = std::unique_ptr<TObject, GLObjectDeleter>;
 
-	template <typename TpObject, typename... TpArgs>
-	inline GLObjectHandle<TpObject> createGLObject( TpArgs && ...pArgs )
+	template <typename TObject, typename... TArgs>
+	inline GLObjectHandle<TObject> createGLObject( TArgs && ...pArgs )
 	{
-		GLObjectHandle<TpObject> result{ new TpObject( std::forward<TpArgs>( pArgs )... ) };
+		GLObjectHandle<TObject> result{ new TObject( std::forward<TArgs>( pArgs )... ) };
 		return result;
 	}
 

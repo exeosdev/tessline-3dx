@@ -1,9 +1,79 @@
 
-#include "GL_commonPipelineStateDefs.h"
+#include "GL_commonGraphicsConfig.h"
 #include <ts3/gpuapiGL/GL_coreAPIProxy.h>
+#include <ts3/gpuapiGL/GL_gpuDevice.h>
 
 namespace ts3::gpuapi
 {
+
+	GLBlendImmutableState::GLBlendImmutableState(
+			GLGPUDevice & pGPUDevice,
+			const GLBlendConfig & pGLBlendConfig,
+			Bitmask<EBlendConfigFlags> pBlendFlags )
+	: BlendImmutableState( pGPUDevice, pBlendFlags )
+	, mGLBlendConfig( pGLBlendConfig )
+	{}
+
+	GLBlendImmutableState::~GLBlendImmutableState() = default;
+
+	GpaHandle<GLBlendImmutableState> GLBlendImmutableState::createInstance(
+			GLGPUDevice & pGPUDevice,
+			const BlendConfig & pBlendConfig )
+	{
+		const auto glcBlendConfig = smutil::translateBlendConfig( pBlendConfig );
+		auto immutableState = createGPUAPIObject<GLBlendImmutableState>(
+				pGPUDevice,
+				glcBlendConfig,
+				pBlendConfig.flags & E_BLEND_CONFIG_MASK_ALL );
+		return immutableState;
+	}
+
+
+	GLDepthStencilImmutableState::GLDepthStencilImmutableState(
+			GLGPUDevice & pGPUDevice,
+			const GLDepthStencilConfig & pGLDepthStencilConfig,
+			Bitmask<EDepthStencilConfigFlags> pDepthStencilFlags  )
+	: DepthStencilImmutableState( pGPUDevice, pDepthStencilFlags )
+	, mGLDepthStencilConfig( pGLDepthStencilConfig )
+	{}
+
+	GLDepthStencilImmutableState::~GLDepthStencilImmutableState() = default;
+
+	GpaHandle<GLDepthStencilImmutableState> GLDepthStencilImmutableState::createInstance(
+			GLGPUDevice & pGPUDevice,
+			const DepthStencilConfig & pDepthStencilConfig  )
+	{
+		const auto glcDepthStencilConfig = smutil::translateDepthStencilConfig( pDepthStencilConfig );
+		auto immutableState = createGPUAPIObject<GLDepthStencilImmutableState>(
+				pGPUDevice,
+				glcDepthStencilConfig,
+				pDepthStencilConfig.commonFlags & E_DEPTH_STENCIL_CONFIG_MASK_ALL );
+		return immutableState;
+	}
+
+
+	GLRasterizerImmutableState::GLRasterizerImmutableState(
+			GLGPUDevice & pGPUDevice,
+			const GLRasterizerConfig & pGLRasterizerConfig,
+			Bitmask<ERasterizerConfigFlags> pRasterizerFlags )
+	: RasterizerImmutableState( pGPUDevice, pRasterizerFlags )
+	, mGLRasterizerConfig( pGLRasterizerConfig )
+	{}
+
+	GLRasterizerImmutableState::~GLRasterizerImmutableState() = default;
+
+	GpaHandle<GLRasterizerImmutableState> GLRasterizerImmutableState::createInstance(
+			GLGPUDevice & pGPUDevice,
+			const RasterizerConfig & pRasterizerConfig )
+	{
+		const auto glcRasterizerConfig = smutil::translateRasterizerConfig( pRasterizerConfig );
+		auto immutableState = createGPUAPIObject<GLRasterizerImmutableState>(
+				pGPUDevice,
+				glcRasterizerConfig,
+				pRasterizerConfig.flags & E_RASTERIZER_CONFIG_MASK_ALL );
+		return immutableState;
+	}
+
 
 	namespace smutil
 	{
@@ -75,78 +145,13 @@ namespace ts3::gpuapi
 			return openglDepthStencilConfig;
 		}
 
-		GLIAInputLayoutDefinition translateIAInputLayoutDefinition( const IAInputLayoutDefinition & pDefinition )
-		{
-			GLIAInputLayoutDefinition openglLayoutDefinition{};
-
-			const auto definedVertexAttributesNum = popCount( pDefinition.activeAttributesMask );
-
-			uint32 currentVertexAttributesNum = 0;
-			uint64 currentAttributePackedRelativeOffset = 0;
-
-			for( uint32 attributeIndex = 0; attributeIndex < cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
-			{
-				const auto attributeBit = cxdefs::makeIAVertexAttributeFlag( attributeIndex );
-				if( pDefinition.activeAttributesMask.isSet( attributeBit ) )
-				{
-					const auto & inputAttributeInfo = pDefinition.attributeArray[attributeIndex];
-					auto & openglAttributeInfo = openglLayoutDefinition.attributeArray[attributeIndex];
-
-					// Translate the attribute data. This includes the relative offset.
-					openglAttributeInfo = translateIAVertexAttributeInfo( inputAttributeInfo );
-
-					if( inputAttributeInfo.relativeOffset == cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND )
-					{
-						// If the offset is APPEND, update it with the current packed offset calculated.
-						openglAttributeInfo.relativeOffset = trunc_numeric_cast<uint32>( currentAttributePackedRelativeOffset );
-					}
-
-					// Update the current packed offset.
-					currentAttributePackedRelativeOffset = openglAttributeInfo.relativeOffset + openglAttributeInfo.byteSize;
-
-					++currentVertexAttributesNum;
-
-					if( currentVertexAttributesNum == definedVertexAttributesNum )
-					{
-						break;
-					}
-				}
-			}
-
-			openglLayoutDefinition.activeAttributesMask = pDefinition.activeAttributesMask;
-			openglLayoutDefinition.primitiveTopology = GLCoreAPIProxy::translateGLPrimitiveTopology( pDefinition.primitiveTopology );
-
-			return openglLayoutDefinition;
-		}
-
-		GLIAVertexAttributeInfo translateIAVertexAttributeInfo( const IAVertexAttributeInfo & pAttributeInfo )
-		{
-			GLIAVertexAttributeInfo openglAttributeInfo{};
-
-			openglAttributeInfo.streamIndex = static_cast<GLuint>( pAttributeInfo.streamIndex );
-			openglAttributeInfo.instanceRate = pAttributeInfo.instanceRate;
-			openglAttributeInfo.relativeOffset = static_cast<uint32>( pAttributeInfo.relativeOffset );
-			openglAttributeInfo.byteSize = cxdefs::getVertexAttribFormatByteSize( pAttributeInfo.format );
-
-			const auto attributeFormatBaseType = cxdefs::getVertexAttribFormatBaseDataType( pAttributeInfo.format );
-			openglAttributeInfo.baseType = GLCoreAPIProxy::translateGLBaseDataType( attributeFormatBaseType );
-
-			const auto attributeFormatLength = cxdefs::getVertexAttribFormatLength( pAttributeInfo.format );
-			openglAttributeInfo.componentsNum = static_cast<uint32>( attributeFormatLength );
-
-			const auto attributeFormatFlags = cxdefs::getVertexAttribFormatFlags( pAttributeInfo.format );
-			openglAttributeInfo.normalized = attributeFormatFlags.isSet( E_GPU_DATA_FORMAT_FLAG_NORMALIZED_BIT ) ? GL_TRUE : GL_FALSE;
-
-			return openglAttributeInfo;
-		}
-
 		GLRasterizerConfig translateRasterizerConfig( const RasterizerConfig & pConfig )
 		{
 			GLRasterizerConfig rasterizerConfig{};
 
+			rasterizerConfig.flags = ( pConfig.flags & E_RASTERIZER_CONFIG_MASK_ALL );
 			rasterizerConfig.cullMode = GLCoreAPIProxy::translateGLCullMode( pConfig.cullMode );
 			rasterizerConfig.frontFaceVerticesOrder = GLCoreAPIProxy::translateGLTriangleVerticesOrder( pConfig.frontFaceVerticesOrder );
-			rasterizerConfig.scissorTestState = pConfig.flags.isSet( E_RASTERIZER_FLAG_ENABLE_SCISSOR_TEST_BIT );
 		#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
 			rasterizerConfig.primitiveFillMode = GLCoreAPIProxy::translateGLPrimitiveFillMode( pConfig.primitiveFillMode );
 		#endif

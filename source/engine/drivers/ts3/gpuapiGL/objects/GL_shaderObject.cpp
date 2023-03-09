@@ -6,38 +6,38 @@
 namespace ts3::gpuapi
 {
 
-	GLShaderObject::GLShaderObject( GLuint pHandle, GLenum pGLEShaderType, GLenum pGLShaderStageMaskBit )
+	GLShaderObject::GLShaderObject( GLuint pHandle, GLenum pGLShaderType, GLenum pGLShaderStageMaskBit )
 	: GLObject( GLObjectBaseType::Shader, pHandle )
-	, mGLEShaderType( pGLEShaderType )
+	, mGLShaderType( pGLShaderType )
 	, mGLShaderStageMaskBit( pGLShaderStageMaskBit )
 	{}
 
 	GLShaderObject::~GLShaderObject() = default;
 
-	GLShaderObjectHandle GLShaderObject::create( GLenum pGLEShaderType )
+	GLShaderObjectHandle GLShaderObject::create( GLenum pGLShaderType )
 	{
-		auto shaderStageMaskBit = getStageMaskForEShaderType( pGLEShaderType );
+		auto shaderStageMaskBit = getStageMaskForEShaderType( pGLShaderType );
 		if( shaderStageMaskBit == cvGLInvalidValue )
 		{
 			return nullptr;
 		}
 
-		auto shaderHandle = glCreateShader( pGLEShaderType );
+		auto shaderHandle = glCreateShader( pGLShaderType );
 		ts3OpenGLHandleLastError();
 
-		GLShaderObjectHandle openglShaderObject{ new GLShaderObject( shaderHandle, pGLEShaderType, shaderStageMaskBit ) };
+		GLShaderObjectHandle openglShaderObject{ new GLShaderObject( shaderHandle, pGLShaderType, shaderStageMaskBit ) };
 
 		return openglShaderObject;
 	}
 
-	GLShaderObjectHandle GLShaderObject::createWithSource( GLenum pGLEShaderType, const void * pSource, size_t pSourceLength )
+	GLShaderObjectHandle GLShaderObject::createWithSource( GLenum pGLShaderType, const void * pSource, size_t pSourceLength )
 	{
 		if( !pSource || ( pSourceLength == 0 ) )
 		{
 			return nullptr;
 		}
 
-		auto shaderObject = create( pGLEShaderType );
+		auto shaderObject = create( pGLShaderType );
 		if( !shaderObject )
 		{
 			return nullptr;
@@ -190,7 +190,7 @@ namespace ts3::gpuapi
 		return shaderBinaryFormatsNum > 0;
 	}
 
-	bool GLShaderObject::checkBinaryFormatSupport( GLenum pFormat)
+	bool GLShaderObject::checkBinaryFormatSupport( GLenum pFormat )
 	{
 		GLint shaderBinaryFormatsNum = 0;
 		glGetIntegerv( GL_NUM_SHADER_BINARY_FORMATS, &shaderBinaryFormatsNum );
@@ -199,9 +199,9 @@ namespace ts3::gpuapi
 		return shaderBinaryFormatsNum > 0;
 	}
 
-	GLbitfield GLShaderObject::getStageMaskForEShaderType( GLenum pGLEShaderType )
+	GLbitfield GLShaderObject::getStageMaskForEShaderType( GLenum pGLShaderType )
 	{
-		switch( pGLEShaderType )
+		switch( pGLShaderType )
 		{
 			ts3CaseReturn( GL_VERTEX_SHADER   , GL_VERTEX_SHADER_BIT   );
 			ts3CaseReturn( GL_FRAGMENT_SHADER , GL_FRAGMENT_SHADER_BIT );

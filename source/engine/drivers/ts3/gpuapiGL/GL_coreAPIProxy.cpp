@@ -1,6 +1,5 @@
 
 #include "GL_coreAPIProxy.h"
-#include <ts3/gpuapi/state/commonGPUStateDefs.h>
 #include <ts3/gpuapi/resources/gpuBufferCommon.h>
 #include <ts3/gpuapi/resources/samplerCommon.h>
 #include <ts3/gpuapi/resources/shaderCommon.h>
@@ -236,20 +235,20 @@ namespace ts3::gpuapi
 			ts3CaseReturn( GL_DEPTH32F_STENCIL8  , 64 );
 
 		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_DESKTOP )
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC1        , 4 );
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC1_SRGBA  , 4 );
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC2        , 4 );
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC2_SRGB   , 8 );
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC3        , 8 );
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC3_SRGB   , 8 );
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC4_SNORM  , 8 );
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC4_UNORM  , 8 );
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC5_SNORM  , 8 );
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC5_UNORM  , 0 );
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC6H_SFLOAT, 0 );
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC6H_UFLOAT, 0 );
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC7        , 0 );
-			ts3CaseReturn( GL_TEXFMT_COMPRESSED_BC7_SRGB   , 0 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC1        , 4 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC1_SRGBA  , 4 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC2        , 4 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC2_SRGB   , 8 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC3        , 8 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC3_SRGB   , 8 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC4_SNORM  , 8 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC4_UNORM  , 8 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC5_SNORM  , 8 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC5_UNORM  , 0 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC6H_SFLOAT, 0 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC6H_UFLOAT, 0 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC7        , 0 );
+			ts3CaseReturn( GL_TEX_FORMAT_COMPRESSED_BC7_SRGB   , 0 );
 		#endif
 		}
 		return GL_TS3_ERR_INVALID_PARAM;
@@ -257,7 +256,7 @@ namespace ts3::gpuapi
 
 	GLenum GLCoreAPIProxy::translateGLBaseDataType( EBaseDataType pBaseDataType )
 	{
-		auto baseDataTypeIndex = ecGetBaseDataTypeIndex( pBaseDataType );
+		auto baseDataTypeIndex = cxdefs::getBaseDataTypeIndex( pBaseDataType );
 		switch( baseDataTypeIndex )
 		{
 			ts3CaseReturn( 0u, GL_BYTE                           );
@@ -458,18 +457,18 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLEShaderType( EShaderType pShaderType )
+	GLenum GLCoreAPIProxy::translateShaderType( EShaderType pShaderType )
 	{
 		switch( pShaderType )
 		{
-			ts3CaseReturn( EShaderType::GSVertex   , GL_VERTEX_SHADER   );
+			ts3CaseReturn( EShaderType::GSVertex   , GL_VERTEX_SHADER );
 			ts3CaseReturn( EShaderType::GSPixel    , GL_FRAGMENT_SHADER );
 		#if( TS3GX_GL_FEATURE_SUPPORT_SHADER_TYPE_GEOMETRY )
 			ts3CaseReturn( EShaderType::GSGeometry , GL_GEOMETRY_SHADER );
         #endif
 		#if( TS3GX_GL_FEATURE_SUPPORT_SHADER_TYPE_TESSELATION )
-			ts3CaseReturn( EShaderType::GSTessControl    , GL_TESS_CONTROL_SHADER    );
-			ts3CaseReturn( EShaderType::GSTessEvaluation , GL_TESS_EVALUATION_SHADER );
+			ts3CaseReturn( EShaderType::GSHull   , GL_TESS_CONTROL_SHADER );
+			ts3CaseReturn( EShaderType::GSDomain , GL_TESS_EVALUATION_SHADER );
         #endif
 		#if( TS3GX_GL_FEATURE_SUPPORT_SHADER_TYPE_COMPUTE )
 			ts3CaseReturn( EShaderType::CSCompute , GL_COMPUTE_SHADER );
@@ -514,15 +513,15 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLTextureBindTarget( ETextureDimensionClass pTextureDimensionClass )
+	GLenum GLCoreAPIProxy::translateGLTextureBindTarget( ETextureClass pTextureDimensionClass )
 	{
 		switch( pTextureDimensionClass )
 		{
-			ts3CaseReturn( ETextureDimensionClass::Texture2D      , GL_TEXTURE_2D             );
-			ts3CaseReturn( ETextureDimensionClass::Texture2DArray , GL_TEXTURE_2D_ARRAY       );
-			ts3CaseReturn( ETextureDimensionClass::Texture2DMS    , GL_TEXTURE_2D_MULTISAMPLE );
-			ts3CaseReturn( ETextureDimensionClass::Texture3D      , GL_TEXTURE_3D             );
-			ts3CaseReturn( ETextureDimensionClass::TextureCubeMap , GL_TEXTURE_CUBE_MAP       );
+			ts3CaseReturn( ETextureClass::T2D      , GL_TEXTURE_2D             );
+			ts3CaseReturn( ETextureClass::T2DArray , GL_TEXTURE_2D_ARRAY       );
+			ts3CaseReturn( ETextureClass::T2DMS    , GL_TEXTURE_2D_MULTISAMPLE );
+			ts3CaseReturn( ETextureClass::T3D      , GL_TEXTURE_3D             );
+			ts3CaseReturn( ETextureClass::TCubeMap , GL_TEXTURE_CUBE_MAP       );
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -531,71 +530,71 @@ namespace ts3::gpuapi
 	{
 		switch( pTextureFormat )
 		{
-			ts3CaseReturn( ETextureFormat::R32_FLOAT           , GL_R32F         );
-			ts3CaseReturn( ETextureFormat::R32_SINT            , GL_R32I         );
-			ts3CaseReturn( ETextureFormat::R32_UINT            , GL_R32UI        );
-			ts3CaseReturn( ETextureFormat::R32G32_FLOAT        , GL_RG32F        );
-			ts3CaseReturn( ETextureFormat::R32G32_SINT         , GL_RG32I        );
-			ts3CaseReturn( ETextureFormat::R32G32_UINT         , GL_RG32UI       );
-			ts3CaseReturn( ETextureFormat::R32G32B32_FLOAT     , GL_RGB32F       );
-			ts3CaseReturn( ETextureFormat::R32G32B32_SINT      , GL_RGB32I       );
-			ts3CaseReturn( ETextureFormat::R32G32B32_UINT      , GL_RGB32UI      );
-			ts3CaseReturn( ETextureFormat::R32G32B32A32_FLOAT  , GL_RGBA32F      );
-			ts3CaseReturn( ETextureFormat::R32G32B32A32_SINT   , GL_RGBA32I      );
-			ts3CaseReturn( ETextureFormat::R32G32B32A32_UINT   , GL_RGBA32UI     );
-			ts3CaseReturn( ETextureFormat::R16_FLOAT           , GL_R16F         );
-			ts3CaseReturn( ETextureFormat::R16_SINT            , GL_R16I         );
-			ts3CaseReturn( ETextureFormat::R16_UINT            , GL_R16UI        );
-			ts3CaseReturn( ETextureFormat::R16G16_FLOAT        , GL_RG16F        );
-			ts3CaseReturn( ETextureFormat::R16G16_SINT         , GL_RG16I        );
-			ts3CaseReturn( ETextureFormat::R16G16_UINT         , GL_RG16UI       );
-			ts3CaseReturn( ETextureFormat::R16G16B16A16_FLOAT  , GL_RGBA16F      );
-			ts3CaseReturn( ETextureFormat::R16G16B16A16_SINT   , GL_RGBA16I      );
-			ts3CaseReturn( ETextureFormat::R16G16B16A16_UINT   , GL_RGBA16UI     );
-			ts3CaseReturn( ETextureFormat::R8_SINT             , GL_R8I          );
-			ts3CaseReturn( ETextureFormat::R8_UINT             , GL_R8UI         );
-			ts3CaseReturn( ETextureFormat::R8_SNORM            , GL_R8_SNORM     );
-			ts3CaseReturn( ETextureFormat::R8_UNORM            , GL_R8           );
-			ts3CaseReturn( ETextureFormat::R8G8_SINT           , GL_RG8I         );
-			ts3CaseReturn( ETextureFormat::R8G8_UINT           , GL_RG8UI        );
-			ts3CaseReturn( ETextureFormat::R8G8_SNORM          , GL_RG8_SNORM    );
-			ts3CaseReturn( ETextureFormat::R8G8_UNORM          , GL_RG8          );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_SINT       , GL_RGBA8I       );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_UINT       , GL_RGBA8UI      );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_SNORM      , GL_RGBA8_SNORM  );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_UNORM      , GL_RGBA8        );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_SRGB       , GL_SRGB8_ALPHA8 );
+			ts3CaseReturn( ETextureFormat::R32F       , GL_R32F         );
+			ts3CaseReturn( ETextureFormat::R32I       , GL_R32I         );
+			ts3CaseReturn( ETextureFormat::R32U       , GL_R32UI        );
+			ts3CaseReturn( ETextureFormat::RG32F      , GL_RG32F        );
+			ts3CaseReturn( ETextureFormat::RG32I      , GL_RG32I        );
+			ts3CaseReturn( ETextureFormat::RG32U      , GL_RG32UI       );
+			ts3CaseReturn( ETextureFormat::RGB32F     , GL_RGB32F       );
+			ts3CaseReturn( ETextureFormat::RGB32I     , GL_RGB32I       );
+			ts3CaseReturn( ETextureFormat::RGB32U     , GL_RGB32UI      );
+			ts3CaseReturn( ETextureFormat::RGBA32F    , GL_RGBA32F      );
+			ts3CaseReturn( ETextureFormat::RGBA32I    , GL_RGBA32I      );
+			ts3CaseReturn( ETextureFormat::RGBA32U    , GL_RGBA32UI     );
+			ts3CaseReturn( ETextureFormat::R16F       , GL_R16F         );
+			ts3CaseReturn( ETextureFormat::R16I       , GL_R16I         );
+			ts3CaseReturn( ETextureFormat::R16U       , GL_R16UI        );
+			ts3CaseReturn( ETextureFormat::RG16F      , GL_RG16F        );
+			ts3CaseReturn( ETextureFormat::RG16I      , GL_RG16I        );
+			ts3CaseReturn( ETextureFormat::RG16U      , GL_RG16UI       );
+			ts3CaseReturn( ETextureFormat::RGBA16F    , GL_RGBA16F      );
+			ts3CaseReturn( ETextureFormat::RGBA16I    , GL_RGBA16I      );
+			ts3CaseReturn( ETextureFormat::RGBA16U    , GL_RGBA16UI     );
+			ts3CaseReturn( ETextureFormat::R8I        , GL_R8I          );
+			ts3CaseReturn( ETextureFormat::R8U        , GL_R8UI         );
+			ts3CaseReturn( ETextureFormat::R8IN       , GL_R8_SNORM     );
+			ts3CaseReturn( ETextureFormat::R8UN       , GL_R8           );
+			ts3CaseReturn( ETextureFormat::RG8I       , GL_RG8I         );
+			ts3CaseReturn( ETextureFormat::RG8U       , GL_RG8UI        );
+			ts3CaseReturn( ETextureFormat::RG8IN      , GL_RG8_SNORM    );
+			ts3CaseReturn( ETextureFormat::RG8UN      , GL_RG8          );
+			ts3CaseReturn( ETextureFormat::RGBA8I     , GL_RGBA8I       );
+			ts3CaseReturn( ETextureFormat::RGBA8U     , GL_RGBA8UI      );
+			ts3CaseReturn( ETextureFormat::RGBA8IN    , GL_RGBA8_SNORM  );
+			ts3CaseReturn( ETextureFormat::RGBA8UN    , GL_RGBA8        );
+			ts3CaseReturn( ETextureFormat::RGBA8SRGB  , GL_SRGB8_ALPHA8 );
 		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_BGR )
-			ts3CaseReturn( ETextureFormat::B8G8R8X8_UNORM , GL_RGB8         );
-			ts3CaseReturn( ETextureFormat::B8G8R8X8_SRGB  , GL_SRGB8        );
-			ts3CaseReturn( ETextureFormat::B8G8R8A8_UNORM , GL_RGBA8        );
-			ts3CaseReturn( ETextureFormat::B8G8R8A8_SRGB  , GL_SRGB8_ALPHA8 );
+			ts3CaseReturn( ETextureFormat::BGRX8UN    , GL_RGB8         );
+			ts3CaseReturn( ETextureFormat::BGRX8SRGB  , GL_SRGB8        );
+			ts3CaseReturn( ETextureFormat::BGRA8UN    , GL_RGBA8        );
+			ts3CaseReturn( ETextureFormat::BGRA8SRGB  , GL_SRGB8_ALPHA8 );
 		#endif
-			ts3CaseReturn( ETextureFormat::R5G5B5A1            , GL_RGB5_A1            );
-			ts3CaseReturn( ETextureFormat::R5G6B5              , GL_RGB565             );
-			ts3CaseReturn( ETextureFormat::R9G9B9E5            , GL_RGB9_E5            );
-			ts3CaseReturn( ETextureFormat::R10G10B10A2_UINT    , GL_RGB10_A2UI         );
-			ts3CaseReturn( ETextureFormat::R10G10B10A2_UNORM   , GL_RGB10_A2           );
-			ts3CaseReturn( ETextureFormat::R11G11B10_FLOAT32   , GL_R11F_G11F_B10F     );
-			ts3CaseReturn( ETextureFormat::D16_UNORM           , GL_DEPTH_COMPONENT16  );
-			ts3CaseReturn( ETextureFormat::D24_UNORM_S8_UINT   , GL_DEPTH24_STENCIL8   );
-			ts3CaseReturn( ETextureFormat::D24_UNORM_X8        , GL_DEPTH_COMPONENT24  );
-			ts3CaseReturn( ETextureFormat::D32_FLOAT           , GL_DEPTH_COMPONENT32F );
+			ts3CaseReturn( ETextureFormat::R5G5B5A1   , GL_RGB5_A1            );
+			ts3CaseReturn( ETextureFormat::R5G6B5     , GL_RGB565             );
+			ts3CaseReturn( ETextureFormat::R9G9B9E5   , GL_RGB9_E5            );
+			ts3CaseReturn( ETextureFormat::RGB10A2U   , GL_RGB10_A2UI         );
+			ts3CaseReturn( ETextureFormat::RGB10A2UN  , GL_RGB10_A2           );
+			ts3CaseReturn( ETextureFormat::R11G11B10F , GL_R11F_G11F_B10F     );
+			ts3CaseReturn( ETextureFormat::D16UN      , GL_DEPTH_COMPONENT16  );
+			ts3CaseReturn( ETextureFormat::D24UNS8U   , GL_DEPTH24_STENCIL8   );
+			ts3CaseReturn( ETextureFormat::D24UNX8    , GL_DEPTH_COMPONENT24  );
+			ts3CaseReturn( ETextureFormat::D32F       , GL_DEPTH_COMPONENT32F );
 		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_COMPRESSED_BCX )
-			ts3CaseReturn( ETextureFormat::BC1_RGBA_UNORM      , GL_TEXFMT_COMPRESSED_BC1         );
-			ts3CaseReturn( ETextureFormat::BC1_RGBA_UNORM_SRGB , GL_TEXFMT_COMPRESSED_BC1_SRGBA   );
-			ts3CaseReturn( ETextureFormat::BC2_UNORM           , GL_TEXFMT_COMPRESSED_BC2         );
-			ts3CaseReturn( ETextureFormat::BC2_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC2_SRGB    );
-			ts3CaseReturn( ETextureFormat::BC3_UNORM           , GL_TEXFMT_COMPRESSED_BC3         );
-			ts3CaseReturn( ETextureFormat::BC3_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC3_SRGB    );
-			ts3CaseReturn( ETextureFormat::BC4_SNORM           , GL_TEXFMT_COMPRESSED_BC4_SNORM   );
-			ts3CaseReturn( ETextureFormat::BC4_UNORM           , GL_TEXFMT_COMPRESSED_BC4_UNORM   );
-			ts3CaseReturn( ETextureFormat::BC5_SNORM           , GL_TEXFMT_COMPRESSED_BC5_SNORM   );
-			ts3CaseReturn( ETextureFormat::BC5_UNORM           , GL_TEXFMT_COMPRESSED_BC5_UNORM   );
-			ts3CaseReturn( ETextureFormat::BC6H_SFLOAT         , GL_TEXFMT_COMPRESSED_BC6H_SFLOAT );
-			ts3CaseReturn( ETextureFormat::BC6H_UFLOAT         , GL_TEXFMT_COMPRESSED_BC6H_UFLOAT );
-			ts3CaseReturn( ETextureFormat::BC7_UNORM           , GL_TEXFMT_COMPRESSED_BC7         );
-			ts3CaseReturn( ETextureFormat::BC7_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC7_SRGB    );
+			ts3CaseReturn( ETextureFormat::BC1        , GL_TEX_FORMAT_COMPRESSED_BC1         );
+			ts3CaseReturn( ETextureFormat::BC1SRGB    , GL_TEX_FORMAT_COMPRESSED_BC1_SRGBA   );
+			ts3CaseReturn( ETextureFormat::BC2        , GL_TEX_FORMAT_COMPRESSED_BC2         );
+			ts3CaseReturn( ETextureFormat::BC2SRGB    , GL_TEX_FORMAT_COMPRESSED_BC2_SRGB    );
+			ts3CaseReturn( ETextureFormat::BC3        , GL_TEX_FORMAT_COMPRESSED_BC3         );
+			ts3CaseReturn( ETextureFormat::BC3SRGB    , GL_TEX_FORMAT_COMPRESSED_BC3_SRGB    );
+			ts3CaseReturn( ETextureFormat::BC4IN      , GL_TEX_FORMAT_COMPRESSED_BC4_SNORM   );
+			ts3CaseReturn( ETextureFormat::BC4UN      , GL_TEX_FORMAT_COMPRESSED_BC4_UNORM   );
+			ts3CaseReturn( ETextureFormat::BC5IN      , GL_TEX_FORMAT_COMPRESSED_BC5_SNORM   );
+			ts3CaseReturn( ETextureFormat::BC5UN      , GL_TEX_FORMAT_COMPRESSED_BC5_UNORM   );
+			ts3CaseReturn( ETextureFormat::BC6HSF     , GL_TEX_FORMAT_COMPRESSED_BC6H_SFLOAT );
+			ts3CaseReturn( ETextureFormat::BC6HUF     , GL_TEX_FORMAT_COMPRESSED_BC6H_UFLOAT );
+			ts3CaseReturn( ETextureFormat::BC7        , GL_TEX_FORMAT_COMPRESSED_BC7         );
+			ts3CaseReturn( ETextureFormat::BC7SRGB    , GL_TEX_FORMAT_COMPRESSED_BC7_SRGB    );
 		#endif
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
@@ -605,72 +604,71 @@ namespace ts3::gpuapi
 	{
 		switch( pTextureFormat )
 		{
-			ts3CaseReturn( ETextureFormat::R32_FLOAT           , GL_RED  );
-			ts3CaseReturn( ETextureFormat::R32_SINT            , GL_RED  );
-			ts3CaseReturn( ETextureFormat::R32_UINT            , GL_RED  );
-			ts3CaseReturn( ETextureFormat::R32G32_FLOAT        , GL_RG   );
-			ts3CaseReturn( ETextureFormat::R32G32_SINT         , GL_RG   );
-			ts3CaseReturn( ETextureFormat::R32G32_UINT         , GL_RG   );
-			ts3CaseReturn( ETextureFormat::R32G32B32_FLOAT     , GL_RGB  );
-			ts3CaseReturn( ETextureFormat::R32G32B32_SINT      , GL_RGB  );
-			ts3CaseReturn( ETextureFormat::R32G32B32_UINT      , GL_RGB  );
-			ts3CaseReturn( ETextureFormat::R32G32B32A32_FLOAT  , GL_RGBA );
-			ts3CaseReturn( ETextureFormat::R32G32B32A32_SINT   , GL_RGBA );
-			ts3CaseReturn( ETextureFormat::R32G32B32A32_UINT   , GL_RGBA );
-			ts3CaseReturn( ETextureFormat::R16_FLOAT           , GL_RED  );
-			ts3CaseReturn( ETextureFormat::R16_SINT            , GL_RED  );
-			ts3CaseReturn( ETextureFormat::R16_UINT            , GL_RED  );
-			ts3CaseReturn( ETextureFormat::R16G16_FLOAT        , GL_RG   );
-			ts3CaseReturn( ETextureFormat::R16G16_SINT         , GL_RG   );
-			ts3CaseReturn( ETextureFormat::R16G16_UINT         , GL_RG   );
-			ts3CaseReturn( ETextureFormat::R16G16B16A16_FLOAT  , GL_RGBA );
-			ts3CaseReturn( ETextureFormat::R16G16B16A16_SINT   , GL_RGBA );
-			ts3CaseReturn( ETextureFormat::R16G16B16A16_UINT   , GL_RGBA );
-			ts3CaseReturn( ETextureFormat::R8_SINT             , GL_RED  );
-			ts3CaseReturn( ETextureFormat::R8_UINT             , GL_RED  );
-			ts3CaseReturn( ETextureFormat::R8_SNORM            , GL_RED  );
-			ts3CaseReturn( ETextureFormat::R8_UNORM            , GL_RED  );
-			ts3CaseReturn( ETextureFormat::R8G8_SINT           , GL_RG   );
-			ts3CaseReturn( ETextureFormat::R8G8_UINT           , GL_RG   );
-			ts3CaseReturn( ETextureFormat::R8G8_SNORM          , GL_RG   );
-			ts3CaseReturn( ETextureFormat::R8G8_UNORM          , GL_RG   );
+			ts3CaseReturn( ETextureFormat::R32F       , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R32I       , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R32U       , GL_RED  );
+			ts3CaseReturn( ETextureFormat::RG32F      , GL_RG   );
+			ts3CaseReturn( ETextureFormat::RG32I      , GL_RG   );
+			ts3CaseReturn( ETextureFormat::RG32U      , GL_RG   );
+			ts3CaseReturn( ETextureFormat::RGB32F     , GL_RGB  );
+			ts3CaseReturn( ETextureFormat::RGB32I     , GL_RGB  );
+			ts3CaseReturn( ETextureFormat::RGB32U     , GL_RGB  );
+			ts3CaseReturn( ETextureFormat::RGBA32F    , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::RGBA32I    , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::RGBA32U    , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::R16F       , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R16I       , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R16U       , GL_RED  );
+			ts3CaseReturn( ETextureFormat::RG16F      , GL_RG   );
+			ts3CaseReturn( ETextureFormat::RG16I      , GL_RG   );
+			ts3CaseReturn( ETextureFormat::RG16U      , GL_RG   );
+			ts3CaseReturn( ETextureFormat::RGBA16F    , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::RGBA16I    , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::RGBA16U    , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::R8I        , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R8U        , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R8IN       , GL_RED  );
+			ts3CaseReturn( ETextureFormat::R8UN       , GL_RED  );
+			ts3CaseReturn( ETextureFormat::RG8I       , GL_RG   );
+			ts3CaseReturn( ETextureFormat::RG8U       , GL_RG   );
+			ts3CaseReturn( ETextureFormat::RG8IN      , GL_RG   );
+			ts3CaseReturn( ETextureFormat::RG8UN      , GL_RG   );
 		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_BGR )
-			ts3CaseReturn( ETextureFormat::B8G8R8X8_UNORM      , GL_BGR  );
-			ts3CaseReturn( ETextureFormat::B8G8R8X8_SRGB       , GL_BGR  );
-			ts3CaseReturn( ETextureFormat::B8G8R8A8_UNORM      , GL_BGRA );
-			ts3CaseReturn( ETextureFormat::B8G8R8A8_SRGB       , GL_BGRA );
+			ts3CaseReturn( ETextureFormat::BGRX8UN    , GL_BGR  );
+			ts3CaseReturn( ETextureFormat::BGRX8SRGB  , GL_BGR  );
+			ts3CaseReturn( ETextureFormat::BGRA8UN    , GL_BGRA );
+			ts3CaseReturn( ETextureFormat::BGRA8SRGB  , GL_BGRA );
 		#endif
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_SINT       , GL_RGBA );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_UINT       , GL_RGBA );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_SNORM      , GL_RGBA );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_UNORM      , GL_RGBA );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_SRGB       , GL_RGBA );
-
-			ts3CaseReturn( ETextureFormat::R5G5B5A1            , GL_RGB5_A1            );
-			ts3CaseReturn( ETextureFormat::R5G6B5              , GL_RGB565             );
-			ts3CaseReturn( ETextureFormat::R9G9B9E5            , GL_RGB9_E5            );
-			ts3CaseReturn( ETextureFormat::R10G10B10A2_UINT    , GL_RGB10_A2UI         );
-			ts3CaseReturn( ETextureFormat::R10G10B10A2_UNORM   , GL_RGB10_A2           );
-			ts3CaseReturn( ETextureFormat::R11G11B10_FLOAT32   , GL_R11F_G11F_B10F     );
-			ts3CaseReturn( ETextureFormat::D16_UNORM           , GL_DEPTH_COMPONENT16  );
-			ts3CaseReturn( ETextureFormat::D24_UNORM_S8_UINT   , GL_DEPTH24_STENCIL8   );
-			ts3CaseReturn( ETextureFormat::D24_UNORM_X8        , GL_DEPTH_COMPONENT24  );
-			ts3CaseReturn( ETextureFormat::D32_FLOAT           , GL_DEPTH_COMPONENT32F );
+			ts3CaseReturn( ETextureFormat::RGBA8I     , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::RGBA8U     , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::RGBA8IN    , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::RGBA8UN    , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::RGBA8SRGB  , GL_RGBA );
+			ts3CaseReturn( ETextureFormat::R5G5B5A1   , GL_RGB5_A1            );
+			ts3CaseReturn( ETextureFormat::R5G6B5     , GL_RGB565             );
+			ts3CaseReturn( ETextureFormat::R9G9B9E5   , GL_RGB9_E5            );
+			ts3CaseReturn( ETextureFormat::RGB10A2U   , GL_RGB10_A2UI         );
+			ts3CaseReturn( ETextureFormat::RGB10A2UN  , GL_RGB10_A2           );
+			ts3CaseReturn( ETextureFormat::R11G11B10F , GL_R11F_G11F_B10F     );
+			ts3CaseReturn( ETextureFormat::D16UN      , GL_DEPTH_COMPONENT16  );
+			ts3CaseReturn( ETextureFormat::D24UNS8U   , GL_DEPTH24_STENCIL8   );
+			ts3CaseReturn( ETextureFormat::D24UNX8    , GL_DEPTH_COMPONENT24  );
+			ts3CaseReturn( ETextureFormat::D32F       , GL_DEPTH_COMPONENT32F );
 		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_COMPRESSED_BCX )
-			ts3CaseReturn( ETextureFormat::BC1_RGBA_UNORM      , GL_TEXFMT_COMPRESSED_BC1         );
-			ts3CaseReturn( ETextureFormat::BC1_RGBA_UNORM_SRGB , GL_TEXFMT_COMPRESSED_BC1_SRGBA   );
-			ts3CaseReturn( ETextureFormat::BC2_UNORM           , GL_TEXFMT_COMPRESSED_BC2         );
-			ts3CaseReturn( ETextureFormat::BC2_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC2_SRGB    );
-			ts3CaseReturn( ETextureFormat::BC3_UNORM           , GL_TEXFMT_COMPRESSED_BC3         );
-			ts3CaseReturn( ETextureFormat::BC3_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC3_SRGB    );
-			ts3CaseReturn( ETextureFormat::BC4_SNORM           , GL_TEXFMT_COMPRESSED_BC4_SNORM   );
-			ts3CaseReturn( ETextureFormat::BC4_UNORM           , GL_TEXFMT_COMPRESSED_BC4_UNORM   );
-			ts3CaseReturn( ETextureFormat::BC5_SNORM           , GL_TEXFMT_COMPRESSED_BC5_SNORM   );
-			ts3CaseReturn( ETextureFormat::BC5_UNORM           , GL_TEXFMT_COMPRESSED_BC5_UNORM   );
-			ts3CaseReturn( ETextureFormat::BC6H_SFLOAT         , GL_TEXFMT_COMPRESSED_BC6H_SFLOAT );
-			ts3CaseReturn( ETextureFormat::BC6H_UFLOAT         , GL_TEXFMT_COMPRESSED_BC6H_UFLOAT );
-			ts3CaseReturn( ETextureFormat::BC7_UNORM           , GL_TEXFMT_COMPRESSED_BC7         );
-			ts3CaseReturn( ETextureFormat::BC7_UNORM_SRGB      , GL_TEXFMT_COMPRESSED_BC7_SRGB    );
+			ts3CaseReturn( ETextureFormat::BC1        , GL_TEX_FORMAT_COMPRESSED_BC1         );
+			ts3CaseReturn( ETextureFormat::BC1SRGB    , GL_TEX_FORMAT_COMPRESSED_BC1_SRGBA   );
+			ts3CaseReturn( ETextureFormat::BC2        , GL_TEX_FORMAT_COMPRESSED_BC2         );
+			ts3CaseReturn( ETextureFormat::BC2SRGB    , GL_TEX_FORMAT_COMPRESSED_BC2_SRGB    );
+			ts3CaseReturn( ETextureFormat::BC3        , GL_TEX_FORMAT_COMPRESSED_BC3         );
+			ts3CaseReturn( ETextureFormat::BC3SRGB    , GL_TEX_FORMAT_COMPRESSED_BC3_SRGB    );
+			ts3CaseReturn( ETextureFormat::BC4IN      , GL_TEX_FORMAT_COMPRESSED_BC4_SNORM   );
+			ts3CaseReturn( ETextureFormat::BC4UN      , GL_TEX_FORMAT_COMPRESSED_BC4_UNORM   );
+			ts3CaseReturn( ETextureFormat::BC5IN      , GL_TEX_FORMAT_COMPRESSED_BC5_SNORM   );
+			ts3CaseReturn( ETextureFormat::BC5UN      , GL_TEX_FORMAT_COMPRESSED_BC5_UNORM   );
+			ts3CaseReturn( ETextureFormat::BC6HSF     , GL_TEX_FORMAT_COMPRESSED_BC6H_SFLOAT );
+			ts3CaseReturn( ETextureFormat::BC6HUF     , GL_TEX_FORMAT_COMPRESSED_BC6H_UFLOAT );
+			ts3CaseReturn( ETextureFormat::BC7        , GL_TEX_FORMAT_COMPRESSED_BC7         );
+			ts3CaseReturn( ETextureFormat::BC7SRGB    , GL_TEX_FORMAT_COMPRESSED_BC7_SRGB    );
 		#endif
 		};
 		return GL_TS3_ERR_INVALID_PARAM;

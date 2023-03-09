@@ -8,13 +8,6 @@
 #include "resources/GL_shader.h"
 #include "resources/GL_texture.h"
 #include "state/GL_pipelineStateObject.h"
-#include "state/GL_renderTargetStateObject.h"
-#include "state/GL_vertexStreamStateObject.h"
-#include <ts3/gpuapi/resources/gpuBuffer.h>
-#include <ts3/gpuapi/resources/shader.h>
-#include <ts3/gpuapi/resources/texture.h>
-
-#include "state/GL_inputAssemblerVertexFormat.h"
 
 namespace ts3::gpuapi
 {
@@ -22,42 +15,30 @@ namespace ts3::gpuapi
 	GLGPUDevice::GLGPUDevice( GLGPUDriver & pGLGPUDriver )
 	: GPUDevice( pGLGPUDriver )
 	, mSysGLDriver( pGLGPUDriver.mSysGLDriver )
-	{}
+	, _immutableStateFactory( *this )
+	, _immutableStateCache( _immutableStateFactory )
+	{
+		setImmutableStateCache( _immutableStateCache );
+	}
 
 	GLGPUDevice::~GLGPUDevice() = default;
 
-	IAVertexInputLayoutDescriptorHandle GLGPUDevice::createIAVertexInputLayoutDescriptor(
-			const IAVertexInputLayoutDescriptorCreateInfo & pCreateInfo ) noexcept
+	GLDebugOutput * GLGPUDevice::getDebugOutputInterface() const
 	{
-		if( pCreateInfo.inputAttributeArray )
+		return _glDebugOutput.get();
+	}
+
+	bool GLGPUDevice::initializeGLDebugOutput()
+	{
+		if( !_glDebugOutput )
 		{
-			return smu::createGLIAVertexInputLayoutDescriptor( *( pCreateInfo.inputAttributeArray ), pCreateInfo.primitiveTopology );
+			auto openglDebugOutput = GLDebugOutput::createInterface( GLDebugOutputVersion::ARBExt );
+			if( openglDebugOutput )
+			{
+				_glDebugOutput = std::move( openglDebugOutput );
+			}
 		}
-		else
-		{
-			return smu::createGLIAVertexInputLayoutDescriptor( pCreateInfo.inputAttributeDefinitions, pCreateInfo.primitiveTopology );
-		}
-	}
-
-	GraphicsPipelineStateObjectHandle GLGPUDevice::createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
-	{
-		auto graphicsPipelineStateObject = GLGraphicsPipelineStateObject::create( *this, pCreateInfo );
-		ts3DebugAssert( graphicsPipelineStateObject );
-		return graphicsPipelineStateObject;
-	}
-
-	VertexStreamStateObjectHandle GLGPUDevice::createVertexStreamStateObject( const VertexStreamStateObjectCreateInfo & pCreateInfo )
-	{
-		auto vertexStreamStateObject = GLVertexStreamStateObject::create( *this, pCreateInfo );
-		ts3DebugAssert( vertexStreamStateObject );
-		return vertexStreamStateObject;
-	}
-
-	RenderTargetStateObjectHandle GLGPUDevice::createRenderTargetStateObject( const RenderTargetStateObjectCreateInfo & pCreateInfo )
-	{
-		auto renderTargetStateObject = GLRenderTargetStateObject::create( *this, pCreateInfo );
-		ts3DebugAssert( renderTargetStateObject );
-		return renderTargetStateObject;
+		return _glDebugOutput ? true : false;
 	}
 
 	void GLGPUDevice::waitForCommandSync( CommandSync & pCommandSync )
@@ -78,69 +59,6 @@ namespace ts3::gpuapi
 	{
 		ts3DebugAssert( !_commandSystem );
 		_commandSystem = createGPUAPIObject<GLCommandSystem>( *this );
-	}
-
-	bool GLGPUDevice::initializeGLDebugOutput()
-	{
-		if( !_glDebugOutput )
-		{
-			auto openglDebugOutput = GLDebugOutput::createInterface( GLDebugOutputVersion::ARBExt );
-			if( openglDebugOutput )
-			{
-				_glDebugOutput = std::move( openglDebugOutput );
-			}
-		}
-		return _glDebugOutput ? true : false;
-	}
-
-	GLDebugOutput * GLGPUDevice::getDebugOutputInterface() const
-	{
-		return _glDebugOutput.get();
-	}
-
-	const GLBlendStateDescriptor & GLGPUDevice::getBlendDescriptor( pipeline_state_descriptor_id_t pDescriptorID ) const
-	{
-		return _descriptorCache.getBlendDescriptor( pDescriptorID );
-	}
-
-	const GLDepthStencilStateDescriptor & GLGPUDevice::getDepthStencilDescriptor( pipeline_state_descriptor_id_t pDescriptorID ) const
-	{
-		return _descriptorCache.getDepthStencilDescriptor( pDescriptorID );
-	}
-
-	const GLRasterizerStateDescriptor & GLGPUDevice::getRasterizerDescriptor( pipeline_state_descriptor_id_t pDescriptorID ) const
-	{
-		return _descriptorCache.getRasterizerDescriptor( pDescriptorID );
-	}
-
-	const GLVertexInputFormatStateDescriptor & GLGPUDevice::getVertexInputFormatDescriptor( pipeline_state_descriptor_id_t pDescriptorID ) const
-	{
-		return _descriptorCache.getVertexInputFormatDescriptor( pDescriptorID );
-	}
-
-	pipeline_state_descriptor_id_t GLGPUDevice::createBlendDescriptor( const BlendConfigDesc & pConfigDesc )
-	{
-		return _descriptorCache.createBlendDescriptor( pConfigDesc );
-	}
-
-	pipeline_state_descriptor_id_t GLGPUDevice::createDepthStencilDescriptor( const DepthStencilConfigDesc & pConfigDesc )
-	{
-		return _descriptorCache.createDepthStencilDescriptor( pConfigDesc );
-	}
-
-	pipeline_state_descriptor_id_t GLGPUDevice::createRasterizerDescriptor( const RasterizerConfigDesc & pConfigDesc )
-	{
-		return _descriptorCache.createRasterizerDescriptor( pConfigDesc );
-	}
-
-	pipeline_state_descriptor_id_t GLGPUDevice::createVertexInputFormatDescriptor( const VertexInputFormatDesc & pInputFormatDesc )
-	{
-		return _descriptorCache.createVertexInputFormatDescriptor( pInputFormatDesc );
-	}
-
-	GLGraphicsPipelineStateDescriptorCache & GLGPUDevice::getDescriptorCache()
-	{
-		return _descriptorCache;
 	}
 
 	bool GLGPUDevice::_drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer )
@@ -173,7 +91,7 @@ namespace ts3::gpuapi
 
 	ShaderHandle GLGPUDevice::_drvCreateShader( const ShaderCreateInfo & pCreateInfo )
 	{
-	    auto openglShader = GLShader::createSeparableStage( *this, pCreateInfo );
+	    auto openglShader = rcutil::createShaderObject( *this, pCreateInfo );
 	    ts3DebugAssert( openglShader );
 	    return openglShader;
 	}

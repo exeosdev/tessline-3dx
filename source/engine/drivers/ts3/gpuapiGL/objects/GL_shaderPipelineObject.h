@@ -29,6 +29,8 @@ namespace ts3::gpuapi
 
 		void resetActiveProgram();
 
+		static GLuint queryCurrentShaderPipelineBinding();
+
 		static GLShaderPipelineObjectHandle create();
 	};
 

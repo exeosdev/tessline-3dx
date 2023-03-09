@@ -1,36 +1,67 @@
 
 #include "GL_pipelineImmutableStateFactory.h"
-#include "GL_graphicsPipelineImmutableState.h"
+#include "GL_commonGraphicsConfig.h"
+#include "GL_graphicsShaderState.h"
+#include "GL_inputAssembler.h"
+#include "GL_renderTarget.h"
+#include "../GL_gpuDevice.h"
 
 namespace ts3::gpuapi
 {
 
-	BlendImmutableStateHandle GLPipelineImmutableStateFactory::createBlendState( const BlendConfig & pConfig )
+	GLPipelineImmutableStateFactory::GLPipelineImmutableStateFactory( GLGPUDevice & pGLGPUDevice )
+	: PipelineImmutableStateFactory()
+	, mGLGPUDevice( pGLGPUDevice )
+	{}
+
+	GLPipelineImmutableStateFactory::~GLPipelineImmutableStateFactory() = default;
+
+	BlendImmutableStateHandle GLPipelineImmutableStateFactory::createBlendState(
+			const BlendConfig & pConfig )
 	{
-		const auto openglConfig = smutil::translateBlendConfig( pConfig );
-		auto immutableState = createGPUAPIObject<GLBlendImmutableState>( mGPUDevice, openglConfig );
-		return immutableState;
+		return GLBlendImmutableState::createInstance( mGLGPUDevice, pConfig );
 	}
 
-	DepthStencilImmutableStateHandle GLPipelineImmutableStateFactory::createDepthStencilState( const DepthStencilConfig & pConfig )
+	DepthStencilImmutableStateHandle GLPipelineImmutableStateFactory::createDepthStencilState(
+			const DepthStencilConfig & pConfig )
 	{
-		const auto openglConfig = smutil::translateDepthStencilConfig( pConfig );
-		auto immutableState = createGPUAPIObject<GLDepthStencilImmutableState>( mGPUDevice, openglConfig );
-		return immutableState;
+		return GLDepthStencilImmutableState::createInstance( mGLGPUDevice, pConfig );
 	}
 
-	IAInputLayoutImmutableStateHandle GLPipelineImmutableStateFactory::createIAInputLayoutState( const IAInputLayoutDefinition & pDefinition )
+	GraphicsShaderLinkageImmutableStateHandle GLPipelineImmutableStateFactory::createGraphicsShaderLinkageState(
+			const GraphicsShaderSet & pShaderSet )
 	{
-		const auto openglDefinition = smutil::translateIAInputLayoutDefinition( pDefinition );
-		auto immutableState = createGPUAPIObject<GLIAInputLayoutImmutableState>( mGPUDevice, openglDefinition );
-		return immutableState;
+		return GLGraphicsShaderLinkageImmutableState::createInstance( mGLGPUDevice, pShaderSet );
 	}
 
-	RasterizerImmutableStateHandle GLPipelineImmutableStateFactory::createRasterizerState( const RasterizerConfig & pConfig )
+	IAInputLayoutImmutableStateHandle GLPipelineImmutableStateFactory::createIAInputLayoutState(
+			const IAInputLayoutDefinition & pDefinition )
 	{
-		const auto openglConfig = smutil::translateRasterizerConfig( pConfig );
-		auto immutableState = createGPUAPIObject<GLRasterizerImmutableState>( mGPUDevice, openglConfig );
-		return immutableState;
+		return GLIAInputLayoutImmutableState::createInstance( mGLGPUDevice, pDefinition );
+	}
+
+	IAVertexStreamImmutableStateHandle GLPipelineImmutableStateFactory::createIAVertexStreamState(
+			const IAVertexStreamDefinition & pDefinition )
+	{
+		return GLIAVertexStreamImmutableState::createInstance( mGLGPUDevice, pDefinition );
+	}
+
+	RasterizerImmutableStateHandle GLPipelineImmutableStateFactory::createRasterizerState(
+			const RasterizerConfig & pConfig )
+	{
+		return GLRasterizerImmutableState::createInstance( mGLGPUDevice, pConfig );
+	}
+
+	RenderTargetBindingImmutableStateHandle GLPipelineImmutableStateFactory::createRenderTargetBindingState(
+			const RenderTargetBindingDefinition & pDefinition )
+	{
+		return GLRenderTargetBindingImmutableState::createInstance( mGLGPUDevice, pDefinition );
+	}
+
+	RenderPassConfigurationImmutableStateHandle GLPipelineImmutableStateFactory::createRenderPassState(
+			const RenderPassConfiguration & pConfiguration )
+	{
+		return GLRenderPassConfigurationImmutableState::createInstance( mGLGPUDevice, pConfiguration );
 	}
 
 }

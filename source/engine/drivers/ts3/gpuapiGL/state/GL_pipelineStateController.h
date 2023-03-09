@@ -4,72 +4,71 @@
 #ifndef __TS3DRIVER_GPUAPI_GLCOMMON_PIPELINE_STATE_CONTROLLER_H__
 #define __TS3DRIVER_GPUAPI_GLCOMMON_PIPELINE_STATE_CONTROLLER_H__
 
-#include "../GL_prerequisites.h"
-#include "../state/GL_graphicsPipelineState.h"
-#include "../state/GL_pipelineStateObject.h"
+#include "GL_inputAssembler.h"
+#include "GL_renderTarget.h"
 #include <ts3/gpuapi/state/separablePipelineState.h>
 
 namespace ts3::gpuapi
 {
 
+	struct GLIAIndexBufferBinding;
+	struct GLIAVertexBuffersBindings;
+
 	/// @brief
-	class GLGraphicsPipelineStateController : public SeparableGraphicsPipelineStateController
+	class GLGraphicsPipelineStateController : public GraphicsPipelineStateControllerSeparable
 	{
 		friend class GLCommandList;
 
 	public:
-		struct GLPipelineConfig
-		{
-			GLuint indexBufferBaseOffset = 0;
-			GLenum indexBufferDataType = 0;
-			GLuint indexBufferElementByteSize = 0;
-			GLenum primitiveTopology = 0;
-			GLuint shaderPipelineObjectHandle = CX_GL_OBJECT_HANDLE_INVALID;
-
-			void reset()
-			{
-				indexBufferBaseOffset = 0;
-				indexBufferDataType = 0;
-				indexBufferElementByteSize = 0;
-				primitiveTopology = 0;
-				shaderPipelineObjectHandle = CX_GL_OBJECT_HANDLE_INVALID;
-			}
-		};
-
-	public:
-		GLGraphicsPipelineStateController( GLGraphicsPipelineStateDescriptorCache & pDescriptorCache );
+		GLGraphicsPipelineStateController();
 		~GLGraphicsPipelineStateController();
 
-		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO ) override;
+		TS3_ATTR_NO_DISCARD const GLDrawTopologyProperties & getGLDrawTopologyProperties() const noexcept;
 
+		TS3_ATTR_NO_DISCARD const GLIAVertexStreamDefinition & getCurrentIAVertexStreamDefinition() const noexcept;
+
+		TS3_ATTR_NO_DISCARD GLRenderTargetBindingInfo getCurrentRenderTargetBindingInfo() const noexcept;
+
+		virtual void applyPipelineStateChanges() override final;
+
+		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO ) override;
 		virtual bool resetGraphicsPipelineStateObject() override;
 
-		virtual bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO ) override;
+		virtual bool setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState ) override;
+		virtual bool setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState ) override;
+		virtual bool resetIAVertexStreamState() override;
 
-		virtual bool resetVertexStreamStateObject() override;
+		virtual bool setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState ) override;
+		virtual bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState ) override;
+		virtual bool resetRenderTargetBindingState() override;
 
-		TS3_ATTR_NO_DISCARD const GLPipelineConfig & getGLPipelineConfig() const
-		{
-			return _currentGLPipelineConfig;
-		}
+	private:
+		void resetDynamicIAVertexStreamState();
 
-		static void updateGLBlendState( const GLBlendStateDescriptor & pDescriptor );
+		void resetDynamicRenderTargetBindingState();
 
-		static void updateGLDepthStencilState( const GLDepthStencilStateDescriptor & pDescriptor );
+		// Apply functions: PSO States
 
-		static void updateGLRasterizerState( const GLRasterizerStateDescriptor & pDescriptor );
+		static void applyGLBlendState( const GLBlendImmutableState & pBlendState );
+		static void applyGLDepthStencilState( const GLDepthStencilImmutableState & pDepthStencilState );
+		static void applyGLRasterizerState( const GLRasterizerImmutableState & pRasterizerState );
+		static void applyGLShaderLinkageState( const GLGraphicsShaderLinkageImmutableState & pShaderLinkageState );
+		static void applyGLIAInputLayoutState( const GLIAInputLayoutImmutableState & pInputLayoutState, GLDrawTopologyProperties & pDrawTopologyProperties );
 
-		static void updateGLVertexInputFormatState( const GLVertexInputFormatStateDescriptor & pDescriptor );
+		// Apply functions: Vertex Stream (VB/IB bindings)
 
-		static void updateGLShaderBinding( const GLShaderPipelineObject & pShaderPipelineObject );
+		static void applyGLIAVertexStreamState( const GLIAVertexStreamDefinition & pVertexStreamDefinition, GLDrawTopologyProperties & pDrawTopologyProperties );
+		static void applyGLIAVertexStreamStateIBBinding( const GLIAIndexBufferBinding & pIndexBufferBinding, GLDrawTopologyProperties & pDrawTopologyProperties );
+		static void applyGLIAVertexStreamStateVBBindings( const GLIAVertexBuffersBindings & pVertexBufferBindings );
 
-		static void updateGLIndexBufferBinding( const GLIndexBufferBinding & pBinding );
+		// Apply functions: Render Target (Attachment bindings)
 
-		static void updateGLVertexBuffersBindings( const GLVertexBuffersBindings & pBinding );
+		static void applyGLRenderTargetBinding( const GLRenderTargetBindingInfo & pGLRenderTargetBinding );
 
 	protected:
-		GLPipelineConfig _currentGLPipelineConfig;
-		GLGraphicsPipelineStateDescriptorCache * _descriptorCache;
+		GLDrawTopologyProperties _currentDrawTopologyProperties;
+		GLIAVertexStreamDefinition _dynamicIAVertexStreamDefinition;
+		GLRenderTargetBindingDefinition _dynamicRenderTargetBindingDefinition;
 	};
 
 } // namespace ts3::gpuapi

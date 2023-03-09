@@ -50,19 +50,19 @@ namespace ts3::gpuapi
 		return isBuffer != GL_FALSE;
 	}
 
-	void GLTextureObject::updateCopy2D( GLTextureObject & pSource, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget )
+	void GLTextureObject::updateCopy2D( GLTextureObject & pSrcTexture, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget )
 	{
 	}
 
-	void GLTextureObject::updateCopy2DArray( GLTextureObject & pSource, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget )
+	void GLTextureObject::updateCopy2DArray( GLTextureObject & pSrcTexture, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget )
 	{
 	}
 
-	void GLTextureObject::updateCopy3D( GLTextureObject & pSource, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget )
+	void GLTextureObject::updateCopy3D( GLTextureObject & pSrcTexture, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget )
 	{
 	}
 
-	void GLTextureObject::updateCopyCubeMap( GLTextureObject & pSource, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget )
+	void GLTextureObject::updateCopyCubeMap( GLTextureObject & pSrcTexture, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget )
 	{
 	}
 
@@ -74,11 +74,11 @@ namespace ts3::gpuapi
 		auto textureBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
 		glTexSubImage2D( textureBindTarget,
-		                 pGLUploadDesc.textureSubRegion.offset.u2D.mipLevel,
-		                 pGLUploadDesc.textureSubRegion.offset.u2D.x,
-		                 pGLUploadDesc.textureSubRegion.offset.u2D.y,
-		                 pGLUploadDesc.textureSubRegion.size.u2D.width,
-		                 pGLUploadDesc.textureSubRegion.size.u2D.height,
+		                 pGLUploadDesc.textureSubRegion.uSubReg2D.offset.mipLevel,
+		                 pGLUploadDesc.textureSubRegion.uSubReg2D.offset.x,
+		                 pGLUploadDesc.textureSubRegion.uSubReg2D.offset.y,
+		                 pGLUploadDesc.textureSubRegion.uSubReg2D.size.width,
+		                 pGLUploadDesc.textureSubRegion.uSubReg2D.size.height,
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataLayout,
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataType,
 		                 pGLUploadDesc.openglInputDataDesc.pointer );
@@ -93,12 +93,12 @@ namespace ts3::gpuapi
 		auto textureBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
 		glTexSubImage3D( textureBindTarget,
-		                 pGLUploadDesc.textureSubRegion.offset.u2DArray.mipLevel,
-		                 pGLUploadDesc.textureSubRegion.offset.u2DArray.x,
-		                 pGLUploadDesc.textureSubRegion.offset.u2DArray.y,
-		                 pGLUploadDesc.textureSubRegion.offset.u2DArray.arrayIndex,
-		                 pGLUploadDesc.textureSubRegion.size.u2DArray.width,
-		                 pGLUploadDesc.textureSubRegion.size.u2DArray.height,
+		                 pGLUploadDesc.textureSubRegion.uSubReg2DArray.offset.mipLevel,
+		                 pGLUploadDesc.textureSubRegion.uSubReg2DArray.offset.x,
+		                 pGLUploadDesc.textureSubRegion.uSubReg2DArray.offset.y,
+		                 pGLUploadDesc.textureSubRegion.uSubReg2DArray.offset.arrayIndex,
+		                 pGLUploadDesc.textureSubRegion.uSubReg2DArray.size.width,
+		                 pGLUploadDesc.textureSubRegion.uSubReg2DArray.size.height,
 		                 1,
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataLayout,
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataType,
@@ -114,13 +114,13 @@ namespace ts3::gpuapi
 		auto textureBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
 		glTexSubImage3D( textureBindTarget,
-		                 pGLUploadDesc.textureSubRegion.offset.u3D.mipLevel,
-		                 pGLUploadDesc.textureSubRegion.offset.u3D.x,
-		                 pGLUploadDesc.textureSubRegion.offset.u3D.y,
-		                 pGLUploadDesc.textureSubRegion.offset.u3D.z,
-		                 pGLUploadDesc.textureSubRegion.size.u3D.width,
-		                 pGLUploadDesc.textureSubRegion.size.u3D.height,
-		                 pGLUploadDesc.textureSubRegion.size.u3D.depth,
+		                 pGLUploadDesc.textureSubRegion.uSubReg3D.offset.mipLevel,
+		                 pGLUploadDesc.textureSubRegion.uSubReg3D.offset.x,
+		                 pGLUploadDesc.textureSubRegion.uSubReg3D.offset.y,
+		                 pGLUploadDesc.textureSubRegion.uSubReg3D.offset.z,
+		                 pGLUploadDesc.textureSubRegion.uSubReg3D.size.width,
+		                 pGLUploadDesc.textureSubRegion.uSubReg3D.size.height,
+		                 pGLUploadDesc.textureSubRegion.uSubReg3D.size.depth,
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataLayout,
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataType,
 		                 pGLUploadDesc.openglInputDataDesc.pointer );
@@ -134,12 +134,12 @@ namespace ts3::gpuapi
 
 		checkActiveBindTarget( pActiveBindTarget );
 
-		glTexSubImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + pGLUploadDesc.textureSubRegion.offset.uCubeMap.uFaceIndex,
-		                 pGLUploadDesc.textureSubRegion.offset.uCubeMap.mipLevel,
-		                 pGLUploadDesc.textureSubRegion.offset.uCubeMap.x,
-		                 pGLUploadDesc.textureSubRegion.offset.uCubeMap.y,
-		                 pGLUploadDesc.textureSubRegion.size.uCubeMap.width,
-		                 pGLUploadDesc.textureSubRegion.size.uCubeMap.height,
+		glTexSubImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + pGLUploadDesc.textureSubRegion.uSubRegCubeMap.offset.faceIndex,
+		                 pGLUploadDesc.textureSubRegion.uSubRegCubeMap.offset.mipLevel,
+		                 pGLUploadDesc.textureSubRegion.uSubRegCubeMap.offset.x,
+		                 pGLUploadDesc.textureSubRegion.uSubRegCubeMap.offset.y,
+		                 pGLUploadDesc.textureSubRegion.uSubRegCubeMap.size.width,
+		                 pGLUploadDesc.textureSubRegion.uSubRegCubeMap.size.height,
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataLayout,
 		                 pGLUploadDesc.openglInputDataDesc.openglPixelDataType,
 		                 pGLUploadDesc.openglInputDataDesc.pointer );
@@ -242,8 +242,8 @@ namespace ts3::gpuapi
 
 			GLTextureSubDataUploadDesc subDataUploadDesc;
 			subDataUploadDesc.openglDimensionClass = GL_TEXTURE_2D;
-			subDataUploadDesc.textureSubRegion.offset.u2D.x = 0;
-			subDataUploadDesc.textureSubRegion.offset.u2D.y = 0;
+			subDataUploadDesc.textureSubRegion.uSubReg2D.offset.x = 0;
+			subDataUploadDesc.textureSubRegion.uSubReg2D.offset.y = 0;
 			subDataUploadDesc.openglInputDataDesc.openglPixelDataLayout = pGLCreateInfo.openglInitDataDesc.openglPixelDataLayout;
 			subDataUploadDesc.openglInputDataDesc.openglPixelDataType = pGLCreateInfo.openglInitDataDesc.openglPixelDataType;
 
@@ -251,9 +251,9 @@ namespace ts3::gpuapi
 			{
 				const auto & mipLevelInitData = textureInitData.mipLevelInitDataArray[mipLevelIndex];
 
-				subDataUploadDesc.textureSubRegion.offset.u2D.mipLevel = mipLevelInitData.mipLevelIndex;
-				subDataUploadDesc.textureSubRegion.size.u2D.width = mipLevelInitData.mipWidth;
-				subDataUploadDesc.textureSubRegion.size.u2D.height = mipLevelInitData.mipHeight;
+				subDataUploadDesc.textureSubRegion.uSubReg2D.offset.mipLevel = mipLevelInitData.mipLevelIndex;
+				subDataUploadDesc.textureSubRegion.uSubReg2D.size.width = mipLevelInitData.mipWidth;
+				subDataUploadDesc.textureSubRegion.uSubReg2D.size.height = mipLevelInitData.mipHeight;
 				subDataUploadDesc.openglInputDataDesc.pointer = mipLevelInitData.pointer;
 				subDataUploadDesc.openglInputDataDesc.size = mipLevelInitData.size;
 
@@ -278,23 +278,23 @@ namespace ts3::gpuapi
 		{
 			GLTextureSubDataUploadDesc subDataUploadDesc;
 			subDataUploadDesc.openglDimensionClass = GL_TEXTURE_2D_ARRAY;
-			subDataUploadDesc.textureSubRegion.offset.u2DArray.x = 0;
-			subDataUploadDesc.textureSubRegion.offset.u2DArray.y = 0;
+			subDataUploadDesc.textureSubRegion.uSubReg2DArray.offset.x = 0;
+			subDataUploadDesc.textureSubRegion.uSubReg2DArray.offset.y = 0;
 			subDataUploadDesc.openglInputDataDesc.openglPixelDataLayout = pGLCreateInfo.openglInitDataDesc.openglPixelDataLayout;
 			subDataUploadDesc.openglInputDataDesc.openglPixelDataType = pGLCreateInfo.openglInitDataDesc.openglPixelDataType;
 
 			for( uint32 arraySubTextureIndex = 0; arraySubTextureIndex < pGLCreateInfo.dimensions.arraySize; ++arraySubTextureIndex )
 			{
 				const auto & textureInitData = pGLCreateInfo.openglInitDataDesc.subTextureInitDataPtr[arraySubTextureIndex];
-				subDataUploadDesc.textureSubRegion.offset.u2DArray.arrayIndex = textureInitData.subTextureIndex;
+				subDataUploadDesc.textureSubRegion.uSubReg2DArray.offset.arrayIndex = textureInitData.subTextureIndex;
 
 				for( uint32 mipLevelIndex = 0; mipLevelIndex < pGLCreateInfo.dimensions.mipLevelsNum; ++mipLevelIndex )
 				{
 					const auto & mipLevelInitData = textureInitData.mipLevelInitDataArray[mipLevelIndex];
 
-					subDataUploadDesc.textureSubRegion.offset.u2DArray.mipLevel = mipLevelInitData.mipLevelIndex;
-					subDataUploadDesc.textureSubRegion.size.u2DArray.width = mipLevelInitData.mipWidth;
-					subDataUploadDesc.textureSubRegion.size.u2DArray.height = mipLevelInitData.mipHeight;
+					subDataUploadDesc.textureSubRegion.uSubReg2DArray.offset.mipLevel = mipLevelInitData.mipLevelIndex;
+					subDataUploadDesc.textureSubRegion.uSubReg2DArray.size.width = mipLevelInitData.mipWidth;
+					subDataUploadDesc.textureSubRegion.uSubReg2DArray.size.height = mipLevelInitData.mipHeight;
 					subDataUploadDesc.openglInputDataDesc.pointer = mipLevelInitData.pointer;
 					subDataUploadDesc.openglInputDataDesc.size = mipLevelInitData.size;
 
@@ -335,9 +335,9 @@ namespace ts3::gpuapi
 
 			GLTextureSubDataUploadDesc subDataUploadDesc;
 			subDataUploadDesc.openglDimensionClass = GL_TEXTURE_3D;
-			subDataUploadDesc.textureSubRegion.offset.u3D.x = 0;
-			subDataUploadDesc.textureSubRegion.offset.u3D.y = 0;
-			subDataUploadDesc.textureSubRegion.offset.u3D.z = 0;
+			subDataUploadDesc.textureSubRegion.uSubReg3D.offset.x = 0;
+			subDataUploadDesc.textureSubRegion.uSubReg3D.offset.y = 0;
+			subDataUploadDesc.textureSubRegion.uSubReg3D.offset.z = 0;
 			subDataUploadDesc.openglInputDataDesc.openglPixelDataLayout = pGLCreateInfo.openglInitDataDesc.openglPixelDataLayout;
 			subDataUploadDesc.openglInputDataDesc.openglPixelDataType = pGLCreateInfo.openglInitDataDesc.openglPixelDataType;
 
@@ -345,10 +345,10 @@ namespace ts3::gpuapi
 			{
 				const auto & mipLevelInitData = textureInitData.mipLevelInitDataArray[mipLevelIndex];
 
-				subDataUploadDesc.textureSubRegion.offset.u3D.mipLevel = mipLevelInitData.mipLevelIndex;
-				subDataUploadDesc.textureSubRegion.size.u3D.width = mipLevelInitData.mipWidth;
-				subDataUploadDesc.textureSubRegion.size.u3D.height = mipLevelInitData.mipHeight;
-				subDataUploadDesc.textureSubRegion.size.u3D.depth = mipLevelInitData.mipDepth;
+				subDataUploadDesc.textureSubRegion.uSubReg3D.offset.mipLevel = mipLevelInitData.mipLevelIndex;
+				subDataUploadDesc.textureSubRegion.uSubReg3D.size.width = mipLevelInitData.mipWidth;
+				subDataUploadDesc.textureSubRegion.uSubReg3D.size.height = mipLevelInitData.mipHeight;
+				subDataUploadDesc.textureSubRegion.uSubReg3D.size.depth = mipLevelInitData.mipDepth;
 				subDataUploadDesc.openglInputDataDesc.pointer = mipLevelInitData.pointer;
 				subDataUploadDesc.openglInputDataDesc.size = mipLevelInitData.size;
 
@@ -374,23 +374,23 @@ namespace ts3::gpuapi
 		{
 			GLTextureSubDataUploadDesc subDataUploadDesc;
 			subDataUploadDesc.openglDimensionClass = GL_TEXTURE_CUBE_MAP;
-			subDataUploadDesc.textureSubRegion.offset.uCubeMap.x = 0;
-			subDataUploadDesc.textureSubRegion.offset.uCubeMap.y = 0;
+			subDataUploadDesc.textureSubRegion.uSubRegCubeMap.offset.x = 0;
+			subDataUploadDesc.textureSubRegion.uSubRegCubeMap.offset.y = 0;
 			subDataUploadDesc.openglInputDataDesc.openglPixelDataLayout = pGLCreateInfo.openglInitDataDesc.openglPixelDataLayout;
 			subDataUploadDesc.openglInputDataDesc.openglPixelDataType = pGLCreateInfo.openglInitDataDesc.openglPixelDataType;
 
 			for( uint32 cubeMapFaceIndex = 0; cubeMapFaceIndex < pGLCreateInfo.dimensions.arraySize; ++cubeMapFaceIndex )
 			{
 				const auto & cubeMapInitData = pGLCreateInfo.openglInitDataDesc.subTextureInitDataPtr[cubeMapFaceIndex];
-				subDataUploadDesc.textureSubRegion.offset.uCubeMap.uFaceIndex = cubeMapInitData.subTextureIndex;
+				subDataUploadDesc.textureSubRegion.uSubRegCubeMap.offset.faceIndex = cubeMapInitData.subTextureIndex;
 
 				for( uint32 mipLevelIndex = 0; mipLevelIndex < pGLCreateInfo.dimensions.mipLevelsNum; ++mipLevelIndex )
 				{
 					const auto & mipLevelInitData = cubeMapInitData.mipLevelInitDataArray[mipLevelIndex];
 
-					subDataUploadDesc.textureSubRegion.offset.uCubeMap.mipLevel = mipLevelInitData.mipLevelIndex;
-					subDataUploadDesc.textureSubRegion.size.uCubeMap.width = mipLevelInitData.mipWidth;
-					subDataUploadDesc.textureSubRegion.size.uCubeMap.height = mipLevelInitData.mipHeight;
+					subDataUploadDesc.textureSubRegion.uSubRegCubeMap.offset.mipLevel = mipLevelInitData.mipLevelIndex;
+					subDataUploadDesc.textureSubRegion.uSubRegCubeMap.size.width = mipLevelInitData.mipWidth;
+					subDataUploadDesc.textureSubRegion.uSubRegCubeMap.size.height = mipLevelInitData.mipHeight;
 					subDataUploadDesc.openglInputDataDesc.pointer = mipLevelInitData.pointer;
 					subDataUploadDesc.openglInputDataDesc.size = mipLevelInitData.size;
 

@@ -144,9 +144,9 @@ namespace ts3::gpuapi
 		mGLBufferObject->invalidateRegion( pRegion.offset, pRegion.size );
 	}
 
-	void GLGPUBuffer::updateSubDataCopy( void * pCommandObject, GPUBuffer & pSource, const GPUBufferSubDataCopyDesc & pCopyDesc )
+	void GLGPUBuffer::updateSubDataCopy( void * pCommandObject, GPUBuffer & pSrcBuffer, const GPUBufferSubDataCopyDesc & pCopyDesc )
 	{
-		auto * openglSourceBufferStorage = pSource.queryInterface<GLGPUBuffer>();
+		auto * openglSourceBufferStorage = pSrcBuffer.queryInterface<GLGPUBuffer>();
 		mGLBufferObject->updateCopy( *( openglSourceBufferStorage->mGLBufferObject ), pCopyDesc );
 	}
 

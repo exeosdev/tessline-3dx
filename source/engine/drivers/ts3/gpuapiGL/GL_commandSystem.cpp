@@ -29,7 +29,7 @@ namespace ts3::gpuapi
 	{
 		std::unique_ptr<CommandContext> commandContext;
 
-		auto contextExecutionMode = ecGetCommandContextExecutionMode( pContextType );
+		auto contextExecutionMode = cxdefs::getCommandContextExecutionMode( pContextType );
 		if( auto * commandList = acquireCommandList( contextExecutionMode ) )
 		{
 			ts3DebugAssert( contextExecutionMode == ECommandExecutionMode::Direct );

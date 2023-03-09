@@ -13,6 +13,16 @@ namespace ts3::gpuapi
 
 	GLShaderProgramObject::~GLShaderProgramObject() = default;
 
+	GLuint GLShaderProgramObject::queryCurrentShaderProgramBinding()
+	{
+		GLint shaderProgramHandle = 0;
+
+		glGetIntegerv( GL_CURRENT_PROGRAM, &shaderProgramHandle );
+		ts3OpenGLHandleLastError();
+
+		return static_cast<GLuint>( shaderProgramHandle );
+	}
+
 	GLShaderProgramObjectHandle GLShaderProgramObject::create( GLShaderProgramType pProgramType )
 	{
 		auto programHandle = glCreateProgram();

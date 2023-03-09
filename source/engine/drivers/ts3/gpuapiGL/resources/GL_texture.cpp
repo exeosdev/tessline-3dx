@@ -26,12 +26,12 @@ namespace ts3::gpuapi
 		}
 
 		GLTextureCreateInfo openglCreateInfo;
-		openglCreateInfo.bindTarget = GLCoreAPIProxy::translateGLTextureBindTarget( createInfo.dimensionClass );
+		openglCreateInfo.bindTarget = GLCoreAPIProxy::translateGLTextureBindTarget( createInfo.texClass );
 		openglCreateInfo.dimensions = createInfo.dimensions;
 		openglCreateInfo.msaaLevel = createInfo.msaaLevel;
 		openglCreateInfo.internalFormat = GLCoreAPIProxy::translateGLTextureInternalFormat( createInfo.pixelFormat );
 		openglCreateInfo.openglInitDataDesc.subTextureInitDataPtr = std::move( createInfo.initDataDesc.subTextureInitDataBasePtr );
-		auto textureInitDataBaseType = ecGetTextureFormatBaseDataType( createInfo.pixelFormat );
+		auto textureInitDataBaseType = cxdefs::getTextureFormatBaseDataType( createInfo.pixelFormat );
 		openglCreateInfo.openglInitDataDesc.openglPixelDataLayout = GLCoreAPIProxy::translateGLTexturePixelDataLayout( createInfo.pixelFormat );
 		openglCreateInfo.openglInitDataDesc.openglPixelDataType = GLCoreAPIProxy::translateGLBaseDataType( textureInitDataBaseType );
 
@@ -51,11 +51,11 @@ namespace ts3::gpuapi
 		textureProperties.resourceFlags = createInfo.resourceFlags;
 
 		TextureLayout textureLayout;
-		textureLayout.dimensionClass = createInfo.dimensionClass;
+		textureLayout.texClass = createInfo.texClass;
 		textureLayout.dimensions = createInfo.dimensions;
 		textureLayout.pixelFormat = createInfo.pixelFormat;
 		textureLayout.msaaLevel = createInfo.msaaLevel;
-		textureLayout.storageSize = trunc_numeric_cast<uint32>( textureSize );
+		textureLayout.storageSize = numeric_cast<uint32>( textureSize );
 		textureLayout.bitsPerPixel = GLCoreAPIProxy::queryGLTextureInternalFormatBPP( textureInternalFormat );
 
 		auto openglTexture = createDynamicInterfaceObject<GLTexture>( pGLGPUDevice,

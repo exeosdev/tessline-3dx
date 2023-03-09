@@ -10,22 +10,64 @@
 #include "resources/GL_shader.h"
 #include "resources/GL_texture.h"
 #include "state/GL_pipelineStateObject.h"
-#include "state/GL_renderTargetStateObject.h"
-#include "state/GL_vertexStreamStateObject.h"
-#include <ts3/gpuapi/resources/gpuBuffer.h>
-#include <ts3/gpuapi/resources/shader.h>
-#include <ts3/gpuapi/resources/texture.h>
+#include "state/GL_graphicsShaderState.h"
+#include "state/GL_renderTarget.h"
+
+#include <ts3/gpuapi/state/renderTargetDynamicStates.h>
 
 namespace ts3::gpuapi
 {
 
-	GLCommandList::GLCommandList( GLCommandSystem & pGLCommandSystem, ECommandListType pListType, system::OpenGLRenderContextHandle pSysGLRenderContext )
-	: CommandList( pGLCommandSystem, pListType )
+	GLCommandList::GLCommandList(
+			GLCommandSystem & pGLCommandSystem,
+			ECommandListType pListType,
+			system::OpenGLRenderContextHandle pSysGLRenderContext )
+	: CommandList( pGLCommandSystem, pListType, _stateController )
 	, mSysGLRenderContext( pSysGLRenderContext )
-	, _stateController( mGPUDevice.queryInterface<GLGPUDevice>()->getDescriptorCache() )
 	{}
 
 	GLCommandList::~GLCommandList() = default;
+
+	bool GLCommandList::beginRenderPass( const RenderPassConfigurationImmutableState & pRenderPassState )
+	{
+		bool beginRenderPassStatus = CommandList::beginRenderPass( pRenderPassState );
+
+		if( beginRenderPassStatus )
+		{
+			const auto * glcRenderPassState = pRenderPassState.queryInterface<GLRenderPassConfigurationImmutableState>();
+			_currentRenderPassConfiguration = glcRenderPassState->mRenderPassConfiguration;
+
+			executeRenderPassLoadActions();
+		}
+
+		return true;
+	}
+
+	bool GLCommandList::beginRenderPass( const RenderPassConfigurationDynamicState & pRenderPassState )
+	{
+		bool beginRenderPassStatus = CommandList::beginRenderPass( pRenderPassState );
+
+		if( beginRenderPassStatus )
+		{
+			_currentRenderPassConfiguration = pRenderPassState.getRenderPassConfiguration();
+
+			executeRenderPassLoadActions();
+		}
+
+		return true;
+	}
+
+	void GLCommandList::endRenderPass()
+	{
+		if( !isRenderPassActive() )
+		{
+			return;
+		}
+
+		executeRenderPassStoreActions();
+
+		CommandList::endRenderPass();
+	}
 
 	void GLCommandList::beginCommandSequence()
 	{
@@ -42,77 +84,12 @@ namespace ts3::gpuapi
 		ts3DebugInterrupt();
 	}
 
-	bool GLCommandList::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO )
-	{
-		return _stateController.setGraphicsPipelineStateObject( pGraphicsPipelineSO );
-	}
-
-	bool GLCommandList::setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO )
-	{
-		return _stateController.setVertexStreamStateObject( pVertexStreamSO );
-	}
-
-	bool GLCommandList::setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO )
-	{
-		const auto & pipelineConfig = _stateController.getCurrentPipelineConfig();
-		const auto & renderTargetLayout = _stateController.graphicsPipelineSO()->mRenderTargetLayout;
-
-		auto * openglRenderTargetSO = pRenderTargetSO.queryInterface<GLRenderTargetStateObject>();
-		if( !checkRenderTargetLayoutCompatibility( openglRenderTargetSO->mRTResourceBinding, renderTargetLayout ) )
-		{
-			ts3DebugInterrupt();
-			return false;
-		}
-
-		glBindFramebuffer( GL_FRAMEBUFFER, openglRenderTargetSO->mGLFramebufferObject->mGLHandle );
-		ts3OpenGLHandleLastError();
-
-		return true;
-	}
-
-	void GLCommandList::clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask )
-	{
-		if( pAttachmentMask == 0 )
-		{
-			return;
-		}
-
-		const auto & renderTargetClearConfig = getRenderTargetClearConfig();
-
-
-		if( pAttachmentMask.isSet( E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_BIT ) )
-		{
-			const GLfloat depthClearValue = renderTargetClearConfig.depthClearValue;
-			glClearBufferfv( GL_DEPTH, 0, &depthClearValue );
-			ts3OpenGLHandleLastError();
-			pAttachmentMask.unset( E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_BIT );
-		}
-
-		if( pAttachmentMask.isSet( E_RENDER_TARGET_ATTACHMENT_FLAG_STENCIL_BIT ) )
-		{
-			const GLint stencilClearValue = renderTargetClearConfig.stencilClearValue;
-			glClearBufferiv( GL_STENCIL, 0, &stencilClearValue );
-			ts3OpenGLHandleLastError();
-			pAttachmentMask.unset( E_RENDER_TARGET_ATTACHMENT_FLAG_STENCIL_BIT );
-		}
-
-		for( uint32 colorBufferIndex = 0; ( colorBufferIndex < E_GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pAttachmentMask != 0 ); ++colorBufferIndex )
-		{
-			auto colorBufferMask = E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_0_BIT << colorBufferIndex;
-			if( pAttachmentMask.isSet( colorBufferMask ) )
-			{
-				glClearBufferfv( GL_COLOR, colorBufferIndex, &( renderTargetClearConfig.colorClearValue.rgbaArray[0] ) );
-				ts3OpenGLHandleLastError();
-				pAttachmentMask.unset( colorBufferMask );
-			}
-		}
-
-		ts3DebugAssert( pAttachmentMask == 0 );
-	}
-
 	void GLCommandList::setViewport( const ViewportDesc & pViewportDesc )
 	{
-		glViewport( pViewportDesc.vpRect.opX, pViewportDesc.vpRect.opY, pViewportDesc.vpRect.sizeX, pViewportDesc.vpRect.sizeY );
+		glViewport( numeric_cast<GLsizei>( pViewportDesc.origin.x ),
+		            numeric_cast<GLsizei>( pViewportDesc.origin.y ),
+		            numeric_cast<GLsizei>( pViewportDesc.size.x ),
+		            numeric_cast<GLsizei>( pViewportDesc.size.y ) );
 		ts3OpenGLHandleLastError();
 
 		glDepthRangef( pViewportDesc.depthRange.zNear, pViewportDesc.depthRange.zFar );
@@ -201,14 +178,14 @@ namespace ts3::gpuapi
 
 	void GLCommandList::drawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset )
 	{
-		updatePipelineState();
+		_stateController.applyPipelineStateChanges();
 
-		const auto & openglPipelineConfig = _stateController.getGLPipelineConfig();
-		const auto * indexDataOffset = reinterpret_cast<void*>( pIndicesOffset * openglPipelineConfig.indexBufferElementByteSize );
+		const auto & drawTopologyProperties = _stateController.getGLDrawTopologyProperties();
+		const auto * indexDataOffset = reinterpret_cast<void*>( pIndicesOffset * drawTopologyProperties.indexBufferElementByteSize );
 
-		glDrawElements( openglPipelineConfig.primitiveTopology,
+		glDrawElements( drawTopologyProperties.primitiveTopology,
 		                static_cast<GLsizei>( pIndicesNum ),
-		                openglPipelineConfig.indexBufferDataType,
+		                drawTopologyProperties.indexBufferDataType,
 		                indexDataOffset );
 		ts3OpenGLHandleLastError();
 	}
@@ -219,11 +196,11 @@ namespace ts3::gpuapi
 
 	void GLCommandList::drawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset )
 	{
-		updatePipelineState();
+		_stateController.applyPipelineStateChanges();
 
-		const auto & openglPipelineConfig = _stateController.getGLPipelineConfig();
+		const auto & drawTopologyProperties = _stateController.getGLDrawTopologyProperties();
 
-		glDrawArrays( openglPipelineConfig.primitiveTopology,
+		glDrawArrays( drawTopologyProperties.primitiveTopology,
 		              static_cast<GLint>( pVerticesOffset ),
 		              static_cast<GLsizei>( pVerticesNum ) );
 		ts3OpenGLHandleLastError();
@@ -233,104 +210,51 @@ namespace ts3::gpuapi
 	{
 	}
 
-	void GLCommandList::updateShaderInputInlineConstantData( const ShaderInputParameterConstant & pConstantInfo, const void * pData )
+	void GLCommandList::executeRenderPassLoadActions()
 	{
-		auto constantBaseType = ecGetVertexAttribFormatBaseDataType( pConstantInfo.iFormat );
-		auto constantLength = ecGetVertexAttribFormatLength( pConstantInfo.iFormat );
-
-		const auto & openglGPSO = _stateController.getCurrentGraphicsPipelineSORef<GLGraphicsPipelineStateObject>();
-		for( const auto & shaderInfo : openglGPSO.mShaderBinding.activeStageList )
+		if( _currentRenderPassConfiguration.attachmentActionClearMask != 0 )
 		{
-			auto stageFlag = getGraphicsShaderStageFlag( static_cast<EShaderType>( shaderInfo.stageID ) );
-			if( pConstantInfo.iVisibilityMask.isSet( stageFlag ) )
-			{
-				auto * openglShader = shaderInfo.shaderObject->queryInterface<GLShader>();
-				updateUniformDataExplicit( *( openglShader->mGLShaderProgramObject ), pConstantInfo.iStageIndex, constantBaseType, constantLength, pData );
-			}
+			smutil::clearRenderPassFramebuffer(
+					_stateController.getCurrentRenderTargetBindingInfo(),
+					_currentRenderPassConfiguration );
 		}
 	}
 
-	void GLCommandList::updateUniformDataCurrent( uint32 pUniformIndex, EBaseDataType pBaseType, uint32 pLength, const void * pData )
+	void GLCommandList::executeRenderPassStoreActions()
 	{
-		if( ( pLength == 0 ) || !pData )
+		if( _currentRenderPassConfiguration.attachmentActionResolveMask != 0 )
 		{
-			return;
-		}
-
-		if( pBaseType == EBaseDataType::Float32 )
-		{
-			const auto * floatData = reinterpret_cast<const float *>( pData );
-			switch( pLength )
-			{
-				case 1: glUniform1fv( pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
-				case 2: glUniform2fv( pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
-				case 3: glUniform3fv( pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
-				case 4: glUniform4fv( pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
-			}
-		}
-		else if( pBaseType == EBaseDataType::Int32 )
-		{
-			const auto * intData = reinterpret_cast<const GLint *>( pData );
-			switch( pLength )
-			{
-				case 1: glUniform1iv( pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
-				case 2: glUniform2iv( pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
-				case 3: glUniform3iv( pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
-				case 4: glUniform4iv( pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
-			}
-		}
-		else if( pBaseType == EBaseDataType::Uint32 )
-		{
-			const auto * uintData = reinterpret_cast<const GLuint *>( pData );
-			switch( pLength )
-			{
-				case 1: glUniform1uiv( pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
-				case 2: glUniform2uiv( pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
-				case 3: glUniform3uiv( pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
-				case 4: glUniform4uiv( pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
-			}
+			smutil::resolveRenderPassFramebuffer(
+					_stateController.getCurrentRenderTargetBindingInfo(),
+					_currentRenderPassConfiguration );
 		}
 	}
 
-	void GLCommandList::updateUniformDataExplicit( GLShaderProgramObject & pProgram, uint32 pUniformIndex, EBaseDataType pBaseType, uint32 pLength, const void * pData )
+	void GLCommandList::updateShaderInputInlineConstantData( const ShaderInputParameterConstant & pConstantInfo, const void * pConstantData )
 	{
-		if( ( pLength == 0 ) || !pData )
-		{
-			return;
-		}
+		auto constantBaseType = cxdefs::getVertexAttribFormatBaseDataType( pConstantInfo.iFormat );
+		auto constantLength = cxdefs::getVertexAttribFormatLength( pConstantInfo.iFormat );
 
-		if( pBaseType == EBaseDataType::Float32 )
+		const auto * shaderLinkageState = _stateController.getCurrentSeparableStates().shaderLinkageState;
+		const auto * glcShaderLinkageState = shaderLinkageState->queryInterface<GLGraphicsShaderLinkageImmutableState>();
+
+		if( glcShaderLinkageState->mGLShaderPipelineObject )
 		{
-			const auto * floatData = reinterpret_cast<const float *>( pData );
-			switch( pLength )
-			{
-				case 1: glProgramUniform1fv( pProgram.mGLHandle, pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
-				case 2: glProgramUniform2fv( pProgram.mGLHandle, pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
-				case 3: glProgramUniform3fv( pProgram.mGLHandle, pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
-				case 4: glProgramUniform4fv( pProgram.mGLHandle, pUniformIndex, 1, floatData ); ts3OpenGLHandleLastError(); break;
-			}
+			smutil::updateUniformDataCurrent(
+					*( glcShaderLinkageState->mGLShaderPipelineObject ),
+					pConstantInfo.iStageIndex,
+					constantBaseType,
+					constantLength,
+					pConstantData );
 		}
-		else if( pBaseType == EBaseDataType::Int32 )
+		else
 		{
-			const auto * intData = reinterpret_cast<const GLint *>( pData );
-			switch( pLength )
-			{
-				case 1: glProgramUniform1iv( pProgram.mGLHandle, pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
-				case 2: glProgramUniform2iv( pProgram.mGLHandle, pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
-				case 3: glProgramUniform3iv( pProgram.mGLHandle, pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
-				case 4: glProgramUniform4iv( pProgram.mGLHandle, pUniformIndex, 1, intData ); ts3OpenGLHandleLastError(); break;
-			}
-		}
-		else if( pBaseType == EBaseDataType::Uint32 )
-		{
-			const auto * uintData = reinterpret_cast<const GLuint *>( pData );
-			switch( pLength )
-			{
-				case 1: glProgramUniform1uiv( pProgram.mGLHandle, pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
-				case 2: glProgramUniform2uiv( pProgram.mGLHandle, pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
-				case 3: glProgramUniform3uiv( pProgram.mGLHandle, pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
-				case 4: glProgramUniform4uiv( pProgram.mGLHandle, pUniformIndex, 1, uintData ); ts3OpenGLHandleLastError(); break;
-			}
+			smutil::updateUniformDataExplicit(
+					*( glcShaderLinkageState->mGLShaderProgramObject ),
+					pConstantInfo.iStageIndex,
+					constantBaseType,
+					constantLength,
+					pConstantData );
 		}
 	}
 

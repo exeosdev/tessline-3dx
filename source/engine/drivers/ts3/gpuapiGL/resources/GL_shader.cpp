@@ -19,24 +19,36 @@ namespace ts3::gpuapi
 
 	GLShader::~GLShader() = default;
 
-	GLShaderHandle GLShader::createShader( GLGPUDevice & pGLGPUDevice, const ShaderCreateInfo & pCreateInfo )
+	GLShaderHandle GLShader::createShaderObjectWithBinary( GLGPUDevice & pGLGPUDevice, EShaderType pShaderType, const ShaderBinary & pShaderBinary )
 	{
-		auto openglEShaderType = GLCoreAPIProxy::translateGLEShaderType( pCreateInfo.shaderType );
-		auto openglShader = GLShaderObject::createWithSource( openglEShaderType, pCreateInfo.sourceCode, pCreateInfo.sourceCodeLength );
+		return nullptr;
+	}
+
+	GLShaderHandle GLShader::createShaderObjectWithSource( GLGPUDevice & pGLGPUDevice, EShaderType pShaderType, const void * pSource, size_t pSourceLength )
+	{
+		const auto openglShaderType = GLCoreAPIProxy::translateShaderType( pShaderType );
+
+		auto openglShader = GLShaderObject::createWithSource( openglShaderType, pSource, pSourceLength );
 		if( !openglShader )
 		{
 			return nullptr;
 		}
 
-		auto shaderInterface = std::make_unique<GLShader>( pGLGPUDevice, pCreateInfo.shaderType, std::move( openglShader ) );
+		auto shaderInterface = std::make_unique<GLShader>( pGLGPUDevice, pShaderType, std::move( openglShader ) );
 
 		return shaderInterface;
 	}
 
-	GLShaderHandle GLShader::createSeparableStage( GLGPUDevice & pGLGPUDevice, const ShaderCreateInfo & pCreateInfo )
+	GLShaderHandle GLShader::createShaderSeparableStageWithBinary( GLGPUDevice & pGLGPUDevice, EShaderType pShaderType, const ShaderBinary & pShaderBinary )
 	{
-		auto openglEShaderType = GLCoreAPIProxy::translateGLEShaderType( pCreateInfo.shaderType );
-		auto openglShader = GLShaderObject::createWithSource( openglEShaderType, pCreateInfo.sourceCode, pCreateInfo.sourceCodeLength );
+		return nullptr;
+	}
+
+	GLShaderHandle GLShader::createShaderSeparableStageWithSource( GLGPUDevice & pGLGPUDevice, EShaderType pShaderType, const void * pSource, size_t pSourceLength )
+	{
+		const auto openglShaderType = GLCoreAPIProxy::translateShaderType( pShaderType );
+
+		auto openglShader = GLShaderObject::createWithSource( openglShaderType, pSource, pSourceLength );
 		if( !openglShader )
 		{
 			return nullptr;
@@ -48,9 +60,72 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
-		auto shaderInterface = std::make_unique<GLShader>( pGLGPUDevice, pCreateInfo.shaderType, std::move( openglProgram ) );
+		auto shaderInterface = std::make_unique<GLShader>( pGLGPUDevice, pShaderType, std::move( openglProgram ) );
 
 		return shaderInterface;
+	}
+
+	namespace rcutil
+	{
+
+		GLShaderHandle createShaderObject( GLGPUDevice & pGLGPUDevice, const ShaderCreateInfo & pCreateInfo )
+		{
+			if( pCreateInfo.shaderBinary && !pCreateInfo.shaderBinary->empty() )
+			{
+				return GLShader::createShaderObjectWithBinary(
+						pGLGPUDevice,
+						pCreateInfo.shaderType,
+						*( pCreateInfo.shaderBinary ) );
+			}
+			else if( !pCreateInfo.shaderSource.empty() )
+			{
+				return GLShader::createShaderObjectWithSource(
+						pGLGPUDevice,
+						pCreateInfo.shaderType,
+						pCreateInfo.shaderSource.data(),
+						pCreateInfo.shaderSource.size() );
+			}
+			else if( pCreateInfo.shaderSourceView )
+			{
+				return GLShader::createShaderObjectWithSource(
+						pGLGPUDevice,
+						pCreateInfo.shaderType,
+						pCreateInfo.shaderSourceView.data(),
+						pCreateInfo.shaderSourceView.size() );
+			}
+
+			return nullptr;
+		}
+
+		GLShaderHandle createShaderSeparableStage( GLGPUDevice & pGLGPUDevice, const ShaderCreateInfo & pCreateInfo )
+		{
+			if( pCreateInfo.shaderBinary && !pCreateInfo.shaderBinary->empty() )
+			{
+				return GLShader::createShaderSeparableStageWithBinary(
+						pGLGPUDevice,
+						pCreateInfo.shaderType,
+						*( pCreateInfo.shaderBinary ) );
+			}
+			else if( !pCreateInfo.shaderSource.empty() )
+			{
+				return GLShader::createShaderSeparableStageWithSource(
+						pGLGPUDevice,
+						pCreateInfo.shaderType,
+						pCreateInfo.shaderSource.data(),
+						pCreateInfo.shaderSource.size() );
+			}
+			else if( pCreateInfo.shaderSourceView )
+			{
+				return GLShader::createShaderSeparableStageWithSource(
+						pGLGPUDevice,
+						pCreateInfo.shaderType,
+						pCreateInfo.shaderSourceView.data(),
+						pCreateInfo.shaderSourceView.size() );
+			}
+
+			return nullptr;
+		}
+
 	}
 
 } // namespace ts3::gpuapi

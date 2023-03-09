@@ -13,6 +13,7 @@ namespace ts3::gpuapi
 
 	enum EGPUDriverConfigFlags : uint32;
 	enum ERenderTargetAttachmentFlags : uint32;
+	enum ETextureCubeMapFace : uint32;
 
 	enum class EBlendFactor : uint16;
 	enum class EBlendOp : uint16;
@@ -24,14 +25,13 @@ namespace ts3::gpuapi
 	enum class ETriangleVerticesOrder : uint16;
 
 	enum class EBlendRenderTargetWriteMask : uint32;
-	enum class EDepthWriteMask : uint32;
+	enum class EDepthWriteMask : uint16;
 
 	enum class EGPUBufferTarget : enum_default_value_t;
-	enum class EIndexDataFormat : vertex_attrib_format_value_t;
+	enum class EIndexDataFormat : base_data_type_value_t;
 	enum class EShaderType : uint32;
 	enum class ETextureAddressMode : enum_default_value_t;
-	enum class ETextureCubeMapFace : size_t;
-	enum class ETextureDimensionClass : enum_default_value_t;
+	enum class ETextureClass : enum_default_value_t;
 	enum class ETextureFilter : enum_default_value_t;
 	enum class ETextureFormat : gpu_pixel_format_value_t;
 	enum class ETextureMipMode : enum_default_value_t;
@@ -71,13 +71,13 @@ namespace ts3::gpuapi
 
 		GLenum translateGLPrimitiveTopology( EPrimitiveTopology pTopology );
 
-		GLenum translateGLEShaderType( EShaderType pShaderType );
+		GLenum translateShaderType( EShaderType pShaderType );
 
 		GLenum translateGLStencilOp( EStencilOp pStencilOp );
 
 		GLenum translateGLETextureAddressMode( ETextureAddressMode pAddressMode );
 
-		GLenum translateGLTextureBindTarget( ETextureDimensionClass pTextureDimensionClass );
+		GLenum translateGLTextureBindTarget( ETextureClass pTextureDimensionClass );
 
 		GLenum translateGLTextureInternalFormat( ETextureFormat pTextureFormat );
 

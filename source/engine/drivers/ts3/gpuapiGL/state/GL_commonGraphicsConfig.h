@@ -1,10 +1,9 @@
 
-#ifndef __TS3DRIVER_GPUAPI_GLCOMMON_COMMON_GPU_STATE_DEFS_H__
-#define __TS3DRIVER_GPUAPI_GLCOMMON_COMMON_GPU_STATE_DEFS_H__
+#ifndef __TS3DRIVER_GPUAPI_GLCOMMON_COMMON_GRAPHICS_CONFIG_H__
+#define __TS3DRIVER_GPUAPI_GLCOMMON_COMMON_GRAPHICS_CONFIG_H__
 
 #include "../GL_prerequisites.h"
-#include <ts3/gpuapi/state/commonGraphicsConfig.h>
-#include <ts3/gpuapi/state/inputAssemblerCommon.h>
+#include <ts3/gpuapi/state/commonGraphicsConfigImmutableStates.h>
 
 namespace ts3::gpuapi
 {
@@ -20,19 +19,6 @@ namespace ts3::gpuapi
 		GLenum dstAlphaFactor;
 		math::RGBAColorR32Norm constantFactor;
 	};
-
-	struct GLIAVertexAttributeInfo
-	{
-		uint16 streamIndex;
-		uint8 normalized;
-		uint8 componentsNum;
-		GLenum baseType;
-		uint32 byteSize;
-		uint32 relativeOffset;
-		uint32 instanceRate;
-	};
-
-	using GLIAVertexAttributeInfoArray = std::array<GLIAVertexAttributeInfo, cxdefs::IA_MAX_VERTEX_ATTRIBUTES_NUM>;
 
 	struct GLBlendConfig
 	{
@@ -65,27 +51,57 @@ namespace ts3::gpuapi
 			GLStencilFaceDesc backFace;
 		};
 
-		uint16 depthTestActive;
-		uint16 stencilTestActive;
 		GLDepthSettings depthSettings;
 		GLStencilSettings stencilSettings;
 	};
 
-	struct GLIAInputLayoutDefinition
-	{
-		GLIAVertexAttributeInfoArray attributeArray;
-		Bitmask<EIAVertexAttributeFlags> activeAttributesMask;
-		GLenum primitiveTopology;
-	};
-
 	struct GLRasterizerConfig
 	{
+		Bitmask<ERasterizerConfigFlags> flags;
 		GLenum cullMode;
 		GLenum frontFaceVerticesOrder;
-		uint32 scissorTestState;
 	#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
 		GLenum primitiveFillMode;
 	#endif
+	};
+
+	///
+	class GLBlendImmutableState : public BlendImmutableState
+	{
+	public:
+		GLBlendConfig const mGLBlendConfig;
+
+	public:
+		GLBlendImmutableState( GLGPUDevice & pGPUDevice, const GLBlendConfig & pGLBlendConfig, Bitmask<EBlendConfigFlags> pBlendFlags );
+		virtual ~GLBlendImmutableState();
+
+		static GpaHandle<GLBlendImmutableState> createInstance( GLGPUDevice & pGPUDevice, const BlendConfig & pBlendConfig );
+	};
+
+	///
+	class GLDepthStencilImmutableState : public DepthStencilImmutableState
+	{
+	public:
+		GLDepthStencilConfig const mGLDepthStencilConfig;
+
+	public:
+		GLDepthStencilImmutableState( GLGPUDevice & pGPUDevice, const GLDepthStencilConfig & pGLDepthStencilConfig, Bitmask<EDepthStencilConfigFlags> pDepthStencilFlags  );
+		virtual ~GLDepthStencilImmutableState();
+
+		static GpaHandle<GLDepthStencilImmutableState> createInstance( GLGPUDevice & pGPUDevice, const DepthStencilConfig & pDepthStencilConfig );
+	};
+
+	///
+	class GLRasterizerImmutableState : public RasterizerImmutableState
+	{
+	public:
+		GLRasterizerConfig const mGLRasterizerConfig;
+
+	public:
+		GLRasterizerImmutableState( GLGPUDevice & pGPUDevice, const GLRasterizerConfig & pGLRasterizerConfig, Bitmask<ERasterizerConfigFlags> pRasterizerFlags );
+		virtual ~GLRasterizerImmutableState();
+
+		static GpaHandle<GLRasterizerImmutableState> createInstance( GLGPUDevice & pGPUDevice, const RasterizerConfig & pRasterizerConfig );
 	};
 
 	namespace smutil
@@ -95,16 +111,13 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD GLDepthStencilConfig translateDepthStencilConfig( const DepthStencilConfig & pConfig );
 
-		TS3_ATTR_NO_DISCARD GLIAInputLayoutDefinition translateIAInputLayoutDefinition( const IAInputLayoutDefinition & pDefinition );
-
-		TS3_ATTR_NO_DISCARD GLIAVertexAttributeInfo translateIAVertexAttributeInfo( const IAVertexAttributeInfo & pAttributeInfo );
-
 		TS3_ATTR_NO_DISCARD GLRasterizerConfig translateRasterizerConfig( const RasterizerConfig & pConfig );
 
-		TS3_ATTR_NO_DISCARD GLRTColorAttachmentBlendSettings translateRTColorAttachmentBlendSettings( const RTColorAttachmentBlendSettings & pSettings );
+		TS3_ATTR_NO_DISCARD GLRTColorAttachmentBlendSettings translateRTColorAttachmentBlendSettings(
+				const RTColorAttachmentBlendSettings & pSettings );
 
 	}
 
 }
 
-#endif // __TS3DRIVER_GPUAPI_GLCOMMON_COMMON_GPU_STATE_DEFS_H__
+#endif // __TS3DRIVER_GPUAPI_GLCOMMON_COMMON_GRAPHICS_CONFIG_H__

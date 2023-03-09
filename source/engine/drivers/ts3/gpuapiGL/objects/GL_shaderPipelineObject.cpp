@@ -11,6 +11,16 @@ namespace ts3::gpuapi
 
 	GLShaderPipelineObject::~GLShaderPipelineObject() = default;
 
+	GLuint GLShaderPipelineObject::queryCurrentShaderPipelineBinding()
+	{
+		GLint shaderPipelineHandle = 0;
+
+		glGetIntegerv( GL_PROGRAM_PIPELINE_BINDING, &shaderPipelineHandle );
+		ts3OpenGLHandleLastError();
+
+		return static_cast<GLuint>( shaderPipelineHandle );
+	}
+
 	GLShaderPipelineObjectHandle GLShaderPipelineObject::create()
 	{
 		GLuint shaderPipelineHandle = 0;

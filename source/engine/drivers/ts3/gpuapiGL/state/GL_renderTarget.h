@@ -4,8 +4,8 @@
 #ifndef __TS3DRIVER_GPUAPI_GLCOMMON_RENDER_TARGET_STATE_OBJECT_H__
 #define __TS3DRIVER_GPUAPI_GLCOMMON_RENDER_TARGET_STATE_OBJECT_H__
 
-#include "GL_graphicsPipelineState.h"
-#include <ts3/gpuapi/state/renderTargetStateObject.h>
+#include "../GL_prerequisites.h"
+#include <ts3/gpuapi/state/renderTargetImmutableStates.h>
 
 namespace ts3::gpuapi
 {
@@ -13,22 +13,84 @@ namespace ts3::gpuapi
 	ts3GLDeclareOpenGLObjectHandle( GLFramebufferObject );
 	ts3GLDeclareOpenGLObjectHandle( GLRenderbufferObject );
 
-	class GLRenderTargetStateObject : public RenderTargetStateObject
+	struct GLRenderTargetBindingFBOData
+	{
+		GLFramebufferObjectHandle renderFBO;
+		GLFramebufferObjectHandle resolveFBO;
+	};
+
+	struct GLRenderTargetBindingDefinition
+	{
+		GLRenderTargetBindingFBOData fboData;
+		RenderTargetLayout rtLayout;
+	};
+
+	struct GLRenderTargetBindingInfo
+	{
+		const GLFramebufferObject * renderFBO;
+		const GLFramebufferObject * resolveFBO;
+		const RenderTargetLayout * rtLayout;
+	};
+
+	class GLRenderTargetBindingImmutableState : public RenderTargetBindingImmutableState
 	{
 	public:
-		GLFramebufferObjectHandle const mGLFramebufferObject;
+		GLRenderTargetBindingFBOData const mGLFBOData;
 
 	public:
-		GLRenderTargetStateObject( GLGPUDevice & pGPUDevice,
-		                           const RenderTargetLayout & pRTLayout,
-		                           const RenderTargetResourceBinding & pRTResourceBinding,
-		                           GLFramebufferObjectHandle pGLFramebufferObject );
+		GLRenderTargetBindingImmutableState(
+				GLGPUDevice & pGPUDevice,
+				const RenderTargetLayout & pRenderTargetLayout,
+				GLRenderTargetBindingFBOData pGLFBOData );
 
-		virtual ~GLRenderTargetStateObject();
+		virtual ~GLRenderTargetBindingImmutableState();
 
-		static GpaHandle<GLRenderTargetStateObject> create( GLGPUDevice & pGPUDevice,
-		                                                    const RenderTargetStateObjectCreateInfo & pCreateInfo );
+		TS3_ATTR_NO_DISCARD GLRenderTargetBindingInfo getGLRenderTargetBindingInfo() const;
+
+		static GpaHandle<GLRenderTargetBindingImmutableState> createInstance(
+				GLGPUDevice & pGPUDevice,
+				const RenderTargetBindingDefinition & pBindingDefinition );
 	};
+
+	class GLRenderPassConfigurationImmutableState : public RenderPassConfigurationImmutableState
+	{
+	public:
+		RenderPassConfiguration const mRenderPassConfiguration;
+
+	public:
+		GLRenderPassConfigurationImmutableState(
+				GLGPUDevice & pGPUDevice,
+				const RenderPassConfiguration & pRenderPassConfiguration );
+
+		virtual ~GLRenderPassConfigurationImmutableState();
+
+		static GpaHandle<GLRenderPassConfigurationImmutableState> createInstance(
+				GLGPUDevice & pGPUDevice,
+				const RenderPassConfiguration & pConfiguration );
+	};
+
+	namespace smutil
+	{
+
+		TS3_ATTR_NO_DISCARD GLRenderTargetBindingInfo getGLRenderTargetBindingInfo(
+				const GLRenderTargetBindingDefinition & pBindingDefinition );
+
+		TS3_ATTR_NO_DISCARD GLRenderTargetBindingDefinition translateRenderTargetBindingDefinition(
+				const RenderTargetBindingDefinition & pBindingDefinition );
+
+		TS3_ATTR_NO_DISCARD GLFramebufferObjectHandle createFramebufferObject(
+				const RenderTargetBindingDefinition & pBindingDefinition,
+				Bitmask<ERTAttachmentFlags> pAttachmentMask );
+
+		void clearRenderPassFramebuffer(
+				const GLRenderTargetBindingInfo & pRTBindingInfo,
+				const RenderPassConfiguration & pRenderPassConfiguration );
+
+		void resolveRenderPassFramebuffer(
+				const GLRenderTargetBindingInfo & pRTBindingInfo,
+				const RenderPassConfiguration & pRenderPassConfiguration );
+
+	}
 
 } // namespace ts3::gpuapi
 
