@@ -23,8 +23,6 @@ namespace ts3::gpuapi
 			gl4GPUDevice->initializeGLDebugOutput();
 		}
 
-		gl4GPUDevice->initializeCommandSystem();
-
 		return gl4GPUDevice;
 	}
 

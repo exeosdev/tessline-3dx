@@ -40,12 +40,12 @@ namespace ts3::gpuapi
 		return gl4Driver;
 	}
 
-	DisplayManagerHandle GL4GPUDriver::createDefaultDisplayManager()
+	DisplayManagerHandle GL4GPUDriver::_drvCreateDefaultDisplayManager()
 	{
 		return nullptr;
 	}
 
-	GPUDeviceHandle GL4GPUDriver::createDevice( const GPUDeviceCreateInfo & pCreateInfo )
+	GPUDeviceHandle GL4GPUDriver::_drvCreateDevice( const GPUDeviceCreateInfo & pCreateInfo )
 	{
 		GL4GPUDeviceCreateInfo createInfo;
 		createInfo.adapterID = pCreateInfo.adapterID;
