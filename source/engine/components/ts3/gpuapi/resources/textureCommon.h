@@ -9,6 +9,9 @@
 namespace ts3::gpuapi
 {
 
+	struct TextureCreateInfo;
+	struct RenderTargetTextureCreateInfo;
+
 	ts3DeclareClassHandle( Texture );
 	ts3DeclareClassHandle( RenderTargetTexture );
 
@@ -212,6 +215,8 @@ namespace ts3::gpuapi
 		TS3_GPUAPI_API_NO_DISCARD bool checkRenderTargetTextureDepthStencilFormat( ETextureFormat pFormat ) noexcept;
 
 		TS3_GPUAPI_API_NO_DISCARD const TextureLayout & queryTextureLayout( TextureHandle pTexture ) noexcept;
+
+		TS3_GPUAPI_API_NO_DISCARD ETextureTarget getTextureTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pTextureResourceFlags );
 
 	}
 

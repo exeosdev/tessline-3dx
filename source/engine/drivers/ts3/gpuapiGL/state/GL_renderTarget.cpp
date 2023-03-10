@@ -20,6 +20,15 @@ namespace ts3::gpuapi
 
 	GLRenderTargetBindingImmutableState::~GLRenderTargetBindingImmutableState() = default;
 
+	GLRenderTargetBindingInfo GLRenderTargetBindingImmutableState::getGLRenderTargetBindingInfo() const
+	{
+		GLRenderTargetBindingInfo glcRTBindingInfo{};
+		glcRTBindingInfo.renderFBO = mGLFBOData.renderFBO.get();
+		glcRTBindingInfo.resolveFBO = mGLFBOData.resolveFBO.get();
+		glcRTBindingInfo.rtLayout = &mRenderTargetLayout;
+		return glcRTBindingInfo;
+	}
+
 	GpaHandle<GLRenderTargetBindingImmutableState> GLRenderTargetBindingImmutableState::createInstance(
 			GLGPUDevice & pGPUDevice,
 			const RenderTargetBindingDefinition & pBindingDefinition )

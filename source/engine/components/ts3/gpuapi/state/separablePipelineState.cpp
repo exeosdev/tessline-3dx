@@ -5,6 +5,38 @@
 namespace ts3::gpuapi
 {
 
+	GraphicsPipelineStateObjectSeparable::GraphicsPipelineStateObjectSeparable(
+			GPUDevice & pGPUDevice,
+			RenderTargetLayout pRenderTargetLayout,
+			ShaderInputSignature pShaderInputSignature,
+			const SeparablePSOStateSet & pSeparableStates )
+	: GraphicsPipelineStateObject(
+			pGPUDevice,
+			std::move( pRenderTargetLayout ),
+			std::move( pShaderInputSignature ) )
+	, mSeparableStates( pSeparableStates )
+	{}
+
+	GraphicsPipelineStateObjectSeparable::~GraphicsPipelineStateObjectSeparable() = default;
+
+
+	GraphicsPipelineStateObjectSeparableShader::GraphicsPipelineStateObjectSeparableShader(
+			GPUDevice & pGPUDevice,
+			RenderTargetLayout pRenderTargetLayout,
+			ShaderInputSignature pShaderInputSignature,
+			const SeparablePSOStateSet & pSeparableStates,
+			const GraphicsShaderSet & pSeparableShaders )
+	: GraphicsPipelineStateObjectSeparable(
+			pGPUDevice,
+			std::move( pRenderTargetLayout ),
+			std::move( pShaderInputSignature ),
+			pSeparableStates )
+	, mSeparableShaders( pSeparableShaders )
+	{}
+
+	GraphicsPipelineStateObjectSeparableShader::~GraphicsPipelineStateObjectSeparableShader() = default;
+
+
 	GraphicsPipelineStateControllerSeparable::GraphicsPipelineStateControllerSeparable() = default;
 
 	GraphicsPipelineStateControllerSeparable::~GraphicsPipelineStateControllerSeparable() = default;

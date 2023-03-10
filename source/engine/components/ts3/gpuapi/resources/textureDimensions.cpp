@@ -345,7 +345,6 @@ namespace ts3::gpuapi
 				( pSubRegion1.offset.mipLevel == pSubRegion2.offset.mipLevel ) &&
 				( pSubRegion1.offset.x == pSubRegion2.offset.x ) &&
 				( pSubRegion1.offset.y == pSubRegion2.offset.y ) &&
-				( pSubRegion1.size.facesNum == pSubRegion2.size.facesNum ) &&
 				( pSubRegion1.size.width == pSubRegion2.size.width ) &&
 				( pSubRegion1.size.height == pSubRegion2.size.height );
 

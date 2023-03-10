@@ -36,7 +36,7 @@ namespace ts3::gpuapi
 
 		RenderTargetLayout * renderTargetLayout = nullptr;
 
-		ShaderInputSignatureDesc * shaderInputSignatureDesc = nullptr;
+		ShaderInputSignatureDesc shaderInputSignatureDesc;
 		mutable ShaderInputSignature shaderInputSignature;
 	};
 

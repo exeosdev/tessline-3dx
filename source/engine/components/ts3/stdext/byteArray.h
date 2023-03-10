@@ -287,7 +287,7 @@ namespace ts3
 	private:
 		void resizeStorage( size_t pCapacity )
 		{
-			_internalBuffer.resize( _dataSize );
+			_internalBuffer.resize( pCapacity );
 			updateStorage( _internalBuffer.data() );
 		}
 

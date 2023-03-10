@@ -39,16 +39,29 @@ namespace ts3::gpuapi
 	/// @brief
 	class RenderTargetTexture : public GPUResourceWrapper
 	{
+		friend class GPUDevice;
+		friend class Texture;
+
 	public:
 		ERenderTargetTextureType const mRTTextureType;
 
 		RenderTargetTextureLayout const mRTTextureLayout;
 
+		Bitmask<resource_flags_value_t> const mInternalResourceFlags;
+
 	public:
 		RenderTargetTexture(
 			GPUDevice & pGPUDevice,
 			ERenderTargetTextureType pRTTextureType,
-			const RenderTargetTextureLayout & pRTTextureLayout );
+			const RenderTargetTextureLayout & pRTTextureLayout,
+			TextureReference pTargetTexture );
+
+		RenderTargetTexture(
+			GPUDevice & pGPUDevice,
+			ERenderTargetTextureType pRTTextureType,
+			const RenderTargetTextureLayout & pRTTextureLayout,
+			GpaHandle<GPUDeviceChildObject> pInternalRenderBuffer,
+			Bitmask<resource_flags_value_t> pRenderBufferFlags );
 
 		virtual ~RenderTargetTexture();
 

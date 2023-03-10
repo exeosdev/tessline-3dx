@@ -36,6 +36,11 @@ namespace ts3
 
 }
 
-TS3_CORE_API void * operator new( size_t pSize, const ts3::AllocNewSizeExplicitTag &, size_t pExtraSize );
+inline void * operator new( size_t pSize, const ts3::AllocNewSizeExplicitTag &, size_t pExtraSize )
+{
+	const auto requestedObjectSize = pSize + pExtraSize;
+	const auto allocationSize = ts3::memGetAlignedValue( requestedObjectSize, ts3::cxdefs::MEMORY_DEFAULT_ALIGNMENT );
+	return std::malloc( allocationSize );
+}
 
 #endif // __TS3_COMMON_MEMORY_DEFS_H__

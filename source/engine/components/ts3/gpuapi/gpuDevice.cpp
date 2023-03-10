@@ -3,6 +3,9 @@
 #include <ts3/gpuapi/gpuDevice.h>
 #include <ts3/gpuapi/gpuDriver.h>
 #include <ts3/gpuapi/presentationLayer.h>
+#include <ts3/gpuapi/resources/texture.h>
+#include <ts3/gpuapi/resources/renderTargetTexture.h>
+#include <ts3/gpuapi/state/pipelineStateObject.h>
 #include <ts3/gpuapi/state/pipelineImmutableStateCache.h>
 
 namespace ts3::gpuapi
@@ -128,11 +131,54 @@ namespace ts3::gpuapi
 
 	RenderTargetTextureHandle GPUDevice::createRenderTargetTexture( const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
+		if( pCreateInfo.targetTexture )
+		{
+			if( !rcutil::validateRenderTextureLayout( pCreateInfo.targetTexture.getRefTexture(), pCreateInfo.rttLayout ) )
+			{
+				return nullptr;
+			}
+
+			const auto rttType = rcutil::queryRenderTargetTextureType( pCreateInfo.targetTexture->mTextureLayout.pixelFormat );
+
+			auto existingTextureRTT = createGPUAPIObject<RenderTargetTexture>( *this, rttType, pCreateInfo.rttLayout, pCreateInfo.targetTexture );
+
+			return existingTextureRTT;
+		}
 		return _drvCreateRenderTargetTexture( pCreateInfo );
 	}
 
 	GraphicsPipelineStateObjectHandle GPUDevice::createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
 	{
+		if( !pCreateInfo.shaderInputSignature )
+		{
+			pCreateInfo.shaderInputSignature = smutil::createShaderInputSignature( pCreateInfo.shaderInputSignatureDesc );
+		}
+
+		if( !pCreateInfo.blendState )
+		{
+			pCreateInfo.blendState = _immutableStateFactoryPtr->createBlendState( pCreateInfo.blendConfig );
+		}
+
+		if( !pCreateInfo.depthStencilState )
+		{
+			pCreateInfo.depthStencilState = _immutableStateFactoryPtr->createDepthStencilState( pCreateInfo.depthStencilConfig );
+		}
+
+		if( !pCreateInfo.rasterizerState )
+		{
+			pCreateInfo.rasterizerState = _immutableStateFactoryPtr->createRasterizerState( pCreateInfo.rasterizerConfig );
+		}
+
+		if( !pCreateInfo.shaderLinkageState )
+		{
+			pCreateInfo.shaderLinkageState = _immutableStateFactoryPtr->createGraphicsShaderLinkageState( pCreateInfo.shaderSet );
+		}
+
+		if( !pCreateInfo.inputLayoutState )
+		{
+			pCreateInfo.inputLayoutState = _immutableStateFactoryPtr->createIAInputLayoutState( pCreateInfo.inputLayoutDefinition );
+		}
+
 		return _drvCreateGraphicsPipelineStateObject( pCreateInfo );
 	}
 

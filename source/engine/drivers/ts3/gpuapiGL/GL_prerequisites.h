@@ -38,6 +38,8 @@
 #  define TS3GX_GL_TARGET TS3GX_GL_TARGET_ES31
 #endif
 
+#  define TS3GX_GL_TARGET TS3GX_GL_TARGET_GL43
+
 #if !defined( TS3GX_GL_TARGET )
 #  error ""
 #endif

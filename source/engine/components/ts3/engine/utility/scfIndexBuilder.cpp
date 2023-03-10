@@ -38,7 +38,7 @@ namespace ts3
 				const auto readSize = memCheckRequestedCopySize( pDataSize, pReadSize, pOffset );
 				if( readSize > 0 )
 				{
-					pTarget.resize( trunc_numeric_cast<size_t>( readSize ) );
+					pTarget.resize( numeric_cast<size_t>( readSize ) );
 					pTarget.fill( 0x7 );
 					return readSize;
 				}
@@ -72,8 +72,8 @@ namespace ts3
 				{
 					if( auto sourceFile = pSysFileManager->openFile( pFilename, system::EFileOpenMode::ReadOnly ) )
 					{
-						sourceFile->setFilePointer( trunc_numeric_cast<system::file_offset_t>( pOffset ) );
-						return sourceFile->readAuto( pTarget, trunc_numeric_cast<system::file_size_t>( readSize ) );
+						sourceFile->setFilePointer( numeric_cast<system::file_offset_t>( pOffset ) );
+						return sourceFile->readAuto( pTarget, numeric_cast<system::file_size_t>( readSize ) );
 					}
 				}
 				return 0;
@@ -96,12 +96,12 @@ namespace ts3
 				const auto readSize = memCheckRequestedCopySize( pMemoryView.size(), pReadSize, pOffset );
 				if( readSize > 0 )
 				{
-					pTarget.resize( trunc_numeric_cast<size_t>( readSize ) );
+					pTarget.resize( numeric_cast<size_t>( readSize ) );
 
 					memCopyUnchecked( pTarget.data(),
 									  pTarget.size(),
 									  pMemoryView.data() + pOffset,
-									  trunc_numeric_cast<size_t>( readSize ) );
+									  numeric_cast<size_t>( readSize ) );
 
 					return readSize;
 				}

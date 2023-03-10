@@ -1,11 +1,12 @@
 
 set( TS3SAMPLES_LINK_INPUT
         ts3-system
+        ts3-gpuapi
         )
 
 set( TS3_SAMPLE_LIST
         mathTest
-        #"gpuapi01"
+        "gpuapi01"
         "sysTest"
         #"test1"
         )

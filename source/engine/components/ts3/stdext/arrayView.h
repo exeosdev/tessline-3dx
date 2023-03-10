@@ -86,7 +86,7 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD bool empty() const
 		{
-			return _dataPtr && ( _size > 0 );
+			return !_dataPtr || ( _size == 0 );
 		}
 
 		void swap( ArrayView & pOther )

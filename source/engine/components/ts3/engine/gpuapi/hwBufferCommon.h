@@ -88,13 +88,13 @@ namespace ts3
 	};
 
 	template <typename TBufferUsage>
-	inline constexpr gpuapi::gpu_memory_flags_value_t ecGetHWBufferUsageGPUMemoryFlags( TBufferUsage pBufferUsage )
+	inline constexpr gpuapi::gpu_memory_flags_value_t cxdefs::getHWBufferUsageGPUMemoryFlags( TBufferUsage pBufferUsage )
 	{
 		return static_cast<gpuapi::gpu_memory_flags_value_t>( ( ( ( hardware_buffer_flags_value_t ) pBufferUsage ) >> 32 ) & Limits<uint32>::maxValue );
 	}
 
 	template <typename TBufferUsage>
-	inline constexpr gpuapi::resource_flags_value_t ecGetHWBufferUsageGPUResourceFlags( TBufferUsage pBufferUsage )
+	inline constexpr gpuapi::resource_flags_value_t cxdefs::getHWBufferUsageGPUResourceFlags( TBufferUsage pBufferUsage )
 	{
 		return static_cast<gpuapi::resource_flags_value_t>( ( ( hardware_buffer_flags_value_t ) pBufferUsage ) & Limits<uint32>::maxValue );
 	}

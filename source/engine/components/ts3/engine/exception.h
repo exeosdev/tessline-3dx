@@ -13,7 +13,7 @@ namespace ts3
 	enum : exception_category_value_t
 	{
 		E_EXCEPTION_CATEGORY_ENGINE_SUBMODULE_MAIN =
-			ecDeclareExceptionCategory( ExceptionBaseType::EngineSubModule, ts3ExcCategoryIID( 0x01 ) ),
+			cxdefs::declareExceptionCategory( ExceptionBaseType::EngineSubModule, ts3ExcCategoryIID( 0x01 ) ),
 	};
 
 	class EngineMainSubModuleException : public EngineSubModuleException
@@ -29,7 +29,7 @@ namespace ts3
 	enum : exception_code_value_t
 	{
 		E_EXC_ESM_MAIN_SCF_ERROR =
-			ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_ENGINE_SUBMODULE, ts3ExcCodeIID( 0x71 ) ),
+			cxdefs::declareExceptionCode( E_EXCEPTION_CATEGORY_ENGINE_SUBMODULE, ts3ExcCodeIID( 0x71 ) ),
 	};
 
 } // namespace ts3

@@ -49,7 +49,7 @@ namespace ts3
 			ftFaceCreateInfo.faceDesc.fontSize = pFontSize;
 			ftFaceCreateInfo.faceDesc.fontResolutionHint = { 0, 0 };
 			ftFaceCreateInfo.inputData = reinterpret_cast<const FT_Byte *>( _ftFontData.data() );
-			ftFaceCreateInfo.inputDataSize = trunc_numeric_cast<FT_Long>( _ftFontData.size() );
+			ftFaceCreateInfo.inputDataSize = numeric_cast<FT_Long>( _ftFontData.size() );
 
 			auto newFontFace = FreeTypeFontFace::create( this, ftFaceCreateInfo );
 			if( newFontFace )

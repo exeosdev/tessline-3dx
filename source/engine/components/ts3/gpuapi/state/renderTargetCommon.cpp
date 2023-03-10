@@ -11,12 +11,12 @@ namespace ts3::gpuapi
 	{
 		attachmentActionResolveMask = 0;
 
-		for(  uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++caIndex )
+		for(  uint32 attachmentIndex = 0; attachmentIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++attachmentIndex )
 		{
-			const auto colorAttachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
+			const auto colorAttachmentBit = cxdefs::makeRTAttachmentFlag( attachmentIndex );
 			if( activeAttachmentsMask.isSet( colorAttachmentBit ) )
 			{
-				const auto & attachmentBinding = colorAttachments[caIndex];
+				const auto & attachmentBinding = colorAttachments[attachmentIndex];
 				if( !attachmentBinding )
 				{
 					activeAttachmentsMask.unset( colorAttachmentBit );
@@ -68,13 +68,18 @@ namespace ts3::gpuapi
 
 			const auto & commonImageLayout = firstBinding->attachmentTexture->mRTTextureLayout;
 
-			for(  uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++caIndex )
+			for(  uint32 attachmentIndex = 0; attachmentIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++attachmentIndex )
 			{
-				const auto colorAttachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
+				const auto colorAttachmentBit = cxdefs::makeRTAttachmentFlag( attachmentIndex );
 				if( pBindingDefinition.activeAttachmentsMask.isSet( colorAttachmentBit ) )
 				{
-					const auto & attachmentBinding = pBindingDefinition.colorAttachments[caIndex];
+					const auto & attachmentBinding = pBindingDefinition.colorAttachments[attachmentIndex];
 					if( !attachmentBinding )
+					{
+						return false;
+					}
+					const auto requiredUsageFlags = cxdefs::getRTAttachmentRequiredUsageFlag( attachmentIndex );
+					if( attachmentBinding.attachmentTexture->mInternalResourceFlags.isSetAnyOf( requiredUsageFlags ) )
 					{
 						return false;
 					}
@@ -113,12 +118,12 @@ namespace ts3::gpuapi
 			renderTargetLayout.sharedImageSize = commonLayout.bufferSize;
 			renderTargetLayout.sharedMSAALevel = commonLayout.msaaLevel;
 
-			for( uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++caIndex )
+			for( uint32 attachmentIndex = 0; attachmentIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++attachmentIndex )
 			{
-				const auto attachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
+				const auto attachmentBit = cxdefs::makeRTAttachmentFlag( attachmentIndex );
 				if( pBindingDefinition.activeAttachmentsMask.isSet( attachmentBit ) )
 				{
-					const auto & attachmentBinding = pBindingDefinition.colorAttachments[caIndex];
+					const auto & attachmentBinding = pBindingDefinition.colorAttachments[attachmentIndex];
 					if( attachmentBinding.empty() )
 					{
 						return {};
@@ -132,7 +137,7 @@ namespace ts3::gpuapi
 						return {};
 					}
 
-					renderTargetLayout.colorAttachments[caIndex].format = caLayout.internalDataFormat;
+					renderTargetLayout.colorAttachments[attachmentIndex].format = caLayout.internalDataFormat;
 					renderTargetLayout.activeAttachmentsMask.set( attachmentBit );
 				}
 			}

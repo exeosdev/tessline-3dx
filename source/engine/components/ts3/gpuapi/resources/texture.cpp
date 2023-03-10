@@ -4,8 +4,6 @@
 namespace ts3::gpuapi
 {
 
-	ETextureTarget getETextureTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pTextureResourceFlags );
-
 	Texture::Texture(
 			GPUDevice & pGPUDevice,
 			const ResourceMemoryInfo & pResourceMemory,
@@ -143,7 +141,7 @@ namespace ts3::gpuapi
 		}
 		else
 		{
-			auto initialTarget = getETextureTargetFromResourceFlags( pCreateInfo.resourceFlags );
+			auto initialTarget = rcutil::getTextureTargetFromResourceFlags( pCreateInfo.resourceFlags );
 			if( initialTarget == ETextureTarget::Unknown )
 			{
 				return false;
@@ -187,30 +185,6 @@ namespace ts3::gpuapi
 		}
 
 		return true;
-	}
-
-
-	ETextureTarget getETextureTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pTextureResourceFlags )
-	{
-		static const ETextureTarget textureTargetArray[] =
-		{
-			ETextureTarget::RenderTargetColorAttachment,
-			ETextureTarget::RenderTargetDepthStencilAttachment,
-			ETextureTarget::ShaderInputSampledImage,
-			ETextureTarget::TransferSourceImage,
-			ETextureTarget::TransferSourceImage,
-		};
-
-		for( auto textureTarget : textureTargetArray )
-		{
-			auto textureTargetResourceFlags = static_cast<resource_flags_value_t>( textureTarget );
-			if( pTextureResourceFlags.isSet( textureTargetResourceFlags ) )
-			{
-				return textureTarget;
-			}
-		}
-
-		return ETextureTarget::Unknown;
 	}
 
 } // namespace ts3::gpuapi

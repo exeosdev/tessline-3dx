@@ -128,7 +128,7 @@ namespace ts3
 	bool DynamicFontLoader::processFontInitData( FreeTypeFontObject * pFTFontObject, const DynamicFontCreateInfo & pFontCreateInfo, FTInternalFontData & pFontData )
 	{
 		// Size, in bytes, of a single pixel of a texture/glyph image.
-		const uint32 cxPixelByteSize = gpuapi::ecGetTextureFormatByteSize( pFontCreateInfo.fontDesc.textureFormat );
+		const uint32 cxPixelByteSize = gpuapi::cxdefs::getTextureFormatByteSize( pFontCreateInfo.fontDesc.textureFormat );
 
 		const auto cxTextureWidth = pFontCreateInfo.fontDesc.textureDimensions.x;  // Width of a single font texture, in pixels.
 		const auto cxTextureHeight = pFontCreateInfo.fontDesc.textureDimensions.y; // Height of a single font texture, in pixels.
@@ -165,7 +165,7 @@ namespace ts3
 					textureLayerAllocator.reset();
 
 					currentTextureLayer = &( pFontData.textureLayerInitDataArray.back() );
-					currentTextureLayer->layerIndex = trunc_numeric_cast<uint32>( pFontData.textureLayerInitDataArray.size() ) - 1;
+					currentTextureLayer->layerIndex = numeric_cast<uint32>( pFontData.textureLayerInitDataArray.size() ) - 1;
 					currentTextureLayer->initDataBuffer.resize( cxTextureSize );
 					currentTextureLayer->initDataBuffer.fill( 0 );
 				}
@@ -206,7 +206,7 @@ namespace ts3
 
 	FontTextureCreateInfo DynamicFontLoader::setupTextureCreateInfo( const DynamicFontCreateInfo & pFontCreateInfo, FTInternalFontData & pFontData )
 	{
-		const auto cxStaticSubTexturesNum = trunc_numeric_cast<uint32>( pFontData.textureLayerInitDataArray.size() );
+		const auto cxStaticSubTexturesNum = numeric_cast<uint32>( pFontData.textureLayerInitDataArray.size() );
 		const auto cxDynamicSubTexturesNum = pFontCreateInfo.fontDesc.dynamicLayersNum;
 		const auto cxTotalSubTexturesNum = cxStaticSubTexturesNum + cxDynamicSubTexturesNum;
 

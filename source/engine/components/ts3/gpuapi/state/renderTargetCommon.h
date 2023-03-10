@@ -20,6 +20,22 @@ namespace ts3::gpuapi
 		E_RENDER_TARGET_BUFFER_FLAG_STENCIL_BIT = 0x04,
 	};
 
+	namespace cxdefs
+	{
+
+		inline constexpr TextureSize2D RENDER_TARGET_LAYOUT_IMAGE_SIZE_UNDEFINED { Limits<uint32>::maxValue, Limits<uint32>::maxValue };
+
+		inline constexpr uint32 RENDER_TARGET_LAYOUT_MSAA_LEVEL_UNDEFINED = Limits<uint32>::maxValue;
+
+		/// @brief
+		inline constexpr uint32 getRTAttachmentRequiredUsageFlag( render_target_index_t pAttachmentIndex )
+		{
+			const auto controlMask = ( pAttachmentIndex < RT_MAX_COMBINED_ATTACHMENTS_NUM ) ? 0xFFFF : 0;
+			return ( pAttachmentIndex < RT_MAX_COLOR_ATTACHMENTS_NUM ) ? E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT : E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT;
+		}
+
+	}
+
 	template <typename TAttachmentProperty>
 	using RenderTargetColorAttachmentPropertyArray = std::array<TAttachmentProperty, cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM>;
 
@@ -158,15 +174,6 @@ namespace ts3::gpuapi
 
 		uint32 sharedMSAALevel;
 	};
-
-	namespace cxdefs
-	{
-
-		inline constexpr TextureSize2D RENDER_TARGET_LAYOUT_IMAGE_SIZE_UNDEFINED { Limits<uint32>::maxValue, Limits<uint32>::maxValue };
-
-		inline constexpr uint32 RENDER_TARGET_LAYOUT_MSAA_LEVEL_UNDEFINED = Limits<uint32>::maxValue;
-
-	}
 
 	namespace smutil
 	{

@@ -19,7 +19,7 @@ namespace ts3::gpuapi
 
 	bool TextureReference::setRefTexture( TextureHandle pTexture )
 	{
-		return _setRefTextureInternal( pTexture );
+		return _setRefTextureInternal( pTexture, pTexture->getDefaultSubResourceRef() );
 	}
 
 	bool TextureReference::setRefTexture( TextureHandle pTexture, const TextureSubResource & pReferencedSubResource )

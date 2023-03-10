@@ -96,7 +96,7 @@ namespace ts3::gpuapi
 				GPUDevice & pGPUDevice,
 				RenderTargetLayout pRenderTargetLayout,
 				ShaderInputSignature pShaderInputSignature,
-				const SeparablePSOStateSet & pPSOImmutableStates );
+				const SeparablePSOStateSet & pSeparableStates );
 
 		virtual ~GraphicsPipelineStateObjectSeparable();
 	};
@@ -112,7 +112,7 @@ namespace ts3::gpuapi
 				GPUDevice & pGPUDevice,
 				RenderTargetLayout pRenderTargetLayout,
 				ShaderInputSignature pShaderInputSignature,
-				const SeparablePSOStateSet & pPSOImmutableStates,
+				const SeparablePSOStateSet & pSeparableStates,
 				const GraphicsShaderSet & pSeparableShaders );
 
 		virtual ~GraphicsPipelineStateObjectSeparableShader();

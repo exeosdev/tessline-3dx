@@ -8,10 +8,26 @@ namespace ts3::gpuapi
 	RenderTargetTexture::RenderTargetTexture(
 			GPUDevice & pGPUDevice,
 			ERenderTargetTextureType pRTTextureType,
-			const RenderTargetTextureLayout & pRTTextureLayout )
+			const RenderTargetTextureLayout & pRTTextureLayout,
+			TextureReference pTargetTexture )
 	: GPUResourceWrapper( pGPUDevice, EGPUResourceBaseType::Texture )
 	, mRTTextureType( pRTTextureType )
 	, mRTTextureLayout( pRTTextureLayout )
+	, mInternalResourceFlags( pTargetTexture->mTextureProperties.resourceFlags )
+	, _targetTexture( pTargetTexture )
+	{}
+
+	RenderTargetTexture::RenderTargetTexture(
+			GPUDevice & pGPUDevice,
+			ERenderTargetTextureType pRTTextureType,
+			const RenderTargetTextureLayout & pRTTextureLayout,
+			GpaHandle<GPUDeviceChildObject> pInternalRenderBuffer,
+			Bitmask<resource_flags_value_t> pRenderBufferFlags )
+	: GPUResourceWrapper( pGPUDevice, EGPUResourceBaseType::Texture )
+	, mRTTextureType( pRTTextureType )
+	, mRTTextureLayout( pRTTextureLayout )
+	, mInternalResourceFlags( pRenderBufferFlags )
+	, _internalRenderBuffer( pInternalRenderBuffer )
 	{}
 
 	RenderTargetTexture::~RenderTargetTexture() = default;

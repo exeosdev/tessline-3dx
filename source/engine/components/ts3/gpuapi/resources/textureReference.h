@@ -23,6 +23,8 @@ namespace ts3::gpuapi
 
 		Texture * operator->() const noexcept;
 
+		explicit operator bool() const noexcept;
+
 		/// @brief Returns a pointer to the referenced texture. This can be null if the reference is empty().
 		TS3_ATTR_NO_DISCARD TextureHandle getRefTexture() const noexcept;
 
@@ -64,6 +66,11 @@ namespace ts3::gpuapi
 	inline Texture * TextureReference::operator->() const noexcept
 	{
 		return _refTextureObject.get();
+	}
+
+	inline TextureReference::operator bool() const noexcept
+	{
+		return !empty();
 	}
 
 	inline TextureHandle TextureReference::getRefTexture() const noexcept

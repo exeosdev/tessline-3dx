@@ -47,8 +47,11 @@ namespace ts3::gpuapi
 	    virtual ShaderHandle _drvCreateShader( const ShaderCreateInfo & pCreateInfo ) override final;
 	    virtual TextureHandle _drvCreateTexture( const TextureCreateInfo & pCreateInfo ) override final;
 
-		virtual RenderTargetTextureHandle _drvCreateRenderTargetTexture( const RenderTargetTextureCreateInfo & pCreateInfo ) override final;
-		virtual GraphicsPipelineStateObjectHandle _drvCreateGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) override final;
+		virtual RenderTargetTextureHandle _drvCreateRenderTargetTexture(
+				const RenderTargetTextureCreateInfo & pCreateInfo ) override final;
+
+		virtual GraphicsPipelineStateObjectHandle _drvCreateGraphicsPipelineStateObject(
+				const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) override final;
 
 	private:
 		GLPipelineImmutableStateFactory _immutableStateFactory;

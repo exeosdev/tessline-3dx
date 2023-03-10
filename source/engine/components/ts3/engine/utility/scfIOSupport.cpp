@@ -22,7 +22,7 @@ namespace ts3
 
 		InternalFileWriteCallback fileWriteCallback =
 			[file]( const void * pInputData, uint64 pWriteSize ) -> uint64 {
-				const auto writeSize = trunc_numeric_cast<system::file_size_t>( pWriteSize );
+				const auto writeSize = numeric_cast<system::file_size_t>( pWriteSize );
 				return file->write( pInputData, writeSize, writeSize );
 			};
 
@@ -43,7 +43,7 @@ namespace ts3
 
 		InternalFileReadCallback fileReadCallback =
 			[file]( void * pOutputBuffer, uint64 pReadSize ) -> uint64 {
-				const auto readSize = trunc_numeric_cast<system::file_size_t>( pReadSize );
+				const auto readSize = numeric_cast<system::file_size_t>( pReadSize );
 				return file->read( pOutputBuffer, readSize, readSize );
 			};
 
@@ -58,8 +58,8 @@ namespace ts3
 
 		SCFIndex::ResourceDataReadCallback resourceDataReadCallback =
 			[file]( void * pOutputBuffer, uint64 pReadSize, uint64 pBaseOffset ) -> uint64 {
-				const auto readSize = trunc_numeric_cast<system::file_size_t>( pReadSize );
-				file->setFilePointer( trunc_numeric_cast<system::file_offset_t>( pBaseOffset ) );
+				const auto readSize = numeric_cast<system::file_size_t>( pReadSize );
+				file->setFilePointer( numeric_cast<system::file_offset_t>( pBaseOffset ) );
 				return file->read( pOutputBuffer, readSize, readSize );
 		};
 

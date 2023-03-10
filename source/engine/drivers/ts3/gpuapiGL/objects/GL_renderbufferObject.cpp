@@ -28,6 +28,9 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
+		glBindRenderbuffer( GL_RENDERBUFFER, 0 );
+		ts3OpenGLHandleLastError();
+
 		return openglRenderbufferObject;
 	}
 
