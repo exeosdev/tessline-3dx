@@ -39,7 +39,7 @@
 {
 	if( [super init] )
 	{
-		mSysContext = pSysContext;
+		mOSXSysContext = pSysContext;
 
 		NSNotificationCenter * defaultNotificationCenter = [NSNotificationCenter defaultCenter];
 
@@ -166,7 +166,7 @@
 
 -( void ) applicationWillFinishLaunching: (NSNotification *)pNotification
 {
-	auto & osxSharedData = ts3::system::platform::osxGetOSXSharedData( *mSysContext );
+	auto & osxSharedData = ts3::system::platform::osxGetOSXSharedData( *mOSXSysContext );
 	ts3DebugAssert( !osxSharedData.stateFlags.isSet( ts3::system::platform::E_OSX_COMMON_STATE_APP_FINISHED_LAUNCHING_BIT ) );
 
 	if( ![NSApp mainMenu] )
@@ -180,7 +180,7 @@
 
 -( void ) applicationDidFinishLaunching:( NSNotification * )pNotification
 {
-	auto & osxSharedData = ts3::system::platform::osxGetOSXSharedData( *mSysContext );
+	auto & osxSharedData = ts3::system::platform::osxGetOSXSharedData( *mOSXSysContext );
 
 	[NSOSXApplicationProxy registerUserDefaults];
 

@@ -50,18 +50,18 @@ namespace ts3::system
 
 	enum : exception_category_value_t
 	{
-		E_EXCEPTION_CATEGORY_SYSTEM_CORE    = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x01 ),
-		E_EXCEPTION_CATEGORY_SYSTEM_DISPLAY = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x02 ),
-		E_EXCEPTION_CATEGORY_SYSTEM_EVENT   = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x03 ),
-		E_EXCEPTION_CATEGORY_SYSTEM_FILE    = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x04 ),
-		E_EXCEPTION_CATEGORY_SYSTEM_METAL   = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x05 ),
-		E_EXCEPTION_CATEGORY_SYSTEM_OPENGL  = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x07 ),
-		E_EXCEPTION_CATEGORY_SYSTEM_WINDOW  = ecDeclareExceptionCategory( ExceptionBaseType::System, 0x09 ),
+		E_EXCEPTION_CATEGORY_SYSTEM_CORE    = cxdefs::declareExceptionCategory( ExceptionBaseType::System, 0x01 ),
+		E_EXCEPTION_CATEGORY_SYSTEM_DISPLAY = cxdefs::declareExceptionCategory( ExceptionBaseType::System, 0x02 ),
+		E_EXCEPTION_CATEGORY_SYSTEM_EVENT   = cxdefs::declareExceptionCategory( ExceptionBaseType::System, 0x03 ),
+		E_EXCEPTION_CATEGORY_SYSTEM_FILE    = cxdefs::declareExceptionCategory( ExceptionBaseType::System, 0x04 ),
+		E_EXCEPTION_CATEGORY_SYSTEM_METAL   = cxdefs::declareExceptionCategory( ExceptionBaseType::System, 0x05 ),
+		E_EXCEPTION_CATEGORY_SYSTEM_OPENGL  = cxdefs::declareExceptionCategory( ExceptionBaseType::System, 0x07 ),
+		E_EXCEPTION_CATEGORY_SYSTEM_WINDOW  = cxdefs::declareExceptionCategory( ExceptionBaseType::System, 0x09 ),
 	};
 
 	enum : exception_code_value_t
 	{
-		E_EXC_SYSTEM_INTERFACE_NOT_SUPPORTED = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_CORE, 0x04 ),
+		E_EXC_SYSTEM_INTERFACE_NOT_SUPPORTED = cxdefs::declareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_CORE, 0x04 ),
 	};
 
 	/// @brief Helper proxy-like base class for platform-specific types.

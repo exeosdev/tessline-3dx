@@ -182,7 +182,7 @@ namespace ts3::system
 			}
 		}
 
-		return trunc_numeric_cast<file_size_t>( readBytesNum );
+		return numeric_cast<file_size_t>( readBytesNum );
 	}
 
 	file_size_t Win32File::_nativeWriteData( const void * pData, file_size_t pWriteSize )
@@ -197,7 +197,7 @@ namespace ts3::system
 			ts3ThrowDesc( E_EXC_DEBUG_PLACEHOLDER, std::move( errorMessage ) );
 		}
 
-		return trunc_numeric_cast<file_size_t>( writtenBytesNum );
+		return numeric_cast<file_size_t>( writtenBytesNum );
 	}
 
 	file_offset_t Win32File::_nativeSetFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
@@ -222,7 +222,7 @@ namespace ts3::system
 			}
 		}
 
-		return trunc_numeric_cast<file_offset_t>( u64FileOffset.QuadPart );
+		return numeric_cast<file_offset_t>( u64FileOffset.QuadPart );
 	}
 
 	file_offset_t Win32File::_nativeGetFilePointer() const
@@ -235,7 +235,7 @@ namespace ts3::system
 
 		::SetFilePointerEx( mNativeData.fileHandle, u64SetFileOffset, &u64GetFilePosition, FILE_CURRENT );
 
-		return trunc_numeric_cast<file_offset_t>( u64GetFilePosition.QuadPart );
+		return numeric_cast<file_offset_t>( u64GetFilePosition.QuadPart );
 	}
 
 	file_size_t Win32File::_nativeGetSize() const
@@ -245,7 +245,7 @@ namespace ts3::system
 
 		::GetFileSizeEx( mNativeData.fileHandle, &u64FileSize );
 
-		return trunc_numeric_cast<file_size_t>( u64FileSize.QuadPart );
+		return numeric_cast<file_size_t>( u64FileSize.QuadPart );
 	}
 
 	file_size_t Win32File::_nativeGetRemainingBytes() const
@@ -266,7 +266,7 @@ namespace ts3::system
 
 		::SetFilePointerEx( mNativeData.fileHandle, u64SetFileOffset, nullptr, FILE_BEGIN );
 
-		return trunc_numeric_cast<file_offset_t>( endFilePosition - previousFilePointer );
+		return numeric_cast<file_offset_t>( endFilePosition - previousFilePointer );
 	}
 
 	bool Win32File::_nativeCheckEOF() const

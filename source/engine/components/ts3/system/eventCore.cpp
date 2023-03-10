@@ -589,7 +589,7 @@ namespace ts3::system
 
 	bool EventDispatcher::postEvent( EventObject pEvent )
 	{
-		if( !ecValidateEventCode( pEvent.code ) )
+		if( !cxdefs::validateEventCode( pEvent.code ) )
 		{
 			return false;
 		}
@@ -599,7 +599,7 @@ namespace ts3::system
 		pEvent.commonData.timeStamp = PerfCounter::queryCurrentStamp();
 
 		{
-			auto codeIndexValue = static_cast<size_t>( ecGetEventCodeCodeIndex( pEvent.code ) );
+			auto codeIndexValue = static_cast<size_t>( cxdefs::getEventCodeCodeIndex( pEvent.code ) );
 			auto & eventHandler = _privateData->handlerMapByCodeIndex[codeIndexValue];
 			if( eventHandler && eventHandler( pEvent ) )
 			{
@@ -607,7 +607,7 @@ namespace ts3::system
 			}
 		}
 		{
-			auto categoryValue = static_cast<size_t>( ecGetEventCodeCategory( pEvent.code ) );
+			auto categoryValue = static_cast<size_t>( cxdefs::getEventCodeCategory( pEvent.code ) );
 			auto & eventHandler = _privateData->handlerMapByCategory[categoryValue];
 			if( eventHandler && eventHandler( pEvent ) )
 			{
@@ -615,7 +615,7 @@ namespace ts3::system
 			}
 		}
 		{
-			auto baseTypeValue = static_cast<size_t>( ecGetEventCodeBaseType( pEvent.code ) );
+			auto baseTypeValue = static_cast<size_t>( cxdefs::getEventCodeBaseType( pEvent.code ) );
 			auto & eventHandler = _privateData->handlerMapByBaseType[baseTypeValue];
 			if( eventHandler && eventHandler( pEvent ) )
 			{
@@ -740,7 +740,7 @@ namespace ts3::system
 			}
 		}
 
-		const auto buttonMask = ecGetMouseButtonFlagFromButtonID( pMouseButtonEvent.buttonID );
+		const auto buttonMask = cxdefs::getMouseButtonFlagFromButtonID( pMouseButtonEvent.buttonID );
 		if( pMouseButtonEvent.buttonAction == EMouseButtonActionType::Click )
 		{
 			pMouseButtonEvent.buttonStateMask.set( buttonMask );

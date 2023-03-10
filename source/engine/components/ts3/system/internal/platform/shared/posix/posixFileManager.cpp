@@ -144,13 +144,13 @@ namespace ts3::system
 	file_size_t PosixFile::_nativeReadData( void * pTargetBuffer, file_size_t pReadSize )
 	{
 		auto readBytesNum = ::fread( pTargetBuffer, 1, pReadSize, mNativeData.filePtr );
-		return trunc_numeric_cast<file_size_t>( readBytesNum );
+		return numeric_cast<file_size_t>( readBytesNum );
 	}
 
 	file_size_t PosixFile::_nativeWriteData( const void * pData, file_size_t pWriteSize )
 	{
 		auto writtenBytesNum = ::fwrite( pData, 1, pWriteSize, mNativeData.filePtr );
-		return trunc_numeric_cast<file_size_t>( writtenBytesNum );
+		return numeric_cast<file_size_t>( writtenBytesNum );
 	}
 
 	file_offset_t PosixFile::_nativeSetFilePointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )

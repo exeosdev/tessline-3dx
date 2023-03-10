@@ -189,20 +189,20 @@ namespace ts3::system
 	file_size_t AndroidAsset::_nativeReadData( void * pTargetBuffer, file_size_t pReadSize )
 	{
 		int readResult = AAsset_read( mNativeData.aAsset, pTargetBuffer, pReadSize );
-		return trunc_numeric_cast<file_size_t>( readResult );
+		return numeric_cast<file_size_t>( readResult );
 	}
 
 	file_offset_t AndroidAsset::_nativeSetReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos )
 	{
 		auto seekOrigin = platform::_androidTranslateFilePointerRefPos( pRefPos );
 		auto seekResult = AAsset_seek64( mNativeData.aAsset, pOffset, seekOrigin );
-		return trunc_numeric_cast<file_offset_t>( seekResult );
+		return numeric_cast<file_offset_t>( seekResult );
 	}
 
 	file_size_t AndroidAsset::_nativeGetSize() const
 	{
 		auto assetSize = AAsset_getLength64( mNativeData.aAsset );
-		return trunc_numeric_cast<file_offset_t>( assetSize );
+		return numeric_cast<file_offset_t>( assetSize );
 	}
 
 

@@ -400,7 +400,7 @@ namespace ts3::system
 				{
 					auto & eInputMouseMove = _osxReadMouseMoveEvent( pNativeEvent, pOutEvent );
 					const auto buttonID = osxQueryMouseButtonID( pNativeEvent.nsEvent );
-					const auto buttonFlag = ecGetMouseButtonFlagFromButtonID( buttonID );
+					const auto buttonFlag = cxdefs::getMouseButtonFlagFromButtonID( buttonID );
 					eInputMouseMove.buttonStateMask.set( buttonFlag );
 					break;
 				}

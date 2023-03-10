@@ -92,9 +92,15 @@ namespace ts3::system
 		EMouseScrollDirection scrollDirection;
 	};
 
-	inline constexpr EMouseButtonFlagBits ecGetMouseButtonFlagFromButtonID( EMouseButtonID pButtonID )
+
+	namespace cxdefs
 	{
-		return static_cast<EMouseButtonFlagBits>( static_cast<uint32>( pButtonID ) & E_MOUSE_BUTTON_FLAG_ALL_BIT );
+
+		inline constexpr EMouseButtonFlagBits getMouseButtonFlagFromButtonID( EMouseButtonID pButtonID )
+		{
+			return static_cast<EMouseButtonFlagBits>( static_cast<uint32>( pButtonID ) & E_MOUSE_BUTTON_FLAG_ALL_BIT );
+		}
+
 	}
 
 } // namespace ts3::system

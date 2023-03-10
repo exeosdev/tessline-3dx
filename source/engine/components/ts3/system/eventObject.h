@@ -63,12 +63,12 @@ namespace ts3::system
 
 		constexpr explicit operator bool() const
 		{
-			return ( code != E_EVENT_CODE_UNDEFINED ) && ecValidateEventCode( code );
+			return ( code != E_EVENT_CODE_UNDEFINED ) && cxdefs::validateEventCode( code );
 		}
 
 		 TS3_ATTR_NO_DISCARD constexpr EEventCategory category() const
 		{
-			return ecGetEventCodeCategory( code );
+			return cxdefs::getEventCodeCategory( code );
 		}
 	};
 

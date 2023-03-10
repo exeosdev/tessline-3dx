@@ -91,8 +91,8 @@ namespace ts3::system
 	enum : exception_code_value_t
 	{
 		///
-		E_EXC_SYSTEM_OPENGL_API_VERSION_NOT_SUPPORTED = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0x03 ),
-		E_EXC_SYSTEM_OPENGL_API_PROFILE_NOT_SUPPORTED = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0x04 ),
+		E_EXC_SYSTEM_OPENGL_API_VERSION_NOT_SUPPORTED = ts3::cxdefs::declareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0x03 ),
+		E_EXC_SYSTEM_OPENGL_API_PROFILE_NOT_SUPPORTED = ts3::cxdefs::declareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0x04 ),
 	};
 
 	inline constexpr Version CX_GL_VERSION_BEST_SUPPORTED{ CX_UINT16_MAX, CX_UINT16_MAX };
@@ -151,7 +151,7 @@ namespace ts3::system
 
 		template <typename TGLErrorCode>
 		constexpr OpenGLErrorInfo( TGLErrorCode pErrorCode, const char * pErrorMessage = nullptr )
-		: errorCode( trunc_numeric_cast<uint32>( pErrorCode ) )
+		: errorCode( numeric_cast<uint32>( pErrorCode ) )
 		, errorString( pErrorMessage ? CX_STR_CHAR_EMPTY : pErrorMessage )
 		{}
 	};

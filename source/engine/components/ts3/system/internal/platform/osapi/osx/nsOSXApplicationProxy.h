@@ -3,8 +3,18 @@
 #define __TS3_SYSTEM_PLATFORM_OSAPI_OSX_NS_OSX_APPLICATION_PROXY_H__
 
 #include "nsCommon.h"
+#include <ts3/system/windowCommon.h>
+#import <AppKit/NSApplication.h>
+#import <AppKit/NSWindow.h>
 
-/// NSApplication::setAppleMenu seems to be gone from the
+namespace ts3::system
+{
+
+	class OSXSysContext;
+	class OSXEventController;
+
+}
+
 @interface NSApplication( NSAppleMenu )
 -( void ) setAppleMenu:( NSMenu * )pMenu;
 @end
@@ -23,10 +33,12 @@
 
 @interface NSOSXApplicationDelegate : NSObject<NSApplicationDelegate>
 {
-	@public OSXSysContext * mSysContext;
+	ts3::system::OSXSysContext * mOSXSysContext;
 }
 
--( id ) initWithSysContext: ( OSXSysContext * )pSysContext;
+-( void ) setOSXSysContext: ( ts3::system::OSXSysContext * )pOSXSysContext;
+
+-( id ) init;
 
 -( void ) dealloc;
 
