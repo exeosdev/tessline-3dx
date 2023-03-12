@@ -24,6 +24,8 @@ namespace ts3::gpuapi
 				const RenderTargetLayout & pRenderTargetLayout );
 
 		virtual ~RenderTargetBindingImmutableState();
+
+		TS3_ATTR_NO_DISCARD static const RenderTargetBindingImmutableState & getDynamicOverrideState();
 	};
 
 	class RenderPassConfigurationImmutableState : public GraphicsPipelineImmutableState

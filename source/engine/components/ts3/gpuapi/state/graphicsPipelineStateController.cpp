@@ -1,17 +1,14 @@
 
 #include "graphicsPipelineStateController.h"
 #include "pipelineStateObject.h"
+#include "inputAssemblerImmutableStates.h"
+#include "renderTargetImmutableStates.h"
+
+#include <ts3/gpuapi/gpuDevice.h>
 #include <ts3/stdext/memory.h>
 
 namespace ts3::gpuapi
 {
-
-	const IAVertexStreamImmutableState * GraphicsPipelineStateController::sIAVertexStreamImmutableStateDynamic =
-			reinterpret_cast<const IAVertexStreamImmutableState *>( Limits<uintptr_t>::maxValue );
-
-	const RenderTargetBindingImmutableState * GraphicsPipelineStateController::sRenderTargetBindingImmutableStateDynamic =
-			reinterpret_cast<const RenderTargetBindingImmutableState *>( Limits<uintptr_t>::maxValue );
-
 
 	GraphicsPipelineStateController::GraphicsPipelineStateController() = default;
 
@@ -44,7 +41,7 @@ namespace ts3::gpuapi
 
 	bool GraphicsPipelineStateController::setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState )
 	{
-		_currentCommonState.iaVertexStreamState = sIAVertexStreamImmutableStateDynamic;
+		_currentCommonState.iaVertexStreamState = &( IAVertexStreamImmutableState::getDynamicOverrideState() );
 		_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_VERTEX_STREAM_BIT );
 		return true;
 	}
@@ -69,7 +66,7 @@ namespace ts3::gpuapi
 
 	bool GraphicsPipelineStateController::setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState )
 	{
-		_currentCommonState.renderTargetBindingState = sRenderTargetBindingImmutableStateDynamic;
+		_currentCommonState.renderTargetBindingState = &( RenderTargetBindingImmutableState::getDynamicOverrideState() );
 		_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_RENDER_TARGET_BINDING_BIT );
 		return true;
 	}

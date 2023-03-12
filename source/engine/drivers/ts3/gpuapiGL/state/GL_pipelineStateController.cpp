@@ -29,7 +29,7 @@ namespace ts3::gpuapi
 
 	const GLIAVertexStreamDefinition & GLGraphicsPipelineStateController::getCurrentIAVertexStreamDefinition() const noexcept
 	{
-		if( _currentCommonState.iaVertexStreamState == sIAVertexStreamImmutableStateDynamic )
+		if( _currentCommonState.iaVertexStreamState->isDynamicOverrideState() )
 		{
 			return _dynamicIAVertexStreamDefinition;
 		}
@@ -43,7 +43,7 @@ namespace ts3::gpuapi
 	GLRenderTargetBindingInfo GLGraphicsPipelineStateController::getCurrentRenderTargetBindingInfo() const noexcept
 	{
 		GLRenderTargetBindingInfo glcRTBindingInfo{};
-		if( _currentCommonState.renderTargetBindingState == sRenderTargetBindingImmutableStateDynamic )
+		if( _currentCommonState.renderTargetBindingState->isDynamicOverrideState() )
 		{
 			return smutil::getGLRenderTargetBindingInfo( _dynamicRenderTargetBindingDefinition );
 		}

@@ -54,6 +54,8 @@ namespace ts3::gpuapi
 		explicit GPUDevice( GPUDriver & pDriver );
 		virtual ~GPUDevice();
 
+		TS3_ATTR_NO_DISCARD virtual bool isNullDevice() const noexcept;
+
 		TS3_ATTR_NO_DISCARD bool isDebugDevice() const noexcept;
 
 		TS3_ATTR_NO_DISCARD bool isMultiThreadAccessSupported() const noexcept;
@@ -130,6 +132,8 @@ namespace ts3::gpuapi
 		void setPresentationLayer( PresentationLayerHandle pPresentationLayer );
 
 		virtual void waitForCommandSync( CommandSync & pCommandSync ) = 0;
+
+		TS3_ATTR_NO_DISCARD static GPUDevice & nullDevice();
 
 	protected:
 		virtual bool onGPUResourceActiveRefsZero( GPUResource & pGPUResource );

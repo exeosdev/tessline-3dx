@@ -28,7 +28,9 @@ namespace ts3::gpuapi
 		explicit GPUDriver( system::SysContextHandle pSysContext ) noexcept;
 		virtual ~GPUDriver() noexcept;
 
-		virtual EGPUDriverID queryGPUDriverID() const = 0;
+		TS3_ATTR_NO_DISCARD virtual EGPUDriverID queryGPUDriverID() const noexcept = 0;
+
+		TS3_ATTR_NO_DISCARD virtual bool isNullDriver() const noexcept;
 
 		Bitmask<EGPUDriverConfigFlags> getConfigFlags() const;
 
@@ -37,6 +39,8 @@ namespace ts3::gpuapi
 		DisplayManagerHandle createDefaultDisplayManager();
 
 		GPUDeviceHandle createDevice( const GPUDeviceCreateInfo & pCreateInfo );
+
+		static GPUDriver & nullDriver();
 
 	protected:
 		void setConfigFlags( Bitmask<EGPUDriverConfigFlags> pConfigFlags );

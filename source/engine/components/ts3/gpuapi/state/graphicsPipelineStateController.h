@@ -52,34 +52,76 @@ namespace ts3::gpuapi
 		virtual bool resetRenderTargetBindingState();
 
 		/// @brief Returns true if the state update mask is not empty (some bits are set) or false otherwise.
-		TS3_ATTR_NO_DISCARD bool isStateUpdateMaskSet() const
+		TS3_ATTR_NO_DISCARD bool hasPendingState() const
 		{
 			return !_stateUpdateMask.empty();
 		}
 
-		template <typename TPSOType = GraphicsPipelineStateObject>
-		inline const TPSOType * getCurrentGraphicsPipelineSO() const noexcept
+		template <typename TGraphicsPipelineStateObject = GraphicsPipelineStateObject>
+		inline const TGraphicsPipelineStateObject * getCurrentGraphicsPSO() const noexcept
 		{
 			if( _currentCommonState.graphicsPSO )
 			{
-				return reinterpret_cast<const GPUAPIObject *>( _currentCommonState.graphicsPSO )->queryInterface<TPSOType>();
+				const auto * baseInterface = reinterpret_cast<const GPUAPIObject *>( _currentCommonState.graphicsPSO );
+				return baseInterface->queryInterface<TGraphicsPipelineStateObject>();
 			}
 			return nullptr;
 		}
 
-		template <typename TPSOType = GraphicsPipelineStateObject>
-		inline const TPSOType & getCurrentGraphicsPipelineSORef() const
+		template <typename TGraphicsPipelineStateObject = GraphicsPipelineStateObject>
+		inline const TGraphicsPipelineStateObject & getCurrentGraphicsPSORef() const
 		{
-			if( const auto * stateObject = getCurrentGraphicsPipelineSO<TPSOType>() )
+			if( const auto * stateObject = getCurrentGraphicsPSO<TGraphicsPipelineStateObject>() )
 			{
 				return *stateObject;
 			}
 			ts3Throw( 0 );
 		}
 
-		static const IAVertexStreamImmutableState * sIAVertexStreamImmutableStateDynamic;
+		template <typename TIAVertexStreamState = IAVertexStreamImmutableState>
+		inline const TIAVertexStreamState * getCurrentIAVertexStreamState() const noexcept
+		{
+			if( _currentCommonState.iaVertexStreamState )
+			{
+				const auto * baseInterface = reinterpret_cast<const GPUAPIObject *>( _currentCommonState.iaVertexStreamState );
+				return baseInterface->queryInterface<TIAVertexStreamState>();
+			}
+			return nullptr;
+		}
 
-		static const RenderTargetBindingImmutableState * sRenderTargetBindingImmutableStateDynamic;
+		template <typename TIAVertexStreamState = IAVertexStreamImmutableState>
+		inline const TIAVertexStreamState & getCurrentIAVertexStreamStateRef() const
+		{
+			if( const auto * stateObject = getCurrentIAVertexStreamState<TIAVertexStreamState>() )
+			{
+				return *stateObject;
+			}
+			ts3Throw( 0 );
+		}
+
+		template <typename TRenderTargetBindingState = RenderTargetBindingImmutableState>
+		inline const TRenderTargetBindingState * getCurrentRenderTargetBindingState() const noexcept
+		{
+			if( _currentCommonState.renderTargetBindingState )
+			{
+				const auto * baseInterface = reinterpret_cast<const GPUAPIObject *>( _currentCommonState.renderTargetBindingState );
+				return baseInterface->queryInterface<TRenderTargetBindingState>();
+			}
+			return nullptr;
+		}
+
+		template <typename TRenderTargetBindingState = RenderTargetBindingImmutableState>
+		inline const TRenderTargetBindingState & getCurrentRenderTargetBindingStateRef() const
+		{
+			if( const auto * stateObject = getCurrentRenderTargetBindingState<TRenderTargetBindingState>() )
+			{
+				return *stateObject;
+			}
+			ts3Throw( 0 );
+		}
+
+	protected:
+		void resetStateUpdateMask();
 
 	protected:
 		struct CurrentCommonState

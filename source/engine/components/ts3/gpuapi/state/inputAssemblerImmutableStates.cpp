@@ -1,8 +1,25 @@
 
 #include "inputAssemblerImmutableStates.h"
+#include <ts3/gpuapi/gpuDevice.h>
 
 namespace ts3::gpuapi
 {
+
+	class IAVertexStreamImmutableStateDynamicOverride : public IAVertexStreamImmutableState
+	{
+	public:
+		IAVertexStreamImmutableStateDynamicOverride()
+		: IAVertexStreamImmutableState( GPUDevice::nullDevice(), {} )
+		{}
+
+		virtual ~IAVertexStreamImmutableStateDynamicOverride() = default;
+
+		bool isDynamicOverrideState() const noexcept override final
+		{
+			return false;
+		}
+	};
+
 
 	IAInputLayoutImmutableState::IAInputLayoutImmutableState(
 			GPUDevice & pGPUDevice,
@@ -31,6 +48,12 @@ namespace ts3::gpuapi
 	EGraphicsPipelineImmutableStateType IAVertexStreamImmutableState::queryStateType() const noexcept
 	{
 		return EGraphicsPipelineImmutableStateType::IAVertexStream;
+	}
+
+	const IAVertexStreamImmutableState & IAVertexStreamImmutableState::getDynamicOverrideState()
+	{
+		static const IAVertexStreamImmutableStateDynamicOverride sDynamicOverrideState{};
+		return sDynamicOverrideState;
 	}
 
 	namespace smutil

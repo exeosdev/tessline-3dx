@@ -57,6 +57,8 @@ namespace ts3::gpuapi
 		virtual ~IAVertexStreamImmutableState();
 
 		TS3_ATTR_NO_DISCARD virtual EGraphicsPipelineImmutableStateType queryStateType() const noexcept override final;
+
+		TS3_ATTR_NO_DISCARD static const IAVertexStreamImmutableState & getDynamicOverrideState();
 	};
 
 	namespace smutil

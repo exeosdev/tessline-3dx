@@ -16,6 +16,11 @@ namespace ts3::gpuapi
 		return EGraphicsPipelineImmutableStateType::Unknown;
 	}
 
+	bool GraphicsPipelineImmutableState::isDynamicOverrideState() const noexcept
+	{
+		return false;
+	}
+
 
 	PipelineImmutableStateFactorySeparableShader::PipelineImmutableStateFactorySeparableShader( GPUDevice & pGPUDevice )
 	: mGPUDevice( pGPUDevice )

@@ -33,6 +33,8 @@ namespace ts3::gpuapi
 		virtual ~GraphicsPipelineImmutableState();
 
 		TS3_ATTR_NO_DISCARD virtual EGraphicsPipelineImmutableStateType queryStateType() const noexcept;
+
+		TS3_ATTR_NO_DISCARD virtual bool isDynamicOverrideState() const noexcept;
 	};
 
 	/// @brief Dummy trait type for the descriptor cache. List all the things required for the traits to provide.

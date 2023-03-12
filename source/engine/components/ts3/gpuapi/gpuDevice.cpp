@@ -1,6 +1,6 @@
 
 #include <ts3/gpuapi/commandSystem.h>
-#include <ts3/gpuapi/gpuDevice.h>
+#include <ts3/gpuapi/gpuDeviceNull.h>
 #include <ts3/gpuapi/gpuDriver.h>
 #include <ts3/gpuapi/presentationLayer.h>
 #include <ts3/gpuapi/resources/texture.h>
@@ -39,6 +39,11 @@ namespace ts3::gpuapi
 	}
 
 	GPUDevice::~GPUDevice() = default;
+
+	bool GPUDevice::isNullDevice() const noexcept
+	{
+		return false;
+	}
 
 	bool GPUDevice::isDebugDevice() const noexcept
 	{
@@ -307,6 +312,12 @@ namespace ts3::gpuapi
 			return;
 		}
 		_presentationLayer = pPresentationLayer;
+	}
+
+	GPUDevice & GPUDevice::nullDevice()
+	{
+		static const GPUDeviceHandle sNullDeviceInstance = createGPUAPIObject<GPUDeviceNull>( GPUDriver::nullDriver() );
+		return *sNullDeviceInstance;
 	}
 
 	bool GPUDevice::onGPUResourceActiveRefsZero( GPUResource & pGPUResource )

@@ -14,6 +14,9 @@ namespace ts3::gpuapi
 	struct GLIAIndexBufferBinding;
 	struct GLIAVertexBuffersBindings;
 
+	class GLCommandList;
+	class GLGraphicsPipelineStateObject;
+
 	/// @brief
 	class GLGraphicsPipelineStateController : public GraphicsPipelineStateControllerSeparable
 	{

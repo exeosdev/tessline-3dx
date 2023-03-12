@@ -20,7 +20,7 @@ namespace ts3::gpuapi
 		explicit GL4GPUDriver( system::OpenGLSystemDriverHandle pSysGLDriver );
 		virtual ~GL4GPUDriver();
 
-		virtual EGPUDriverID queryGPUDriverID() const override;
+		virtual EGPUDriverID queryGPUDriverID() const noexcept override;
 
 		static GL4GPUDriverHandle create( const GL4GPUDriverCreateInfo & pCreateInfo );
 

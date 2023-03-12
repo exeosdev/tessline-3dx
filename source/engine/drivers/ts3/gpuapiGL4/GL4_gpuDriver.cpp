@@ -54,7 +54,7 @@ namespace ts3::gpuapi
 		return GL4GPUDevice::create( *this, createInfo );
 	}
 
-	EGPUDriverID GL4GPUDriver::queryGPUDriverID() const
+	EGPUDriverID GL4GPUDriver::queryGPUDriverID() const noexcept
 	{
 		return EGPUDriverID::GDIOpenGLDesktop4;
 	}

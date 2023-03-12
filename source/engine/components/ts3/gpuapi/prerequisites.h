@@ -120,6 +120,7 @@ namespace ts3::gpuapi
 		GDIOpenGLDesktop4 = cxdefs::makeGPUDriverID( EGPUDriverAPI::OpenGL,  0xD4 ),
 		GDIOpenGLES3      = cxdefs::makeGPUDriverID( EGPUDriverAPI::OpenGL,  0xE3 ),
 		GDIVulkan10       = cxdefs::makeGPUDriverID( EGPUDriverAPI::Vulkan,  0x10 ),
+		GDINull           = cxdefs::makeGPUDriverID( EGPUDriverAPI::Unknown, 0xFF ),
 		GDIUnknown        = cxdefs::makeGPUDriverID( EGPUDriverAPI::Unknown, 0x00 )
 	};
 
