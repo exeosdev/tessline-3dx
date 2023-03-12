@@ -113,6 +113,9 @@ namespace ts3::gpuapi
 				}
 			}
 
+			openglBlendConfig.constantColor = pConfig.constantColor;
+			openglBlendConfig.flags = pConfig.flags;
+
 			return openglBlendConfig;
 		}
 
@@ -163,7 +166,6 @@ namespace ts3::gpuapi
 		{
 			GLRTColorAttachmentBlendSettings openglBlendSettings{};
 
-			openglBlendSettings.constantFactor = pSettings.constantFactor;
 			openglBlendSettings.colorEquation = GLCoreAPIProxy::translateGLBlendOp( pSettings.opColor );
 			openglBlendSettings.alphaEquation = GLCoreAPIProxy::translateGLBlendOp( pSettings.opAlpha );
 			openglBlendSettings.srcColorFactor = GLCoreAPIProxy::translateGLBlendFactor( pSettings.factorSrcColor );

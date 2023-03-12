@@ -17,13 +17,14 @@ namespace ts3::gpuapi
 		GLenum dstColorFactor;
 		GLenum srcAlphaFactor;
 		GLenum dstAlphaFactor;
-		math::RGBAColorR32Norm constantFactor;
 	};
 
 	struct GLBlendConfig
 	{
-		Bitmask<ERTAttachmentFlags> attachmentsMask = 0;
+		Bitmask<ERTAttachmentFlags> attachmentsMask;
+		Bitmask<EBlendConfigFlags> flags;
 		GLRTColorAttachmentBlendSettings attachments[cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+		math::RGBAColorR32Norm constantColor;
 	};
 
 	struct GLDepthStencilConfig

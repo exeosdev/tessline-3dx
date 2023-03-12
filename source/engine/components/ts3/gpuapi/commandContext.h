@@ -48,7 +48,7 @@ namespace ts3::gpuapi
 		void submit();
 		CommandSync submit( const CommandContextSubmitInfo & pSubmitInfo );
 
-		void executeDeferredContext( CommandContextDeferred & pDeferredContext );
+		void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext );
 
 		bool invalidateBuffer( GPUBuffer & pBuffer );
 		bool invalidateBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion );
@@ -84,8 +84,8 @@ namespace ts3::gpuapi
 
 		virtual ~CommandContextDirectCompute() = default;
 
-		void dispatchCompute( uint32 pThrGroupSizeX, uint32 pThrGroupSizeY, uint32 pThrGroupSizeZ );
-		void dispatchComputeIndirect( uint32 pIndirectBufferOffset );
+		void cmdDispatchCompute( uint32 pThrGroupSizeX, uint32 pThrGroupSizeY, uint32 pThrGroupSizeZ );
+		void cmdDispatchComputeIndirect( uint32 pIndirectBufferOffset );
 	};
 
 	class CommandContextDirectGraphics : public CommandContextDirectCompute
@@ -106,16 +106,17 @@ namespace ts3::gpuapi
 		bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
 		bool setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState );
 
-		void setViewport( const ViewportDesc & pViewportDesc );
-		bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
-		bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
-		bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture );
-		bool setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler );
+		bool cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor );
+		bool cmdSetViewport( const ViewportDesc & pViewportDesc );
+		bool cmdSetShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
+		bool cmdSetShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
+		bool cmdSetShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture );
+		bool cmdSetShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler );
 
-		void drawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset );
-		void drawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset );
-		void drawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset );
-		void drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset );
+		void cmdDrawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset );
+		void cmdDrawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset );
+		void cmdDrawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset );
+		void cmdDrawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset );
 	};
 
 	class CommandContextDeferred : public CommandContext
@@ -152,16 +153,17 @@ namespace ts3::gpuapi
 		bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
 		bool setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState );
 
-		void setViewport( const ViewportDesc & pViewportDesc );
-		bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
-		bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
-		bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture );
-		bool setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler );
+		bool cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor );
+		bool cmdSetViewport( const ViewportDesc & pViewportDesc );
+		bool cmdSetShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
+		bool cmdSetShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
+		bool cmdSetShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture );
+		bool cmdSetShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler );
 
-		void drawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset, EIndexDataFormat pIndexFormat );
-		void drawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset, EIndexDataFormat pIndexFormat );
-		void drawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset );
-		void drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset );
+		void cmdDrawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset, EIndexDataFormat pIndexFormat );
+		void cmdDrawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset, EIndexDataFormat pIndexFormat );
+		void cmdDrawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset );
+		void cmdDrawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset );
 	};
 
 } // namespace ts3::gpuapi

@@ -32,7 +32,7 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD GLRenderTargetBindingInfo getCurrentRenderTargetBindingInfo() const noexcept;
 
-		virtual void applyPipelineStateChanges() override final;
+		virtual bool applyStateChanges() override final;
 
 		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO ) override;
 		virtual bool resetGraphicsPipelineStateObject() override;
@@ -45,9 +45,15 @@ namespace ts3::gpuapi
 		virtual bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState ) override;
 		virtual bool resetRenderTargetBindingState() override;
 
+		virtual bool setBlendConstantColor( const math::RGBAColorR32Norm & pColor ) override;
+		virtual bool setViewport( const ViewportDesc & pViewportDesc ) override;
+		virtual bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData ) override;
+		virtual bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer ) override;
+		virtual bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture ) override;
+		virtual bool setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler ) override;
+
 	private:
 		void resetDynamicIAVertexStreamState();
-
 		void resetDynamicRenderTargetBindingState();
 
 		// Apply functions: PSO States
@@ -67,6 +73,11 @@ namespace ts3::gpuapi
 		// Apply functions: Render Target (Attachment bindings)
 
 		static void applyGLRenderTargetBinding( const GLRenderTargetBindingInfo & pGLRenderTargetBinding );
+
+		void updateShaderInputInlineConstantData(
+				const GLGraphicsShaderLinkageImmutableState & pShaderState,
+				const ShaderInputParameterConstant & pConstantInfo,
+				const void * pConstantData );
 
 	protected:
 		GLDrawTopologyProperties _currentDrawTopologyProperties;

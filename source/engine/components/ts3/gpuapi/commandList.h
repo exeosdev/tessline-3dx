@@ -13,6 +13,11 @@ namespace ts3::gpuapi
 
 	class GraphicsPipelineStateController;
 
+	enum ECommandListActionFlags : uint32
+	{
+		E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT = 0x01
+	};
+
 	class TS3_GPUAPI_CLASS CommandList : public GPUDeviceChildObject
 	{
 	public:
@@ -32,8 +37,12 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD bool isRenderPassActive() const noexcept;
 
+		TS3_ATTR_NO_DISCARD bool hasPendingGraphicsPipelineStateChanges() const noexcept;
+
 		bool acquireList();
 		void releaseList();
+
+		bool applyGraphicsPipelineStateChanges();
 
 		virtual void beginCommandSequence();
 		virtual void endCommandSequence();
@@ -50,15 +59,15 @@ namespace ts3::gpuapi
 		bool updateBufferDataUpload( GPUBuffer & pBuffer, const GPUBufferDataUploadDesc & pUploadDesc );
 		bool updateBufferSubDataUpload( GPUBuffer & pBuffer, const GPUBufferSubDataUploadDesc & pUploadDesc );
 
-		virtual bool beginRenderPass( const RenderPassConfigurationImmutableState & pRenderPassState );
-		virtual bool beginRenderPass( const RenderPassConfigurationDynamicState & pRenderPassState );
+		virtual bool beginRenderPass(
+				const RenderPassConfigurationImmutableState & pRenderPassState,
+				Bitmask<ECommandListActionFlags> pFlags );
+
+		virtual bool beginRenderPass(
+				const RenderPassConfigurationDynamicState & pRenderPassState,
+				Bitmask<ECommandListActionFlags> pFlags );
 
 		virtual void endRenderPass();
-
-		virtual void executeDeferredContext( CommandContextDeferred & pDeferredContext ) = 0;
-
-		virtual void dispatchCompute( uint32 pThrGroupSizeX, uint32 pThrGroupSizeY, uint32 pThrGroupSizeZ ) {} // = 0;
-		virtual void dispatchComputeIndirect( uint32 pIndirectBufferOffset ) {} // = 0;
 
 		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO );
 		bool setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState );
@@ -66,23 +75,29 @@ namespace ts3::gpuapi
 		bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
 		bool setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState );
 
-		virtual void setViewport( const ViewportDesc & pViewportDesc ) = 0;
-		virtual bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData ) = 0;
-		virtual bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer ) = 0;
-		virtual bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture ) = 0;
-		virtual bool setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler ) = 0;
+		bool cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor );
+		bool cmdSetViewport( const ViewportDesc & pViewportDesc );
+		bool cmdSetShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
+		bool cmdSetShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
+		bool cmdSetShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture );
+		bool cmdSetShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler );
 
-		virtual void drawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset ) = 0;
-		virtual void drawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset ) = 0;
-		virtual void drawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset ) = 0;
-		virtual void drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset ) = 0;
+		virtual void cmdDispatchCompute( uint32 pThrGroupSizeX, uint32 pThrGroupSizeY, uint32 pThrGroupSizeZ ) {} // = 0;
+		virtual void cmdDispatchComputeIndirect( uint32 pIndirectBufferOffset ) {} // = 0;
+
+		virtual void cmdDrawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset ) = 0;
+		virtual void cmdDrawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset ) = 0;
+		virtual void cmdDrawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset ) = 0;
+		virtual void cmdDrawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset ) = 0;
+
+		virtual void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext ) = 0;
 
 	private:
 		std::atomic<bool> _listLockStatus = ATOMIC_VAR_INIT( false );
 
 		Bitmask<uint32> _internalStateMask;
 
-		GraphicsPipelineStateController * _pipelineStateController = nullptr;
+		GraphicsPipelineStateController * _graphicsPipelineStateController = nullptr;
 	};
 
 } // namespace ts3::gpuapi

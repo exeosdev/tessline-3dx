@@ -536,13 +536,13 @@ int main( int pArgc, const char ** pArgv )
 //            gxDriverState.cmdContext->beginCommandSequence();
 //            gxDriverState.cmdContext->setVertexStreamStateObject( *globalVSSO );
 //            gxDriverState.cmdContext->setGraphicsPipelineStateObject( *globalPSO );
-//            gxDriverState.cmdContext->setShaderConstantBuffer( 0, *cbuffer0 );
-//            gxDriverState.cmdContext->setShaderTextureSampler( 10, *defaultSampler );
+//            gxDriverState.cmdContext->cmdSetShaderConstantBuffer( 0, *cbuffer0 );
+//            gxDriverState.cmdContext->cmdSetShaderTextureSampler( 10, *defaultSampler );
 //
 //            const uint32 VNUM = 36;
 //            {
 //                gxDriverState.cmdContext->setRenderTargetStateObject( *renderTargetSO );
-//                gxDriverState.cmdContext->setViewport( vpDescTexture );
+//                gxDriverState.cmdContext->cmdSetViewport( vpDescTexture );
 //                gxDriverState.cmdContext->setColorBufferClearValue(
 //                        ts3::math::RGBAColorU8 { 0x8F, 0x0F, 0x1F, 0xFF } );
 //                //gxDriverState.cmdContext->setColorBufferClearValue(
@@ -553,7 +553,7 @@ int main( int pArgc, const char ** pArgv )
 //                cb0DataUploadDesc.inputDataDesc.pointer = &cb0Data;
 //                cb0DataUploadDesc.inputDataDesc.size = sizeof(CB0Data);
 //
-//                gxDriverState.cmdContext->setShaderTextureImage( 1, *tex0 );
+//                gxDriverState.cmdContext->cmdSetShaderTextureImage( 1, *tex0 );
 //                {
 //                    cb0Data.projectionMatrix = ts3ProjectionTexture;
 //                    cb0Data.viewMatrix = ts3ViewTexture;
@@ -578,12 +578,12 @@ int main( int pArgc, const char ** pArgv )
 //                gxDriverState.cmdContext->drawDirectIndexed( VNUM, 0 );
 //
 //                gxDriverState.presentationLayer->bindRenderTarget( gxDriverState.cmdContext.get() );
-//                gxDriverState.cmdContext->setViewport( vpDescScreen );
+//                gxDriverState.cmdContext->cmdSetViewport( vpDescScreen );
 //                gxDriverState.cmdContext->setColorBufferClearValue( gxDriverState.device->getDefaultClearColor() );
 //                gxDriverState.cmdContext->clearRenderTarget( ts3::gpuapi::E_RENDER_TARGET_ATTACHMENT_FLAGS_DEFAULT_C0DS );
 //
 //                auto * rttTexture0 = renderTargetSO->mRTResourceBinding.colorAttachmentArray[0].uTextureRef.texture;
-//                gxDriverState.cmdContext->setShaderTextureImage( 1, *rttTexture0 );
+//                gxDriverState.cmdContext->cmdSetShaderTextureImage( 1, *rttTexture0 );
 //                {
 //                    cb0Data.projectionMatrix = math::perspectiveAspectLH<float>(
 //                            cameraController.getPerspectiveFOVAngle(), ( float )rtSize.x / ( float )rtSize.y, 0.1f, 1000.0f );

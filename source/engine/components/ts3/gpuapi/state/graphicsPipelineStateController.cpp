@@ -14,8 +14,10 @@ namespace ts3::gpuapi
 
 	GraphicsPipelineStateController::~GraphicsPipelineStateController() = default;
 
-	void GraphicsPipelineStateController::applyPipelineStateChanges()
-	{}
+	bool GraphicsPipelineStateController::applyStateChanges()
+	{
+		return false;
+	}
 
 	bool GraphicsPipelineStateController::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO )
 	{
@@ -86,6 +88,36 @@ namespace ts3::gpuapi
 	{
 		_currentCommonState.renderTargetBindingState = nullptr;
 		_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_RENDER_TARGET_BINDING_BIT );
+		return true;
+	}
+
+	bool GraphicsPipelineStateController::setBlendConstantColor( const math::RGBAColorR32Norm & pColor )
+	{
+		return true;
+	}
+
+	bool GraphicsPipelineStateController::setViewport( const ViewportDesc & pViewportDesc )
+	{
+		return true;
+	}
+
+	bool GraphicsPipelineStateController::setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData )
+	{
+		return true;
+	}
+
+	bool GraphicsPipelineStateController::setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer )
+	{
+		return true;
+	}
+
+	bool GraphicsPipelineStateController::setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture )
+	{
+		return true;
+	}
+
+	bool GraphicsPipelineStateController::setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler )
+	{
 		return true;
 	}
 

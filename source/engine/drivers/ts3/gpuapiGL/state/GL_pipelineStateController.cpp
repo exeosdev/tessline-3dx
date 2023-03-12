@@ -4,6 +4,10 @@
 #include "../objects/GL_framebufferObject.h"
 #include "../objects/GL_shaderPipelineObject.h"
 #include "../objects/GL_vertexArrayObject.h"
+#include "../resources/GL_gpuBuffer.h"
+#include "../resources/GL_sampler.h"
+#include "../resources/GL_shader.h"
+#include "../resources/GL_texture.h"
 #include "../state/GL_pipelineStateObject.h"
 #include "../state/GL_commonGraphicsConfig.h"
 #include "../state/GL_inputAssembler.h"
@@ -55,8 +59,10 @@ namespace ts3::gpuapi
 		return glcRTBindingInfo;
 	}
 
-	void GLGraphicsPipelineStateController::applyPipelineStateChanges()
+	bool GLGraphicsPipelineStateController::applyStateChanges()
 	{
+		Bitmask<uint32> executedUpdatesMask = 0;
+
 		if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_PSO_BIT ) )
 		{
 			const auto * glcGraphicsPSO = _currentCommonState.graphicsPSO->queryInterface<GLGraphicsPipelineStateObject>();
@@ -67,24 +73,28 @@ namespace ts3::gpuapi
 				{
 					const auto & blendState = glcGraphicsPSO->getBlendState();
 					applyGLBlendState( blendState );
+					executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_BLEND_BIT );
 				}
 
 				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_DEPTH_STENCIL_BIT ) )
 				{
 					const auto & depthStencilState = glcGraphicsPSO->getDepthStencilState();
 					applyGLDepthStencilState( depthStencilState );
+					executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_DEPTH_STENCIL_BIT );
 				}
 
 				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_RASTERIZER_BIT ) )
 				{
 					const auto & rasterizerState = glcGraphicsPSO->getRasterizerState();
 					applyGLRasterizerState( rasterizerState );
+					executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_RASTERIZER_BIT );
 				}
 
 				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_IA_INPUT_LAYOUT_BIT ) )
 				{
 					const auto & inputLayoutState = glcGraphicsPSO->getIAInputLayoutState();
 					applyGLIAInputLayoutState( inputLayoutState, _currentDrawTopologyProperties );
+					executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_IA_INPUT_LAYOUT_BIT );
 				}
 			}
 
@@ -92,6 +102,7 @@ namespace ts3::gpuapi
 			{
 				const auto & shaderLinkageState = glcGraphicsPSO->getGraphicsShaderLinkageState();
 				applyGLShaderLinkageState( shaderLinkageState );
+				executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_MASK_SEPARABLE_SHADERS_ALL );
 			}
 		}
 
@@ -105,15 +116,19 @@ namespace ts3::gpuapi
 		{
 			const auto & currentIAVertexStreamDefinition = getCurrentIAVertexStreamDefinition();
 			applyGLIAVertexStreamState( currentIAVertexStreamDefinition, _currentDrawTopologyProperties );
+			executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_MASK_COMBINED_INPUT_ASSEMBLER );
 		}
 
 		if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_RENDER_TARGET_BINDING_BIT ) )
 		{
 			const auto & currentRenderTargetBindingInfo = getCurrentRenderTargetBindingInfo();
 			applyGLRenderTargetBinding( currentRenderTargetBindingInfo );
+			executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_RENDER_TARGET_BINDING_BIT );
 		}
 
 		_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_MASK_COMMON_ALL | E_GRAPHICS_STATE_UPDATE_MASK_SEPARABLE_ALL );
+
+		return !executedUpdatesMask.empty();
 	}
 
 	bool GLGraphicsPipelineStateController::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO )
@@ -177,6 +192,148 @@ namespace ts3::gpuapi
 		return GraphicsPipelineStateControllerSeparable::resetRenderTargetBindingState();
 	}
 
+	bool GLGraphicsPipelineStateController::setBlendConstantColor( const math::RGBAColorR32Norm & pColor )
+	{
+		bool baseResult = GraphicsPipelineStateController::setBlendConstantColor( pColor );
+
+		if( baseResult )
+		{
+			glBlendColor( pColor.fpRed, pColor.fpGreen, pColor.fpBlue, pColor.fpAlpha );
+			ts3OpenGLHandleLastError();
+		}
+
+		return baseResult;
+	}
+
+	bool GLGraphicsPipelineStateController::setViewport( const ViewportDesc & pViewportDesc )
+	{
+		bool baseResult = GraphicsPipelineStateController::setViewport( pViewportDesc );
+
+		if( baseResult )
+		{
+			glViewport(
+				numeric_cast<GLsizei>( pViewportDesc.origin.x ),
+		        numeric_cast<GLsizei>( pViewportDesc.origin.y ),
+	        numeric_cast<GLsizei>( pViewportDesc.size.x ),
+	        numeric_cast<GLsizei>( pViewportDesc.size.y ) );
+			ts3OpenGLHandleLastError();
+
+			glDepthRangef( pViewportDesc.depthRange.zNear, pViewportDesc.depthRange.zFar );
+			ts3OpenGLHandleLastError();
+		}
+
+		return baseResult;
+	}
+
+	bool GLGraphicsPipelineStateController::setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData )
+	{
+		bool baseResult = GraphicsPipelineStateController::setShaderConstant( pParamRefID, pData );
+
+		if( baseResult )
+		{
+			const auto & glcGraphicsPSO = getCurrentGraphicsPSORef<GLGraphicsPipelineStateObject>();
+			if( const auto & inputSignature = glcGraphicsPSO.mShaderInputSignature )
+			{
+				const auto & constantInfo = inputSignature.getConstantInfo( pParamRefID );
+				if( constantInfo.iVisibilityMask != 0 )
+				{
+					const auto * shaderLinkageState = getCurrentSeparableStates().shaderLinkageState;
+					const auto * glcShaderLinkageState = shaderLinkageState->queryInterface<GLGraphicsShaderLinkageImmutableState>();
+
+					updateShaderInputInlineConstantData( *glcShaderLinkageState, constantInfo, pData );
+
+					return true;
+				}
+			}
+			return false;
+		}
+
+		return baseResult;
+	}
+
+	bool GLGraphicsPipelineStateController::setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer )
+	{
+		bool baseResult = GraphicsPipelineStateController::setShaderConstantBuffer( pParamRefID, pConstantBuffer );
+
+		if( baseResult )
+		{
+			const auto & glcGraphicsPSO = getCurrentGraphicsPSORef<GLGraphicsPipelineStateObject>();
+			if( const auto & inputSignature = glcGraphicsPSO.mShaderInputSignature )
+			{
+				const auto & descriptorInfo = inputSignature.getDescriptorInfo( pParamRefID );
+				ts3DebugAssert( descriptorInfo.dDescriptorType == EShaderInputDescriptorType::Resource );
+				ts3DebugAssert( descriptorInfo.uResourceInfo.resourceType == EShaderInputResourceType::CBVConstantBuffer );
+
+				if( descriptorInfo.dShaderVisibilityMask != 0 )
+				{
+					auto * openglBuffer = pConstantBuffer.queryInterface<GLGPUBuffer>();
+
+					glBindBufferBase( GL_UNIFORM_BUFFER, descriptorInfo.uResourceInfo.resourceBaseRegisterIndex, openglBuffer->mGLBufferObject->mGLHandle );
+					ts3OpenGLHandleLastError();
+
+					return true;
+				}
+			}
+		}
+
+		return baseResult;
+	}
+
+	bool GLGraphicsPipelineStateController::setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture )
+	{
+		bool baseResult = GraphicsPipelineStateController::setShaderTextureImage( pParamRefID, pTexture );
+
+		if( baseResult )
+		{
+			const auto & glcGraphicsPSO = getCurrentGraphicsPSORef<GLGraphicsPipelineStateObject>();
+			if( const auto & inputSignature = glcGraphicsPSO.mShaderInputSignature )
+			{
+				const auto & descriptorInfo = inputSignature.getDescriptorInfo( pParamRefID );
+				ts3DebugAssert( descriptorInfo.dDescriptorType == EShaderInputDescriptorType::Resource );
+				ts3DebugAssert( descriptorInfo.uResourceInfo.resourceType == EShaderInputResourceType::SRVTextureImage );
+
+				auto * openglTexture = pTexture.queryInterface<GLTexture>();
+
+				glActiveTexture( GL_TEXTURE0 + descriptorInfo.uResourceInfo.resourceBaseRegisterIndex );
+				ts3OpenGLHandleLastError();
+
+				glBindTexture( openglTexture->mGLTextureObject->mGLTextureBindTarget, openglTexture->mGLTextureObject->mGLHandle );
+				ts3OpenGLHandleLastError();
+
+				return true;
+			}
+		}
+
+		return baseResult;
+	}
+
+	bool GLGraphicsPipelineStateController::setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler )
+	{
+		bool baseResult = GraphicsPipelineStateController::setShaderTextureSampler( pParamRefID, pSampler );
+
+		if( baseResult )
+		{
+			const auto & glcGraphicsPSO = getCurrentGraphicsPSORef<GLGraphicsPipelineStateObject>();
+			if( const auto & inputSignature = glcGraphicsPSO.mShaderInputSignature )
+			{
+				const auto & descriptorInfo = inputSignature.getDescriptorInfo( pParamRefID );
+				ts3DebugAssert( descriptorInfo.dDescriptorType == EShaderInputDescriptorType::Sampler );
+
+				if( descriptorInfo.dShaderVisibilityMask != 0 )
+				{
+					auto * openglSampler = pSampler.queryInterface<GLSampler>();
+
+					glBindSampler( descriptorInfo.uSamplerInfo.samplerBindingIndex, openglSampler->mGLSamplerObject->mGLHandle );
+					ts3OpenGLHandleLastError();
+
+					return true;
+				}
+			}
+		}
+
+		return baseResult;
+	}
+
 	void GLGraphicsPipelineStateController::resetDynamicIAVertexStreamState()
 	{}
 
@@ -190,9 +347,6 @@ namespace ts3::gpuapi
 	{
 		if( pBlendState.mGLBlendConfig.attachmentsMask.isSetAnyOf( E_RT_ATTACHMENT_MASK_COLOR_ALL ) )
 		{
-			glEnable( GL_BLEND );
-			ts3OpenGLHandleLastError();
-
 			if( pBlendState.mBlendFlags.isSet( E_BLEND_CONFIG_FLAG_ENABLE_MRT_INDEPENDENT_BLENDING_BIT ) )
 			{
 				for( uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM; ++caIndex )
@@ -200,23 +354,29 @@ namespace ts3::gpuapi
 					const auto attachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
 					if( pBlendState.mGLBlendConfig.attachmentsMask.isSet( attachmentBit ) )
 					{
+						glEnablei( GL_BLEND, caIndex );
+						ts3OpenGLHandleLastError();
+
 						const auto & blendProps = pBlendState.mGLBlendConfig.attachments[caIndex];
 
-						glBlendFuncSeparate( blendProps.srcColorFactor, blendProps.dstColorFactor, blendProps.srcAlphaFactor, blendProps.dstAlphaFactor );
+						glBlendFuncSeparatei( caIndex, blendProps.srcColorFactor, blendProps.dstColorFactor, blendProps.srcAlphaFactor, blendProps.dstAlphaFactor );
 						ts3OpenGLHandleLastError();
 
-						glBlendEquationSeparate( blendProps.colorEquation, blendProps.alphaEquation );
+						glBlendEquationSeparatei( caIndex, blendProps.colorEquation, blendProps.alphaEquation );
 						ts3OpenGLHandleLastError();
-
-						const auto & blendFactor = pBlendState.mGLBlendConfig.attachments[caIndex].constantFactor;
-
-						glBlendColor( blendFactor.fpRed, blendFactor.fpGreen, blendFactor.fpBlue, blendFactor.fpAlpha );
+					}
+					else
+					{
+						glDisablei( GL_BLEND, caIndex );
 						ts3OpenGLHandleLastError();
 					}
 				}
 			}
 			else
 			{
+				glEnable( GL_BLEND );
+				ts3OpenGLHandleLastError();
+
 				const auto & blendProps = pBlendState.mGLBlendConfig.attachments[0];
 
 				glBlendFuncSeparate( blendProps.srcColorFactor, blendProps.dstColorFactor, blendProps.srcAlphaFactor, blendProps.dstAlphaFactor );
@@ -224,8 +384,11 @@ namespace ts3::gpuapi
 
 				glBlendEquationSeparate( blendProps.colorEquation, blendProps.alphaEquation );
 				ts3OpenGLHandleLastError();
+			}
 
-				const auto & blendFactor = pBlendState.mGLBlendConfig.attachments[0].constantFactor;
+			if( pBlendState.mGLBlendConfig.flags.isSetAnyOf( E_BLEND_CONFIG_FLAG_SET_FIXED_BLEND_CONSTANTS_BIT ) )
+			{
+				const auto & blendFactor = pBlendState.mGLBlendConfig.constantColor;
 
 				glBlendColor( blendFactor.fpRed, blendFactor.fpGreen, blendFactor.fpBlue, blendFactor.fpAlpha );
 				ts3OpenGLHandleLastError();
@@ -392,6 +555,34 @@ namespace ts3::gpuapi
 	{
 		glBindFramebuffer( GL_FRAMEBUFFER, pGLRenderTargetBinding.renderFBO->mGLHandle );
 		ts3OpenGLHandleLastError();
+	}
+
+	void GLGraphicsPipelineStateController::updateShaderInputInlineConstantData(
+			const GLGraphicsShaderLinkageImmutableState & pShaderState,
+			const ShaderInputParameterConstant & pConstantInfo,
+			const void * pConstantData )
+	{
+		auto constantBaseType = cxdefs::getVertexAttribFormatBaseDataType( pConstantInfo.iFormat );
+		auto constantLength = cxdefs::getVertexAttribFormatLength( pConstantInfo.iFormat );
+
+		if( pShaderState.mGLShaderPipelineObject )
+		{
+			smutil::updateUniformDataCurrent(
+					*( pShaderState.mGLShaderPipelineObject ),
+					pConstantInfo.iStageIndex,
+					constantBaseType,
+					constantLength,
+					pConstantData );
+		}
+		else
+		{
+			smutil::updateUniformDataExplicit(
+					*( pShaderState.mGLShaderProgramObject ),
+					pConstantInfo.iStageIndex,
+					constantBaseType,
+					constantLength,
+					pConstantData );
+		}
 	}
 
 } // namespace ts3::gpuapi

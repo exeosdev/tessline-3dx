@@ -9,7 +9,6 @@ namespace ts3::gpuapi
 
 		const RTColorAttachmentBlendSettings cvCommonRTColorAttachmentBlendSettingsDefault =
 		{
-			{ 0u, 0u, 0u, 0u },
 			EBlendFactor::One,
 			EBlendFactor::One,
 			EBlendFactor::Zero,
@@ -50,7 +49,8 @@ namespace ts3::gpuapi
 			E_BLEND_CONFIG_FLAGS_DEFAULT,
 			{
 				cvCommonRTColorAttachmentBlendSettingsDefault
-			}
+			},
+			math::RGBAColorR32Norm{ 0.0f, 0.0f, 0.0f, 0.0f },
 		};
 
 		const DepthStencilConfig cvPipelineDepthStencilConfigDefault =

@@ -14,6 +14,7 @@ namespace ts3::gpuapi
 		E_BLEND_CONFIG_FLAG_ENABLE_ALPHA_TO_COVERAGE_BIT = 0x01,
 		E_BLEND_CONFIG_FLAG_ENABLE_MULTI_RENDER_TARGET_BIT = 0x02,
 		E_BLEND_CONFIG_FLAG_ENABLE_MRT_INDEPENDENT_BLENDING_BIT = 0x04,
+		E_BLEND_CONFIG_FLAG_SET_FIXED_BLEND_CONSTANTS_BIT = 0x08,
 		E_BLEND_CONFIG_FLAGS_DEFAULT = 0,
 		E_BLEND_CONFIG_MASK_ALL = 0x07,
 	};
@@ -107,7 +108,6 @@ namespace ts3::gpuapi
 	/// @see BlendConfig
 	struct RTColorAttachmentBlendSettings
 	{
-		math::RGBAColorU8 constantFactor;
 		EBlendFactor factorSrcColor;
 		EBlendFactor factorSrcAlpha;
 		EBlendFactor factorDstColor;
@@ -163,6 +163,8 @@ namespace ts3::gpuapi
 		/// Otherwise, attachments[0] is used for all targets and rest of the array is ignored.
 		/// @see EBlendConfigFlags
 		RTColorAttachmentBlendSettings attachments[cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+
+		math::RGBAColorR32Norm constantColor;
 	};
 
 	/// @brief
@@ -187,7 +189,7 @@ namespace ts3::gpuapi
 
 		/// @brief A default blend configuration for an RT attachment.
 		/// This default config represents default set of options used for blending. The config is as follows:
-		/// - constantFactor:        {0,0,0,0}
+		/// - constantColor:        {0,0,0,0}
 		/// - factorSrcColor:        EBlendFactor::One
 		/// - factorSrcAlpha:        EBlendFactor::One
 		/// - factorDstColor:        EBlendFactor::Zero

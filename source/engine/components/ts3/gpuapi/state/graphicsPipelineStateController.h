@@ -31,7 +31,7 @@ namespace ts3::gpuapi
 		GraphicsPipelineStateController();
 		virtual ~GraphicsPipelineStateController();
 
-		virtual void applyPipelineStateChanges() = 0;
+		virtual bool applyStateChanges() = 0;
 
 		/// @brief Binds the specified state object to the pipeline. Returns true if any change has been made.
 		/// @return True if anything has been changed or false otherwise.
@@ -51,8 +51,15 @@ namespace ts3::gpuapi
 		virtual bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
 		virtual bool resetRenderTargetBindingState();
 
-		/// @brief Returns true if the state update mask is not empty (some bits are set) or false otherwise.
-		TS3_ATTR_NO_DISCARD bool hasPendingState() const
+		virtual bool setBlendConstantColor( const math::RGBAColorR32Norm & pColor );
+		virtual bool setViewport( const ViewportDesc & pViewportDesc );
+		virtual bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
+		virtual bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
+		virtual bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture );
+		virtual bool setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler );
+
+		/// @brief
+		TS3_ATTR_NO_DISCARD bool hasPendingStateChanges() const noexcept
 		{
 			return !_stateUpdateMask.empty();
 		}
