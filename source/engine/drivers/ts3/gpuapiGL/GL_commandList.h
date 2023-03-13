@@ -36,10 +36,10 @@ namespace ts3::gpuapi
 		virtual void beginCommandSequence() override;
 		virtual void endCommandSequence() override;
 
-		virtual void cmdDrawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset ) override;
-		virtual void cmdDrawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset ) override;
-		virtual void cmdDrawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset ) override;
-		virtual void cmdDrawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset ) override;
+		virtual void cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset ) override;
+		virtual void cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset ) override;
+		virtual void cmdDrawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset ) override;
+		virtual void cmdDrawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset ) override;
 
 		virtual void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext ) override;
 

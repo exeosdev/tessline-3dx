@@ -13,6 +13,8 @@ namespace ts3::gpuapi
 			GLShaderPipelineObjectHandle pGLShaderPipelineObject,
 			GLShaderProgramObjectHandle pGLShaderProgramObject )
 	: GraphicsShaderLinkageImmutableState( pGPUDevice, pCommonProperties )
+	, mGLShaderPipelineObject( std::move( pGLShaderPipelineObject ) )
+	, mGLShaderProgramObject( std::move( pGLShaderProgramObject ) )
 	{}
 
 	GLGraphicsShaderLinkageImmutableState::~GLGraphicsShaderLinkageImmutableState() = default;

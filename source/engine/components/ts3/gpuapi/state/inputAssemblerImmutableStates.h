@@ -17,7 +17,7 @@ namespace ts3::gpuapi
 		Bitmask<EIAVertexAttributeFlags> activeAttributesMask;
 
 		/// Number of active attributes enabled for the IA stage.
-		uint32 activeAttributesNum;
+		native_uint activeAttributesNum;
 
 		/// Primitive topology used to render vertices.
 		EPrimitiveTopology primitiveTopology;

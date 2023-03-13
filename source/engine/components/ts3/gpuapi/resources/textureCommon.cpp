@@ -173,6 +173,21 @@ namespace ts3::gpuapi
 			return pTexture ? pTexture->mTextureLayout : sInvalidTextureLayout;
 		}
 
+		RenderTargetTextureLayout queryRenderTargetTextureLayoutForTexture( TextureHandle pTexture ) noexcept
+		{
+			return pTexture ? queryRenderTargetTextureLayoutForTexture( pTexture->mTextureLayout ) : RenderTargetTextureLayout{};
+		}
+
+		RenderTargetTextureLayout queryRenderTargetTextureLayoutForTexture( const TextureLayout & pTextureLayout ) noexcept
+		{
+			RenderTargetTextureLayout rttLayout{};
+			rttLayout.internalDataFormat = pTextureLayout.pixelFormat;
+			rttLayout.msaaLevel = pTextureLayout.msaaLevel;
+			rttLayout.bufferSize.width = pTextureLayout.dimensions.width;
+			rttLayout.bufferSize.height = pTextureLayout.dimensions.height;
+			return rttLayout;
+		}
+
 		ETextureTarget getTextureTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pTextureResourceFlags )
 		{
 			static const ETextureTarget textureTargetArray[] =

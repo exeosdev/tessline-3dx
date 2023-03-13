@@ -39,11 +39,20 @@ namespace ts3::gpuapi
 
 	struct SeparablePSOStateSet
 	{
-		const BlendImmutableState * blendState = nullptr;
-		const DepthStencilImmutableState * depthStencilState = nullptr;
-		const RasterizerImmutableState * rasterizerState = nullptr;
-		const IAInputLayoutImmutableState * iaInputLayoutState = nullptr;
-		const GraphicsShaderLinkageImmutableState * shaderLinkageState = nullptr;
+		BlendImmutableStateHandle blendState;
+		DepthStencilImmutableStateHandle depthStencilState;
+		RasterizerImmutableStateHandle rasterizerState;
+		IAInputLayoutImmutableStateHandle iaInputLayoutState;
+		GraphicsShaderLinkageImmutableStateHandle shaderLinkageState;
+	};
+
+	struct SeparablePSOStateCache
+	{
+		BlendImmutableState * blendState = nullptr;
+		DepthStencilImmutableState * depthStencilState = nullptr;
+		RasterizerImmutableState * rasterizerState = nullptr;
+		IAInputLayoutImmutableState * iaInputLayoutState = nullptr;
+		GraphicsShaderLinkageImmutableState * shaderLinkageState = nullptr;
 
 		void reset()
 		{
@@ -55,7 +64,7 @@ namespace ts3::gpuapi
 		}
 	};
 
-	struct SeparableShaderSet
+	struct SeparableShaderCache
 	{
 		Shader * vertexShader = nullptr;
 		Shader * hullShader = nullptr;
@@ -125,7 +134,7 @@ namespace ts3::gpuapi
 		GraphicsPipelineStateControllerSeparable();
 		virtual ~GraphicsPipelineStateControllerSeparable();
 
-		TS3_ATTR_NO_DISCARD const SeparablePSOStateSet & getCurrentSeparableStates() const noexcept;
+		TS3_ATTR_NO_DISCARD const SeparablePSOStateCache & getCurrentSeparableStates() const noexcept;
 
 		/// @see GraphicsPipelineStateController::setGraphicsPipelineStateObject
 		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO ) override;
@@ -137,7 +146,7 @@ namespace ts3::gpuapi
 		Bitmask<uint64> setSeparablePSOStates( const GraphicsPipelineStateObjectSeparable & pGraphicsPSOSeparable );
 
 	private:
-		SeparablePSOStateSet _currentSeparableStates;
+		SeparablePSOStateCache _currentSeparableStates;
 	};
 
 	/// @brief
@@ -147,7 +156,7 @@ namespace ts3::gpuapi
 		GraphicsPipelineStateControllerSeparableShader();
 		virtual ~GraphicsPipelineStateControllerSeparableShader();
 
-		TS3_ATTR_NO_DISCARD const SeparableShaderSet & getCurrentSeparableShaders() const noexcept;
+		TS3_ATTR_NO_DISCARD const SeparableShaderCache & getCurrentSeparableShaders() const noexcept;
 
 		/// @see GraphicsPipelineStateController::setGraphicsPipelineStateObject
 		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO ) override;
@@ -159,7 +168,7 @@ namespace ts3::gpuapi
 		Bitmask<uint64> setSeparableShaders( const GraphicsPipelineStateObjectSeparableShader & pGraphicsPSOSeparableShader );
 
 	private:
-		SeparableShaderSet _currentSeparableShaders;
+		SeparableShaderCache _currentSeparableShaders;
 	};
 
 } // namespace ts3::gpuapi

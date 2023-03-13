@@ -15,7 +15,10 @@ namespace ts3::gpuapi
 
 	enum ECommandListActionFlags : uint32
 	{
-		E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT = 0x01
+		E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT = 0x01,
+
+		E_COMMAND_LIST_ACTION_FLAGS_DEFAULT =
+			E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT,
 	};
 
 	class TS3_GPUAPI_CLASS CommandList : public GPUDeviceChildObject
@@ -61,11 +64,11 @@ namespace ts3::gpuapi
 
 		virtual bool beginRenderPass(
 				const RenderPassConfigurationImmutableState & pRenderPassState,
-				Bitmask<ECommandListActionFlags> pFlags );
+				Bitmask<ECommandListActionFlags> pFlags = E_COMMAND_LIST_ACTION_FLAGS_DEFAULT );
 
 		virtual bool beginRenderPass(
 				const RenderPassConfigurationDynamicState & pRenderPassState,
-				Bitmask<ECommandListActionFlags> pFlags );
+				Bitmask<ECommandListActionFlags> pFlags = E_COMMAND_LIST_ACTION_FLAGS_DEFAULT );
 
 		virtual void endRenderPass();
 
@@ -85,10 +88,10 @@ namespace ts3::gpuapi
 		virtual void cmdDispatchCompute( uint32 pThrGroupSizeX, uint32 pThrGroupSizeY, uint32 pThrGroupSizeZ ) {} // = 0;
 		virtual void cmdDispatchComputeIndirect( uint32 pIndirectBufferOffset ) {} // = 0;
 
-		virtual void cmdDrawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset ) = 0;
-		virtual void cmdDrawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset ) = 0;
-		virtual void cmdDrawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset ) = 0;
-		virtual void cmdDrawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset ) = 0;
+		virtual void cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset ) = 0;
+		virtual void cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset ) = 0;
+		virtual void cmdDrawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset ) = 0;
+		virtual void cmdDrawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset ) = 0;
 
 		virtual void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext ) = 0;
 

@@ -68,19 +68,19 @@ namespace ts3::gpuapi
 		return true;
 	}
 
-	void VKCommandList::drawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset )
+	void VKCommandList::drawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset )
 	{
 	}
 
-	void VKCommandList::drawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset )
+	void VKCommandList::drawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset )
 	{
 	}
 
-	void VKCommandList::drawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset )
+	void VKCommandList::drawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset )
 	{
 	}
 
-	void VKCommandList::drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset )
+	void VKCommandList::drawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset )
 	{
 	}
 

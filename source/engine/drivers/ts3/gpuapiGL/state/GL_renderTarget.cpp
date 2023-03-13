@@ -94,7 +94,7 @@ namespace ts3::gpuapi
 					smutil::createFramebufferObject( pBindingDefinition, pBindingDefinition.activeAttachmentsMask );
 
 			glcRenderTargetBindingDefinition.fboData.resolveFBO =
-					smutil::createFramebufferObject( pBindingDefinition, pBindingDefinition.attachmentActionResolveMask );
+					smutil::createFramebufferObject( pBindingDefinition, pBindingDefinition.attachmentsActionResolveMask );
 
 			glcRenderTargetBindingDefinition.rtLayout = renderTargetLayout;
 
@@ -116,13 +116,12 @@ namespace ts3::gpuapi
 				return nullptr;
 			}
 
-			for( uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM; ++caIndex )
+			for( uint32 caIndex = 0; cxdefs::isRTColorAttachmentIndexValid( caIndex ); ++caIndex )
 			{
 				const auto attachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
 				if( pAttachmentMask.isSet( attachmentBit ) )
 				{
 					auto & colorAttachmentBinding = pBindingDefinition.colorAttachments[caIndex];
-
 					auto & textureReference = colorAttachmentBinding.attachmentTexture->getTargetTextureRef();
 					auto * openglTexture = textureReference.getRefTexture()->queryInterface<GLTexture>();
 
@@ -164,33 +163,36 @@ namespace ts3::gpuapi
 			return framebufferObject;
 		}
 
-		void clearRenderPassFramebuffer(
-				const GLRenderTargetBindingInfo & pRTBindingInfo,
-				const RenderPassConfiguration & pRenderPassConfiguration )
+		void clearRenderPassFramebuffer( const RenderPassConfiguration & pRenderPassConfiguration )
 		{
-			if( pRenderPassConfiguration.attachmentActionClearMask != 0 )
+			if( pRenderPassConfiguration.attachmentsActionClearMask != 0 )
 			{
-				ts3DebugAssert( pRTBindingInfo.renderFBO );
-
-				glBindFramebuffer( GL_DRAW_FRAMEBUFFER, pRTBindingInfo.renderFBO->mGLHandle );
-				ts3OpenGLHandleLastError();
-
-				for( uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM; ++caIndex )
+				auto colorAttachmentsClearMask = pRenderPassConfiguration.attachmentsActionClearMask & E_RT_ATTACHMENT_MASK_COLOR_ALL;
+				for( uint32 caIndex = 0; cxdefs::isRTColorAttachmentIndexValid( caIndex ); ++caIndex )
 				{
 					const auto attachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
-					if( pRenderPassConfiguration.attachmentActionClearMask .isSet( attachmentBit ) )
+					if( colorAttachmentsClearMask.isSet( attachmentBit ) )
 					{
 						const auto & attachmentConfig = pRenderPassConfiguration.colorAttachments[caIndex];
 						const auto & clearColor = attachmentConfig.clearConfig.colorValue;
 
-						GLfloat clearArray[4] = { clearColor.fpRed, clearColor.fpGreen, clearColor.fpBlue, clearColor.fpAlpha };
+						if( attachmentConfig.clearMask.isSet( E_RENDER_TARGET_BUFFER_FLAG_COLOR_BIT ) )
+						{
+							GLfloat clearArray[4] = { clearColor.fpRed, clearColor.fpGreen, clearColor.fpBlue, clearColor.fpAlpha };
+							glClearBufferfv( GL_COLOR, caIndex, clearArray );
+							ts3OpenGLHandleLastError();
+						}
 
-						glClearBufferfv( GL_COLOR, caIndex, clearArray );
-						ts3OpenGLHandleLastError();
+						colorAttachmentsClearMask.unset( attachmentBit );
+					}
+
+					if( colorAttachmentsClearMask.empty() )
+					{
+						break;
 					}
 				}
 
-				if( pRenderPassConfiguration.attachmentActionClearMask .isSet( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT ) )
+				if( pRenderPassConfiguration.attachmentsActionClearMask.isSet( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT ) )
 				{
 					const auto & attachmentConfig = pRenderPassConfiguration.depthStencilAttachment;
 					const auto & clearData = attachmentConfig.clearConfig;
@@ -209,9 +211,6 @@ namespace ts3::gpuapi
 						ts3OpenGLHandleLastError();
 					}
 				}
-
-				glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0u );
-				ts3OpenGLHandleLastError();
 			}
 		}
 
@@ -219,22 +218,29 @@ namespace ts3::gpuapi
 				const GLRenderTargetBindingInfo & pRTBindingInfo,
 				const RenderPassConfiguration & pRenderPassConfiguration )
 		{
-			if( pRenderPassConfiguration.attachmentActionResolveMask != 0 )
+			if( pRenderPassConfiguration.attachmentsActionResolveMask != 0 )
 			{
 				ts3DebugAssert( pRTBindingInfo.resolveFBO );
 
+				GLint drawFramebufferHandle = -1;
+				glGetIntegerv( GL_DRAW_FRAMEBUFFER_BINDING, &drawFramebufferHandle );
+
+				GLint readFramebufferHandle = -1;
+				glGetIntegerv( GL_READ_FRAMEBUFFER_BINDING, &readFramebufferHandle );
+
 				const auto & fboImageSize = pRTBindingInfo.rtLayout->sharedImageSize;
 
-				glBindFramebuffer( GL_READ_FRAMEBUFFER, pRTBindingInfo.renderFBO->mGLHandle );
+				glBindFramebuffer( GL_READ_FRAMEBUFFER, drawFramebufferHandle );
 				ts3OpenGLHandleLastError();
 
 				glBindFramebuffer( GL_DRAW_FRAMEBUFFER, pRTBindingInfo.renderFBO->mGLHandle );
 				ts3OpenGLHandleLastError();
 
-				for( uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM; ++caIndex )
+				auto colorAttachmentsResolveMask = pRenderPassConfiguration.attachmentsActionResolveMask;
+				for( uint32 caIndex = 0; cxdefs::isRTColorAttachmentIndexValid( caIndex ); ++caIndex )
 				{
 					const auto attachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
-					if( pRenderPassConfiguration.attachmentActionResolveMask.isSet( attachmentBit ) )
+					if( colorAttachmentsResolveMask.isSet( attachmentBit ) )
 					{
 						glReadBuffer( GL_COLOR_ATTACHMENT0 + caIndex );
 						ts3OpenGLHandleLastError();
@@ -254,12 +260,19 @@ namespace ts3::gpuapi
 								GL_COLOR_BUFFER_BIT,
 								GL_LINEAR );
 						ts3OpenGLHandleLastError();
+
+						colorAttachmentsResolveMask.unset( attachmentBit );
+
+						if( colorAttachmentsResolveMask.empty() )
+						{
+							break;
+						}
 					}
 
-					glBindFramebuffer( GL_READ_FRAMEBUFFER, 0u );
+					glBindFramebuffer( GL_READ_FRAMEBUFFER, readFramebufferHandle );
 					ts3OpenGLHandleLastError();
 
-					glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0u );
+					glBindFramebuffer( GL_DRAW_FRAMEBUFFER, drawFramebufferHandle );
 					ts3OpenGLHandleLastError();
 				}
 			}

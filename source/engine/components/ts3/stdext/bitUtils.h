@@ -25,24 +25,24 @@ namespace ts3
 		return static_cast<TUint>( pValue ) >> tShift;
 	}
 
-	inline constexpr uint16 popCount( uint8 pValue )
+	inline uint16 popCount( uint8 pValue )
 	{
-		return TS3_PCL_POPCOUNT16( static_cast<native_uint>( pValue ) );
+		return static_cast<uint16>( TS3_PCL_POPCOUNT16( static_cast<uint16>( pValue ) ) );
 	}
 
-	inline constexpr uint16 popCount( uint16 pValue )
+	inline uint16 popCount( uint16 pValue )
 	{
-		return TS3_PCL_POPCOUNT16( pValue );
+		return static_cast<uint16>( TS3_PCL_POPCOUNT16( pValue ) );
 	}
 
-	inline constexpr uint16 popCount( uint32 pValue )
+	inline uint16 popCount( uint32 pValue )
 	{
-		return TS3_PCL_POPCOUNT32( pValue );
+		return static_cast<uint16>( TS3_PCL_POPCOUNT32( pValue ) );
 	}
 
-	inline constexpr uint16 popCount( uint64 pValue )
+	inline uint16 popCount( uint64 pValue )
 	{
-		return TS3_PCL_POPCOUNT64( pValue );
+		return static_cast<uint16>( TS3_PCL_POPCOUNT64( pValue ) );
 	}
 
 	template <typename TVal>

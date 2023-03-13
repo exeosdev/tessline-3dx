@@ -86,7 +86,7 @@ namespace ts3::gpuapi
 
 	void GLScreenPresentationLayer::bindRenderTarget( CommandContext * pCmdContext )
 	{
-		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 		ts3OpenGLHandleLastError();
 	}
 

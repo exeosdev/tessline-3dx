@@ -111,10 +111,16 @@ namespace ts3
 	template <typename TResultType, typename TInputType>
 	TS3_ATTR_NO_DISCARD inline std::unique_ptr<TResultType> moveInterfaceUniquePtr( std::unique_ptr<TInputType> pUPtr )
 	{
-		using LocalUniquePtr = std::unique_ptr<TInputType, DefaultDelete<TInputType>>;
-		TResultType * targetPtr = pUPtr->template queryInterface<TResultType>();
-		LocalUniquePtr localPtr{ pUPtr.release() };
-		return std::unique_ptr<TResultType>{ targetPtr };
+		std::unique_ptr<TResultType> result;
+		if( pUPtr )
+		{
+			if( TResultType * targetPtr = pUPtr->template queryInterface<TResultType>() )
+			{
+				result = std::unique_ptr<TResultType>{ targetPtr };
+				pUPtr.release();
+			}
+		}
+		return result;
 	}
 
 	template <typename TInterfaceSubClass, typename TInputType>

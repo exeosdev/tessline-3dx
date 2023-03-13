@@ -277,7 +277,7 @@ namespace ts3
 	};
 
 	template <>
-	struct HashTraits<EHashAlgo::FNV1A32> : public HashCommonTraits<uint64>
+	struct HashTraits<EHashAlgo::FNV1A32> : public HashCommonTraits<uint32>
 	{
 		static constexpr uint32 sHashInitValue = 0x811C9DC5;
 		static uint32 compute( const void * pInput, size_t pInputSize );

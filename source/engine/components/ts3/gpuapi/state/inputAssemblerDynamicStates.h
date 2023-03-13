@@ -23,24 +23,24 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD bool empty() const noexcept;
 
-		TS3_ATTR_NO_DISCARD uint32 countActiveVertexBuffers() const noexcept;
+		TS3_ATTR_NO_DISCARD native_uint countActiveVertexBuffers() const noexcept;
 
 		TS3_ATTR_NO_DISCARD const IAVertexStreamDefinition & getVertexStreamDefinition() const noexcept;
 
 		void assign( const IAVertexStreamDefinition & pDefinition );
 
-		IAVertexBufferReference & setVertexBufferRef( input_assembler_index_t pIndex );
+		IAVertexBufferReference & setVertexBufferRef( native_uint pIndex );
 
-		void setVertexBufferRef( input_assembler_index_t pIndex, const IAVertexBufferReference & pVBReference );
+		void setVertexBufferRef( native_uint pIndex, const IAVertexBufferReference & pVBReference );
 		void setVertexBufferRefs( const IAVertexBufferReferenceArray & pVBReferences );
-		void setVertexBufferRefs( uint32 pFirstIndex, uint32 pCount, const IAVertexBufferReference * pVBReferences );
+		void setVertexBufferRefs( native_uint pFirstIndex, native_uint pCount, const IAVertexBufferReference * pVBReferences );
 
 		IAIndexBufferReference & setIndexBufferRef();
 
 		void setIndexBufferRef( const IAIndexBufferReference & pIBReference );
 
-		void resetVertexBufferRef( input_assembler_index_t pIndex );
-		void resetVertexBufferRefs( uint32 pFirstIndex, uint32 pCount );
+		void resetVertexBufferRef( native_uint pIndex );
+		void resetVertexBufferRefs( native_uint pFirstIndex, native_uint pCount );
 		void resetVertexBufferRefs();
 
 		void resetIndexBufferRef();
@@ -48,8 +48,8 @@ namespace ts3::gpuapi
 		void resetAllBufferRefs();
 
 	private:
-		void _setVertexBufferRefs( uint32 pFirstIndex, uint32 pCount, const IAVertexBufferReference * pVBReferences );
-		void _resetVertexBufferRefs( uint32 pFirstIndex, uint32 pCount );
+		void _setVertexBufferRefs( native_uint pFirstIndex, native_uint pCount, const IAVertexBufferReference * pVBReferences );
+		void _resetVertexBufferRefs( native_uint pFirstIndex, native_uint pCount );
 
 	private:
 		IAVertexStreamDefinition _vertexStreamDefinition;

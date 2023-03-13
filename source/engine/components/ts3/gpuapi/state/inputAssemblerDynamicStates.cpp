@@ -18,7 +18,7 @@ namespace ts3::gpuapi
 		return _vertexStreamDefinition.activeBindingsMask.empty();
 	}
 
-	uint32 IAVertexStreamDynamicState::countActiveVertexBuffers() const noexcept
+	native_uint IAVertexStreamDynamicState::countActiveVertexBuffers() const noexcept
 	{
 		return popCount( _vertexStreamDefinition.activeBindingsMask & E_IA_VERTEX_STREAM_BINDING_MASK_VERTEX_BUFFER_ALL_BITS );
 	}
@@ -33,7 +33,7 @@ namespace ts3::gpuapi
 		_vertexStreamDefinition = pDefinition;
 	}
 
-	IAVertexBufferReference & IAVertexStreamDynamicState::setVertexBufferRef( input_assembler_index_t pIndex )
+	IAVertexBufferReference & IAVertexStreamDynamicState::setVertexBufferRef( native_uint pIndex )
 	{
 		ts3DebugAssert( cxdefs::isIAVertexBufferIndexValid( pIndex ) );
 		_vertexStreamDefinition.activeBindingsMask.set( cxdefs::makeIAVertexBufferFlag( pIndex ) );
@@ -41,9 +41,9 @@ namespace ts3::gpuapi
 
 	}
 
-	void IAVertexStreamDynamicState::setVertexBufferRef( input_assembler_index_t pIndex, const IAVertexBufferReference & pVBReference )
+	void IAVertexStreamDynamicState::setVertexBufferRef( native_uint pIndex, const IAVertexBufferReference & pVBReference )
 	{
-		_setVertexBufferRefs( pIndex, 1, &pVBReference );
+		_setVertexBufferRefs( pIndex, 1u, &pVBReference );
 	}
 
 	void IAVertexStreamDynamicState::setVertexBufferRefs( const IAVertexBufferReferenceArray & pVBReferences )
@@ -51,7 +51,7 @@ namespace ts3::gpuapi
 		_setVertexBufferRefs( 0, pVBReferences.size(), pVBReferences.data() );
 	}
 
-	void IAVertexStreamDynamicState::setVertexBufferRefs( uint32 pFirstIndex, uint32 pCount, const IAVertexBufferReference * pVBReferences )
+	void IAVertexStreamDynamicState::setVertexBufferRefs( native_uint pFirstIndex, native_uint pCount, const IAVertexBufferReference * pVBReferences )
 	{
 		_setVertexBufferRefs( pFirstIndex, pCount, pVBReferences );
 	}
@@ -68,12 +68,12 @@ namespace ts3::gpuapi
 		_vertexStreamDefinition.indexBufferReference = pIBReference;
 	}
 
-	void IAVertexStreamDynamicState::resetVertexBufferRef( input_assembler_index_t pIndex )
+	void IAVertexStreamDynamicState::resetVertexBufferRef( native_uint pIndex )
 	{
 		_resetVertexBufferRefs( pIndex, 1 );
 	}
 
-	void IAVertexStreamDynamicState::resetVertexBufferRefs( uint32 pFirstIndex, uint32 pCount )
+	void IAVertexStreamDynamicState::resetVertexBufferRefs( native_uint pFirstIndex, native_uint pCount )
 	{
 		_resetVertexBufferRefs( pFirstIndex, pCount );
 	}
@@ -95,9 +95,9 @@ namespace ts3::gpuapi
 		resetVertexBufferRefs();
 	}
 
-	void IAVertexStreamDynamicState::_setVertexBufferRefs( uint32 pFirstIndex, uint32 pCount, const IAVertexBufferReference * pVBReferences )
+	void IAVertexStreamDynamicState::_setVertexBufferRefs( native_uint pFirstIndex, native_uint pCount, const IAVertexBufferReference * pVBReferences )
 	{
-		for( uint32 vbIndex = pFirstIndex; ( vbIndex < cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) && ( pCount != 0 ); ++vbIndex, --pCount )
+		for( native_uint vbIndex = pFirstIndex; ( vbIndex < cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) && ( pCount != 0 ); ++vbIndex, --pCount )
 		{
 			const auto & sourceVBReference = pVBReferences[vbIndex - pFirstIndex];
 
@@ -108,9 +108,9 @@ namespace ts3::gpuapi
 		}
 	}
 
-	void IAVertexStreamDynamicState::_resetVertexBufferRefs( uint32 pFirstIndex, uint32 pCount )
+	void IAVertexStreamDynamicState::_resetVertexBufferRefs( native_uint pFirstIndex, native_uint pCount )
 	{
-		for( uint32 vbIndex = pFirstIndex; ( vbIndex < cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) && ( pCount != 0 ); ++vbIndex, --pCount )
+		for( native_uint vbIndex = pFirstIndex; ( vbIndex < cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) && ( pCount != 0 ); ++vbIndex, --pCount )
 		{
 			const auto vertexBufferBit = cxdefs::makeIAVertexBufferFlag( vbIndex );
 

@@ -12,16 +12,16 @@ namespace ts3::gpuapi
 	/// @brief
 	enum ERenderPassAttachmentActionFlags : uint32
 	{
-		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_LOAD_CLEAR_BIT            = 0x01,
-		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_LOAD_DISCARD_BIT          = 0x02,
-		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_LOAD_FETCH_BIT            = 0x04,
-		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_LOAD_RESTRICT_ACCESS_BIT  = 0x08,
-		E_RENDER_PASS_ATTACHMENT_ACTION_FLAGS_LOAD_ALL                 = 0x0F,
-		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_DISCARD_BIT         = 0x0100,
-		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_KEEP_BIT            = 0x0200,
-		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_RESOLVE_BIT         = 0x0400,
-		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_RESTRICT_ACCESS_BIT = 0x0800,
-		E_RENDER_PASS_ATTACHMENT_ACTION_FLAGS_STORE_ALL                = 0x0F00,
+		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_ACCESS_RESTRICT_BIT = 0x001,
+		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_LOAD_CLEAR_BIT      = 0x010,
+		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_LOAD_DISCARD_BIT    = 0x020,
+		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_LOAD_FETCH_BIT      = 0x040,
+		E_RENDER_PASS_ATTACHMENT_ACTION_MASK_LOAD_ALL            = 0x070,
+		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_DISCARD_BIT   = 0x100,
+		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_KEEP_BIT      = 0x200,
+		E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_RESOLVE_BIT   = 0x400,
+		E_RENDER_PASS_ATTACHMENT_ACTION_MASK_STORE_ALL           = 0x700,
+		E_RENDER_PASS_ATTACHMENT_ACTION_MASK_ALL                 = 0x771,
 	};
 
 	/// @brief Specifies how the contents of render pass attachments are treated at the beginning of a render pass.
@@ -32,7 +32,7 @@ namespace ts3::gpuapi
 		/// The resource may have the previous data or some uninitialized one. No guarantees are given.
 		Discard = E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_LOAD_DISCARD_BIT,
 		Fetch = E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_LOAD_FETCH_BIT,
-		RestrictAccess = E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_LOAD_RESTRICT_ACCESS_BIT,
+		RestrictAccess = E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_ACCESS_RESTRICT_BIT,
 		Undefined = 0
 	};
 
@@ -47,14 +47,13 @@ namespace ts3::gpuapi
 		Keep = E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_KEEP_BIT,
 		KeepResolve = E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_KEEP_BIT | E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_RESOLVE_BIT,
 		Resolve = E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_RESOLVE_BIT,
-		RestrictAccess = E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_RESTRICT_ACCESS_BIT,
 		Undefined = 0
 	};
 
 	struct RenderPassAttachmentConfig
 	{
 		RenderTargetAttachmentClearConfig clearConfig;
-		Bitmask<ERenderTargetBufferFlags> clearMask;
+		Bitmask<ERenderTargetBufferFlags> clearMask = E_RENDER_TARGET_BUFFER_MASK_ALL;
 		ERenderPassAttachmentLoadAction renderPassLoadAction = ERenderPassAttachmentLoadAction::Undefined;
 		ERenderPassAttachmentStoreAction renderPassStoreAction = ERenderPassAttachmentStoreAction::Undefined;
 
@@ -82,23 +81,16 @@ namespace ts3::gpuapi
 	{
 		Bitmask<ERTAttachmentFlags> attachmentsAccessRestrictMask = 0;
 
-		Bitmask<ERTAttachmentFlags> attachmentActionClearMask = 0;
+		Bitmask<ERTAttachmentFlags> attachmentsActionClearMask = 0;
 
-		Bitmask<ERTAttachmentFlags> attachmentActionDiscardMask = 0;
-
-		TS3_ATTR_NO_DISCARD uint32 countAttachmentsAccessRestrict() const noexcept
+		TS3_ATTR_NO_DISCARD native_uint countAttachmentsAccessRestrict() const noexcept
 		{
 			return popCount( attachmentsAccessRestrictMask & E_RT_ATTACHMENT_MASK_ALL );
 		}
 
-		TS3_ATTR_NO_DISCARD uint32 countAttachmentsActionClear() const noexcept
+		TS3_ATTR_NO_DISCARD native_uint countAttachmentsActionClear() const noexcept
 		{
-			return popCount( attachmentActionClearMask & E_RT_ATTACHMENT_MASK_ALL );
-		}
-
-		TS3_ATTR_NO_DISCARD uint32 countAttachmentsActionDiscard() const noexcept
-		{
-			return popCount( attachmentActionDiscardMask & E_RT_ATTACHMENT_MASK_ALL );
+			return popCount( attachmentsActionClearMask & E_RT_ATTACHMENT_MASK_ALL );
 		}
 
 		TS3_ATTR_NO_DISCARD RenderPassConfiguration getValidated() const noexcept

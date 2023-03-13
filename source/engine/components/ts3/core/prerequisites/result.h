@@ -37,8 +37,8 @@ namespace ts3
 		template <typename TOtherValue>
 		explicit ResultProxy( TOtherValue pCode )
 		: code( static_cast<TValue>( pCode ) )
-		, codeStr( CX_STR_CHAR_EMPTY )
-		, infoStr( CX_STR_CHAR_EMPTY )
+		, codeStr( cxdefs::STR_CHAR_EMPTY )
+		, infoStr( cxdefs::STR_CHAR_EMPTY )
 		{}
 
 		/// @brief Initializes result object with specified content.
@@ -48,8 +48,8 @@ namespace ts3
 		template <typename TOtherValue>
 		ResultProxy( TOtherValue pCode, const char * pCodeStr, const char * pInfoStr = nullptr )
 		: code( static_cast<TValue>( pCode ) )
-		, codeStr( pCodeStr ? pCodeStr : CX_STR_CHAR_EMPTY )
-		, infoStr( pInfoStr ? pCodeStr : CX_STR_CHAR_EMPTY )
+		, codeStr( pCodeStr ? pCodeStr : cxdefs::STR_CHAR_EMPTY )
+		, infoStr( pInfoStr ? pCodeStr : cxdefs::STR_CHAR_EMPTY )
 		{}
 
 		constexpr explicit operator bool() const
@@ -171,7 +171,7 @@ namespace ts3
 	#define ts3ResultGetCodeStr( pResult ) ts3MakeStr( pResult )
 
 	/// @brief
-	#define ts3ResultGetInfoStr( pResult ) CX_STR_CHAR_EMPTY
+	#define ts3ResultGetInfoStr( pResult ) cxdefs::STR_CHAR_EMPTY
 
 #endif
 

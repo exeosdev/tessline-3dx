@@ -47,9 +47,6 @@ namespace ts3::system
 		Win32EventController( SysContextHandle pSysContext );
 		virtual ~Win32EventController() noexcept;
 
-		using EventController::getEventDispatcherInputState;
-        using EventController::getEventDispatcherConfig;
-
 	private:
 		/// @copybrief EventController::_nativeRegisterEventSource
 		virtual void _nativeRegisterEventSource( EventSource & pEventSource ) override final;

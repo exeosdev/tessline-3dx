@@ -10,6 +10,11 @@
 namespace ts3::gpuapi
 {
 
+	class RenderPassConfigurationDynamicState;
+	class RenderPassConfigurationImmutableState;
+
+	enum ECommandListActionFlags : uint32;
+
 	class CommandContext : public GPUDeviceChildObject
 	{
 	public:
@@ -98,7 +103,17 @@ namespace ts3::gpuapi
 		: CommandContextDirectCompute( pCommandSystem, pCommandList )
 		{}
 
-		virtual ~CommandContextDirectGraphics() = default;
+		~CommandContextDirectGraphics() = default;
+		
+		bool beginRenderPass(
+			const RenderPassConfigurationImmutableState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags );
+
+		bool beginRenderPass(
+			const RenderPassConfigurationDynamicState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags );
+
+		void endRenderPass();
 
 		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO );
 		bool setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState );
@@ -113,10 +128,10 @@ namespace ts3::gpuapi
 		bool cmdSetShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture );
 		bool cmdSetShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler );
 
-		void cmdDrawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset );
-		void cmdDrawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset );
-		void cmdDrawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset );
-		void cmdDrawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset );
+		void cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset );
+		void cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset );
+		void cmdDrawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset );
+		void cmdDrawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset );
 	};
 
 	class CommandContextDeferred : public CommandContext
@@ -147,6 +162,16 @@ namespace ts3::gpuapi
 
 		virtual ~CommandContextDeferredGraphics() = default;
 
+		bool beginRenderPass(
+			const RenderPassConfigurationImmutableState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags );
+
+		bool beginRenderPass(
+			const RenderPassConfigurationDynamicState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags );
+
+		void endRenderPass();
+
 		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO );
 		bool setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState );
 		bool setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState );
@@ -160,10 +185,10 @@ namespace ts3::gpuapi
 		bool cmdSetShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture );
 		bool cmdSetShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler );
 
-		void cmdDrawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset, EIndexDataFormat pIndexFormat );
-		void cmdDrawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset, EIndexDataFormat pIndexFormat );
-		void cmdDrawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset );
-		void cmdDrawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset );
+		void cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset, EIndexDataFormat pIndexFormat );
+		void cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset, EIndexDataFormat pIndexFormat );
+		void cmdDrawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset );
+		void cmdDrawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset );
 	};
 
 } // namespace ts3::gpuapi

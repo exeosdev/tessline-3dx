@@ -137,29 +137,29 @@ namespace ts3::gpuapi
 
 		/// @brief Returns an EShaderStageIndex matching the specified shader stage index value.
 		/// @return Corresponding EShaderStageIndex for valid index values or E_SHADER_STAGE_INDEX_INVALID otherwise.
-		TS3_ATTR_NO_DISCARD inline constexpr EShaderStageIndex getShaderStageIndexFromValue( uint32 pStageIndex )
+		TS3_ATTR_NO_DISCARD inline constexpr EShaderStageIndex getShaderStageIndexFromValue( native_uint pStageIndex )
 		{
 			return ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX ) ? static_cast<EShaderStageIndex>( pStageIndex ) : E_SHADER_STAGE_INDEX_INVALID;
 		}
 
 		/// @brief Returns a 32-bit value which is a bit flag matching the shader stage specified using its index.
 		/// @return One of E_SHADER_STAGE_FLAG_xxx values for a valid stage index or 0 otherwise, returned as uint32.
-		TS3_ATTR_NO_DISCARD inline constexpr uint32 makeShaderStageBit( uint32 pStageIndex )
+		TS3_ATTR_NO_DISCARD inline constexpr uint32 makeShaderStageBit( native_uint pStageIndex )
 		{
-			return ( 1 << pStageIndex ) & E_SHADER_STAGE_MASK_ALL;
+			return ( 1 << static_cast<EShaderStageIndex>( pStageIndex ) ) & E_SHADER_STAGE_MASK_ALL;
 		}
 
 		/// @brief Returns a 32-bit value which is a bit flag matching the graphics shader stage specified using its index.
 		/// @return One of E_SHADER_STAGE_FLAG_GRAPHICS_xxx values for a valid stage index or 0 otherwise, returned as uint32.
-		TS3_ATTR_NO_DISCARD inline constexpr uint32 makeGraphicsShaderStageBit( uint32 pGraphicsStageIndex )
+		TS3_ATTR_NO_DISCARD inline constexpr uint32 makeGraphicsShaderStageBit( native_uint pGraphicsStageIndex )
 		{
-			return ( 1 << pGraphicsStageIndex ) & E_SHADER_STAGE_MASK_GRAPHICS_ALL;
+			return ( 1 << static_cast<EShaderStageIndex>( pGraphicsStageIndex ) ) & E_SHADER_STAGE_MASK_GRAPHICS_ALL;
 		}
 
 		/// @brief
-		TS3_ATTR_NO_DISCARD inline constexpr EShaderStageFlags makeGraphicsShaderStageFlag( uint32 pGraphicsStageIndex )
+		TS3_ATTR_NO_DISCARD inline constexpr EShaderStageFlags makeGraphicsShaderStageFlag( native_uint pGraphicsStageIndex )
 		{
-			return static_cast<EShaderStageFlags>( makeGraphicsShaderStageBit( pGraphicsStageIndex ) );
+			return static_cast<EShaderStageFlags>( makeGraphicsShaderStageBit( static_cast<EShaderStageIndex>( pGraphicsStageIndex ) ) );
 		}
 
 	}

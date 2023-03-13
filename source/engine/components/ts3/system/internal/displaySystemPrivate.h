@@ -4,6 +4,7 @@
 
 #include <ts3/system/displayConfiguration.h>
 #include <ts3/system/displaySystem.h>
+
 #include <deque>
 #include <map>
 

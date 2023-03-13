@@ -16,7 +16,7 @@ namespace ts3::gpuapi
 
 		bool isDynamicOverrideState() const noexcept override final
 		{
-			return false;
+			return true;
 		}
 	};
 

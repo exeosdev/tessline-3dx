@@ -6,26 +6,39 @@ namespace ts3::gpuapi
 
 	void RenderPassConfiguration::resetAttachmentsFlags() noexcept
 	{
-		attachmentActionResolveMask = 0;
 		attachmentsAccessRestrictMask = 0;
-		attachmentActionClearMask = 0;
-		attachmentActionDiscardMask = 0;
+		attachmentsActionClearMask = 0;
+		attachmentsActionResolveMask = 0;
 
-		for(  uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++caIndex )
-		{
-			const auto colorAttachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
-			if( activeAttachmentsMask.isSet( colorAttachmentBit ) )
+		foreachRTAttachmentIndex( activeAttachmentsMask,
+			[&]( native_uint pIndex, ERTAttachmentFlags pAttachmentBit )
 			{
-				const auto & attachmentConfig = colorAttachments[caIndex];
+				const auto & attachmentConfig = attachments[pIndex];
 				if( !attachmentConfig )
 				{
-					activeAttachmentsMask.unset( colorAttachmentBit );
+					activeAttachmentsMask.unset( pAttachmentBit );
 				}
 				else
 				{
+					const auto attachmentActionMask = smutil::getRenderPassAttachmentActionMask( attachmentConfig );
+					if( attachmentActionMask.isSet( E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_ACCESS_RESTRICT_BIT ) )
+					{
+						attachmentsAccessRestrictMask.set( pAttachmentBit );
+					}
+					else
+					{
+						if( attachmentActionMask.isSet( E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_LOAD_CLEAR_BIT ) )
+						{
+							attachmentsActionClearMask.set( pAttachmentBit );
+						}
+						if( attachmentActionMask.isSet( E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_RESOLVE_BIT ) )
+						{
+							attachmentsActionResolveMask.set( pAttachmentBit );
+						}
+					}
 				}
-			}
-		}
+				return true;
+			} );
 	}
 
 	namespace smutil
@@ -47,18 +60,16 @@ namespace ts3::gpuapi
 				Bitmask<ERenderPassAttachmentActionFlags> pActionMask )
 		{
 			Bitmask<ERTAttachmentFlags> attachmentActionMask = 0;
-			for( uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++caIndex )
-			{
-				const auto attachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
-				if( pActiveAttachmentsMask.isSet( attachmentBit ) )
+			foreachRTAttachmentIndex( pActiveAttachmentsMask,
+				[&]( native_uint pIndex, ERTAttachmentFlags pAttachmentBit )
 				{
-					const auto attachmentUsage = getRenderPassAttachmentActionMask( pColorAttachments[caIndex] );
+					const auto attachmentUsage = getRenderPassAttachmentActionMask( pColorAttachments[pIndex] );
 					if( attachmentUsage.isSet( pActionMask ) )
 					{
-						attachmentActionMask.set( attachmentBit );
+						attachmentActionMask.set( pAttachmentBit );
 					}
-				}
-			}
+					return true;
+				} );
 			return attachmentActionMask;
 		}
 
@@ -88,22 +99,20 @@ namespace ts3::gpuapi
 
 		void updateRenderPassConfigurationFlags( RenderPassConfiguration & pRenderPassConfig )
 		{
-			for( uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++caIndex )
-			{
-				const auto attachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
-				if( pRenderPassConfig.activeAttachmentsMask.isSet( attachmentBit ) )
+			foreachRTAttachmentIndex( pRenderPassConfig.activeAttachmentsMask,
+				[&]( native_uint pIndex, ERTAttachmentFlags pAttachmentBit )
 				{
-					const auto attachmentUsage = getRenderPassAttachmentActionMask( pRenderPassConfig.colorAttachments[caIndex] );
+					const auto attachmentUsage = getRenderPassAttachmentActionMask( pRenderPassConfig.colorAttachments[pIndex] );
 					if( attachmentUsage.isSet( E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_LOAD_CLEAR_BIT ) )
 					{
-						pRenderPassConfig.attachmentActionClearMask.set( attachmentBit );
+						pRenderPassConfig.attachmentsActionClearMask.set( pAttachmentBit );
 					}
 					if( attachmentUsage.isSet( E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_RESOLVE_BIT ) )
 					{
-						pRenderPassConfig.attachmentActionResolveMask.set( attachmentBit );
+						pRenderPassConfig.attachmentsActionResolveMask.set( pAttachmentBit );
 					}
-				}
-			}
+					return true;
+				} );
 		}
 
 	}

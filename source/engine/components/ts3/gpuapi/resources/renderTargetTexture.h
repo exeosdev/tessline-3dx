@@ -20,14 +20,6 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief
-	struct RenderTargetTextureLayout
-	{
-		TextureSize2D bufferSize;
-		ETextureFormat internalDataFormat;
-		uint32 msaaLevel;
-	};
-
-	/// @brief
 	struct RenderTargetTextureCreateInfo
 	{
 		TextureReference targetTexture;
@@ -102,7 +94,7 @@ namespace ts3::gpuapi
 
 		TS3_GPUAPI_API_NO_DISCARD RenderTargetTextureLayout queryRenderTargetTextureLayout( const TextureLayout & pTextureLayout );
 
-		TS3_GPUAPI_API_NO_DISCARD bool validateRenderTextureLayout(
+		TS3_GPUAPI_API_NO_DISCARD bool validateRenderTargetTextureLayout(
 				TextureHandle pTargetTexture,
 				const RenderTargetTextureLayout & pRTTextureLayout );
 

@@ -22,24 +22,24 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD bool empty() const noexcept;
 
-		TS3_ATTR_NO_DISCARD uint32 countActiveColorAttachments() const noexcept;
+		TS3_ATTR_NO_DISCARD native_uint countActiveColorAttachments() const noexcept;
 
 		TS3_ATTR_NO_DISCARD const RenderTargetBindingDefinition & getBindingDefinition() const noexcept;
 
 		void assign( const RenderTargetBindingDefinition & pDefinition );
 
-		RenderTargetAttachmentBinding & setColorAttachmentBinding( render_target_index_t pIndex );
+		RenderTargetAttachmentBinding & setColorAttachmentBinding( native_uint pIndex );
 
-		void setColorAttachmentBinding( render_target_index_t pIndex, const RenderTargetAttachmentBinding & pRPCAttachmentBinding );
+		void setColorAttachmentBinding( native_uint pIndex, const RenderTargetAttachmentBinding & pRPCAttachmentBinding );
 		void setColorAttachmentBindings( const RenderTargetColorAttachmentBindingArray & pRPCAttachmentBindings );
-		void setColorAttachmentBindings( uint32 pFirstIndex, uint32 pCount, const RenderTargetAttachmentBinding * pRPCAttachmentBindings );
+		void setColorAttachmentBindings( native_uint pFirstIndex, native_uint pCount, const RenderTargetAttachmentBinding * pRPCAttachmentBindings );
 
 		RenderTargetAttachmentBinding & setDepthStencilAttachmentBinding();
 
 		void setDepthStencilAttachmentBinding( const RenderTargetAttachmentBinding & pRPDSAttachmentBinding );
 
-		void resetColorAttachmentBinding( render_target_index_t pIndex );
-		void resetColorAttachmentBindings( uint32 pFirstIndex, uint32 pCount );
+		void resetColorAttachmentBinding( native_uint pIndex );
+		void resetColorAttachmentBindings( native_uint pFirstIndex, native_uint pCount );
 		void resetColorAttachmentBindings();
 
 		void resetDepthStencilAttachmentBinding();
@@ -47,8 +47,8 @@ namespace ts3::gpuapi
 		void resetAllAttachmentBindings();
 
 	private:
-		void _setColorAttachmentBindings( uint32 pFirstIndex, uint32 pCount, const RenderTargetAttachmentBinding * pRPCAttachmentBindings );
-		void _resetColorAttachmentBindings( uint32 pFirstIndex, uint32 pCount );
+		void _setColorAttachmentBindings( native_uint pFirstIndex, native_uint pCount, const RenderTargetAttachmentBinding * pRPCAttachmentBindings );
+		void _resetColorAttachmentBindings( native_uint pFirstIndex, native_uint pCount );
 
 	private:
 		RenderTargetBindingDefinition _renderTargetBindingDefinition;
@@ -67,24 +67,24 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD bool empty() const noexcept;
 
-		TS3_ATTR_NO_DISCARD uint32 countActiveColorAttachments() const noexcept;
+		TS3_ATTR_NO_DISCARD native_uint countActiveColorAttachments() const noexcept;
 
 		TS3_ATTR_NO_DISCARD const RenderPassConfiguration & getRenderPassConfiguration() const noexcept;
 
 		void assign( const RenderPassConfiguration & pConfiguration );
 
-		RenderPassAttachmentConfig & setColorAttachmentUsage( render_target_index_t pIndex );
+		RenderPassAttachmentConfig & setColorAttachmentUsage( native_uint pIndex );
 
-		void setColorAttachmentUsage( render_target_index_t pIndex, const RenderPassAttachmentConfig & pRPCAttachmentUsage );
+		void setColorAttachmentUsage( native_uint pIndex, const RenderPassAttachmentConfig & pRPCAttachmentUsage );
 		void setColorAttachmentUsages( const RenderPassColorAttachmentConfigArray & pRPCAttachmentUsages );
-		void setColorAttachmentBindings( uint32 pFirstIndex, uint32 pCount, const RenderPassAttachmentConfig * pRPCAttachmentUsages );
+		void setColorAttachmentBindings( native_uint pFirstIndex, native_uint pCount, const RenderPassAttachmentConfig * pRPCAttachmentUsages );
 
 		RenderPassAttachmentConfig & setDepthStencilAttachmentUsage();
 
 		void setDepthStencilAttachmentUsage( const RenderPassAttachmentConfig & pRPDSAttachmentUsage );
 
-		void resetColorAttachmentUsage( render_target_index_t pIndex );
-		void resetColorAttachmentUsages( uint32 pFirstIndex, uint32 pCount );
+		void resetColorAttachmentUsage( native_uint pIndex );
+		void resetColorAttachmentUsages( native_uint pFirstIndex, native_uint pCount );
 		void resetColorAttachmentUsages();
 
 		void resetDepthStencilAttachmentUsage();
@@ -92,8 +92,8 @@ namespace ts3::gpuapi
 		void resetAllAttachmentUsages();
 
 	private:
-		void _setColorAttachmentUsages( uint32 pFirstIndex, uint32 pCount, const RenderPassAttachmentConfig * pRPCAttachmentUsages );
-		void _resetColorAttachmentUsages( uint32 pFirstIndex, uint32 pCount );
+		void _setColorAttachmentUsages( native_uint pFirstIndex, native_uint pCount, const RenderPassAttachmentConfig * pRPCAttachmentUsages );
+		void _resetColorAttachmentUsages( native_uint pFirstIndex, native_uint pCount );
 
 	private:
 		RenderPassConfiguration _renderPassConfiguration;

@@ -5,7 +5,7 @@
 #define __TS3_GPUAPI_RENDER_TARGET_COMMON_H__
 
 #include "commonGPUStateDefs.h"
-#include "../resources/textureDimensions.h"
+#include "../resources/textureCommon.h"
 #include <ts3/stdext/bitUtils.h>
 
 namespace ts3::gpuapi
@@ -18,17 +18,21 @@ namespace ts3::gpuapi
 		E_RENDER_TARGET_BUFFER_FLAG_COLOR_BIT = 0x01,
 		E_RENDER_TARGET_BUFFER_FLAG_DEPTH_BIT = 0x02,
 		E_RENDER_TARGET_BUFFER_FLAG_STENCIL_BIT = 0x04,
+
+		E_RENDER_TARGET_BUFFER_MASK_DEPTH_STENCIL =
+			E_RENDER_TARGET_BUFFER_FLAG_DEPTH_BIT |
+			E_RENDER_TARGET_BUFFER_FLAG_STENCIL_BIT,
+
+		E_RENDER_TARGET_BUFFER_MASK_ALL =
+			E_RENDER_TARGET_BUFFER_FLAG_COLOR_BIT |
+			E_RENDER_TARGET_BUFFER_MASK_DEPTH_STENCIL,
 	};
 
 	namespace cxdefs
 	{
 
-		inline constexpr TextureSize2D RENDER_TARGET_LAYOUT_IMAGE_SIZE_UNDEFINED { Limits<uint32>::maxValue, Limits<uint32>::maxValue };
-
-		inline constexpr uint32 RENDER_TARGET_LAYOUT_MSAA_LEVEL_UNDEFINED = Limits<uint32>::maxValue;
-
 		/// @brief
-		inline constexpr uint32 getRTAttachmentRequiredUsageFlag( render_target_index_t pAttachmentIndex )
+		inline constexpr uint32 getRTAttachmentRequiredUsageFlag( native_uint pAttachmentIndex )
 		{
 			const auto controlMask = ( pAttachmentIndex < RT_MAX_COMBINED_ATTACHMENTS_NUM ) ? 0xFFFF : 0;
 			return ( pAttachmentIndex < RT_MAX_COLOR_ATTACHMENTS_NUM ) ? E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT : E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT;
@@ -101,11 +105,11 @@ namespace ts3::gpuapi
 	template <typename TAttachmentProperty>
 	struct RenderTargetAttachmentConfigurationSet : public RenderTargetAttachmentPropertySet<TAttachmentProperty>
 	{
-		Bitmask<ERTAttachmentFlags> attachmentActionResolveMask = 0;
+		Bitmask<ERTAttachmentFlags> attachmentsActionResolveMask = 0;
 
 		TS3_ATTR_NO_DISCARD uint32 countAttachmentsActionResolve() const noexcept
 		{
-			return popCount( attachmentActionResolveMask & E_RT_ATTACHMENT_MASK_COLOR_ALL );
+			return popCount( attachmentsActionResolveMask & E_RT_ATTACHMENT_MASK_COLOR_ALL );
 		}
 	};
 
@@ -170,9 +174,9 @@ namespace ts3::gpuapi
 	/// @brief A definition of a vertex layout used to create a driver-specific RenderTargetLayout object.
 	struct RenderTargetLayout : public RenderTargetAttachmentPropertySet<RenderTargetAttachmentLayout>
 	{
-		TextureSize2D sharedImageSize;
+		TextureSize2D sharedImageSize = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
 
-		uint32 sharedMSAALevel;
+		uint32 sharedMSAALevel = 0;
 	};
 
 	namespace smutil
@@ -197,6 +201,39 @@ namespace ts3::gpuapi
 		TS3_GPUAPI_OBJ const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8;
 		TS3_GPUAPI_OBJ const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8D24S8;
 
+	}
+
+	template <typename TFunction>
+	inline bool foreachRTAttachmentIndex( Bitmask<ERTAttachmentFlags> pActiveAttachmentsMask, TFunction pFunction )
+	{
+		// A local copy of the active attachments mask. Bits of already processed attachments
+		// are removed, so when the value reaches 0, we can immediately stop further processing.
+		auto activeAttachmentsMask = pActiveAttachmentsMask;
+
+		for( // Iterate using RTA (Render Target Attachment) index value.
+			native_uint attachmentIndex = 0;
+			// Stop after reaching the limit or when there are no active attachments to process.
+			cxdefs::isRTAttachmentIndexValid( attachmentIndex ) && !activeAttachmentsMask.empty();
+			// This is rather self-descriptive, but it looked bad without this third comment here :)
+			++attachmentIndex )
+		{
+			const auto attachmentBit = cxdefs::makeRTAttachmentFlag( attachmentIndex );
+			// Check if the attachments mask has this bit set.
+			if( activeAttachmentsMask.isSet( attachmentBit ) )
+			{
+				// The function returns false if there was some internal error condition
+				// and the processing should be aborted.
+				if( !pFunction( attachmentIndex, makeBitmaskEx<ERTAttachmentFlags>( attachmentBit ) ) )
+				{
+					return false;
+				}
+
+				// Update the control mask.
+				activeAttachmentsMask.unset( attachmentBit );
+			}
+		}
+
+		return true;
 	}
 
 } // namespace ts3::gpuapi

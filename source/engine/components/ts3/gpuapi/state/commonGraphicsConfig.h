@@ -228,6 +228,9 @@ namespace ts3::gpuapi
 		TS3_GPUAPI_OBJ const DepthStencilConfig cvPipelineDepthStencilConfigDefault;
 
 		///
+		TS3_GPUAPI_OBJ const DepthStencilConfig cvPipelineDepthStencilConfigEnableDepthTest;
+
+		///
 		TS3_GPUAPI_OBJ const RasterizerConfig cvPipelineRasterizerConfigDefault;
 
 	}

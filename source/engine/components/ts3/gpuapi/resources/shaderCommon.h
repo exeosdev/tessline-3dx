@@ -15,9 +15,9 @@ namespace ts3::gpuapi
 	namespace cxdefs
 	{
 
-		TS3_ATTR_NO_DISCARD inline constexpr uint32 makeShaderType( uint32 pStageIndex )
+		TS3_ATTR_NO_DISCARD inline constexpr uint32 makeShaderType( native_uint pStageIndex )
 		{
-			return ( pStageIndex << 16 ) | cxdefs::makeShaderStageBit( pStageIndex );
+			return ( static_cast<uint32>( pStageIndex ) << 16 ) | cxdefs::makeShaderStageBit( static_cast< uint32 >( pStageIndex ) );
 		}
 
 	}
@@ -96,12 +96,12 @@ namespace ts3::gpuapi
 	namespace cxdefs
 	{
 
-		TS3_ATTR_NO_DISCARD inline constexpr bool isShaderStageIndexValid( uint32 pStageIndex )
+		TS3_ATTR_NO_DISCARD inline constexpr bool isShaderStageIndexValid( native_uint pStageIndex )
 		{
 			return ( pStageIndex >= E_SHADER_STAGE_INDEX_BASE ) && ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX );
 		}
 
-		TS3_ATTR_NO_DISCARD inline constexpr bool isShaderStageIndexValidGraphics( uint32 pStageIndex )
+		TS3_ATTR_NO_DISCARD inline constexpr bool isShaderStageIndexValidGraphics( native_uint pStageIndex )
 		{
 			return ( pStageIndex >= E_SHADER_STAGE_INDEX_BASE ) && ( pStageIndex <= E_SHADER_STAGE_INDEX_MAX_GRAPHICS );
 		}
@@ -126,7 +126,7 @@ namespace ts3::gpuapi
 			return getShaderStageIndex( pShaderType ) <= E_SHADER_STAGE_INDEX_MAX;
 		}
 
-		TS3_ATTR_NO_DISCARD inline constexpr EShaderType getShaderTypeFromStageIndex( uint32 pStageIndex )
+		TS3_ATTR_NO_DISCARD inline constexpr EShaderType getShaderTypeFromStageIndex( native_uint pStageIndex )
 		{
 			return isShaderStageIndexValid( pStageIndex ) ? static_cast<EShaderType>( cxdefs::makeShaderType( pStageIndex ) ) : EShaderType::Unknown;
 		}

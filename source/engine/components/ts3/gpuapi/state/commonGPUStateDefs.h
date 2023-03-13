@@ -58,10 +58,10 @@ namespace ts3::gpuapi
 		constexpr auto VERTEX_ATTRIBUTE_OFFSET_APPEND = Limits<gpu_memory_size_t>::maxValue;
 
 		///
-		constexpr auto RT_MAX_COLOR_ATTACHMENTS_NUM = static_cast<render_target_index_t>( cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM );
+		constexpr auto RT_MAX_COLOR_ATTACHMENTS_NUM = static_cast<render_target_index_t>( GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM );
 
 		///
-		constexpr auto RT_MAX_COMBINED_ATTACHMENTS_NUM = static_cast<render_target_index_t>( cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM );
+		constexpr auto RT_MAX_COMBINED_ATTACHMENTS_NUM = static_cast<render_target_index_t>( GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM );
 
 		///
 		constexpr auto RT_ATTACHMENT_MSAA_LEVEL_INVALID = Limits<uint32>::maxValue;
@@ -70,13 +70,19 @@ namespace ts3::gpuapi
 		constexpr auto PIPELINE_IMMUTABLE_STATE_TYPES_NUM = 8u;
 
 		/// @brief
-		inline constexpr uint32 makeRTAttachmentFlag( render_target_index_t pAttachmentIndex )
+		inline constexpr uint32 makeRTAttachmentFlag( native_uint pAttachmentIndex )
 		{
-			return ( pAttachmentIndex < RT_MAX_COMBINED_ATTACHMENTS_NUM ) ? ( 1 << pAttachmentIndex ) : 0u;
+			return ( pAttachmentIndex < RT_MAX_COMBINED_ATTACHMENTS_NUM ) ? ( 1 << static_cast<render_target_index_t>( pAttachmentIndex ) ) : 0u;
 		}
 
 		/// @brief
-		inline constexpr bool isRTAttachmentIndexValid( render_target_index_t pIndex )
+		inline constexpr bool isRTAttachmentIndexValid( native_uint pIndex )
+		{
+			return pIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM;
+		}
+
+		/// @brief
+		inline constexpr bool isRTColorAttachmentIndexValid( native_uint pIndex )
 		{
 			return pIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM;
 		}

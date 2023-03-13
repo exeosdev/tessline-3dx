@@ -47,14 +47,21 @@ namespace ts3::gpuapi
 	GLRenderTargetBindingInfo GLGraphicsPipelineStateController::getCurrentRenderTargetBindingInfo() const noexcept
 	{
 		GLRenderTargetBindingInfo glcRTBindingInfo{};
-		if( _currentCommonState.renderTargetBindingState->isDynamicOverrideState() )
+		if( _currentCommonState.renderTargetBindingState )
 		{
-			return smutil::getGLRenderTargetBindingInfo( _dynamicRenderTargetBindingDefinition );
+			if( _currentCommonState.renderTargetBindingState->isDynamicOverrideState() )
+			{
+				return smutil::getGLRenderTargetBindingInfo( _dynamicRenderTargetBindingDefinition );
+			}
+			else
+			{
+				const auto * glcRTBindingState = _currentCommonState.renderTargetBindingState->getInterface<GLRenderTargetBindingImmutableState>();
+				return glcRTBindingState->getGLRenderTargetBindingInfo();
+			}
 		}
 		else
 		{
-			const auto * glcRTBindingState = _currentCommonState.renderTargetBindingState->getInterface<GLRenderTargetBindingImmutableState>();
-			return glcRTBindingState->getGLRenderTargetBindingInfo();
+			return GLRenderTargetBindingInfo{};
 		}
 		return glcRTBindingInfo;
 	}
@@ -90,19 +97,19 @@ namespace ts3::gpuapi
 					executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_RASTERIZER_BIT );
 				}
 
+				if( _stateUpdateMask.isSetAnyOf( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_SHADER_LINKAGE_BIT ) )
+				{
+					const auto & shaderLinkageState = glcGraphicsPSO->getGraphicsShaderLinkageState();
+					applyGLShaderLinkageState( shaderLinkageState );
+					executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_SHADER_LINKAGE_BIT );
+				}
+
 				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_IA_INPUT_LAYOUT_BIT ) )
 				{
 					const auto & inputLayoutState = glcGraphicsPSO->getIAInputLayoutState();
 					applyGLIAInputLayoutState( inputLayoutState, _currentDrawTopologyProperties );
 					executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_IA_INPUT_LAYOUT_BIT );
 				}
-			}
-
-			if( _stateUpdateMask.isSetAnyOf( E_GRAPHICS_STATE_UPDATE_MASK_SEPARABLE_SHADERS_ALL ) )
-			{
-				const auto & shaderLinkageState = glcGraphicsPSO->getGraphicsShaderLinkageState();
-				applyGLShaderLinkageState( shaderLinkageState );
-				executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_MASK_SEPARABLE_SHADERS_ALL );
 			}
 		}
 
@@ -349,7 +356,7 @@ namespace ts3::gpuapi
 		{
 			if( pBlendState.mBlendFlags.isSet( E_BLEND_CONFIG_FLAG_ENABLE_MRT_INDEPENDENT_BLENDING_BIT ) )
 			{
-				for( uint32 caIndex = 0; caIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM; ++caIndex )
+				for( uint32 caIndex = 0; cxdefs::isRTColorAttachmentIndexValid( caIndex ); ++caIndex )
 				{
 					const auto attachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
 					if( pBlendState.mGLBlendConfig.attachmentsMask.isSet( attachmentBit ) )

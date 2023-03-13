@@ -39,18 +39,6 @@ namespace ts3::gpuapi
 				const GraphicsPipelineStateObjectCreateInfo & pCreateInfo );
 	};
 
-
-	namespace smutil
-	{
-
-		TS3_ATTR_NO_DISCARD GLShaderPipelineObjectHandle createGraphicsShaderPipelineObject(
-				const SeparableShaderSet & pShaderSet );
-
-		TS3_ATTR_NO_DISCARD GLShaderProgramObjectHandle createGraphicsShaderProgramObject(
-				const SeparableShaderSet & pShaderSet );
-
-	}
-
 } // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_PIPELINE_STATE_OBJECT_H__

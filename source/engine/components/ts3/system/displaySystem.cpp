@@ -1,4 +1,5 @@
 
+#include "displaySystemNative.h"
 #include "internal/displaySystemPrivate.h"
 
 namespace ts3::system

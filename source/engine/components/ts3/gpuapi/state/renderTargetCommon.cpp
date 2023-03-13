@@ -9,27 +9,25 @@ namespace ts3::gpuapi
 
 	void RenderTargetBindingDefinition::resetAttachmentsFlags() noexcept
 	{
-		attachmentActionResolveMask = 0;
+		attachmentsActionResolveMask = 0;
 
-		for(  uint32 attachmentIndex = 0; attachmentIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++attachmentIndex )
-		{
-			const auto colorAttachmentBit = cxdefs::makeRTAttachmentFlag( attachmentIndex );
-			if( activeAttachmentsMask.isSet( colorAttachmentBit ) )
+		foreachRTAttachmentIndex( activeAttachmentsMask,
+			[&]( native_uint pIndex, ERTAttachmentFlags pAttachmentBit )
 			{
-				const auto & attachmentBinding = colorAttachments[attachmentIndex];
+				const auto & attachmentBinding = attachments[pIndex];
 				if( !attachmentBinding )
 				{
-					activeAttachmentsMask.unset( colorAttachmentBit );
+					activeAttachmentsMask.unset( pAttachmentBit );
 				}
 				else
 				{
 					if( attachmentBinding.resolveTexture )
 					{
-						attachmentActionResolveMask.set( colorAttachmentBit );
+						attachmentsActionResolveMask.set( pAttachmentBit );
 					}
 				}
-			}
-		}
+				return true;
+			} );
 	}
 
 
@@ -41,18 +39,13 @@ namespace ts3::gpuapi
 		{
 			const RenderTargetAttachmentBinding * firstBinding = nullptr;
 
-			for( const auto & colorAttachmentBinding : pBindingDefinition.colorAttachments )
+			for( const auto & attachmentBinding : pBindingDefinition.attachments )
 			{
-				if( colorAttachmentBinding )
+				if( attachmentBinding )
 				{
-					firstBinding = &colorAttachmentBinding;
+					firstBinding = &attachmentBinding;
 					break;
 				}
-			}
-
-			if( !firstBinding && pBindingDefinition.depthStencilAttachment )
-			{
-				firstBinding = &( pBindingDefinition.depthStencilAttachment );
 			}
 
 			return firstBinding;
@@ -60,89 +53,90 @@ namespace ts3::gpuapi
 
 		bool validateRenderTargetBindingDefinition( const RenderTargetBindingDefinition & pBindingDefinition )
 		{
-			const auto * firstBinding = getRenderTargetBindingDefinitionFirstTarget( pBindingDefinition );
-			if( !firstBinding )
+			if( const auto * firstBinding = getRenderTargetBindingDefinitionFirstTarget( pBindingDefinition ) )
 			{
-				return false;
-			}
+				const auto & commonImageLayout = firstBinding->attachmentTexture->mRTTextureLayout;
 
-			const auto & commonImageLayout = firstBinding->attachmentTexture->mRTTextureLayout;
+				const auto bindingValid = foreachRTAttachmentIndex( pBindingDefinition.activeAttachmentsMask,
+					[&]( native_uint pIndex, ERTAttachmentFlags pAttachmentBit )
+					{
+						const auto & attachmentBinding = pBindingDefinition.attachments[pIndex];
+						if( !attachmentBinding )
+						{
+							return false;
+						}
+						const auto requiredUsageFlags = cxdefs::getRTAttachmentRequiredUsageFlag( pIndex );
+						if( !attachmentBinding.attachmentTexture->mInternalResourceFlags.isSet( requiredUsageFlags ) )
+						{
+							return false;
+						}
+						const auto & textureLayout = attachmentBinding.attachmentTexture->mRTTextureLayout;
+						if( textureLayout.bufferSize != commonImageLayout.bufferSize )
+						{
+							return false;
+						}
+						if( textureLayout.msaaLevel != commonImageLayout.msaaLevel )
+						{
+							return false;
+						}
+						if( pBindingDefinition.attachmentsActionResolveMask.isSet( pAttachmentBit ) && !attachmentBinding.resolveTexture )
+						{
+							return false;
+						}
+						return true;
+					} );
 
-			for(  uint32 attachmentIndex = 0; attachmentIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++attachmentIndex )
-			{
-				const auto colorAttachmentBit = cxdefs::makeRTAttachmentFlag( attachmentIndex );
-				if( pBindingDefinition.activeAttachmentsMask.isSet( colorAttachmentBit ) )
+				if( bindingValid )
 				{
-					const auto & attachmentBinding = pBindingDefinition.colorAttachments[attachmentIndex];
-					if( !attachmentBinding )
-					{
-						return false;
-					}
-					const auto requiredUsageFlags = cxdefs::getRTAttachmentRequiredUsageFlag( attachmentIndex );
-					if( attachmentBinding.attachmentTexture->mInternalResourceFlags.isSetAnyOf( requiredUsageFlags ) )
-					{
-						return false;
-					}
-					const auto & textureLayout = attachmentBinding.attachmentTexture->mRTTextureLayout;
-					if( textureLayout.bufferSize != commonImageLayout.bufferSize )
-					{
-						return false;
-					}
-					if( textureLayout.msaaLevel != commonImageLayout.msaaLevel )
-					{
-						return false;
-					}
-					if( pBindingDefinition.attachmentActionResolveMask.isSet( colorAttachmentBit ) && !attachmentBinding.resolveTexture )
-					{
-						return false;
-					}
+					return true;
 				}
 			}
 
-			return true;
+			return false;
 		}
 
 		RenderTargetLayout getRenderTargetLayoutForBindingDefinition(
 				const RenderTargetBindingDefinition & pBindingDefinition )
 		{
-			const auto * firstBinding = getRenderTargetBindingDefinitionFirstTarget( pBindingDefinition );
-			if( !firstBinding )
+			if( const auto * firstBinding = getRenderTargetBindingDefinitionFirstTarget( pBindingDefinition ) )
 			{
-				return {};
-			}
+				const auto & commonLayout = firstBinding->attachmentTexture->mRTTextureLayout;
 
-			const auto & commonLayout = firstBinding->attachmentTexture->mRTTextureLayout;
+				RenderTargetLayout renderTargetLayout{};
+				renderTargetLayout.activeAttachmentsMask = 0;
+				renderTargetLayout.sharedImageSize = commonLayout.bufferSize;
+				renderTargetLayout.sharedMSAALevel = commonLayout.msaaLevel;
 
-			RenderTargetLayout renderTargetLayout{};
-			renderTargetLayout.activeAttachmentsMask = 0;
-			renderTargetLayout.sharedImageSize = commonLayout.bufferSize;
-			renderTargetLayout.sharedMSAALevel = commonLayout.msaaLevel;
+				const auto layoutValid = foreachRTAttachmentIndex( pBindingDefinition.activeAttachmentsMask,
+					[&]( native_uint pIndex, ERTAttachmentFlags pAttachmentBit )
+					{
+						const auto & attachmentBinding = pBindingDefinition.attachments[pIndex];
+						if( attachmentBinding.empty() )
+						{
+							return false;
+						}
 
-			for( uint32 attachmentIndex = 0; attachmentIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM; ++attachmentIndex )
-			{
-				const auto attachmentBit = cxdefs::makeRTAttachmentFlag( attachmentIndex );
-				if( pBindingDefinition.activeAttachmentsMask.isSet( attachmentBit ) )
+						const auto & caTexture = attachmentBinding.attachmentTexture;
+						const auto & caLayout = caTexture->mRTTextureLayout;
+
+						if( ( caLayout.bufferSize != commonLayout.bufferSize ) || ( caLayout.msaaLevel != commonLayout.msaaLevel ) )
+						{
+							return false;
+						}
+
+						renderTargetLayout.attachments[pIndex].format = caLayout.internalDataFormat;
+						renderTargetLayout.activeAttachmentsMask.set( pAttachmentBit );
+
+						return true;
+					} );
+
+				if( layoutValid )
 				{
-					const auto & attachmentBinding = pBindingDefinition.colorAttachments[attachmentIndex];
-					if( attachmentBinding.empty() )
-					{
-						return {};
-					}
-
-					const auto & caTexture = attachmentBinding.attachmentTexture;
-					const auto & caLayout = caTexture->mRTTextureLayout;
-
-					if( ( caLayout.bufferSize != commonLayout.bufferSize ) || ( caLayout.msaaLevel != commonLayout.msaaLevel ) )
-					{
-						return {};
-					}
-
-					renderTargetLayout.colorAttachments[attachmentIndex].format = caLayout.internalDataFormat;
-					renderTargetLayout.activeAttachmentsMask.set( attachmentBit );
+					return renderTargetLayout;
 				}
 			}
 
-			return renderTargetLayout;
+			return RenderTargetLayout{};
 		}
 	}
 
@@ -153,8 +147,8 @@ namespace ts3::gpuapi
 		{
 			RenderTargetLayout rtLayout{};
 			rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAG_COLOR_0_BIT;
-			rtLayout.sharedImageSize = cxdefs::RENDER_TARGET_LAYOUT_IMAGE_SIZE_UNDEFINED;
-			rtLayout.sharedMSAALevel = cxdefs::RENDER_TARGET_LAYOUT_MSAA_LEVEL_UNDEFINED;
+			rtLayout.sharedImageSize = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
+			rtLayout.sharedMSAALevel = cxdefs::TEXTURE_MSAA_LEVEL_UNDEFINED;
 			rtLayout.colorAttachments[0].format = ETextureFormat::BGRA8UN;
 			return rtLayout;
 		}
@@ -163,8 +157,8 @@ namespace ts3::gpuapi
 		{
 			RenderTargetLayout rtLayout{};
 			rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAG_COLOR_0_BIT | E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT;
-			rtLayout.sharedImageSize = cxdefs::RENDER_TARGET_LAYOUT_IMAGE_SIZE_UNDEFINED;
-			rtLayout.sharedMSAALevel = cxdefs::RENDER_TARGET_LAYOUT_MSAA_LEVEL_UNDEFINED;
+			rtLayout.sharedImageSize = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
+			rtLayout.sharedMSAALevel = cxdefs::TEXTURE_MSAA_LEVEL_UNDEFINED;
 			rtLayout.colorAttachments[0].format = ETextureFormat::BGRA8UN;
 			rtLayout.depthStencilAttachment.format = ETextureFormat::D24UNS8U;
 			return rtLayout;
@@ -174,8 +168,8 @@ namespace ts3::gpuapi
 		{
 			RenderTargetLayout rtLayout{};
 			rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAG_COLOR_0_BIT;
-			rtLayout.sharedImageSize = cxdefs::RENDER_TARGET_LAYOUT_IMAGE_SIZE_UNDEFINED;
-			rtLayout.sharedMSAALevel = cxdefs::RENDER_TARGET_LAYOUT_MSAA_LEVEL_UNDEFINED;
+			rtLayout.sharedImageSize = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
+			rtLayout.sharedMSAALevel = cxdefs::TEXTURE_MSAA_LEVEL_UNDEFINED;
 			rtLayout.colorAttachments[0].format = ETextureFormat::RGBA8UN;
 			return rtLayout;
 		}
@@ -184,8 +178,8 @@ namespace ts3::gpuapi
 		{
 			RenderTargetLayout rtLayout{};
 			rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAG_COLOR_0_BIT | E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT;
-			rtLayout.sharedImageSize = cxdefs::RENDER_TARGET_LAYOUT_IMAGE_SIZE_UNDEFINED;
-			rtLayout.sharedMSAALevel = cxdefs::RENDER_TARGET_LAYOUT_MSAA_LEVEL_UNDEFINED;
+			rtLayout.sharedImageSize = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
+			rtLayout.sharedMSAALevel = cxdefs::TEXTURE_MSAA_LEVEL_UNDEFINED;
 			rtLayout.colorAttachments[0].format = ETextureFormat::RGBA8UN;
 			rtLayout.depthStencilAttachment.format = ETextureFormat::D24UNS8U;
 			return rtLayout;

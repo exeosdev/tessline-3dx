@@ -20,7 +20,7 @@ namespace ts3::gpuapi
 	{
 
 		///
-		constexpr auto IA_MAX_VERTEX_ATTRIBUTES_NUM = static_cast<input_assembler_index_t>( cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM );
+		constexpr auto IA_MAX_VERTEX_ATTRIBUTES_NUM = static_cast<input_assembler_index_t>( GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM );
 
 		///
 		constexpr auto IA_VERTEX_ATTRIBUTE_INDEX_UNDEFINED = Limits<input_assembler_index_t>::maxValue;
@@ -29,7 +29,7 @@ namespace ts3::gpuapi
 		constexpr auto IA_VERTEX_ATTRIBUTE_MASK_ALL = makeLSFBitmask<input_assembler_index_t>( IA_MAX_VERTEX_ATTRIBUTES_NUM );
 
 		///
-		constexpr auto IA_MAX_VERTEX_BUFFER_BINDINGS_NUM = static_cast<input_assembler_index_t>( cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM );
+		constexpr auto IA_MAX_VERTEX_BUFFER_BINDINGS_NUM = static_cast<input_assembler_index_t>( GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM );
 
 		///
 		constexpr auto IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED = Limits<input_assembler_index_t>::maxValue;
@@ -41,27 +41,33 @@ namespace ts3::gpuapi
 		constexpr auto IA_INPUT_STREAM_BINDING_MASK_ALL = IA_VERTEX_BUFFER_BINDING_MASK_ALL | 0x10000u;
 
 		/// @brief
-		inline constexpr bool isIAVertexAttributeIndexValid( input_assembler_index_t pIndex )
+		inline constexpr bool isIAVertexAttributeIndexValid( native_uint pIndex )
 		{
 			return pIndex < IA_MAX_VERTEX_ATTRIBUTES_NUM;
 		}
 
 		/// @brief
-		inline constexpr uint32 makeIAVertexAttributeFlag( input_assembler_index_t pAttribIndex )
+		inline constexpr uint32 makeIAVertexAttributeFlag( native_uint pAttribIndex )
 		{
-			return ( pAttribIndex < IA_MAX_VERTEX_ATTRIBUTES_NUM ) ? ( 1 << pAttribIndex ) : 0u;
+			return ( pAttribIndex < IA_MAX_VERTEX_ATTRIBUTES_NUM ) ? ( 1 << static_cast<input_assembler_index_t>( pAttribIndex ) ) : 0u;
 		}
 
 		/// @brief
-		inline constexpr bool isIAVertexBufferIndexValid( input_assembler_index_t pStreamIndex )
+		inline constexpr bool isIAVertexBufferIndexValid( native_uint pStreamIndex )
 		{
 			return pStreamIndex < IA_MAX_VERTEX_BUFFER_BINDINGS_NUM;
 		}
 
 		/// @brief Returns
-		inline constexpr uint32 makeIAVertexBufferFlag( input_assembler_index_t pStreamIndex )
+		inline constexpr uint32 makeIAVertexBufferFlag( native_uint pStreamIndex )
 		{
-			return ( pStreamIndex < IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) ? ( 1 << pStreamIndex ) : 0u;
+			return ( pStreamIndex < IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) ? ( 1 << static_cast<input_assembler_index_t> ( pStreamIndex ) ) : 0u;
+		}
+
+		/// @brief Returns
+		inline constexpr uint32 makeIAIndexBufferFlag()
+		{
+			return ( 1 << static_cast<input_assembler_index_t>( IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) );
 		}
 
 	}
@@ -92,8 +98,7 @@ namespace ts3::gpuapi
 		E_IA_VERTEX_STREAM_BINDING_FLAG_VERTEX_BUFFER_6_BIT = cxdefs::makeIAVertexBufferFlag( 6 ),
 		E_IA_VERTEX_STREAM_BINDING_FLAG_VERTEX_BUFFER_7_BIT = cxdefs::makeIAVertexBufferFlag( 7 ),
 
-		E_IA_VERTEX_STREAM_BINDING_FLAG_INDEX_BUFFER_BIT =
-				cxdefs::makeIAVertexBufferFlag( cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ),
+		E_IA_VERTEX_STREAM_BINDING_FLAG_INDEX_BUFFER_BIT = cxdefs::makeIAIndexBufferFlag(),
 
 		E_IA_VERTEX_STREAM_BINDING_MASK_VERTEX_BUFFER_ALL_BITS =
 				makeLSFBitmask<uint32>( cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ),
@@ -107,13 +112,17 @@ namespace ts3::gpuapi
 	{
 		input_assembler_index_t streamIndex{ cxdefs::IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED };
 
-		uint16 instanceRate{ 0 };
+		const char * semanticName = ts3::cxdefs::STR_CHAR_EMPTY;
+
+		input_assembler_index_t semanticIndex = 0;
 
 		EVertexAttribFormat format{ EVertexAttribFormat::Undefined };
 
 		/// An offset of the attribute from the start of the vertex data.
 		/// VERTEX_ATTRIBUTE_OFFSET_APPEND can be specified if the attribute is placed directly after previous one.
 		gpu_memory_size_t relativeOffset{ cxdefs::GPU_MEMORY_OFFSET_INVALID };
+
+		uint16 instanceRate{ 0 };
 
 		/// @brief Returns true if this instance represents a valid vertex attribute.
 		TS3_ATTR_NO_DISCARD constexpr bool active() const noexcept
@@ -134,9 +143,9 @@ namespace ts3::gpuapi
 	/// @brief
 	struct IAInputLayoutDefinition
 	{
+		EPrimitiveTopology primitiveTopology;
 		Bitmask<EIAVertexAttributeFlags> activeAttributesMask;
 		IAVertexAttributeInfoArray attributeArray;
-		EPrimitiveTopology primitiveTopology;
 	};
 
 	struct IAVertexStreamBufferReference

@@ -41,7 +41,7 @@ namespace ts3::gpuapi
 
 	GraphicsPipelineStateControllerSeparable::~GraphicsPipelineStateControllerSeparable() = default;
 
-	const SeparablePSOStateSet & GraphicsPipelineStateControllerSeparable::getCurrentSeparableStates() const noexcept
+	const SeparablePSOStateCache & GraphicsPipelineStateControllerSeparable::getCurrentSeparableStates() const noexcept
 	{
 		return _currentSeparableStates;
 	}
@@ -86,35 +86,35 @@ namespace ts3::gpuapi
 	{
 		auto stateUpdateMask = makeBitmask<uint64>( 0 );
 
-		const auto * blendState = pGraphicsPSOSeparable.mSeparableStates.blendState;
+		auto * blendState = pGraphicsPSOSeparable.mSeparableStates.blendState.get();
 		if( blendState != _currentSeparableStates.blendState )
 		{
 			_currentSeparableStates.blendState = blendState;
 			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_BLEND_BIT );
 		}
 
-		const auto * depthStencilState = pGraphicsPSOSeparable.mSeparableStates.depthStencilState;
+		auto * depthStencilState = pGraphicsPSOSeparable.mSeparableStates.depthStencilState.get();
 		if( depthStencilState != _currentSeparableStates.depthStencilState )
 		{
 			_currentSeparableStates.depthStencilState = depthStencilState;
 			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_DEPTH_STENCIL_BIT );
 		}
 
-		const auto * rasterizerState = pGraphicsPSOSeparable.mSeparableStates.rasterizerState;
+		auto * rasterizerState = pGraphicsPSOSeparable.mSeparableStates.rasterizerState.get();
 		if( rasterizerState != _currentSeparableStates.rasterizerState )
 		{
 			_currentSeparableStates.rasterizerState = rasterizerState;
 			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_RASTERIZER_BIT );
 		}
 
-		const auto * iaInputLayoutState = pGraphicsPSOSeparable.mSeparableStates.iaInputLayoutState;
+		auto * iaInputLayoutState = pGraphicsPSOSeparable.mSeparableStates.iaInputLayoutState.get();
 		if( iaInputLayoutState != _currentSeparableStates.iaInputLayoutState )
 		{
 			_currentSeparableStates.iaInputLayoutState = iaInputLayoutState;
 			stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_IA_INPUT_LAYOUT_BIT );
 		}
 
-		const auto * shaderLinkageState = pGraphicsPSOSeparable.mSeparableStates.shaderLinkageState;
+		auto * shaderLinkageState = pGraphicsPSOSeparable.mSeparableStates.shaderLinkageState.get();
 		if( shaderLinkageState != _currentSeparableStates.shaderLinkageState )
 		{
 			_currentSeparableStates.shaderLinkageState = shaderLinkageState;
@@ -131,7 +131,7 @@ namespace ts3::gpuapi
 
 	GraphicsPipelineStateControllerSeparableShader::~GraphicsPipelineStateControllerSeparableShader() = default;
 
-	const SeparableShaderSet & GraphicsPipelineStateControllerSeparableShader::getCurrentSeparableShaders() const noexcept
+	const SeparableShaderCache & GraphicsPipelineStateControllerSeparableShader::getCurrentSeparableShaders() const noexcept
 	{
 		return _currentSeparableShaders;
 	}

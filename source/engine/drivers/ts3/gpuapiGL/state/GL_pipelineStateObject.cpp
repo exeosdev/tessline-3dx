@@ -60,18 +60,18 @@ namespace ts3::gpuapi
 			const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
 	{
 		SeparablePSOStateSet separableStates{};
-		separableStates.blendState = pCreateInfo.blendState.get();
-		separableStates.depthStencilState = pCreateInfo.depthStencilState.get();
-		separableStates.rasterizerState = pCreateInfo.rasterizerState.get();
-		separableStates.shaderLinkageState = pCreateInfo.shaderLinkageState.get();
-		separableStates.iaInputLayoutState = pCreateInfo.inputLayoutState.get();
+		separableStates.blendState = pCreateInfo.blendState;
+		separableStates.depthStencilState = pCreateInfo.depthStencilState;
+		separableStates.rasterizerState = pCreateInfo.rasterizerState;
+		separableStates.shaderLinkageState = pCreateInfo.shaderLinkageState;
+		separableStates.iaInputLayoutState = pCreateInfo.inputLayoutState;
 
-		const auto & renderTargetLayout = *( pCreateInfo.renderTargetLayout );
+		auto & renderTargetLayout = pCreateInfo.renderTargetLayout;
 		auto & shaderInputSignature = pCreateInfo.shaderInputSignature;
 
 		auto graphicsPSO = createGPUAPIObject<GLGraphicsPipelineStateObject>(
 				pGPUDevice,
-				renderTargetLayout,
+				std::move( renderTargetLayout ),
 				std::move( shaderInputSignature ),
 				separableStates );
 

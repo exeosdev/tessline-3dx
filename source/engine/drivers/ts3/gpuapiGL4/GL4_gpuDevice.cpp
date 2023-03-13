@@ -20,7 +20,7 @@ namespace ts3::gpuapi
 
 		if( driverConfigFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
 		{
-			// gl4GPUDevice->initializeGLDebugOutput();
+			gl4GPUDevice->initializeGLDebugOutput();
 		}
 
 		return gl4GPUDevice;

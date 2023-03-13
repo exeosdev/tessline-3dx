@@ -10,7 +10,7 @@
 namespace ts3::gpuapi
 {
 
-	class GraphicsShaderSet
+	struct GraphicsShaderSet
 	{
 	private:
 		GraphicsShaderArray _shaderArray;

@@ -100,7 +100,7 @@ namespace ts3::gpuapi
 			return rtTextureLayout;
 		}
 
-		bool validateRenderTextureLayout( TextureHandle pTargetTexture, const RenderTargetTextureLayout & pRTTextureLayout )
+		bool validateRenderTargetTextureLayout( TextureHandle pTargetTexture, const RenderTargetTextureLayout & pRTTextureLayout )
 		{
 			if( !pTargetTexture )
 			{

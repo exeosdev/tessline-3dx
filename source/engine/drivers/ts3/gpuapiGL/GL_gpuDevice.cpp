@@ -91,7 +91,11 @@ namespace ts3::gpuapi
 
 	ShaderHandle GLGPUDevice::_drvCreateShader( const ShaderCreateInfo & pCreateInfo )
 	{
+	#if( TS3GX_GL_TARGET >= TS3GX_GL_TARGET_GL43 )
+		auto glcShader = rcutil::createShaderSeparableStage( *this, pCreateInfo );
+	#else
 	    auto glcShader = rcutil::createShaderObject( *this, pCreateInfo );
+	#endif
 	    ts3DebugAssert( glcShader );
 	    return glcShader;
 	}

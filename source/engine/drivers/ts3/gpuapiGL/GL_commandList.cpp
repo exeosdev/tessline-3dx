@@ -79,39 +79,40 @@ namespace ts3::gpuapi
 		CommandList::endCommandSequence();
 	}
 
-	void GLCommandList::cmdDrawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset )
+	void GLCommandList::cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset )
 	{
 		_stateController.applyStateChanges();
 
 		const auto & drawTopologyProperties = _stateController.getGLDrawTopologyProperties();
-		const auto * indexDataOffset = reinterpret_cast<void*>( pIndicesOffset * drawTopologyProperties.indexBufferElementByteSize );
+		const auto relativeIndexDataOffset = pIndicesOffset * drawTopologyProperties.indexBufferElementByteSize;
+		const auto * baseIndexDataOffset = reinterpret_cast<void *>( drawTopologyProperties.indexBufferBaseOffset + relativeIndexDataOffset );
 
 		glDrawElements(
-				drawTopologyProperties.primitiveTopology,
-				static_cast<GLsizei>( pIndicesNum ),
-				drawTopologyProperties.indexBufferDataType,
-				indexDataOffset );
+			drawTopologyProperties.primitiveTopology,
+			static_cast< GLsizei >( pIndicesNum ),
+			drawTopologyProperties.indexBufferDataType,
+			baseIndexDataOffset );
 		ts3OpenGLHandleLastError();
 	}
 
-	void GLCommandList::cmdDrawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset )
+	void GLCommandList::cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset )
 	{
 	}
 
-	void GLCommandList::cmdDrawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset )
+	void GLCommandList::cmdDrawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset )
 	{
 		_stateController.applyStateChanges();
 
 		const auto & drawTopologyProperties = _stateController.getGLDrawTopologyProperties();
 
 		glDrawArrays(
-				drawTopologyProperties.primitiveTopology,
-				static_cast<GLint>( pVerticesOffset ),
-				static_cast<GLsizei>( pVerticesNum ) );
+			drawTopologyProperties.primitiveTopology,
+			static_cast< GLint >( pVerticesOffset ),
+			static_cast< GLsizei >( pVerticesNum ) );
 		ts3OpenGLHandleLastError();
 	}
 
-	void GLCommandList::cmdDrawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset )
+	void GLCommandList::cmdDrawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset )
 	{
 	}
 
@@ -122,17 +123,15 @@ namespace ts3::gpuapi
 
 	void GLCommandList::executeRenderPassLoadActions()
 	{
-		if( _currentRenderPassConfiguration.attachmentActionClearMask != 0 )
+		if( _currentRenderPassConfiguration.attachmentsActionClearMask != 0 )
 		{
-			smutil::clearRenderPassFramebuffer(
-					_stateController.getCurrentRenderTargetBindingInfo(),
-					_currentRenderPassConfiguration );
+			smutil::clearRenderPassFramebuffer( _currentRenderPassConfiguration );
 		}
 	}
 
 	void GLCommandList::executeRenderPassStoreActions()
 	{
-		if( _currentRenderPassConfiguration.attachmentActionResolveMask != 0 )
+		if( _currentRenderPassConfiguration.attachmentsActionResolveMask != 0 )
 		{
 			smutil::resolveRenderPassFramebuffer(
 					_stateController.getCurrentRenderTargetBindingInfo(),

@@ -246,9 +246,9 @@ namespace ts3::system
 		const int contextAttributes[] =
 		{
 			// Requested OpenGL API version: major part
-			WGL_CONTEXT_MAJOR_VERSION_ARB, pCreateInfo.runtimeVersionDesc.apiVersion.major,
+			WGL_CONTEXT_MAJOR_VERSION_ARB, pCreateInfo.requestedAPIVersion.major,
 			// Requested OpenGL API version: minor part
-			WGL_CONTEXT_MINOR_VERSION_ARB, pCreateInfo.runtimeVersionDesc.apiVersion.minor,
+			WGL_CONTEXT_MINOR_VERSION_ARB, pCreateInfo.requestedAPIVersion.minor,
 			//
 			WGL_CONTEXT_PROFILE_MASK_ARB, contextAPIProfile,
 			//
@@ -308,7 +308,7 @@ namespace ts3::system
 
 	bool Win32OpenGLSystemDriver::_nativeIsAPIClassSupported( EOpenGLAPIClass pAPIClass ) const
 	{
-		if( pAPIClass == EOpenGLAPIClass::OpenGL )
+		if( pAPIClass == EOpenGLAPIClass::OpenGLDesktop )
 		{
 			return true;
 		}
@@ -340,6 +340,11 @@ namespace ts3::system
 	void Win32OpenGLDisplaySurface::_nativeSwapBuffers()
 	{
 		::SwapBuffers( mNativeData.hdc );
+	}
+
+	EOpenGLAPIClass Win32OpenGLDisplaySurface::_nativeQuerySupportedAPIClass() const noexcept
+	{
+		return EOpenGLAPIClass::OpenGLDesktop;
 	}
 
 	FrameSize Win32OpenGLDisplaySurface::_nativeQueryRenderAreaSize() const

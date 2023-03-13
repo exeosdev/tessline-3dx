@@ -146,13 +146,13 @@ namespace ts3::system
 	public:
 		constexpr OpenGLErrorInfo( bool pStatus )
 		: errorCode( pStatus ? 0u : Limits<uint32>::maxValue )
-		, errorString( CX_STR_CHAR_EMPTY )
+		, errorString( ts3::cxdefs::STR_CHAR_EMPTY )
 		{}
 
 		template <typename TGLErrorCode>
 		constexpr OpenGLErrorInfo( TGLErrorCode pErrorCode, const char * pErrorMessage = nullptr )
 		: errorCode( numeric_cast<uint32>( pErrorCode ) )
-		, errorString( pErrorMessage ? CX_STR_CHAR_EMPTY : pErrorMessage )
+		, errorString( pErrorMessage ? ts3::cxdefs::STR_CHAR_EMPTY : pErrorMessage )
 		{}
 	};
 

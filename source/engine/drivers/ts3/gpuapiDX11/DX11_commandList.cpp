@@ -275,28 +275,28 @@ namespace ts3::gpuapi
 		return true;
 	}
 
-	void DX11CommandList::drawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset )
+	void DX11CommandList::drawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset )
 	{
 		updatePipelineState();
 
 		mD3D11DeviceContext1->DrawIndexed( pIndicesNum, pIndicesOffset, 0 );
 	}
 
-	void DX11CommandList::drawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset )
+	void DX11CommandList::drawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset )
 	{
 		updatePipelineState();
 
 		mD3D11DeviceContext1->DrawIndexedInstanced( pIndicesNumPerInstance, pInstancesNum, pIndicesOffset, 0, 0 );
 	}
 
-	void DX11CommandList::drawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset )
+	void DX11CommandList::drawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset )
 	{
 		updatePipelineState();
 
 		mD3D11DeviceContext1->Draw( pVerticesNum, pVerticesOffset );
 	}
 
-	void DX11CommandList::drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset )
+	void DX11CommandList::drawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset )
 	{
 	}
 

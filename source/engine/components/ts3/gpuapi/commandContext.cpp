@@ -145,6 +145,28 @@ namespace ts3::gpuapi
 	const Bitmask<ECommandListFlags> CommandContextDirectGraphics::sListFlagsDirectGraphics =
 			E_COMMAND_LIST_FLAG_EXECUTION_MODE_DIRECT_BIT | E_COMMAND_LIST_FLAG_COMMAND_CLASS_GRAPHICS_BIT;
 
+	bool CommandContextDirectGraphics::beginRenderPass(
+		const RenderPassConfigurationImmutableState & pRenderPassState,
+		Bitmask<ECommandListActionFlags> pFlags )
+	{
+		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
+		return mCommandList->beginRenderPass( pRenderPassState, pFlags );
+	}
+
+	bool CommandContextDirectGraphics::beginRenderPass(
+		const RenderPassConfigurationDynamicState & pRenderPassState,
+		Bitmask<ECommandListActionFlags> pFlags )
+	{
+		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
+		return mCommandList->beginRenderPass( pRenderPassState, pFlags );
+	}
+
+	void CommandContextDirectGraphics::endRenderPass()
+	{
+		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
+		return mCommandList->endRenderPass();
+	}
+
 	bool CommandContextDirectGraphics::cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
@@ -161,6 +183,30 @@ namespace ts3::gpuapi
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
 		return mCommandList->setGraphicsPipelineStateObject( pGraphicsPSO );
+	}
+
+	bool CommandContextDirectGraphics::setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState )
+	{
+		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
+		return mCommandList->setIAVertexStreamState( pIAVertexStreamState );
+	}
+
+	bool CommandContextDirectGraphics::setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState )
+	{
+		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
+		return mCommandList->setIAVertexStreamState( pIAVertexStreamState );
+	}
+
+	bool CommandContextDirectGraphics::setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState )
+	{
+		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
+		return mCommandList->setRenderTargetBindingState( pRenderTargetBindingState );
+	}
+
+	bool CommandContextDirectGraphics::setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState )
+	{
+		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
+		return mCommandList->setRenderTargetBindingState( pRenderTargetBindingState );
 	}
 
 	bool CommandContextDirectGraphics::cmdSetShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData )
@@ -187,25 +233,25 @@ namespace ts3::gpuapi
 		return mCommandList->cmdSetShaderTextureSampler( pParamRefID, pSampler );
 	}
 
-	void CommandContextDirectGraphics::cmdDrawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset )
+	void CommandContextDirectGraphics::cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
 		return mCommandList->cmdDrawDirectIndexed( pIndicesNum, pIndicesOffset );
 	}
 
-	void CommandContextDirectGraphics::cmdDrawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset )
+	void CommandContextDirectGraphics::cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
 		return mCommandList->cmdDrawDirectIndexedInstanced( pIndicesNumPerInstance, pInstancesNum, pIndicesOffset );
 	}
 
-	void CommandContextDirectGraphics::cmdDrawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset )
+	void CommandContextDirectGraphics::cmdDrawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
 		return mCommandList->cmdDrawDirectNonIndexed( pVerticesNum, pVerticesOffset );
 	}
 
-	void CommandContextDirectGraphics::cmdDrawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset )
+	void CommandContextDirectGraphics::cmdDrawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDirectGraphics ) );
 		return mCommandList->cmdDrawDirectNonIndexedInstanced( pVerticesNumPerInstance, pInstancesNum, pVerticesOffset );
@@ -235,6 +281,28 @@ namespace ts3::gpuapi
 
 	const Bitmask<ECommandListFlags> CommandContextDeferredGraphics::sListFlagsDeferredGraphics =
 			E_COMMAND_LIST_FLAG_EXECUTION_MODE_DEFERRED_BIT | E_COMMAND_LIST_FLAG_COMMAND_CLASS_GRAPHICS_BIT;
+
+	bool CommandContextDeferredGraphics::beginRenderPass(
+		const RenderPassConfigurationImmutableState & pRenderPassState,
+		Bitmask<ECommandListActionFlags> pFlags )
+	{
+		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
+		return mCommandList->beginRenderPass( pRenderPassState, pFlags );
+	}
+
+	bool CommandContextDeferredGraphics::beginRenderPass(
+		const RenderPassConfigurationDynamicState & pRenderPassState,
+		Bitmask<ECommandListActionFlags> pFlags )
+	{
+		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
+		return mCommandList->beginRenderPass( pRenderPassState, pFlags );
+	}
+
+	void CommandContextDeferredGraphics::endRenderPass()
+	{
+		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
+		return mCommandList->endRenderPass();
+	}
 
 	bool CommandContextDeferredGraphics::cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor )
 	{
@@ -278,25 +346,25 @@ namespace ts3::gpuapi
 		return mCommandList->cmdSetShaderTextureSampler( pParamRefID, pSampler );
 	}
 
-	void CommandContextDeferredGraphics::cmdDrawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset, EIndexDataFormat pIndexFormat )
+	void CommandContextDeferredGraphics::cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset, EIndexDataFormat pIndexFormat )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
 		return mCommandList->cmdDrawDirectIndexed( pIndicesNum, pIndicesOffset );
 	}
 
-	void CommandContextDeferredGraphics::cmdDrawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset, EIndexDataFormat pIndexFormat )
+	void CommandContextDeferredGraphics::cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset, EIndexDataFormat pIndexFormat )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
 		return mCommandList->cmdDrawDirectIndexedInstanced( pIndicesNumPerInstance, pInstancesNum, pIndicesOffset );
 	}
 
-	void CommandContextDeferredGraphics::cmdDrawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset )
+	void CommandContextDeferredGraphics::cmdDrawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
 		return mCommandList->cmdDrawDirectNonIndexed( pVerticesNum, pVerticesOffset );
 	}
 
-	void CommandContextDeferredGraphics::cmdDrawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset )
+	void CommandContextDeferredGraphics::cmdDrawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset )
 	{
 		ts3DebugAssert( checkCommandListSupport( sListFlagsDeferredGraphics ) );
 		return mCommandList->cmdDrawDirectNonIndexedInstanced( pVerticesNumPerInstance, pInstancesNum, pVerticesOffset );

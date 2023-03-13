@@ -38,10 +38,10 @@ namespace ts3::gpuapi
 		virtual bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer ) override;
 		virtual bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture ) override;
 		virtual bool setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler ) override;
-		virtual void drawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset ) override;
-		virtual void drawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset ) override;
-		virtual void drawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset ) override;
-		virtual void drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset ) override;
+		virtual void drawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset ) override;
+		virtual void drawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset ) override;
+		virtual void drawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset ) override;
+		virtual void drawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset ) override;
 
 	friendapi:
 		ID3D11Query * releaseExecutionSyncQuery();

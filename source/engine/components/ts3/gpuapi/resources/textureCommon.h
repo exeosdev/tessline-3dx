@@ -21,6 +21,10 @@ namespace ts3::gpuapi
 		/// @brief Identifies all mip levels available in a texture resource. Can be used for all resource accesses.
 		constexpr uint32 TEXTURE_MIP_LEVEL_ALL = Limits<uint32>::maxValue;
 
+		inline constexpr TextureSize2D TEXTURE_SIZE_2D_UNDEFINED{ Limits<uint32>::maxValue, Limits<uint32>::maxValue };
+
+		inline constexpr uint32 TEXTURE_MSAA_LEVEL_UNDEFINED = Limits<uint32>::maxValue;
+
 	}
 
 	enum ETextureDataCopyFlags : uint32
@@ -83,6 +87,18 @@ namespace ts3::gpuapi
 		TransferSourceImage                = E_TEXTURE_BIND_FLAG_TRANSFER_SOURCE_IMAGE_BIT,
 		TransferTargetImage                = E_TEXTURE_BIND_FLAG_TRANSFER_TARGET_IMAGE_BIT,
 		Unknown = 0
+	};
+
+	struct RenderTargetTextureLayout
+	{
+		ETextureFormat internalDataFormat = ETextureFormat::UNKNOWN;
+		uint32 msaaLevel;
+		TextureSize2D bufferSize;
+
+		explicit operator bool() const noexcept
+		{
+			return internalDataFormat != ETextureFormat::UNKNOWN;
+		}
 	};
 
 	struct TextureLayout
@@ -215,6 +231,10 @@ namespace ts3::gpuapi
 		TS3_GPUAPI_API_NO_DISCARD bool checkRenderTargetTextureDepthStencilFormat( ETextureFormat pFormat ) noexcept;
 
 		TS3_GPUAPI_API_NO_DISCARD const TextureLayout & queryTextureLayout( TextureHandle pTexture ) noexcept;
+
+		TS3_GPUAPI_API_NO_DISCARD RenderTargetTextureLayout queryRenderTargetTextureLayoutForTexture( TextureHandle pTexture ) noexcept;
+
+		TS3_GPUAPI_API_NO_DISCARD RenderTargetTextureLayout queryRenderTargetTextureLayoutForTexture( const TextureLayout & pTextureLayout ) noexcept;
 
 		TS3_GPUAPI_API_NO_DISCARD ETextureTarget getTextureTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pTextureResourceFlags );
 

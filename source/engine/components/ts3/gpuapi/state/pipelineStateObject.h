@@ -34,10 +34,11 @@ namespace ts3::gpuapi
 		IAInputLayoutDefinition inputLayoutDefinition;
 		mutable IAInputLayoutImmutableStateHandle inputLayoutState;
 
-		RenderTargetLayout * renderTargetLayout = nullptr;
-
 		ShaderInputSignatureDesc shaderInputSignatureDesc;
 		mutable ShaderInputSignature shaderInputSignature;
+
+		RenderTargetLayout renderTargetLayout;
+
 	};
 
 	/// @brief A monolithic state object, containing subset of a certain GPU pipeline state.

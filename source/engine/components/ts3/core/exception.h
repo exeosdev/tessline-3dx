@@ -234,12 +234,12 @@ namespace ts3
         template <exception_category_value_t tExceptionCategory> \
         struct ExceptionCategoryClassProxy \
         { \
-            using Type = typename ::ts3::ExceptionBaseTypeClassProxy<cxdefs::getExceptionCategoryBaseType( tExceptionCategory )>::Type; \
+            using Type = typename ::ts3::ExceptionBaseTypeClassProxy<ts3::cxdefs::getExceptionCategoryBaseType( tExceptionCategory )>::Type; \
         }; \
         template <exception_code_value_t tExceptionCode> \
         struct ExceptionCodeClassProxy \
         { \
-            using Type = typename ExceptionCategoryClassProxy<cxdefs::getExceptionCodeCategory( tExceptionCode )>::Type; \
+            using Type = typename ExceptionCategoryClassProxy<ts3::cxdefs::getExceptionCodeCategory( tExceptionCode )>::Type; \
         }
 
     #define ts3SetExceptionCategoryType( pExceptionCategory, pType ) \

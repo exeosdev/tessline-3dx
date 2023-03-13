@@ -60,6 +60,13 @@ namespace ts3::gpuapi
 			cvCommonStencilTestSettingsDefault
 		};
 
+		const DepthStencilConfig cvPipelineDepthStencilConfigEnableDepthTest =
+		{
+			E_DEPTH_STENCIL_CONFIG_FLAG_ENABLE_DEPTH_TEST_BIT,
+			cvCommonDepthTestSettingsDefault,
+			cvCommonStencilTestSettingsDefault
+		};
+
 		const RasterizerConfig cvPipelineRasterizerConfigDefault =
 		{
 			0u,

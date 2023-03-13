@@ -85,33 +85,21 @@ namespace ts3::gpuapi
 			const auto blendActiveAttachmentsNum = popCount( pConfig.attachmentsMask );
 			const auto commonBlendSettings = smutil::translateRTColorAttachmentBlendSettings( pConfig.attachments[0] );
 
-			uint32 currentAttachmentsNum = 0;
-
-			for( uint32 attachmentIndex = 0; attachmentIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM; ++attachmentIndex )
-			{
-				const auto attachmentBit = cxdefs::makeRTAttachmentFlag( attachmentIndex );
-				if( pConfig.attachmentsMask.isSet( attachmentBit ) )
+			foreachRTAttachmentIndex( pConfig.attachmentsMask,
+				[&]( native_uint pIndex, ERTAttachmentFlags pAttachmentBit )
 				{
-					auto & openglAttachmentSettings = openglBlendConfig.attachments[attachmentIndex];
-
+					auto & openglAttachmentSettings = openglBlendConfig.attachments[pIndex];
 					if( pConfig.flags.isSet( E_BLEND_CONFIG_FLAG_ENABLE_MRT_INDEPENDENT_BLENDING_BIT ) )
 					{
-						const auto & inputAttachmentSettings = pConfig.attachments[attachmentIndex];
-						openglAttachmentSettings = smutil::translateRTColorAttachmentBlendSettings( pConfig.attachments[attachmentIndex] );
+						const auto & inputAttachmentSettings = pConfig.attachments[pIndex];
+						openglAttachmentSettings = smutil::translateRTColorAttachmentBlendSettings( inputAttachmentSettings );
 					}
 					else
 					{
 						openglAttachmentSettings = commonBlendSettings;
 					}
-
-					++currentAttachmentsNum;
-
-					if( currentAttachmentsNum == blendActiveAttachmentsNum )
-					{
-						break;
-					}
-				}
-			}
+					return true;
+				} );
 
 			openglBlendConfig.constantColor = pConfig.constantColor;
 			openglBlendConfig.flags = pConfig.flags;

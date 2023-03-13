@@ -18,7 +18,7 @@ namespace ts3::gpuapi
 		return _renderTargetBindingDefinition.activeAttachmentsMask.empty();
 	}
 
-	uint32 RenderTargetBindingDynamicState::countActiveColorAttachments() const noexcept
+	native_uint RenderTargetBindingDynamicState::countActiveColorAttachments() const noexcept
 	{
 		return popCount( _renderTargetBindingDefinition.activeAttachmentsMask & E_RT_ATTACHMENT_MASK_COLOR_ALL );
 	}
@@ -33,7 +33,7 @@ namespace ts3::gpuapi
 		_renderTargetBindingDefinition = pDefinition;
 	}
 
-	RenderTargetAttachmentBinding & RenderTargetBindingDynamicState::setColorAttachmentBinding( render_target_index_t pIndex )
+	RenderTargetAttachmentBinding & RenderTargetBindingDynamicState::setColorAttachmentBinding( native_uint pIndex )
 	{
 		ts3DebugAssert( cxdefs::isRTAttachmentIndexValid( pIndex ) );
 		_renderTargetBindingDefinition.activeAttachmentsMask.set( cxdefs::makeRTAttachmentFlag( pIndex ) );
@@ -41,7 +41,7 @@ namespace ts3::gpuapi
 	}
 
 	void RenderTargetBindingDynamicState::setColorAttachmentBinding(
-			render_target_index_t pIndex,
+			native_uint pIndex,
 			const RenderTargetAttachmentBinding & pRPCAttachmentBinding )
 	{
 		_setColorAttachmentBindings( pIndex, 1, &pRPCAttachmentBinding );
@@ -54,8 +54,8 @@ namespace ts3::gpuapi
 	}
 
 	void RenderTargetBindingDynamicState::setColorAttachmentBindings(
-			uint32 pFirstIndex,
-			uint32 pCount,
+			native_uint pFirstIndex,
+			native_uint pCount,
 			const RenderTargetAttachmentBinding * pRPCAttachmentBindings )
 	{
 		_setColorAttachmentBindings( pFirstIndex, pCount, pRPCAttachmentBindings );
@@ -74,12 +74,12 @@ namespace ts3::gpuapi
 		_renderTargetBindingDefinition.depthStencilAttachment = pRPDSAttachmentBinding;
 	}
 
-	void RenderTargetBindingDynamicState::resetColorAttachmentBinding( render_target_index_t pIndex )
+	void RenderTargetBindingDynamicState::resetColorAttachmentBinding( native_uint pIndex )
 	{
 		_resetColorAttachmentBindings( pIndex, 1 );
 	}
 
-	void RenderTargetBindingDynamicState::resetColorAttachmentBindings( uint32 pFirstIndex, uint32 pCount )
+	void RenderTargetBindingDynamicState::resetColorAttachmentBindings( native_uint pFirstIndex, native_uint pCount )
 	{
 		_resetColorAttachmentBindings( pFirstIndex, pCount );
 	}
@@ -102,11 +102,11 @@ namespace ts3::gpuapi
 	}
 
 	void RenderTargetBindingDynamicState::_setColorAttachmentBindings(
-			uint32 pFirstIndex,
-			uint32 pCount,
+			native_uint pFirstIndex,
+			native_uint pCount,
 			const RenderTargetAttachmentBinding * pRPCAttachmentBindings )
 	{
-		for( uint32 caIndex = pFirstIndex; ( caIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pCount != 0 ); ++caIndex, --pCount )
+		for( native_uint caIndex = pFirstIndex; cxdefs::isRTColorAttachmentIndexValid( caIndex ) && ( pCount != 0 ); ++caIndex, --pCount )
 		{
 			const auto & sourceCABinding = pRPCAttachmentBindings[caIndex - pFirstIndex];
 
@@ -117,9 +117,9 @@ namespace ts3::gpuapi
 		}
 	}
 
-	void RenderTargetBindingDynamicState::_resetColorAttachmentBindings( uint32 pFirstIndex, uint32 pCount )
+	void RenderTargetBindingDynamicState::_resetColorAttachmentBindings( native_uint pFirstIndex, native_uint pCount )
 	{
-		for( uint32 caIndex = pFirstIndex; ( caIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pCount != 0 ); ++caIndex, --pCount )
+		for( native_uint caIndex = pFirstIndex; cxdefs::isRTColorAttachmentIndexValid( caIndex ) && ( pCount != 0 ); ++caIndex, --pCount )
 		{
 			const auto colorAttachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
 
@@ -143,7 +143,7 @@ namespace ts3::gpuapi
 		return _renderPassConfiguration.activeAttachmentsMask.empty();
 	}
 
-	uint32 RenderPassConfigurationDynamicState::countActiveColorAttachments() const noexcept
+	native_uint RenderPassConfigurationDynamicState::countActiveColorAttachments() const noexcept
 	{
 		return popCount( _renderPassConfiguration.activeAttachmentsMask & E_RT_ATTACHMENT_MASK_COLOR_ALL );
 	}
@@ -158,7 +158,7 @@ namespace ts3::gpuapi
 		_renderPassConfiguration = pConfiguration;
 	}
 
-	RenderPassAttachmentConfig & RenderPassConfigurationDynamicState::setColorAttachmentUsage( render_target_index_t pIndex )
+	RenderPassAttachmentConfig & RenderPassConfigurationDynamicState::setColorAttachmentUsage( native_uint pIndex )
 	{
 		ts3DebugAssert( cxdefs::isRTAttachmentIndexValid( pIndex ) );
 		_renderPassConfiguration.activeAttachmentsMask.set( cxdefs::makeRTAttachmentFlag( pIndex ) );
@@ -166,7 +166,7 @@ namespace ts3::gpuapi
 	}
 
 	void RenderPassConfigurationDynamicState::setColorAttachmentUsage(
-			render_target_index_t pIndex,
+			native_uint pIndex,
 			const RenderPassAttachmentConfig & pRPCAttachmentUsage )
 	{
 		_setColorAttachmentUsages( pIndex, 1, &pRPCAttachmentUsage );
@@ -179,8 +179,8 @@ namespace ts3::gpuapi
 	}
 
 	void RenderPassConfigurationDynamicState::setColorAttachmentBindings(
-			uint32 pFirstIndex,
-			uint32 pCount,
+			native_uint pFirstIndex,
+			native_uint pCount,
 			const RenderPassAttachmentConfig * pRPCAttachmentUsages )
 	{
 		_setColorAttachmentUsages( pFirstIndex, pCount, pRPCAttachmentUsages );
@@ -199,12 +199,12 @@ namespace ts3::gpuapi
 		_renderPassConfiguration.depthStencilAttachment = pRPDSAttachmentUsage;
 	}
 
-	void RenderPassConfigurationDynamicState::resetColorAttachmentUsage( render_target_index_t pIndex )
+	void RenderPassConfigurationDynamicState::resetColorAttachmentUsage( native_uint pIndex )
 	{
 		_resetColorAttachmentUsages( pIndex, 1 );
 	}
 
-	void RenderPassConfigurationDynamicState::resetColorAttachmentUsages( uint32 pFirstIndex, uint32 pCount )
+	void RenderPassConfigurationDynamicState::resetColorAttachmentUsages( native_uint pFirstIndex, native_uint pCount )
 	{
 		_resetColorAttachmentUsages( pFirstIndex, pCount );
 	}
@@ -227,11 +227,11 @@ namespace ts3::gpuapi
 	}
 
 	void RenderPassConfigurationDynamicState::_setColorAttachmentUsages(
-			uint32 pFirstIndex,
-			uint32 pCount,
+			native_uint pFirstIndex,
+			native_uint pCount,
 			const RenderPassAttachmentConfig * pRPCAttachmentUsages )
 	{
-		for( uint32 caIndex = pFirstIndex; ( caIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pCount != 0 ); ++caIndex, --pCount )
+		for( native_uint caIndex = pFirstIndex; cxdefs::isRTColorAttachmentIndexValid( caIndex ) && ( pCount != 0 ); ++caIndex, --pCount )
 		{
 			const auto & sourceCAUsage = pRPCAttachmentUsages[caIndex - pFirstIndex];
 
@@ -242,9 +242,9 @@ namespace ts3::gpuapi
 		}
 	}
 
-	void RenderPassConfigurationDynamicState::_resetColorAttachmentUsages( uint32 pFirstIndex, uint32 pCount )
+	void RenderPassConfigurationDynamicState::_resetColorAttachmentUsages( native_uint pFirstIndex, native_uint pCount )
 	{
-		for( uint32 caIndex = pFirstIndex; ( caIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ) && ( pCount != 0 ); ++caIndex, --pCount )
+		for( native_uint caIndex = pFirstIndex; cxdefs::isRTColorAttachmentIndexValid( caIndex ) && ( pCount != 0 ); ++caIndex, --pCount )
 		{
 			const auto colorAttachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
 

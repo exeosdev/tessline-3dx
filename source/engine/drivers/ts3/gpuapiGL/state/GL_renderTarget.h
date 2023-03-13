@@ -27,9 +27,9 @@ namespace ts3::gpuapi
 
 	struct GLRenderTargetBindingInfo
 	{
-		const GLFramebufferObject * renderFBO;
-		const GLFramebufferObject * resolveFBO;
-		const RenderTargetLayout * rtLayout;
+		const GLFramebufferObject * renderFBO = nullptr;
+		const GLFramebufferObject * resolveFBO = nullptr;
+		const RenderTargetLayout * rtLayout = nullptr;
 	};
 
 	class GLRenderTargetBindingImmutableState : public RenderTargetBindingImmutableState
@@ -82,9 +82,7 @@ namespace ts3::gpuapi
 				const RenderTargetBindingDefinition & pBindingDefinition,
 				Bitmask<ERTAttachmentFlags> pAttachmentMask );
 
-		void clearRenderPassFramebuffer(
-				const GLRenderTargetBindingInfo & pRTBindingInfo,
-				const RenderPassConfiguration & pRenderPassConfiguration );
+		void clearRenderPassFramebuffer( const RenderPassConfiguration & pRenderPassConfiguration );
 
 		void resolveRenderPassFramebuffer(
 				const GLRenderTargetBindingInfo & pRTBindingInfo,

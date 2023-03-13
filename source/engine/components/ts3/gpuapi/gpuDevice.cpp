@@ -138,22 +138,24 @@ namespace ts3::gpuapi
 	{
 		if( pCreateInfo.targetTexture )
 		{
-			if( !rcutil::validateRenderTextureLayout( pCreateInfo.targetTexture.getRefTexture(), pCreateInfo.rttLayout ) )
-			{
-				return nullptr;
-			}
-
 			const auto rttType = rcutil::queryRenderTargetTextureType( pCreateInfo.targetTexture->mTextureLayout.pixelFormat );
+			const auto rttLayout = rcutil::queryRenderTargetTextureLayout( pCreateInfo.targetTexture->mTextureLayout );
 
-			auto existingTextureRTT = createGPUAPIObject<RenderTargetTexture>( *this, rttType, pCreateInfo.rttLayout, pCreateInfo.targetTexture );
+			auto existingTextureRTT = createGPUAPIObject<RenderTargetTexture>( *this, rttType, rttLayout, pCreateInfo.targetTexture );
 
 			return existingTextureRTT;
 		}
+
 		return _drvCreateRenderTargetTexture( pCreateInfo );
 	}
 
 	GraphicsPipelineStateObjectHandle GPUDevice::createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
 	{
+		if( pCreateInfo.renderTargetLayout.empty() )
+		{
+			return nullptr;
+		}
+
 		if( !pCreateInfo.shaderInputSignature )
 		{
 			pCreateInfo.shaderInputSignature = smutil::createShaderInputSignature( pCreateInfo.shaderInputSignatureDesc );
