@@ -1,0 +1,8 @@
+//
+// Created by Mateusz Grzejek on 01/05/2022.
+//
+
+#ifndef TESSLINE_3DX_MTL1_GPUDEVICE_H
+#define TESSLINE_3DX_MTL1_GPUDEVICE_H
+
+#endif //TESSLINE_3DX_MTL1_GPUDEVICE_H

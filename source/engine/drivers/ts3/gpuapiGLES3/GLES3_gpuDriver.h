@@ -24,7 +24,7 @@ namespace ts3::gpuapi
 
 		virtual GPUDeviceHandle createDevice( const GPUDeviceCreateInfo & pCreateInfo ) override;
 
-		virtual EGPUDriverID queryGPUDriverID() const override;
+		virtual EGPUDriverID queryGPUDriverID() const noexcept override;
 
 		static GLES3GPUDriverHandle create( const GLES3GPUDriverCreateInfo & pCreateInfo );
 	};

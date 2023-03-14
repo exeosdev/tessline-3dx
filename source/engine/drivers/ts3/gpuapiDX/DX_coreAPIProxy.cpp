@@ -260,7 +260,7 @@ namespace ts3::gpuapi
 			DXGI_FORMAT_R32_FLOAT,
 			DXGI_FORMAT_D24_UNORM_S8_UINT,
 		};
-		auto baseDataTypeIndex = ecGetBaseDataTypeIndex( pBaseDataType );
+		auto baseDataTypeIndex = cxdefs::getBaseDataTypeIndex( pBaseDataType );
 		return staticArrayElement( baseDataTypeArray, baseDataTypeIndex );
 	}
 

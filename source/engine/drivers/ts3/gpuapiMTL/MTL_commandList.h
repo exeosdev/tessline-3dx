@@ -1,31 +1,30 @@
 
 #pragma once
 
-#ifndef __TS3DRIVER_GPUAPI_GLCOMMON_GPU_COMMAND_LIST_H__
-#define __TS3DRIVER_GPUAPI_GLCOMMON_GPU_COMMAND_LIST_H__
+#ifndef __TS3DRIVER_GPUAPI_MTLCOMMON_GPU_COMMAND_LIST_H__
+#define __TS3DRIVER_GPUAPI_MTLCOMMON_GPU_COMMAND_LIST_H__
 
-#include "GL_prerequisites.h"
-#include "state/GL_pipelineStateController.h"
+#include "MTL_prerequisites.h"
 #include <ts3/gpuapi/commandList.h>
+
+#include <Metal/MTLCommandBuffer.h>
+#include <Metal/MTLCommandEncoder.h>
 
 namespace ts3::gpuapi
 {
 
-	class GLShaderProgramObject;
-
 	/// @brief
-	class TS3_GPUAPI_CLASS GLCommandList : public CommandList
+	class MetalCommandList : public CommandList
 	{
 	public:
-		system::OpenGLRenderContextHandle const mSysGLRenderContext;
+		///
+		id<MTLDevice> mMTLDevice;
+		///
+		id<MTLCommandQueue> const mMTLCommandQueue;
 
 	public:
-		GLCommandList(
-			GLCommandSystem & pGLCommandSystem,
-			ECommandListType pListType,
-			system::OpenGLRenderContextHandle pSysGLRenderContext );
-
-		virtual ~GLCommandList();
+		MetalCommandList( MetalCommandSystem & pMTLCommandSystem, ECommandListType pListType, id<MTLCommandQueue> pMTLCommandQueue );
+		virtual ~MetalCommandList();
 
 		virtual bool beginRenderPass(
 				const RenderPassConfigurationImmutableState & pRenderPassState,
@@ -47,15 +46,10 @@ namespace ts3::gpuapi
 
 		virtual void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext ) override;
 
-	protected:
-		void executeRenderPassLoadActions();
-		void executeRenderPassStoreActions();
-
 	private:
-		GLGraphicsPipelineStateController _stateController;
-		RenderPassConfiguration _currentRenderPassConfiguration;
+		id<MTLRenderCommandEncoder> _currentPassCommandEncoder;
 	};
 
 } // namespace ts3::gpuapi
 
-#endif // __TS3DRIVER_GPUAPI_GLCOMMON_GPU_COMMAND_LIST_H__
+#endif // __TS3DRIVER_GPUAPI_MTLCOMMON_GPU_COMMAND_LIST_H__

@@ -12,9 +12,9 @@
 namespace ts3::gpuapi
 {
 
-	GLGPUDevice::GLGPUDevice( GLGPUDriver & pGLGPUDriver )
-	: GPUDevice( pGLGPUDriver )
-	, mSysGLDriver( pGLGPUDriver.mSysGLDriver )
+	GLGPUDevice::GLGPUDevice( GLGPUDriver & pGPUDriver )
+	: GPUDevice( pGPUDriver )
+	, mSysGLDriver( pGPUDriver.mSysGLDriver )
 	, _immutableStateFactory( *this )
 	, _immutableStateCache( _immutableStateFactory )
 	{
