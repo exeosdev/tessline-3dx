@@ -7,15 +7,15 @@
 namespace ts3::gpuapi
 {
 
-	constexpr GLuint cxGLObjectHandleInvalid = ts3::Limits<GLuint>::maxValue;
+	constexpr auto CX_GL_OBJECT_HANDLE_INVALID = Limits<GLuint>::maxValue;
 
-	constexpr GLenum cxGLBindTargetUnknown = ts3::Limits<GLenum>::maxValue;
+	constexpr auto CX_GL_BIND_TARGET_UNKNOWN = Limits<GLenum>::maxValue;
 
 	enum class GLObjectBaseType : enum_default_value_t
 	{
 		// Type for buffer objects (glGenBuffers).
 		Buffer,
-		// Type for framebuffer objects (glGenFamebuffers).
+		// Type for framebuffer objects (glGenFramebuffers).
 		Framebuffer,
 		// Type for buffer objects (glGenRenderbuffers).
 		Renderbuffer,
@@ -59,7 +59,7 @@ namespace ts3::gpuapi
 
 	inline bool GLObject::checkHandle() const
 	{
-		return mGLHandle != cxGLObjectHandleInvalid;
+		return mGLHandle != CX_GL_OBJECT_HANDLE_INVALID;
 	}
 
 	struct GLObjectDeleter
@@ -71,8 +71,15 @@ namespace ts3::gpuapi
 		}
 	};
 
-	template <typename TpObject>
-	using GLObjectHandle = std::unique_ptr<TpObject, GLObjectDeleter>;
+	template <typename TObject>
+	using GLObjectHandle = std::unique_ptr<TObject, GLObjectDeleter>;
+
+	template <typename TObject, typename... TArgs>
+	inline GLObjectHandle<TObject> createGLObject( TArgs && ...pArgs )
+	{
+		GLObjectHandle<TObject> result{ new TObject( std::forward<TArgs>( pArgs )... ) };
+		return result;
+	}
 
 #define ts3GLDeclareOpenGLObjectHandle( pObjectClass ) \
 	class pObjectClass; \

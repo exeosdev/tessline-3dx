@@ -27,19 +27,19 @@ namespace ts3::system
 
 		virtual ~DisplayAdapter() noexcept;
 
-		TS3_FUNC_NO_DISCARD DisplayOutput * findOutput( DisplayOutputPredicate pPredicate ) const;
-		TS3_FUNC_NO_DISCARD DisplayOutputList findOutputs( DisplayOutputPredicate pPredicate ) const;
+		TS3_ATTR_NO_DISCARD DisplayOutput * findOutput( DisplayOutputPredicate pPredicate ) const;
+		TS3_ATTR_NO_DISCARD DisplayOutputList findOutputs( DisplayOutputPredicate pPredicate ) const;
 
-		TS3_FUNC_NO_DISCARD DisplayOutput * getOutput( dsm_index_t pOutputIndex ) const;
-		TS3_FUNC_NO_DISCARD DisplayOutput * getDefaultOutput() const;
+		TS3_ATTR_NO_DISCARD DisplayOutput * getOutput( dsm_index_t pOutputIndex ) const;
+		TS3_ATTR_NO_DISCARD DisplayOutput * getDefaultOutput() const;
 
-		TS3_FUNC_NO_DISCARD const DisplayAdapterDesc & getAdapterDesc() const;
-		TS3_FUNC_NO_DISCARD const DisplayOutputList & getOutputList() const;
+		TS3_ATTR_NO_DISCARD const DisplayAdapterDesc & getAdapterDesc() const;
+		TS3_ATTR_NO_DISCARD const DisplayOutputList & getOutputList() const;
 
-		TS3_FUNC_NO_DISCARD bool isActiveAdapter() const;
-		TS3_FUNC_NO_DISCARD bool isPrimaryAdapter() const;
-		TS3_FUNC_NO_DISCARD bool hasActiveOutputs() const;
-		TS3_FUNC_NO_DISCARD bool hasAnyOutputs() const;
+		TS3_ATTR_NO_DISCARD bool isActiveAdapter() const;
+		TS3_ATTR_NO_DISCARD bool isPrimaryAdapter() const;
+		TS3_ATTR_NO_DISCARD bool hasActiveOutputs() const;
+		TS3_ATTR_NO_DISCARD bool hasAnyOutputs() const;
 
 	private:
 		// Registers an output of this adapter. Adds it to the list and fills internal info.
@@ -73,22 +73,22 @@ namespace ts3::system
 		explicit DisplayOutput( DisplayAdapter & pDisplayAdapter );
 		virtual ~DisplayOutput() noexcept;
 
-		TS3_FUNC_NO_DISCARD ArrayView<const EColorFormat> getSupportedColorFormatList() const;
+		TS3_ATTR_NO_DISCARD ArrayView<const EColorFormat> getSupportedColorFormatList() const;
 
-		TS3_FUNC_NO_DISCARD bool checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings,
+		TS3_ATTR_NO_DISCARD bool checkVideoSettingsSupport( const DisplayVideoSettings & pVideoSettings,
 		                                                    EColorFormat pColorFormat = EColorFormat::Unknown ) const;
 
-		TS3_FUNC_NO_DISCARD DisplayVideoMode * findVideoMode( EColorFormat pColorFormat, DisplayVideoModePredicate pPredicate ) const;
-		TS3_FUNC_NO_DISCARD DisplayVideoModeList findVideoModes( EColorFormat pColorFormat, DisplayVideoModePredicate pPredicate ) const;
+		TS3_ATTR_NO_DISCARD DisplayVideoMode * findVideoMode( EColorFormat pColorFormat, DisplayVideoModePredicate pPredicate ) const;
+		TS3_ATTR_NO_DISCARD DisplayVideoModeList findVideoModes( EColorFormat pColorFormat, DisplayVideoModePredicate pPredicate ) const;
 
-		TS3_FUNC_NO_DISCARD const DisplayOutputDesc & getOutputDesc() const;
-		TS3_FUNC_NO_DISCARD const DisplayVideoModeList & getVideoModeList() const;
-		TS3_FUNC_NO_DISCARD const DisplayVideoModeList & getVideoModeList( EColorFormat pColorFormat ) const;
+		TS3_ATTR_NO_DISCARD const DisplayOutputDesc & getOutputDesc() const;
+		TS3_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList() const;
+		TS3_ATTR_NO_DISCARD const DisplayVideoModeList & getVideoModeList( EColorFormat pColorFormat ) const;
 
-		TS3_FUNC_NO_DISCARD bool isActiveOutput() const;
-		TS3_FUNC_NO_DISCARD bool isPrimaryOutput() const;
+		TS3_ATTR_NO_DISCARD bool isActiveOutput() const;
+		TS3_ATTR_NO_DISCARD bool isPrimaryOutput() const;
 
-		TS3_FUNC_NO_DISCARD bool isColorFormatSupported( EColorFormat pColorFormat ) const;
+		TS3_ATTR_NO_DISCARD bool isColorFormatSupported( EColorFormat pColorFormat ) const;
 
 	private:
 		// Registers a supported video mode for this output. Adds it to the list and fills internal info.
@@ -120,7 +120,7 @@ namespace ts3::system
 		explicit DisplayVideoMode( DisplayOutput & pDisplayOutput );
 		virtual ~DisplayVideoMode() noexcept;
 
-		TS3_FUNC_NO_DISCARD const DisplayVideoModeDesc & getModeDesc() const;
+		TS3_ATTR_NO_DISCARD const DisplayVideoModeDesc & getModeDesc() const;
 
 	private:
 		// Returns a writable video mode desc. Used by the driver and parent output to fill the info about this video mode.

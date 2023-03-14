@@ -6,18 +6,29 @@ namespace ts3::gpuapi
 
 	EGPUBufferTarget getBufferTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pBufferResourceFlags );
 
-	GPUBuffer::GPUBuffer( GPUDevice & pGPUDevice,
-	                      const ResourceMemoryInfo & pResourceMemory,
-	                      const GPUBufferProperties & pBufferProperties )
+	GPUBuffer::GPUBuffer(
+			GPUDevice & pGPUDevice,
+			const ResourceMemoryInfo & pResourceMemory,
+			const GPUBufferProperties & pBufferProperties )
 	: GPUResource( pGPUDevice, EGPUResourceBaseType::Buffer, pResourceMemory )
 	, mBufferProperties( pBufferProperties )
 	{}
 
 	GPUBuffer::~GPUBuffer() = default;
 
+	const GPUResourceProperties & GPUBuffer::getProperties() const
+	{
+		return mBufferProperties;
+	}
+
 	bool GPUBuffer::checkBufferTargetSupport( EGPUBufferTarget pBufferTarget ) const
 	{
 		return mBufferProperties.resourceFlags.isSet( pBufferTarget );
+	}
+
+	GPUMemoryRegion GPUBuffer::getWholeBufferRegion() const
+	{
+		return GPUMemoryRegion{ 0, mBufferProperties.byteSize };
 	}
 
 	bool GPUBuffer::validateMapRequest( const GPUMemoryRegion & pRegion, const EGPUMemoryMapMode & pMapMode )
@@ -27,13 +38,13 @@ namespace ts3::gpuapi
 			return false;
 		}
 
-		if( !checkMemoryMapAccess( pMapMode, mResourceMemory.memoryFlags ) )
+		if( !GpuMem::checkMemoryMapAccess( pMapMode, mResourceMemory.memoryFlags ) )
 		{
 			return false;
 		}
 
 		const GPUMemoryRegion bufferDataRegion{ 0, mBufferProperties.byteSize };
-		if( !ts3::checkRangeSubrange( bufferDataRegion.asRange(), pRegion.asRange() ) )
+		if( !ts3::checkRangeSubRange( bufferDataRegion.asRange(), pRegion.asRange() ) )
 		{
 			return false;
 		}
@@ -64,7 +75,7 @@ namespace ts3::gpuapi
 
 		if( pCreateInfo.memoryBaseAlignment == 0 )
 		{
-		    pCreateInfo.memoryBaseAlignment = CX_MEMORY_DEFAULT_ALIGNMENT;
+		    pCreateInfo.memoryBaseAlignment = ts3::cxdefs::MEMORY_DEFAULT_ALIGNMENT;
 		}
 
 		if( ( pCreateInfo.bufferSize == 0 ) && pCreateInfo.initDataDesc )

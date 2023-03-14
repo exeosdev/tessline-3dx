@@ -32,20 +32,20 @@
 namespace ts3::math
 {
 
-	template <typename TpValue, size_t tpSize>
-	using Array = TpValue[tpSize];
+	template <typename TValue, size_t tSize>
+	using Array = TValue[tSize];
 
-	template <typename TpValue>
-	using Array2 = Array<TpValue, 2>;
+	template <typename TValue>
+	using Array2 = Array<TValue, 2>;
 
-	template <typename TpValue>
-	using Array3 = Array<TpValue, 3>;
+	template <typename TValue>
+	using Array3 = Array<TValue, 3>;
 
-	template <typename TpValue>
-	using Array4 = Array<TpValue, 4>;
+	template <typename TValue>
+	using Array4 = Array<TValue, 4>;
 
-	template <typename TpScalar>
-	using enable_if_scalar_t = std::enable_if_t<std::is_arithmetic<TpScalar>::value, bool>;
+	template <typename TScalar>
+	using enable_if_scalar_t = std::enable_if_t<std::is_arithmetic<TScalar>::value, bool>;
 
 	namespace constants
 	{

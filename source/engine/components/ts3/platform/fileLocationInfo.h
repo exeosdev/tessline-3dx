@@ -11,11 +11,16 @@
 namespace ts3
 {
 
-	/// @brief Represents empty char* literal.
-	inline constexpr const char * CX_STR_CHAR_EMPTY = "";
+	namespace cxdefs
+	{
 
-	/// @brief Represents empty wchar_t* literal.
-	inline constexpr const wchar_t * CX_STR_WCHAR_EMPTY = L"";
+		/// @brief Represents empty char* literal.
+		inline constexpr const char * STR_CHAR_EMPTY = "";
+
+		/// @brief Represents empty wchar_t* literal.
+		inline constexpr const wchar_t * STR_WCHAR_EMPTY = L"";
+
+	}
 
 	struct FileLocationInfo
 	{
@@ -29,8 +34,8 @@ namespace ts3
 		FileLocationInfo & operator=( const FileLocationInfo & ) = default;
 
 		FileLocationInfo()
-		: function( CX_STR_CHAR_EMPTY )
-		, filename( CX_STR_CHAR_EMPTY )
+		: function( cxdefs::STR_CHAR_EMPTY )
+		, filename( cxdefs::STR_CHAR_EMPTY )
 		, lineNumber( 0 )
 		{}
 
@@ -40,7 +45,7 @@ namespace ts3
 		, lineNumber( pLineNumber )
 		{}
 
-		TS3_PCL_ATTR_NO_DISCARD std::string toString() const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD std::string toString() const;
 	};
 
 	inline std::string toString( const FileLocationInfo & pLocationInfo )

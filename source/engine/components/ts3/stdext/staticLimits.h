@@ -3,6 +3,7 @@
 #define __TS3_STDEXT_STATIC_LIMITS_H__
 
 #include "prerequisites.h"
+
 #include <cfloat>
 #include <climits>
 #include <numeric>
@@ -11,79 +12,87 @@
 namespace ts3
 {
 
-	template <typename TpType, size_t tTypeSize, bool tSigned>
+	template <typename TType, size_t tTypeSize, bool tSigned>
 	struct IntegerLimitsProxy;
 
-	template <typename TpType>
-	struct IntegerLimitsProxy<TpType, 1, true>
+	template <typename TType>
+	struct IntegerLimitsProxy<TType, 1, true>
 	{
-		static constexpr TpType minValue = INT8_MIN;
-		static constexpr TpType maxValue = INT8_MAX;
-		static constexpr TpType epsilon = 0;
-		static constexpr TpType roundError = 0;
+		static constexpr uint32 bitCount = CHAR_BIT;
+		static constexpr TType minValue = INT8_MIN;
+		static constexpr TType maxValue = INT8_MAX;
+		static constexpr TType epsilon = 0;
+		static constexpr TType roundError = 0;
 	};
 
-	template <typename TpType>
-	struct IntegerLimitsProxy<TpType, 1, false>
+	template <typename TType>
+	struct IntegerLimitsProxy<TType, 1, false>
 	{
-		static constexpr TpType minValue = 0U;
-		static constexpr TpType maxValue = UINT8_MAX;
-		static constexpr TpType epsilon = 0U;
-		static constexpr TpType roundError = 0U;
+		static constexpr uint32 bitCount = CHAR_BIT;
+		static constexpr TType minValue = 0U;
+		static constexpr TType maxValue = UINT8_MAX;
+		static constexpr TType epsilon = 0U;
+		static constexpr TType roundError = 0U;
 	};
 
-	template <typename TpType>
-	struct IntegerLimitsProxy<TpType, 2, true>
+	template <typename TType>
+	struct IntegerLimitsProxy<TType, 2, true>
 	{
-		static constexpr TpType minValue = INT16_MIN;
-		static constexpr TpType maxValue = INT16_MAX;
-		static constexpr TpType epsilon = 0;
-		static constexpr TpType roundError = 0;
+		static constexpr uint32 bitCount = CHAR_BIT * 2;
+		static constexpr TType minValue = INT16_MIN;
+		static constexpr TType maxValue = INT16_MAX;
+		static constexpr TType epsilon = 0;
+		static constexpr TType roundError = 0;
 	};
 
-	template <typename TpType>
-	struct IntegerLimitsProxy<TpType, 2, false>
+	template <typename TType>
+	struct IntegerLimitsProxy<TType, 2, false>
 	{
-		static constexpr TpType minValue = 0U;
-		static constexpr TpType maxValue = UINT16_MAX;
-		static constexpr TpType epsilon = 0U;
-		static constexpr TpType roundError = 0U;
+		static constexpr uint32 bitCount = CHAR_BIT * 2;
+		static constexpr TType minValue = 0U;
+		static constexpr TType maxValue = UINT16_MAX;
+		static constexpr TType epsilon = 0U;
+		static constexpr TType roundError = 0U;
 	};
 
-	template <typename TpType>
-	struct IntegerLimitsProxy<TpType, 4, true>
+	template <typename TType>
+	struct IntegerLimitsProxy<TType, 4, true>
 	{
-		static constexpr TpType minValue = INT32_MIN;
-		static constexpr TpType maxValue = INT32_MAX;
-		static constexpr TpType epsilon = 0;
-		static constexpr TpType roundError = 0;
+		static constexpr uint32 bitCount = CHAR_BIT * 4;
+		static constexpr TType minValue = INT32_MIN;
+		static constexpr TType maxValue = INT32_MAX;
+		static constexpr TType epsilon = 0;
+		static constexpr TType roundError = 0;
 	};
 
-	template <typename TpType>
-	struct IntegerLimitsProxy<TpType, 4, false>
+	template <typename TType>
+	struct IntegerLimitsProxy<TType, 4, false>
 	{
-		static constexpr TpType minValue = 0U;
-		static constexpr TpType maxValue = UINT32_MAX;
-		static constexpr TpType epsilon = 0U;
-		static constexpr TpType roundError = 0U;
+		static constexpr uint32 bitCount = CHAR_BIT * 4;
+		static constexpr TType minValue = 0U;
+		static constexpr TType maxValue = UINT32_MAX;
+		static constexpr TType epsilon = 0U;
+		static constexpr TType roundError = 0U;
 	};
 
-	template <typename TpType>
-	struct IntegerLimitsProxy<TpType, 8, true>
+	template <typename TType>
+	struct IntegerLimitsProxy<TType, 8, true>
 	{
-		static constexpr TpType minValue = LLONG_MIN;
-		static constexpr TpType maxValue = LLONG_MAX;
-		static constexpr TpType epsilon = 0;
-		static constexpr TpType roundError = 0;
+		static constexpr uint32 bitCount = CHAR_BIT * 8;
+		static constexpr TType minValue = LLONG_MIN;
+		static constexpr TType maxValue = LLONG_MAX;
+		static constexpr TType epsilon = 0;
+		static constexpr TType roundError = 0;
 	};
 
-	template <typename TpType>
-	struct IntegerLimitsProxy<TpType, 8, false>
+	template <typename TType>
+	struct IntegerLimitsProxy<TType, 8, false>
 	{
-		static constexpr TpType minValue = 0U;
-		static constexpr TpType maxValue = ULLONG_MAX;
-		static constexpr TpType epsilon = 0U;
-		static constexpr TpType roundError = 0U;
+		static constexpr uint32 bitCount = CHAR_BIT * 8;
+		static constexpr TType minValue = 0U;
+		static constexpr TType maxValue = ULLONG_MAX;
+		static constexpr TType epsilon = 0U;
+		static constexpr TType roundError = 0U;
 	};
 
 	template <typename>

@@ -1,6 +1,6 @@
 
-#include <ts3/gpuapi/displayManager.h>
-#include <ts3/gpuapi/gpuDriver.h>
+#include "gpuDriverNull.h"
+#include "gpuDeviceNull.h"
 
 namespace ts3::gpuapi
 {
@@ -11,12 +11,41 @@ namespace ts3::gpuapi
 
 	GPUDriver::~GPUDriver() noexcept = default;
 
-	EGPUDriverID GPUDriver::queryGPUDriverID() const
+	EGPUDriverID GPUDriver::queryGPUDriverID() const noexcept
 	{
-		return EGPUDriverID::GDID0;
+		return EGPUDriverID::GDIUnknown;
 	}
 
-	void GPUDriver::setConfigFlags( Bitmask<GPUDriverConfigFlags> pConfigFlags )
+	bool GPUDriver::isNullDriver() const noexcept
+	{
+		return false;
+	}
+
+	DisplayManagerHandle GPUDriver::createDefaultDisplayManager()
+	{
+		return nullptr;
+	}
+
+	GPUDeviceHandle GPUDriver::createDevice( const GPUDeviceCreateInfo & pCreateInfo )
+	{
+		auto gpuDevice = _drvCreateDevice( pCreateInfo );
+		if( !gpuDevice )
+		{
+			return nullptr;
+		}
+
+		gpuDevice->initializeCommandSystem();
+
+		return gpuDevice;
+	}
+
+	GPUDriver & GPUDriver::nullDriver()
+	{
+		static const GPUDriverHandle sNullDriverInstance = createGPUAPIObject<GPUDriverNull>();
+		return *sNullDriverInstance;
+	}
+
+	void GPUDriver::setConfigFlags( Bitmask<EGPUDriverConfigFlags> pConfigFlags )
 	{
 		_configFlags = pConfigFlags;
 	}

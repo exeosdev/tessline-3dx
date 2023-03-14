@@ -56,8 +56,8 @@ namespace ts3::system
 		file_size_t readAuto( DynamicMemoryBuffer & pTarget, file_size_t pReadSize = CX_FILE_SIZE_MAX );
 		file_size_t readAuto( DynamicByteArray & pTarget, file_size_t pReadSize = CX_FILE_SIZE_MAX );
 
-		template <typename TpResizableBuffer>//, std::enable_if_t<!std::is_pointer<TpResizableBuffer>::value, int>>
-		file_size_t readAuto( TpResizableBuffer & pTarget, file_size_t pReadSize = CX_FILE_SIZE_MAX )
+		template <typename TResizableBuffer>//, std::enable_if_t<!std::is_pointer<TResizableBuffer>::value, int>>
+		file_size_t readAuto( TResizableBuffer & pTarget, file_size_t pReadSize = CX_FILE_SIZE_MAX )
 		{
 			return _readAuto( pTarget, pReadSize );
 		}
@@ -68,8 +68,8 @@ namespace ts3::system
 		file_size_t write( const MemoryBuffer & pSource, file_size_t pWriteSize = CX_FILE_SIZE_MAX );
 		file_size_t write( const ByteArray & pSource, file_size_t pWriteSize = CX_FILE_SIZE_MAX );
 
-		template <typename TpBuffer, std::enable_if_t<!std::is_pointer<TpBuffer>::value, int>>
-		file_size_t write( const TpBuffer & pSource, file_size_t pWriteSize )
+		template <typename TBuffer, std::enable_if_t<!std::is_pointer<TBuffer>::value, int>>
+		file_size_t write( const TBuffer & pSource, file_size_t pWriteSize )
 		{
 			return _write( pSource, pWriteSize );
 		}
@@ -88,8 +88,8 @@ namespace ts3::system
 		bool isGood() const;
 
 	private:
-		template <typename TpResizableBuffer>
-		file_size_t _readAuto( TpResizableBuffer & pTarget, file_size_t pReadSize )
+		template <typename TResizableBuffer>
+		file_size_t _readAuto( TResizableBuffer & pTarget, file_size_t pReadSize )
 		{
 			if( pReadSize == 0 )
 			{
@@ -104,8 +104,8 @@ namespace ts3::system
 			return _nativeReadData( pTarget.data(), readSize );
 		}
 
-		template <typename TpContinuousBuffer>
-		file_size_t _write( const TpContinuousBuffer & pBuffer, file_size_t pWriteSize )
+		template <typename TContinuousBuffer>
+		file_size_t _write( const TContinuousBuffer & pBuffer, file_size_t pWriteSize )
 		{
 			if( pWriteSize == 0 )
 			{

@@ -196,7 +196,7 @@ namespace ts3::system
 			XSetWMProtocols( xSessionData.display,
 			                 pWindowNativeData.windowXID,
 			                 &( registeredWMProtocolArray[0] ),
-			                 trunc_numeric_cast<int>( registeredWMProtocolsNum ) );
+			                 numeric_cast<int>( registeredWMProtocolsNum ) );
 
 			XStoreName( xSessionData.display, pWindowNativeData.windowXID, pCreateInfo.title.c_str() );
 			XFlush( xSessionData.display );
@@ -235,7 +235,7 @@ namespace ts3::system
 			wmEvent.xclient.message_type = xSessionData.atomCache.wmState;
 			wmEvent.xclient.format = 32;
 			wmEvent.xclient.data.l[0] = pSetFullscreen ? 1 : 0;
-			wmEvent.xclient.data.l[1] = trunc_numeric_cast<long>( xSessionData.atomCache.wmStateFullscreen );
+			wmEvent.xclient.data.l[1] = numeric_cast<long>( xSessionData.atomCache.wmStateFullscreen );
 			wmEvent.xclient.data.l[2] = 0;
 
 			XSendEvent( xSessionData.display,
@@ -341,7 +341,7 @@ namespace ts3::system
 			                    &wmPropertyValueBytesNum,
 			                    &wmPropertyValueData8 );
 
-			const long wmPropertyValuesNum = trunc_numeric_cast<long>( wmPropertyValueBytesNum ) / 4;
+			const long wmPropertyValuesNum = numeric_cast<long>( wmPropertyValueBytesNum ) / 4;
 
 			XGetWindowProperty( pDisplay,
 			                    pWindow,
@@ -393,7 +393,7 @@ namespace ts3::system
 			                    &wmPropertyValueBytesNum,
 			                    &wmPropertyValueData8 );
 
-			const long wmPropertyValuesNum = trunc_numeric_cast<long>( wmPropertyValueBytesNum ) / 4;
+			const long wmPropertyValuesNum = numeric_cast<long>( wmPropertyValueBytesNum ) / 4;
 
 			XGetWindowProperty( pDisplay,
 			                    pWindow,

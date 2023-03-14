@@ -4,35 +4,31 @@
 #ifndef __TS3DRIVER_GPUAPI_GLCOMMON_RENDER_TARGET_BUFFER_H__
 #define __TS3DRIVER_GPUAPI_GLCOMMON_RENDER_TARGET_BUFFER_H__
 
-#include <ts3/gpuapi/resources/renderBuffer.h>
+#include <ts3/gpuapi/resources/renderTargetTexture.h>
 #include <ts3/gpuapiGL/objects/GL_renderbufferObject.h>
 #include <ts3/gpuapiGL/objects/GL_textureObject.h>
 
 namespace ts3::gpuapi
 {
 
-	class GLRenderBuffer : public RenderBuffer
+	class GLInternalRenderBuffer : public GPUDeviceChildObject
 	{
 	public:
 		GLRenderbufferObjectHandle const mGLRenderbufferObject;
 		GLTextureObjectHandle const mGLTextureObject;
 
 	public:
-		GLRenderBuffer( GLGPUDevice & pGLGPUDevice,
-		                ERenderBufferType pRenderBufferType,
-		                const RenderBufferLayout & pRenderBufferLayout,
-		                GLRenderbufferObjectHandle pGLRenderbufferObject );
+		GLInternalRenderBuffer(
+				GLGPUDevice & pGLGPUDevice,
+				GLRenderbufferObjectHandle pGLRenderbufferObject );
 
-		GLRenderBuffer( GLGPUDevice & pGLGPUDevice,
-		                ERenderBufferType pRenderBufferType,
-		                const RenderBufferLayout & pRenderBufferLayout,
-		                GLTextureObjectHandle pGLTextureObject );
+		GLInternalRenderBuffer(
+				GLGPUDevice & pGLGPUDevice,
+				GLTextureObjectHandle pGLTextureObject );
 
-		virtual ~GLRenderBuffer();
-
-		virtual bool isNull() const override;
-
-		static GpaHandle<GLRenderBuffer> create( GLGPUDevice & pGLGPUDevice, const RenderBufferCreateInfo & pCreateInfo );
+		static GpaHandle<GLInternalRenderBuffer> createInstance(
+				GLGPUDevice & pGLGPUDevice,
+				const RenderTargetTextureCreateInfo & pCreateInfo );
 	};
 
 } // namespace ts3::gpuapi

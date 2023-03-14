@@ -12,34 +12,34 @@
 namespace ts3
 {
 
-	template <typename TpClass, typename TpEvent>
+	template <typename TClass, typename TEvent>
 	class EventEmitter;
 
-	template <typename TpClass, event_code_value_t tpEventCode, typename... TpEventArgs>
-	class EventEmitter< TpClass, Event<tpEventCode, TpEventArgs...> >
+	template <typename TClass, event_code_value_t tEventCode, typename... TEventArgs>
+	class EventEmitter< TClass, Event<tEventCode, TEventArgs...> >
 	{
 	public:
-		using Handler = std::function<void( TpClass &, TpEventArgs... )>;
+		using Handler = std::function<void( TClass &, TEventArgs... )>;
 		using HandlerList = std::list<Handler>;
 		using HandlerMap = std::unordered_map<uintptr_t, HandlerList>;
 		using HandlerRef = typename HandlerList::iterator;
 		using HandlerRefList = std::list<HandlerRef>;
 
 	public:
-		explicit EventEmitter( TpClass & pSourceObjectRef )
+		explicit EventEmitter( TClass & pSourceObjectRef )
 		: _sourceObjectRef( pSourceObjectRef )
 		{}
 
-		void emit( TpEventArgs &&... pArgs )
+		void emit( TEventArgs &&... pArgs )
 		{
 			for( auto & handlerRef : _handlerOrderedRefList )
 			{
-				( *handlerRef )( _sourceObjectRef, std::forward<TpEventArgs>( pArgs )... );
+				( *handlerRef )( _sourceObjectRef, std::forward<TEventArgs>( pArgs )... );
 			}
 		}
 
-		template <typename TpRet, typename TpReceiver>
-		void connect( uintptr_t pRefID, std::function<TpRet( TpClass &, TpEventArgs... )> pHandler ) const
+		template <typename TRet, typename TReceiver>
+		void connect( uintptr_t pRefID, std::function<TRet( TClass &, TEventArgs... )> pHandler ) const
 		{
 			auto & handlerList = _handlerMap[pRefID];
 
@@ -47,22 +47,22 @@ namespace ts3
 			_handlerOrderedRefList.push_back( newHandlerRef );
 		}
 
-		template <typename TpRet, typename TpReceiver>
-		void connect( TpReceiver * pReceiver, TpRet( TpReceiver:: * pSlot )( TpClass &, TpEventArgs... ) ) const
+		template <typename TRet, typename TReceiver>
+		void connect( TReceiver * pReceiver, TRet( TReceiver:: * pSlot )( TClass &, TEventArgs... ) ) const
 		{
 			auto refID = reinterpret_cast<uintptr_t>( pReceiver );
 			auto & handlerList = _handlerMap[refID];
 
 			auto newHandlerRef = handlerList.insert(
 				handlerList.end(),
-				[pReceiver, pSlot]( TpClass & pSource, TpEventArgs &&... pEventArgs ) -> void {
-					( pReceiver->*pSlot )( pSource, std::forward<TpEventArgs>( pEventArgs )... );
+				[pReceiver, pSlot]( TClass & pSource, TEventArgs &&... pEventArgs ) -> void {
+					( pReceiver->*pSlot )( pSource, std::forward<TEventArgs>( pEventArgs )... );
 				} );
 			_handlerOrderedRefList.push_back( newHandlerRef );
 		}
 
-		template <typename TpRet, typename TpReceiver>
-		bool connectUnique( uintptr_t pRefID, std::function<TpRet( TpClass &, TpEventArgs... )> pHandler ) const
+		template <typename TRet, typename TReceiver>
+		bool connectUnique( uintptr_t pRefID, std::function<TRet( TClass &, TEventArgs... )> pHandler ) const
 		{
 			auto & handlerList = _handlerMap[pRefID];
 			if( !handlerList.empty() )
@@ -76,8 +76,8 @@ namespace ts3
 			return true;
 		}
 
-		template <typename TpRet, typename TpReceiver>
-		bool connectUnique( TpReceiver * pReceiver, TpRet( TpReceiver:: * pSlot )( TpClass &, TpEventArgs... ) ) const
+		template <typename TRet, typename TReceiver>
+		bool connectUnique( TReceiver * pReceiver, TRet( TReceiver:: * pSlot )( TClass &, TEventArgs... ) ) const
 		{
 			auto refID = reinterpret_cast<uintptr_t>( pReceiver );
 			auto & handlerList = _handlerMap[refID];
@@ -87,28 +87,28 @@ namespace ts3
 			}
 
 			auto newHandlerRef = handlerList.insert(
-					handlerList.end(),
-					[pReceiver, pSlot]( TpClass & pSource, TpEventArgs &&... pEventArgs ) -> void {
-						( pReceiver->*pSlot )( pSource, std::forward<TpEventArgs>( pEventArgs )... );
-					} );
+				handlerList.end(),
+				[pReceiver, pSlot]( TClass & pSource, TEventArgs &&... pEventArgs ) -> void {
+					( pReceiver->*pSlot )( pSource, std::forward<TEventArgs>( pEventArgs )... );
+				} );
 			_handlerOrderedRefList.push_back( newHandlerRef );
 
 			return true;
 		}
 
 	private:
-		TpClass & _sourceObjectRef;
+		TClass & _sourceObjectRef;
 		mutable HandlerMap _handlerMap;
 		mutable HandlerRefList _handlerOrderedRefList;
 	};
 
-	// template <event_code_value_t tpEventCode, typename... TpEventArgs, typename TpRet, typename TpReceiver>
-	// void eventConnect( const EventEmitter< Event<tpEventCode, TpEventArgs...> > & pEmitter, TpRet( TpReceiver:: * pSlot )( TpEventArgs... ), TpReceiver * pReceiver )
+	// template <event_code_value_t tEventCode, typename... TEventArgs, typename TRet, typename TReceiver>
+	// void eventConnect( const EventEmitter< Event<tEventCode, TEventArgs...> > & pEmitter, TRet( TReceiver:: * pSlot )( TEventArgs... ), TReceiver * pReceiver )
 	// {
 	// 	pEmitter.connect( pSlot, pReceiver );
 	// }
-	// template <event_code_value_t tpEventCode, typename... TpEventArgs, typename TpReceiver>
-	// void eventDisconnect( const EventEmitter< Event<tpEventCode, TpEventArgs...> > & pEmitter, TpReceiver * pReceiver )
+	// template <event_code_value_t tEventCode, typename... TEventArgs, typename TReceiver>
+	// void eventDisconnect( const EventEmitter< Event<tEventCode, TEventArgs...> > & pEmitter, TReceiver * pReceiver )
 	// {
 	// 	pEmitter.disconnect( pReceiver );
 	// }

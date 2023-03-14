@@ -6,6 +6,7 @@
 #include <ts3/stdext/arrayView.h>
 #include <ts3/stdext/bitmask.h>
 #include <ts3/stdext/bitUtils.h>
+#include <ts3/stdext/refWrapper.h>
 #include <ts3/stdext/staticLimits.h>
 
 #if( TS3_BUILD_STATIC )
@@ -46,7 +47,7 @@
 namespace ts3
 {
 
-	/// @brief Helper struct for triggering a dedicated "init-as-empty" constructor. Used whenever default ctor is not feasible.
+	/// @brief Helper struct for triggering a "empty-init" ctor. Used whenever default initialization has a different meaning.
 	struct InitEmptyTag
 	{
 	};

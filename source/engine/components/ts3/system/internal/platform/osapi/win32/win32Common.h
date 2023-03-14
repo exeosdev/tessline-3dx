@@ -23,13 +23,13 @@ namespace ts3::system
 
     }
 
-	template <typename TpBaseType, typename TpNativeData>
-	class Win32NativeObject : public NativeObject<TpBaseType, TpNativeData>
+	template <typename TBaseType, typename TNativeData>
+	class Win32NativeObject : public NativeObject<TBaseType, TNativeData>
 	{
 	public:
-		template <typename... TpBaseTypeArgs>
-		Win32NativeObject( TpBaseTypeArgs && ...pBaseTypeArgs )
-		: NativeObject<TpBaseType, TpNativeData>( std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
+		template <typename... TBaseTypeArgs>
+		Win32NativeObject( TBaseTypeArgs && ...pBaseTypeArgs )
+		: NativeObject<TBaseType, TNativeData>( std::forward<TBaseTypeArgs>( pBaseTypeArgs )... )
 		{}
 
 		virtual ~Win32NativeObject() = default;

@@ -206,7 +206,7 @@ int main( int pArgc, const char ** pArgv )
     initializeGraphics( sysContext, gfxState );
 
     evtController->registerPrimaryEventSource( *(gfxState.glSurface) );
-    evtController->setEventSystemConfigFlags( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_QUIT_ON_PRIMARY_SOURCE_DESTROY_BIT );
+    evtController->setEventSystemConfigFlags( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_AUTO_QUIT_ON_PRIMARY_SOURCE_DESTROY_BIT );
 
     gfxState.glSystemDriver->releaseInitState( *(gfxState.glContext) );
     gfxState.glContext->bindForCurrentThread( *(gfxState.glSurface) );

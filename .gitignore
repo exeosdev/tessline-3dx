@@ -1,9 +1,14 @@
 
+CMakeSettings.json
+
 .gradle/
 .idea/
 .vs/
 .vscode/
 .cxx/
+
+# OSX
+.DS_Store
 
 bin/
 build/
@@ -14,7 +19,9 @@ cmake-build-debug/
 cmake-build-release/
 out/
 
-_system.old/
+# Doxygen
+html/
+latex/
 
 # IDE-specific
 *.iml

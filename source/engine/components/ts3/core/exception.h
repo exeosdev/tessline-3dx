@@ -13,40 +13,40 @@ namespace ts3
     enum : exception_category_value_t
     {
         E_EXCEPTION_CATEGORY_DEBUG =
-            ecDeclareExceptionCategory( ExceptionBaseType::Debug, ts3ExcCategoryIID( 0 ) ),
+            cxdefs::declareExceptionCategory( ExceptionBaseType::Debug, ts3ExcCategoryIID( 0 ) ),
 
         E_EXCEPTION_CATEGORY_ENGINE_SUBMODULE =
-            ecDeclareExceptionCategory( ExceptionBaseType::EngineSubModule, ts3ExcCategoryIID( 0 ) ),
+            cxdefs::declareExceptionCategory( ExceptionBaseType::EngineSubModule, ts3ExcCategoryIID( 0 ) ),
 
         E_EXCEPTION_CATEGORY_FRAMEWORK_CORE =
-            ecDeclareExceptionCategory( ExceptionBaseType::FrameworkCore, ts3ExcCategoryIID( 0 ) ),
+            cxdefs::declareExceptionCategory( ExceptionBaseType::FrameworkCore, ts3ExcCategoryIID( 0 ) ),
 
         E_EXCEPTION_CATEGORY_INTERNAL =
-            ecDeclareExceptionCategory( ExceptionBaseType::Internal, ts3ExcCategoryIID( 0 ) ),
+            cxdefs::declareExceptionCategory( ExceptionBaseType::Internal, ts3ExcCategoryIID( 0 ) ),
 
         E_EXCEPTION_CATEGORY_INTERRUPT =
-            ecDeclareExceptionCategory( ExceptionBaseType::Interrupt, ts3ExcCategoryIID( 0 ) ),
+            cxdefs::declareExceptionCategory( ExceptionBaseType::Interrupt, ts3ExcCategoryIID( 0 ) ),
 
         E_EXCEPTION_CATEGORY_MATH =
-            ecDeclareExceptionCategory( ExceptionBaseType::Math, ts3ExcCategoryIID( 0 ) ),
+            cxdefs::declareExceptionCategory( ExceptionBaseType::Math, ts3ExcCategoryIID( 0 ) ),
 
         E_EXCEPTION_CATEGORY_RESULT_PROXY =
-            ecDeclareExceptionCategory( ExceptionBaseType::ResultProxy, ts3ExcCategoryIID( 0 ) ),
+            cxdefs::declareExceptionCategory( ExceptionBaseType::ResultProxy, ts3ExcCategoryIID( 0 ) ),
 
         E_EXCEPTION_CATEGORY_SYSTEM =
-            ecDeclareExceptionCategory( ExceptionBaseType::System, ts3ExcCategoryIID( 0 ) ),
+            cxdefs::declareExceptionCategory( ExceptionBaseType::System, ts3ExcCategoryIID( 0 ) ),
 
         E_EXCEPTION_CATEGORY_USER_EXTERNAL =
-            ecDeclareExceptionCategory( ExceptionBaseType::UserExternal, ts3ExcCategoryIID( 0 ) ),
+            cxdefs::declareExceptionCategory( ExceptionBaseType::UserExternal, ts3ExcCategoryIID( 0 ) ),
     };
 
     enum : exception_code_value_t
     {
         E_EXC_DEBUG_PLACEHOLDER =
-            ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_DEBUG, ts3ExcCodeIID( 0x01 ) ),
+            cxdefs::declareExceptionCode( E_EXCEPTION_CATEGORY_DEBUG, ts3ExcCodeIID( 0x01 ) ),
 
         E_EXC_RESULT_CODE_ERROR =
-            ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_RESULT_PROXY, ts3ExcCodeIID( 0x01 ) ),
+            cxdefs::declareExceptionCode( E_EXCEPTION_CATEGORY_RESULT_PROXY, ts3ExcCodeIID( 0x01 ) ),
     };
 
 	/// @brief
@@ -165,14 +165,14 @@ namespace ts3
 	using UserExternalException = ExceptionClass<ExceptionBaseType::UserExternal>;
 
 	/// @brief Specialized class for ResultWrapper exceptions. Adds ResultProxy object.
-	template <typename TpValue, typename TpErrorPredicate>
+	template <typename TValue, typename TErrorPredicate>
 	class ResultProxyException : public ExceptionClass<ExceptionBaseType::ResultProxy>
     {
     public:
-        ResultProxy<TpValue, TpErrorPredicate> mResult;
+        ResultProxy<TValue, TErrorPredicate> mResult;
 
     public:
-        ResultProxyException( ExceptionInfo pExceptionInfo, ResultProxy<TpValue, TpErrorPredicate> pResult )
+        ResultProxyException( ExceptionInfo pExceptionInfo, ResultProxy<TValue, TErrorPredicate> pResult )
         : ExceptionClass( std::move( pExceptionInfo ) )
         , mResult( pResult )
         {}
@@ -202,26 +202,26 @@ namespace ts3
 	template <>
 	struct ExceptionClassResolver<ExceptionBaseType::ResultProxy, true>
     {
-		template <typename TpValue, typename TpErrorPredicate>
-	    using Type = ResultProxyException<TpValue, TpErrorPredicate>;
+		template <typename TValue, typename TErrorPredicate>
+	    using Type = ResultProxyException<TValue, TErrorPredicate>;
     };
 
 	template <ExceptionBaseType tExceptionBaseType>
 	struct ExceptionBaseTypeClassProxy
     {
-	    using Type = typename ExceptionClassResolver<tExceptionBaseType, ecIsExceptionBaseTypeValid( tExceptionBaseType )>::Type;
+	    using Type = typename ExceptionClassResolver<tExceptionBaseType, cxdefs::isExceptionBaseTypeValid( tExceptionBaseType )>::Type;
     };
 
 	template <exception_category_value_t tExceptionCategory>
 	struct ExceptionCategoryClassProxy
     {
-	    using Type = typename ExceptionBaseTypeClassProxy<ecGetExceptionCategoryBaseType( tExceptionCategory )>::Type;
+	    using Type = typename ExceptionBaseTypeClassProxy<cxdefs::getExceptionCategoryBaseType( tExceptionCategory )>::Type;
     };
 
 	template <exception_code_value_t tExceptionCode>
 	struct ExceptionCodeClassProxy
     {
-	    using Type = typename ExceptionCategoryClassProxy<ecGetExceptionCodeCategory( tExceptionCode )>::Type;
+	    using Type = typename ExceptionCategoryClassProxy<cxdefs::getExceptionCodeCategory( tExceptionCode )>::Type;
     };
 
 	template <>
@@ -234,12 +234,12 @@ namespace ts3
         template <exception_category_value_t tExceptionCategory> \
         struct ExceptionCategoryClassProxy \
         { \
-            using Type = typename ::ts3::ExceptionBaseTypeClassProxy<ecGetExceptionCategoryBaseType( tExceptionCategory )>::Type; \
+            using Type = typename ::ts3::ExceptionBaseTypeClassProxy<ts3::cxdefs::getExceptionCategoryBaseType( tExceptionCategory )>::Type; \
         }; \
         template <exception_code_value_t tExceptionCode> \
         struct ExceptionCodeClassProxy \
         { \
-            using Type = typename ExceptionCategoryClassProxy<ecGetExceptionCodeCategory( tExceptionCode )>::Type; \
+            using Type = typename ExceptionCategoryClassProxy<ts3::cxdefs::getExceptionCodeCategory( tExceptionCode )>::Type; \
         }
 
     #define ts3SetExceptionCategoryType( pExceptionCategory, pType ) \
@@ -256,29 +256,29 @@ namespace ts3
             using Type = pType; \
         }
 
-	template <typename TpException, typename... TpArgs>
-	TS3_PCL_ATTR_NO_RETURN inline void throwException( ExceptionInfo pExceptionInfo, TpArgs &&... pArgs )
+	template <typename TException, typename... TArgs>
+	TS3_PCL_ATTR_NO_RETURN inline void throwException( ExceptionInfo pExceptionInfo, TArgs &&... pArgs )
 	{
-		// TpException is a class derived from ExceptionClass<ExceptionBaseType>. It contains 'baseType'
+		// TException is a class derived from ExceptionClass<ExceptionBaseType>. It contains 'baseType'
 		// member with type tag. It should match the type embedded within the code. In case of mismatch, there is
 		// either a typo (in case of manual call) or a problem with the throwException() function defined below.
-		ts3DebugAssert( TpException::mBaseType == ecGetExceptionCodeBaseType( pExceptionInfo.code ) );
+		ts3DebugAssert( TException::mBaseType == cxdefs::getExceptionCodeBaseType( pExceptionInfo.code ) );
 
-		throw TpException( std::move( pExceptionInfo ), std::forward<TpArgs>( pArgs )... );
+		throw TException( std::move( pExceptionInfo ), std::forward<TArgs>( pArgs )... );
 	}
 
-	template <typename TpException, typename... TpArgs>
+	template <typename TException, typename... TArgs>
 	TS3_PCL_ATTR_NO_RETURN inline void throwException( exception_code_value_t pExceptionCode,
                                                        std::string pDescription,
                                                        const FileLocationInfo & pFileLocationInfo,
-                                                       TpArgs &&... pArgs )
+                                                       TArgs &&... pArgs )
 	{
 	    ExceptionInfo exceptionInfo;
 	    exceptionInfo.code = pExceptionCode;
 	    exceptionInfo.description = std::move( pDescription );
 	    exceptionInfo.fileLocationInfo = pFileLocationInfo;
 
-	    throwException<TpException>( std::move( exceptionInfo ), std::forward<TpArgs>( pArgs )... );
+	    throwException<TException>( std::move( exceptionInfo ), std::forward<TArgs>( pArgs )... );
     }
 
 } // namespace ts3

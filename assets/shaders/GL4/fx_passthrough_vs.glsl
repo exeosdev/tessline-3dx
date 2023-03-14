@@ -11,7 +11,6 @@ layout( std140, binding = 0 ) uniform CB0
 
 layout( location = 0 ) in vec3 vPosition;
 layout( location = 1 ) in vec2 vTexCoord0;
-layout( location = 2 ) in vec4 vStaticColor;
 
 out gl_PerVertex
 {

@@ -3,6 +3,7 @@
 #define __TS3_STDEXT_RANGE_H__
 
 #include "staticLimits.h"
+#include "utilities.h"
 
 namespace ts3
 {
@@ -15,131 +16,143 @@ namespace ts3
 		InclusiveRight
 	};
 
-	template <typename Tp, RangeType tpRangeType = RangeType::Inclusive>
+	template <typename TVal, RangeType tRangeType = RangeType::Inclusive>
 	struct Range
 	{
-		Tp begin;
-		Tp end;
+		TVal begin;
+		TVal end;
 	};
 
-	template <typename Tp>
-	using ExclusiveRange = Range<Tp, RangeType::Exclusive>;
+	template <typename TVal>
+	using ExclusiveRange = Range<TVal, RangeType::Exclusive>;
 
-	template <typename Tp>
-	using InclusiveRange = Range<Tp, RangeType::Inclusive>;
+	template <typename TVal>
+	using InclusiveRange = Range<TVal, RangeType::Inclusive>;
 
-	template <typename Tp, RangeType>
+	template <typename TVal, RangeType>
 	struct LeftRangeBound;
 
-	template <typename Tp, RangeType>
+	template <typename TVal, RangeType>
 	struct RightRangeBound;
 
-	template <typename Tp, RangeType tpRangeType>
-	inline bool checkRangeLeftBound( const Range<Tp, tpRangeType> & pRange, Tp pValue )
+	template <typename TVal, RangeType tRangeType>
+	inline bool checkRangeLeftBound( const Range<TVal, tRangeType> & pRange, TVal pValue )
 	{
-		return LeftRangeBound<Tp, tpRangeType>::inside( pRange, pValue );
+		return LeftRangeBound<TVal, tRangeType>::inside( pRange, pValue );
 	}
 
-	template <typename Tp, RangeType tpRangeType>
-	inline bool checkRangeRightBound( const Range<Tp, tpRangeType> & pRange, Tp pValue )
+	template <typename TVal, RangeType tRangeType>
+	inline bool checkRangeRightBound( const Range<TVal, tRangeType> & pRange, TVal pValue )
 	{
-		return RightRangeBound<Tp, tpRangeType>::inside( pRange, pValue );
+		return RightRangeBound<TVal, tRangeType>::inside( pRange, pValue );
 	}
 
-	template <typename Tp, RangeType tpRangeType>
-	inline bool checkValueInsideRange( const Range<Tp, tpRangeType> & pRange, Tp pValue )
+	template <typename TVal, RangeType tRangeType>
+	inline bool checkValueInsideRange( const Range<TVal, tRangeType> & pRange, TVal pValue )
 	{
 		return checkRangeLeftBound( pRange, pValue ) && checkRangeRightBound( pRange, pValue );
 	}
 
-	template <typename Tp, RangeType tpRangeType>
-	inline bool checkValueOutsideRange( const Range<Tp, tpRangeType> & pRange, Tp pValue )
+	template <typename TVal, RangeType tRangeType>
+	inline bool checkValueOutsideRange( const Range<TVal, tRangeType> & pRange, TVal pValue )
 	{
 		return !checkRangeLeftBound( pRange, pValue ) || !checkRangeRightBound( pRange, pValue );
 	}
 
-	template <typename Tp>
-	inline bool checkRangeOverlap( const InclusiveRange<Tp> & pFirst, const InclusiveRange<Tp> & pSecond )
+	template <typename TVal>
+	inline bool checkRangeOverlap( const InclusiveRange<TVal> & pFirst, const InclusiveRange<TVal> & pSecond )
 	{
 		return checkValueInsideRange( pFirst, pSecond.begin ) || checkValueInsideRange( pFirst, pSecond.end );
 	}
 
-	template <typename Tp>
-	inline bool checkRangeSubrange( const InclusiveRange<Tp> & pRange, const InclusiveRange<Tp> & pSubrange )
+	template <typename TVal>
+	inline bool checkRangeSubRange( const InclusiveRange<TVal> & pRange, const InclusiveRange<TVal> & pSubRange )
 	{
-		return checkRangeLeftBound( pRange, pSubrange.begin ) && checkRangeRightBound( pRange, pSubrange.end );
+		return checkRangeLeftBound( pRange, pSubRange.begin ) && checkRangeRightBound( pRange, pSubRange.end );
 	}
 
-	template <typename Tp, RangeType tpRangeType>
+	template <typename TVal, RangeType tRangeType>
 	struct LeftRangeBound
 	{
-		static bool inside( const Range<Tp, tpRangeType> & pRange, Tp pValue )
+		static bool inside( const Range<TVal, tRangeType> & pRange, TVal pValue )
 		{
 			return pValue > pRange.begin;
 		}
 	};
 
-	template <typename Tp>
-	struct LeftRangeBound<Tp, RangeType::Inclusive>
+	template <typename TVal>
+	struct LeftRangeBound<TVal, RangeType::Inclusive>
 	{
-		static bool inside( const Range<Tp, RangeType::Inclusive> & pRange, Tp pValue )
+		static bool inside( const Range<TVal, RangeType::Inclusive> & pRange, TVal pValue )
 		{
 			return pValue >= pRange.begin;
 		}
 	};
 
-	template <typename Tp>
-	struct LeftRangeBound<Tp, RangeType::InclusiveLeft>
+	template <typename TVal>
+	struct LeftRangeBound<TVal, RangeType::InclusiveLeft>
 	{
-		static bool inside( const Range<Tp, RangeType::InclusiveLeft> & pRange, Tp pValue )
+		static bool inside( const Range<TVal, RangeType::InclusiveLeft> & pRange, TVal pValue )
 		{
 			return pValue >= pRange.begin;
 		}
 	};
 
-	template <typename Tp, RangeType tpRangeType>
+	template <typename TVal, RangeType tRangeType>
 	struct RightRangeBound
 	{
-		static bool inside( const Range<Tp, tpRangeType> & pRange, Tp pValue )
+		static bool inside( const Range<TVal, tRangeType> & pRange, TVal pValue )
 		{
 			return pValue < pRange.end;
 		}
 	};
 
-	template <typename Tp>
-	struct RightRangeBound<Tp, RangeType::Inclusive>
+	template <typename TVal>
+	struct RightRangeBound<TVal, RangeType::Inclusive>
 	{
-		static bool inside( const Range<Tp, RangeType::Inclusive> & pRange, Tp pValue )
+		static bool inside( const Range<TVal, RangeType::Inclusive> & pRange, TVal pValue )
 		{
 			return pValue <= pRange.end;
 		}
 	};
 
-	template <typename Tp>
-	struct RightRangeBound<Tp, RangeType::InclusiveRight>
+	template <typename TVal>
+	struct RightRangeBound<TVal, RangeType::InclusiveRight>
 	{
-		static bool inside( const Range<Tp, RangeType::InclusiveRight> & pRange, Tp pValue )
+		static bool inside( const Range<TVal, RangeType::InclusiveRight> & pRange, TVal pValue )
 		{
 			return pValue <= pRange.end;
 		}
 	};
 
-	template <typename TpSize, typename TpOffset = TpSize>
+	template <typename TSize, typename TOffset = TSize>
 	struct Region
 	{
-		using Range = InclusiveRange<TpSize>;
+		static_assert( !std::is_signed_v<TSize>, "Region size cannot be negative, hence usage of signed types is forbidden." );
 
-		TpOffset offset = 0;
-		TpSize size = 0;
+		using Range = InclusiveRange<TSize>;
 
-		explicit operator bool() const
+		TOffset offset = 0;
+		TSize size = 0;
+
+		TS3_PCL_ATTR_FUNC_NO_DISCARD explicit operator bool() const
 		{
 			return !empty();
 		}
 
-		Range asRange() const
+		TS3_PCL_ATTR_FUNC_NO_DISCARD Range asRange() const
 		{
 			return { offset, offset + size };
+		}
+
+		TS3_PCL_ATTR_FUNC_NO_DISCARD bool empty() const
+		{
+			return size == 0;
+		}
+
+		TS3_PCL_ATTR_FUNC_NO_DISCARD bool contains( const Region<TSize, TOffset> & pOther ) const
+		{
+			return checkRangeSubRange( asRange(), pOther.asRange() );
 		}
 
 		void reset()
@@ -147,23 +160,34 @@ namespace ts3
 			offset = 0;
 			size = 0;
 		}
-
-		TS3_PCL_ATTR_NO_DISCARD bool empty() const
-		{
-			return size == 0;
-		}
 	};
 
-	template <typename TpSize, typename TpOffset>
-	inline bool operator==( const Region<TpSize, TpOffset> & pLhs, const Region<TpSize, TpOffset> & pRhs )
+	template <typename TSize, typename TOffset>
+	inline bool operator==( const Region<TSize, TOffset> & pLhs, const Region<TSize, TOffset> & pRhs )
 	{
 		return ( pLhs.offset == pRhs.offset ) && ( pLhs.size == pRhs.size );
 	}
 
-	template <typename TpSize, typename TpOffset>
-	inline bool operator!=( const Region<TpSize, TpOffset> & pLhs, const Region<TpSize, TpOffset> & pRhs )
+	template <typename TSize, typename TOffset>
+	inline bool operator!=( const Region<TSize, TOffset> & pLhs, const Region<TSize, TOffset> & pRhs )
 	{
 		return ( pLhs.offset != pRhs.offset ) || ( pLhs.size != pRhs.size );
+	}
+
+	template <typename TOffset, typename TSize, typename TLimit>
+	inline Region<TSize, TOffset> getValidRegion( TOffset pOffset, TSize pSize, TLimit pSizeLimit )
+	{
+		const auto validOffset = getMinOf( pOffset, pSizeLimit );
+		const auto maxRegionSize = pSizeLimit - validOffset;
+		const auto regionSize = getMinOf( pSize, maxRegionSize );
+
+		return { numeric_cast<TOffset>( validOffset ), numeric_cast<TSize>( regionSize ) };
+	}
+
+	template <typename TOffset, typename TSize, typename TLimit>
+	inline Region<TSize, TOffset> getValidRegion( const Region<TSize, TOffset> & pRegion, TLimit pSizeLimit )
+	{
+		getValidRegion( pRegion.offset, pRegion.size, pSizeLimit );
 	}
 
 }

@@ -45,11 +45,9 @@ namespace ts3::system
 			XEvent xEvent;
 		};
 
-		using X11NativeEvent = NativeEventType;
-
 		TS3_SYSTEM_API_NODISCARD EventSource * x11FindEventSourceByXWindow( X11EventController & pEventController, XWindow pWindowXID );
 
-		bool x11TranslateEvent( X11EventController & pEventController, const XEvent & pXEvent, EventObject & pOutEvent );
+		bool x11TranslateEvent( EventSource & pEventSource, const XEvent & pXEvent, EventObject & pOutEvent );
 
 	}
 
@@ -59,20 +57,17 @@ namespace ts3::system
 		X11EventController( SysContextHandle pSysContext );
 		virtual ~X11EventController() noexcept;
 
-		using EventController::getEventDispatcherInputState;
-		using EventController::getEventDispatcherConfig;
-
 	private:
-		/// @override EventController::_nativeRegisterEventSource
+		/// @copybrief EventController::_nativeRegisterEventSource
 		virtual void _nativeRegisterEventSource( EventSource & pEventSource ) override final;
 
-		/// @override EventController::_nativeUnregisterEventSource
+		/// @copybrief EventController::_nativeUnregisterEventSource
 		virtual void _nativeUnregisterEventSource( EventSource & pEventSource ) override final;
 
-		/// @override EventController::_nativeDispatchPendingEvents
+		/// @copybrief EventController::_nativeDispatchPendingEvents
 		virtual bool _nativeDispatchPendingEvents() override final;
 
-		/// @override EventController::_nativeDispatchPendingEventsWait
+		/// @copybrief EventController::_nativeDispatchPendingEventsWait
 		virtual bool _nativeDispatchPendingEventsWait() override final;
 	};
 

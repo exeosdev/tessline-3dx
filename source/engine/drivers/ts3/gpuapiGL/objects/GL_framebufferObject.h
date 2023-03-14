@@ -24,21 +24,25 @@ namespace ts3::gpuapi
 		virtual bool release();
 		virtual bool validateHandle() const;
 
-		void bindColorRenderbuffer( uint32 pColorAttachmentIndex,
-		                            GLRenderbufferObject & pGLRenderbuffer,
-		                            GLenum pActiveBindTarget = 0 );
+		void bindColorRenderbuffer(
+				uint32 pColorAttachmentIndex,
+				GLRenderbufferObject & pGLRenderbuffer,
+				GLenum pActiveBindTarget = 0 );
 
-		void bindDepthStencilRenderbuffer( GLRenderbufferObject & pGLRenderbuffer,
-		                                   GLenum pActiveBindTarget = 0 );
+		void bindDepthStencilRenderbuffer(
+				GLRenderbufferObject & pGLRenderbuffer,
+				GLenum pActiveBindTarget = 0 );
 
-		void bindColorTexture( uint32 pColorAttachmentIndex,
-		                       GLTextureObject & pGLTexture,
-		                       const TextureSubResource & pSubResource,
-		                       GLenum pActiveBindTarget = 0 );
+		void bindColorTexture(
+				uint32 pColorAttachmentIndex,
+				GLTextureObject & pGLTexture,
+				const TextureSubResource & pSubResource,
+				GLenum pActiveBindTarget = 0 );
 
-		void bindDepthStencilTexture( GLTextureObject & pGLTexture,
-		                              const TextureSubResource & pSubResource,
-		                              GLenum pActiveBindTarget = 0 );
+		void bindDepthStencilTexture(
+				GLTextureObject & pGLTexture,
+				const TextureSubResource & pSubResource,
+				GLenum pActiveBindTarget = 0 );
 
 		bool checkStatus( GLenum pActiveBindTarget = 0 ) const;
 

@@ -24,7 +24,7 @@ namespace ts3::system
 
 	enum : exception_code_value_t
 	{
-		E_EXC_SYSTEM_FILE_OPEN_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_FILE, 1 )
+		E_EXC_SYSTEM_FILE_OPEN_ERROR = ts3::cxdefs::declareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_FILE, 1 )
 	};
 
 	enum class EFilePointerRefPos : enum_default_value_t

@@ -159,7 +159,7 @@ namespace ts3::gpuapi
 		ts3DebugAssert( _rtvDescriptorHeap && ( _rtvDescriptorSize > 0 ) );
 
 		// Get the CPU handle for our previously created descriptor heap. Using the base pointer and the size of a
-		// single descriptor (_rtvDescriptorSize) we can then manually compute offsets for all descriptors (see below).
+		// single descriptor (_rtvDescriptorSize) we can then manually compute offsets for all pdesc (see below).
 		D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptorHandle = _rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
 		_frameResourceArray.resize( _frameQueueSize );

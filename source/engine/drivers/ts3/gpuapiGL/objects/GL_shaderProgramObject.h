@@ -57,6 +57,8 @@ namespace ts3::gpuapi
 		bool hasAttachedShaders() const;
 		bool isInfoLogEmpty() const;
 
+		static GLuint queryCurrentShaderProgramBinding();
+
 		static GLShaderProgramObjectHandle create( GLShaderProgramType pProgramType );
 
 		static GLShaderProgramObjectHandle createSeparableModule( GLShaderObject & pShader );

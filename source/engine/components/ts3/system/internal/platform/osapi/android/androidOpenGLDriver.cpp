@@ -39,7 +39,7 @@ namespace ts3::system
 	void AndroidOpenGLSystemDriver::_nativeReleaseInitState() noexcept
 	{}
 
-	OpenGLDisplaySurfaceHandle AndroidOpenGLSystemDriver::_nativeCreateDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo )
+	OpenGLDisplaySurfaceHandle AndroidOpenGLSystemDriver::_nativeCreateDisplaySurface( const OpenGLDisplaySurfaceCreateInfo & pCreateInfo )
 	{
 		auto & aSessionData = platform::androidGetASessionData( *this );
 
@@ -91,7 +91,7 @@ namespace ts3::system
 	}
 
 	OpenGLRenderContextHandle AndroidOpenGLSystemDriver::_nativeCreateRenderContext( OpenGLDisplaySurface & pDisplaySurface,
-	                                                                                 const GLRenderContextCreateInfo & pCreateInfo )
+	                                                                                 const OpenGLRenderContextCreateInfo & pCreateInfo )
 	{
 		auto * androidDisplaySurface = pDisplaySurface.queryInterface<AndroidOpenGLDisplaySurface>();
 
@@ -133,9 +133,9 @@ namespace ts3::system
 		return {};
 	}
 
-	bool AndroidOpenGLSystemDriver::_nativeIsGLAPIProfileSupported( EGLAPIProfile pGLAPIProfile ) const
+	bool AndroidOpenGLSystemDriver::_nativeIsAPIClassSupported( EOpenGLAPIClass pAPIClass ) const
 	{
-		if( pGLAPIProfile == EGLAPIProfile::OpenGLES )
+		if( pAPIClass == EOpenGLAPIClass::OpenGLES )
 		{
 			return true;
 		}

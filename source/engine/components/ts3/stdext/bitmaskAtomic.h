@@ -8,15 +8,16 @@
 namespace ts3
 {
 
-	template <typename TpIntegral>
+	template <typename TVal>
 	class AtomicBitmask
 	{
-		static_assert( ( std::is_integral<TpIntegral>::value || std::is_enum<TpIntegral>::value ) && !std::is_same<TpIntegral, bool>::value,
-		               "Atomic Masks are only valid for integer and enum types (but not a bool type)!" );
+		static_assert(
+			( std::is_integral<TVal>::value || std::is_enum<TVal>::value ) && !std::is_same<TVal, bool>::value,
+			"Atomic Masks are only valid for integer and enum types (but not a bool type)!" );
 
 	public:
-		using MyType = AtomicBitmask<TpIntegral>;
-		using ValueType = typename UintTypeBySize<sizeof( TpIntegral )>::Type;
+		using MyType = AtomicBitmask<TVal>;
+		using ValueType = typename UintTypeBySize<sizeof( TVal )>::Type;
 
 	public:
 		AtomicBitmask( const AtomicBitmask & ) = delete;
@@ -26,86 +27,49 @@ namespace ts3
 		: _value( 0 )
 		{}
 
-		template <typename TpBits>
-		AtomicBitmask( TpBits pBits ) noexcept
-		: _value( static_cast<ValueType>(pBits) )
+		template <typename TBits>
+		AtomicBitmask( TBits pBits ) noexcept
+		: _value( static_cast<ValueType>( pBits ) )
 		{}
 
-		template <typename TpBits>
-		MyType & operator=( TpBits pBits )
+		template <typename TBits>
+		MyType & operator=( TBits pBits )
 		{
-			_value.store( static_cast<ValueType>(pBits), std::memory_order_relaxed );
+			_value.store( static_cast<ValueType>( pBits ), std::memory_order_relaxed );
 			return *this;
 		}
 
-		operator ValueType() const
+		operator TVal() const
 		{
-			return get();
+			return static_cast<TVal>( get() );
 		}
 
-		template <typename TpBits>
-		void store( TpBits pBits )
+		template <typename TBits>
+		void store( TBits pBits, std::memory_order pOrder = std::memory_order_relaxed )
 		{
-			_value.store( static_cast<ValueType>(pBits), std::memory_order_relaxed );
+			_value.store( static_cast<ValueType>( pBits ), pOrder );
 		}
 
-		template <typename TpBits>
-		void store( TpBits pBits, std::memory_order pOrder )
+		template <typename TBits>
+		void set( TBits pBits, std::memory_order pOrder = std::memory_order_relaxed )
 		{
-			_value.store( static_cast<ValueType>(pBits), pOrder );
+			_value.fetch_or( static_cast<ValueType>( pBits ), pOrder );
 		}
 
-		template <typename TpBits>
-		void set( TpBits pBits )
+		template <typename TBits>
+		void toggle( TBits pBits, std::memory_order pOrder = std::memory_order_relaxed )
 		{
-			_value.fetch_or( static_cast<ValueType>(pBits), std::memory_order_relaxed );
+			_value.fetch_xor( static_cast<ValueType>( pBits ), pOrder );
 		}
 
-		template <typename TpBits>
-		void set( TpBits pBits, std::memory_order pOrder )
+		template <typename TBits>
+		void unset( TBits pBits, std::memory_order pOrder = std::memory_order_relaxed )
 		{
-			_value.fetch_or( static_cast<ValueType>(pBits), pOrder );
+			_value.fetch_and( ~static_cast<ValueType>( pBits ), pOrder );
 		}
 
-		template <typename TpBits>
-		void toggle( TpBits pBits )
-		{
-			_value.fetch_xor( static_cast<ValueType>(pBits), std::memory_order_relaxed );
-		}
-
-		template <typename TpBits>
-		void toggle( TpBits pBits, std::memory_order pOrder )
-		{
-			_value.fetch_xor( static_cast<ValueType>(pBits), pOrder );
-		}
-
-		template <typename TpBits>
-		void unset( TpBits pBits )
-		{
-			_value.fetch_and( ~static_cast<ValueType>(pBits), std::memory_order_relaxed );
-		}
-
-		template <typename TpBits>
-		void unset( TpBits pBits, std::memory_order pOrder )
-		{
-			_value.fetch_and( ~static_cast<ValueType>(pBits), pOrder );
-		}
-
-		template <typename TpBits>
-		void setOrUnset( TpBits pBits, bool pSet )
-		{
-			if( pSet )
-			{
-				set( pBits );
-			}
-			else
-			{
-				unset( pBits );
-			}
-		}
-
-		template <typename TpBits>
-		void setOrUnset( TpBits pBits, bool pSet, std::memory_order pOrder )
+		template <typename TBits>
+		void setOrUnset( TBits pBits, bool pSet, std::memory_order pOrder = std::memory_order_relaxed )
 		{
 			if( pSet )
 			{
@@ -117,118 +81,99 @@ namespace ts3
 			}
 		}
 
-		void clear()
+		template <typename TBits>
+		bool testAndSet( TBits pBits )
 		{
-			_value.store( 0, std::memory_order_relaxed );
+			ValueType current = _value.load( std::memory_order_relaxed );
+
+			while( true )
+			{
+				if( ( current & static_cast<ValueType>( pBits ) ) != 0 )
+				{
+					return false;
+				}
+
+				if( _value.compare_exchange_weak( current,
+				                                  current | static_cast<ValueType>( pBits ),
+				                                  std::memory_order_acq_rel,
+				                                  std::memory_order_relaxed ) )
+				{
+					return true;
+				}
+			}
 		}
 
-		void clear( std::memory_order pOrder )
+		template <typename TBits>
+		bool testAndUnset( TBits pBits )
+		{
+			ValueType current = _value.load( std::memory_order_relaxed );
+
+			while( true )
+			{
+				if( ( current & static_cast<ValueType>( pBits ) ) != static_cast<ValueType>( pBits ) )
+				{
+					return false;
+				}
+
+				if( _value.compare_exchange_weak( current,
+				                                  current & ~static_cast<ValueType>( pBits ),
+				                                  std::memory_order_acq_rel,
+				                                  std::memory_order_relaxed ) )
+				{
+					return true;
+				}
+			}
+		}
+
+		void clear( std::memory_order pOrder = std::memory_order_relaxed )
 		{
 			_value.store( 0, pOrder );
 		}
 
-		template <typename TpBits>
-		bool testAndSet( TpBits pBits )
-		{
-			ValueType current = _value.load( std::memory_order_relaxed );
-
-			while( true )
-			{
-				if( ( current & static_cast<ValueType>(pBits) ) != 0 )
-				{
-					return false;
-				}
-
-				if( _value.compare_exchange_weak( current, current | static_cast<ValueType>(pBits),
-												   std::memory_order_acq_rel, std::memory_order_relaxed ) )
-				{
-					return true;
-				}
-			}
-		}
-
-		template <typename TpBits>
-		bool testAndUnset( TpBits pBits )
-		{
-			ValueType current = _value.load( std::memory_order_relaxed );
-
-			while( true )
-			{
-				if( ( current & static_cast<ValueType>(pBits) ) != static_cast<ValueType>(pBits) )
-				{
-					return false;
-				}
-
-				if( _value.compare_exchange_weak( current, current & ~static_cast<ValueType>(pBits),
-												   std::memory_order_acq_rel, std::memory_order_relaxed ) )
-				{
-					return true;
-				}
-			}
-		}
-
-		ValueType get() const
-		{
-			return _value.load( std::memory_order_relaxed );
-		}
-
-		ValueType get( std::memory_order pOrder ) const
+		TS3_ATTR_NO_DISCARD ValueType get( std::memory_order pOrder = std::memory_order_relaxed ) const
 		{
 			return _value.load( pOrder );
 		}
 
-		template <typename TpBits>
-		ValueType test( TpBits pBits ) const
+		template <typename TBits>
+		TS3_ATTR_NO_DISCARD ValueType test( TBits pBits, std::memory_order pOrder = std::memory_order_relaxed ) const
 		{
-			return get() & static_cast<ValueType>(pBits);
+			return get( pOrder ) & static_cast<ValueType>( pBits );
 		}
 
-		template <typename TpBits>
-		ValueType test( TpBits pBits, std::memory_order pOrder ) const
+		template <typename TBits>
+		TS3_ATTR_NO_DISCARD bool isSet( TBits pBits, std::memory_order pOrder = std::memory_order_relaxed ) const
 		{
-			return get( pOrder ) & static_cast<ValueType>(pBits);
+			return ( pBits != 0 ) && ( ( get( pOrder ) & static_cast<ValueType>( pBits ) ) == static_cast<ValueType>( pBits ) );
 		}
 
-		template <typename TpBits>
-		bool isSet( TpBits pBits ) const
-		{
-			return ( get() & static_cast<ValueType>(pBits) ) == static_cast<ValueType>(pBits);
-		}
-
-		template <typename TpBits>
-		bool isSet( TpBits pBits, std::memory_order pOrder ) const
-		{
-			return ( get( pOrder ) & static_cast<ValueType>(pBits) ) == static_cast<ValueType>(pBits);
-		}
-
-		template <typename TpBits>
-		bool isSetAnyOf( TpBits pBits ) const
-		{
-			return ( get() & static_cast<ValueType>( pBits ) ) == static_cast<ValueType>( pBits );
-		}
-
-		template <typename TpBits>
-		bool isSetAnyOf( TpBits pBits, std::memory_order pOrder ) const
+		template <typename TBits>
+		TS3_ATTR_NO_DISCARD bool isSetAnyOf( TBits pBits, std::memory_order pOrder = std::memory_order_relaxed ) const
 		{
 			return ( get( pOrder ) & static_cast<ValueType>( pBits ) ) != static_cast<ValueType>( 0 );
 		}
 
-		template <typename TpBits>
-		void operator|=( TpBits pBits )
+		TS3_ATTR_NO_DISCARD bool empty( std::memory_order pOrder = std::memory_order_relaxed ) const
 		{
-			_value.fetch_or( static_cast<ValueType>(pBits), std::memory_order_relaxed );
+			return get( pOrder ) == 0;
 		}
 
-		template <typename TpBits>
-		void operator&=( TpBits pBits )
+		template <typename TBits>
+		void operator|=( TBits pBits )
 		{
-			_value.fetch_and( static_cast<ValueType>(pBits), std::memory_order_relaxed );
+			_value.fetch_or( static_cast<ValueType>( pBits ), std::memory_order_relaxed );
 		}
 
-		template <typename TpBits>
-		void operator^=( TpBits pBits )
+		template <typename TBits>
+		void operator&=( TBits pBits )
 		{
-			_value.fetch_xor( static_cast<ValueType>(pBits), std::memory_order_relaxed );
+			_value.fetch_and( static_cast<ValueType>( pBits ), std::memory_order_relaxed );
+		}
+
+		template <typename TBits>
+		void operator^=( TBits pBits )
+		{
+			_value.fetch_xor( static_cast<ValueType>( pBits ), std::memory_order_relaxed );
 		}
 
 		ValueType operator~() const
@@ -236,22 +181,22 @@ namespace ts3
 			return ~( get() );
 		}
 
-		template <typename TpBits>
-		ValueType operator|( TpBits pBits ) const
+		template <typename TBits>
+		ValueType operator|( TBits pBits ) const
 		{
-			return get() | static_cast<ValueType>(pBits);
+			return get() | static_cast<ValueType>( pBits );
 		}
 
-		template <typename TpBits>
-		ValueType operator&( TpBits pBits ) const
+		template <typename TBits>
+		ValueType operator&( TBits pBits ) const
 		{
-			return get() & static_cast<ValueType>(pBits);
+			return get() & static_cast<ValueType>( pBits );
 		}
 
-		template <typename TpBits>
-		ValueType operator^( TpBits pBits ) const
+		template <typename TBits>
+		ValueType operator^( TBits pBits ) const
 		{
-			return get() ^ static_cast<ValueType>(pBits);
+			return get() ^ static_cast<ValueType>( pBits );
 		}
 
 		ValueType operator<<( size_t pShift ) const

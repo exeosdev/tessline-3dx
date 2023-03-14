@@ -1,5 +1,5 @@
 
-#include <ts3/system/openGLDriver.h>
+#include "openGLDriver.h"
 #include "displaySystem.h"
 
 namespace ts3::system
@@ -12,17 +12,18 @@ namespace ts3::system
 
 	OpenGLSystemDriver::~OpenGLSystemDriver() noexcept = default;
 
-	void OpenGLSystemDriver::initializePlatform()
+	OpenGLVersionSupportInfo OpenGLSystemDriver::initializePlatform()
 	{
 		_nativeInitializePlatform();
 
-		_supportedRuntimeVersion = GLCoreAPI::queryRuntimeVersion();
+		_versionSupportInfo = _nativeQueryVersionSupportInfo();
 
-		if( _supportedRuntimeVersion.major == 0 )
-		{
-			_supportedRuntimeVersion.major = 1;
-			_supportedRuntimeVersion.minor = 0;
-		}
+		return _versionSupportInfo;
+	}
+
+	const OpenGLVersionSupportInfo & OpenGLSystemDriver::getVersionSupportInfo() const
+	{
+		return _versionSupportInfo;
 	}
 
 	void OpenGLSystemDriver::releaseInitState( OpenGLRenderContext & /* pGLRenderContext */ )
@@ -30,11 +31,11 @@ namespace ts3::system
 		_nativeReleaseInitState();
 	}
 
-	OpenGLDisplaySurfaceHandle OpenGLSystemDriver::createDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo )
+	OpenGLDisplaySurfaceHandle OpenGLSystemDriver::createDisplaySurface( const OpenGLDisplaySurfaceCreateInfo & pCreateInfo )
 	{
-		GLDisplaySurfaceCreateInfo surfaceCreateInfo = pCreateInfo;
+		OpenGLDisplaySurfaceCreateInfo surfaceCreateInfo = pCreateInfo;
 
-		if( pCreateInfo.flags.isSet( E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
+		if( pCreateInfo.flags.isSet( E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT ) )
 		{
 			surfaceCreateInfo.frameGeometry.size = CX_FRAME_SIZE_MAX;
 			surfaceCreateInfo.frameGeometry.style = EFrameStyle::Overlay;
@@ -44,6 +45,12 @@ namespace ts3::system
 			surfaceCreateInfo.frameGeometry.position = pCreateInfo.frameGeometry.position;
 			surfaceCreateInfo.frameGeometry.size = pCreateInfo.frameGeometry.size;
 			surfaceCreateInfo.frameGeometry.style = pCreateInfo.frameGeometry.style;
+		}
+
+		if( pCreateInfo.minimumAPIVersion == CX_GL_VERSION_BEST_SUPPORTED )
+		{
+			const auto versionSupportInfo = _nativeQueryVersionSupportInfo();
+			surfaceCreateInfo.minimumAPIVersion = versionSupportInfo.apiVersion;
 		}
 
 		surfaceCreateInfo.frameGeometry = mDisplayManager->validateFrameGeometry( surfaceCreateInfo.frameGeometry );
@@ -63,55 +70,56 @@ namespace ts3::system
 	}
 
 	OpenGLRenderContextHandle OpenGLSystemDriver::createRenderContext( OpenGLDisplaySurface & pSurface,
-                                                                       const GLRenderContextCreateInfo & pCreateInfo )
+                                                                       const OpenGLRenderContextCreateInfo & pCreateInfo )
 	{
-		GLRenderContextCreateInfo surfaceCreateInfo = pCreateInfo;
+		OpenGLRenderContextCreateInfo contextCreateInfo = pCreateInfo;
 
-		if( surfaceCreateInfo.runtimeVersionDesc.apiVersion == CX_VERSION_UNKNOWN  )
+		if( contextCreateInfo.requestedAPIVersion == CX_VERSION_UNKNOWN  )
 		{
-			surfaceCreateInfo.runtimeVersionDesc.apiVersion = Version{ 1, 0 };
+			contextCreateInfo.requestedAPIVersion = Version{ 1, 0 };
 		}
-		else if( surfaceCreateInfo.runtimeVersionDesc.apiVersion == CX_GL_VERSION_BEST_SUPPORTED )
+		else if( contextCreateInfo.requestedAPIVersion == CX_GL_VERSION_BEST_SUPPORTED )
 		{
-			surfaceCreateInfo.runtimeVersionDesc.apiVersion = _supportedRuntimeVersion;
+			contextCreateInfo.requestedAPIVersion = _versionSupportInfo.apiVersion;
 		}
 
-		if( surfaceCreateInfo.runtimeVersionDesc.apiProfile == EGLAPIProfile::OpenGLES )
+		const auto surfaceAPIClass = pSurface.querySupportedAPIClass();
+		if( surfaceAPIClass == EOpenGLAPIClass::OpenGLES )
 		{
-			if( surfaceCreateInfo.runtimeVersionDesc.apiVersion > CX_GL_VERSION_MAX_ES )
+			if( contextCreateInfo.requestedAPIVersion > CX_GL_VERSION_MAX_ES )
 			{
 				return nullptr;
 			}
 		}
 		else
 		{
-			if( surfaceCreateInfo.runtimeVersionDesc.apiVersion > CX_GL_VERSION_MAX_DESKTOP )
+			if( contextCreateInfo.requestedAPIVersion > CX_GL_VERSION_MAX_DESKTOP )
 			{
 				return nullptr;
 			}
 		}
 
-		if( surfaceCreateInfo.runtimeVersionDesc.apiVersion == Version{ 3, 1 } )
+		if( contextCreateInfo.requestedAPIVersion == Version{ 3, 1 } )
 		{
-			if( ( surfaceCreateInfo.contextProfile == EGLContextProfile::Auto ) || ( surfaceCreateInfo.contextProfile == EGLContextProfile::Core ) )
+			if( ( contextCreateInfo.contextAPIProfile == EOpenGLAPIProfile::Auto ) || ( contextCreateInfo.contextAPIProfile == EOpenGLAPIProfile::Core ) )
 			{
-				surfaceCreateInfo.flags.set( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
+				contextCreateInfo.flags.set( E_OPENGL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
 			}
 			else
 			{
-				surfaceCreateInfo.flags.unset( E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
+				contextCreateInfo.flags.unset( E_OPENGL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT );
 			}
 		}
 
-		if( surfaceCreateInfo.runtimeVersionDesc.apiVersion >= Version{ 3, 2 } )
+		if( contextCreateInfo.requestedAPIVersion >= Version{ 3, 2 } )
 		{
-			if( surfaceCreateInfo.contextProfile == EGLContextProfile::Auto )
+			if( contextCreateInfo.contextAPIProfile == EOpenGLAPIProfile::Auto )
 			{
-				surfaceCreateInfo.contextProfile = EGLContextProfile::Core;
+				contextCreateInfo.contextAPIProfile = EOpenGLAPIProfile::Core;
 			}
 		}
 
-		auto renderContext = _nativeCreateRenderContext( pSurface, surfaceCreateInfo );
+		auto renderContext = _nativeCreateRenderContext( pSurface, contextCreateInfo );
 		renderContext->setInternalOwnershipFlag( true );
 
 		return renderContext;
@@ -139,6 +147,11 @@ namespace ts3::system
 	void OpenGLSystemDriver::resetContextBinding()
 	{
 		_nativeResetContextBinding();
+	}
+
+	bool OpenGLSystemDriver::isAPIClassSupported( EOpenGLAPIClass pAPIClass ) const
+	{
+		return _nativeIsAPIClassSupported( pAPIClass );
 	}
 
 	bool OpenGLSystemDriver::isRenderContextBound() const
@@ -196,6 +209,23 @@ namespace ts3::system
 		}
 	}
 
+	OpenGLVersionSupportInfo OpenGLSystemDriver::_nativeQueryVersionSupportInfo() const noexcept
+	{
+		OpenGLVersionSupportInfo openGLVersionSupportInfo{};
+
+		openGLVersionSupportInfo.apiVersion = OpenGLCoreAPI::queryRuntimeVersion();
+		openGLVersionSupportInfo.apiClass = EOpenGLAPIClass::OpenGLDesktop;
+		openGLVersionSupportInfo.apiProfile = EOpenGLAPIProfile::Legacy;
+
+		if( openGLVersionSupportInfo.apiVersion.major == 0 )
+		{
+			openGLVersionSupportInfo.apiVersion.major = 1;
+			openGLVersionSupportInfo.apiVersion.minor = 0;
+		}
+
+		return openGLVersionSupportInfo;
+	}
+
 
 	OpenGLDisplaySurface::OpenGLDisplaySurface( OpenGLSystemDriverHandle pGLSystemDriver, void * pNativeData )
 	: Frame( pGLSystemDriver->mSysContext )
@@ -211,13 +241,21 @@ namespace ts3::system
 
 	void OpenGLDisplaySurface::clearColorBuffer()
 	{
-		glClearColor( 0.2f, 0.4f, 0.92f, 1.0f );
+		glClearColor( 0.24f, 0.72f, 0.4f, 1.0f );
+		ts3OpenGLHandleLastError();
+
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		ts3OpenGLHandleLastError();
 	}
 
 	void OpenGLDisplaySurface::swapBuffers()
 	{
 		_nativeSwapBuffers();
+	}
+
+	EOpenGLAPIClass OpenGLDisplaySurface::querySupportedAPIClass() const
+	{
+		return _nativeQuerySupportedAPIClass();
 	}
 
 	FrameSize OpenGLDisplaySurface::queryRenderAreaSize() const
@@ -327,15 +365,15 @@ namespace ts3::system
 		return _nativeSysValidate();
 	}
 
-	GLSystemVersionInfo OpenGLRenderContext::querySystemVersionInfo() const
+	OpenGLSystemVersionInfo OpenGLRenderContext::querySystemVersionInfo() const
 	{
 		if( !sysValidate() )
 		{
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 		}
 
-		GLSystemVersionInfo systemVersionInfo;
-		systemVersionInfo.apiVersion = GLCoreAPI::queryRuntimeVersion();
+		OpenGLSystemVersionInfo systemVersionInfo;
+		systemVersionInfo.apiVersion = OpenGLCoreAPI::queryRuntimeVersion();
 
 		if( const auto * versionStr = glGetString( GL_VERSION ) )
 		{
@@ -354,7 +392,7 @@ namespace ts3::system
 			systemVersionInfo.vendorName.assign( reinterpret_cast<const char *>( vendorNameStr ) );
 		}
 
-		ts3GLResetErrorQueue();
+		ts3OpenGLResetErrorQueue();
 
 		return systemVersionInfo;
 	}

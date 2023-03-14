@@ -5,7 +5,7 @@
 #define __TS3_GPUAPI_COMMON_TYPES_H__
 
 #include <ts3/math/color.h>
-
+#include <ts3/math/vector.h>
 
 namespace ts3::gpuapi
 {
@@ -17,15 +17,10 @@ namespace ts3::gpuapi
 			float zNear;
 			float zFar;
 		};
-		struct ViewportRect
-		{
-			uint32 opX;
-			uint32 opY;
-			uint32 sizeX;
-			uint32 sizeY;
-		};
+
 		DepthRange depthRange;
-		ViewportRect vpRect;
+		math::Vec2u32 origin;
+		math::Size2u size;
 	};
 
 } // namespace ts3::gpuapi

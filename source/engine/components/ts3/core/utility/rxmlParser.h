@@ -19,10 +19,10 @@ namespace ts3
 			return strncmp( pRxmlNode->name(), pName, getMinOf( pRxmlNode->name_size(), pNameLength ) ) == 0;
 		}
 
-		template <size_t tpNameLength>
-		static bool checkNodeNameEquals( RxmlNode * pRxmlNode, const char ( &pName )[tpNameLength] )
+		template <size_t tNameLength>
+		static bool checkNodeNameEquals( RxmlNode * pRxmlNode, const char ( &pName )[tNameLength] )
 		{
-			return checkNodeNameEquals( pRxmlNode, &( pName[0] ), tpNameLength );
+			return checkNodeNameEquals( pRxmlNode, &( pName[0] ), tNameLength );
 		}
 
 		static bool checkNodeHasAttribute( RxmlNode * pRxmlNode, const char * pName, size_t pNameLength, bool pAllowEmpty = true )
@@ -31,10 +31,10 @@ namespace ts3
 			return attribNode && ( pAllowEmpty || ( attribNode->value_size() > 0 ) );
 		}
 
-		template <size_t tpNameLength>
-		static bool checkNodeHasAttribute( RxmlNode * pRxmlNode, const char ( &pName )[tpNameLength], bool pAllowEmpty = true )
+		template <size_t tNameLength>
+		static bool checkNodeHasAttribute( RxmlNode * pRxmlNode, const char ( &pName )[tNameLength], bool pAllowEmpty = true )
 		{
-			return checkNodeHasAttribute( pRxmlNode, &( pName[0] ), tpNameLength );
+			return checkNodeHasAttribute( pRxmlNode, &( pName[0] ), tNameLength );
 		}
 
 		static bool checkNodeHasValue( RxmlNode * pRxmlNode )

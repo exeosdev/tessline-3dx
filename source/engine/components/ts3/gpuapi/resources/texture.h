@@ -5,12 +5,10 @@
 #define __TS3_GPUAPI_TEXTURE_H__
 
 #include "gpuResource.h"
-#include "textureCommon.h"
+#include "textureReference.h"
 
 namespace ts3::gpuapi
 {
-
-	class TextureStorage;
 
 	struct TextureProperties : public GPUResourceProperties
 	{
@@ -18,18 +16,28 @@ namespace ts3::gpuapi
 
 	class Texture : public GPUResource
 	{
+		friend class CommandList;
+		friend class TextureReference;
+
 	public:
         TextureProperties const mTextureProperties;
 		TextureLayout const mTextureLayout;
 
-		Texture( GPUDevice & pGPUDevice,
-		         const ResourceMemoryInfo & pResourceMemory,
-		         const TextureProperties & pTextureProperties,
-		         const TextureLayout & pTextureLayout );
+		Texture(
+			GPUDevice & pGPUDevice,
+			const ResourceMemoryInfo & pResourceMemory,
+			const TextureProperties & pTextureProperties,
+			const TextureLayout & pTextureLayout );
 
 		virtual ~Texture();
 
-		bool checkETextureTargetSupport( ETextureTarget pTextureTarget ) const;
+		TS3_ATTR_NO_DISCARD virtual const GPUResourceProperties & getProperties() const override final;
+
+		TS3_ATTR_NO_DISCARD bool checkTextureTargetSupport( ETextureTarget pTextureTarget ) const;
+
+		TS3_ATTR_NO_DISCARD TextureSubResource getAllSubResourcesRef() const;
+
+		TS3_ATTR_NO_DISCARD TextureSubResource getDefaultSubResourceRef() const;
 
 	protected:
 		static bool validateTextureCreateInfo( TextureCreateInfo & pCreateInfo );

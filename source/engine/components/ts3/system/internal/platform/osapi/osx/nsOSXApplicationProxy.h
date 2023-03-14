@@ -16,18 +16,15 @@ namespace ts3::system
 }
 
 @interface NSApplication( NSAppleMenu )
--( void ) setAppleMenu: (NSMenu *)pMenu;
+-( void ) setAppleMenu:( NSMenu * )pMenu;
 @end
 
 /// @brief
 @interface NSOSXApplicationProxy : NSApplication
-{
-	ts3::system::OSXEventController * mEventController;
-}
 
--( void ) terminate: ( id )pSender;
+-( void ) terminate:( id )pSender;
 
--( void ) sendEvent: ( NSEvent * )pEvent;
+-( void ) sendEvent:( NSEvent * )pEvent;
 
 +( void ) registerUserDefaults;
 

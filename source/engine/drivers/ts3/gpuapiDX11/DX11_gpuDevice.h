@@ -7,7 +7,7 @@
 #include "DX11_prerequisites.h"
 #include "state/DX11_pipelineStateDesc.h"
 #include <ts3/gpuapiDX/DX_gpuDevice.h>
-#include <ts3/gpuapi/state/graphicsPipelineStateDescriptorCache.h>
+#include <ts3/gpuapi/state/graphicsPipelineDescriptorCache.h>
 
 namespace ts3::gpuapi
 {

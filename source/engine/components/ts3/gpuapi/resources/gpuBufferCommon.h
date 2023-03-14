@@ -33,12 +33,12 @@ namespace ts3::gpuapi
 		E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT          = 0x010000 | E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT,
 
 		// Bind flag for using a buffer as a source for vertex data fetched during execution of all rendering commands.
-		// Such buffer is bound to the pipeline via VertexStreamStateObject.
+		// Such buffer is bound to the pipeline via TODO.
 		// Implies VERTEX_STREAM usage bit.
 		E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT            = 0x020000 | E_GPU_RESOURCE_USAGE_FLAG_VERTEX_STREAM_BIT,
 
 		// Bind flag for using a buffer as a source for index data fetched during execution of indexed rendering commands.
-		// Such buffer is bound to the pipeline via VertexStreamStateObject.
+		// Such buffer is bound to the pipeline via TODO.
 		// Implies VERTEX_STREAM usage bit.
 		E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT             = 0x040000 | E_GPU_RESOURCE_USAGE_FLAG_VERTEX_STREAM_BIT,
 
@@ -137,6 +137,31 @@ namespace ts3::gpuapi
 		ResourceInputDataDesc inputDataDesc;
 		Bitmask<EGPUBufferDataCopyFlags> flags = E_GPU_BUFFER_DATA_COPY_FLAGS_DEFAULT;
 	};
+
+	namespace rcutil
+	{
+
+		TS3_GPUAPI_API_NO_DISCARD gpu_memory_size_t queryGPUBufferByteSize( GPUBufferHandle pGPUBuffer );
+
+		TS3_GPUAPI_API_NO_DISCARD bool checkGPUBufferRegion(
+				GPUBufferHandle pGPUBuffer,
+				gpu_memory_size_t pOffset,
+				gpu_memory_size_t pSize );
+
+		TS3_GPUAPI_API_NO_DISCARD bool checkGPUBufferRegion(
+				GPUBufferHandle pGPUBuffer,
+				const GPUMemoryRegion & pRegion );
+
+		TS3_GPUAPI_API_NO_DISCARD GPUMemoryRegion validateGPUBufferRegion(
+				GPUBufferHandle pGPUBuffer,
+				gpu_memory_size_t pOffset,
+				gpu_memory_size_t pSize );
+
+		TS3_GPUAPI_API_NO_DISCARD GPUMemoryRegion validateGPUBufferRegion(
+				GPUBufferHandle pGPUBuffer,
+				const GPUMemoryRegion & pRegion );
+
+	}
 
 } // namespace ts3::gpuapi
 

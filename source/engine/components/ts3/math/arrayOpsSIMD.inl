@@ -50,14 +50,14 @@ namespace ts3::math
 			pResult = _mm_mul_ps( pLData, pRData );
 		}
 
-		template <typename TpScalar>
-		inline void mul( const __m128 & pData, const TpScalar pScalar, __m128 & pResult )
+		template <typename TScalar>
+		inline void mul( const __m128 & pData, const TScalar pScalar, __m128 & pResult )
 		{
 			pResult = _mm_mul_ps( pData, _mm_set1_ps( static_cast<float>( pScalar ) ) );
 		}
 
-		template <typename TpScalar>
-		inline void mul( const TpScalar pScalar, const __m128 & pData, __m128 & pResult )
+		template <typename TScalar>
+		inline void mul( const TScalar pScalar, const __m128 & pData, __m128 & pResult )
 		{
 			pResult = _mm_mul_ps( _mm_set1_ps( static_cast<float>( pScalar ) ), pData );
 		}
@@ -67,14 +67,14 @@ namespace ts3::math
 			pResult = _mm_div_ps( pLData, pRData );
 		}
 
-		template <typename TpScalar>
-		inline void div( const __m128 & pData, const TpScalar pScalar, __m128 & pResult )
+		template <typename TScalar>
+		inline void div( const __m128 & pData, const TScalar pScalar, __m128 & pResult )
 		{
 			pResult = _mm_div_ps( pData, _mm_set1_ps( static_cast<float>( pScalar ) ) );
 		}
 
-		template <typename TpScalar>
-		inline void div( const TpScalar pScalar, const __m128 & pData, __m128 & pResult )
+		template <typename TScalar>
+		inline void div( const TScalar pScalar, const __m128 & pData, __m128 & pResult )
 		{
 			pResult = _mm_div_ps( _mm_set1_ps( static_cast<float>( pScalar ) ), pData );
 		}

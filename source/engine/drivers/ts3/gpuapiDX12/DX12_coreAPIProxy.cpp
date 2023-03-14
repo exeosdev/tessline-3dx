@@ -5,9 +5,9 @@
 namespace ts3::gpuapi
 {
 
-	ComPtr<ID3D12Debug> DX12CoreAPIProxy::initializeD3D12DebugInterface( Bitmask<GPUDriverConfigFlags> pDriverConfigFlags )
+	ComPtr<ID3D12Debug> DX12CoreAPIProxy::initializeD3D12DebugInterface( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags )
 	{
-		if( !pDriverConfigFlags.isSet( GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
+		if( !pDriverConfigFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
 		{
 			return nullptr;
 		}

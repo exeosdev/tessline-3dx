@@ -40,17 +40,17 @@ namespace ts3::system
 		                                                                          const perf_counter_ratio_t & pUnitRatio );
 
 		/// @brief Helper function which converts a perf counter duration to a duration value in unit expressed as ts3::EDurationPeriod.
-		template <EDurationPeriod tpPeriod>
+		template <EDurationPeriod tPeriod>
 		TS3_SYSTEM_API_NODISCARD static long double convertToDuration( perf_counter_value_t pStampDiff )
 		{
-			return convertToDuration( pStampDiff, DurationTraits<tpPeriod>::unitRatio );
+			return convertToDuration( pStampDiff, DurationTraits<tPeriod>::unitRatio );
 		}
 
 		/// @brief Helper function which converts a duration value in unit expressed as ts3::EDurationPeriod back to a PC time stamp difference.
-		template <EDurationPeriod tpPeriod>
-		TS3_SYSTEM_API_NODISCARD static perf_counter_value_t convertFromDuration( const Duration<tpPeriod> & pDuration )
+		template <EDurationPeriod tPeriod>
+		TS3_SYSTEM_API_NODISCARD static perf_counter_value_t convertFromDuration( const Duration<tPeriod> & pDuration )
 		{
-			return convertFromDuration( pDuration.count(), DurationTraits<tpPeriod>::unitRatio );
+			return convertFromDuration( pDuration.count(), DurationTraits<tPeriod>::unitRatio );
 		}
 	};
 

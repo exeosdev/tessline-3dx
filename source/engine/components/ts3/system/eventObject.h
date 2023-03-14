@@ -11,6 +11,8 @@
 namespace ts3::system
 {
 
+	struct EventSystemSharedState;
+
 	struct EventObject
 	{
 		union
@@ -30,7 +32,8 @@ namespace ts3::system
 			EvtInputGamepadAxis        eInputGamepadAxis;
 			EvtInputGamepadButton      eInputGamepadButton;
 			EvtInputGamepadState       eInputGamepadState;
-			EvtInputKeyboardKey        eInputKeyboardKey;
+			EvtInputKeyboard           eInputKeyboard;
+			EvtInputMouse              eInputMouse;
 			EvtInputMouseButton        eInputMouseButton;
 			EvtInputMouseMove          eInputMouseMove;
 			EvtInputMouseScroll        eInputMouseScroll;
@@ -43,6 +46,8 @@ namespace ts3::system
 			EvtWindowUpdateResize      eWindowUpdateResize;
 			EvtWindowUpdateVisibility  eWindowUpdateVisibility;
 		};
+
+		EventSystemSharedState * eventSystemSharedState = nullptr;
 
 		constexpr EventObject()
 		: code{ E_EVENT_CODE_UNDEFINED }
@@ -58,7 +63,12 @@ namespace ts3::system
 
 		constexpr explicit operator bool() const
 		{
-			return ( code != E_EVENT_CODE_UNDEFINED ) && ecValidateEventCode( code );
+			return ( code != E_EVENT_CODE_UNDEFINED ) && cxdefs::validateEventCode( code );
+		}
+
+		 TS3_ATTR_NO_DISCARD constexpr EEventCategory category() const
+		{
+			return cxdefs::getEventCodeCategory( code );
 		}
 	};
 

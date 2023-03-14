@@ -37,6 +37,10 @@
 #define  TS3_PCL_BYTESWAP32	_byteswap_ulong
 #define  TS3_PCL_BYTESWAP64	_byteswap_uint64
 
+#define  TS3_PCL_POPCOUNT16	__popcnt16
+#define  TS3_PCL_POPCOUNT32	__popcnt
+#define  TS3_PCL_POPCOUNT64	__popcnt64
+
 #define  TS3_PCL_ROTL16 _rotl16
 #define  TS3_PCL_ROTL32 _rotl
 #define  TS3_PCL_ROTL64 _rotl64

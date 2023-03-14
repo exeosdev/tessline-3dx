@@ -23,9 +23,16 @@ namespace ts3::gpuapi
     using GPUMemoryRegion = Region<gpu_memory_size_t>;
     using GPUMemoryRange = GPUMemoryRegion::Range;
 
-    inline constexpr gpu_memory_size_t CX_GPU_MEMORY_OFFSET_INVALID = ts3::Limits<gpu_memory_size_t>::maxValue;
+	namespace cxdefs
+	{
 
-    inline constexpr gpu_memory_size_t CX_GPU_MEMORY_SIZE_MAX = ts3::Limits<gpu_memory_size_t>::maxValue;
+		/// @brief
+		inline constexpr gpu_memory_size_t GPU_MEMORY_OFFSET_INVALID = Limits<gpu_memory_size_t>::maxValue;
+
+		/// @brief
+		inline constexpr gpu_memory_size_t GPU_MEMORY_SIZE_MAX = Limits<gpu_memory_size_t>::maxValue;
+
+	}
 
 	/// @brief Flags representing various properties of host/device memory pools like access and heap properties.
 	enum EGPUMemoryFlags : gpu_memory_flags_value_t
@@ -144,10 +151,16 @@ namespace ts3::gpuapi
 		}
 	};
 
-	inline bool checkMemoryMapAccess( EGPUMemoryMapMode pMapMode, Bitmask<EGPUMemoryFlags> pMemoryFlags )
+	namespace GpuMem
 	{
-		auto mapRequestedAccessFlags = static_cast<uint32>( pMapMode ) & E_GPU_MEMORY_MAP_FLAG_ACCESS_READ_WRITE_BIT;
-		return pMemoryFlags.isSet( mapRequestedAccessFlags );
+
+		/// @brief Returns true if the requested memory map mode is valid for the memory with given properties (flags).
+		inline bool checkMemoryMapAccess( EGPUMemoryMapMode pRequestedMapMode, Bitmask<EGPUMemoryFlags> pMemoryFlags )
+		{
+			auto mapRequestedAccessFlags = static_cast<uint32>( pRequestedMapMode ) & E_GPU_MEMORY_MAP_FLAG_ACCESS_READ_WRITE_BIT;
+			return pMemoryFlags.isSet( mapRequestedAccessFlags );
+		}
+
 	}
 
 } // namespace ts3::gpuapi

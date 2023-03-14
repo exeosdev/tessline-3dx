@@ -34,7 +34,7 @@ namespace ts3::gpuapi
 		auto deviceCreateFlags = DX11CoreAPIProxy::translateDX11GPUDeviceCreateFlags( driverConfigFlags );
 
 		D3D_DRIVER_TYPE deviceDriverType = D3D_DRIVER_TYPE_HARDWARE;
-		if( driverConfigFlags.isSet( GPU_DRIVER_CONFIG_FLAG_USE_REFERENCE_DRIVER_BIT ) )
+		if( driverConfigFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_USE_REFERENCE_DRIVER_BIT ) )
 		{
 			deviceDriverType = D3D_DRIVER_TYPE_REFERENCE;
 		}

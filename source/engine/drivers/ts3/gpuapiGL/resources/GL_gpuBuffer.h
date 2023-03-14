@@ -40,7 +40,7 @@ namespace ts3::gpuapi
 
 		virtual void invalidateRegion( void * pCommandObject, const GPUMemoryRegion & pRegion ) override;
 
-		virtual void updateSubDataCopy( void * pCommandObject, GPUBuffer & pSource, const GPUBufferSubDataCopyDesc & pCopyDesc ) override;
+		virtual void updateSubDataCopy( void * pCommandObject, GPUBuffer & pSrcBuffer, const GPUBufferSubDataCopyDesc & pCopyDesc ) override;
 
 		virtual void updateSubDataUpload( void * pCommandObject, const GPUBufferSubDataUploadDesc & pUploadDesc ) override;
 		

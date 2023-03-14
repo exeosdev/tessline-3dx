@@ -24,42 +24,42 @@ namespace ts3
 		inline constexpr uint64 CX_SERIALIZE_FLT80_DECIMAL_PRECISION = 1000000000000u;
 
 		/// @brief Helper trait with a static bool 'sValue' indicating whether a type can be serialized using byte-wise copy.
-		template <typename Tp>
+		template <typename TVal>
 		struct IsTriviallySerializable
 		{
 			static inline constexpr bool sValue =
-				std::is_union<Tp>::value || ( std::is_class<Tp>::value && std::is_standard_layout<Tp>::value && std::is_trivial<Tp>::value );
+				std::is_union<TVal>::value || ( std::is_class<TVal>::value && std::is_standard_layout<TVal>::value && std::is_trivial<TVal>::value );
 		};
 
 		/// @brief Helper trait with a static bool 'sValue' indicating whether a type is a character (does not include wchar_t).
-		template <typename Tp>
+		template <typename TVal>
 		struct IsCharType
 		{
 			static inline constexpr bool sValue =
-				std::is_same<Tp, char>::value || std::is_same<Tp, signed char>::value || std::is_same<Tp, unsigned char>::value;
+				std::is_same<TVal, char>::value || std::is_same<TVal, signed char>::value || std::is_same<TVal, unsigned char>::value;
 		};
 
 		/// @brief Helper trait with a static bool 'sValue' which yields true only for wchar_t.
-		template <typename Tp>
+		template <typename TVal>
 		struct IsWideChar
 		{
-			static inline constexpr bool sValue = std::is_same<Tp, wchar_t>::value;
+			static inline constexpr bool sValue = std::is_same<TVal, wchar_t>::value;
 		};
 
 		/// @brief Helper trait with a static bool 'sValue' indicating whether a type is an arithmetic type.
 		/// In contrast to std::is_arithmetic, this trait does not concern character types to be arithmetic.
-		template <typename Tp>
+		template <typename TVal>
 		struct IsArithmetic
 		{
 			static inline constexpr bool sValue =
-				std::is_arithmetic<Tp>::value && !std::is_enum<Tp>::value && !IsCharType<Tp>::sValue && !IsWideChar<Tp>::sValue;
+				std::is_arithmetic<TVal>::value && !std::is_enum<TVal>::value && !IsCharType<TVal>::sValue && !IsWideChar<TVal>::sValue;
 		};
 
 		/// @brief Helper trait type. Provides static gds_size_t 'sValue' with a size of the binary representation of a type.
-		template <typename Tp>
+		template <typename TVal>
 		struct ArithmeticTypeSerializedSize
 		{
-			static inline constexpr gds_size_t sValue = sizeof( Tp );
+			static inline constexpr gds_size_t sValue = sizeof( TVal );
 		};
 
 		template <>
@@ -91,44 +91,44 @@ namespace ts3
 		};
 
 		/// @brief Helper utility type. Implements serialization/deserialization of an integral type of given size.
-		/// @tparam tpTypeSize The size of the integral type, in bytes.
-		template <size_t tpTypeSize>
+		/// @tparam tTypeSize The size of the integral type, in bytes.
+		template <size_t tTypeSize>
 		struct IntegralTypeSerializeProxy
 		{
 			/// @brief Serializes the specified integral value into byte representation using requested ByteOrder.
 			///
-			/// @tparam Tp Type of the input value, deduced automatically from the parameter.
+			/// @tparam TVal Type of the input value, deduced automatically from the parameter.
 			///
 			/// @param pOutputBuffer Pointer to the beginning of the buffer for serialized data.
 			/// @param pByteOrder	Byte order which should be used for types larger than 1 byte.
 			/// @param pValue		Integral value to serialize.
-			template <typename Tp>
-			static void serializeIntegral( EByteOrder pByteOrder, byte * pOutputBuffer, const Tp pValue );
+			template <typename TVal>
+			static void serializeIntegral( EByteOrder pByteOrder, byte * pOutputBuffer, const TVal pValue );
 
 			/// @brief Deserializes the byte representation of an integral, stored in a given ByteOrder, and returns it.
 			///
-			/// @tparam Tp Type of the output value.
+			/// @tparam TVal Type of the output value.
 			///
 			/// @param pInputData Pointer to the beginning of the serialized data.
 			/// @param pByteOrder Byte order in which the input data has been serialized.
-			template <typename Tp>
-			static Tp deserializeIntegral( EByteOrder pByteOrder, const byte * pInputData );
+			template <typename TVal>
+			static TVal deserializeIntegral( EByteOrder pByteOrder, const byte * pInputData );
 		};
 
 		/// @brief Specialization of IntegralTypeSerializeProxy for 1-byte integral types.
 		template <>
 		struct IntegralTypeSerializeProxy<1>
 		{
-			template <typename Tp>
-			static inline void serializeIntegral( EByteOrder /* pByteOrder */, byte * pOutputBuffer, const Tp pValue )
+			template <typename TVal>
+			static inline void serializeIntegral( EByteOrder /* pByteOrder */, byte * pOutputBuffer, const TVal pValue )
 			{
-				*( reinterpret_cast<Tp *>( pOutputBuffer ) ) = pValue;
+				*( reinterpret_cast<TVal *>( pOutputBuffer ) ) = pValue;
 			}
 
-			template <typename Tp>
-			static inline Tp deserializeIntegral( EByteOrder /* pByteOrder */, const byte * pInputData )
+			template <typename TVal>
+			static inline TVal deserializeIntegral( EByteOrder /* pByteOrder */, const byte * pInputData )
 			{
-				return *( reinterpret_cast<const Tp *>( pInputData ) );
+				return *( reinterpret_cast<const TVal *>( pInputData ) );
 			}
 		};
 
@@ -136,30 +136,30 @@ namespace ts3
 		template <>
 		struct IntegralTypeSerializeProxy<2>
 		{
-			template <typename Tp>
-			static inline void serializeIntegral( EByteOrder pByteOrder, byte * pOutputBuffer, const Tp pValue )
+			template <typename TVal>
+			static inline void serializeIntegral( EByteOrder pByteOrder, byte * pOutputBuffer, const TVal pValue )
 			{
 				if( pByteOrder == EByteOrder::Native )
 				{
-					*( reinterpret_cast<Tp *>( pOutputBuffer ) ) = pValue;
+					*( reinterpret_cast<TVal *>( pOutputBuffer ) ) = pValue;
 				}
 				else
 				{
-					*( reinterpret_cast<Tp *>( pOutputBuffer ) ) = static_cast<Tp>( TS3_PCL_BYTESWAP16( static_cast<uint16>( pValue ) ) );
+					*( reinterpret_cast<TVal *>( pOutputBuffer ) ) = static_cast<TVal>( TS3_PCL_BYTESWAP16( static_cast<uint16>( pValue ) ) );
 				}
 			}
 
 			/// @brief Specialization of IntegralTypeSerializeProxy for 4-byte integral types.
-			template <typename Tp>
-			static inline Tp deserializeIntegral( EByteOrder pByteOrder, const byte * pInputData )
+			template <typename TVal>
+			static inline TVal deserializeIntegral( EByteOrder pByteOrder, const byte * pInputData )
 			{
 				if( pByteOrder == EByteOrder::Native )
 				{
-					return *( reinterpret_cast<const Tp *>( pInputData ) );
+					return *( reinterpret_cast<const TVal *>( pInputData ) );
 				}
 				else
 				{
-					return static_cast<Tp>( TS3_PCL_BYTESWAP16( *( reinterpret_cast<const uint16 *>( pInputData ) ) ) );
+					return static_cast<TVal>( TS3_PCL_BYTESWAP16( *( reinterpret_cast<const uint16 *>( pInputData ) ) ) );
 				}
 			}
 		};
@@ -168,29 +168,29 @@ namespace ts3
 		template <>
 		struct IntegralTypeSerializeProxy<4>
 		{
-			template <typename Tp>
-			static inline void serializeIntegral( EByteOrder pByteOrder, byte * pOutputBuffer, const Tp pValue )
+			template <typename TVal>
+			static inline void serializeIntegral( EByteOrder pByteOrder, byte * pOutputBuffer, const TVal pValue )
 			{
 				if( pByteOrder == EByteOrder::Native )
 				{
-					*( reinterpret_cast<Tp *>( pOutputBuffer ) ) = pValue;
+					*( reinterpret_cast<TVal *>( pOutputBuffer ) ) = pValue;
 				}
 				else
 				{
-					*( reinterpret_cast<Tp *>( pOutputBuffer ) ) = static_cast<Tp>( TS3_PCL_BYTESWAP32( static_cast<uint32>( pValue ) ) );
+					*( reinterpret_cast<TVal *>( pOutputBuffer ) ) = static_cast<TVal>( TS3_PCL_BYTESWAP32( static_cast<uint32>( pValue ) ) );
 				}
 			}
 
-			template <typename Tp>
-			static inline Tp deserializeIntegral( EByteOrder pByteOrder, const byte * pInputData )
+			template <typename TVal>
+			static inline TVal deserializeIntegral( EByteOrder pByteOrder, const byte * pInputData )
 			{
 				if( pByteOrder == EByteOrder::Native )
 				{
-					return *( reinterpret_cast<const Tp *>( pInputData ) );
+					return *( reinterpret_cast<const TVal *>( pInputData ) );
 				}
 				else
 				{
-					return static_cast<Tp>( TS3_PCL_BYTESWAP32( *( reinterpret_cast<const uint32 *>( pInputData ) ) ) );
+					return static_cast<TVal>( TS3_PCL_BYTESWAP32( *( reinterpret_cast<const uint32 *>( pInputData ) ) ) );
 				}
 			}
 		};
@@ -199,41 +199,41 @@ namespace ts3
 		template <>
 		struct IntegralTypeSerializeProxy<8>
 		{
-			template <typename Tp>
-			static inline void serializeIntegral( EByteOrder pByteOrder, byte * pOutputBuffer, const Tp pValue )
+			template <typename TVal>
+			static inline void serializeIntegral( EByteOrder pByteOrder, byte * pOutputBuffer, const TVal pValue )
 			{
 				if( pByteOrder == EByteOrder::Native )
 				{
-					*( reinterpret_cast<Tp *>( pOutputBuffer ) ) = pValue;
+					*( reinterpret_cast<TVal *>( pOutputBuffer ) ) = pValue;
 				}
 				else
 				{
-					*( reinterpret_cast<Tp *>( pOutputBuffer ) ) = static_cast<Tp>( TS3_PCL_BYTESWAP64( static_cast<uint64>( pValue ) ) );
+					*( reinterpret_cast<TVal *>( pOutputBuffer ) ) = static_cast<TVal>( TS3_PCL_BYTESWAP64( static_cast<uint64>( pValue ) ) );
 				}
 			}
 
-			template <typename Tp>
-			static inline Tp deserializeIntegral( EByteOrder pByteOrder, const byte * pInputData )
+			template <typename TVal>
+			static inline TVal deserializeIntegral( EByteOrder pByteOrder, const byte * pInputData )
 			{
 				if( pByteOrder == EByteOrder::Native )
 				{
-					return *( reinterpret_cast<const Tp *>( pInputData ) );
+					return *( reinterpret_cast<const TVal *>( pInputData ) );
 				}
 				else
 				{
-					return static_cast<Tp>( TS3_PCL_BYTESWAP64( *( reinterpret_cast<const uint64 *>( pInputData ) ) ) );
+					return static_cast<TVal>( TS3_PCL_BYTESWAP64( *( reinterpret_cast<const uint64 *>( pInputData ) ) ) );
 				}
 			}
 		};
 
-		template <typename Tp, std::enable_if_t<IsCharType<Tp>::sValue || IsArithmetic<Tp>::sValue, int> = 0>
-		inline void serializePrimitive( EByteOrder pByteOrder, byte * pOutputBuffer, const Tp pValue )
+		template <typename TVal, std::enable_if_t<IsCharType<TVal>::sValue || IsArithmetic<TVal>::sValue, int> = 0>
+		inline void serializePrimitive( EByteOrder pByteOrder, byte * pOutputBuffer, const TVal pValue )
 		{
-			IntegralTypeSerializeProxy<sizeof( Tp )>::template serializeIntegral( pByteOrder, pOutputBuffer, pValue );
+			IntegralTypeSerializeProxy<sizeof( TVal )>::template serializeIntegral( pByteOrder, pOutputBuffer, pValue );
 		}
 
-		template <typename Tp, std::enable_if_t<IsWideChar<Tp>::sValue, int> = 0>
-		inline void serializePrimitive( EByteOrder pByteOrder, byte * pOutputBuffer, const Tp pValue )
+		template <typename TVal, std::enable_if_t<IsWideChar<TVal>::sValue, int> = 0>
+		inline void serializePrimitive( EByteOrder pByteOrder, byte * pOutputBuffer, const TVal pValue )
 		{
 			serializePrimitive<uint32>( pByteOrder, pOutputBuffer, static_cast<uint32>( pValue ) );
 		}
@@ -262,16 +262,16 @@ namespace ts3
 			serializePrimitive<uint32>( pByteOrder, pOutputBuffer + sizeof( uint32 ), static_cast<uint32>( exponent ) );
 		}
 
-		template <typename Tp, std::enable_if_t<IsCharType<Tp>::sValue || IsArithmetic<Tp>::sValue, int> = 0>
-		inline Tp deserializePrimitive( EByteOrder pByteOrder, const byte * pInputData )
+		template <typename TVal, std::enable_if_t<IsCharType<TVal>::sValue || IsArithmetic<TVal>::sValue, int> = 0>
+		inline TVal deserializePrimitive( EByteOrder pByteOrder, const byte * pInputData )
 		{
-			return IntegralTypeSerializeProxy<sizeof( Tp )>::template deserializeIntegral<Tp>( pByteOrder, pInputData );
+			return IntegralTypeSerializeProxy<sizeof( TVal )>::template deserializeIntegral<TVal>( pByteOrder, pInputData );
 		}
 
-		template <typename Tp, std::enable_if_t<IsWideChar<Tp>::sValue, int> = 0>
-		inline Tp deserializePrimitive( EByteOrder pByteOrder, const byte * pInputData )
+		template <typename TVal, std::enable_if_t<IsWideChar<TVal>::sValue, int> = 0>
+		inline TVal deserializePrimitive( EByteOrder pByteOrder, const byte * pInputData )
 		{
-			return static_cast<Tp>( deserializePrimitive<uint32>( pByteOrder, pInputData ) );
+			return static_cast<TVal>( deserializePrimitive<uint32>( pByteOrder, pInputData ) );
 		}
 
 		template <>
@@ -298,58 +298,58 @@ namespace ts3
 			return ldexpl( static_cast<long double>( intBase ) / CX_SERIALIZE_FLT80_DECIMAL_PRECISION, exponent );
 		}
 
-		template <typename TpRef, typename TpInternal>
+		template <typename TRef, typename TInternal>
 		struct ValueRef
 		{
-			using RefType = TpRef;
-			using InternalType = TpInternal;
+			using RefType = TRef;
+			using InternalType = TInternal;
 
-			std::reference_wrapper<TpRef> value;
-			mutable TpInternal internalValue;
+			std::reference_wrapper<TRef> value;
+			mutable TInternal internalValue;
 
-			template <typename... TpArgs>
-			ValueRef( TpRef & pRef, TpArgs && ...pArgs )
+			template <typename... TArgs>
+			ValueRef( TRef & pRef, TArgs && ...pArgs )
 			: value( pRef )
-			, internalValue( std::forward<TpArgs>( pArgs )... )
+			, internalValue( std::forward<TArgs>( pArgs )... )
 			{}
 
 			~ValueRef()
 			{
-				value.get() = static_cast<TpRef>( internalValue );
+				value.get() = static_cast<TRef>( internalValue );
 			}
 
-			TpInternal & get() const
+			TInternal & get() const
 			{
 				return internalValue;
 			}
 
-			void set( TpInternal pValue ) const
+			void set( TInternal pValue ) const
 			{
-				value.get() = static_cast<TpRef>( pValue );
+				value.get() = static_cast<TRef>( pValue );
 			}
 		};
 
-		template <typename TpRef, typename TpInternal>
-		struct ValueRef<const TpRef, TpInternal>
+		template <typename TRef, typename TInternal>
+		struct ValueRef<const TRef, TInternal>
 		{
-			using RefType = TpRef;
-			using InternalType = TpInternal;
+			using RefType = TRef;
+			using InternalType = TInternal;
 
-			std::reference_wrapper<const TpRef> value;
+			std::reference_wrapper<const TRef> value;
 
-			ValueRef( const TpRef & pRef )
+			ValueRef( const TRef & pRef )
 			: value( pRef )
 			{}
 
 			~ValueRef() = default;
 
-			TpInternal get() const
+			TInternal get() const
 			{
-				return static_cast<TpInternal>( value.get() );
+				return static_cast<TInternal>( value.get() );
 			}
 		};
 
-		template <typename TpCast>
+		template <typename TCast>
 		struct TypeCastTag
 		{};
 
@@ -357,70 +357,70 @@ namespace ts3
 
 		inline constexpr TypeCastNoneTag cvTypeCastNone {};
 
-		template <typename TpRef, typename TpCast>
+		template <typename TRef, typename TCast>
 		struct TypeCastInfo
 		{
-			std::reference_wrapper<TpRef> refWrapper;
-			TypeCastTag<TpCast> castTag;
+			std::reference_wrapper<TRef> refWrapper;
+			TypeCastTag<TCast> castTag;
 
-			TypeCastInfo( TpRef & pRef )
+			TypeCastInfo( TRef & pRef )
 			: refWrapper( pRef )
 			{}
 		};
 
-		template <typename TpCast, typename Tp>
-		inline constexpr TypeCastInfo<const Tp, TpCast> typeCast( const Tp & pValue )
+		template <typename TCast, typename TVal>
+		inline constexpr TypeCastInfo<const TVal, TCast> typeCast( const TVal & pValue )
 		{
 			return { pValue };
 		}
 
-		template <typename TpCast, typename Tp>
-		inline constexpr TypeCastInfo<Tp, TpCast> typeCast( Tp & pValue )
+		template <typename TCast, typename TVal>
+		inline constexpr TypeCastInfo<TVal, TCast> typeCast( TVal & pValue )
 		{
 			return { pValue };
 		}
 
-		template <typename TpRef = uint64>
-		using NativeIntRef = ValueRef<TpRef, uint64>;
+		template <typename TRef = uint64>
+		using NativeIntRef = ValueRef<TRef, uint64>;
 
-		template <typename TpRef = uint64>
-		using SizeTypeRef = ValueRef<TpRef, uint64>;
+		template <typename TRef = uint64>
+		using SizeTypeRef = ValueRef<TRef, uint64>;
 
-		template <typename TpRef = uint32>
-		using TypeIDRef = ValueRef<TpRef, uint32>;
+		template <typename TRef = uint32>
+		using TypeIDRef = ValueRef<TRef, uint32>;
 
-		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value, int> = 0>
-		inline NativeIntRef<const Tp> asNativeInt( const Tp & pValue )
+		template <typename TVal, std::enable_if_t<std::is_integral<TVal>::value, int> = 0>
+		inline NativeIntRef<const TVal> asNativeInt( const TVal & pValue )
 		{
 			return { pValue };
 		}
 
-		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value, int> = 0>
-		inline SizeTypeRef<const Tp> asSizeType( const Tp & pValue )
+		template <typename TVal, std::enable_if_t<std::is_integral<TVal>::value, int> = 0>
+		inline SizeTypeRef<const TVal> asSizeType( const TVal & pValue )
 		{
 			return { pValue };
 		}
 
-		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value || std::is_enum<Tp>::value, int> = 0>
-		inline TypeIDRef<const Tp> asTypeID( const Tp & pValue )
+		template <typename TVal, std::enable_if_t<std::is_integral<TVal>::value || std::is_enum<TVal>::value, int> = 0>
+		inline TypeIDRef<const TVal> asTypeID( const TVal & pValue )
 		{
 			return { pValue };
 		}
 
-		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value, int> = 0>
-		inline NativeIntRef<Tp> asNativeInt( Tp & pValue )
+		template <typename TVal, std::enable_if_t<std::is_integral<TVal>::value, int> = 0>
+		inline NativeIntRef<TVal> asNativeInt( TVal & pValue )
 		{
 			return { pValue };
 		}
 
-		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value, int> = 0>
-		inline SizeTypeRef<Tp> asSizeType( Tp & pValue )
+		template <typename TVal, std::enable_if_t<std::is_integral<TVal>::value, int> = 0>
+		inline SizeTypeRef<TVal> asSizeType( TVal & pValue )
 		{
 			return { pValue };
 		}
 
-		template <typename Tp, std::enable_if_t<std::is_integral<Tp>::value || std::is_enum<Tp>::value, int> = 0>
-		inline TypeIDRef<Tp> asTypeID( Tp & pValue )
+		template <typename TVal, std::enable_if_t<std::is_integral<TVal>::value || std::is_enum<TVal>::value, int> = 0>
+		inline TypeIDRef<TVal> asTypeID( TVal & pValue )
 		{
 			return { pValue };
 		}
@@ -441,140 +441,140 @@ namespace ts3
 		}
 
 
-		template <typename Tp, std::enable_if_t<IsTriviallySerializable<Tp>::sValue, int> = 0>
-		inline constexpr gds_size_t evalByteSize( const Tp & )
+		template <typename TVal, std::enable_if_t<IsTriviallySerializable<TVal>::sValue, int> = 0>
+		inline constexpr gds_size_t evalByteSize( const TVal & )
 		{
-			return sizeof( Tp );
+			return sizeof( TVal );
 		}
 
-		template <typename Tp, std::enable_if_t<IsArithmetic<Tp>::sValue || IsCharType<Tp>::sValue || IsWideChar<Tp>::sValue, int> = 0>
-		inline constexpr gds_size_t evalByteSize( Tp )
+		template <typename TVal, std::enable_if_t<IsArithmetic<TVal>::sValue || IsCharType<TVal>::sValue || IsWideChar<TVal>::sValue, int> = 0>
+		inline constexpr gds_size_t evalByteSize( TVal )
 		{
-			return ArithmeticTypeSerializedSize<Tp>::sValue;
+			return ArithmeticTypeSerializedSize<TVal>::sValue;
 		}
 
-		template <typename Tp, std::enable_if_t<std::is_enum<Tp>::value, int> = 0>
-		inline constexpr gds_size_t evalByteSize( Tp )
+		template <typename TVal, std::enable_if_t<std::is_enum<TVal>::value, int> = 0>
+		inline constexpr gds_size_t evalByteSize( TVal )
 		{
-			return ArithmeticTypeSerializedSize<typename std::underlying_type<Tp>::type>::sValue;
+			return ArithmeticTypeSerializedSize<typename std::underlying_type<TVal>::type>::sValue;
 		}
 
-		template <typename TpRef, typename TpInternal>
-		inline gds_size_t evalByteSize( const ValueRef<TpRef, TpInternal> & pValueRef )
+		template <typename TRef, typename TInternal>
+		inline gds_size_t evalByteSize( const ValueRef<TRef, TInternal> & pValueRef )
 		{
 			return evalByteSize( pValueRef.get() );
 		}
 
-		template <typename Tp, typename TpInternal, std::enable_if_t<std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t evalByteSize( const Tp & pValue, const TypeCastTag<TpInternal> & )
+		template <typename TVal, typename TInternal, std::enable_if_t<std::is_void<TInternal>::value, int> = 0>
+		inline gds_size_t evalByteSize( const TVal & pValue, const TypeCastTag<TInternal> & )
 		{
 			return evalByteSize( pValue );
 		}
 
-		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t evalByteSize( const Tp & pValue, const TypeCastTag<TpInternal> & )
+		template <typename TVal, typename TInternal, std::enable_if_t<!std::is_void<TInternal>::value, int> = 0>
+		inline gds_size_t evalByteSize( const TVal & pValue, const TypeCastTag<TInternal> & )
 		{
-			return evalByteSize( ValueRef<const Tp, TpInternal>{ pValue } );
+			return evalByteSize( ValueRef<const TVal, TInternal>{ pValue } );
 		}
 
-		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t evalByteSize( const TypeCastInfo<Tp, TpInternal> & pCastInfo )
+		template <typename TVal, typename TInternal, std::enable_if_t<!std::is_void<TInternal>::value, int> = 0>
+		inline gds_size_t evalByteSize( const TypeCastInfo<TVal, TInternal> & pCastInfo )
 		{
 			return evalByteSize( pCastInfo.refWrapper.get(), pCastInfo.castTag );
 		}
 
 
-		template <typename Tp, std::enable_if_t<IsTriviallySerializable<Tp>::sValue, int> = 0>
-		inline gds_size_t serialize( byte * pOutputBuffer, const Tp & pValue )
+		template <typename TVal, std::enable_if_t<IsTriviallySerializable<TVal>::sValue, int> = 0>
+		inline gds_size_t serialize( byte * pOutputBuffer, const TVal & pValue )
 		{
-			std::memcpy( pOutputBuffer, &pValue, sizeof( Tp ) );
-			return sizeof( Tp );
+			std::memcpy( pOutputBuffer, &pValue, sizeof( TVal ) );
+			return sizeof( TVal );
 		}
 
-		template <typename Tp, std::enable_if_t<IsArithmetic<Tp>::sValue || IsCharType<Tp>::sValue || IsWideChar<Tp>::sValue, int> = 0>
-		inline gds_size_t serialize( byte * pOutputBuffer, const Tp pValue )
+		template <typename TVal, std::enable_if_t<IsArithmetic<TVal>::sValue || IsCharType<TVal>::sValue || IsWideChar<TVal>::sValue, int> = 0>
+		inline gds_size_t serialize( byte * pOutputBuffer, const TVal pValue )
 		{
 			serializePrimitive( EByteOrder::BigEndian, pOutputBuffer, pValue );
-			return ArithmeticTypeSerializedSize<Tp>::sValue;
+			return ArithmeticTypeSerializedSize<TVal>::sValue;
 		}
 
-		template <typename Tp, std::enable_if_t<std::is_enum<Tp>::value, int> = 0>
-		inline gds_size_t serialize( byte * pOutputBuffer, const Tp pValue )
+		template <typename TVal, std::enable_if_t<std::is_enum<TVal>::value, int> = 0>
+		inline gds_size_t serialize( byte * pOutputBuffer, const TVal pValue )
 		{
-			serializePrimitive( EByteOrder::BigEndian, pOutputBuffer, static_cast<typename std::underlying_type<Tp>::type>( pValue ) );
-			return ArithmeticTypeSerializedSize<typename std::underlying_type<Tp>::type>::sValue;
+			serializePrimitive( EByteOrder::BigEndian, pOutputBuffer, static_cast<typename std::underlying_type<TVal>::type>( pValue ) );
+			return ArithmeticTypeSerializedSize<typename std::underlying_type<TVal>::type>::sValue;
 		}
 
-		template <typename TpRef, typename TpInternal>
-		inline gds_size_t serialize( byte * pOutputBuffer, const ValueRef<TpRef, TpInternal> & pValueRef )
+		template <typename TRef, typename TInternal>
+		inline gds_size_t serialize( byte * pOutputBuffer, const ValueRef<TRef, TInternal> & pValueRef )
 		{
-			// ValueRef::get() returns the original value (of TpRef type) cast to TpInternal type.
+			// ValueRef::get() returns the original value (of TRef type) cast to TInternal type.
 			// Hence, it will trigger serialization as a different type than the original one.
 			serializePrimitive( EByteOrder::BigEndian, pOutputBuffer, pValueRef.get() );
-			return ArithmeticTypeSerializedSize<typename ValueRef<TpRef, TpInternal>::InternalType>::sValue;
+			return ArithmeticTypeSerializedSize<typename ValueRef<TRef, TInternal>::InternalType>::sValue;
 		}
 
-		template <typename Tp, typename TpInternal, std::enable_if_t<std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t serialize( byte * pOutputBuffer, const Tp & pValue, const TypeCastTag<TpInternal> & )
+		template <typename TVal, typename TInternal, std::enable_if_t<std::is_void<TInternal>::value, int> = 0>
+		inline gds_size_t serialize( byte * pOutputBuffer, const TVal & pValue, const TypeCastTag<TInternal> & )
 		{
 			return serialize( pOutputBuffer, pValue );
 		}
 
-		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t serialize( byte * pOutputBuffer, const Tp & pValue, const TypeCastTag<TpInternal> & )
+		template <typename TVal, typename TInternal, std::enable_if_t<!std::is_void<TInternal>::value, int> = 0>
+		inline gds_size_t serialize( byte * pOutputBuffer, const TVal & pValue, const TypeCastTag<TInternal> & )
 		{
-			return serialize( pOutputBuffer, ValueRef<Tp, TpInternal>{ pValue } );
+			return serialize( pOutputBuffer, ValueRef<TVal, TInternal>{ pValue } );
 		}
 
-		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t serialize( byte * pOutputBuffer, const TypeCastInfo<Tp, TpInternal> & pCastInfo )
+		template <typename TVal, typename TInternal, std::enable_if_t<!std::is_void<TInternal>::value, int> = 0>
+		inline gds_size_t serialize( byte * pOutputBuffer, const TypeCastInfo<TVal, TInternal> & pCastInfo )
 		{
 			return serialize( pOutputBuffer, pCastInfo.refWrapper.get(), pCastInfo.castTag );
 		}
 
 
-		template <typename Tp, std::enable_if_t<IsTriviallySerializable<Tp>::sValue, int> = 0>
-		inline gds_size_t deserialize( const byte * pInputData, Tp & pValue )
+		template <typename TVal, std::enable_if_t<IsTriviallySerializable<TVal>::sValue, int> = 0>
+		inline gds_size_t deserialize( const byte * pInputData, TVal & pValue )
 		{
-			std::memcpy( &pValue, pInputData, sizeof( Tp ) );
-			return sizeof( Tp );
+			std::memcpy( &pValue, pInputData, sizeof( TVal ) );
+			return sizeof( TVal );
 		}
 
-		template <typename Tp, std::enable_if_t<IsArithmetic<Tp>::sValue || IsCharType<Tp>::sValue || IsWideChar<Tp>::sValue, int> = 0>
-		inline gds_size_t deserialize( const byte * pInputData, Tp & pValue )
+		template <typename TVal, std::enable_if_t<IsArithmetic<TVal>::sValue || IsCharType<TVal>::sValue || IsWideChar<TVal>::sValue, int> = 0>
+		inline gds_size_t deserialize( const byte * pInputData, TVal & pValue )
 		{
-			pValue = deserializePrimitive<Tp>( EByteOrder::BigEndian, pInputData );
-			return ArithmeticTypeSerializedSize<Tp>::sValue;
+			pValue = deserializePrimitive<TVal>( EByteOrder::BigEndian, pInputData );
+			return ArithmeticTypeSerializedSize<TVal>::sValue;
 		}
 
-		template <typename Tp, std::enable_if_t<std::is_enum<Tp>::value, int> = 0>
-		inline gds_size_t deserialize( const byte * pInputData, Tp & pValue )
+		template <typename TVal, std::enable_if_t<std::is_enum<TVal>::value, int> = 0>
+		inline gds_size_t deserialize( const byte * pInputData, TVal & pValue )
 		{
-			pValue = static_cast<Tp>( deserializePrimitive<typename std::underlying_type<Tp>::type>( EByteOrder::BigEndian, pInputData ) );
-			return ArithmeticTypeSerializedSize<typename std::underlying_type<Tp>::type>::sValue;
+			pValue = static_cast<TVal>( deserializePrimitive<typename std::underlying_type<TVal>::type>( EByteOrder::BigEndian, pInputData ) );
+			return ArithmeticTypeSerializedSize<typename std::underlying_type<TVal>::type>::sValue;
 		}
 
-		template <typename TpRef, typename TpInternal>
-		inline gds_size_t deserialize( const byte * pInputData, const ValueRef<TpRef, TpInternal> & pValueRef )
+		template <typename TRef, typename TInternal>
+		inline gds_size_t deserialize( const byte * pInputData, const ValueRef<TRef, TInternal> & pValueRef )
 		{
-			pValueRef.set( deserializePrimitive<TpInternal>( EByteOrder::BigEndian, pInputData ) );
-			return ArithmeticTypeSerializedSize<TpInternal>::sValue;
+			pValueRef.set( deserializePrimitive<TInternal>( EByteOrder::BigEndian, pInputData ) );
+			return ArithmeticTypeSerializedSize<TInternal>::sValue;
 		}
 
-		template <typename Tp, typename TpInternal, std::enable_if_t<std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t deserialize( const byte * pInputData, Tp & pRef, const TypeCastTag<TpInternal> & )
+		template <typename TVal, typename TInternal, std::enable_if_t<std::is_void<TInternal>::value, int> = 0>
+		inline gds_size_t deserialize( const byte * pInputData, TVal & pRef, const TypeCastTag<TInternal> & )
 		{
 			return deserialize( pInputData, pRef );
 		}
 
-		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t deserialize( const byte * pInputData, Tp & pRef, const TypeCastTag<TpInternal> & )
+		template <typename TVal, typename TInternal, std::enable_if_t<!std::is_void<TInternal>::value, int> = 0>
+		inline gds_size_t deserialize( const byte * pInputData, TVal & pRef, const TypeCastTag<TInternal> & )
 		{
-			return deserialize( pInputData, ValueRef<Tp, TpInternal>{ pRef } );
+			return deserialize( pInputData, ValueRef<TVal, TInternal>{ pRef } );
 		}
 
-		template <typename Tp, typename TpInternal, std::enable_if_t<!std::is_void<TpInternal>::value, int> = 0>
-		inline gds_size_t deserialize( const byte * pInputData, const TypeCastInfo<Tp, TpInternal> & pCastInfo )
+		template <typename TVal, typename TInternal, std::enable_if_t<!std::is_void<TInternal>::value, int> = 0>
+		inline gds_size_t deserialize( const byte * pInputData, const TypeCastInfo<TVal, TInternal> & pCastInfo )
 		{
 			return deserialize( pInputData, pCastInfo.refWrapper.get(), pCastInfo.castTag );
 		}

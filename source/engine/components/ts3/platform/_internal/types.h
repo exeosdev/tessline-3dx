@@ -13,24 +13,25 @@ using uint32 = uint32_t;
 using uint64 = uint64_t;
 
 #if !defined( w64 )
-// Supported by some compilers (e.g. __w64 on MSVC) - compiler will report any
-// warnings that would be reported if the code was compiled with a 64-bit compiler.
+/// Supported by some compilers (e.g. __w64 on MSVC) - compiler will report any
+/// warnings that would be reported if the code was compiled with a 64-bit compiler.
+/// Useful for code compiled (for any reason...) for 32-bit platforms.
 #  define w64
 #endif
 
-#if( TS3_PCL_TARGET_64 )
-using _native_int = int64;
-using _native_uint = uint64;
-#else
-using _native_int = w64 int32;
-using _native_uint = w64 uint32;
-#endif
-
+/// @def native_int
 /// @brief Native signed integer, with size matching the machine word size (either 32 or 64 bits).
-using native_int = _native_int;
 
+/// @def native_uint
 /// @brief Native unsigned integer, with size matching the machine word size (either 32 or 64 bits).
-using native_uint = _native_uint;
+
+#if( TS3_PCL_TARGET_64 )
+using native_int = int64;
+using native_uint = uint64;
+#else
+using native_int = w64 int32;
+using native_uint = w64 uint32;
+#endif
 
 /// @brief Value type which is able to store the numerical value of a pointer (address) on the current platform.
 using ptr_value_t = native_uint;

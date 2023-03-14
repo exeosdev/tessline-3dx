@@ -13,15 +13,25 @@ namespace ts3::gpuapi
 
 	GLShaderProgramObject::~GLShaderProgramObject() = default;
 
+	GLuint GLShaderProgramObject::queryCurrentShaderProgramBinding()
+	{
+		GLint shaderProgramHandle = 0;
+
+		glGetIntegerv( GL_CURRENT_PROGRAM, &shaderProgramHandle );
+		ts3OpenGLHandleLastError();
+
+		return static_cast<GLuint>( shaderProgramHandle );
+	}
+
 	GLShaderProgramObjectHandle GLShaderProgramObject::create( GLShaderProgramType pProgramType )
 	{
 		auto programHandle = glCreateProgram();
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		if( pProgramType == GLShaderProgramType::Separable )
 		{
 			glProgramParameteri( programHandle, GL_PROGRAM_SEPARABLE, GL_TRUE );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 
 		GLShaderProgramObjectHandle openglProgramObject{ new GLShaderProgramObject( programHandle, pProgramType ) };
@@ -45,7 +55,7 @@ namespace ts3::gpuapi
 		if( deleteStatus == GL_FALSE )
 		{
 			glDeleteProgram( mGLHandle );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			return true;
 		}
@@ -56,7 +66,7 @@ namespace ts3::gpuapi
 	bool GLShaderProgramObject::validateHandle() const
 	{
 		auto isProgram = glIsProgram( mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return isProgram != GL_FALSE;
 	}
@@ -64,13 +74,13 @@ namespace ts3::gpuapi
 	void GLShaderProgramObject::attachShader( GLuint pShaderHandle )
 	{
 		glAttachShader( mGLHandle, pShaderHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLShaderProgramObject::attachShader( const GLShaderObject & pShader )
 	{
 		glAttachShader( mGLHandle, pShader.mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLShaderProgramObject::detachAllShaders()
@@ -79,20 +89,20 @@ namespace ts3::gpuapi
 		for( auto & shaderHandle : attachedShaders )
 		{
 			glDetachShader( mGLHandle, shaderHandle );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 	}
 
 	void GLShaderProgramObject::detachShader( GLuint pShaderHandle )
 	{
 		glDetachShader( mGLHandle, pShaderHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLShaderProgramObject::detachShader( const GLShaderObject & pShader )
 	{
 		glDetachShader( mGLHandle, pShader.mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	bool GLShaderProgramObject::link()
@@ -100,7 +110,7 @@ namespace ts3::gpuapi
 		auto attachedShadersStageMask = queryShaderStageMask();
 
 		glLinkProgram( mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		auto linkStatus = queryParameter( GL_LINK_STATUS );
 		if( linkStatus == GL_FALSE )
@@ -119,7 +129,7 @@ namespace ts3::gpuapi
 	bool GLShaderProgramObject::validate()
 	{
 		glValidateProgram( mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		auto validateStatus = queryParameter( GL_VALIDATE_STATUS );
 		if( validateStatus == GL_FALSE )
@@ -141,7 +151,7 @@ namespace ts3::gpuapi
 		});
 
 		glBindAttribLocation( mGLHandle, pLocation, pAttribName );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLShaderProgramObject::setSamplerTextureUnit( const char * pSamplerName, GLuint pTextureIndex )
@@ -152,10 +162,10 @@ namespace ts3::gpuapi
 		});
 
 		GLint samplerLocation = glGetUniformLocation( mGLHandle, pSamplerName );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		glProgramUniform1i( mGLHandle, samplerLocation, pTextureIndex );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLShaderProgramObject::setUniformBlockBinding( const char * pBlockName, GLuint pBinding )
@@ -166,10 +176,10 @@ namespace ts3::gpuapi
 		});
 
 		GLint uniformBlockIndex = glGetUniformBlockIndex( mGLHandle, pBlockName );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		glUniformBlockBinding( mGLHandle, uniformBlockIndex, pBinding );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	GLint GLShaderProgramObject::queryParameter( GLenum pParameter ) const
@@ -177,7 +187,7 @@ namespace ts3::gpuapi
 		GLint parameterValue = GL_INVALID_VALUE;
 
 		glGetProgramiv( mGLHandle, pParameter, &parameterValue );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return parameterValue;
 	}
@@ -185,7 +195,7 @@ namespace ts3::gpuapi
 	GLuint GLShaderProgramObject::queryVertexAttributeLocation( const char * pAttribName ) const
 	{
 		auto attribLocation = glGetAttribLocation( mGLHandle, reinterpret_cast<const GLchar *>( pAttribName ) );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		if( attribLocation == -1 )
 		{
@@ -205,7 +215,7 @@ namespace ts3::gpuapi
 		{
 			GLint shaderType = 0;
 			glGetShaderiv( shaderHandle, GL_SHADER_TYPE, &shaderType );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			auto shaderStageBit = GLShaderObject::getStageMaskForEShaderType( shaderType );
 			shaderStageMask.set( shaderStageBit );
@@ -225,7 +235,7 @@ namespace ts3::gpuapi
 			infoLogBuffer.resize( infoLogLength );
 
 			glGetProgramInfoLog( mGLHandle, static_cast<GLsizei>( infoLogLength ), nullptr, infoLogBuffer.dataAs<GLchar>() );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			// Note: length returned by the GL includes null terminator!
 			infoLog.assign( infoLogBuffer.dataAs<GLchar>(), infoLogLength - 1 );
@@ -245,7 +255,7 @@ namespace ts3::gpuapi
 
 			GLsizei returnedShadersNum = 0;
 			glGetAttachedShaders( mGLHandle, 64, &returnedShadersNum, shaderArray.data() );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			ts3DebugAssert( returnedShadersNum == attachedShadersNum );
 		}

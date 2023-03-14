@@ -14,40 +14,40 @@ namespace ts3
     namespace sync
     {
 
-        template <typename TpMutex, typename TpMutexInterface>
+        template <typename TMutex, typename TMutexInterface>
         class UniqueLock
         {
         public:
-            UniqueLock( TpMutex & pMutex )
+            UniqueLock( TMutex & pMutex )
             : _mutex( &pMutex )
             , _ownsLock( false )
             {
                 lock();
             }
 
-            UniqueLock( TpMutex & pMutex, const std::defer_lock_t & )
+            UniqueLock( TMutex & pMutex, const std::defer_lock_t & )
             : _mutex( &pMutex )
             , _ownsLock( false )
             {}
 
-            UniqueLock( TpMutex & pMutex, const std::try_to_lock_t & )
+            UniqueLock( TMutex & pMutex, const std::try_to_lock_t & )
             : _mutex( &pMutex )
             , _ownsLock( false )
             {
                 _ownsLock = tryLock();
             }
 
-            UniqueLock( TpMutex & pMutex, const std::adopt_lock_t & )
+            UniqueLock( TMutex & pMutex, const std::adopt_lock_t & )
             : _mutex( &pMutex )
             , _ownsLock( true )
             {}
 
-            UniqueLock( UniqueLock && pSource )
-            : _mutex( pSource._mutex )
-            , _ownsLock( pSource._ownsLock )
+            UniqueLock( UniqueLock && pSrcObject )
+            : _mutex( pSrcObject._mutex )
+            , _ownsLock( pSrcObject._ownsLock )
             {
-                pSource._mutex = nullptr;
-                pSource._ownsLock = false;
+	            pSrcObject._mutex = nullptr;
+	            pSrcObject._ownsLock = false;
             }
 
             ~UniqueLock()
@@ -60,32 +60,32 @@ namespace ts3
 
             void lock()
             {
-                TpMutexInterface::lock( *_mutex );
+                TMutexInterface::lock( *_mutex );
                 _ownsLock = true;
             }
 
             bool tryLock()
             {
-                _ownsLock = TpMutexInterface::tryLock( *_mutex );
+                _ownsLock = TMutexInterface::tryLock( *_mutex );
                 return _ownsLock;
             }
 
             void unlock()
             {
-                TpMutexInterface::unlock( *_mutex );
+                TMutexInterface::unlock( *_mutex );
                 _ownsLock = false;
             }
 
-            TpMutex * releaseMutex()
+            TMutex * releaseMutex()
             {
-                TpMutex * mutexPtr = _mutex;
+                TMutex * mutexPtr = _mutex;
                 _mutex = nullptr;
                 _ownsLock = false;
                 return mutexPtr;
 
             }
 
-            TS3_FUNC_NO_DISCARD bool checkLockOwnership() const
+            TS3_ATTR_NO_DISCARD bool checkLockOwnership() const
             {
                 return _ownsLock;
             }
@@ -97,44 +97,44 @@ namespace ts3
             }
 
         private:
-            TpMutex * _mutex;
+            TMutex * _mutex;
             bool _ownsLock;
         };
 
-        template <typename TpMutex, typename TpMutexInterface>
+        template <typename TMutex, typename TMutexInterface>
         class SharedLock
         {
         public:
-            explicit SharedLock( TpMutex & pMutex )
+            explicit SharedLock( TMutex & pMutex )
             : _mutex( &pMutex )
             , _ownsLock( false )
             {
                 lock();
             }
 
-            SharedLock( TpMutex & pMutex, const std::defer_lock_t & )
+            SharedLock( TMutex & pMutex, const std::defer_lock_t & )
             : _mutex( &pMutex )
             , _ownsLock( false )
             {}
 
-            SharedLock( TpMutex & pMutex, const std::try_to_lock_t & )
+            SharedLock( TMutex & pMutex, const std::try_to_lock_t & )
             : _mutex( &pMutex )
             , _ownsLock( false )
             {
                 _ownsLock = tryLock();
             }
 
-            SharedLock( TpMutex & pMutex, const std::adopt_lock_t & )
+            SharedLock( TMutex & pMutex, const std::adopt_lock_t & )
             : _mutex( &pMutex )
             , _ownsLock( true )
             {}
 
-            SharedLock( SharedLock && pSource ) noexcept
-            : _mutex( pSource._mutex )
-            , _ownsLock( pSource._ownsLock )
+            SharedLock( SharedLock && pSrcObject ) noexcept
+            : _mutex( pSrcObject._mutex )
+            , _ownsLock( pSrcObject._ownsLock )
             {
-            	pSource._mutex = nullptr;
-            	pSource._ownsLock = false;
+	            pSrcObject._mutex = nullptr;
+	            pSrcObject._ownsLock = false;
             }
 
             ~SharedLock()
@@ -153,32 +153,32 @@ namespace ts3
 
             void lock()
             {
-                TpMutexInterface::lockShared( *_mutex );
+                TMutexInterface::lockShared( *_mutex );
                 _ownsLock = true;
             }
 
             bool tryLock()
             {
-                _ownsLock = TpMutexInterface::tryLockShared( *_mutex );
+                _ownsLock = TMutexInterface::tryLockShared( *_mutex );
                 return _ownsLock;
             }
 
             void unlock()
             {
-                TpMutexInterface::unlockShared( *_mutex );
+                TMutexInterface::unlockShared( *_mutex );
                 _ownsLock = false;
             }
 
-            TpMutex * releaseMutex()
+            TMutex * releaseMutex()
             {
-                TpMutex * mutexPtr = _mutex;
+                TMutex * mutexPtr = _mutex;
                 _mutex = nullptr;
                 _ownsLock = false;
                 return mutexPtr;
 
             }
 
-            TS3_FUNC_NO_DISCARD bool checkLockOwnership() const
+            TS3_ATTR_NO_DISCARD bool checkLockOwnership() const
             {
                 return _ownsLock;
             }
@@ -190,16 +190,16 @@ namespace ts3
             }
 
         private:
-            TpMutex * _mutex;
+            TMutex * _mutex;
             bool _ownsLock;
         };
 
 
-        template <typename TpMutex>
-        using AutoUniqueLock = UniqueLock<TpMutex, typename MutexInterface<TpMutex>::Type>;
+        template <typename TMutex>
+        using AutoUniqueLock = UniqueLock<TMutex, typename MutexInterface<TMutex>::Type>;
 
-        template <typename TpMutex>
-        using AutoSharedLock = SharedLock<TpMutex, typename MutexInterface<TpMutex>::Type>;
+        template <typename TMutex>
+        using AutoSharedLock = SharedLock<TMutex, typename MutexInterface<TMutex>::Type>;
 
     }
 

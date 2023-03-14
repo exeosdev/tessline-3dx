@@ -15,37 +15,37 @@ namespace ts3::gpuapi
 	class GLShaderObject : public GLObject
 	{
 	public:
-		GLenum const mGLEShaderType;
+		GLenum const mGLShaderType;
 		GLbitfield const mGLShaderStageMaskBit;
 
-		GLShaderObject( GLuint pHandle, GLenum pGLEShaderType, GLenum pGLShaderStageMaskBit );
+		GLShaderObject( GLuint pHandle, GLenum pGLShaderType, GLenum pGLShaderStageMaskBit );
 		virtual ~GLShaderObject();
 
 		virtual bool release();
 		virtual bool validateHandle() const;
 
-		bool compileSource( const void * pSource, size_t pSourceLength );
+		bool compileSource( const void * pShaderSource, size_t pSourceLength );
 		bool loadBinary( GLenum pFormat, const void * pBinary, size_t pBinarySize );
 
-		TS3_PCL_ATTR_NO_DISCARD GLint queryParameter( GLenum pParameter ) const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD GLint queryParameter( GLenum pParameter ) const;
 
-		TS3_PCL_ATTR_NO_DISCARD std::string getInfoLog() const;
-		TS3_PCL_ATTR_NO_DISCARD std::string getSource() const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD std::string getInfoLog() const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD std::string getSource() const;
 
-		TS3_PCL_ATTR_NO_DISCARD size_t getInfoLogLength() const;
-		TS3_PCL_ATTR_NO_DISCARD size_t getSourceLength() const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD size_t getInfoLogLength() const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD size_t getSourceLength() const;
 
-		TS3_PCL_ATTR_NO_DISCARD bool isInfoLogEmpty() const;
-		TS3_PCL_ATTR_NO_DISCARD bool isSourceEmpty() const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD bool isInfoLogEmpty() const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD bool isSourceEmpty() const;
 
 		static bool checkBinaryCodeSupport();
 
 		static bool checkBinaryFormatSupport( GLenum pFormat );
 
-		static GLbitfield getStageMaskForEShaderType( GLenum pGLEShaderType );
+		static GLbitfield getStageMaskForEShaderType( GLenum pGLShaderType );
 
-		static GLShaderObjectHandle create( GLenum pGLEShaderType );
-		static GLShaderObjectHandle createWithSource( GLenum pGLEShaderType, const void * pSource, size_t pSourceLength );
+		static GLShaderObjectHandle create( GLenum pGLShaderType );
+		static GLShaderObjectHandle createWithSource( GLenum pGLShaderType, const void * pShaderSource, size_t pSourceLength );
 	};
 
 } // namespace ts3::gpuapi

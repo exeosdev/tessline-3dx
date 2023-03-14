@@ -7,7 +7,7 @@
 namespace ts3::system
 {
 
-	std::string GLSystemVersionInfo::toString() const
+	std::string OpenGLSystemVersionInfo::toString() const
 	{
 		std::ostringstream strStream;
 		strStream << "[OpenGL Rendering Context Information]\n";
@@ -19,7 +19,7 @@ namespace ts3::system
 		return strStream.str();
 	}
 
-	Version GLCoreAPI::queryRuntimeVersion()
+	Version OpenGLCoreAPI::queryRuntimeVersion()
 	{
 		Version resultVersion;
 
@@ -34,19 +34,19 @@ namespace ts3::system
 		return resultVersion;
 	}
 
-	bool GLCoreAPI::checkLastResult()
+	bool OpenGLCoreAPI::checkLastResult()
 	{
 		GLenum errorCode = glGetError();
 		return errorCode == GL_NO_ERROR;
 	}
 
-	bool GLCoreAPI::checkLastError( GLenum pErrorCode )
+	bool OpenGLCoreAPI::checkLastError( GLenum pErrorCode )
 	{
 		GLenum errorCode = glGetError();
 		return ( pErrorCode != GL_NO_ERROR ) && ( errorCode == pErrorCode );
 	}
 
-	void GLCoreAPI::handleLastError()
+	void OpenGLCoreAPI::handleLastError()
 	{
 		GLenum errorCode = glGetError();
 		if( errorCode != GL_NO_ERROR )
@@ -57,7 +57,7 @@ namespace ts3::system
 		}
 	}
 
-	void GLCoreAPI::resetErrorQueue()
+	void OpenGLCoreAPI::resetErrorQueue()
 	{
 		size_t errorsNum = 0;
 		while( true )
@@ -73,11 +73,11 @@ namespace ts3::system
 		}
 	}
 
-	const char * GLCoreAPI::translateErrorCode( GLenum pError )
+	const char * OpenGLCoreAPI::translateErrorCode( GLenum pError )
 	{
 		static const std::unordered_map<GLenum, const char *> errorStringMap =
 		{
-		#if( TS3_SYSTEM_GL_PLATFORM_TYPE == TS3_SYSTEM_GL_PLATFORM_TYPE_CORE )
+		#if( TS3_SYSTEM_GL_PLATFORM_TYPE == TS3_SYSTEM_GL_PLATFORM_TYPE_DESKTOP )
 			{ GL_STACK_OVERFLOW  , "GL_STACK_OVERFLOW"  },
 			{ GL_STACK_UNDERFLOW , "GL_STACK_UNDERFLOW" },
 		#endif

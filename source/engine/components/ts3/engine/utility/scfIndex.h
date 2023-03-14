@@ -5,6 +5,7 @@
 #define __TS3_ENGINE_SCF_INDEX_H__
 
 #include "scfEntry.h"
+#include <unordered_map>
 
 namespace ts3
 {

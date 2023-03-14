@@ -92,16 +92,16 @@ namespace ts3::system
 		file_size_t readData( void * pTargetBuffer, file_size_t pTargetBufferSize, file_size_t pReadSize = CX_FILE_SIZE_MAX );
 		file_size_t readData( MemoryBuffer & pBuffer, file_size_t pReadSize = CX_FILE_SIZE_MAX );
 
-		template <typename TpChar>
-		file_size_t readData( std::basic_string<TpChar> & pString, file_size_t pReadSize = CX_FILE_SIZE_MAX )
+		template <typename TChar>
+		file_size_t readData( std::basic_string<TChar> & pString, file_size_t pReadSize = CX_FILE_SIZE_MAX )
 		{
-			return readData( pString.data(), pString.length() * sizeof( TpChar ), pReadSize );
+			return readData( pString.data(), pString.length() * sizeof( TChar ), pReadSize );
 		}
 
-		template <typename TpValue>
-		file_size_t readData( std::vector<TpValue> & pVector, file_size_t pReadSize = CX_FILE_SIZE_MAX )
+		template <typename TValue>
+		file_size_t readData( std::vector<TValue> & pVector, file_size_t pReadSize = CX_FILE_SIZE_MAX )
 		{
-			return readData( pVector.data(), pVector.size() * sizeof( TpValue ), pReadSize );
+			return readData( pVector.data(), pVector.size() * sizeof( TValue ), pReadSize );
 		}
 
 		file_size_t readAll( DynamicMemoryBuffer & pBuffer )
@@ -111,22 +111,22 @@ namespace ts3::system
 			return readData( pBuffer.data(), assetSize, assetSize );
 		}
 
-		template <typename TpChar>
-		file_size_t readAll( std::basic_string<TpChar> & pString )
+		template <typename TChar>
+		file_size_t readAll( std::basic_string<TChar> & pString )
 		{
 			const auto assetSize = _nativeGetSize();
-			const auto strLength = assetSize / sizeof( TpChar );
+			const auto strLength = assetSize / sizeof( TChar );
 			pString.resize( strLength + 1 );
-			return readData( pString.data(), pString.length() * sizeof( TpChar ), assetSize );
+			return readData( pString.data(), pString.length() * sizeof( TChar ), assetSize );
 		}
 
-		template <typename TpValue>
-		file_size_t readAll( std::vector<TpValue> & pVector )
+		template <typename TValue>
+		file_size_t readAll( std::vector<TValue> & pVector )
 		{
 			const auto assetSize = _nativeGetSize();
-			const auto vectorSize = assetSize / sizeof( TpValue );
+			const auto vectorSize = assetSize / sizeof( TValue );
 			pVector.resize( vectorSize );
-			return readData( pVector.data(), pVector.size() * sizeof( TpValue ), vectorSize );
+			return readData( pVector.data(), pVector.size() * sizeof( TValue ), vectorSize );
 		}
 
 		file_offset_t setReadPointer( file_offset_t pOffset, EFilePointerRefPos pRefPos = EFilePointerRefPos::FileBeg );

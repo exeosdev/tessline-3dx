@@ -50,7 +50,7 @@ namespace ts3::gpuapi
 	{
 	public:
 		TextureDimensions const mDimensions;
-		GLenum const mGLTextureBindTarget = cxGLBindTargetUnknown;
+		GLenum const mGLTextureBindTarget = CX_GL_BIND_TARGET_UNKNOWN;
 		GLenum const mGLInternalFormat;
 		GLuint const mMultisampleLevel;
 
@@ -60,10 +60,10 @@ namespace ts3::gpuapi
 		virtual bool release();
 		virtual bool validateHandle() const;
 
-		void updateCopy2D( GLTextureObject & pSource, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget = 0 );
-		void updateCopy2DArray( GLTextureObject & pSource, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget = 0 );
-		void updateCopy3D( GLTextureObject & pSource, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget = 0 );
-		void updateCopyCubeMap( GLTextureObject & pSource, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget = 0 );
+		void updateCopy2D( GLTextureObject & pSrcTexture, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget = 0 );
+		void updateCopy2DArray( GLTextureObject & pSrcTexture, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget = 0 );
+		void updateCopy3D( GLTextureObject & pSrcTexture, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget = 0 );
+		void updateCopyCubeMap( GLTextureObject & pSrcTexture, const TextureSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget = 0 );
 
 		void updateUpload2D( const GLTextureSubDataUploadDesc & pGLUploadDesc, GLenum pActiveBindTarget = 0 );
 		void updateUpload2DArray( const GLTextureSubDataUploadDesc & pGLUploadDesc, GLenum pActiveBindTarget = 0 );

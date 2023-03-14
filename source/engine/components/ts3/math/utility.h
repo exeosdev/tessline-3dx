@@ -22,8 +22,8 @@ namespace ts3::math
 		return std::sqrt( pValue );
 	}
 
-	template <typename Tp>
-	inline double sqrt( Tp pValue )
+	template <typename TVal>
+	inline double sqrt( TVal pValue )
 	{
 		return std::sqrt( static_cast<double>( pValue ) );
 	}
@@ -43,8 +43,8 @@ namespace ts3::math
 		return 1.0L / sqrt( pValue );
 	}
 
-	template <typename Tp>
-	inline double invSqrt( Tp pValue )
+	template <typename TVal>
+	inline double invSqrt( TVal pValue )
 	{
 		return 1.0 / sqrt( pValue );
 	}

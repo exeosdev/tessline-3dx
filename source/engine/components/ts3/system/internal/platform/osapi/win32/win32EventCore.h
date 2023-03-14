@@ -32,8 +32,6 @@ namespace ts3::system
 		struct NativeEventType : public MSG
 		{};
 
-		using Win32NativeEvent = NativeEventType;
-
 		TS3_SYSTEM_API_NODISCARD EventSource * win32FindEventSourceByHWND( Win32EventController & pEventController, HWND pHWND );
 
 		bool win32TranslateEvent( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent );
@@ -49,20 +47,17 @@ namespace ts3::system
 		Win32EventController( SysContextHandle pSysContext );
 		virtual ~Win32EventController() noexcept;
 
-		using EventController::getEventDispatcherInputState;
-        using EventController::getEventDispatcherConfig;
-
 	private:
-		/// @override EventController::_nativeRegisterEventSource
+		/// @copybrief EventController::_nativeRegisterEventSource
 		virtual void _nativeRegisterEventSource( EventSource & pEventSource ) override final;
 
-		/// @override EventController::_nativeUnregisterEventSource
+		/// @copybrief EventController::_nativeUnregisterEventSource
 		virtual void _nativeUnregisterEventSource( EventSource & pEventSource ) override final;
 
-		/// @override EventController::_nativeDispatchPendingEvents
+		/// @copybrief EventController::_nativeDispatchPendingEvents
 		virtual bool _nativeDispatchPendingEvents() override final;
 
-		/// @override EventController::_nativeDispatchPendingEventsWait
+		/// @copybrief EventController::_nativeDispatchPendingEventsWait
 		virtual bool _nativeDispatchPendingEventsWait() override final;
 	};
 

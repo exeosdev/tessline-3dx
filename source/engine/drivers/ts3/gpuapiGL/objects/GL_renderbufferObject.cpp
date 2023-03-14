@@ -17,10 +17,10 @@ namespace ts3::gpuapi
 		GLuint renderbufferHandle = 0;
 
 		glGenRenderbuffers( 1, &renderbufferHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		glBindRenderbuffer( GL_RENDERBUFFER, renderbufferHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		GLRenderbufferObjectHandle openglRenderbufferObject{ new GLRenderbufferObject( renderbufferHandle, pGLCreateInfo ) };
 		if( !openglRenderbufferObject->initialize( pGLCreateInfo ) )
@@ -28,13 +28,16 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
+		glBindRenderbuffer( GL_RENDERBUFFER, 0 );
+		ts3OpenGLHandleLastError();
+
 		return openglRenderbufferObject;
 	}
 
 	bool GLRenderbufferObject::release()
 	{
 		glDeleteRenderbuffers( 1, &mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return true;
 	}
@@ -42,7 +45,7 @@ namespace ts3::gpuapi
 	bool GLRenderbufferObject::validateHandle() const
 	{
 		auto isBuffer = glIsRenderbuffer( mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return isBuffer != GL_FALSE;
 	}
@@ -55,7 +58,7 @@ namespace ts3::gpuapi
 			                       pGLCreateInfo.internalFormat,
 			                       pGLCreateInfo.dimensions.x,
 			                       pGLCreateInfo.dimensions.y );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 		else
 		{
@@ -64,7 +67,7 @@ namespace ts3::gpuapi
 			                                  pGLCreateInfo.internalFormat,
 			                                  pGLCreateInfo.dimensions.x,
 			                                  pGLCreateInfo.dimensions.y );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 
 		return true;

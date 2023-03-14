@@ -3,56 +3,71 @@
 #include "commandSystem.h"
 #include "gpuDevice.h"
 #include "resources/gpuBuffer.h"
+#include "state/graphicsPipelineStateController.h"
 
 namespace ts3::gpuapi
 {
 
-	CommandList::CommandList( CommandSystem & pCommandSystem, ECommandListType pListType )
+	enum ECommandListInternalStateFlags : uint32
+	{
+		E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT = 0x01
+	};
+
+	CommandList::CommandList(
+			CommandSystem & pCommandSystem,
+			ECommandListType pListType,
+			GraphicsPipelineStateController & pPipelineStateController )
 	: GPUDeviceChildObject( pCommandSystem.mGPUDevice )
 	, mCommandSystem( &pCommandSystem )
 	, mListType( pListType )
-	, _renderTargetClearConfig( mGPUDevice.getDefaultRenderTargetClearConfig() )
+	, _graphicsPipelineStateController( &pPipelineStateController )
 	{}
 
 	CommandList::~CommandList() = default;
 
+	bool CommandList::checkContextSupport( ECommandContextType pContextType ) const noexcept
+	{
+		return checkFeatureSupport( static_cast<ECommandListFlags>( pContextType ) );
+	}
+
+	bool CommandList::checkFeatureSupport( Bitmask<ECommandListFlags> pListFlags ) const noexcept
+	{
+		// Command list type (its value) is basically a bitwise OR of all supported bits.
+		Bitmask<ECommandListFlags> commandListFlags = static_cast<ECommandListFlags>( mListType );
+		// Check if the specified command classes and/or execution type matches those supported by the list.
+		return commandListFlags.isSet( pListFlags & E_COMMAND_LIST_FLAGS_ALL );
+	}
+
+	bool CommandList::isRenderPassActive() const noexcept
+	{
+		return _internalStateMask.isSet( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
+	}
+
+	bool CommandList::hasPendingGraphicsPipelineStateChanges() const noexcept
+	{
+		return _graphicsPipelineStateController->hasPendingStateChanges();
+	}
+
 	bool CommandList::acquireList()
 	{
-		auto listStatus = ListStatus::Available;
-		auto acquireSuccessful = _listStatusFlag.compare_exchange_strong( listStatus,
-		                                                                  ListStatus::Acquired,
-		                                                                  std::memory_order_acq_rel,
-		                                                                  std::memory_order_relaxed );
+		auto listLockStatus = false;
+		auto acquireSuccessful = _listLockStatus.compare_exchange_strong(
+			listLockStatus,
+			true,
+			std::memory_order_acq_rel,
+			std::memory_order_relaxed );
+
 		return acquireSuccessful;
 	}
 
 	void CommandList::releaseList()
 	{
-		_listStatusFlag.store( ListStatus::Available, std::memory_order_release );
+		_listLockStatus.store( false, std::memory_order_release );
 	}
 
-	void CommandList::setColorBufferClearValue( const math::RGBAColorR32Norm & pColorClearValue )
+	bool CommandList::applyGraphicsPipelineStateChanges()
 	{
-		_renderTargetClearConfig.colorClearValue = pColorClearValue;
-	}
-
-	void CommandList::setDepthBufferClearValue( float pDepthClearValue )
-	{
-		_renderTargetClearConfig.depthClearValue = pDepthClearValue;
-	}
-
-	void CommandList::setStencilBufferClearValue( uint8 pStencilClearValue )
-	{
-		_renderTargetClearConfig.stencilClearValue = pStencilClearValue;
-	}
-
-	void CommandList::initializeClearState()
-	{
-		const auto & defaultClearColor = mGPUDevice.getDefaultClearColor();
-
-		setColorBufferClearValue( defaultClearColor );
-		setDepthBufferClearValue( 1.0f );
-		setStencilBufferClearValue( 0 );
+		return _graphicsPipelineStateController->applyStateChanges();
 	}
 
 	void CommandList::beginCommandSequence()
@@ -191,22 +206,139 @@ namespace ts3::gpuapi
 		return true;
 	}
 
-	bool CommandList::checkContextSupport( ECommandContextType pContextType ) const
+	bool CommandList::beginRenderPass(
+			const RenderPassConfigurationImmutableState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags )
 	{
-		return checkFeatureSupport( static_cast<ECommandListFlags>( pContextType ) );
+		if( isRenderPassActive() )
+		{
+			return false;
+		}
+
+		_internalStateMask.set( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
+
+		if( pFlags.isSet( E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT ) )
+		{
+			_graphicsPipelineStateController->applyStateChanges();
+		}
+
+		return true;
+	}
+	
+	bool CommandList::beginRenderPass(
+			const RenderPassConfigurationDynamicState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags )
+	{
+		if( isRenderPassActive() )
+		{
+			return false;
+		}
+
+		_internalStateMask.set( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
+
+		if( pFlags.isSet( E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT ) )
+		{
+			_graphicsPipelineStateController->applyStateChanges();
+		}
+
+		return true;
 	}
 
-	bool CommandList::checkFeatureSupport( Bitmask<ECommandListFlags> pListFlags ) const
+	void CommandList::endRenderPass()
 	{
-		// Command list type (its value) is basically a bitwise OR of all supported bits.
-		Bitmask<ECommandListFlags> commandListFlags = static_cast<ECommandListFlags>( mListType );
-		// Check if the specified command classes and/or execution type matches those supported by the list.
-		return commandListFlags.isSet( pListFlags & E_COMMAND_LIST_FLAGS_ALL_BITS_MASK );
+		_internalStateMask.unset( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
 	}
 
-	const RenderTargetClearConfig & CommandList::getRenderTargetClearConfig() const
+	bool CommandList::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO )
 	{
-		return _renderTargetClearConfig;
+		return _graphicsPipelineStateController->setGraphicsPipelineStateObject( pGraphicsPSO );
 	}
+
+	bool CommandList::setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState )
+	{
+		return _graphicsPipelineStateController->setIAVertexStreamState( pIAVertexStreamState );
+	}
+
+	bool CommandList::setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState )
+	{
+		return _graphicsPipelineStateController->setIAVertexStreamState( pIAVertexStreamState );
+	}
+
+	bool CommandList::setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState )
+	{
+		return _graphicsPipelineStateController->setRenderTargetBindingState( pRenderTargetBindingState );
+	}
+
+	bool CommandList::setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState )
+	{
+		return _graphicsPipelineStateController->setRenderTargetBindingState( pRenderTargetBindingState );
+	}
+
+	bool CommandList::cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor )
+	{
+		if( !isRenderPassActive() )
+		{
+			ts3DebugInterrupt();
+			return false;
+		}
+
+		return _graphicsPipelineStateController->setBlendConstantColor( pColor );
+	}
+
+	bool CommandList::cmdSetViewport( const ViewportDesc & pViewportDesc )
+	{
+		if( !isRenderPassActive() )
+		{
+			ts3DebugInterrupt();
+			return false;
+		}
+
+		return _graphicsPipelineStateController->setViewport( pViewportDesc );
+	}
+
+	bool CommandList::cmdSetShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData )
+	{
+		if( !isRenderPassActive() )
+		{
+			ts3DebugInterrupt();
+			return false;
+		}
+
+		return _graphicsPipelineStateController->setShaderConstant( pParamRefID, pData );
+	}
+
+	bool CommandList::cmdSetShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer )
+	{
+		if( !isRenderPassActive() )
+		{
+			ts3DebugInterrupt();
+			return false;
+		}
+
+		return _graphicsPipelineStateController->setShaderConstantBuffer( pParamRefID, pConstantBuffer );
+	}
+
+	bool CommandList::cmdSetShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture )
+	{
+		if( !isRenderPassActive() )
+		{
+			ts3DebugInterrupt();
+			return false;
+		}
+
+		return _graphicsPipelineStateController->setShaderTextureImage( pParamRefID, pTexture );
+	}
+
+	bool CommandList::cmdSetShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler )
+	{
+		if( !isRenderPassActive() )
+		{
+			ts3DebugInterrupt();
+			return false;
+		}
+
+		return _graphicsPipelineStateController->setShaderTextureSampler( pParamRefID, pSampler );
+	}
+
 
 } // namespace ts3::gpuapi

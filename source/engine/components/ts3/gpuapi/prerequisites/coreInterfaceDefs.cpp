@@ -19,4 +19,9 @@ namespace ts3::gpuapi
 
 	GPUDeviceChildObject::~GPUDeviceChildObject() = default;
 
+	UniqueGPUObjectID GPUDeviceChildObject::queryObjectID() const
+	{
+		return cxdefs::GPU_OBJECT_ID_EMPTY;
+	}
+
 } // namespace ts3::gpuapi

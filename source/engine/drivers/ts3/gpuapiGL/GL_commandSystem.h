@@ -38,6 +38,7 @@ namespace ts3::gpuapi
 
 	private:
 		GLCommandList * acquireCommandList( ECommandExecutionMode pCommandExecutionMode );
+
 		bool initializeMainCommandList();
 
 		static system::OpenGLRenderContextHandle createSysGLRenderContext( GLGPUDevice & pGLGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface );

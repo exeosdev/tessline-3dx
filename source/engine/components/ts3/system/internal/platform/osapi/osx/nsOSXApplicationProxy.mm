@@ -4,11 +4,11 @@
 
 @implementation NSOSXApplicationProxy
 
--( void ) terminate: ( id )pSender
+-( void ) terminate:( id )pSender
 {
 }
 
--( void ) sendEvent: ( NSEvent * )pEvent
+-( void ) sendEvent:( NSEvent * )pEvent
 {
 	[super sendEvent:pEvent];
 }
@@ -35,16 +35,12 @@
 
 @implementation NSOSXApplicationDelegate
 
--( void ) setOSXSysContext: ( ts3::system::OSXSysContext * )pOSXSysContext
+-( id ) initWithSysContext: ( OSXSysContext * )pSysContext
 {
-	mOSXSysContext = pOSXSysContext;
-}
-
--( id ) init
-{
-	self = [super init];
-	if( self )
+	if( [super init] )
 	{
+		mOSXSysContext = pSysContext;
+
 		NSNotificationCenter * defaultNotificationCenter = [NSNotificationCenter defaultCenter];
 
 		[defaultNotificationCenter addObserver:self
@@ -93,7 +89,7 @@
 	if( NSWindow * nsAppKeyWindow = [NSApp keyWindow] )
 	{
 		// Idea:
-		// auto * ts3Window = mOSXSysContext->findWindowByNSWindow( nsAppKeyWindow );
+		// auto * ts3Window = mSysContext->findWindowByNSWindow( nsAppKeyWindow );
 		// if( !ts3Window )
 		// {
 		//   return;
@@ -109,14 +105,17 @@
 
 -( void ) windowWillCloseNotificationHandler:( NSNotification * )pNotification
 {
-	if( ![pNotification object] )
-	{
-		return;
-	}
-
 	// This handler solves a problem with events when the key window is closed - we have narrowed down
 	// few issues to be caused by this problem. Simple solution: iterate over app's windows and make
 	// a certain window the key window.
+
+	if( ![pNotification object] )
+	{
+		// Not sure if this can happen, but events without
+		// sources are definitely not the right ones to handle.
+		// TODO: Maybe a diagnostic message? Looks like an edge case.
+		return;
+	}
 
 	// Get the window that will be closed
 	auto * nsWindowToClose = ( NSWindow * )[pNotification object];

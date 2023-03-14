@@ -8,23 +8,23 @@
 namespace ts3::math
 {
 
-	template <typename Tp, size_t tC>
-	inline void add( const Matrix<Tp, 2, tC> & pFirst, const Matrix<Tp, 2, tC> & pSecond, Matrix<Tp, 2, tC> & pResult )
+	template <typename TVal, size_t tC>
+	inline void add( const Matrix<TVal, 2, tC> & pFirst, const Matrix<TVal, 2, tC> & pSecond, Matrix<TVal, 2, tC> & pResult )
 	{
 		pResult.row0 = pFirst.row0 + pSecond.row0;
 		pResult.row1 = pFirst.row1 + pSecond.row1;
 	}
 
-	template <typename Tp, size_t tC>
-	inline void add( const Matrix<Tp, 3, tC> & pFirst, const Matrix<Tp, 3, tC> & pSecond, Matrix<Tp, 3, tC> & pResult )
+	template <typename TVal, size_t tC>
+	inline void add( const Matrix<TVal, 3, tC> & pFirst, const Matrix<TVal, 3, tC> & pSecond, Matrix<TVal, 3, tC> & pResult )
 	{
 		pResult.row0 = pFirst.row0 + pSecond.row0;
 		pResult.row1 = pFirst.row1 + pSecond.row1;
 		pResult.row2 = pFirst.row2 + pSecond.row2;
 	}
 
-	template <typename Tp, size_t tC>
-	inline void add( const Matrix<Tp, 4, tC> & pFirst, const Matrix<Tp, 4, tC> & pSecond, Matrix<Tp, 4, tC> & pResult )
+	template <typename TVal, size_t tC>
+	inline void add( const Matrix<TVal, 4, tC> & pFirst, const Matrix<TVal, 4, tC> & pSecond, Matrix<TVal, 4, tC> & pResult )
 	{
 		pResult.row0 = pFirst.row0 + pSecond.row0;
 		pResult.row1 = pFirst.row1 + pSecond.row1;
@@ -32,31 +32,31 @@ namespace ts3::math
 		pResult.row3 = pFirst.row3 + pSecond.row3;
 	}
 
-	template <typename TpMatrix>
-	inline TpMatrix add( const TpMatrix & pFirst, const TpMatrix & pSecond )
+	template <typename TMatrix>
+	inline TMatrix add( const TMatrix & pFirst, const TMatrix & pSecond )
 	{
-		TpMatrix result;
+		TMatrix result;
 		add( pFirst, pSecond, result );
 		return result;
 	}
 
-	template <typename Tp, size_t tC>
-	inline void sub( const Matrix<Tp, 2, tC> & pFirst, const Matrix<Tp, 2, tC> & pSecond, Matrix<Tp, 2, tC> & pResult )
+	template <typename TVal, size_t tC>
+	inline void sub( const Matrix<TVal, 2, tC> & pFirst, const Matrix<TVal, 2, tC> & pSecond, Matrix<TVal, 2, tC> & pResult )
 	{
 		pResult.row0 = pFirst.row0 - pSecond.row0;
 		pResult.row1 = pFirst.row1 - pSecond.row1;
 	}
 
-	template <typename Tp, size_t tC>
-	inline void sub( const Matrix<Tp, 3, tC> & pFirst, const Matrix<Tp, 3, tC> & pSecond, Matrix<Tp, 3, tC> & pResult )
+	template <typename TVal, size_t tC>
+	inline void sub( const Matrix<TVal, 3, tC> & pFirst, const Matrix<TVal, 3, tC> & pSecond, Matrix<TVal, 3, tC> & pResult )
 	{
 		pResult.row0 = pFirst.row0 - pSecond.row0;
 		pResult.row1 = pFirst.row1 - pSecond.row1;
 		pResult.row2 = pFirst.row2 - pSecond.row2;
 	}
 
-	template <typename Tp, size_t tC>
-	inline void sub( const Matrix<Tp, 4, tC> & pFirst, const Matrix<Tp, 4, tC> & pSecond, Matrix<Tp, 4, tC> & pResult )
+	template <typename TVal, size_t tC>
+	inline void sub( const Matrix<TVal, 4, tC> & pFirst, const Matrix<TVal, 4, tC> & pSecond, Matrix<TVal, 4, tC> & pResult )
 	{
 		pResult.row0 = pFirst.row0 - pSecond.row0;
 		pResult.row1 = pFirst.row1 - pSecond.row1;
@@ -64,22 +64,22 @@ namespace ts3::math
 		pResult.row3 = pFirst.row3 - pSecond.row3;
 	}
 
-	template <typename TpMatrix>
-	inline TpMatrix sub( const TpMatrix & pFirst, const TpMatrix & pSecond )
+	template <typename TMatrix>
+	inline TMatrix sub( const TMatrix & pFirst, const TMatrix & pSecond )
 	{
-		TpMatrix result;
+		TMatrix result;
 		sub( pFirst, pSecond, result );
 		return result;
 	}
 
-	template <typename Tp, size_t tR, size_t tN, size_t tC>
-	inline void mul( const Matrix<Tp, tR, tN> & pFirst, const Matrix<Tp, tN, tC> & pSecond, Matrix<Tp, tR, tC> & pResult )
+	template <typename TVal, size_t tR, size_t tN, size_t tC>
+	inline void mul( const Matrix<TVal, tR, tN> & pFirst, const Matrix<TVal, tN, tC> & pSecond, Matrix<TVal, tR, tC> & pResult )
 	{
 		for( size_t fRowIndex = 0; fRowIndex < tR; ++fRowIndex )
 		{
 			for( size_t sColumnIndex = 0; sColumnIndex < tC; ++sColumnIndex )
 			{
-				Tp currentElemValue = static_cast<Tp>( 0 );
+				TVal currentElemValue = static_cast<TVal>( 0 );
 				for( size_t elemIndex = 0; elemIndex < tN; ++elemIndex )
 				{
 					currentElemValue += ( pFirst[fRowIndex][elemIndex] * pSecond[elemIndex][sColumnIndex] );
@@ -89,8 +89,8 @@ namespace ts3::math
 		}
 	}
 
-	template <typename Tp>
-	inline void mul( const Matrix2x2<Tp> & pFirst, const Matrix2x2<Tp> & pSecond, Matrix2x2<Tp> & pResult )
+	template <typename TVal>
+	inline void mul( const Matrix2x2<TVal> & pFirst, const Matrix2x2<TVal> & pSecond, Matrix2x2<TVal> & pResult )
 	{
 		const auto firstE00MulSecondR0 = pFirst.row0[0] * pSecond.row0;
 		const auto firstE01MulSecondR1 = pFirst.row0[1] * pSecond.row1;
@@ -101,8 +101,8 @@ namespace ts3::math
 		pResult.row1 = firstE10MulSecondR0 + firstE11MulSecondR1;
 	}
 
-	template <typename Tp>
-	inline void mul( const Matrix3x3<Tp> & pFirst, const Matrix3x3<Tp> & pSecond, Matrix3x3<Tp> & pResult )
+	template <typename TVal>
+	inline void mul( const Matrix3x3<TVal> & pFirst, const Matrix3x3<TVal> & pSecond, Matrix3x3<TVal> & pResult )
 	{
 		const auto firstE00MulSecondR0 = pFirst.row0[0] * pSecond.row0;
 		const auto firstE01MulSecondR1 = pFirst.row0[1] * pSecond.row1;
@@ -120,8 +120,8 @@ namespace ts3::math
 		pResult.row2 = firstE20MulSecondR0 + firstE21MulSecondR1 + firstE22MulSecondR2;
 	}
 
-	template <typename Tp>
-	inline void mul( const Matrix4x4<Tp> & pFirst, const Matrix4x4<Tp> & pSecond, Matrix4x4<Tp> & pResult )
+	template <typename TVal>
+	inline void mul( const Matrix4x4<TVal> & pFirst, const Matrix4x4<TVal> & pSecond, Matrix4x4<TVal> & pResult )
 	{
 		const auto firstE00MulSecondR0 = pFirst.row0[0] * pSecond.row0;
 		const auto firstE01MulSecondR1 = pFirst.row0[1] * pSecond.row1;
@@ -148,38 +148,38 @@ namespace ts3::math
 		pResult.row3 = firstE30MulSecondR0 + firstE31MulSecondR1 + firstE32MulSecondR2 + firstE33MulSecondR3;
 	}
 
-	template <typename Tp>
-	inline void mul( const Matrix2x2<Tp> & pMatrix, const Vector2<Tp> & pVector, Vector2<Tp> & pResult )
+	template <typename TVal>
+	inline void mul( const Matrix2x2<TVal> & pMatrix, const Vector2<TVal> & pVector, Vector2<TVal> & pResult )
 	{
 		pResult[0] = pMatrix.row0 * pVector;
 		pResult[1] = pMatrix.row1 * pVector;
 	}
 
-	template <typename Tp>
-	inline void mul( const Vector2<Tp> & pVector, const Matrix2x2<Tp> & pMatrix, Vector2<Tp> & pResult )
+	template <typename TVal>
+	inline void mul( const Vector2<TVal> & pVector, const Matrix2x2<TVal> & pMatrix, Vector2<TVal> & pResult )
 	{
 		pResult[0] = dot( pVector, pMatrix.column( 0 ) );
 		pResult[1] = dot( pVector, pMatrix.column( 1 ) );
 	}
 
-	template <typename Tp>
-	inline void mul( const Matrix3x3<Tp> & pMatrix, const Vector3<Tp> & pVector, Vector3<Tp> & pResult )
+	template <typename TVal>
+	inline void mul( const Matrix3x3<TVal> & pMatrix, const Vector3<TVal> & pVector, Vector3<TVal> & pResult )
 	{
 		pResult.x = pMatrix.row0 * pVector;
 		pResult.y = pMatrix.row1 * pVector;
 		pResult.z = pMatrix.row2 * pVector;
 	}
 
-	template <typename Tp>
-	inline void mul( const Vector3<Tp> & pVector, const Matrix3x3<Tp> & pMatrix, Vector3<Tp> & pResult )
+	template <typename TVal>
+	inline void mul( const Vector3<TVal> & pVector, const Matrix3x3<TVal> & pMatrix, Vector3<TVal> & pResult )
 	{
 		pResult[0] = dot( pVector, pMatrix.column( 0 ) );
 		pResult[1] = dot( pVector, pMatrix.column( 1 ) );
 		pResult[2] = dot( pVector, pMatrix.column( 2 ) );
 	}
 
-	template <typename Tp>
-	inline void mul( const Matrix4x4<Tp> & pMatrix, const Vector4<Tp> & pVector, Vector4<Tp> & pResult )
+	template <typename TVal>
+	inline void mul( const Matrix4x4<TVal> & pMatrix, const Vector4<TVal> & pVector, Vector4<TVal> & pResult )
 	{
 		pResult.x = dot( pMatrix.row0, pVector );
 		pResult.y = dot( pMatrix.row1, pVector );
@@ -187,8 +187,8 @@ namespace ts3::math
 		pResult.w = dot( pMatrix.row3, pVector );
 	}
 
-	template <typename Tp>
-	inline void mul( const Vector4<Tp> & pVector, const Matrix4x4<Tp> & pMatrix, Vector4<Tp> & pResult )
+	template <typename TVal>
+	inline void mul( const Vector4<TVal> & pVector, const Matrix4x4<TVal> & pMatrix, Vector4<TVal> & pResult )
 	{
 		pResult[0] = dot( pVector, pMatrix.column( 0 ) );
 		pResult[1] = dot( pVector, pMatrix.column( 1 ) );
@@ -196,26 +196,26 @@ namespace ts3::math
 		pResult[3] = dot( pVector, pMatrix.column( 3 ) );
 	}
 
-	template <typename Tp, size_t tN>
-	inline Matrix<Tp, tN, tN> mul( const Matrix<Tp, tN, tN> & pFirst, const Matrix<Tp, tN, tN> & pSecond )
+	template <typename TVal, size_t tN>
+	inline Matrix<TVal, tN, tN> mul( const Matrix<TVal, tN, tN> & pFirst, const Matrix<TVal, tN, tN> & pSecond )
 	{
-		Matrix<Tp, tN, tN> result;
+		Matrix<TVal, tN, tN> result;
 		mul( pFirst, pSecond, result );
 		return result;
 	}
 
-	template <typename Tp, size_t tN>
-	inline Vector<Tp, tN> mul( const Matrix<Tp, tN, tN> & pMatrix, const Vector<Tp, tN> & pVector )
+	template <typename TVal, size_t tN>
+	inline Vector<TVal, tN> mul( const Matrix<TVal, tN, tN> & pMatrix, const Vector<TVal, tN> & pVector )
 	{
-		Vector<Tp, tN> result;
+		Vector<TVal, tN> result;
 		mul( pMatrix, pVector, result );
 		return result;
 	}
 
-	template <typename Tp, size_t tN>
-	inline Vector<Tp, tN> mul( const Vector<Tp, tN> & pVector, const Matrix<Tp, tN, tN> & pMatrix )
+	template <typename TVal, size_t tN>
+	inline Vector<TVal, tN> mul( const Vector<TVal, tN> & pVector, const Matrix<TVal, tN, tN> & pMatrix )
 	{
-		Vector<Tp, tN> result;
+		Vector<TVal, tN> result;
 		mul( pVector, pMatrix, result );
 		return result;
 	}

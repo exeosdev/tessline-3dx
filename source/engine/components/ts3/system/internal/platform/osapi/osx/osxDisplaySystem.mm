@@ -71,6 +71,18 @@ namespace ts3::system
 		return createSysObject<OSXDisplayDriver>( getHandle<OSXDisplayManager>() );
 	}
 
+	void OSXDisplayManager::_nativeQueryDefaultDisplayOffset( DisplayOffset & pOutOffset ) const
+	{
+		if( mNativeData.cgMainDisplayID == kCGNullDirectDisplay )
+		{
+			throw 0;
+		}
+
+		const auto screenBounds = platform::osxQueryDisplayRect( mNativeData.cgMainDisplayID );
+
+		pOutOffset = screenBounds.offset;
+	}
+
 	void OSXDisplayManager::_nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const
 	{
 		if( mNativeData.cgMainDisplayID == kCGNullDirectDisplay )
@@ -109,7 +121,7 @@ namespace ts3::system
 	namespace platform
 	{
 
-		ScreenRect osxQueryDisplayBounds( CGDirectDisplayID pCGDisplayID )
+		ScreenRect osxQueryDisplayRect( CGDirectDisplayID pCGDisplayID )
 		{
 			ts3DebugAssert( pCGDisplayID != kCGNullDirectDisplay );
 

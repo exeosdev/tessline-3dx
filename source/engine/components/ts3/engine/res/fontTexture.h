@@ -17,7 +17,7 @@ namespace ts3
 		gpuapi::TextureHandle texture;
 
 		// Texture dimension. Usually - a single 2D texture or an array of those.
-		gpuapi::ETextureDimensionClass dimensionClass;
+		gpuapi::ETextureClass texClass;
 
 		// Internal format of the texture.
 		gpuapi::ETextureFormat format;
@@ -85,7 +85,7 @@ namespace ts3
 //
 //		const PreloadedSubDataArray & getPreloadedSubData() const;
 //
-//		bool isEmpty() const;
+//		bool empty() const;
 //
 //		bool isFull() const;
 //

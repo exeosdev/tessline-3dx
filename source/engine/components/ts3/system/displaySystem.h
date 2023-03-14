@@ -21,23 +21,23 @@ namespace ts3::system
 		explicit DisplayManager( SysContextHandle pSysContext );
 		virtual ~DisplayManager() noexcept;
 
-		TS3_FUNC_NO_DISCARD DisplayDriverHandle createDisplayDriver( EDisplayDriverType pDriverID );
+		TS3_ATTR_NO_DISCARD DisplayDriverHandle createDisplayDriver( EDisplayDriverType pDriverID );
 
-		TS3_FUNC_NO_DISCARD DisplayDriverHandle createDisplayDriver();
+		TS3_ATTR_NO_DISCARD DisplayDriverHandle createDisplayDriver();
 
-		TS3_FUNC_NO_DISCARD bool checkDriverSupport( EDisplayDriverType pDriverID ) const;
+		TS3_ATTR_NO_DISCARD bool checkDriverSupport( EDisplayDriverType pDriverID ) const;
 
-		TS3_FUNC_NO_DISCARD EDisplayDriverType resolveDisplayDriverID( EDisplayDriverType pDriverID ) const;
+		TS3_ATTR_NO_DISCARD EDisplayDriverType resolveDisplayDriverID( EDisplayDriverType pDriverID ) const;
 
-		TS3_FUNC_NO_DISCARD DisplayOffset queryDefaultDisplayOffset() const;
+		TS3_ATTR_NO_DISCARD DisplayOffset queryDefaultDisplayOffset() const;
 
-		TS3_FUNC_NO_DISCARD DisplaySize queryDefaultDisplaySize() const;
+		TS3_ATTR_NO_DISCARD DisplaySize queryDefaultDisplaySize() const;
 
-		TS3_FUNC_NO_DISCARD DisplaySize queryMinWindowSize() const;
+		TS3_ATTR_NO_DISCARD DisplaySize queryMinWindowSize() const;
 
-		TS3_FUNC_NO_DISCARD bool checkFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
+		TS3_ATTR_NO_DISCARD bool checkFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
 
-		TS3_FUNC_NO_DISCARD FrameGeometry validateFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
+		TS3_ATTR_NO_DISCARD FrameGeometry validateFrameGeometry( const FrameGeometry & pFrameGeometry ) const;
 
 	private:
 		virtual DisplayDriverHandle _nativeCreateDisplayDriver() = 0;
@@ -73,24 +73,24 @@ namespace ts3::system
 
 		EColorFormat queryDefaultSystemColorFormat() const;
 
-		TS3_FUNC_NO_DISCARD DisplayAdapter * findAdapter( DisplayAdapterPredicate pPredicate ) const;
-		TS3_FUNC_NO_DISCARD DisplayAdapterList findAdapters( DisplayAdapterPredicate pPredicate ) const;
+		TS3_ATTR_NO_DISCARD DisplayAdapter * findAdapter( DisplayAdapterPredicate pPredicate ) const;
+		TS3_ATTR_NO_DISCARD DisplayAdapterList findAdapters( DisplayAdapterPredicate pPredicate ) const;
 
-		TS3_FUNC_NO_DISCARD const DisplayAdapterList & getAdapterList() const;
-		TS3_FUNC_NO_DISCARD const DisplayOutputList & getOutputList( dsm_index_t pAdapterIndex ) const;
+		TS3_ATTR_NO_DISCARD const DisplayAdapterList & getAdapterList() const;
+		TS3_ATTR_NO_DISCARD const DisplayOutputList & getOutputList( dsm_index_t pAdapterIndex ) const;
 
-		TS3_FUNC_NO_DISCARD DisplayAdapter * getAdapter( dsm_index_t pAdapterIndex ) const;
-		TS3_FUNC_NO_DISCARD DisplayAdapter * getDefaultAdapter() const;
+		TS3_ATTR_NO_DISCARD DisplayAdapter * getAdapter( dsm_index_t pAdapterIndex ) const;
+		TS3_ATTR_NO_DISCARD DisplayAdapter * getDefaultAdapter() const;
 
-		TS3_FUNC_NO_DISCARD DisplayOutput * getDefaultOutput( dsm_index_t pAdapterIndex = CX_DSM_INDEX_DEFAULT ) const;
-		TS3_FUNC_NO_DISCARD DisplayOutput * getOutput( dsm_output_id_t pOutputID ) const;
+		TS3_ATTR_NO_DISCARD DisplayOutput * getDefaultOutput( dsm_index_t pAdapterIndex = CX_DSM_INDEX_DEFAULT ) const;
+		TS3_ATTR_NO_DISCARD DisplayOutput * getOutput( dsm_output_id_t pOutputID ) const;
 
-		TS3_FUNC_NO_DISCARD bool hasActiveAdapters() const;
-		TS3_FUNC_NO_DISCARD bool hasAnyAdapters() const;
+		TS3_ATTR_NO_DISCARD bool hasActiveAdapters() const;
+		TS3_ATTR_NO_DISCARD bool hasAnyAdapters() const;
 
-		TS3_FUNC_NO_DISCARD bool hasValidConfiguration() const;
+		TS3_ATTR_NO_DISCARD bool hasValidConfiguration() const;
 
-		TS3_FUNC_NO_DISCARD std::string generateConfigurationDump( const std::string & pLinePrefix = {} ) const;
+		TS3_ATTR_NO_DISCARD std::string generateConfigurationDump( const std::string & pLinePrefix = {} ) const;
 
 	protected:
 		DisplayDriver( DisplayManagerHandle pDisplayManager, EDisplayDriverType pDriverType );
@@ -101,26 +101,26 @@ namespace ts3::system
 
 		static DisplayVideoModeDesc & getVideoModeDescInternal( DisplayVideoMode & pVideoMode );
 
-		template <typename TpAdapter, typename TpDriver>
-		SysHandle<TpAdapter> createAdapter( TpDriver & pDriver)
+		template <typename TAdapter, typename TDriver>
+		SysHandle<TAdapter> createAdapter( TDriver & pDriver)
 		{
-			auto adapterHandle = createSysObject<TpAdapter>( pDriver );
+			auto adapterHandle = createSysObject<TAdapter>( pDriver );
 			_registerAdapter( adapterHandle );
 			return adapterHandle;
 		}
 
-		template <typename TpOutput, typename TpAdapter>
-		SysHandle<TpOutput> createOutput( TpAdapter & pAdapter )
+		template <typename TOutput, typename TAdapter>
+		SysHandle<TOutput> createOutput( TAdapter & pAdapter )
 		{
-			auto outputHandle = createSysObject<TpOutput>( pAdapter );
+			auto outputHandle = createSysObject<TOutput>( pAdapter );
 			_registerOutput( pAdapter, outputHandle );
 			return outputHandle;
 		}
 
-		template <typename TpVideoMode, typename TpOutput>
-		SysHandle<TpVideoMode> createVideoMode( TpOutput & pOutput, EColorFormat pColorFormat )
+		template <typename TVideoMode, typename TOutput>
+		SysHandle<TVideoMode> createVideoMode( TOutput & pOutput, EColorFormat pColorFormat )
 		{
-			auto videoModeHandle = createSysObject<TpVideoMode>( pOutput );
+			auto videoModeHandle = createSysObject<TVideoMode>( pOutput );
 			_registerVideoMode( pOutput, pColorFormat, videoModeHandle );
 			return videoModeHandle;
 		}

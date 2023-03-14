@@ -242,7 +242,7 @@ function( _ebsSysconfDetectTargetPlatform )
         setInternal( CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_VULKAN TRUE )
     elseif( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
         setInternal( CM_EBS_SYSCONF_TARGET_PLATFORM  "Apple" )
-        setInternal( CM_EBS_SYSCONF_TARGET_LIBRARY_SUBDIR  "osx" )
+        setInternal( CM_EBS_SYSCONF_TARGET_LIBRARY_SUBDIR  "macos" )
         setInternal( CM_EBS_SYSCONF_TARGET_ARCH_DEFAULT_32  "x86" )
         setInternal( CM_EBS_SYSCONF_TARGET_ARCH_DEFAULT_64  "x86_64" )
         setInternal( CM_EBS_SYSCONF_TARGET_ARCH_DEFAULT_BIT "64" )
@@ -318,13 +318,20 @@ function( _ebsSysconfConfigureArch )
 endfunction()
 
 function( _ebsSysconfConfigureBuildcfg )
-    setInternal( CM_EBS_SYSCONF_TARGET_BUILDCONFIG "Debug" )
+    if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+        setInternal( CM_EBS_SYSCONF_TARGET_BUILDCONFIG "Debug" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D DEBUG=1" )
+    else()
+        setInternal( CM_EBS_SYSCONF_TARGET_BUILDCONFIG "Release" )
+    endif()
 endfunction()
 
 
 #@FunDef ebsSysconfInitialize
 #@DocStr
 function( ebsSysconfInitialize )
+    clearInternalCache()
+
     _ebsSysconfDetectHostPlatformSetup()
     _ebsSysconfDetectHostCompiler()
     _ebsSysconfDetectTargetPlatform()

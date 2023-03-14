@@ -5,6 +5,7 @@
 #define __TS3_GPUAPI_GPU_RESOURCE_H__
 
 #include "commonGPUResourceDefs.h"
+#include <ts3/stdext/refCounter.h>
 
 namespace ts3::gpuapi
 {
@@ -14,34 +15,77 @@ namespace ts3::gpuapi
 		Bitmask<resource_flags_value_t> resourceFlags;
 	};
 
-	class GPUResource : public GPUBaseObject
+	class GPUResource : public GPUDeviceChildObject
 	{
 	public:
 		EGPUResourceBaseType const mResourceBaseType;
 		ResourceMemoryInfo const mResourceMemory;
 
-		GPUResource( GPUDevice & pGPUDevice,
-		             EGPUResourceBaseType pResourceBaseType,
-		             const ResourceMemoryInfo & pResourceMemory );
+		GPUResource(
+			GPUDevice & pGPUDevice,
+			EGPUResourceBaseType pResourceBaseType,
+			const ResourceMemoryInfo & pResourceMemory );
 
 		virtual ~GPUResource();
 
-		bool isMapped() const;
-		bool isMapped( const GPUMemoryRegion & pRegion ) const;
+		TS3_ATTR_NO_DISCARD ref_counter_value_t getActiveRefsNum() const noexcept;
 
-		const ResourceMappedMemory & getMappedMemory() const;
+		TS3_ATTR_NO_DISCARD const ResourceMappedMemory & getMappedMemory() const noexcept;
+
+		TS3_ATTR_NO_DISCARD bool isMapped() const;
+
+		TS3_ATTR_NO_DISCARD bool isMapped( const GPUMemoryRegion & pRegion ) const;
+
+		TS3_ATTR_NO_DISCARD virtual const GPUResourceProperties & getProperties() const = 0;
 
 	protected:
+		ref_counter_value_t addActiveRef();
+
+		ref_counter_value_t releaseActiveRef();
+
 		void setMappedMemory( const ResourceMappedMemory & pMappedMemory );
+
 		void resetMappedMemory();
 
 	private:
+		AtomicRefCounter _activeRefsCounter;
 		ResourceMappedMemory _mappedMemory;
 	};
 
-	inline const ResourceMappedMemory & GPUResource::getMappedMemory() const
+	inline ref_counter_value_t GPUResource::getActiveRefsNum() const noexcept
+	{
+		return _activeRefsCounter.getValue();
+	}
+
+	inline const ResourceMappedMemory & GPUResource::getMappedMemory() const noexcept
 	{
 		return _mappedMemory;
+	}
+
+	class GPUResourceWrapper : public GPUDeviceChildObject
+	{
+	public:
+		EGPUResourceBaseType const mInternalResourceBaseType;
+
+		GPUResourceWrapper(
+			GPUDevice & pGPUDevice,
+			EGPUResourceBaseType pInternalResourceBaseType );
+
+		virtual ~GPUResourceWrapper();
+
+		TS3_ATTR_NO_DISCARD GPUResource * getInternalResource() const noexcept;
+
+	protected:
+		void setInternalResource( GPUResource & pResource );
+		void resetInternalResource();
+
+	private:
+		GPUResource * _internalResource;
+	};
+
+	inline GPUResource * GPUResourceWrapper::getInternalResource() const noexcept
+	{
+		return _internalResource;
 	}
 
 } // namespace ts3::gpuapi

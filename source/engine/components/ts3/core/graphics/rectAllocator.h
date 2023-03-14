@@ -11,7 +11,7 @@ namespace ts3
 	{
 		struct HorizontalLayout
 		{
-			uint32 hLineAdvanceThreshold = ts3::Limits<uint32>::maxValue;
+			uint32 hLineAdvanceThreshold = Limits<uint32>::maxValue;
 			uint32 hSpacing = 0;
 		};
 		struct VerticalLayout
@@ -36,10 +36,10 @@ namespace ts3
 
 		void reset();
 
-		TS3_PCL_ATTR_NO_DISCARD bool checkFreeSpace( const math::Vec2u32 & pRect ) const;
-        TS3_PCL_ATTR_NO_DISCARD bool isEmpty() const;
+		TS3_PCL_ATTR_FUNC_NO_DISCARD bool checkFreeSpace( const math::Vec2u32 & pRect ) const;
+        TS3_PCL_ATTR_FUNC_NO_DISCARD bool empty() const;
 
-        TS3_PCL_ATTR_NO_DISCARD const RectAllocatorConfig & getConfig() const
+        TS3_PCL_ATTR_FUNC_NO_DISCARD const RectAllocatorConfig & getConfig() const
 		{
 			return _config;
 		}

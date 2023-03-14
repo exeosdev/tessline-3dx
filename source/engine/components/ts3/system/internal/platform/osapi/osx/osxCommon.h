@@ -4,7 +4,8 @@
 
 #include <ts3/system/prerequisites.h>
 #include <ts3/stdext/bitmaskAtomic.h>
-#include <objc/objc.h>
+
+#import <AppKit/NSApplication.h>
 #import <CoreGraphics/CGError.h>
 
 namespace ts3::system
@@ -41,7 +42,7 @@ namespace ts3::system
 				osxSharedDataPtr = nullptr;
 			}
 
-			TS3_FUNC_NO_DISCARD OSXSharedData & getSharedData() const
+			TS3_ATTR_NO_DISCARD OSXSharedData & getSharedData() const
 			{
 				ts3DebugAssert( osxSharedDataPtr != nullptr );
 				return *osxSharedDataPtr;
@@ -60,11 +61,13 @@ namespace ts3::system
 			return pNativeData.getSharedData();
 		}
 
-		template <typename TpBaseType, typename TpNativeData>
-		TS3_SYSTEM_API_NODISCARD inline OSXSharedData & osxGetOSXSharedData( const NativeObject<TpBaseType, TpNativeData> & pNativeObject )
+		template <typename TBaseType, typename TNativeData>
+		TS3_SYSTEM_API_NODISCARD inline OSXSharedData & osxGetOSXSharedData( const NativeObject<TBaseType, TNativeData> & pNativeObject )
 		{
 			return osxGetOSXSharedData( static_cast<OSXNativeDataCommon>( pNativeObject.mNativeData ) );
 		}
+
+		TS3_SYSTEM_API_NODISCARD bool osxCheckAppKitFrameworkVersion( NSAppKitVersion pRequiredVersion );
 
 		TS3_SYSTEM_API_NODISCARD const char * osxQueryCGErrorMessage( CGError pCGError );
 
@@ -75,27 +78,27 @@ namespace ts3::system
 	}
 
 
-	template <typename TpBaseType, typename TpNativeData>
-	class OSXNativeObject : public NativeObject<TpBaseType, TpNativeData>
+	template <typename TBaseType, typename TNativeData>
+	class OSXNativeObject : public NativeObject<TBaseType, TNativeData>
 	{
 	public:
-		template <typename... TpBaseTypeArgs>
-		explicit OSXNativeObject( SysContextHandle pSysContext, TpBaseTypeArgs && ...pBaseTypeArgs )
-		: NativeObject<TpBaseType, TpNativeData>( pSysContext, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
+		template <typename... TBaseTypeArgs>
+		explicit OSXNativeObject( SysContextHandle pSysContext, TBaseTypeArgs && ...pBaseTypeArgs )
+		: NativeObject<TBaseType, TNativeData>( pSysContext, std::forward<TBaseTypeArgs>( pBaseTypeArgs )... )
 		{
 			this->mNativeData.setSharedData( platform::osxGetOSXSharedData( *pSysContext ) );
 		}
 
-		template <typename TpParentSysObject, typename... TpBaseTypeArgs>
-		explicit OSXNativeObject( TpParentSysObject & pParentSysObject, TpBaseTypeArgs && ...pBaseTypeArgs )
-		: NativeObject<TpBaseType, TpNativeData>( pParentSysObject, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
+		template <typename TParentSysObject, typename... TBaseTypeArgs>
+		explicit OSXNativeObject( TParentSysObject & pParentSysObject, TBaseTypeArgs && ...pBaseTypeArgs )
+		: NativeObject<TBaseType, TNativeData>( pParentSysObject, std::forward<TBaseTypeArgs>( pBaseTypeArgs )... )
 		{
 			this->mNativeData.setSharedData( platform::osxGetOSXSharedData( pParentSysObject ) );
 		}
 
-		template <typename TpParentSysObject, typename... TpBaseTypeArgs>
-		explicit OSXNativeObject( SysHandle<TpParentSysObject> pParentSysObject, TpBaseTypeArgs && ...pBaseTypeArgs )
-		: NativeObject<TpBaseType, TpNativeData>( pParentSysObject, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
+		template <typename TParentSysObject, typename... TBaseTypeArgs>
+		explicit OSXNativeObject( SysHandle<TParentSysObject> pParentSysObject, TBaseTypeArgs && ...pBaseTypeArgs )
+		: NativeObject<TBaseType, TNativeData>( pParentSysObject, std::forward<TBaseTypeArgs>( pBaseTypeArgs )... )
 		{
 			this->mNativeData.setSharedData( platform::osxGetOSXSharedData( *pParentSysObject ) );
 		}

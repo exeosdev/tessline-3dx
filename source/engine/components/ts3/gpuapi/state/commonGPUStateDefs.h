@@ -5,101 +5,144 @@
 #define __TS3_GPUAPI_COMMON_STATE_DEFS_H__
 
 #include "../memory/commonGPUMemoryDefs.h"
+#include "../resources/commonGPUResourceDefs.h"
 #include <ts3/stdext/hash.h>
-#include <list>
 
 namespace ts3::gpuapi
 {
 
-	ts3DeclareClassHandle( GPUStateObject );
-	ts3DeclareClassHandle( PipelineStateObject );
-	ts3DeclareClassHandle( GraphicsPipelineStateObject );
-	ts3DeclareClassHandle( VertexStreamStateObject );
+	struct BlendConfig;
+	struct DepthStencilConfig;
+	struct GraphicsShaderSet;
+	struct IAInputLayoutDefinition;
+	struct IAVertexStreamDefinition;
+	struct RasterizerConfig;
+	struct RenderTargetBindingDefinition;
+	struct RenderPassConfiguration;
 
-	struct GraphicsShaderBinding;
-	struct ShaderInputSignature;
-
+	struct ComputePipelineStateObjectCreateInfo;
 	struct GraphicsPipelineStateObjectCreateInfo;
-	struct VertexStreamStateObjectCreateInfo;
 
+	class IAVertexStreamDynamicState;
+	class RenderTargetBindingDynamicState;
+	class RenderPassConfigurationDynamicState;
+
+	ts3GpaDeclareClassHandle( GPUDeviceChildObject );
+	ts3GpaDeclareClassHandle( PipelineStateObject );
+	ts3GpaDeclareClassHandle( ComputePipelineStateObject );
+	ts3GpaDeclareClassHandle( GraphicsPipelineStateObject );
+
+	ts3GpaDeclareClassHandle( BlendImmutableState );
+	ts3GpaDeclareClassHandle( DepthStencilImmutableState );
+	ts3GpaDeclareClassHandle( GraphicsShaderLinkageImmutableState );
+	ts3GpaDeclareClassHandle( IAInputLayoutImmutableState );
+	ts3GpaDeclareClassHandle( IAVertexStreamImmutableState );
+	ts3GpaDeclareClassHandle( RasterizerImmutableState );
+	ts3GpaDeclareClassHandle( RenderTargetBindingImmutableState );
+	ts3GpaDeclareClassHandle( RenderPassConfigurationImmutableState );
+
+	using pipeline_internal_state_hash_t = uint64;
+	using render_target_index_t = uint16;
 	using shader_input_ref_id_t = uint64;
 	using shader_input_index_t = uint32;
 
-	using vertex_attribute_index_t = uint16;
-	using vertex_stream_index_t = uint16;
+	using GraphicsShaderArray = std::array<ShaderHandle, cxdefs::GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM>;
 
-	using EBlendState = EActiveState;
-	using EDepthTestState = EActiveState;
-	using EStencilTestState = EActiveState;
-	using EScissorTestState = EActiveState;
-
-	constexpr vertex_attribute_index_t cxInvalidVertexAttributeIndex = ts3::Limits<vertex_attribute_index_t>::maxValue;
-	constexpr vertex_stream_index_t cxInvalidVertexStreamIndex = ts3::Limits<vertex_stream_index_t>::maxValue;
-
-	enum class EBlendFactor : enum_default_value_t
+	namespace cxdefs
 	{
-		Zero,
-		One,
-		Const,
-		ConstInv,
-		SrcColor,
-		SrcAlpha,
-		DstColor,
-		DstAlpha,
-		SrcColorInv,
-		SrcAlphaInv,
-		DstColorInv,
-		DstAlphaInv,
+
+		///
+		constexpr auto PIPELINE_INTERNAL_STATE_ID_INVALID = 0u;
+
+		///
+		constexpr auto VERTEX_ATTRIBUTE_OFFSET_APPEND = Limits<gpu_memory_size_t>::maxValue;
+
+		///
+		constexpr auto RT_MAX_COLOR_ATTACHMENTS_NUM = static_cast<render_target_index_t>( GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM );
+
+		///
+		constexpr auto RT_MAX_COMBINED_ATTACHMENTS_NUM = static_cast<render_target_index_t>( GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM );
+
+		///
+		constexpr auto RT_ATTACHMENT_MSAA_LEVEL_INVALID = Limits<uint32>::maxValue;
+
+		///
+		constexpr auto PIPELINE_IMMUTABLE_STATE_TYPES_NUM = 8u;
+
+		/// @brief
+		inline constexpr uint32 makeRTAttachmentFlag( native_uint pAttachmentIndex )
+		{
+			return ( pAttachmentIndex < RT_MAX_COMBINED_ATTACHMENTS_NUM ) ? ( 1 << static_cast<render_target_index_t>( pAttachmentIndex ) ) : 0u;
+		}
+
+		/// @brief
+		inline constexpr bool isRTAttachmentIndexValid( native_uint pIndex )
+		{
+			return pIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM;
+		}
+
+		/// @brief
+		inline constexpr bool isRTColorAttachmentIndexValid( native_uint pIndex )
+		{
+			return pIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM;
+		}
+
+	}
+
+	enum EPipelineImmutableStateTypeFlags : uint32
+	{
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_BLEND_BIT = 0x0001,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_DEPTH_STENCIL_BIT = 0x0002,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_GRAPHICS_SHADER_LINKAGE_BIT = 0x0008,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_IA_INPUT_LAYOUT_BIT = 0x0010,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_IA_VERTEX_STREAM_BIT = 0x0020,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_RASTERIZER_BIT = 0x0004,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_RENDER_TARGET_BINDING_BIT = 0x0040,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_FLAG_RENDER_PASS_BIT = 0x0080,
+		E_PIPELINE_IMMUTABLE_STATE_TYPE_MASK_ALL = 0x00FF,
 	};
 
-	enum class EBlendOp : enum_default_value_t
+	/// @brief
+	enum ERTAttachmentIndex : render_target_index_t
 	{
-		Add,
-		Min,
-		Max,
-		Subtract,
-		SubtractRev
+		E_RT_ATTACHMENT_INDEX_COLOR_0,
+		E_RT_ATTACHMENT_INDEX_COLOR_1,
+		E_RT_ATTACHMENT_INDEX_COLOR_2,
+		E_RT_ATTACHMENT_INDEX_COLOR_3,
+		E_RT_ATTACHMENT_INDEX_COLOR_4,
+		E_RT_ATTACHMENT_INDEX_COLOR_5,
+		E_RT_ATTACHMENT_INDEX_COLOR_6,
+		E_RT_ATTACHMENT_INDEX_COLOR_7,
+		E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL
 	};
 
-	enum class EBlendRenderTargetWriteMask : enum_default_value_t
+	/// @brief A set of bit flags representing render target attachments.
+	enum ERTAttachmentFlags : uint32
 	{
-		Zero = 0,
-		All = ts3::Limits<enum_default_value_t>::maxValue
+		E_RT_ATTACHMENT_FLAG_COLOR_0_BIT       = cxdefs::makeRTAttachmentFlag( E_RT_ATTACHMENT_INDEX_COLOR_0 ),
+		E_RT_ATTACHMENT_FLAG_COLOR_1_BIT       = cxdefs::makeRTAttachmentFlag( E_RT_ATTACHMENT_INDEX_COLOR_1 ),
+		E_RT_ATTACHMENT_FLAG_COLOR_2_BIT       = cxdefs::makeRTAttachmentFlag( E_RT_ATTACHMENT_INDEX_COLOR_2 ),
+		E_RT_ATTACHMENT_FLAG_COLOR_3_BIT       = cxdefs::makeRTAttachmentFlag( E_RT_ATTACHMENT_INDEX_COLOR_3 ),
+		E_RT_ATTACHMENT_FLAG_COLOR_4_BIT       = cxdefs::makeRTAttachmentFlag( E_RT_ATTACHMENT_INDEX_COLOR_4 ),
+		E_RT_ATTACHMENT_FLAG_COLOR_5_BIT       = cxdefs::makeRTAttachmentFlag( E_RT_ATTACHMENT_INDEX_COLOR_5 ),
+		E_RT_ATTACHMENT_FLAG_COLOR_6_BIT       = cxdefs::makeRTAttachmentFlag( E_RT_ATTACHMENT_INDEX_COLOR_6 ),
+		E_RT_ATTACHMENT_FLAG_COLOR_7_BIT       = cxdefs::makeRTAttachmentFlag( E_RT_ATTACHMENT_INDEX_COLOR_7 ),
+		E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT = cxdefs::makeRTAttachmentFlag( E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL ),
+
+		E_RT_ATTACHMENT_MASK_COLOR_ALL = makeLSFBitmask<uint32>( cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ),
+		E_RT_ATTACHMENT_MASK_ALL = E_RT_ATTACHMENT_MASK_COLOR_ALL | E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT,
+		E_RT_ATTACHMENT_FLAGS_DEFAULT_C0_DS = E_RT_ATTACHMENT_FLAG_COLOR_0_BIT | E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT,
 	};
 
-	enum class ECompFunc : enum_default_value_t
-	{
-		Never,
-		Always,
-		Equal,
-		NotEqual,
-		Greater,
-		GreaterEqual,
-		Less,
-		LessEqual
-	};
-
-	enum class ECullMode : enum_default_value_t
-	{
-		None,
-		Back,
-		Front
-	};
-
-	enum class EDepthWriteMask : enum_default_value_t
-	{
-		Zero = 0,
-		All = ts3::Limits<enum_default_value_t>::maxValue
-	};
-
-	enum class EPrimitiveFillMode : enum_default_value_t
+	enum class EPrimitiveFillMode : uint16
 	{
 		Solid,
 		Wireframe
 	};
 
-	enum class EPrimitiveTopology : enum_default_value_t
+	enum class EPrimitiveTopology : uint16
 	{
+		Undefined,
 		PointList,
 		LineList,
 		LineListAdj,
@@ -109,80 +152,20 @@ namespace ts3::gpuapi
 		TriangleListAdj,
 		TriangleStrip,
 		TriangleStripAdj,
-		TesselationPatch
+		TesselationPatch,
 	};
 
-	enum class EStencilOp : enum_default_value_t
-	{
-		Zero,
-		Keep,
-		Replace,
-		IncrClamp,
-		IncrWrap,
-		DecrClamp,
-		DecrWrap,
-		Invert
-	};
-
-	enum class ETriangleVerticesOrder : enum_default_value_t
+	enum class ETriangleVerticesOrder : uint16
 	{
 		Clockwise,
 		CounterClockwise
 	};
 
-	enum class EShaderInputParameterType : uint16
+	struct RenderTargetAttachmentClearConfig
 	{
-		// D3D12: root constants
-		// Vulkan: push constants
-		// Others: API-specific (explicit direct constants or implicit constant buffer)
-		Constant,
-		// CBV/SRV/UAV
-		Resource,
-		//
-		Sampler
-	};
-
-	enum class EShaderInputDescriptorType : uint16
-	{
-		// CBV/SRV/UAV
-		Resource = 1,
-		//
-		Sampler,
-	};
-
-	enum class EShaderInputResourceClass : uint16
-	{
-		CBV = 1,
-		SRV,
-		UAV,
-		Unknown = 0,
-	};
-
-	inline constexpr uint32 ecDeclareShaderInputResourceType( EShaderInputResourceClass pResourceClass, uint16 pIndex )
-	{
-		return ( ( static_cast<uint32>( pResourceClass ) << 16u ) | pIndex );
-	}
-
-	enum class EShaderInputResourceType : uint32
-	{
-		CBVConstantBuffer = ecDeclareShaderInputResourceType( EShaderInputResourceClass::CBV, 0 ),
-		SRVTextureBuffer  = ecDeclareShaderInputResourceType( EShaderInputResourceClass::SRV, 1 ),
-		SRVTextureImage   = ecDeclareShaderInputResourceType( EShaderInputResourceClass::SRV, 2 ),
-		UAVStorageBuffer  = ecDeclareShaderInputResourceType( EShaderInputResourceClass::UAV, 3 ),
-		UAVStorageImage   = ecDeclareShaderInputResourceType( EShaderInputResourceClass::UAV, 4 ),
-		Unknown        = 0
-	};
-
-	inline constexpr EShaderInputResourceClass ecGetShaderInputResourceResourceClass( EShaderInputResourceType pResourceType )
-	{
-		return static_cast<EShaderInputResourceClass>( ( static_cast<uint32>( pResourceType ) >> 16u ) & 0xFFFFu );
-	}
-
-	struct RenderTargetClearConfig
-	{
-		math::RGBAColorR32Norm colorClearValue;
-		float depthClearValue;
-		uint8 stencilClearValue;
+		math::RGBAColorR32Norm colorValue;
+		float depthValue;
+		uint8 stencilValue;
 	};
 
 } // namespace ts3::gpuapi

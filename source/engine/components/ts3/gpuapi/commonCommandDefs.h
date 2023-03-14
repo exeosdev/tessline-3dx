@@ -23,7 +23,6 @@ namespace ts3::gpuapi
 
 	class ComputePipelineStateObject;
 	class GraphicsPipelineStateObject;
-	class VertexStreamStateObject;
 
 	using gpu_cmd_device_queue_id_t = native_uint;
 
@@ -33,7 +32,7 @@ namespace ts3::gpuapi
         E_DEVICE_COMMAND_QUEUE_ID_DEFAULT_COMPUTE = 1u,
         E_DEVICE_COMMAND_QUEUE_ID_DEFAULT_TRANSFER = 2u,
         E_DEVICE_COMMAND_QUEUE_ID_PRESENT = 3u,
-        E_DEVICE_COMMAND_QUEUE_ID_UNKNOWN = ts3::Limits<gpu_cmd_device_queue_id_t>::maxValue,
+        E_DEVICE_COMMAND_QUEUE_ID_UNKNOWN = Limits<gpu_cmd_device_queue_id_t>::maxValue,
     };
 
 	enum ECommandListFlags : uint32
@@ -42,11 +41,11 @@ namespace ts3::gpuapi
 		E_COMMAND_LIST_FLAG_COMMAND_CLASS_TRANSFER_BIT = 0x02,
 		E_COMMAND_LIST_FLAG_COMMAND_CLASS_COMPUTE_BIT = 0x04,
 		E_COMMAND_LIST_FLAG_COMMAND_CLASS_GRAPHICS_BIT = 0x08,
-		E_COMMAND_LIST_FLAGS_COMMAND_CLASS_ALL_BITS_MASK = 0x0F,
+		E_COMMAND_LIST_FLAGS_COMMAND_CLASS_ALL = 0x0F,
 		E_COMMAND_LIST_FLAG_EXECUTION_MODE_DIRECT_BIT = 0x10,
 		E_COMMAND_LIST_FLAG_EXECUTION_MODE_DEFERRED_BIT = 0x20,
-		E_COMMAND_LIST_FLAGS_EXECUTION_MODE_ALL_BITS_MASK = 0x30,
-		E_COMMAND_LIST_FLAGS_ALL_BITS_MASK = E_COMMAND_LIST_FLAGS_COMMAND_CLASS_ALL_BITS_MASK | E_COMMAND_LIST_FLAGS_EXECUTION_MODE_ALL_BITS_MASK,
+		E_COMMAND_LIST_FLAGS_EXECUTION_MODE_ALL = 0x30,
+		E_COMMAND_LIST_FLAGS_ALL = E_COMMAND_LIST_FLAGS_COMMAND_CLASS_ALL | E_COMMAND_LIST_FLAGS_EXECUTION_MODE_ALL,
 	};
 
 	enum class ECommandExecutionMode : uint32
@@ -68,19 +67,25 @@ namespace ts3::gpuapi
 		DirectTransfer = static_cast<uint32>( ECommandQueueType::Transfer ) | static_cast<uint32>( ECommandExecutionMode::Direct ),
 		DirectCompute = static_cast<uint32>( ECommandQueueType::Compute ) | static_cast<uint32>( ECommandExecutionMode::Direct ),
 		DirectGraphics = static_cast<uint32>( ECommandQueueType::Graphics ) | static_cast<uint32>( ECommandExecutionMode::Direct ),
-		DeferredGraphics = static_cast<uint32>( ECommandQueueType::Graphics ) | static_cast<uint32>( ECommandExecutionMode::Deferred )
+		DeferredGraphics = static_cast<uint32>( ECommandQueueType::Graphics ) | static_cast<uint32>( ECommandExecutionMode::Deferred ),
+		Undefined = 0
 	};
 
 	using ECommandListType = ECommandContextType;
 
-	inline constexpr ECommandQueueType ecGetCommandContextQueueType( ECommandContextType pContextType ) noexcept
+	namespace cxdefs
 	{
-		return static_cast<ECommandQueueType>( static_cast<uint32>( pContextType ) & E_COMMAND_LIST_FLAGS_COMMAND_CLASS_ALL_BITS_MASK );
-	}
 
-	inline constexpr ECommandExecutionMode ecGetCommandContextExecutionMode( ECommandContextType pContextType ) noexcept
-	{
-		return static_cast<ECommandExecutionMode>( static_cast<uint32>( pContextType ) & E_COMMAND_LIST_FLAGS_EXECUTION_MODE_ALL_BITS_MASK );
+		inline constexpr ECommandQueueType getCommandContextQueueType( ECommandContextType pContextType ) noexcept
+		{
+			return static_cast<ECommandQueueType>( static_cast<uint32>( pContextType ) & E_COMMAND_LIST_FLAGS_COMMAND_CLASS_ALL );
+		}
+
+		inline constexpr ECommandExecutionMode getCommandContextExecutionMode( ECommandContextType pContextType ) noexcept
+		{
+			return static_cast<ECommandExecutionMode>( static_cast<uint32>( pContextType ) & E_COMMAND_LIST_FLAGS_EXECUTION_MODE_ALL );
+		}
+
 	}
 
 	enum class ECommandSubmitStateOp : enum_default_value_t
@@ -89,6 +94,7 @@ namespace ts3::gpuapi
 		// its internal state is invalidated, and it may no longer be used for command
 		// submission. User must acquire a new context to do so.
 		Discard,
+
 		// Context is used multiple times or stored in a permanent manner. After the
 		// submission, its internal state is updated with a new data and becomes ready
 		// for further command recording/submission.
@@ -105,6 +111,7 @@ namespace ts3::gpuapi
 		// 2) Returns a non-empty CommandSync object (its operator bool() evaluates to true),
 		//    which can be used to wait for completion of all commands issued before.
 		Default,
+
 		// No sync option is provided. Commands are executed in a driver-specific manner.
 		// Only commands executed on the same device queue are guaranteed to be executed
 		// in the order of recording/submission.
@@ -131,12 +138,12 @@ namespace ts3::gpuapi
 	public:
 		CommandSync() = default;
 
-		CommandSync( CommandSync && pSource )
-		: syncData( pSource.syncData )
-		, syncDataReleaseFunc( pSource.syncDataReleaseFunc )
+		CommandSync( CommandSync && pSrcObject )
+		: syncData( pSrcObject.syncData )
+		, syncDataReleaseFunc( pSrcObject.syncDataReleaseFunc )
 		{
-			pSource.syncData = nullptr;
-			pSource.syncDataReleaseFunc = nullptr;
+			pSrcObject.syncData = nullptr;
+			pSrcObject.syncDataReleaseFunc = nullptr;
 		}
 
 		~CommandSync()

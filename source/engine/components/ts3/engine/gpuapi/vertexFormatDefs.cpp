@@ -26,7 +26,7 @@ namespace ts3
 
 	const gpuapi::VertexInputFormatDesc cvVertexInputFormatDesc2DDefault =
 	{
-		ts3gaVertexAttributeDesc( 0,
+		ts3GAVertexAttributeDesc( 0,
 		                          0,
 		                          "POSITION",
 		                          0,
@@ -34,7 +34,7 @@ namespace ts3
 		                          0,
 		                          0 ),
 
-		ts3gaVertexAttributeDesc( 1,
+		ts3GAVertexAttributeDesc( 1,
 		                          0,
 		                          "TEXCOORD0",
 		                          0,
@@ -42,7 +42,7 @@ namespace ts3
 		                          8,
 		                          0 ),
 
-		ts3gaVertexAttributeDesc( 2,
+		ts3GAVertexAttributeDesc( 2,
 		                          0,
 		                          "COLOR",
 		                          0,
@@ -53,7 +53,7 @@ namespace ts3
 
 	const gpuapi::VertexInputFormatDesc cvVertexInputFormatDesc2DUI =
 	{
-		ts3gaVertexAttributeDesc( 0,
+		ts3GAVertexAttributeDesc( 0,
 		                          0,
 		                          "POSITION",
 		                          0,
@@ -61,7 +61,7 @@ namespace ts3
 		                          0,
 		                          0 ),
 
-		ts3gaVertexAttributeDesc( 1,
+		ts3GAVertexAttributeDesc( 1,
 		                          0,
 		                          "TEXCOORD0",
 		                          0,
@@ -69,7 +69,7 @@ namespace ts3
 		                          12,
 		                          0 ),
 
-		ts3gaVertexAttributeDesc( 2,
+		ts3GAVertexAttributeDesc( 2,
 		                          0,
 		                          "COLOR",
 		                          0,
@@ -80,7 +80,7 @@ namespace ts3
 
 	const gpuapi::VertexInputFormatDesc cvVertexInputFormatDesc3DDefault =
 	{
-		ts3gaVertexAttributeDesc( 0,
+		ts3GAVertexAttributeDesc( 0,
 		                          0,
 		                          "POSITION",
 		                          0,
@@ -88,7 +88,7 @@ namespace ts3
 		                          0,
 		                          0 ),
 
-		ts3gaVertexAttributeDesc( 1,
+		ts3GAVertexAttributeDesc( 1,
 		                          0,
 		                          "COLOR",
 		                          0,

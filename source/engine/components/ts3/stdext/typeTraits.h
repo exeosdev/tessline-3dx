@@ -7,34 +7,34 @@
 namespace ts3
 {
 
-	/// @brief Contains a static `size_t` member variable `value` which yields the length of `TpTypes...`.
-	template <typename... TpTypes>
+	/// @brief Contains a static `size_t` member variable `value` which yields the length of `TTypes...`.
+	template <typename... TTypes>
 	struct TypeCounter
 	{
-		static constexpr size_t value = sizeof...( TpTypes );
+		static constexpr size_t value = sizeof...( TTypes );
 	};
 
 	/// @brief 
-	template <bool tBoolean, typename TpTrueType, typename TpFalseType>
+	template <bool tBoolean, typename TTrueType, typename TFalseType>
 	struct ConditionalType
 	{
-		using Type = typename std::conditional<tBoolean, TpTrueType, TpFalseType>::type;
+		using Type = typename std::conditional<tBoolean, TTrueType, TFalseType>::type;
 	};
 
 	/// @brief
-	template <typename TpValue, bool tBoolean, TpValue tTrueval, TpValue tFalseval>
+	template <typename TValue, bool tBoolean, TValue tTrueval, TValue tFalseval>
 	struct ConditionalValue;
 	
-	template <typename TpValue, TpValue tTrueval, TpValue tFalseval>
-	struct ConditionalValue<TpValue, true, tTrueval, tFalseval>
+	template <typename TValue, TValue tTrueval, TValue tFalseval>
+	struct ConditionalValue<TValue, true, tTrueval, tFalseval>
 	{
-		static constexpr TpValue value = tTrueval;
+		static constexpr TValue value = tTrueval;
 	};
 	
-	template <typename TpValue, TpValue tTrueval, TpValue tFalseval>
-	struct ConditionalValue<TpValue, false, tTrueval, tFalseval>
+	template <typename TValue, TValue tTrueval, TValue tFalseval>
+	struct ConditionalValue<TValue, false, tTrueval, tFalseval>
 	{
-		static constexpr TpValue value = tFalseval;
+		static constexpr TValue value = tFalseval;
 	};
 
 
@@ -56,13 +56,36 @@ namespace ts3
 
 	/// @brief Contains a member typedef `type`, which is the smallest signed integral type of at least specified size (in bytes)
 	template <size_t tSize>
+	struct IntTypeByBits
+	{
+		using Type = typename ConditionalType<
+	        tSize <= ( sizeof( int8 ) * CHAR_BIT ), int8, typename ConditionalType<
+                tSize <= ( sizeof( int16 ) * CHAR_BIT  ), int16, typename ConditionalType<
+                    tSize <= ( sizeof( int32 ) * CHAR_BIT ), int32, typename ConditionalType<
+						tSize <= ( sizeof( int64 ) * CHAR_BIT ), int64, void>::Type>::Type>::Type>::Type;
+	};
+
+	/// @brief Contains a member typedef `type`, which is the smallest unsigned integral type of at least specified size (in bytes)
+	template <size_t tSize>
+	struct UintTypeByBits
+	{
+		using Type = typename ConditionalType<
+	        tSize <= ( sizeof( uint8 ) * CHAR_BIT ), uint8, typename ConditionalType<
+                tSize <= ( sizeof( uint16 ) * CHAR_BIT ), uint16, typename ConditionalType<
+                    tSize <= ( sizeof( uint32 ) * CHAR_BIT ), uint32, typename ConditionalType<
+						tSize <= ( sizeof( uint64 ) * CHAR_BIT ), uint64, void>::Type>::Type>::Type>::Type;
+	};
+
+
+	/// @brief Contains a member typedef `type`, which is the smallest signed integral type of at least specified size (in bytes)
+	template <size_t tSize>
 	struct IntTypeBySize
 	{
 		using Type = typename ConditionalType<
 	        tSize <= sizeof( int8 ), int8, typename ConditionalType<
                 tSize <= sizeof( int16 ), int16, typename ConditionalType<
-                    tSize == sizeof( int32 ), int32, typename ConditionalType<
-						tSize == sizeof( int64 ), int64, void>::Type>::Type>::Type>::Type;
+                    tSize <= sizeof( int32 ), int32, typename ConditionalType<
+						tSize <= sizeof( int64 ), int64, void>::Type>::Type>::Type>::Type;
 	};
 
 	/// @brief Contains a member typedef `type`, which is the smallest unsigned integral type of at least specified size (in bytes)
@@ -70,10 +93,10 @@ namespace ts3
 	struct UintTypeBySize
 	{
 		using Type = typename ConditionalType<
-	        tSize == sizeof( uint8 ), uint8, typename ConditionalType<
-                tSize == sizeof( uint16 ), uint16, typename ConditionalType<
-                    tSize == sizeof( uint32 ), uint32, typename ConditionalType<
-						tSize == sizeof( uint64 ), uint64, void>::Type>::Type>::Type>::Type;
+	        tSize <= sizeof( uint8 ), uint8, typename ConditionalType<
+                tSize <= sizeof( uint16 ), uint16, typename ConditionalType<
+                    tSize <= sizeof( uint32 ), uint32, typename ConditionalType<
+						tSize <= sizeof( uint64 ), uint64, void>::Type>::Type>::Type>::Type;
 	};
 
 	/// @brief Contains a member typedef `type`, which is the smallest signed integral type required to hold the specified value.
@@ -97,53 +120,53 @@ namespace ts3
 	};
 
 
-	/// @brief Contains a static boolean variable `value`, which yields true if specified type list `TpTypes` contains `void` or false otherwise.
-	template <typename... TpTypes>
+	/// @brief Contains a static boolean variable `value`, which yields true if specified type list `TTypes` contains `void` or false otherwise.
+	template <typename... TTypes>
 	struct IsVoidOnTypeList;
 
-	template <typename Tp>
-	struct IsVoidOnTypeList<Tp>
+	template <typename TVal>
+	struct IsVoidOnTypeList<TVal>
 	{
-		static constexpr bool value = std::is_void<Tp>::value;
+		static constexpr bool value = std::is_void<TVal>::value;
 	};
 
-	template <typename Tp, typename... TpRest>
-	struct IsVoidOnTypeList<Tp, TpRest...>
+	template <typename TVal, typename... TRest>
+	struct IsVoidOnTypeList<TVal, TRest...>
 	{
-		static constexpr bool value = std::is_void<Tp>::value || IsVoidOnTypeList<TpRest...>::value;
+		static constexpr bool value = std::is_void<TVal>::value || IsVoidOnTypeList<TRest...>::value;
 	};
 
 
-	template <typename TpType, typename... TpList>
+	template <typename TType, typename... TList>
 	struct IsTypeOnTypeList;
 
-	template <typename TpType, typename TpCheck>
-	struct IsTypeOnTypeList<TpType, TpCheck>
+	template <typename TType, typename TCheck>
+	struct IsTypeOnTypeList<TType, TCheck>
 	{
-		static constexpr bool value = std::is_same<TpType, TpCheck>::value;
+		static constexpr bool value = std::is_same<TType, TCheck>::value;
 	};
 
-	template <typename TpType, typename TpCheck, typename... TpList>
-	struct IsTypeOnTypeList<TpType, TpCheck, TpList...>
+	template <typename TType, typename TCheck, typename... TList>
+	struct IsTypeOnTypeList<TType, TCheck, TList...>
 	{
-		static constexpr bool value = std::is_same<TpType, TpCheck>::value || IsTypeOnTypeList<TpType, TpList...>::value;
+		static constexpr bool value = std::is_same<TType, TCheck>::value || IsTypeOnTypeList<TType, TList...>::value;
 	};
 
 
-	/// @brief Contains a member typedef `type`, which is the first type from `TpTypes...` which matches `TpPred`
-	template <template<typename> class TpPred, typename... TpTypes>
+	/// @brief Contains a member typedef `type`, which is the first type from `TTypes...` which matches `TPred`
+	template <template<typename> class TPred, typename... TTypes>
 	struct FirstMatchingType;
 
-	template <template<typename> class TpPred, typename Tp>
-	struct FirstMatchingType<TpPred, Tp>
+	template <template<typename> class TPred, typename TVal>
+	struct FirstMatchingType<TPred, TVal>
 	{
-		using Type = typename ConditionalType<TpPred<Tp>::value, Tp, void>::Type;
+		using Type = typename ConditionalType<TPred<TVal>::value, TVal, void>::Type;
 	};
 
-	template <template<typename> class TpPred, typename Tp, typename... TpRest>
-	struct FirstMatchingType<TpPred, Tp, TpRest...>
+	template <template<typename> class TPred, typename TVal, typename... TRest>
+	struct FirstMatchingType<TPred, TVal, TRest...>
 	{
-		using Type = typename ConditionalType<TpPred<Tp>::value, Tp, typename FirstMatchingType<TpPred, TpRest...>::Type>::Type;
+		using Type = typename ConditionalType<TPred<TVal>::value, TVal, typename FirstMatchingType<TPred, TRest...>::Type>::Type;
 	};
 
 }

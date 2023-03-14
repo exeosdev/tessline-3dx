@@ -31,14 +31,14 @@ namespace ts3
 
 		static SCFInputDataSource fromMemory( ReadOnlyMemoryView pMemoryView );
 
-		template <typename TpCallback, typename... TpArgs>
-		static SCFInputDataSource bindGenericCallback( TpCallback pCallback, TpArgs && ...pArgs )
+		template <typename TCallback, typename... TArgs>
+		static SCFInputDataSource bindGenericCallback( TCallback pCallback, TArgs && ...pArgs )
 		{
 			return std::bind( pCallback,
 			                  std::placeholders::_1,
 			                  std::placeholders::_2,
 			                  std::placeholders::_3,
-			                  std::forward<TpArgs>( pArgs )... );
+			                  std::forward<TArgs>( pArgs )... );
 		}
 	};
 

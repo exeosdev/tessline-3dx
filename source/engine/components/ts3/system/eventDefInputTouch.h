@@ -7,15 +7,15 @@
 namespace ts3::system
 {
 
-	struct EvtInputTouchDown : public EvtInput<E_EVENT_CODE_INPUT_TOUCH_DOWN>
+	struct EvtInputTouchDown : public EvtInput
 	{
 	};
 
-	struct EvtInputTouchMove : public EvtInput<E_EVENT_CODE_INPUT_TOUCH_MOVE>
+	struct EvtInputTouchMove : public EvtInput
 	{
 	};
 
-	struct EvtInputTouchUp : public EvtInput<E_EVENT_CODE_INPUT_TOUCH_UP>
+	struct EvtInputTouchUp : public EvtInput
 	{
 	};
 

@@ -53,8 +53,8 @@ namespace ts3::system
 			auto width = ANativeWindow_getWidth( pANativeWindow );
 			auto height = ANativeWindow_getHeight( pANativeWindow );
 
-			resultSize.x = trunc_numeric_cast<decltype( resultSize.x )>( width );
-			resultSize.y = trunc_numeric_cast<decltype( resultSize.x )>( height );
+			resultSize.x = numeric_cast<decltype( resultSize.x )>( width );
+			resultSize.y = numeric_cast<decltype( resultSize.x )>( height );
 
 			return resultSize;
 		}

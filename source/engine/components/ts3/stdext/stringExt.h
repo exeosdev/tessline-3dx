@@ -44,8 +44,8 @@ namespace ts3
 	template <>
 	struct ToStringProxy<char>
 	{
-		template <class _Tp>
-		std::basic_string<char> toString( const _Tp & pValue )
+		template <class _T>
+		std::basic_string<char> toString( const _T & pValue )
 		{
 			return std::to_string( pValue );
 		}
@@ -54,8 +54,8 @@ namespace ts3
 	template <>
 	struct ToStringProxy<wchar_t>
 	{
-		template <class _Tp>
-		std::basic_string<wchar_t> toString( const _Tp & pValue )
+		template <class _T>
+		std::basic_string<wchar_t> toString( const _T & pValue )
 		{
 			return std::to_wstring( pValue );
 		}
@@ -250,38 +250,38 @@ namespace ts3
 
 
 	/// @brief
-	template <typename _Char, typename _Tp>
-	std::basic_string<_Char> toString( const _Tp & pValue )
+	template <typename _Char, typename _T>
+	std::basic_string<_Char> toString( const _T & pValue )
 	{
 		return ToStringProxy<_Char>::toString( pValue );
 	}
 
 	/// @brief
-	template <typename _Tp, typename _Char>
-	std::pair<_Tp, _Char *> fromString( const _Char * pInputStr )
+	template <typename _T, typename _Char>
+	std::pair<_T, _Char *> fromString( const _Char * pInputStr )
 	{
-		return FromStringProxy<_Tp>::fromString( pInputStr );
+		return FromStringProxy<_T>::fromString( pInputStr );
 	}
 
 	/// @brief
-	template <typename _Tp, typename _Char>
-	std::pair<_Tp, _Char *> fromString( const _Char * pInputStr, IntegerBase pBase )
+	template <typename _T, typename _Char>
+	std::pair<_T, _Char *> fromString( const _Char * pInputStr, IntegerBase pBase )
 	{
-		return FromStringProxy<_Tp>::fromString( pInputStr, pBase );
+		return FromStringProxy<_T>::fromString( pInputStr, pBase );
 	}
 
 	/// @brief
-	template <typename _Tp, typename _Char>
-	std::pair<_Tp, size_t> fromString( const std::basic_string<_Char> & pInputStr )
+	template <typename _T, typename _Char>
+	std::pair<_T, size_t> fromString( const std::basic_string<_Char> & pInputStr )
 	{
-		return FromStringProxy<_Tp>::fromString( pInputStr );
+		return FromStringProxy<_T>::fromString( pInputStr );
 	}
 
 	/// @brief
-	template <typename _Tp, typename _Char>
-	std::pair<_Tp, size_t> fromString( const std::basic_string<_Char> & pInputStr, IntegerBase pBase )
+	template <typename _T, typename _Char>
+	std::pair<_T, size_t> fromString( const std::basic_string<_Char> & pInputStr, IntegerBase pBase )
 	{
-		return FromStringProxy<_Tp>::fromString( pInputStr, pBase );
+		return FromStringProxy<_T>::fromString( pInputStr, pBase );
 	}
 
 }

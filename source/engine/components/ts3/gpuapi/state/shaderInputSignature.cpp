@@ -27,47 +27,52 @@ namespace ts3::gpuapi
 	                                                        InputDescriptorLayoutInfo & pOutDescriptorLayoutInfo );
 	static uint32 computeConstantDwordSize( size_t pByteSize );
 
-	ShaderInputSignature createShaderInputSignature( const ShaderInputSignatureDesc & pInputSignatureDesc )
+	namespace smutil
 	{
-		ShaderInputSignature inputSignature;
-		inputSignature.dwordSize = 0;
-		inputSignature.constantsNum = 0;
-		inputSignature.descriptorsNum = 0;
-		inputSignature.descriptorSetsNum = 0;
-		inputSignature.parametersNum = 0;
 
-		if( !createInputSignatureConstantLayout( pInputSignatureDesc, inputSignature ) )
+		ShaderInputSignature createShaderInputSignature( const ShaderInputSignatureDesc & pInputSignatureDesc )
 		{
-			return CX_INIT_EMPTY;
+			ShaderInputSignature inputSignature;
+			inputSignature.dwordSize = 0;
+			inputSignature.constantsNum = 0;
+			inputSignature.descriptorsNum = 0;
+			inputSignature.descriptorSetsNum = 0;
+			inputSignature.parametersNum = 0;
+
+			if( !createInputSignatureConstantLayout( pInputSignatureDesc, inputSignature ) )
+			{
+				return CX_INIT_EMPTY;
+			}
+
+			if( !createInputSignatureDescriptorLayout( pInputSignatureDesc, inputSignature ) )
+			{
+				return CX_INIT_EMPTY;
+			}
+
+			inputSignature.constantsNum = inputSignature.constantLayout.constantsNum;
+			inputSignature.descriptorsNum = inputSignature.descriptorLayout.totalDescriptorsNum;
+			inputSignature.descriptorSetsNum = inputSignature.descriptorLayout.descriptorSetsNum;
+			inputSignature.parametersNum = inputSignature.constantsNum + inputSignature.descriptorsNum;
+			inputSignature.dwordSize = inputSignature.constantLayout.dwordSize + inputSignature.descriptorSetsNum;
+
+			uint32 globalParamIndex = 0;
+
+			for( auto & constant : inputSignature.constantLayout.commonConstantArray )
+			{
+				constant.cParamIndex = globalParamIndex++;
+				inputSignature.commonParameterList.push_back( &constant );
+				inputSignature.constantMap[constant.cRefID] = &constant;
+			}
+			for( auto & resourceDescriptor : inputSignature.descriptorLayout.commonDescriptorArray )
+			{
+				resourceDescriptor.cParamIndex = globalParamIndex++;
+				inputSignature.commonParameterList.push_back( &resourceDescriptor );
+				inputSignature.descriptorMap[resourceDescriptor.cRefID] = &resourceDescriptor;
+			}
+
+			return inputSignature;
 		}
 
-		if( !createInputSignatureDescriptorLayout( pInputSignatureDesc, inputSignature ) )
-		{
-			return CX_INIT_EMPTY;
-		}
-
-		inputSignature.constantsNum = inputSignature.constantLayout.constantsNum;
-		inputSignature.descriptorsNum = inputSignature.descriptorLayout.totalDescriptorsNum;
-		inputSignature.descriptorSetsNum = inputSignature.descriptorLayout.descriptorSetsNum;
-		inputSignature.parametersNum = inputSignature.constantsNum + inputSignature.descriptorsNum;
-		inputSignature.dwordSize = inputSignature.constantLayout.dwordSize + inputSignature.descriptorSetsNum;
-
-		uint32 globalParamIndex = 0;
-
-		for( auto & constant : inputSignature.constantLayout.commonConstantArray )
-		{
-			constant.cParamIndex = globalParamIndex++;
-			inputSignature.commonParameterList.push_back( &constant );
-			inputSignature.constantMap[constant.cRefID] = &constant;
-		}
-		for( auto & resourceDescriptor : inputSignature.descriptorLayout.commonDescriptorArray )
-		{
-			resourceDescriptor.cParamIndex = globalParamIndex++;
-			inputSignature.commonParameterList.push_back( &resourceDescriptor );
-			inputSignature.descriptorMap[resourceDescriptor.cRefID] = &resourceDescriptor;
-		}
-
-		return inputSignature;
 	}
 
 	bool createInputSignatureConstantLayout( const ShaderInputSignatureDesc & pInputSignatureDesc, ShaderInputSignature & pOutSignature )
@@ -96,7 +101,7 @@ namespace ts3::gpuapi
 				constantParameter.cParamType = EShaderInputParameterType::Constant;
 				constantParameter.iFormat = constantDesc.format;
 				constantParameter.iStageIndex = constantDesc.bindingIndex;
-				constantParameter.iByteSize = ecGetVertexAttribFormatByteSize( constantDesc.format );
+				constantParameter.iByteSize = cxdefs::getVertexAttribFormatByteSize( constantDesc.format );
 				constantParameter.iDwordSize = computeConstantDwordSize( constantParameter.iByteSize );
 				constantParameter.iAccessClass = constantGroupDesc.accessClass;
 
@@ -117,13 +122,13 @@ namespace ts3::gpuapi
 			auto & constant = constantLayout.commonConstantArray.at( globalConstantIndex );
 			constant.iGlobalIndex = globalConstantIndex;
 
-			if( constant.iAccessClass == EShaderConstantAccessClass::AllActiveStages )
+			if( constant.iAccessClass == EShaderConstantAccessClass::ACAllActive )
 			{
 				constant.iVisibilityMask = pInputSignatureDesc.activeShaderStagesMask;
 			}
 			else
 			{
-				constant.iVisibilityMask = ecGetShaderConstantVisibilityStageBit( constant.iAccessClass );
+				constant.iVisibilityMask = cxdefs::getShaderConstantVisibilityStageMask( constant.iAccessClass );
 			}
 		}
 
@@ -163,7 +168,7 @@ namespace ts3::gpuapi
 				auto & descriptor = descriptorLayout.commonDescriptorArray.emplace_back();
 				descriptor.cRefID = descriptorDesc.refID;
 				descriptor.dDescriptorType = descriptorSetDesc.descriptorType;
-				descriptor.dSetIndex = trunc_numeric_cast<shader_input_index_t>( descriptorSetIndex );
+				descriptor.dSetIndex = numeric_cast<shader_input_index_t>( descriptorSetIndex );
 				descriptor.dShaderVisibilityMask = descriptorDesc.shaderVisibilityMask & pInputSignatureDesc.activeShaderStagesMask;
 
 				if( descriptorSetDesc.descriptorType == EShaderInputDescriptorType::Resource )
@@ -171,7 +176,7 @@ namespace ts3::gpuapi
 					descriptor.cParamType = EShaderInputParameterType::Resource;
 					descriptor.uResourceInfo.resourceArraySize = descriptorDesc.uResourceDesc.resourceArraySize;
 					descriptor.uResourceInfo.resourceType = descriptorDesc.uResourceDesc.resourceType;
-					descriptor.uResourceInfo.resourceClass = ecGetShaderInputResourceResourceClass( descriptorDesc.uResourceDesc.resourceType );
+					descriptor.uResourceInfo.resourceClass = cxdefs::getShaderInputResourceResourceClass( descriptorDesc.uResourceDesc.resourceType );
 					descriptor.uResourceInfo.resourceBaseRegisterIndex = descriptorDesc.uResourceDesc.resourceBaseRegisterIndex;
 				}
 				else if( descriptorSetDesc.descriptorType == EShaderInputDescriptorType::Sampler )
@@ -186,10 +191,10 @@ namespace ts3::gpuapi
 
 			auto & descriptorSet = descriptorLayout.descriptorSets.emplace_back();
 			descriptorSet.descriptorType = descriptorSetDesc.descriptorType;
-			descriptorSet.arrayOffset = trunc_numeric_cast<uint32>( descriptorSetArrayOffset );
+			descriptorSet.arrayOffset = numeric_cast<uint32>( descriptorSetArrayOffset );
 			descriptorSet.basePtr = descriptorLayout.commonDescriptorArray.data() + descriptorSetArrayOffset;
 			descriptorSet.setDescriptorsNum = setDescriptorsNum;
-			descriptorSet.setIndex = trunc_numeric_cast<uint32>( descriptorSetIndex );
+			descriptorSet.setIndex = numeric_cast<uint32>( descriptorSetIndex );
 			descriptorSet.shaderVisibilityMask = descriptorSetVisibilityMask;
 		}
 
@@ -204,7 +209,7 @@ namespace ts3::gpuapi
 		size_t constantsNum = 0;
 		size_t totalDwordSize = 0;
 
-		if( pInputSignatureDesc.constantGroupsNum > GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM + 1 )
+		if( pInputSignatureDesc.constantGroupsNum > cxdefs::GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM + 1 )
 		{
 			ts3DebugInterrupt();
 			return false;
@@ -213,11 +218,11 @@ namespace ts3::gpuapi
 		for( uint32 inputConstantGroupIndex = 0; inputConstantGroupIndex < pInputSignatureDesc.constantGroupsNum; ++inputConstantGroupIndex )
 		{
 			const auto & constantGroupDesc = pInputSignatureDesc.constantGroupArray[inputConstantGroupIndex];
-			auto groupShaderStageBit = ecGetShaderConstantVisibilityStageBit( constantGroupDesc.accessClass );
+			auto groupShaderStageMask = cxdefs::getShaderConstantVisibilityStageMask( constantGroupDesc.accessClass );
 
 			constantsNum += constantGroupDesc.constantsNum;
 
-			if( !pInputSignatureDesc.activeShaderStagesMask.isSet( groupShaderStageBit ) )
+			if( !pInputSignatureDesc.activeShaderStagesMask.isSet( groupShaderStageMask ) )
 			{
 				ts3DebugInterrupt();
 				return false;
@@ -227,11 +232,11 @@ namespace ts3::gpuapi
 			{
 				const auto & constantDesc = constantGroupDesc.constantList[inputConstantIndex];
 
-				auto constantByteSize = ecGetVertexAttribFormatByteSize( constantDesc.format );
+				auto constantByteSize = cxdefs::getVertexAttribFormatByteSize( constantDesc.format );
 				auto constantDwordSize = computeConstantDwordSize( constantByteSize );
 				totalDwordSize += constantDwordSize;
 
-				if( totalDwordSize > GPU_SYSTEM_METRIC_IS_MAX_DWORD_SIZE )
+				if( totalDwordSize > cxdefs::GPU_SYSTEM_METRIC_IS_MAX_DWORD_SIZE )
 				{
 					ts3DebugInterrupt();
 					return false;
@@ -239,8 +244,8 @@ namespace ts3::gpuapi
 			}
 		}
 
-		pOutConstantLayoutInfo.constantsNum = trunc_numeric_cast<uint32>( constantsNum );
-		pOutConstantLayoutInfo.totalDwordSize = trunc_numeric_cast<uint32>( totalDwordSize );
+		pOutConstantLayoutInfo.constantsNum = numeric_cast<uint32>( constantsNum );
+		pOutConstantLayoutInfo.totalDwordSize = numeric_cast<uint32>( totalDwordSize );
 
 		return true;
 	}
@@ -251,7 +256,7 @@ namespace ts3::gpuapi
 		size_t descriptorsNum = 0;
 		size_t descriptorSetsNum = pInputSignatureDesc.descriptorSetsNum;
 
-		if( descriptorSetsNum > GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM )
+		if( descriptorSetsNum > cxdefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM )
 		{
 			ts3DebugInterrupt();
 			return false;
@@ -273,8 +278,8 @@ namespace ts3::gpuapi
 			}
 		}
 
-		pOutDescriptorLayoutInfo.descriptorsNum = trunc_numeric_cast<uint32>( descriptorsNum );
-		pOutDescriptorLayoutInfo.descriptorSetsNum = trunc_numeric_cast<uint32>( descriptorSetsNum );
+		pOutDescriptorLayoutInfo.descriptorsNum = numeric_cast<uint32>( descriptorsNum );
+		pOutDescriptorLayoutInfo.descriptorSetsNum = numeric_cast<uint32>( descriptorSetsNum );
 
 		return true;
 	}
@@ -283,7 +288,7 @@ namespace ts3::gpuapi
 	{
 		auto dwordSize = pByteSize / sizeof( uint32 );
 		auto dwordSizeMod = pByteSize % sizeof( uint32 );
-		return ( dwordSizeMod == 0 ) ? trunc_numeric_cast<uint32>( dwordSize ) : trunc_numeric_cast<uint32>( dwordSize + 1 );
+		return ( dwordSizeMod == 0 ) ? numeric_cast<uint32>( dwordSize ) : numeric_cast<uint32>( dwordSize + 1 );
 	}
 
 } // namespace ts3::gpuapi

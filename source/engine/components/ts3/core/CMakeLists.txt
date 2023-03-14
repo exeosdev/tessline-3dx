@@ -15,6 +15,7 @@ set( TS3_CORE_SRC_FILES
 		"exception.cpp"
 		"exceptionCommon.h"
 		"exceptionResult.h"
+		"exceptionUtils.h"
         "graphicsTypes.h"
         "mathImports.h"
 
@@ -37,6 +38,7 @@ set( TS3_CORE_SRC_FILES
 		"typeinfo/tpiCoreEnum.cpp"
 
         "utility/gdsCore.h"
+		"utility/hfsIdentifier.h"
 		"utility/rxmlParser.h"
 		"utility/rxmlParser.cpp"
 		"utility/xmlTypes.h"

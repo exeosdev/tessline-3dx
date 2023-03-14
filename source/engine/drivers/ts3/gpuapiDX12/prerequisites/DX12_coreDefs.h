@@ -7,11 +7,11 @@
 namespace ts3::gpuapi
 {
 
-	constexpr SIZE_T cvD3D12CPUDescriptorPtrInvalid = ts3::Limits<SIZE_T>::maxValue;
+	constexpr SIZE_T cvD3D12CPUDescriptorPtrInvalid = Limits<SIZE_T>::maxValue;
 
 	constexpr D3D12_CPU_DESCRIPTOR_HANDLE cvD3D12CPUDescriptorEmpty{ cvD3D12CPUDescriptorPtrInvalid };
 
-	constexpr auto cvD3D12CommandListTypeInvalid = static_cast<D3D12_COMMAND_LIST_TYPE>( ts3::Limits<uint32>::maxValue );
+	constexpr auto cvD3D12CommandListTypeInvalid = static_cast<D3D12_COMMAND_LIST_TYPE>( Limits<uint32>::maxValue );
 
 } // namespace ts3::gpuapi
 

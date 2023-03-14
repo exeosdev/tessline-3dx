@@ -10,10 +10,12 @@ namespace ts3::gpuapi
 	class GPUDriver;
 	class GPUDevice;
 
+	/// @brief
     class GPUAPIObject : public DynamicInterface
     {
     };
 
+	/// @brief
     class TS3_GPUAPI_API GPUDriverChildObject : public GPUAPIObject
     {
     public:
@@ -23,20 +25,24 @@ namespace ts3::gpuapi
 	    virtual ~GPUDriverChildObject();
     };
 
+	/// @brief
 	class TS3_GPUAPI_API GPUDeviceChildObject : public GPUAPIObject
 	{
 	public:
         GPUDriver & mGPUDriver;
 		GPUDevice & mGPUDevice;
 
+	public:
 		explicit GPUDeviceChildObject( GPUDevice & pGPUDevice );
 		virtual ~GPUDeviceChildObject();
+
+		virtual UniqueGPUObjectID queryObjectID() const;
 	};
 
-	template <typename TpClass, typename... TpArgs>
-	inline GpaHandle<TpClass> createGPUAPIObject( TpArgs && ...pArgs )
+	template <typename TClass, typename... TArgs>
+	inline GpaHandle<TClass> createGPUAPIObject( TArgs && ...pArgs )
 	{
-		return createDynamicInterfaceObject<TpClass>( std::forward<TpArgs>( pArgs )... );
+		return createDynamicInterfaceObject<TClass>( std::forward<TArgs>( pArgs )... );
 	}
 
 } // namespace ts3::gpuapi

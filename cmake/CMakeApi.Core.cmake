@@ -21,6 +21,10 @@ macro( ebsCoreAppendUniqueInternal pListName pListSetCache pAppendUniqueOnly pCo
     ebsCoreAppend( ${pListName} "${pListSetCache}" "${pAppendUniqueOnly}" "${pContent}" )
 endmacro()
 
+macro( clearInternalCache )
+    set( CM_EBS_VARREG "" CACHE INTERNAL "" )
+endmacro()
+
 macro( setInternal pVarName )
     set( ${pVarName} "${ARGN}" CACHE INTERNAL "" )
     ebsCoreAppend( CM_EBS_VARREG TRUE TRUE "${pVarName}" )

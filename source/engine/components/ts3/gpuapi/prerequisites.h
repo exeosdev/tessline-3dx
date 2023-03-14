@@ -8,6 +8,8 @@
 #include <ts3/core/coreEngineState.h>
 #include <ts3/core/graphicsTypes.h>
 #include <ts3/core/mathImports.h>
+#include <ts3/core/utility/hfsIdentifier.h>
+#include <ts3/stdext/utilities.h>
 
 #include <memory>
 
@@ -27,14 +29,30 @@
 #  endif
 #endif
 
+#define TS3_GPUAPI_API_NO_DISCARD \
+	TS3_GPUAPI_API TS3_ATTR_NO_DISCARD
+
+#define ts3driverApi( access ) access
+
 #include "prerequisites/commonDefs.h"
 #include "prerequisites/commonTypes.h"
 #include "prerequisites/coreInterfaceDefs.h"
-#include "prerequisites/gpuBaseObject.h"
 #include "prerequisites/gpuDataFormats.h"
 
 namespace ts3::gpuapi
 {
+
+	/// @namespace cxdefs
+	/// @brief GpuAPI-level constant expressions and utility functions used by those.
+
+	/// @namespace defaults
+	/// @brief GpuAPI-level default/pre-defined values/instances that can be used whenever a common case is implemented.
+
+	/// @namespace rcutil
+	/// @brief Resource Utilities, used to interact with resources and provide additional, common functionalities.
+
+	/// @namespace smutil
+	/// @brief State Management Utilities, used to provide helper methods related to GPU state management.
 
 	// Same for all drivers. A top-level interface for querying capabilities and
 	// creating some system-level things like a display manager or a swap chain.
@@ -68,21 +86,42 @@ namespace ts3::gpuapi
 	// Vulkan: native window + KHR swap chain + KHR present
 	class PresentationLayer;
 
-	ts3DeclareClassHandle( CommandContext );
-	ts3DeclareClassHandle( CommandSystem );
-	ts3DeclareClassHandle( DisplayManager );
-	ts3DeclareClassHandle( GPUDevice );
-	ts3DeclareClassHandle( GPUDriver );
-	ts3DeclareClassHandle( PresentationLayer );
+	ts3GpaDeclareClassHandle( CommandContext );
+	ts3GpaDeclareClassHandle( CommandSystem );
+	ts3GpaDeclareClassHandle( DisplayManager );
+	ts3GpaDeclareClassHandle( GPUDevice );
+	ts3GpaDeclareClassHandle( GPUDriver );
+	ts3GpaDeclareClassHandle( PresentationLayer );
+
+	enum class EGPUDriverAPI : uint32
+	{
+		DirectX = 0xD1,
+		Metal = 0xAA,
+		OpenGL = 0x77,
+		Vulkan = 0xCC,
+		Unknown = 0x00
+	};
+
+	namespace cxdefs
+	{
+
+		inline constexpr uint32 makeGPUDriverID( EGPUDriverAPI pDriverAPI, uint32 pAPISubVersion )
+		{
+			return ( ( static_cast<uint32>( pDriverAPI ) & 0xFF ) << 8 ) | ( pAPISubVersion & 0xFF );
+		}
+
+	}
 
 	enum class EGPUDriverID : uint32
 	{
-		GDIDDX11 = 0xCD11,
-		GDIDDX12 = 0xCD12,
-		GDIDGL4 = 0xA0C4,
-		GDIDGLES3 = 0xA0E3,
-		GDIDVK1 = 0xFF01,
-		GDID0 = 0
+		GDIDirectX11      = cxdefs::makeGPUDriverID( EGPUDriverAPI::DirectX, 0x11 ),
+		GDIDirectX12      = cxdefs::makeGPUDriverID( EGPUDriverAPI::DirectX, 0x12 ),
+		GDIMetal1         = cxdefs::makeGPUDriverID( EGPUDriverAPI::Metal,   0x01 ),
+		GDIOpenGLDesktop4 = cxdefs::makeGPUDriverID( EGPUDriverAPI::OpenGL,  0xD4 ),
+		GDIOpenGLES3      = cxdefs::makeGPUDriverID( EGPUDriverAPI::OpenGL,  0xE3 ),
+		GDIVulkan10       = cxdefs::makeGPUDriverID( EGPUDriverAPI::Vulkan,  0x10 ),
+		GDINull           = cxdefs::makeGPUDriverID( EGPUDriverAPI::Unknown, 0xFF ),
+		GDIUnknown        = cxdefs::makeGPUDriverID( EGPUDriverAPI::Unknown, 0x00 )
 	};
 
 } // namespace ts3::gpuapi

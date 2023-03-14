@@ -9,7 +9,7 @@
 namespace ts3::gpuapi
 {
 
-	class TS3_GPUAPI_CLASS Sampler : public GPUBaseObject
+	class TS3_GPUAPI_CLASS Sampler : public GPUDeviceChildObject
 	{
 	public:
 		SamplerDesc const mSamplerDesc;

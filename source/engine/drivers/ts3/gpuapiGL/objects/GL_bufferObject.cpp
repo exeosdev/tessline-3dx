@@ -17,10 +17,10 @@ namespace ts3::gpuapi
 		GLuint bufferHandle = 0;
 
 		glGenBuffers( 1, &bufferHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		glBindBuffer( pGLCreateInfo.bindTarget, bufferHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		GLBufferObjectHandle openglBufferObject{ new GLBufferObject( bufferHandle, pGLCreateInfo ) };
 		if( !openglBufferObject->initialize( pGLCreateInfo ) )
@@ -34,7 +34,7 @@ namespace ts3::gpuapi
 	bool GLBufferObject::release()
 	{
 		glDeleteBuffers( 1, &mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return true;
 	}
@@ -42,7 +42,7 @@ namespace ts3::gpuapi
 	bool GLBufferObject::validateHandle() const
 	{
 		auto isBuffer = glIsBuffer( mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return isBuffer != GL_FALSE;
 	}
@@ -53,7 +53,7 @@ namespace ts3::gpuapi
 
 		void * mapPointer = nullptr;
 		glGetBufferPointerv( bufferBindTarget, GL_BUFFER_MAP_POINTER, &mapPointer );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		if( mapPointer != nullptr )
 		{
@@ -61,10 +61,10 @@ namespace ts3::gpuapi
 		}
 
 		glMapBufferRange( bufferBindTarget,
-                          trunc_numeric_cast<GLintptr>( pOffset ),
-                          trunc_numeric_cast<GLsizeiptr>( pLength ),
+                          numeric_cast<GLintptr>( pOffset ),
+                          numeric_cast<GLsizeiptr>( pLength ),
                           pFlags );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return queryIsMapped();
 	}
@@ -88,7 +88,7 @@ namespace ts3::gpuapi
 		auto bufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
 		glUnmapBuffer( bufferBindTarget );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLBufferObject::flushMappedRegion( gpu_memory_size_t pOffset, gpu_memory_size_t pLength, GLenum pActiveBindTarget )
@@ -97,14 +97,14 @@ namespace ts3::gpuapi
 
 		void * mapPointer = nullptr;
 		glGetBufferPointerv( bufferBindTarget, GL_BUFFER_MAP_POINTER, &mapPointer );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		ts3DebugAssert( mapPointer );
 
 		glFlushMappedBufferRange( bufferBindTarget,
-                                  trunc_numeric_cast<GLintptr>( pOffset ),
-                                  trunc_numeric_cast<GLsizeiptr>( pLength ) );
-		ts3GLHandleLastError();
+                                  numeric_cast<GLintptr>( pOffset ),
+                                  numeric_cast<GLsizeiptr>( pLength ) );
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLBufferObject::invalidateRegion( gpu_memory_size_t pOffset, gpu_memory_size_t pLength, GLenum pActiveBindTarget )
@@ -113,16 +113,16 @@ namespace ts3::gpuapi
 		auto bufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
 		glBufferSubData( bufferBindTarget, pOffset, pLength, nullptr );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	#else
 		glInvalidateBufferSubData( mGLHandle,
-                                   trunc_numeric_cast<GLintptr>( pOffset ),
-                                   trunc_numeric_cast<GLsizeiptr>( pLength ) );
-		ts3GLHandleLastError();
+                                   numeric_cast<GLintptr>( pOffset ),
+                                   numeric_cast<GLsizeiptr>( pLength ) );
+		ts3OpenGLHandleLastError();
 	#endif
 	}
 
-	void GLBufferObject::updateCopy( GLBufferObject & pSource, const GPUBufferSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget )
+	void GLBufferObject::updateCopy( GLBufferObject & pSrcBuffer, const GPUBufferSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget )
 	{
 		auto bufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
@@ -133,25 +133,25 @@ namespace ts3::gpuapi
 		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
 			GLint bufferUsage = 0;
 			glGetBufferParameteriv( bufferBindTarget, GL_BUFFER_USAGE, &bufferUsage );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
-			glBufferData( bufferBindTarget, trunc_numeric_cast<GLsizeiptr>( mSize ), nullptr, bufferUsage );
-			ts3GLHandleLastError();
+			glBufferData( bufferBindTarget, numeric_cast<GLsizeiptr>( mSize ), nullptr, bufferUsage );
+			ts3OpenGLHandleLastError();
 		#else
 			glInvalidateBufferData( mGLHandle );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		#endif
 		}
 
-		glBindBuffer( GL_COPY_READ_BUFFER, pSource.mGLHandle );
-		ts3GLHandleLastError();
+		glBindBuffer( GL_COPY_READ_BUFFER, pSrcBuffer.mGLHandle );
+		ts3OpenGLHandleLastError();
 
 		glCopyBufferSubData( GL_COPY_READ_BUFFER,
 		                     bufferBindTarget,
-		                     trunc_numeric_cast<GLintptr>( pCopyDesc.sourceBufferRegion.offset ),
-		                     trunc_numeric_cast<GLintptr>( pCopyDesc.targetBufferOffset ),
-		                     trunc_numeric_cast<GLsizeiptr>( pCopyDesc.sourceBufferRegion.size ) );
-		ts3GLHandleLastError();
+		                     numeric_cast<GLintptr>( pCopyDesc.sourceBufferRegion.offset ),
+		                     numeric_cast<GLintptr>( pCopyDesc.targetBufferOffset ),
+		                     numeric_cast<GLsizeiptr>( pCopyDesc.sourceBufferRegion.size ) );
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLBufferObject::updateUpload( const GPUBufferSubDataUploadDesc & pUploadDesc, GLenum pActiveBindTarget )
@@ -163,21 +163,21 @@ namespace ts3::gpuapi
 		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
 			GLint bufferUsage = 0;
 			glGetBufferParameteriv( bufferBindTarget, GL_BUFFER_USAGE, &bufferUsage );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			glBufferData( bufferBindTarget, mSize, nullptr, bufferUsage );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		#else
 			glInvalidateBufferData( mGLHandle );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		#endif
 		}
 
 		glBufferSubData( bufferBindTarget,
-                         trunc_numeric_cast<GLintptr>( pUploadDesc.bufferRegion.offset ),
-                         trunc_numeric_cast<GLsizeiptr>( pUploadDesc.bufferRegion.size ),
+                         numeric_cast<GLintptr>( pUploadDesc.bufferRegion.offset ),
+                         numeric_cast<GLsizeiptr>( pUploadDesc.bufferRegion.size ),
 		                 pUploadDesc.inputDataDesc.pointer );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	bool GLBufferObject::queryIsMapped( GLenum pActiveBindTarget ) const
@@ -186,7 +186,7 @@ namespace ts3::gpuapi
 
 		GLint64 mappedState = 0;
 		glGetBufferParameteri64v( bufferBindTarget, GL_BUFFER_MAPPED, &mappedState );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return mappedState != GL_FALSE;
 	}
@@ -197,7 +197,7 @@ namespace ts3::gpuapi
 
 		void * mappedMemoryPtr = nullptr;
 		glGetBufferPointerv( bufferBindTarget, GL_BUFFER_MAP_POINTER, &mappedMemoryPtr );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return reinterpret_cast<byte *>( mappedMemoryPtr );
 	}
@@ -208,11 +208,11 @@ namespace ts3::gpuapi
 
 		GLint64 mapOffset = 0;
 		glGetBufferParameteri64v( bufferBindTarget, GL_BUFFER_MAP_OFFSET, &mapOffset );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		GLint64 mapLength = 0;
 		glGetBufferParameteri64v( bufferBindTarget, GL_BUFFER_MAP_LENGTH, &mapLength );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		MemoryRegion mappedRegion;
 		mappedRegion.offset = static_cast<memory_size_t>( mapOffset );
@@ -227,7 +227,7 @@ namespace ts3::gpuapi
 
 		GLint64 bufferSize = 0;
 		glGetBufferParameteri64v( bufferBindTarget, GL_BUFFER_SIZE, &bufferSize );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return static_cast<memory_size_t>( bufferSize );
 	}
@@ -241,16 +241,16 @@ namespace ts3::gpuapi
 
 	#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
 		glBufferData( pGLCreateInfo.bindTarget,
-                      trunc_numeric_cast<GLsizeiptr>( pGLCreateInfo.size ),
+                      numeric_cast<GLsizeiptr>( pGLCreateInfo.size ),
                       initDataPtr,
                       pGLCreateInfo.initFlags );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	#else
 		glBufferStorage( pGLCreateInfo.bindTarget,
-                         trunc_numeric_cast<GLsizeiptr>( pGLCreateInfo.size ),
+                         numeric_cast<GLsizeiptr>( pGLCreateInfo.size ),
                          initDataPtr,
                          pGLCreateInfo.initFlags );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	#endif
 
 		if( !copyDataOnInit && nonEmptyInitData )
@@ -258,9 +258,9 @@ namespace ts3::gpuapi
 			auto initDataSize = getMinOf( pGLCreateInfo.size, pGLCreateInfo.initDataDesc.size );
 			glBufferSubData( pGLCreateInfo.bindTarget,
                              0,
-                             trunc_numeric_cast<GLsizeiptr>( initDataSize ),
+                             numeric_cast<GLsizeiptr>( initDataSize ),
                              pGLCreateInfo.initDataDesc.pointer );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 
 		return true;
@@ -273,7 +273,7 @@ namespace ts3::gpuapi
 			pBindTarget = mGLBufferBindTarget;
 
 			glBindBuffer( pBindTarget, mGLHandle );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 		}
 
 		return pBindTarget;

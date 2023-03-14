@@ -5,9 +5,9 @@
 #define __TS3DRIVER_GPUAPI_GLCOMMON_GPU_DEVICE_H__
 
 #include "GL_coreAPIProxy.h"
-#include "state/GL_pipelineStateDesc.h"
+#include "state/GL_pipelineImmutableStateFactory.h"
 #include <ts3/gpuapi/gpuDevice.h>
-#include <ts3/gpuapi/state/graphicsPipelineStateDescriptorCache.h>
+#include <ts3/gpuapi/state/pipelineImmutableStateCache.h>
 
 namespace ts3::gpuapi
 {
@@ -22,40 +22,22 @@ namespace ts3::gpuapi
 		friend class GLCommandContext;
 		friend class GLCommandList;
 		friend class GLGraphicsPipelineStateObject;
-		friend class GLVertexStreamStateObject;
 
 	public:
 		system::OpenGLSystemDriverHandle const mSysGLDriver;
 
 	public:
-		explicit GLGPUDevice( GLGPUDriver & pGLGPUDriver );
+		explicit GLGPUDevice( GLGPUDriver & pGPUDriver );
 		virtual ~GLGPUDevice();
-
-		virtual GraphicsPipelineStateObjectHandle createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) override;
-		virtual VertexStreamStateObjectHandle createVertexStreamStateObject( const VertexStreamStateObjectCreateInfo & pCreateInfo ) override;
-		virtual RenderTargetStateObjectHandle createRenderTargetStateObject( const RenderTargetStateObjectCreateInfo & pCreateInfo ) override;
-
-		virtual void waitForCommandSync( CommandSync & pCommandSync ) override;
-
-		bool initializeGLDebugOutput();
 
 		GLDebugOutput * getDebugOutputInterface() const;
 
-		const GLBlendStateDescriptor & getBlendDescriptor( pipeline_state_descriptor_id_t pDescriptorID ) const;
-		const GLDepthStencilStateDescriptor & getDepthStencilDescriptor( pipeline_state_descriptor_id_t pDescriptorID ) const;
-		const GLRasterizerStateDescriptor & getRasterizerDescriptor( pipeline_state_descriptor_id_t pDescriptorID ) const;
-		const GLVertexInputFormatStateDescriptor & getVertexInputFormatDescriptor( pipeline_state_descriptor_id_t pDescriptorID ) const;
+		bool initializeGLDebugOutput();
+
+		virtual void waitForCommandSync( CommandSync & pCommandSync ) override;
 
 	protected:
 		virtual void initializeCommandSystem() override;
-
-	friendapi:
-		pipeline_state_descriptor_id_t createBlendDescriptor( const BlendConfigDesc & pConfigDesc );
-		pipeline_state_descriptor_id_t createDepthStencilDescriptor( const DepthStencilConfigDesc & pConfigDesc );
-		pipeline_state_descriptor_id_t createRasterizerDescriptor( const RasterizerConfigDesc & pConfigDesc );
-		pipeline_state_descriptor_id_t createVertexInputFormatDescriptor( const VertexInputFormatDesc & pInputFormatDesc );
-
-		GLGraphicsPipelineStateDescriptorCache & getDescriptorCache();
 
 	private:
 	    virtual bool _drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer ) override;
@@ -65,8 +47,15 @@ namespace ts3::gpuapi
 	    virtual ShaderHandle _drvCreateShader( const ShaderCreateInfo & pCreateInfo ) override final;
 	    virtual TextureHandle _drvCreateTexture( const TextureCreateInfo & pCreateInfo ) override final;
 
+		virtual RenderTargetTextureHandle _drvCreateRenderTargetTexture(
+				const RenderTargetTextureCreateInfo & pCreateInfo ) override final;
+
+		virtual GraphicsPipelineStateObjectHandle _drvCreateGraphicsPipelineStateObject(
+				const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) override final;
+
 	private:
-		GLGraphicsPipelineStateDescriptorCache _descriptorCache;
+		GLPipelineImmutableStateFactory _immutableStateFactory;
+		PipelineImmutableStateCache _immutableStateCache;
 		std::unique_ptr<GLDebugOutput> _glDebugOutput;
 	};
 

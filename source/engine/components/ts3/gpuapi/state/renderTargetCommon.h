@@ -5,171 +5,235 @@
 #define __TS3_GPUAPI_RENDER_TARGET_COMMON_H__
 
 #include "commonGPUStateDefs.h"
-#include <ts3/gpuapi/resources/renderBuffer.h>
+#include "../resources/textureCommon.h"
+#include <ts3/stdext/bitUtils.h>
 
 namespace ts3::gpuapi
 {
 
-	ts3DeclareClassHandle( RenderBuffer );
-	ts3DeclareClassHandle( RenderTargetStateObject );
+	ts3DeclareClassHandle( RenderTargetTexture );
 
-	struct RenderTargetLayout;
-	struct RenderTargetResourceBinding;
+	enum ERenderTargetBufferFlags : uint32
+	{
+		E_RENDER_TARGET_BUFFER_FLAG_COLOR_BIT = 0x01,
+		E_RENDER_TARGET_BUFFER_FLAG_DEPTH_BIT = 0x02,
+		E_RENDER_TARGET_BUFFER_FLAG_STENCIL_BIT = 0x04,
 
-	struct RenderTargetStateObjectCreateInfo;
+		E_RENDER_TARGET_BUFFER_MASK_DEPTH_STENCIL =
+			E_RENDER_TARGET_BUFFER_FLAG_DEPTH_BIT |
+			E_RENDER_TARGET_BUFFER_FLAG_STENCIL_BIT,
+
+		E_RENDER_TARGET_BUFFER_MASK_ALL =
+			E_RENDER_TARGET_BUFFER_FLAG_COLOR_BIT |
+			E_RENDER_TARGET_BUFFER_MASK_DEPTH_STENCIL,
+	};
+
+	namespace cxdefs
+	{
+
+		/// @brief
+		inline constexpr uint32 getRTAttachmentRequiredUsageFlag( native_uint pAttachmentIndex )
+		{
+			return ( pAttachmentIndex < RT_MAX_COLOR_ATTACHMENTS_NUM ) ? E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT : E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT;
+		}
+
+	}
+
+	template <typename TAttachmentProperty>
+	using RenderTargetColorAttachmentPropertyArray = std::array<TAttachmentProperty, cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM>;
+
+	template <typename TAttachmentProperty>
+	struct RenderTargetAttachmentPropertySet
+	{
+		using AttachmentPropertyArray = std::array<TAttachmentProperty, cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM>;
+
+		AttachmentPropertyArray attachments;
+
+		Bitmask<ERTAttachmentFlags> activeAttachmentsMask = 0;
+
+		ArrayView<TAttachmentProperty> const colorAttachments;
+
+		TAttachmentProperty & depthStencilAttachment;
+
+		RenderTargetAttachmentPropertySet()
+		: colorAttachments( bindArrayView( attachments.data(), cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ) )
+		, depthStencilAttachment( attachments[E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL] )
+		{}
+
+		RenderTargetAttachmentPropertySet( const RenderTargetAttachmentPropertySet<TAttachmentProperty> & pSource )
+		: attachments( pSource.attachments )
+		, activeAttachmentsMask( pSource.activeAttachmentsMask )
+		, colorAttachments( bindArrayView( attachments.data(), cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ) )
+		, depthStencilAttachment( attachments[E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL] )
+		{}
+
+		RenderTargetAttachmentPropertySet & operator=( const RenderTargetAttachmentPropertySet<TAttachmentProperty> & pRhs )
+		{
+			attachments = pRhs.attachments;
+			activeAttachmentsMask = pRhs.activeAttachmentsMask;
+			return *this;
+		}
+
+		TS3_ATTR_NO_DISCARD bool empty() const noexcept
+		{
+			return activeAttachmentsMask.empty();
+		}
+
+		TS3_ATTR_NO_DISCARD uint32 countActiveColorAttachments() const noexcept
+		{
+			return popCount( activeAttachmentsMask & E_RT_ATTACHMENT_MASK_COLOR_ALL );
+		}
+
+		TS3_ATTR_NO_DISCARD bool isColorAttachmentActive( uint32 pAttachmentIndex ) const noexcept
+		{
+			const auto attachmentBit = cxdefs::makeRTAttachmentFlag( pAttachmentIndex );
+			return ( attachmentBit != 0 ) && activeAttachmentsMask.isSet( attachmentBit );
+		}
+
+		TS3_ATTR_NO_DISCARD bool isDepthStencilAttachmentActive() const noexcept
+		{
+			return activeAttachmentsMask.isSet( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT );
+		}
+
+		TS3_ATTR_NO_DISCARD bool hasAnyColorAttachmentsActive() const noexcept
+		{
+			return ( activeAttachmentsMask & E_RT_ATTACHMENT_MASK_COLOR_ALL) != 0;
+		}
+	};
+
+	template <typename TAttachmentProperty>
+	struct RenderTargetAttachmentConfigurationSet : public RenderTargetAttachmentPropertySet<TAttachmentProperty>
+	{
+		Bitmask<ERTAttachmentFlags> attachmentsActionResolveMask = 0;
+
+		TS3_ATTR_NO_DISCARD uint32 countAttachmentsActionResolve() const noexcept
+		{
+			return popCount( attachmentsActionResolveMask & E_RT_ATTACHMENT_MASK_COLOR_ALL );
+		}
+	};
 
 	/// @brief
-	enum class ERenderTargetAttachmentID : enum_default_value_t
+	struct RenderTargetAttachmentBinding
 	{
-		RTColor0,
-		RTColor1,
-		RTColor2,
-		RTColor3,
-		RTColor4,
-		RTColor5,
-		RTColor6,
-		RTColor7,
-		RTDepthStencil,
-		RTUndefined
+		RenderTargetTextureHandle attachmentTexture;
+		RenderTargetTextureHandle resolveTexture;
+
+		void reset()
+		{
+			attachmentTexture.reset();
+			resolveTexture.reset();
+		}
+
+		bool empty() const noexcept
+		{
+			return !attachmentTexture;
+		}
+
+		explicit operator bool() const noexcept
+		{
+			return !empty();
+		}
+	};
+
+	using RenderTargetColorAttachmentBindingArray = RenderTargetColorAttachmentPropertyArray<RenderTargetAttachmentBinding>;
+
+	struct RenderTargetBindingDefinition : public RenderTargetAttachmentConfigurationSet<RenderTargetAttachmentBinding>
+	{
+		TS3_ATTR_NO_DISCARD RenderTargetBindingDefinition getValidated() const noexcept
+		{
+			RenderTargetBindingDefinition validatedDefinition = *this;
+			validatedDefinition.resetAttachmentsFlags();
+			return validatedDefinition;
+		}
+
+		TS3_GPUAPI_API void resetAttachmentsFlags() noexcept;
 	};
 
 	/// @brief
-	enum class ERenderTargetResourceType : enum_default_value_t
-	{
-		RenderBuffer,
-		Texture,
-		Unknown
-	};
-
-	/// @brief A set of bit flags representing render target attachments.
-	enum ERenderTargetAttachmentFlags : uint32
-	{
-		// Note: Implementation depends on all COLOR values having consecutive bit positions!
-
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_0_BIT    = 1 << 0,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_1_BIT    = 1 << 1,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_2_BIT    = 1 << 2,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_3_BIT    = 1 << 3,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_4_BIT    = 1 << 4,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_5_BIT    = 1 << 5,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_6_BIT    = 1 << 6,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_7_BIT    = 1 << 7,
-		E_RENDER_TARGET_ATTACHMENT_MASK_COLOR_ALL      = 0x7F,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_BIT      = 1 << 8,
-		E_RENDER_TARGET_ATTACHMENT_FLAG_STENCIL_BIT    = 1 << 9,
-		E_RENDER_TARGET_ATTACHMENT_FLAGS_DEPTH_STENCIL = E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_BIT |
-		                                                 E_RENDER_TARGET_ATTACHMENT_FLAG_STENCIL_BIT,
-		E_RENDER_TARGET_ATTACHMENT_FLAGS_DEFAULT_C0DS  = E_RENDER_TARGET_ATTACHMENT_FLAG_COLOR_0_BIT |
-		                                                 E_RENDER_TARGET_ATTACHMENT_FLAGS_DEPTH_STENCIL,
-		E_RENDER_TARGET_ATTACHMENT_MASK_ALL            = E_RENDER_TARGET_ATTACHMENT_MASK_COLOR_ALL |
-		                                                 E_RENDER_TARGET_ATTACHMENT_FLAGS_DEPTH_STENCIL,
-	};
-
-	struct RTARenderBufferRef
-	{
-		RenderBuffer * renderBuffer;
-	};
-
-	struct RTATextureRef
-	{
-		Texture * texture;
-		TextureSubResource textureSubResource;
-	};
-
-	struct RenderTargetLayoutDesc
-	{
-		struct AttachmentLayoutDesc
-		{
-			ERenderTargetAttachmentID attachmentID = ERenderTargetAttachmentID::RTUndefined;
-			ETextureFormat format;
-			constexpr explicit operator bool() const
-			{
-				return attachmentID != ERenderTargetAttachmentID::RTUndefined;
-			}
-		};
-		using AttachmentLayoutDescArray = std::array<AttachmentLayoutDesc, GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
-		AttachmentLayoutDescArray attachmentLayoutDescArray;
-	};
-
-	struct RenderTargetResourceBindingDesc
-	{
-		struct AttachmentResourceBindingDesc
-		{
-			ERenderTargetAttachmentID attachmentID = ERenderTargetAttachmentID::RTUndefined;
-			ERenderTargetResourceType attachmentResourceType = ERenderTargetResourceType::Unknown;
-			RTARenderBufferRef renderBufferRef;
-			RTATextureRef textureRef;
-			constexpr explicit operator bool() const
-			{
-				return attachmentID != ERenderTargetAttachmentID::RTUndefined;
-			}
-		};
-		using AttachmentResourceBindingDescArray = std::array<AttachmentResourceBindingDesc, GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM>;
-		AttachmentResourceBindingDescArray attachmentResourceBindingDescArray;
-		uint32 activeBindingsNum = GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM;
-		uint32 sharedMSAALevel = 0;
-	};
-
 	struct RenderTargetAttachmentLayout
 	{
 		ETextureFormat format = ETextureFormat::UNKNOWN;
 
-		constexpr explicit operator bool() const
+		void reset()
+		{
+			format = ETextureFormat::UNKNOWN;
+		}
+
+		bool valid() const noexcept
 		{
 			return format != ETextureFormat::UNKNOWN;
 		}
-	};
 
-	struct RenderTargetAttachmentResourceBinding
-	{
-		union
+		explicit operator bool() const noexcept
 		{
-			RTARenderBufferRef uRenderBufferRef;
-			RTATextureRef uTextureRef;
-		};
-
-		ERenderTargetResourceType attachmentResourceType = ERenderTargetResourceType::Unknown;
-		ETextureFormat format = ETextureFormat::UNKNOWN;
-
-		constexpr explicit operator bool() const
-		{
-			return attachmentResourceType != ERenderTargetResourceType::Unknown;
+			return valid();
 		}
 	};
 
-	struct RenderTargetLayout
+	/// @brief A definition of a vertex layout used to create a driver-specific RenderTargetLayout object.
+	struct RenderTargetLayout : public RenderTargetAttachmentPropertySet<RenderTargetAttachmentLayout>
 	{
-		Bitmask<ERenderTargetAttachmentFlags> attachmentMask = 0;
-		uint32 colorAttachmentActiveCount = 0;
-		uint32 depthStencilAttachmentState = 0;
-		RenderTargetAttachmentLayout colorAttachmentArray[GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
-		RenderTargetAttachmentLayout depthStencilAttachment;
+		TextureSize2D sharedImageSize = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
+
+		uint32 sharedMSAALevel = 0;
 	};
 
-	inline constexpr uint32 CX_RT_BUFFER_MSAA_LEVEL_INVALID = Limits<uint32>::maxValue;
-
-	struct RenderTargetResourceBinding
+	namespace smutil
 	{
-		RenderTargetAttachmentResourceBinding colorAttachmentArray[GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
-		RenderTargetAttachmentResourceBinding depthStencilAttachment;
-		TextureSize2D commonBufferSize;
-		uint32 commonMSAALevel = CX_RT_BUFFER_MSAA_LEVEL_INVALID;
-	};
 
-	TS3_GPUAPI_OBJ const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultBGRA8;
-	TS3_GPUAPI_OBJ const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultBGRA8D24S8;
-	TS3_GPUAPI_OBJ const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultRGBA8;
-	TS3_GPUAPI_OBJ const RenderTargetLayoutDesc cvRenderTargetLayoutDescDefaultRGBA8D24S8;
+		TS3_GPUAPI_API_NO_DISCARD const RenderTargetAttachmentBinding * getRenderTargetBindingDefinitionFirstTarget(
+				const RenderTargetBindingDefinition & pBindingDefinition );
 
-	TS3_GPUAPI_API bool createRenderTargetLayout( const RenderTargetLayoutDesc & pRTLayoutDesc,
-	                                              RenderTargetLayout & pOutRTLayout );
+		TS3_GPUAPI_API_NO_DISCARD bool validateRenderTargetBindingDefinition(
+				const RenderTargetBindingDefinition & pBindingDefinition );
 
-	TS3_GPUAPI_API bool createRenderTargetLayoutAndResourceBinding( const RenderTargetResourceBindingDesc & pRTResourceBindingDesc,
-	                                                                RenderTargetLayout & pOutRTLayout,
-	                                                                RenderTargetResourceBinding & pOutRTResourceBinding );
+		TS3_GPUAPI_API_NO_DISCARD RenderTargetLayout getRenderTargetLayoutForBindingDefinition(
+				const RenderTargetBindingDefinition & pBindingDefinition );
 
-	TS3_GPUAPI_API bool checkRenderTargetLayoutCompatibility( const RenderTargetResourceBinding & pRTResourceBinding,
-	                                                          const RenderTargetLayout & pRTLayout );
+	}
+
+	namespace defaults
+	{
+
+		TS3_GPUAPI_OBJ const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8;
+		TS3_GPUAPI_OBJ const RenderTargetLayout cvRenderTargetLayoutDefaultBGRA8D24S8;
+		TS3_GPUAPI_OBJ const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8;
+		TS3_GPUAPI_OBJ const RenderTargetLayout cvRenderTargetLayoutDefaultRGBA8D24S8;
+
+	}
+
+	template <typename TFunction>
+	inline bool foreachRTAttachmentIndex( Bitmask<ERTAttachmentFlags> pActiveAttachmentsMask, TFunction pFunction )
+	{
+		// A local copy of the active attachments mask. Bits of already processed attachments
+		// are removed, so when the value reaches 0, we can immediately stop further processing.
+		auto activeAttachmentsMask = pActiveAttachmentsMask;
+
+		for( // Iterate using RTA (Render Target Attachment) index value.
+			native_uint attachmentIndex = 0;
+			// Stop after reaching the limit or when there are no active attachments to process.
+			cxdefs::isRTAttachmentIndexValid( attachmentIndex ) && !activeAttachmentsMask.empty();
+			// This is rather self-descriptive, but it looked bad without this third comment here :)
+			++attachmentIndex )
+		{
+			const auto attachmentBit = cxdefs::makeRTAttachmentFlag( attachmentIndex );
+			// Check if the attachments mask has this bit set.
+			if( activeAttachmentsMask.isSet( attachmentBit ) )
+			{
+				// The function returns false if there was some internal error condition
+				// and the processing should be aborted.
+				if( !pFunction( attachmentIndex, makeBitmaskEx<ERTAttachmentFlags>( attachmentBit ) ) )
+				{
+					return false;
+				}
+
+				// Update the control mask.
+				activeAttachmentsMask.unset( attachmentBit );
+			}
+		}
+
+		return true;
+	}
 
 } // namespace ts3::gpuapi
 

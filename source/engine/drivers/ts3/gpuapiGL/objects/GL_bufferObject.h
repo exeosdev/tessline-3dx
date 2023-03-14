@@ -23,7 +23,7 @@ namespace ts3::gpuapi
 	class GLBufferObject : public GLObject
 	{
 	public:
-		GLenum const mGLBufferBindTarget = cxGLBindTargetUnknown;
+		GLenum const mGLBufferBindTarget = CX_GL_BIND_TARGET_UNKNOWN;
 		GLuint const mSize;
 
 		GLBufferObject( GLuint pHandle, const GLBufferCreateInfo & pGLCreateInfo );
@@ -42,7 +42,7 @@ namespace ts3::gpuapi
 
 		void invalidateRegion( gpu_memory_size_t pOffset, gpu_memory_size_t pLength, GLenum pActiveBindTarget = 0 );
 
-		void updateCopy( GLBufferObject & pSource, const GPUBufferSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget = 0 );
+		void updateCopy( GLBufferObject & pSrcBuffer, const GPUBufferSubDataCopyDesc & pCopyDesc, GLenum pActiveBindTarget = 0 );
 
 		void updateUpload( const GPUBufferSubDataUploadDesc & pUploadDesc, GLenum pActiveBindTarget = 0 );
 

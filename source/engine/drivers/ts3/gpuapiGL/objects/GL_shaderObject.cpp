@@ -6,38 +6,38 @@
 namespace ts3::gpuapi
 {
 
-	GLShaderObject::GLShaderObject( GLuint pHandle, GLenum pGLEShaderType, GLenum pGLShaderStageMaskBit )
+	GLShaderObject::GLShaderObject( GLuint pHandle, GLenum pGLShaderType, GLenum pGLShaderStageMaskBit )
 	: GLObject( GLObjectBaseType::Shader, pHandle )
-	, mGLEShaderType( pGLEShaderType )
+	, mGLShaderType( pGLShaderType )
 	, mGLShaderStageMaskBit( pGLShaderStageMaskBit )
 	{}
 
 	GLShaderObject::~GLShaderObject() = default;
 
-	GLShaderObjectHandle GLShaderObject::create( GLenum pGLEShaderType )
+	GLShaderObjectHandle GLShaderObject::create( GLenum pGLShaderType )
 	{
-		auto shaderStageMaskBit = getStageMaskForEShaderType( pGLEShaderType );
+		auto shaderStageMaskBit = getStageMaskForEShaderType( pGLShaderType );
 		if( shaderStageMaskBit == cvGLInvalidValue )
 		{
 			return nullptr;
 		}
 
-		auto shaderHandle = glCreateShader( pGLEShaderType );
-		ts3GLHandleLastError();
+		auto shaderHandle = glCreateShader( pGLShaderType );
+		ts3OpenGLHandleLastError();
 
-		GLShaderObjectHandle openglShaderObject{ new GLShaderObject( shaderHandle, pGLEShaderType, shaderStageMaskBit ) };
+		GLShaderObjectHandle openglShaderObject{ new GLShaderObject( shaderHandle, pGLShaderType, shaderStageMaskBit ) };
 
 		return openglShaderObject;
 	}
 
-	GLShaderObjectHandle GLShaderObject::createWithSource( GLenum pGLEShaderType, const void * pSource, size_t pSourceLength )
+	GLShaderObjectHandle GLShaderObject::createWithSource( GLenum pGLShaderType, const void * pSource, size_t pSourceLength )
 	{
 		if( !pSource || ( pSourceLength == 0 ) )
 		{
 			return nullptr;
 		}
 
-		auto shaderObject = create( pGLEShaderType );
+		auto shaderObject = create( pGLShaderType );
 		if( !shaderObject )
 		{
 			return nullptr;
@@ -57,7 +57,7 @@ namespace ts3::gpuapi
 		if( deleteStatus == GL_FALSE )
 		{
 			glDeleteShader( mGLHandle );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			return true;
 		}
@@ -77,10 +77,10 @@ namespace ts3::gpuapi
 		const auto sourceLength = static_cast<GLint>( pSourceLength );
 
 		glShaderSource( mGLHandle, 1, &sourceBuffer, &sourceLength );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		glCompileShader( mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		auto compileStatus = queryParameter( GL_COMPILE_STATUS );
 		if ( compileStatus != GL_TRUE )
@@ -102,7 +102,7 @@ namespace ts3::gpuapi
 		}
 
 		glShaderBinary( 1, &mGLHandle, pFormat, pBinary, static_cast<GLsizei>( pBinarySize ) );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return true;
 	}
@@ -112,7 +112,7 @@ namespace ts3::gpuapi
 		GLint parameterValue = GL_INVALID_VALUE;
 
 		glGetShaderiv( mGLHandle, pParameter, &parameterValue );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return parameterValue;
 	}
@@ -128,7 +128,7 @@ namespace ts3::gpuapi
 			infoLogBuffer.resize( infoLogLength );
 
 			glGetShaderInfoLog( mGLHandle, static_cast<GLsizei>( infoLogLength ), nullptr, infoLogBuffer.dataAs<GLchar>() );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			// Note: length returned by the GL includes null terminator!
 			infoLog.assign( infoLogBuffer.dataAs<GLchar>(), infoLogLength - 1 );
@@ -148,7 +148,7 @@ namespace ts3::gpuapi
 			sourceBuffer.resize( sourceLength );
 
 			glGetShaderSource( mGLHandle, static_cast<GLsizei>( sourceLength ), nullptr, sourceBuffer.dataAs<GLchar>() );
-			ts3GLHandleLastError();
+			ts3OpenGLHandleLastError();
 
 			// Note: length returned by the GL includes null terminator!
 			source.assign( sourceBuffer.dataAs<GLchar>(), sourceLength - 1 );
@@ -185,23 +185,23 @@ namespace ts3::gpuapi
 	{
 		GLint shaderBinaryFormatsNum = 0;
 		glGetIntegerv( GL_NUM_SHADER_BINARY_FORMATS, &shaderBinaryFormatsNum );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return shaderBinaryFormatsNum > 0;
 	}
 
-	bool GLShaderObject::checkBinaryFormatSupport( GLenum pFormat)
+	bool GLShaderObject::checkBinaryFormatSupport( GLenum pFormat )
 	{
 		GLint shaderBinaryFormatsNum = 0;
 		glGetIntegerv( GL_NUM_SHADER_BINARY_FORMATS, &shaderBinaryFormatsNum );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return shaderBinaryFormatsNum > 0;
 	}
 
-	GLbitfield GLShaderObject::getStageMaskForEShaderType( GLenum pGLEShaderType )
+	GLbitfield GLShaderObject::getStageMaskForEShaderType( GLenum pGLShaderType )
 	{
-		switch( pGLEShaderType )
+		switch( pGLShaderType )
 		{
 			ts3CaseReturn( GL_VERTEX_SHADER   , GL_VERTEX_SHADER_BIT   );
 			ts3CaseReturn( GL_FRAGMENT_SHADER , GL_FRAGMENT_SHADER_BIT );

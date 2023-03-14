@@ -1,5 +1,8 @@
 
 #include "GL_pipelineStateObject.h"
+#include "GL_commonGraphicsConfig.h"
+#include "GL_inputAssembler.h"
+#include "GL_graphicsShaderState.h"
 #include <ts3/gpuapiGL/GL_gpuDevice.h>
 #include <ts3/gpuapiGL/objects/GL_vertexArrayObject.h>
 #include <ts3/gpuapiGL/resources/GL_shader.h>
@@ -8,135 +11,71 @@
 namespace ts3::gpuapi
 {
 
-	GLGraphicsPipelineStateObject::GLGraphicsPipelineStateObject( GLGPUDevice & pGPUDevice,
-	                                                              RenderTargetLayout pRenderTargetLayout,
-	                                                              GraphicsShaderBinding pShaderBinding,
-	                                                              ShaderInputSignature pShaderInputSignature,
-	                                                              const GraphicsPipelineStateDescriptorSet & pSeparableDescriptorSet,
-	                                                              GLShaderPipelineObjectHandle pGLShaderPipelineObject,
-	                                                              GLVertexArrayObjectHandle pGLVertexArrayObject )
-	: SeparableGraphicsPipelineStateObject( pGPUDevice, std::move( pRenderTargetLayout ), std::move( pShaderBinding ), std::move( pShaderInputSignature ), pSeparableDescriptorSet )
-	, mGLShaderPipelineObject ( std::move( pGLShaderPipelineObject ) )
-	, mGLVertexArrayObject ( std::move( pGLVertexArrayObject ) )
+	GLGraphicsPipelineStateObject::GLGraphicsPipelineStateObject(
+			GLGPUDevice & pGPUDevice,
+			RenderTargetLayout pRenderTargetLayout,
+			ShaderInputSignature pShaderInputSignature,
+			const SeparablePSOStateSet & pPSOImmutableStates )
+	: GraphicsPipelineStateObjectSeparable(
+		pGPUDevice,
+		std::move( pRenderTargetLayout ),
+		std::move( pShaderInputSignature ),
+		pPSOImmutableStates )
 	{}
 
 	GLGraphicsPipelineStateObject::~GLGraphicsPipelineStateObject() = default;
 
-	GpaHandle<GLGraphicsPipelineStateObject> GLGraphicsPipelineStateObject::create( GLGPUDevice & pGPUDevice,
-	                                                                                const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
+	const GLBlendImmutableState & GLGraphicsPipelineStateObject::getBlendState() const noexcept
 	{
-		CommonPSOState commonPSOState;
-		if( !createCommonPSOState( pCreateInfo, commonPSOState ) )
-		{
-			return nullptr;
-		}
-
-		GraphicsPipelineStateDescriptorSet graphicsDescriptorSet;
-		graphicsDescriptorSet.blendDescriptorID = pGPUDevice.createBlendDescriptor( pCreateInfo.blendDesc );
-		graphicsDescriptorSet.depthStencilDescriptorID = pGPUDevice.createDepthStencilDescriptor( pCreateInfo.depthStencilDesc );
-		graphicsDescriptorSet.rasterizerDescriptorID = pGPUDevice.createRasterizerDescriptor( pCreateInfo.rasterizerDesc );
-		graphicsDescriptorSet.vertexInputFormatDescriptorID = pGPUDevice.createVertexInputFormatDescriptor( pCreateInfo.vertexInputFormatDesc );
-
-		const auto & vertexInputFormatDescriptor = pGPUDevice.getVertexInputFormatDescriptor( graphicsDescriptorSet.vertexInputFormatDescriptorID );
-
-		auto vertexArrayObject = createVertexArrayObjectFormatOnly( vertexInputFormatDescriptor );
-		auto shaderPipelineObject = createGraphicsShaderPipelineObject( commonPSOState.shaderBinding );
-		if( !vertexArrayObject || !shaderPipelineObject )
-		{
-			return nullptr;
-		}
-
-		auto pipelineStateObject = createDynamicInterfaceObject<GLGraphicsPipelineStateObject>( pGPUDevice,
-		                                                                                        std::move( commonPSOState.renderTargetLayout ),
-		                                                                                        std::move( commonPSOState.shaderBinding ),
-		                                                                                        std::move( commonPSOState.shaderInputSignature ),
-		                                                                                        graphicsDescriptorSet,
-		                                                                                        std::move( shaderPipelineObject ),
-		                                                                                        std::move( vertexArrayObject ) );
-		
-		return pipelineStateObject;
+		ts3DebugAssert( mSeparableStates.blendState );
+		return *( mSeparableStates.blendState->queryInterface<GLBlendImmutableState>() );
 	}
 
-	GLShaderPipelineObjectHandle GLGraphicsPipelineStateObject::createGraphicsShaderPipelineObject( const GraphicsShaderBinding & pShaderBinding )
+	const GLDepthStencilImmutableState & GLGraphicsPipelineStateObject::getDepthStencilState() const noexcept
 	{
-		auto shaderPipelineObject = GLShaderPipelineObject::create();
-		ts3DebugAssert( shaderPipelineObject );
-
-		glBindProgramPipeline( shaderPipelineObject->mGLHandle );
-		ts3GLHandleLastError();
-
-		for( auto & activeStage : pShaderBinding.activeStageList )
-		{
-			auto * openglShader = activeStage.shaderObject->queryInterface<GLShader>();
-			ts3DebugAssert( openglShader->mGLShaderProgramObject );
-			shaderPipelineObject->attachProgram( *( openglShader->mGLShaderProgramObject ) );
-		}
-
-		glBindProgramPipeline( 0 );
-		ts3GLHandleLastError();
-
-		return shaderPipelineObject;
+		ts3DebugAssert( mSeparableStates.depthStencilState );
+		return *( mSeparableStates.depthStencilState->queryInterface<GLDepthStencilImmutableState>() );
 	}
 
-	GLShaderProgramObjectHandle GLGraphicsPipelineStateObject::createGraphicsShaderProgramObject( const GraphicsShaderBinding & pShaderBinding )
+	const GLRasterizerImmutableState & GLGraphicsPipelineStateObject::getRasterizerState() const noexcept
 	{
-		auto shaderProgramObject = GLShaderProgramObject::create( GLShaderProgramType::Combined );
-		ts3DebugAssert( shaderProgramObject );
-
-		for( auto & activeStage : pShaderBinding.activeStageList )
-		{
-			auto * openglShader = activeStage.shaderObject->queryInterface<GLShader>();
-			ts3DebugAssert( openglShader->mGLShaderObject );
-			shaderProgramObject->attachShader( *( openglShader->mGLShaderObject ) );
-		}
-
-		if( !shaderProgramObject->link() )
-		{
-			ts3DebugInterrupt();
-			return nullptr;
-		}
-		if( !shaderProgramObject->validate() )
-		{
-			ts3DebugInterrupt();
-			return nullptr;
-		}
-
-		shaderProgramObject->detachAllShaders();
-
-		return shaderProgramObject;
+		ts3DebugAssert( mSeparableStates.rasterizerState );
+		return *( mSeparableStates.rasterizerState->queryInterface<GLRasterizerImmutableState>() );
 	}
 
-	GLVertexArrayObjectHandle GLGraphicsPipelineStateObject::createVertexArrayObjectFormatOnly( const GLVertexInputFormatStateDescriptor & pVertexInputFormatDescriptor )
+	const GLGraphicsShaderLinkageImmutableState & GLGraphicsPipelineStateObject::getGraphicsShaderLinkageState() const noexcept
 	{
-		auto vertexArrayObject = GLVertexArrayObject::create();
+		ts3DebugAssert( mSeparableStates.shaderLinkageState );
+		return *( mSeparableStates.shaderLinkageState->queryInterface<GLGraphicsShaderLinkageImmutableState>() );
+	}
 
-		glBindVertexArray( vertexArrayObject->mGLHandle );
-		ts3GLHandleLastError();
+	const GLIAInputLayoutImmutableState & GLGraphicsPipelineStateObject::getIAInputLayoutState() const noexcept
+	{
+		ts3DebugAssert( mSeparableStates.iaInputLayoutState );
+		return *( mSeparableStates.iaInputLayoutState->queryInterface<GLIAInputLayoutImmutableState>() );
+	}
 
-		for( uint32 attributeCounter = 0; attributeCounter < pVertexInputFormatDescriptor.inputFormatDesc.activeVertexAttributesNum; ++attributeCounter )
-		{
-			const auto & vertexAttribute = pVertexInputFormatDescriptor.inputFormatDesc.vertexAttributeArray[attributeCounter];
-			ts3DebugAssert( vertexAttribute );
+	GpaHandle<GLGraphicsPipelineStateObject> GLGraphicsPipelineStateObject::create(
+			GLGPUDevice & pGPUDevice,
+			const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
+	{
+		SeparablePSOStateSet separableStates{};
+		separableStates.blendState = pCreateInfo.blendState;
+		separableStates.depthStencilState = pCreateInfo.depthStencilState;
+		separableStates.rasterizerState = pCreateInfo.rasterizerState;
+		separableStates.shaderLinkageState = pCreateInfo.shaderLinkageState;
+		separableStates.iaInputLayoutState = pCreateInfo.inputLayoutState;
 
-			glEnableVertexAttribArray( vertexAttribute.attributeIndex );
-			ts3GLHandleLastError();
+		auto & renderTargetLayout = pCreateInfo.renderTargetLayout;
+		auto & shaderInputSignature = pCreateInfo.shaderInputSignature;
 
-			glVertexAttribFormat( vertexAttribute.attributeIndex, vertexAttribute.componentsNum, vertexAttribute.baseType, vertexAttribute.normalized, vertexAttribute.relativeOffset );
-			ts3GLHandleLastError();
+		auto graphicsPSO = createGPUAPIObject<GLGraphicsPipelineStateObject>(
+				pGPUDevice,
+				std::move( renderTargetLayout ),
+				std::move( shaderInputSignature ),
+				separableStates );
 
-			glVertexAttribDivisor( vertexAttribute.attributeIndex, vertexAttribute.instanceRate );
-			ts3GLHandleLastError();
-
-			// This must be called *AFTER* glEnableVertexAttribArray and glVertexAttribFormat. TODO: documentation?
-			// Moving this up causes crash during an actual draw call on at least Quadro T2000 and RX580 (Win 10).
-			glVertexAttribBinding( vertexAttribute.attributeIndex, vertexAttribute.streamIndex );
-			ts3GLHandleLastError();
-		}
-
-		glBindVertexArray( 0 );
-		ts3GLHandleLastError();
-
-		return vertexArrayObject;
+		return graphicsPSO;
 	}
 
 } // namespace ts3::gpuapi

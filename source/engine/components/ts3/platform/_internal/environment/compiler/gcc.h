@@ -31,6 +31,10 @@
 #define TS3_PCL_BYTESWAP32	__builtin_bswap32
 #define TS3_PCL_BYTESWAP64	__builtin_bswap64
 
+#define  TS3_PCL_POPCOUNT16	__builtin_popcount
+#define  TS3_PCL_POPCOUNT32	__builtin_popcountl
+#define  TS3_PCL_POPCOUNT64	__builtin_popcountll
+
 #define TS3_PCL_ROTL16( x, n ) ( (x << n) | (x >> (16-n)) )
 #define TS3_PCL_ROTL32( x, n ) ( (x << n) | (x >> (32-n)) )
 #define TS3_PCL_ROTL64( x, n ) ( (x << n) | (x >> (64-n)) )

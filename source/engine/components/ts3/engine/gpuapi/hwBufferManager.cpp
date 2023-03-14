@@ -53,7 +53,7 @@ namespace ts3
 	                                                                     gpuapi::gpu_memory_size_t pBufferSize,
 	                                                                     Bitmask<gpuapi::gpu_memory_flags_value_t> pMemoryFlags )
 	{
-		return CX_MEMORY_DEFAULT_ALIGNMENT;
+		return ts3::cxdefs::MEMORY_DEFAULT_ALIGNMENT;
 	}
 
 	gpuapi::GPUBufferHandle HWBufferManager::_createGPUBuffer( gpuapi_buffer_ref_id_t pGPUBufferRefID,
@@ -67,7 +67,7 @@ namespace ts3
 
 		// All buffer-related flags at the engine level are combined into a single enum.
 		// Extract MemoryFlags part using the dedicated utility function.
-		const auto memoryFlags = ecGetHWBufferUsageGPUMemoryFlags( pHWBCreateInfo.flags );
+		const auto memoryFlags = cxdefs::getHWBufferUsageGPUMemoryFlags( pHWBCreateInfo.flags );
 
 		// Compute the alignment using the provided buffer specification.
 		// If this is '0', everything is fine - it means default alignment for the current platform.
@@ -76,7 +76,7 @@ namespace ts3
 		gpuapi::GPUBufferCreateInfo gpuBufferCreateInfo;
 		gpuBufferCreateInfo.bufferSize = requestedBufferSize;
 		gpuBufferCreateInfo.initialTarget = static_cast<gpuapi::EGPUBufferTarget>( pHWBCreateInfo.baseType );
-		gpuBufferCreateInfo.resourceFlags = ecGetHWBufferUsageGPUResourceFlags( pHWBCreateInfo.flags );
+		gpuBufferCreateInfo.resourceFlags = cxdefs::getHWBufferUsageGPUResourceFlags( pHWBCreateInfo.flags );
 		gpuBufferCreateInfo.memoryFlags = memoryFlags;
 		gpuBufferCreateInfo.memoryBaseAlignment = memoryAlignment;
 		gpuBufferCreateInfo.initDataDesc = pHWBCreateInfo.initData;

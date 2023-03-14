@@ -5,11 +5,17 @@
 #include "visual.h"
 #include "windowCommon.h"
 
-#define TS3_SYSTEM_GL_PLATFORM_TYPE_CORE 0x7001
-#define TS3_SYSTEM_GL_PLATFORM_TYPE_ES   0x7002
+/// @brief Identifies a desktop OpenGL-based platform (like Win32, GLX or MacOS).
+#define TS3_SYSTEM_GL_PLATFORM_TYPE_DESKTOP 0x7001
+
+/// @brief Identifies an ES-based platform (like Android or iOS).
+#define TS3_SYSTEM_GL_PLATFORM_TYPE_ES 0x7002
+
+/// @def TS3_SYSTEM_GL_PLATFORM_TYPE
+/// @brief Defined as either TS3_SYSTEM_GL_PLATFORM_TYPE_DESKTOP or TS3_SYSTEM_GL_PLATFORM_TYPE_ES, depending on the target platform.
 
 #if( TS3_PCL_TARGET_OS & TS3_PCL_TARGET_FLAG_OS_DESKTOP )
-#  define TS3_SYSTEM_GL_PLATFORM_TYPE TS3_SYSTEM_GL_PLATFORM_TYPE_CORE
+#  define TS3_SYSTEM_GL_PLATFORM_TYPE TS3_SYSTEM_GL_PLATFORM_TYPE_DESKTOP
 #  include <GL/glew.h>
 #else
 #  define TS3_SYSTEM_GL_PLATFORM_TYPE TS3_SYSTEM_GL_PLATFORM_TYPE_ES
@@ -18,9 +24,15 @@
 #  include <GLES3/gl31.h>
 #endif
 
+/// @def TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS
+/// @brief Controls the GL error-checking macros. If TRUE, they are replaced with appropriate calls. Otherwise, all calls are no-ops.
+/// @see ts3OpenGLCheckLastResult
+/// @see ts3OpenGLCheckLastError
+/// @see ts3OpenGLHandleLastError
+/// @see ts3OpenGLResetErrorQueue
 #if !defined( TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS )
-#  if( TS3_DEBUG || TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS_NON_DEBUG )
-#    define TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS 1
+#  if( TS3_RELEASE_OPT_MAX )
+#    define TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS 0
 #  else
 #    define TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS 1
 #  endif
@@ -33,37 +45,42 @@ namespace ts3::system
 	ts3SysDeclareHandle( OpenGLDisplaySurface );
 	ts3SysDeclareHandle( OpenGLRenderContext );
 
-	struct GLDisplaySurfaceCreateInfo;
-	struct GLRenderContextCreateInfo;
+	struct OpenGLDisplaySurfaceCreateInfo;
+	struct OpenGLRenderContextCreateInfo;
 
 	/// @brief
-	enum EGLSurfaceCreateFlags : uint32
+	enum EOpenGLSurfaceCreateFlags : uint32
 	{
-		// Specifies a full-screen surface, covering the whole screen.
-		// Ignored for mobile (iOS and Android), where fullscreen is always used.
-		E_GL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT = 0x1000,
-		E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT = 0x2000,
-		E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_DISABLED_BIT = 0x4000,
-		E_GL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT = 0x8000,
+		/// Surface is created as a fullscreen layer/window, adjusted to the selected display dimensions.
+		E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_FULLSCREEN_BIT = 0x1000,
+
+		/// Enables adaptive sync for the surface: v-sync is performed only when the frame rate exceeds vertical frequency.
+		E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_ADAPTIVE_BIT = 0x2000,
+
+		/// Disables vertical sync for the surface: buffers are swapped immediately upon request.
+		E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_DISABLED_BIT = 0x4000,
+
+		/// Enables vertical sync for the surface: swap is performed during a v-blank.
+		E_OPENGL_DISPLAY_SURFACE_CREATE_FLAG_SYNC_VERTICAL_BIT = 0x8000,
 	};
 
 	/// @brief
-	enum EGLRenderContextCreateFlags : uint32
+	enum EOpenGLRenderContextCreateFlags : uint32
 	{
-		E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT = 0x1000,
-		E_GL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT = 0x2000,
-		E_GL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT = 0x0010,
-		E_GL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT = 0x0020
+		E_OPENGL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT = 0x1000,
+		E_OPENGL_RENDER_CONTEXT_CREATE_FLAG_FORWARD_COMPATIBLE_BIT = 0x2000,
+		E_OPENGL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_SHARING_BIT = 0x0010,
+		E_OPENGL_RENDER_CONTEXT_CREATE_FLAG_SHARE_WITH_CURRENT_BIT = 0x0020
 	};
 
-	enum class EGLAPIProfile : enum_default_value_t
+	enum class EOpenGLAPIClass : enum_default_value_t
 	{
-		OpenGL,
+		OpenGLDesktop,
 		OpenGLES
 	};
 
 	/// @brief
-	enum class EGLContextProfile : enum_default_value_t
+	enum class EOpenGLAPIProfile : enum_default_value_t
 	{
 		Auto,
 		Core,
@@ -73,11 +90,9 @@ namespace ts3::system
 
 	enum : exception_code_value_t
 	{
-		E_EXC_SYSTEM_OPENGL_CORE_ERROR	     = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE0 ),
-		E_EXC_SYSTEM_OPENGL_SUBSYS_AGL_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE1 ),
-		E_EXC_SYSTEM_OPENGL_SUBSYS_EGL_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE2 ),
-		E_EXC_SYSTEM_OPENGL_SUBSYS_GLX_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE3 ),
-		E_EXC_SYSTEM_OPENGL_SUBSYS_WGL_ERROR = ecDeclareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0xE4 )
+		///
+		E_EXC_SYSTEM_OPENGL_API_VERSION_NOT_SUPPORTED = ts3::cxdefs::declareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0x03 ),
+		E_EXC_SYSTEM_OPENGL_API_PROFILE_NOT_SUPPORTED = ts3::cxdefs::declareExceptionCode( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, 0x04 ),
 	};
 
 	inline constexpr Version CX_GL_VERSION_BEST_SUPPORTED{ CX_UINT16_MAX, CX_UINT16_MAX };
@@ -88,9 +103,19 @@ namespace ts3::system
 
 	inline constexpr Version CX_GL_VERSION_MAX_ES{ 3, 2 };
 
+	/// @brief
+	struct OpenGLVersionSupportInfo
+	{
+		EOpenGLAPIClass apiClass;
+
+		EOpenGLAPIProfile apiProfile;
+
+		Version apiVersion;
+	};
+
 	/// @brief Represents combined info about the current OpenGL subsystem version.
 	/// Basically, this struct stores the output from all version-related GL queries.
-	struct GLSystemVersionInfo
+	struct OpenGLSystemVersionInfo
 	{
 	public:
 		// Numeric version of the GL (GL_VERSION_MAJOR.GL_VERSION_MINOR)
@@ -105,13 +130,13 @@ namespace ts3::system
 		std::string vendorName;
 
 	public:
-		TS3_FUNC_NO_DISCARD	std::string toString() const;
+		TS3_ATTR_NO_DISCARD	std::string toString() const;
 	};
 
-	struct GLErrorInfo
+	struct OpenGLErrorInfo
 	{
 	public:
-		// The error code. It will contains either a common OpenGL error
+		// The error identifier. It will contain either a common OpenGL error
 		// code (GLenum) or one of the subsystem-specific ones (AGL/EGL/GLX/WGL).
 		uint32 errorCode;
 
@@ -119,38 +144,38 @@ namespace ts3::system
 		const char * errorString;
 
 	public:
-		constexpr GLErrorInfo( bool pStatus )
+		constexpr OpenGLErrorInfo( bool pStatus )
 		: errorCode( pStatus ? 0u : Limits<uint32>::maxValue )
-		, errorString( CX_STR_CHAR_EMPTY )
+		, errorString( ts3::cxdefs::STR_CHAR_EMPTY )
 		{}
 
-		template <typename TpGLErrorCode>
-		constexpr GLErrorInfo( TpGLErrorCode pErrorCode, const char * pErrorMessage = nullptr )
-		: errorCode( trunc_numeric_cast<uint32>( pErrorCode ) )
-		, errorString( pErrorMessage ? CX_STR_CHAR_EMPTY : pErrorMessage )
+		template <typename TGLErrorCode>
+		constexpr OpenGLErrorInfo( TGLErrorCode pErrorCode, const char * pErrorMessage = nullptr )
+		: errorCode( numeric_cast<uint32>( pErrorCode ) )
+		, errorString( pErrorMessage ? ts3::cxdefs::STR_CHAR_EMPTY : pErrorMessage )
 		{}
 	};
 
 	class GLSystemException : public SystemException
 	{
 	public:
-		GLErrorInfo mGLErrorInfo;
+		OpenGLErrorInfo mOpenGLErrorInfo;
 
 	public:
 		explicit GLSystemException( ExceptionInfo pExceptionInfo )
 		: SystemException( std::move( pExceptionInfo ) )
-		, mGLErrorInfo( true )
+		, mOpenGLErrorInfo( true )
 		{}
 
-		GLSystemException( ExceptionInfo pExceptionInfo, GLErrorInfo pGLErrorInfo )
+		GLSystemException( ExceptionInfo pExceptionInfo, OpenGLErrorInfo pOpenGLErrorInfo )
 		: SystemException( std::move( pExceptionInfo ) )
-		, mGLErrorInfo( std::move( pGLErrorInfo ) )
+		, mOpenGLErrorInfo( std::move( pOpenGLErrorInfo ) )
 		{}
 	};
 
 	ts3SetExceptionCategoryType( E_EXCEPTION_CATEGORY_SYSTEM_OPENGL, GLSystemException );
 
-	class GLCoreAPI
+	class OpenGLCoreAPI
 	{
 	public:
 		static Version queryRuntimeVersion();
@@ -168,16 +193,36 @@ namespace ts3::system
 
 } // namespace ts3::system
 
+/// @def ts3OpenGLCheckLastResult
+/// @brief A configuration-dependent macro which expands to either OpenGLCoreAPI::checkLastResult() or an empty statement.
+/// @see TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS
+/// @see ts3::system::OpenGLCoreAPI::checkLastResult
+
+/// @def ts3OpenGLCheckLastError
+/// @brief A configuration-dependent macro which expands to either OpenGLCoreAPI::checkLastError() or an empty statement.
+/// @see TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS
+/// @see ts3::system::OpenGLCoreAPI::checkLastError
+
+/// @def ts3OpenGLHandleLastError
+/// @brief A configuration-dependent macro which expands to either OpenGLCoreAPI::handleLastError() or an empty statement.
+/// @see TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS
+/// @see ts3::system::OpenGLCoreAPI::handleLastError
+
+/// @def ts3OpenGLResetErrorQueue
+/// @brief A configuration-dependent macro which expands to either OpenGLCoreAPI::resetErrorQueue() or an empty statement.
+/// @see TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS
+/// @see ts3::system::OpenGLCoreAPI::resetErrorQueue()
+
 #if( TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS )
-#  define ts3GLCheckLastResult()             ::ts3::system::GLCoreAPI::checkLastResult()
-#  define ts3GLCheckLastError( pErrorCode )  ::ts3::system::GLCoreAPI::checkLastError( pErrorCode )
-#  define ts3GLHandleLastError()             ::ts3::system::GLCoreAPI::handleLastError()
-#  define ts3GLResetErrorQueue()             ::ts3::system::GLCoreAPI::resetErrorQueue()
+#  define ts3OpenGLCheckLastResult()            ::ts3::system::OpenGLCoreAPI::checkLastResult()
+#  define ts3OpenGLCheckLastError( pErrorCode ) ::ts3::system::OpenGLCoreAPI::checkLastError( pErrorCode )
+#  define ts3OpenGLHandleLastError()            ::ts3::system::OpenGLCoreAPI::handleLastError()
+#  define ts3OpenGLResetErrorQueue()            ::ts3::system::OpenGLCoreAPI::resetErrorQueue()
 #else
-#  define ts3GLCheckLastResult()
-#  define ts3GLCheckLastError( pErrorCode )
-#  define ts3GLHandleLastError()
-#  define ts3GLResetErrorQueue()
+#  define ts3OpenGLCheckLastResult()
+#  define ts3OpenGLCheckLastError( pErrorCode )
+#  define ts3OpenGLHandleLastError()
+#  define ts3OpenGLResetErrorQueue()
 #endif
 
 #endif // __TS3_SYSTEM_GFX_OPENGL_COMMON_H__

@@ -73,69 +73,80 @@ namespace ts3
         UserExternal,
 
         //
-        _Reserved
+        Reserved
     };
 
-    /// @brief Number of total enum values. Used for validation.
-    inline constexpr auto CX_ENUM_EXCEPTION_BASE_TYPE_COUNT = static_cast<exception_base_type_value_t>( ExceptionBaseType::_Reserved );
+	namespace cxdefs
+	{
 
-    /// @brief Checks whether the specified value is a valid ExceptionBaseType.
-    /// Used primarily by the library in the template-based mappings.
-    inline constexpr bool ecIsExceptionBaseTypeValid( ExceptionBaseType pBaseType )
+
+		/// @brief Number of total enum values. Used for validation.
+		constexpr auto ENUM_EXCEPTION_BASE_TYPE_COUNT = static_cast<exception_base_type_value_t>( ExceptionBaseType::Reserved );
+
+		// Exception code: control key for validation.
+		constexpr auto EXCEPTION_CODE_CONTROL_KEY = static_cast<exception_code_value_t>( 0xE7000000u );
+
+		// Exception code: mask for type component (ExceptionBaseType, 8-bit integer).
+		constexpr auto EXCEPTION_CODE_BASE_TYPE_MASK = static_cast<exception_code_value_t>( 0x00FF0000u );
+
+		// Exception code: mask for category component (16-bit integer). Includes base type.
+		constexpr auto EXCEPTION_CODE_CATEGORY_MASK = static_cast<exception_code_value_t>( 0x00FFFF00u );
+
+		// Exception code: mask for IID (internal ID) component (8-bit integer).
+		constexpr auto EXCEPTION_CODE_IID_MASK = static_cast<exception_code_value_t>( 0x000000FFu );
+
+		// Exception category: mask for base type component (8-bit integer).
+		constexpr auto EXCEPTION_CATEGORY_BASE_TYPE_MASK = static_cast<exception_category_value_t>( 0xFF00u );
+
+	}
+
+    namespace cxdefs
     {
-        return ( ( exception_base_type_value_t )( pBaseType ) > 0u ) && ( ( exception_base_type_value_t )( pBaseType ) < CX_ENUM_EXCEPTION_BASE_TYPE_COUNT );
-    }
 
-    // Exception code: control key for validation.
-    constexpr exception_code_value_t CX_EXCEPTION_CODE_CONTROL_KEY = 0xE7000000;
+	    /// @brief Checks whether the specified value is a valid ExceptionBaseType.
+	    /// Used primarily by the library in the template-based mappings.
+	    inline constexpr bool isExceptionBaseTypeValid( ExceptionBaseType pBaseType )
+	    {
+		    return ( ( exception_base_type_value_t )( pBaseType ) > 0u ) && ( ( exception_base_type_value_t )( pBaseType ) < ENUM_EXCEPTION_BASE_TYPE_COUNT );
+	    }
 
-    // Exception code: mask for type component (ExceptionBaseType, 8-bit integer).
-    constexpr exception_code_value_t CX_EXCEPTION_CODE_BASE_TYPE_MASK = 0x00FF0000;
+	    ///
+	    inline constexpr exception_category_value_t declareExceptionCategory( ExceptionBaseType pBaseType, uint8 pCategoryIID )
+	    {
+		    return ( ( ( exception_base_type_value_t )( pBaseType ) << 8 ) | pCategoryIID );
+	    }
 
-    // Exception code: mask for category component (16-bit integer). Includes base type.
-    constexpr exception_code_value_t CX_EXCEPTION_CODE_CATEGORY_MASK = 0x00FFFF00;
+	    ///
+	    inline constexpr exception_code_value_t declareExceptionCode( exception_category_value_t pCategory, uint8 pCodeIID )
+	    {
+		    return ( EXCEPTION_CODE_CONTROL_KEY | ( ( exception_code_value_t )( pCategory ) << 8 ) | pCodeIID );
+	    }
 
-    // Exception code: mask for IID (internal ID) component (8-bit integer).
-    constexpr exception_code_value_t CX_EXCEPTION_CODE_IID_MASK = 0x000000FF;
+	    ///
+	    inline constexpr ExceptionBaseType getExceptionCategoryBaseType( exception_category_value_t pCategory )
+	    {
+		    return ( ExceptionBaseType )( ( pCategory & 0xFF00 ) >> 8 );
+	    }
 
-    // Exception category: mask for base type component (8-bit integer).
-    constexpr exception_category_value_t CX_EXCEPTION_CATEGORY_BASE_TYPE_MASK = 0xFF00;
+	    ///
+	    inline constexpr ExceptionBaseType getExceptionCodeBaseType( exception_code_value_t pCode )
+	    {
+		    return ( ExceptionBaseType )( ( pCode & EXCEPTION_CODE_BASE_TYPE_MASK ) >> 16 );
+	    }
 
-    ///
-    inline constexpr exception_category_value_t ecDeclareExceptionCategory( ExceptionBaseType pBaseType, uint8 pCategoryIID )
-    {
-        return ( ( ( exception_base_type_value_t )( pBaseType ) << 8 ) | pCategoryIID );
-    }
+	    ///
+	    inline constexpr exception_category_value_t getExceptionCodeCategory( exception_code_value_t pCode )
+	    {
+		    return ( exception_category_value_t )( ( pCode & EXCEPTION_CODE_CATEGORY_MASK ) >> 8 );
+	    }
 
-    ///
-    inline constexpr exception_code_value_t ecDeclareExceptionCode( exception_category_value_t pCategory, uint8 pCodeIID )
-    {
-        return ( CX_EXCEPTION_CODE_CONTROL_KEY | ( ( exception_code_value_t )( pCategory ) << 8 ) | pCodeIID );
-    }
+	    ///
+	    inline constexpr bool validateExceptionCode( exception_code_value_t pCode )
+	    {
+		    return ( pCode & EXCEPTION_CODE_CONTROL_KEY ) == EXCEPTION_CODE_CONTROL_KEY;
+	    }
 
-    ///
-    inline constexpr ExceptionBaseType ecGetExceptionCategoryBaseType( exception_category_value_t pCategory )
-    {
-        return ( ExceptionBaseType )( ( pCategory & 0xFF00 ) >> 8 );
-    }
-
-    ///
-    inline constexpr ExceptionBaseType ecGetExceptionCodeBaseType( exception_code_value_t pCode )
-    {
-        return ( ExceptionBaseType )( ( pCode & CX_EXCEPTION_CODE_BASE_TYPE_MASK ) >> 16 );
-    }
-
-    ///
-    inline constexpr exception_category_value_t ecGetExceptionCodeCategory( exception_code_value_t pCode )
-    {
-        return ( exception_category_value_t )( ( pCode & CX_EXCEPTION_CODE_CATEGORY_MASK ) >> 8 );
-    }
-
-    ///
-    inline constexpr bool ecValidateExceptionCode( exception_code_value_t pCode )
-    {
-        return ( pCode & CX_EXCEPTION_CODE_CONTROL_KEY ) == CX_EXCEPTION_CODE_CONTROL_KEY;
-    }
+	}
 
 } // namespace ts3
 

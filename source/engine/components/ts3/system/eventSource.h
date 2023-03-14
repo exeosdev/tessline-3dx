@@ -18,14 +18,18 @@ namespace ts3::system
 		explicit EventSource( SysContextHandle pSysContext );
 		virtual ~EventSource() noexcept;
 
-		TS3_FUNC_NO_DISCARD void * getEventSourceNativeData() const;
+		TS3_ATTR_NO_DISCARD void * getEventSourceNativeData() const;
 
-		template <typename TpOutput>
-		TS3_FUNC_NO_DISCARD TpOutput * getEventSourceNativeDataAs() const;
+		template <typename TOutput>
+		TS3_ATTR_NO_DISCARD TOutput * getEventSourceNativeDataAs() const;
 
-		TS3_FUNC_NO_DISCARD bool isPrimaryEventSource() const;
+        TS3_ATTR_NO_DISCARD EventController * getEventController() const;
 
-		TS3_FUNC_NO_DISCARD bool isLastEventSource() const;
+        TS3_ATTR_NO_DISCARD EventController & getEventControllerRef() const;
+
+		TS3_ATTR_NO_DISCARD bool isPrimaryEventSource() const;
+
+		TS3_ATTR_NO_DISCARD bool isLastEventSource() const;
 
 	protected:
 		virtual void onDestroySystemObjectRequested() override;
@@ -48,10 +52,10 @@ namespace ts3::system
 		void * _eventSourceNativeData;
 	};
 
-	template <typename TpOutput>
-	inline TpOutput * EventSource::getEventSourceNativeDataAs() const
+	template <typename TOutput>
+	inline TOutput * EventSource::getEventSourceNativeDataAs() const
 	{
-		return static_cast<TpOutput *>( getEventSourceNativeData() );
+		return static_cast<TOutput *>( getEventSourceNativeData() );
 	}
 
 } // namespace ts3::system

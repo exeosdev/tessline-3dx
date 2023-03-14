@@ -11,23 +11,42 @@
 namespace ts3::gpuapi
 {
 
+	class GraphicsPipelineStateController;
+
+	enum ECommandListActionFlags : uint32
+	{
+		E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT = 0x01,
+
+		E_COMMAND_LIST_ACTION_FLAGS_DEFAULT =
+			E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT,
+	};
+
 	class TS3_GPUAPI_CLASS CommandList : public GPUDeviceChildObject
 	{
 	public:
 		CommandSystem * const mCommandSystem = nullptr;
-		ECommandListType const mListType;
+		ECommandListType const mListType = ECommandListType::Undefined;
 
-		CommandList( CommandSystem & pCommandSystem, ECommandListType pListType );
+		CommandList(
+			CommandSystem & pCommandSystem,
+			ECommandListType pListType,
+			GraphicsPipelineStateController & pPipelineStateController );
+
 		virtual ~CommandList();
+
+		TS3_ATTR_NO_DISCARD bool checkContextSupport( ECommandContextType pContextType ) const noexcept;
+
+		TS3_ATTR_NO_DISCARD bool checkFeatureSupport( Bitmask<ECommandListFlags> pListFlags ) const noexcept;
+
+		TS3_ATTR_NO_DISCARD bool isRenderPassActive() const noexcept;
+
+		TS3_ATTR_NO_DISCARD bool hasPendingGraphicsPipelineStateChanges() const noexcept;
 
 		bool acquireList();
 		void releaseList();
 
-		void setColorBufferClearValue( const math::RGBAColorR32Norm & pColorClearValue );
-		void setDepthBufferClearValue( float pDepthClearValue );
-		void setStencilBufferClearValue( uint8 pStencilClearValue );
+		bool applyGraphicsPipelineStateChanges();
 
-		virtual void initializeClearState();
 		virtual void beginCommandSequence();
 		virtual void endCommandSequence();
 
@@ -43,40 +62,45 @@ namespace ts3::gpuapi
 		bool updateBufferDataUpload( GPUBuffer & pBuffer, const GPUBufferDataUploadDesc & pUploadDesc );
 		bool updateBufferSubDataUpload( GPUBuffer & pBuffer, const GPUBufferSubDataUploadDesc & pUploadDesc );
 
-		virtual void executeDeferredContext( CommandContextDeferred & pDeferredContext ) = 0;
+		virtual bool beginRenderPass(
+				const RenderPassConfigurationImmutableState & pRenderPassState,
+				Bitmask<ECommandListActionFlags> pFlags = E_COMMAND_LIST_ACTION_FLAGS_DEFAULT );
 
-		virtual void dispatchCompute( uint32 pThrGroupSizeX, uint32 pThrGroupSizeY, uint32 pThrGroupSizeZ ) {} // = 0;
-		virtual void dispatchComputeIndirect( uint32 pIndirectBufferOffset ) {} // = 0;
+		virtual bool beginRenderPass(
+				const RenderPassConfigurationDynamicState & pRenderPassState,
+				Bitmask<ECommandListActionFlags> pFlags = E_COMMAND_LIST_ACTION_FLAGS_DEFAULT );
 
-		virtual void clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask ) = 0;
-		virtual void setViewport( const ViewportDesc & pViewportDesc ) = 0;
-		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO ) = 0;
-		virtual bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO ) = 0;
-		virtual bool setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO ) = 0;
-		virtual bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData ) = 0;
-		virtual bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer ) = 0;
-		virtual bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture ) = 0;
-		virtual bool setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler ) = 0;
-		virtual void drawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset ) = 0;
-		virtual void drawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset ) = 0;
-		virtual void drawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset ) = 0;
-		virtual void drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset ) = 0;
+		virtual void endRenderPass();
 
-		bool checkContextSupport( ECommandContextType pContextType ) const;
-		bool checkFeatureSupport( Bitmask<ECommandListFlags> pListFlags ) const;
+		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO );
+		bool setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState );
+		bool setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState );
+		bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
+		bool setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState );
 
-	protected:
-		const RenderTargetClearConfig & getRenderTargetClearConfig() const;
+		bool cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor );
+		bool cmdSetViewport( const ViewportDesc & pViewportDesc );
+		bool cmdSetShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
+		bool cmdSetShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
+		bool cmdSetShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture );
+		bool cmdSetShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler );
+
+		virtual void cmdDispatchCompute( uint32 pThrGroupSizeX, uint32 pThrGroupSizeY, uint32 pThrGroupSizeZ ) {} // = 0;
+		virtual void cmdDispatchComputeIndirect( uint32 pIndirectBufferOffset ) {} // = 0;
+
+		virtual void cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset ) = 0;
+		virtual void cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset ) = 0;
+		virtual void cmdDrawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset ) = 0;
+		virtual void cmdDrawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset ) = 0;
+
+		virtual void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext ) = 0;
 
 	private:
-		enum class ListStatus : uint32
-		{
-			Acquired,
-			Available
-		};
+		std::atomic<bool> _listLockStatus = ATOMIC_VAR_INIT( false );
 
-		RenderTargetClearConfig _renderTargetClearConfig;
-		std::atomic<ListStatus> _listStatusFlag = ATOMIC_VAR_INIT( ListStatus::Available );
+		Bitmask<uint32> _internalStateMask;
+
+		GraphicsPipelineStateController * _graphicsPipelineStateController = nullptr;
 	};
 
 } // namespace ts3::gpuapi

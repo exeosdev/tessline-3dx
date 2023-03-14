@@ -13,18 +13,76 @@ namespace ts3::gpuapi
 
 	enum EShaderConstantAccessClass : uint32
 	{
-		AllActiveStages = 0,
-		Vertex          = static_cast<uint32>( EShaderType::VertexShader ),
-		TessControl     = static_cast<uint32>( EShaderType::TessControlShader ),
-		TessEvaluation  = static_cast<uint32>( EShaderType::TessEvaluationShader ),
-		Geometry        = static_cast<uint32>( EShaderType::GeometryShader ),
-		Pixel           = static_cast<uint32>( EShaderType::PixelShader ),
-		Compute         = static_cast<uint32>( EShaderType::ComputeShader ),
+		ACAllActive  = E_SHADER_STAGE_MASK_ALL,
+		ACGSVertex   = E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT,
+		ACGSHull     = E_SHADER_STAGE_FLAG_GRAPHICS_HULL_BIT,
+		ACGSDomain   = E_SHADER_STAGE_FLAG_GRAPHICS_DOMAIN_BIT,
+		ACGSGeometry = E_SHADER_STAGE_FLAG_GRAPHICS_GEOMETRY_BIT,
+		ACGSPixel    = E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT,
+		ACCSCompute  = E_SHADER_STAGE_FLAG_COMPUTE_BIT,
 	};
 
-	inline Bitmask<EShaderStageFlags> ecGetShaderConstantVisibilityStageBit( EShaderConstantAccessClass pAccessClass )
+	enum class EShaderInputParameterType : uint16
 	{
-		return ecGetShaderStageMaskBit( static_cast<EShaderType>( pAccessClass ) );
+		// D3D12: root constants
+		// Vulkan: push constants
+		// Others: API-specific (explicit direct constants or implicit constant buffer)
+		Constant,
+		// CBV/SRV/UAV
+		Resource,
+		//
+		Sampler
+	};
+
+	enum class EShaderInputDescriptorType : uint16
+	{
+		// CBV/SRV/UAV
+		Resource = 1,
+		//
+		Sampler,
+	};
+
+	enum class EShaderInputResourceClass : uint16
+	{
+		CBV = 1,
+		SRV,
+		UAV,
+		Unknown = 0,
+	};
+
+	namespace cxdefs
+	{
+
+		inline constexpr uint16 declareShaderInputResourceType( EShaderInputResourceClass pResourceClass, uint8 pIndex )
+		{
+			return ( ( static_cast<uint16>( pResourceClass ) << 8u ) | pIndex );
+		}
+
+	}
+
+	enum class EShaderInputResourceType : uint16
+	{
+		CBVConstantBuffer = cxdefs::declareShaderInputResourceType( EShaderInputResourceClass::CBV, 0 ),
+		SRVTextureBuffer  = cxdefs::declareShaderInputResourceType( EShaderInputResourceClass::SRV, 1 ),
+		SRVTextureImage   = cxdefs::declareShaderInputResourceType( EShaderInputResourceClass::SRV, 2 ),
+		UAVStorageBuffer  = cxdefs::declareShaderInputResourceType( EShaderInputResourceClass::UAV, 3 ),
+		UAVStorageImage   = cxdefs::declareShaderInputResourceType( EShaderInputResourceClass::UAV, 4 ),
+		Unknown           = 0
+	};
+
+	namespace cxdefs
+	{
+
+		inline constexpr EShaderInputResourceClass getShaderInputResourceResourceClass( EShaderInputResourceType pResourceType )
+		{
+			return static_cast<EShaderInputResourceClass>( ( static_cast<uint32>( pResourceType ) >> 8u ) & 0xFFu );
+		}
+
+		inline constexpr Bitmask<EShaderStageFlags> getShaderConstantVisibilityStageMask( EShaderConstantAccessClass pAccessClass )
+		{
+			return static_cast<uint32>( pAccessClass );
+		}
+
 	}
 
 	struct ShaderInputSignatureDesc
@@ -33,12 +91,12 @@ namespace ts3::gpuapi
 		{
 			shader_input_index_t bindingIndex;
 			shader_input_ref_id_t refID;
-			ShaderInputConstantFormat format;
+			EShaderInputConstantFormat format;
 		};
 
 		struct ConstantGroup
 		{
-			using ConstantList = std::array<ConstantDesc, GPU_SYSTEM_METRIC_IS_MAX_CONSTANT_GROUP_SIZE>;
+			using ConstantList = std::array<ConstantDesc, cxdefs::GPU_SYSTEM_METRIC_IS_MAX_CONSTANT_GROUP_SIZE>;
 			EShaderConstantAccessClass accessClass;
 			ConstantList constantList;
 			uint32 constantsNum = 0;
@@ -64,21 +122,21 @@ namespace ts3::gpuapi
 
 			union
 			{
-				ResourceDesc uResourceDesc{};
+				ResourceDesc uResourceDesc;
 				SamplerDesc uSamplerDesc;
 			};
 		};
 
 		struct DescriptorSet
 		{
-			using DescriptorList = std::array<DescriptorDesc, GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SET_SIZE>;
+			using DescriptorList = std::array<DescriptorDesc, cxdefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SET_SIZE>;
 			EShaderInputDescriptorType descriptorType;
 			DescriptorList descriptorList;
 			uint32 descriptorsNum = 0;
 		};
 
-		using ConstantGroupArray = std::array<ConstantGroup, GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM>;
-		using DescriptorSetArray = std::array<DescriptorSet, GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM>;
+		using ConstantGroupArray = std::array<ConstantGroup, cxdefs::GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM>;
+		using DescriptorSetArray = std::array<DescriptorSet, cxdefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM>;
 
 		Bitmask<EShaderStageFlags> activeShaderStagesMask;
 		ConstantGroupArray constantGroupArray;
@@ -98,7 +156,7 @@ namespace ts3::gpuapi
 	{
 		uint32 iByteSize;
 		uint32 iDwordSize;
-		ShaderInputConstantFormat iFormat;
+		EShaderInputConstantFormat iFormat;
 		shader_input_index_t iGlobalIndex;
 		shader_input_index_t iStageIndex;
 		EShaderConstantAccessClass iAccessClass;
@@ -220,7 +278,12 @@ namespace ts3::gpuapi
 		}
 	};
 
-	TS3_GPUAPI_API ShaderInputSignature createShaderInputSignature( const ShaderInputSignatureDesc & pSignatureDesc );
+	namespace smutil
+	{
+
+		TS3_GPUAPI_API ShaderInputSignature createShaderInputSignature( const ShaderInputSignatureDesc & pSignatureDesc );
+
+	}
 
 } // namespace ts3::gpuapi
 

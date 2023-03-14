@@ -20,13 +20,14 @@ namespace ts3::gpuapi
 		explicit GL4GPUDriver( system::OpenGLSystemDriverHandle pSysGLDriver );
 		virtual ~GL4GPUDriver();
 
-		virtual DisplayManagerHandle createDefaultDisplayManager() override;
-
-		virtual GPUDeviceHandle createDevice( const GPUDeviceCreateInfo & pCreateInfo ) override;
-
-		virtual EGPUDriverID queryGPUDriverID() const override;
+		virtual EGPUDriverID queryGPUDriverID() const noexcept override;
 
 		static GL4GPUDriverHandle create( const GL4GPUDriverCreateInfo & pCreateInfo );
+
+	private:
+		virtual DisplayManagerHandle _drvCreateDefaultDisplayManager() override;
+
+		virtual GPUDeviceHandle _drvCreateDevice( const GPUDeviceCreateInfo & pCreateInfo ) override;
 	};
 
 } // namespace ts3::gpuapi

@@ -60,35 +60,35 @@ namespace ts3::system
 			return pNativeData.getSessionData();
 		}
 
-		template <typename TpNativeData>
-		TS3_SYSTEM_API_NODISCARD inline ASessionData & androidGetASessionData( const NativeObject<TpNativeData> & pNativeObject )
+		template <typename TNativeData>
+		TS3_SYSTEM_API_NODISCARD inline ASessionData & androidGetASessionData( const NativeObject<TNativeData> & pNativeObject )
 		{
 			return androidGetASessionData( static_cast<AndroidNativeDataCommon>( pNativeObject.mNativeData ) );
 		}
 		
 	}
 
-	template <typename TpBaseType, typename TpNativeData>
-	class AndroidNativeObject : public TpBaseType, public NativeObject<TpNativeData>
+	template <typename TBaseType, typename TNativeData>
+	class AndroidNativeObject : public TBaseType, public NativeObject<TNativeData>
 	{
 	public:
-		template <typename... TpBaseTypeArgs>
-		explicit AndroidNativeObject( SysContextHandle pSysContext, TpBaseTypeArgs && ...pBaseTypeArgs )
-		: TpBaseType( pSysContext, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
+		template <typename... TBaseTypeArgs>
+		explicit AndroidNativeObject( SysContextHandle pSysContext, TBaseTypeArgs && ...pBaseTypeArgs )
+		: TBaseType( pSysContext, std::forward<TBaseTypeArgs>( pBaseTypeArgs )... )
 		{
 			this->mNativeData.setSessionData( platform::androidGetASessionData( *pSysContext ) );
 		}
 
-		template <typename TpParentSysObject, typename... TpBaseTypeArgs>
-		explicit AndroidNativeObject( TpParentSysObject & pParentSysObject, TpBaseTypeArgs && ...pBaseTypeArgs )
-		: TpBaseType( pParentSysObject, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
+		template <typename TParentSysObject, typename... TBaseTypeArgs>
+		explicit AndroidNativeObject( TParentSysObject & pParentSysObject, TBaseTypeArgs && ...pBaseTypeArgs )
+		: TBaseType( pParentSysObject, std::forward<TBaseTypeArgs>( pBaseTypeArgs )... )
 		{
 			this->mNativeData.setSessionData( platform::androidGetASessionData( pParentSysObject ) );
 		}
 
-		template <typename TpParentSysObject, typename... TpBaseTypeArgs>
-		explicit AndroidNativeObject( SysHandle<TpParentSysObject> pParentSysObject, TpBaseTypeArgs && ...pBaseTypeArgs )
-		: TpBaseType( pParentSysObject, std::forward<TpBaseTypeArgs>( pBaseTypeArgs )... )
+		template <typename TParentSysObject, typename... TBaseTypeArgs>
+		explicit AndroidNativeObject( SysHandle<TParentSysObject> pParentSysObject, TBaseTypeArgs && ...pBaseTypeArgs )
+		: TBaseType( pParentSysObject, std::forward<TBaseTypeArgs>( pBaseTypeArgs )... )
 		{
 			this->mNativeData.setSessionData( platform::androidGetASessionData( *pParentSysObject ) );
 		}

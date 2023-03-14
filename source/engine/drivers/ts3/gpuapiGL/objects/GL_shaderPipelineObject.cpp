@@ -11,22 +11,30 @@ namespace ts3::gpuapi
 
 	GLShaderPipelineObject::~GLShaderPipelineObject() = default;
 
+	GLuint GLShaderPipelineObject::queryCurrentShaderPipelineBinding()
+	{
+		GLint shaderPipelineHandle = 0;
+
+		glGetIntegerv( GL_PROGRAM_PIPELINE_BINDING, &shaderPipelineHandle );
+		ts3OpenGLHandleLastError();
+
+		return static_cast<GLuint>( shaderPipelineHandle );
+	}
+
 	GLShaderPipelineObjectHandle GLShaderPipelineObject::create()
 	{
 		GLuint shaderPipelineHandle = 0;
 
 		glGenProgramPipelines( 1, &shaderPipelineHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
-		GLShaderPipelineObjectHandle openglShaderPipelineObject{ new GLShaderPipelineObject( shaderPipelineHandle ) };
-
-		return openglShaderPipelineObject;
+		return createGLObject<GLShaderPipelineObject>( shaderPipelineHandle );
 	}
 
 	bool GLShaderPipelineObject::release()
 	{
 		glDeleteProgramPipelines( 1, &mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return true;
 	}
@@ -34,7 +42,7 @@ namespace ts3::gpuapi
 	bool GLShaderPipelineObject::validateHandle() const
 	{
 		auto isProgram = glIsProgramPipeline( mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 
 		return isProgram != GL_FALSE;
 	}
@@ -48,7 +56,7 @@ namespace ts3::gpuapi
 		}
 
 		glUseProgramStages( mGLHandle, programStageMask, pProgram.mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLShaderPipelineObject::attachProgram( GLShaderProgramObject & pProgram, Bitmask<GLenum> pStageMask )
@@ -66,19 +74,19 @@ namespace ts3::gpuapi
 		}
 
 		glUseProgramStages( mGLHandle, pStageMask, pProgram.mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLShaderPipelineObject::setActiveProgram( GLShaderProgramObject & pProgram )
 	{
 		glActiveShaderProgram( mGLHandle, pProgram.mGLHandle );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 	void GLShaderPipelineObject::resetActiveProgram()
 	{
 		glActiveShaderProgram( mGLHandle, 0 );
-		ts3GLHandleLastError();
+		ts3OpenGLHandleLastError();
 	}
 
 } // namespace ts3::gpuapi

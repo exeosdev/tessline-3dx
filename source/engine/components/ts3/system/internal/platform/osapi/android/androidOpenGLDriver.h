@@ -44,45 +44,45 @@ namespace ts3::system
 
 		void _releaseAndroidDriverState();
 
-		/// @override OpenGLSystemDriver::_nativeInitializePlatform
+		/// @copybrief OpenGLSystemDriver::_nativeInitializePlatform
 		virtual void _nativeInitializePlatform() override final;
 
-		/// @override OpenGLSystemDriver::_nativeReleaseInitState
+		/// @copybrief OpenGLSystemDriver::_nativeReleaseInitState
 		virtual void _nativeReleaseInitState() noexcept override final;
 
-		/// @override OpenGLSystemDriver::_nativeCreateDisplaySurface
-		virtual OpenGLDisplaySurfaceHandle _nativeCreateDisplaySurface( const GLDisplaySurfaceCreateInfo & pCreateInfo ) override final;
+		/// @copybrief OpenGLSystemDriver::_nativeCreateDisplaySurface
+		virtual OpenGLDisplaySurfaceHandle _nativeCreateDisplaySurface( const OpenGLDisplaySurfaceCreateInfo & pCreateInfo ) override final;
 
-		/// @override OpenGLSystemDriver::_nativeCreateDisplaySurfaceForCurrentThread
+		/// @copybrief OpenGLSystemDriver::_nativeCreateDisplaySurfaceForCurrentThread
 		virtual OpenGLDisplaySurfaceHandle _nativeCreateDisplaySurfaceForCurrentThread() override final;
 
-		/// @override OpenGLSystemDriver::_nativeDestroyDisplaySurface
+		/// @copybrief OpenGLSystemDriver::_nativeDestroyDisplaySurface
 		virtual void _nativeDestroyDisplaySurface( OpenGLDisplaySurface & pDisplaySurface ) override final;
 
-		/// @override OpenGLSystemDriver::_nativeCreateRenderContext
+		/// @copybrief OpenGLSystemDriver::_nativeCreateRenderContext
 		virtual OpenGLRenderContextHandle _nativeCreateRenderContext( OpenGLDisplaySurface & pDisplaySurface,
-		                                                              const GLRenderContextCreateInfo & pCreateInfo ) override final;
+		                                                              const OpenGLRenderContextCreateInfo & pCreateInfo ) override final;
 
-		/// @override OpenGLSystemDriver::_nativeCreateRenderContextForCurrentThread
+		/// @copybrief OpenGLSystemDriver::_nativeCreateRenderContextForCurrentThread
 		virtual OpenGLRenderContextHandle _nativeCreateRenderContextForCurrentThread() override final;
 
-		/// @override OpenGLSystemDriver::_nativeDestroyDisplaySurface
+		/// @copybrief OpenGLSystemDriver::_nativeDestroyDisplaySurface
 		virtual void _nativeDestroyRenderContext( OpenGLRenderContext & pRenderContext ) override final;
 
-		/// @override OpenGLSystemDriver::_nativeResetContextBinding
+		/// @copybrief OpenGLSystemDriver::_nativeResetContextBinding
 		virtual void _nativeResetContextBinding() override final;
 
-		/// @override OpenGLSystemDriver::_nativeQuerySupportedDepthStencilFormats
+		/// @copybrief OpenGLSystemDriver::_nativeQuerySupportedDepthStencilFormats
 		virtual std::vector<EDepthStencilFormat> _nativeQuerySupportedDepthStencilFormats( EColorFormat pColorFormat ) const override final;
 
-		/// @override OpenGLSystemDriver::_nativeQuerySupportedMSAAModes
+		/// @copybrief OpenGLSystemDriver::_nativeQuerySupportedMSAAModes
 		virtual std::vector<EMSAAMode> _nativeQuerySupportedMSAAModes( EColorFormat pColorFormat,
 		                                                               EDepthStencilFormat pDepthStencilFormat ) const override final;
 
-		/// @override OpenGLSystemDriver::_nativeIssGLAPIProfileSupported
-		virtual bool _nativeIsGLAPIProfileSupported( EGLAPIProfile pGLAPIProfile ) const override final;;
+		/// @copybrief OpenGLSystemDriver::_nativeIssAPIClassSupported
+		virtual bool _nativeIsAPIClassSupported( EOpenGLAPIClass pAPIClass ) const override final;;
 
-		/// @override OpenGLSystemDriver::_nativeIsRenderContextBound
+		/// @copybrief OpenGLSystemDriver::_nativeIsRenderContextBound
 		virtual bool _nativeIsRenderContextBound() const override final;
 	};
 
@@ -96,29 +96,29 @@ namespace ts3::system
 	private:
 		void _releaseAndroidSurfaceState();
 
-		/// @override OpenGLDisplaySurface::_nativeSwapBuffers
+		/// @copybrief OpenGLDisplaySurface::_nativeSwapBuffers
 		virtual void _nativeSwapBuffers() override final;
 
-		/// @override OpenGLDisplaySurface::_nativeQueryRenderAreaSize
+		/// @copybrief OpenGLDisplaySurface::_nativeQueryRenderAreaSize
 		virtual FrameSize _nativeQueryRenderAreaSize() const override final;
 
-		/// @override OpenGLDisplaySurface::_nativeSysValidate
+		/// @copybrief OpenGLDisplaySurface::_nativeSysValidate
 		virtual bool _nativeSysValidate() const override final;
 
-		/// @override OpenGLDisplaySurface::_nativeResize
+		/// @copybrief OpenGLDisplaySurface::_nativeResize
 		virtual void _nativeResize( const FrameSize & pFrameSize, EFrameSizeMode pSizeMode ) override final;
 
-		/// @override OpenGLDisplaySurface::_nativeSetFullscreenMode
+		/// @copybrief OpenGLDisplaySurface::_nativeSetFullscreenMode
 		virtual void _nativeSetFullscreenMode( bool pEnable ) override final;
 
-		/// @override OpenGLDisplaySurface::_nativeSetTitle
+		/// @copybrief OpenGLDisplaySurface::_nativeSetTitle
 		virtual void _nativeSetTitle( const std::string & pTitle ) override final;
 
-		/// @override OpenGLDisplaySurface::_nativeUpdateGeometry
+		/// @copybrief OpenGLDisplaySurface::_nativeUpdateGeometry
 		virtual void _nativeUpdateGeometry( const FrameGeometry & pFrameGeometry,
 		                                    Bitmask<EFrameGeometryUpdateFlags> pUpdateFlags ) override final;
 
-		/// @override OpenGLDisplaySurface::_nativeGetSize
+		/// @copybrief OpenGLDisplaySurface::_nativeGetSize
 		virtual FrameSize _nativeGetSize( EFrameSizeMode pSizeMode ) const override final;
 	};
 
@@ -132,13 +132,13 @@ namespace ts3::system
 	private:
 		void _releaseAndroidContextState();
 
-		/// @override OpenGLRenderContext::_nativeBindForCurrentThread
+		/// @copybrief OpenGLRenderContext::_nativeBindForCurrentThread
 		virtual void _nativeBindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface ) override final;
 
-		/// @override OpenGLRenderContext::_nativeIsCurrent
+		/// @copybrief OpenGLRenderContext::_nativeIsCurrent
 		virtual bool _nativeIsCurrent() const override final;
 
-		/// @override OpenGLRenderContext::_nativeSysValidate
+		/// @copybrief OpenGLRenderContext::_nativeSysValidate
 		virtual bool _nativeSysValidate() const override final;
 	};
 

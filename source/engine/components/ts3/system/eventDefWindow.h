@@ -15,43 +15,38 @@ namespace ts3::system
 		Visible
 	};
 
-	template <event_code_value_t tpEventCode>
 	struct EvtWindow : public EvtBase
 	{
 	public:
 		EventSource * eventSource = nullptr;
 
 	public:
-		constexpr EvtWindow()
-		: EvtBase( tpEventCode )
-		{}
-
-		template <typename TpObject>
-		bool checkEventSource( const TpObject * pSource ) const
+		template <typename TObject>
+		bool checkEventSource( const TObject * pSource ) const
 		{
 			return static_cast<const void *>( pSource ) == eventSource;
 		}
 	};
 
-	struct EvtWindowUpdateCreate : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_CREATE>
+	struct EvtWindowUpdateCreate : public EvtWindow
 	{
 	};
 
-	struct EvtWindowUpdateDestroy : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_DESTROY>
+	struct EvtWindowUpdateDestroy : public EvtWindow
 	{
 	};
 
-	struct EvtWindowUpdateFullscreen : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_FULLSCREEN>
+	struct EvtWindowUpdateFullscreen : public EvtWindow
 	{
 		EActiveState fullscreenState = EActiveState::Unknown;
 	};
 
-	struct EvtWindowUpdateResize : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_RESIZE>
+	struct EvtWindowUpdateResize : public EvtWindow
 	{
 		FrameSize newSize;
 	};
 
-	struct EvtWindowUpdateVisibility : public EvtWindow<E_EVENT_CODE_WINDOW_UPDATE_VISIBILITY>
+	struct EvtWindowUpdateVisibility : public EvtWindow
 	{
 		EWindowVisibilityState newVisibilityState = EWindowVisibilityState::Unknown;
 	};

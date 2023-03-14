@@ -40,7 +40,7 @@ namespace ts3::system
 		{
 		};
 
-		TS3_SYSTEM_API_NODISCARD ScreenRect osxQueryDisplayBounds( CGDirectDisplayID pCGDisplayID );
+		TS3_SYSTEM_API_NODISCARD ScreenRect osxQueryDisplayRect( CGDirectDisplayID pCGDisplayID );
 
 		TS3_SYSTEM_API_NODISCARD DisplaySize osxQueryDisplaySize( CGDirectDisplayID pCGDisplayID );
 
@@ -62,6 +62,8 @@ namespace ts3::system
 		void _releaseOSXDisplayManagerState();
 		
 		virtual DisplayDriverHandle _nativeCreateDisplayDriver() override final;
+
+		virtual void _nativeQueryDefaultDisplayOffset( DisplayOffset & pOutOffset ) const override final;
 
 		virtual void _nativeQueryDefaultDisplaySize( DisplaySize & pOutSize ) const override final;
 

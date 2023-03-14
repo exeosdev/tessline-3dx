@@ -6,52 +6,38 @@
 namespace ts3::gpuapi
 {
 
-	GLRenderBuffer::GLRenderBuffer( GLGPUDevice & pGLGPUDevice,
-	                                ERenderBufferType pRenderBufferType,
-	                                const RenderBufferLayout & pRenderBufferLayout,
-	                                GLRenderbufferObjectHandle pGLRenderbufferObject )
-	: RenderBuffer( pGLGPUDevice, pRenderBufferType, pRenderBufferLayout )
+	GLInternalRenderBuffer::GLInternalRenderBuffer(
+			GLGPUDevice & pGLGPUDevice,
+			GLRenderbufferObjectHandle pGLRenderbufferObject )
+	: GPUDeviceChildObject( pGLGPUDevice )
 	, mGLRenderbufferObject( std::move( pGLRenderbufferObject ) )
 	{}
 
-	GLRenderBuffer::GLRenderBuffer( GLGPUDevice & pGLGPUDevice,
-	                                ERenderBufferType pRenderBufferType,
-	                                const RenderBufferLayout & pRenderBufferLayout,
-	                                GLTextureObjectHandle pGLTextureObject )
-	: RenderBuffer( pGLGPUDevice, pRenderBufferType, pRenderBufferLayout )
+	GLInternalRenderBuffer::GLInternalRenderBuffer(
+			GLGPUDevice & pGLGPUDevice,
+			GLTextureObjectHandle pGLTextureObject )
+	: GPUDeviceChildObject( pGLGPUDevice )
 	, mGLTextureObject( std::move( pGLTextureObject ) )
 	{}
 
-	GLRenderBuffer::~GLRenderBuffer() = default;
-
-	bool GLRenderBuffer::isNull() const
+	GpaHandle<GLInternalRenderBuffer> GLInternalRenderBuffer::createInstance(
+			GLGPUDevice & pGLGPUDevice,
+			const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
-		return !mGLRenderbufferObject && !mGLTextureObject;
-	}
+		GLRenderbufferCreateInfo openglRenderbufferCreateInfo;
+		openglRenderbufferCreateInfo.dimensions.x = pCreateInfo.rttLayout.bufferSize.width;
+		openglRenderbufferCreateInfo.dimensions.y = pCreateInfo.rttLayout.bufferSize.height;
+		openglRenderbufferCreateInfo.msaaLevel = pCreateInfo.rttLayout.msaaLevel;
+		openglRenderbufferCreateInfo.internalFormat =
+				GLCoreAPIProxy::translateGLTextureInternalFormat( pCreateInfo.rttLayout.internalDataFormat );
 
-	GpaHandle<GLRenderBuffer> GLRenderBuffer::create( GLGPUDevice & pGLGPUDevice, const RenderBufferCreateInfo & pCreateInfo )
-	{
-		if( !validateCreateInfo( pCreateInfo ) )
-		{
-			return nullptr;
-		}
-
-		GLRenderbufferCreateInfo openglRBCreateInfo;
-		openglRBCreateInfo.dimensions.x = pCreateInfo.layout.bufferSize.width;
-		openglRBCreateInfo.dimensions.y = pCreateInfo.layout.bufferSize.height;
-		openglRBCreateInfo.internalFormat = GLCoreAPIProxy::translateGLTextureInternalFormat( pCreateInfo.layout.internalDataFormat );
-		openglRBCreateInfo.msaaLevel = pCreateInfo.layout.msaaLevel;
-
-		auto openglRenderbuffer = GLRenderbufferObject::create( openglRBCreateInfo );
+		auto openglRenderbuffer = GLRenderbufferObject::create( openglRenderbufferCreateInfo );
 		if( !openglRenderbuffer )
 		{
 			return nullptr;
 		}
 
-		auto renderBuffer = std::make_shared<GLRenderBuffer>( pGLGPUDevice,
-		                                                      pCreateInfo.bufferType,
-		                                                      pCreateInfo.layout,
-		                                                      std::move( openglRenderbuffer ) );
+		auto renderBuffer = createGPUAPIObject<GLInternalRenderBuffer>( pGLGPUDevice, std::move( openglRenderbuffer ) );
 
 		return renderBuffer;
 	}

@@ -6,10 +6,14 @@
 
 #include "commonCommandDefs.h"
 #include "resources/commonGPUResourceDefs.h"
-#include "state/pipelineStateDesc.h"
 
 namespace ts3::gpuapi
 {
+
+	class RenderPassConfigurationDynamicState;
+	class RenderPassConfigurationImmutableState;
+
+	enum ECommandListActionFlags : uint32;
 
 	class CommandContext : public GPUDeviceChildObject
 	{
@@ -49,7 +53,7 @@ namespace ts3::gpuapi
 		void submit();
 		CommandSync submit( const CommandContextSubmitInfo & pSubmitInfo );
 
-		void executeDeferredContext( CommandContextDeferred & pDeferredContext );
+		void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext );
 
 		bool invalidateBuffer( GPUBuffer & pBuffer );
 		bool invalidateBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion );
@@ -85,8 +89,8 @@ namespace ts3::gpuapi
 
 		virtual ~CommandContextDirectCompute() = default;
 
-		void dispatchCompute( uint32 pThrGroupSizeX, uint32 pThrGroupSizeY, uint32 pThrGroupSizeZ );
-		void dispatchComputeIndirect( uint32 pIndirectBufferOffset );
+		void cmdDispatchCompute( uint32 pThrGroupSizeX, uint32 pThrGroupSizeY, uint32 pThrGroupSizeZ );
+		void cmdDispatchComputeIndirect( uint32 pIndirectBufferOffset );
 	};
 
 	class CommandContextDirectGraphics : public CommandContextDirectCompute
@@ -99,25 +103,35 @@ namespace ts3::gpuapi
 		: CommandContextDirectCompute( pCommandSystem, pCommandList )
 		{}
 
-		virtual ~CommandContextDirectGraphics() = default;
+		~CommandContextDirectGraphics() = default;
+		
+		bool beginRenderPass(
+			const RenderPassConfigurationImmutableState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags );
 
-		void setColorBufferClearValue( const math::RGBAColorR32Norm & pColorClearValue );
-		void setDepthBufferClearValue( float pDepthClearValue );
-		void setStencilBufferClearValue( uint8 pStencilClearValue );
+		bool beginRenderPass(
+			const RenderPassConfigurationDynamicState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags );
 
-		void clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask );
-		void setViewport( const ViewportDesc & pViewportDesc );
-		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO );
-		bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO );
-		bool setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO );
-		bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
-		bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
-		bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture );
-		bool setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler );
-		void drawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset );
-		void drawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset );
-		void drawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset );
-		void drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset );
+		void endRenderPass();
+
+		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO );
+		bool setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState );
+		bool setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState );
+		bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
+		bool setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState );
+
+		bool cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor );
+		bool cmdSetViewport( const ViewportDesc & pViewportDesc );
+		bool cmdSetShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
+		bool cmdSetShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
+		bool cmdSetShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture );
+		bool cmdSetShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler );
+
+		void cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset );
+		void cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset );
+		void cmdDrawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset );
+		void cmdDrawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset );
 	};
 
 	class CommandContextDeferred : public CommandContext
@@ -148,23 +162,33 @@ namespace ts3::gpuapi
 
 		virtual ~CommandContextDeferredGraphics() = default;
 
-		void setColorBufferClearValue( const math::RGBAColorR32Norm & pColorClearValue );
-		void setDepthBufferClearValue( float pDepthClearValue );
-		void setStencilBufferClearValue( uint8 pStencilClearValue );
+		bool beginRenderPass(
+			const RenderPassConfigurationImmutableState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags );
 
-		void clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask );
-		void setViewport( const ViewportDesc & pViewportDesc );
-		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO );
-		bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO );
-		bool setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO );
-		bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
-		bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
-		bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture );
-		bool setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler );
-		void drawDirectIndexed( uint32 pIndicesNum, uint32 pIndicesOffset, EIndexDataFormat pIndexFormat );
-		void drawDirectIndexedInstanced( uint32 pIndicesNumPerInstance, uint32 pInstancesNum, uint32 pIndicesOffset, EIndexDataFormat pIndexFormat );
-		void drawDirectNonIndexed( uint32 pVerticesNum, uint32 pVerticesOffset );
-		void drawDirectNonIndexedInstanced( uint32 pVerticesNumPerInstance, uint32 pInstancesNum, uint32 pVerticesOffset );
+		bool beginRenderPass(
+			const RenderPassConfigurationDynamicState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags );
+
+		void endRenderPass();
+
+		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO );
+		bool setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState );
+		bool setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState );
+		bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
+		bool setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState );
+
+		bool cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor );
+		bool cmdSetViewport( const ViewportDesc & pViewportDesc );
+		bool cmdSetShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
+		bool cmdSetShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
+		bool cmdSetShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture );
+		bool cmdSetShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler );
+
+		void cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset, EIndexDataFormat pIndexFormat );
+		void cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset, EIndexDataFormat pIndexFormat );
+		void cmdDrawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset );
+		void cmdDrawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset );
 	};
 
 } // namespace ts3::gpuapi

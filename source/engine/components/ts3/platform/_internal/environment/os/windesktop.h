@@ -7,8 +7,8 @@
 #include <Windows.h>
 #include <wrl/client.h>
 
-template <typename Tp>
-using ComPtr = Microsoft::WRL::ComPtr<Tp>;
+template <typename TVal>
+using ComPtr = Microsoft::WRL::ComPtr<TVal>;
 
 #undef ChangeDisplaySettings
 #undef CreateFile

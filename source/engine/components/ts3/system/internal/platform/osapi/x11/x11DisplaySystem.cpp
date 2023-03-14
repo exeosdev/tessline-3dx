@@ -63,13 +63,14 @@ namespace ts3::system
 
 			if( xrrMonitorList && ( xrrMonitorsNum > 0 ) )
 			{
-				for( int monitorIndex = 0; monitorIndex < xrrMonitorsNum; ++monitorIndex )
+                mNativeData.xrrDefaultMonitorInfo = xrrMonitorList[0];
+                for( int monitorIndex = 0; monitorIndex < xrrMonitorsNum; ++monitorIndex )
 				{
 					auto & xrrMonitorInfo = xrrMonitorList[monitorIndex];
 					if( xrrMonitorInfo.primary != 0 )
 					{
 						mNativeData.xrrDefaultMonitorInfo = xrrMonitorInfo;
-						//break;
+						break;
 					}
 				}
 
@@ -163,12 +164,14 @@ namespace ts3::system
 			ts3Throw( E_EXC_DEBUG_PLACEHOLDER ); // ExsThrowException( EXC_Internal_Error );
 		}
 
+        mNativeData.xrrDefaultMonitorInfo = &( mNativeData.xrrMonitorList[0] );
 		for( int monitorIndex = 0; monitorIndex < mNativeData.xrrMonitorsNum; ++monitorIndex )
 		{
 			auto & monitorInfo = mNativeData.xrrMonitorList[monitorIndex];
 			if( monitorInfo.primary != 0 )
 			{
 				mNativeData.xrrDefaultMonitorInfo = &monitorInfo;
+                break;
 			}
 		}
 
