@@ -5,6 +5,7 @@
 #include <ts3/platform/debug.h>
 
 #include <algorithm>
+#include <limits>
 #include <type_traits>
 #include <utility>
 

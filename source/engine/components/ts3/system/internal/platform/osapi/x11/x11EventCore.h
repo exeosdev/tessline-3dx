@@ -47,7 +47,7 @@ namespace ts3::system
 
 		TS3_SYSTEM_API_NODISCARD EventSource * x11FindEventSourceByXWindow( X11EventController & pEventController, XWindow pWindowXID );
 
-		bool x11TranslateEvent( const XEvent & pXEvent, EventSystemSharedState & pSharedState, EventSource & pEventSource, EventObject & pOutEvent );
+		bool x11TranslateEvent( EventSource & pEventSource, const XEvent & pXEvent, EventObject & pOutEvent );
 
 	}
 
@@ -56,9 +56,6 @@ namespace ts3::system
 	public:
 		X11EventController( SysContextHandle pSysContext );
 		virtual ~X11EventController() noexcept;
-
-		using EventController::getEventDispatcherInputState;
-		using EventController::getEventDispatcherConfig;
 
 	private:
 		/// @copybrief EventController::_nativeRegisterEventSource

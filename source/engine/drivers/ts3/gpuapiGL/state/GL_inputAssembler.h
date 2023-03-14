@@ -159,12 +159,12 @@ namespace ts3::gpuapi
 		TS3_ATTR_NO_DISCARD GLIAVertexStreamDefinition translateIAVertexStreamDefinition(
 				const IAVertexStreamDefinition & pDefinition );
 
-		TS3_ATTR_NO_DISCARD uint32 translateVertexBufferReferences(
+		uint32 translateVertexBufferReferences(
 				const IAVertexBufferReferenceArray & pVBReferences,
 				Bitmask<EIAVertexStreamBindingFlags> pBindingMask,
 				GLIAVertexBuffersBindings & pOutGLBindings);
 
-		TS3_ATTR_NO_DISCARD bool translateIndexBufferReference(
+		bool translateIndexBufferReference(
 				const IAIndexBufferReference & pIBReference,
 				GLIAIndexBufferBinding & pOutGLBinding );
 

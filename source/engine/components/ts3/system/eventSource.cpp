@@ -23,6 +23,17 @@ namespace ts3::system
 		return _eventSourceNativeData;
 	}
 
+    EventController * EventSource::getEventController() const
+    {
+        return _eventControllerActiveRef.get();
+    }
+
+    EventController & EventSource::getEventControllerRef() const
+    {
+        ts3DebugAssert( _eventControllerActiveRef );
+        return *_eventControllerActiveRef;
+    }
+
 	bool EventSource::isPrimaryEventSource() const
 	{
 		return _eventControllerActiveRef && ( this == _eventControllerActiveRef->getPrimaryEventSource() );

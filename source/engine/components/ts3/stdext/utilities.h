@@ -164,12 +164,14 @@ namespace ts3
 	inline size_t countNonNullPointers( TIter pBegin, TIter pEnd )
 	{
 		const auto numElements = std::count_if( pBegin, pEnd, []( auto && pValue ) -> bool { return !!pValue; } );
+        return numElements;
 	}
 
 	template <typename TIter>
 	inline size_t countNullPointers( TIter pBegin, TIter pEnd )
 	{
 		const auto numElements = std::count_if( pBegin, pEnd, []( auto && pValue ) -> bool { return !pValue; } );
+        return numElements;
 	}
 
 }

@@ -143,7 +143,7 @@ int main( int pArgc, const char ** pArgv )
     auto sysContext = platform::createSysContext( sysContextCreateInfo );
 
     platform::AssetLoaderCreateInfoNativeParams aslCreateInfoNP;
-    aslCreateInfoNP.relativeAssetRootDir = "../../../../../../tessline-3dx/assets";
+    aslCreateInfoNP.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
     AssetLoaderCreateInfo aslCreateInfo;
     aslCreateInfo.nativeParams = &aslCreateInfoNP;
     auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );

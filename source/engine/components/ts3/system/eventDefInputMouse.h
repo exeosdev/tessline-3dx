@@ -59,6 +59,8 @@ namespace ts3::system
 
 		// Current sequence length, i.e. number of clicks of the same button in a row.
 		uint32 currentMultiClickSequenceLength = 1;
+
+        Bitmask<EMouseButtonFlagBits> buttonStateMask = 0;
 	};
 
 	struct EvtInputMouse : public EvtInput

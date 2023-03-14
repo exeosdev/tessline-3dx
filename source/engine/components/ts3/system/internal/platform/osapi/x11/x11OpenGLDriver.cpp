@@ -243,9 +243,9 @@ namespace ts3::system
 		const int contextAttributes[] =
 		{
 			// Requested OpenGL API version: major part
-			GLX_CONTEXT_MAJOR_VERSION_ARB, pCreateInfo.runtimeVersionDesc.apiVersion.major,
+			GLX_CONTEXT_MAJOR_VERSION_ARB, pCreateInfo.requestedAPIVersion.major,
 			// Requested OpenGL API version: minor part
-			GLX_CONTEXT_MINOR_VERSION_ARB, pCreateInfo.runtimeVersionDesc.apiVersion.minor,
+			GLX_CONTEXT_MINOR_VERSION_ARB, pCreateInfo.requestedAPIVersion.minor,
 			//
 			GLX_CONTEXT_PROFILE_MASK_ARB, contextAPIProfile,
 			//
@@ -310,7 +310,7 @@ namespace ts3::system
 
 	bool X11OpenGLSystemDriver::_nativeIsAPIClassSupported( EOpenGLAPIClass pAPIClass ) const
 	{
-		if( pAPIClass == EOpenGLAPIClass::OpenGL )
+		if( pAPIClass == EOpenGLAPIClass::OpenGLDesktop )
 		{
 			return true;
 		}
@@ -343,6 +343,11 @@ namespace ts3::system
 		auto & xSessionData = platform::x11GetXSessionData( *this );
 		glXSwapBuffers( xSessionData.display, mNativeData.windowXID );
 	}
+
+    EOpenGLAPIClass X11OpenGLDisplaySurface::_nativeQuerySupportedAPIClass() const noexcept
+    {
+        return EOpenGLAPIClass::OpenGLDesktop;
+    }
 
 	FrameSize X11OpenGLDisplaySurface::_nativeQueryRenderAreaSize() const
 	{
@@ -508,7 +513,7 @@ namespace ts3::system
 			auto & xSessionData = platform::x11GetXSessionData( pGLSurfaceNativeData );
 
 			auto tempContextHandle = ::glXCreateContext( xSessionData.display, pGLSurfaceNativeData.visualInfo, nullptr, True );
-			if( tempContextHandle == nullptr )
+			if( !tempContextHandle )
 			{
 				ts3Throw( E_EXC_DEBUG_PLACEHOLDER );
 			}

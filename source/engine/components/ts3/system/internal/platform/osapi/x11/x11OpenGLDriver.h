@@ -119,6 +119,8 @@ namespace ts3::system
 		/// @copybrief OpenGLDisplaySurface::_nativeSwapBuffers
 		virtual void _nativeSwapBuffers() override final;
 
+        virtual EOpenGLAPIClass _nativeQuerySupportedAPIClass() const noexcept override final;
+
 		/// @copybrief OpenGLDisplaySurface::_nativeQueryRenderAreaSize
 		virtual FrameSize _nativeQueryRenderAreaSize() const override final;
 

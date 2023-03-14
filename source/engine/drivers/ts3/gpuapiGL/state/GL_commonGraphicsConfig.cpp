@@ -82,7 +82,6 @@ namespace ts3::gpuapi
 		{
 			GLBlendConfig openglBlendConfig{};
 
-			const auto blendActiveAttachmentsNum = popCount( pConfig.attachmentsMask );
 			const auto commonBlendSettings = smutil::translateRTColorAttachmentBlendSettings( pConfig.attachments[0] );
 
 			foreachRTAttachmentIndex( pConfig.attachmentsMask,

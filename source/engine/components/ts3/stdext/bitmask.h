@@ -239,7 +239,7 @@ namespace ts3
 	template <typename TEnum, typename ::std::enable_if<::std::is_enum<TEnum>::value, int>::type = 0>
 	TS3_ATTR_NO_DISCARD inline constexpr Bitmask<typename ::std::underlying_type<TEnum>::type> makeBitmask( TEnum pValue ) noexcept
 	{
-		return Bitmask<::std::underlying_type<TEnum>::type>( pValue );
+		return Bitmask<typename std::underlying_type<TEnum>::type>( pValue );
 	}
 
 	template <typename TIntegral, typename ::std::enable_if<::std::is_integral<TIntegral>::value, int>::type = 0>

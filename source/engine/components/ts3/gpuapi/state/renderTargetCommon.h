@@ -34,7 +34,6 @@ namespace ts3::gpuapi
 		/// @brief
 		inline constexpr uint32 getRTAttachmentRequiredUsageFlag( native_uint pAttachmentIndex )
 		{
-			const auto controlMask = ( pAttachmentIndex < RT_MAX_COMBINED_ATTACHMENTS_NUM ) ? 0xFFFF : 0;
 			return ( pAttachmentIndex < RT_MAX_COLOR_ATTACHMENTS_NUM ) ? E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT : E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT;
 		}
 

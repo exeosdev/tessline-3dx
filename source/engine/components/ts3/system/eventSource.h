@@ -23,6 +23,10 @@ namespace ts3::system
 		template <typename TOutput>
 		TS3_ATTR_NO_DISCARD TOutput * getEventSourceNativeDataAs() const;
 
+        TS3_ATTR_NO_DISCARD EventController * getEventController() const;
+
+        TS3_ATTR_NO_DISCARD EventController & getEventControllerRef() const;
+
 		TS3_ATTR_NO_DISCARD bool isPrimaryEventSource() const;
 
 		TS3_ATTR_NO_DISCARD bool isLastEventSource() const;
