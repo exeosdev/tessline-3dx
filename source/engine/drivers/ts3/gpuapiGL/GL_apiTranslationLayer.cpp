@@ -1,7 +1,7 @@
 
-#include "GL_coreAPIProxy.h"
+#include "GL_apiTranslationLayer.h"
 #include <ts3/gpuapi/resources/gpuBufferCommon.h>
-#include <ts3/gpuapi/resources/samplerCommon.h>
+#include <ts3/gpuapi/state/samplerCommon.h>
 #include <ts3/gpuapi/resources/shaderCommon.h>
 #include <ts3/gpuapi/resources/textureCommon.h>
 #include <ts3/stdext/stlHelperAlgo.h>
@@ -10,7 +10,7 @@
 namespace ts3::gpuapi
 {
 
-	GLenum GLCoreAPIProxy::chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags )
+	GLenum atl::chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags )
 	{
 	#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
 		return chooseGLBufferUsagePolicy( pBindTarget, pBufferFlags );
@@ -20,7 +20,7 @@ namespace ts3::gpuapi
 	}
 
 #if( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL43 )
-	GLenum GLCoreAPIProxy::chooseGLBufferStorageFlags( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags )
+	GLenum atl::chooseGLBufferStorageFlags( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags )
 	{
 		Bitmask<GLenum> storageFlags = 0;
 
@@ -60,7 +60,7 @@ namespace ts3::gpuapi
 	}
 #endif
 
-	GLenum GLCoreAPIProxy::chooseGLBufferUsagePolicy( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags )
+	GLenum atl::chooseGLBufferUsagePolicy( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags )
 	{
 		// Usage constants have standard values. Use that fact to avoid huge if-else.
 		// Basically, we first select between DYNAMIC, STREAM and STATIC and then advance
@@ -108,7 +108,7 @@ namespace ts3::gpuapi
 		return usagePolicy;
 	}
 
-	GLenum GLCoreAPIProxy::chooseGLTextureMagFilter( ETextureFilter pMagFilter, ETextureMipMode pMipMode )
+	GLenum atl::chooseGLTextureMagFilter( ETextureFilter pMagFilter, ETextureMipMode pMipMode )
 	{
 		GLenum magFilter = GL_INVALID_VALUE;
 
@@ -128,7 +128,7 @@ namespace ts3::gpuapi
 		return magFilter;
 	}
 
-	GLenum GLCoreAPIProxy::chooseGLTextureMinFilter( ETextureFilter pMinFilter, ETextureMipMode pMipMode )
+	GLenum atl::chooseGLTextureMinFilter( ETextureFilter pMinFilter, ETextureMipMode pMipMode )
 	{
 		GLenum minFilter = GL_INVALID_VALUE;
 
@@ -181,7 +181,7 @@ namespace ts3::gpuapi
 		return minFilter;
 	}
 
-	GLsizei GLCoreAPIProxy::queryGLTextureInternalFormatBPP( GLenum pGLInternalFormat )
+	GLsizei atl::queryGLTextureInternalFormatBPP( GLenum pGLInternalFormat )
 	{
 		switch( pGLInternalFormat )
 		{
@@ -254,7 +254,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLBaseDataType( EBaseDataType pBaseDataType )
+	GLenum atl::translateGLBaseDataType( EBaseDataType pBaseDataType )
 	{
 		auto baseDataTypeIndex = cxdefs::getBaseDataTypeIndex( pBaseDataType );
 		switch( baseDataTypeIndex )
@@ -278,7 +278,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLBlendFactor( EBlendFactor pBlendFactor )
+	GLenum atl::translateGLBlendFactor( EBlendFactor pBlendFactor )
 	{
 		switch( pBlendFactor )
 		{
@@ -303,7 +303,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLBlendOp( EBlendOp pBlendOp )
+	GLenum atl::translateGLBlendOp( EBlendOp pBlendOp )
 	{
 		switch( pBlendOp )
 		{
@@ -321,7 +321,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLBufferBindTarget( EGPUBufferTarget pBufferTarget )
+	GLenum atl::translateGLBufferBindTarget( EGPUBufferTarget pBufferTarget )
 	{
 		switch( pBufferTarget )
 		{
@@ -344,7 +344,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLBufferMapFlags( EGPUMemoryMapMode pMapMode, Bitmask<EGPUMemoryFlags> pMemoryFlags )
+	GLenum atl::translateGLBufferMapFlags( EGPUMemoryMapMode pMapMode, Bitmask<EGPUMemoryFlags> pMemoryFlags )
 	{
 		Bitmask<uint32> resourceMapFlags = static_cast<uint32>( pMapMode );
 		Bitmask<GLenum> openglMapFlags = 0;
@@ -380,7 +380,7 @@ namespace ts3::gpuapi
 		return openglMapFlags;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLCompFunc( ECompFunc pCompFunc )
+	GLenum atl::translateGLCompFunc( ECompFunc pCompFunc )
 	{
 		switch( pCompFunc )
 		{
@@ -396,7 +396,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLCullMode( ECullMode pCullMode )
+	GLenum atl::translateGLCullMode( ECullMode pCullMode )
 	{
 		switch( pCullMode )
 		{
@@ -407,7 +407,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLIndexDataFormat( EIndexDataFormat pIndexDataFormat )
+	GLenum atl::translateGLIndexDataFormat( EIndexDataFormat pIndexDataFormat )
 	{
 		switch( pIndexDataFormat )
 		{
@@ -422,7 +422,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLPrimitiveFillMode( EPrimitiveFillMode pFillMode )
+	GLenum atl::translateGLPrimitiveFillMode( EPrimitiveFillMode pFillMode )
 	{
 	#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
 		switch( pFillMode )
@@ -434,7 +434,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLPrimitiveTopology( EPrimitiveTopology pTopology )
+	GLenum atl::translateGLPrimitiveTopology( EPrimitiveTopology pTopology )
 	{
 		switch( pTopology )
 		{
@@ -457,7 +457,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateShaderType( EShaderType pShaderType )
+	GLenum atl::translateShaderType( EShaderType pShaderType )
 	{
 		switch( pShaderType )
 		{
@@ -482,7 +482,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLStencilOp( EStencilOp pStencilOp )
+	GLenum atl::translateGLStencilOp( EStencilOp pStencilOp )
 	{
 		switch( pStencilOp )
 		{
@@ -498,7 +498,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLETextureAddressMode( ETextureAddressMode pAddressMode )
+	GLenum atl::translateGLTextureAddressMode( ETextureAddressMode pAddressMode )
 	{
 		switch( pAddressMode )
 		{
@@ -513,7 +513,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLTextureBindTarget( ETextureClass pTextureDimensionClass )
+	GLenum atl::translateGLTextureBindTarget( ETextureClass pTextureDimensionClass )
 	{
 		switch( pTextureDimensionClass )
 		{
@@ -526,7 +526,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLTextureInternalFormat( ETextureFormat pTextureFormat )
+	GLenum atl::translateGLTextureInternalFormat( ETextureFormat pTextureFormat )
 	{
 		switch( pTextureFormat )
 		{
@@ -600,7 +600,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLTexturePixelDataLayout( ETextureFormat pTextureFormat )
+	GLenum atl::translateGLTexturePixelDataLayout( ETextureFormat pTextureFormat )
 	{
 		switch( pTextureFormat )
 		{
@@ -674,7 +674,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	GLenum GLCoreAPIProxy::translateGLTriangleVerticesOrder( ETriangleVerticesOrder pVerticesOrder )
+	GLenum atl::translateGLTriangleVerticesOrder( ETriangleVerticesOrder pVerticesOrder )
 	{
 		switch( pVerticesOrder )
 		{
@@ -684,7 +684,7 @@ namespace ts3::gpuapi
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
 
-	const char * GLCoreAPIProxy::translateGLDebugOutputExtensionName( GLDebugOutputVersion pDebugOutputVersion )
+	const char * atl::translateGLDebugOutputExtensionName( GLDebugOutputVersion pDebugOutputVersion )
 	{
 		switch( pDebugOutputVersion )
 		{
@@ -695,7 +695,7 @@ namespace ts3::gpuapi
 		return "Unknown";
 	}
 
-	const char * GLCoreAPIProxy::translateGLDebugEventCategoryStrAMD( GLenum pEventCategory )
+	const char * atl::translateGLDebugEventCategoryStrAMD( GLenum pEventCategory )
 	{
 	#if( TS3GX_GL_FEATURE_SUPPORT_DEBUG_OUTPUT )
 		switch( pEventCategory )
@@ -713,7 +713,7 @@ namespace ts3::gpuapi
 		return "Unknown";
 	}
 
-	const char * GLCoreAPIProxy::translateGLDebugEventSeverityStr( GLenum pEventSeverity )
+	const char * atl::translateGLDebugEventSeverityStr( GLenum pEventSeverity )
 	{
 	#if( TS3GX_GL_FEATURE_SUPPORT_DEBUG_OUTPUT )
 	    switch( pEventSeverity )
@@ -727,7 +727,7 @@ namespace ts3::gpuapi
 		return "Unknown";
 	}
 
-	const char * GLCoreAPIProxy::translateGLDebugEventSourceStr( GLenum pEventSource )
+	const char * atl::translateGLDebugEventSourceStr( GLenum pEventSource )
 	{
 	#if( TS3GX_GL_FEATURE_SUPPORT_DEBUG_OUTPUT )
 	    switch( pEventSource )
@@ -743,7 +743,7 @@ namespace ts3::gpuapi
 		return "Unknown";
 	}
 
-	const char * GLCoreAPIProxy::translateGLDebugEventTypeStr( GLenum pEventType )
+	const char * atl::translateGLDebugEventTypeStr( GLenum pEventType )
 	{
 	#if( TS3GX_GL_FEATURE_SUPPORT_DEBUG_OUTPUT )
 	    switch( pEventType )

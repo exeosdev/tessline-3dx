@@ -35,20 +35,34 @@ namespace ts3::system
 	public:
 		std::unique_ptr<MetalSystemDriverData> const mDriverData;
 		DisplayManagerHandle const mDisplayManager;
-		MetalDeviceHandle const mMetalDevice;
 
 	public:
-		explicit MetalSystemDriver( DisplayManagerHandle pDisplayManager, MetalDeviceHandle pMetalDevice );
+		explicit MetalSystemDriver( DisplayManagerHandle pDisplayManager );
 		virtual ~MetalSystemDriver() noexcept;
 		
 		/// @brief
-		TS3_ATTR_NO_DISCARD MetalDisplaySurfaceHandle createDisplaySurface( const MetalDisplaySurfaceCreateInfo & pCreateInfo );
+		TS3_ATTR_NO_DISCARD MetalDevice & initializeDefaultDevice();
+
+		/// @brief
+		TS3_ATTR_NO_DISCARD MetalDevice & getDefaultDevice() noexcept;
+
+		/// @brief
+		TS3_ATTR_NO_DISCARD MetalDevice & getDefaultDevice() const;
+
+		/// @brief
+		TS3_ATTR_NO_DISCARD MetalDisplaySurfaceHandle createDisplaySurface(
+				MetalDevice & pMetalDevice,
+				const MetalDisplaySurfaceCreateInfo & pCreateInfo );
 		
 	private:
-		virtual MetalDisplaySurfaceHandle _nativeCreateDisplaySurface( const MetalDisplaySurfaceCreateInfo & pCreateInfo ) = 0;
+		virtual MetalDisplaySurfaceHandle _nativeCreateDisplaySurface(
+				MetalDevice & pMetalDevice,
+				const MetalDisplaySurfaceCreateInfo & pCreateInfo ) = 0;
 
 		virtual void _nativeDestroyDisplaySurface( MetalDisplaySurface & pDisplaySurface ) = 0;
 
+	private:
+		MetalDeviceHandle _defaultMetalDevice;
 	};
 
 	class MetalDisplaySurface : public Frame

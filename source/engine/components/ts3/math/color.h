@@ -65,6 +65,7 @@ namespace ts3::math
 			TReal fpBlue;
 			TReal fpAlpha;
 		};
+
 		TReal rgbaArray[4];
 
 	public:
@@ -83,11 +84,20 @@ namespace ts3::math
 		{}
 
 		constexpr RGBAColorNorm( RGBAColor pColor )
-		: fpRed( static_cast<TReal>( pColor.u8Red ) / static_cast<TReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
-		, fpGreen( static_cast<TReal>( pColor.u8Green ) / static_cast<TReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
-		, fpBlue( static_cast<TReal>( pColor.u8Blue ) / static_cast<TReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
-		, fpAlpha( static_cast<TReal>( pColor.u8Alpha ) / static_cast<TReal>( Limits<decltype( pColor.u8Red )>::maxValue ) )
+		: fpRed( static_cast<TReal>( pColor.u8Red ) / static_cast<TReal>( Limits<uint8>::maxValue ) )
+		, fpGreen( static_cast<TReal>( pColor.u8Green ) / static_cast<TReal>( Limits<uint8>::maxValue ) )
+		, fpBlue( static_cast<TReal>( pColor.u8Blue ) / static_cast<TReal>( Limits<uint8>::maxValue ) )
+		, fpAlpha( static_cast<TReal>( pColor.u8Alpha ) / static_cast<TReal>( Limits<uint8>::maxValue ) )
 		{}
+
+		constexpr RGBAColor toU8Color() const
+		{
+			return RGBAColor(
+				static_cast<uint8>( fpRed * Limits<uint8>::maxValue  ),
+				static_cast<uint8>( fpGreen * Limits<uint8>::maxValue  ),
+				static_cast<uint8>( fpBlue * Limits<uint8>::maxValue  ),
+				static_cast<uint8>( fpAlpha * Limits<uint8>::maxValue  ) );
+		}
 	};
 
 	using RGBAColorU8 = RGBAColor;
@@ -129,6 +139,10 @@ namespace ts3::math
 		constexpr RGBAColorU8 cxColorPeachPuff{ 0xFF, 0xDA, 0xB9 };
 		constexpr RGBAColorU8 cxColorTeal{ 0x00, 0x80, 0x80 };
 		constexpr RGBAColorU8 cxColorTopaz{ 0x01, 0x98, 0xE1 };
+
+		constexpr RGBAColorU8 CX_COLOR_BLACK_OPAQUE{ 0x00, 0x00, 0x00, 0xFF };
+		constexpr RGBAColorU8 CX_COLOR_BLACK_TRANSPARENT{ 0x00, 0x00, 0x00, 0x00 };
+		constexpr RGBAColorU8 CX_COLOR_WHITE_OPAQUE{ 0xFF, 0xFF, 0xFF, 0xFF };
 
 	}
 

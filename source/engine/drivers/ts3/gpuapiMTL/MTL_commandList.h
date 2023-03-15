@@ -21,6 +21,8 @@ namespace ts3::gpuapi
 		id<MTLDevice> mMTLDevice;
 		///
 		id<MTLCommandQueue> const mMTLCommandQueue;
+		///
+		id<MTLCommandBuffer> const mMTLCommandBuffer;
 
 	public:
 		MetalCommandList( MetalCommandSystem & pMTLCommandSystem, ECommandListType pListType, id<MTLCommandQueue> pMTLCommandQueue );

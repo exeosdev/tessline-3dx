@@ -1,6 +1,9 @@
 
-#include "displaySystemNative.h"
 #include "internal/displaySystemPrivate.h"
+
+#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
+#  include "internal/platform/shared/dxgi/dxgiDisplaySystem.h"
+#endif
 
 namespace ts3::system
 {

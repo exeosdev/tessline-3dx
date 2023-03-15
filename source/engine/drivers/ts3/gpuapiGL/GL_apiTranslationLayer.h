@@ -36,7 +36,7 @@ namespace ts3::gpuapi
 	enum class ETextureFormat : gpu_pixel_format_value_t;
 	enum class ETextureMipMode : enum_default_value_t;
 
-	namespace GLCoreAPIProxy
+	namespace atl
 	{
 
 		GLenum chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags );
@@ -75,7 +75,7 @@ namespace ts3::gpuapi
 
 		GLenum translateGLStencilOp( EStencilOp pStencilOp );
 
-		GLenum translateGLETextureAddressMode( ETextureAddressMode pAddressMode );
+		GLenum translateGLTextureAddressMode( ETextureAddressMode pAddressMode );
 
 		GLenum translateGLTextureBindTarget( ETextureClass pTextureDimensionClass );
 

@@ -64,13 +64,7 @@ namespace ts3::system
 			pDisplayManager = createDisplayManager();
 		}
 
-		auto metalDevice = pCreateInfo.metalDevice;
-		if( !metalDevice )
-		{
-			metalDevice = MetalDevice::createDefault( pDisplayManager->mSysContext );
-		}
-
-		return createSysObject<OSXMetalSystemDriver>( pDisplayManager->getHandle<OSXDisplayManager>(), std::move( metalDevice ) );
+		return createSysObject<OSXMetalSystemDriver>( pDisplayManager->getHandle<OSXDisplayManager>() );
 	}
 
     OpenGLSystemDriverHandle OSXSysContext::createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager )

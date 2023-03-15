@@ -32,7 +32,6 @@ namespace ts3::system
 
 	struct MetalSystemDriverCreateInfo
 	{
-		MetalDeviceHandle metalDevice = nullptr;
 	};
 
 }

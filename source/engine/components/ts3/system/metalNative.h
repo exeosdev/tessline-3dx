@@ -21,7 +21,6 @@ namespace ts3::system
 	struct MetalDisplaySurfaceData
 	{
 		CAMetalLayer * caMetalLayer = nil;
-
 		MTLRenderPassDescriptor * mtlClearRPDescriptor = nil;
 	};
 

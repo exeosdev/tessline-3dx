@@ -4,7 +4,6 @@
 #ifndef __TS3_GPUAPI_SAMPLER_COMMON_H__
 #define __TS3_GPUAPI_SAMPLER_COMMON_H__
 
-#include "commonGPUResourceDefs.h"
 #include "../state/commonGraphicsConfig.h"
 
 namespace ts3::gpuapi
