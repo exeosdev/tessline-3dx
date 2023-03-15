@@ -395,7 +395,7 @@ int main( int pArgc, const char ** pArgv )
     }
     
     ts3::gpuapi::SamplerCreateInfo samplerCreateInfo;
-    samplerCreateInfo.samplerDesc = ts3::gpuapi::cvSamplerDescDefault;
+    samplerCreateInfo.samplerConfig = ts3::gpuapi::cvSamplerConfigDefault;
     
     auto defaultSampler = gxDriverState.device->createSampler( samplerCreateInfo );
 
@@ -434,7 +434,7 @@ int main( int pArgc, const char ** pArgv )
 		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorType = ts3::gpuapi::EShaderInputDescriptorType::Sampler;
 		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorsNum = 1;
 		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorList[0] = { 10, ts3::gpuapi::EShaderInputDescriptorType::Sampler, ts3::gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT };
-		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorList[0].uSamplerDesc = { 0 };
+		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorList[0].uSamplerConfig = { 0 };
 
 		mainPSO = gxDriverState.device->createGraphicsPipelineStateObject( psoci );
     }

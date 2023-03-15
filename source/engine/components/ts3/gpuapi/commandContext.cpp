@@ -8,7 +8,7 @@ namespace ts3::gpuapi
 {
 
 	CommandContext::CommandContext( CommandList & pCommandList, ECommandContextType pContextType )
-	: GPUDeviceChildObject( mCommandList->mCommandSystem->mGPUDevice )
+	: GPUDeviceChildObject( pCommandList.mGPUDevice )
 	, mCommandList( &pCommandList )
 	, mCommandSystem( mCommandList->mCommandSystem )
 	, mContextType( pContextType )
