@@ -51,23 +51,23 @@ namespace ts3::gpuapi
 
 	enum class EBaseDataType : base_data_type_value_t
 	{
-		Byte         = cxdefs::declareBaseDataType( 0, 1 ),
-		Ubyte        = cxdefs::declareBaseDataType( 1, 1 ),
-		Int16        = cxdefs::declareBaseDataType( 2, 2 ),
-		Uint16       = cxdefs::declareBaseDataType( 3, 2 ),
-		Int32        = cxdefs::declareBaseDataType( 4, 4 ),
-		Uint32       = cxdefs::declareBaseDataType( 5, 4 ),
-		Float16      = cxdefs::declareBaseDataType( 6, 2 ),
-		Float32      = cxdefs::declareBaseDataType( 7, 4 ),
-		Uint24S8     = cxdefs::declareBaseDataType( 8, 4 ),
-		Undefined    = cxdefs::declareBaseDataType( 9, 0 ),
+		Undefined    = cxdefs::declareBaseDataType( 0, 0 ),
+		Byte         = cxdefs::declareBaseDataType( 1, 1 ),
+		Ubyte        = cxdefs::declareBaseDataType( 2, 1 ),
+		Int16        = cxdefs::declareBaseDataType( 3, 2 ),
+		Uint16       = cxdefs::declareBaseDataType( 4, 2 ),
+		Int32        = cxdefs::declareBaseDataType( 5, 4 ),
+		Uint32       = cxdefs::declareBaseDataType( 6, 4 ),
+		Float16      = cxdefs::declareBaseDataType( 7, 2 ),
+		Float32      = cxdefs::declareBaseDataType( 8, 4 ),
+		Uint24S8     = cxdefs::declareBaseDataType( 9, 4 ),
 	};
 
 	enum class EIndexDataFormat : base_data_type_value_t
 	{
+		Undefined = 0,
 		Uint16 = static_cast<base_data_type_value_t>( EBaseDataType::Uint16 ),
 		Uint32 = static_cast<base_data_type_value_t>( EBaseDataType::Uint32 ),
-		Undefined = 0
 	};
 
 	enum class ETextureFormat : gpu_pixel_format_value_t

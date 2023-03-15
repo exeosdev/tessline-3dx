@@ -44,6 +44,7 @@ namespace ts3::gpuapi
 
 	enum class EBlendFactor : uint16
 	{
+		Undefined,
 		Zero,
 		One,
 		Const,
@@ -60,6 +61,7 @@ namespace ts3::gpuapi
 
 	enum class EBlendOp : uint16
 	{
+		Undefined,
 		Add,
 		Min,
 		Max,
@@ -69,6 +71,7 @@ namespace ts3::gpuapi
 
 	enum class ECompFunc : uint16
 	{
+		Undefined,
 		Never,
 		Always,
 		Equal,
@@ -81,6 +84,7 @@ namespace ts3::gpuapi
 
 	enum class ECullMode : uint16
 	{
+		Undefined,
 		None,
 		Back,
 		Front
@@ -94,6 +98,7 @@ namespace ts3::gpuapi
 
 	enum class EStencilOp : uint16
 	{
+		Undefined,
 		Zero,
 		Keep,
 		Replace,
@@ -101,7 +106,7 @@ namespace ts3::gpuapi
 		IncrWrap,
 		DecrClamp,
 		DecrWrap,
-		Invert
+		Invert,
 	};
 
 	/// @brief Blend configuration for a single render target attachment (texture/render buffer).

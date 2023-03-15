@@ -18,13 +18,18 @@ namespace ts3::gpuapi
 	class CommandContext : public GPUDeviceChildObject
 	{
 	public:
-		static const Bitmask<ECommandListFlags> sListFlagsCommon;
+		CommandList * const mCommandList;
 
-		CommandList * const mCommandList = nullptr;
-		CommandSystem * const mCommandSystem = nullptr;
+		CommandSystem * const mCommandSystem;
 
-		CommandContext( CommandSystem & pCommandSystem, CommandList & pCommandList );
+		ECommandContextType const mContextType;
+
+		Bitmask<ECommandObjectPropertyFlags> const mCommandFlags;
+
+	public:
 		virtual ~CommandContext();
+
+		TS3_ATTR_NO_DISCARD bool checkCommandClassSupport( ECommandQueueClass pQueueClass ) const;
 
 		void beginCommandSequence();
 		void endCommandSequence();
@@ -36,37 +41,38 @@ namespace ts3::gpuapi
 		bool flushMappedBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion );
 
 	protected:
-		bool checkCommandListSupport( Bitmask<ECommandListFlags> pCmdListFlags );
+		CommandContext( CommandList & pCommandList, ECommandContextType pContextType );
+
+		bool checkCommandListSupport( Bitmask<ECommandObjectPropertyFlags> pCmdListFlags );
 	};
 
 	class CommandContextDirect : public CommandContext
 	{
 	public:
-		static const Bitmask<ECommandListFlags> sListFlagsDirect;
-
-		CommandContextDirect( CommandSystem & pCommandSystem, CommandList & pCommandList )
-		: CommandContext( pCommandSystem, pCommandList )
-		{}
-
 		virtual ~CommandContextDirect() = default;
 
 		void submit();
+
 		CommandSync submit( const CommandContextSubmitInfo & pSubmitInfo );
 
 		void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext );
 
 		bool invalidateBuffer( GPUBuffer & pBuffer );
 		bool invalidateBufferRegion( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion );
+
+	protected:
+		CommandContextDirect( CommandList & pCommandList, ECommandContextType pContextType )
+		: CommandContext( pCommandList, pContextType )
+		{}
 	};
 
 	class CommandContextDirectTransfer : public CommandContextDirect
 	{
 	public:
 		static ECommandContextType const sContextType = ECommandContextType::DirectTransfer;
-		static Bitmask<ECommandListFlags> const sListFlagsDirectTransfer;
 
-		CommandContextDirectTransfer( CommandSystem & pCommandSystem, CommandList & pCommandList )
-		: CommandContextDirect( pCommandSystem, pCommandList )
+		CommandContextDirectTransfer( CommandList & pCommandList )
+		: CommandContextDirect( pCommandList, ECommandContextType::DirectTransfer )
 		{}
 
 		virtual ~CommandContextDirectTransfer() = default;
@@ -75,32 +81,40 @@ namespace ts3::gpuapi
 		bool updateBufferSubDataCopy( GPUBuffer & pBuffer, GPUBuffer & pSourceBuffer, const GPUBufferSubDataCopyDesc & pCopyDesc );
 		bool updateBufferDataUpload( GPUBuffer & pBuffer, const GPUBufferDataUploadDesc & pUploadDesc );
 		bool updateBufferSubDataUpload( GPUBuffer & pBuffer, const GPUBufferSubDataUploadDesc & pUploadDesc );
+
+	protected:
+		CommandContextDirectTransfer( CommandList & pCommandList, ECommandContextType pContextType )
+		: CommandContextDirect( pCommandList, pContextType )
+		{}
 	};
 
 	class CommandContextDirectCompute : public CommandContextDirectTransfer
 	{
 	public:
 		static ECommandContextType const sContextType = ECommandContextType::DirectCompute;
-		static Bitmask<ECommandListFlags> const sListFlagsDirectCompute;
 
-		CommandContextDirectCompute( CommandSystem & pCommandSystem, CommandList & pCommandList )
-		: CommandContextDirectTransfer( pCommandSystem, pCommandList )
+		CommandContextDirectCompute( CommandList & pCommandList )
+		: CommandContextDirectTransfer( pCommandList, ECommandContextType::DirectCompute )
 		{}
 
 		virtual ~CommandContextDirectCompute() = default;
 
 		void cmdDispatchCompute( uint32 pThrGroupSizeX, uint32 pThrGroupSizeY, uint32 pThrGroupSizeZ );
 		void cmdDispatchComputeIndirect( uint32 pIndirectBufferOffset );
+
+	protected:
+		CommandContextDirectCompute( CommandList & pCommandList, ECommandContextType pContextType )
+		: CommandContextDirectTransfer( pCommandList, pContextType )
+		{}
 	};
 
 	class CommandContextDirectGraphics : public CommandContextDirectCompute
 	{
 	public:
 		static ECommandContextType const sContextType = ECommandContextType::DirectGraphics;
-		static Bitmask<ECommandListFlags> const sListFlagsDirectGraphics;
 
-		CommandContextDirectGraphics( CommandSystem & pCommandSystem, CommandList & pCommandList )
-		: CommandContextDirectCompute( pCommandSystem, pCommandList )
+		CommandContextDirectGraphics( CommandList & pCommandList )
+		: CommandContextDirectCompute( pCommandList, ECommandContextType::DeferredGraphics )
 		{}
 
 		~CommandContextDirectGraphics() = default;
@@ -137,27 +151,26 @@ namespace ts3::gpuapi
 	class CommandContextDeferred : public CommandContext
 	{
 	public:
-		static const Bitmask<ECommandListFlags> sListFlagsDeferred;
-
-		CommandContextDeferred( CommandSystem & pCommandSystem, CommandList & pCommandList )
-		: CommandContext( pCommandSystem, pCommandList )
-		{}
-
 		virtual ~CommandContextDeferred() = default;
 
 		bool mapBufferDeferred( GPUBuffer & pBuffer );
 		bool mapBufferRegionDeferred( GPUBuffer & pBuffer, const GPUMemoryRegion & pRegion );
 		bool unmapBufferDeferred( GPUBuffer & pBuffer );
+
+	protected:
+		CommandContextDeferred( CommandList & pCommandList, ECommandContextType pContextType )
+		: CommandContext( pCommandList, pContextType )
+		{}
+
 	};
 
 	class CommandContextDeferredGraphics : public CommandContextDeferred
 	{
 	public:
 		static ECommandContextType const sContextType = ECommandContextType::DirectTransfer;
-		static Bitmask<ECommandListFlags> const sListFlagsDeferredGraphics;
 
-		CommandContextDeferredGraphics( CommandSystem & pCommandSystem, CommandList & pCommandList )
-		: CommandContextDeferred( pCommandSystem, pCommandList )
+		CommandContextDeferredGraphics( CommandList & pCommandList )
+		: CommandContextDeferred( pCommandList, ECommandContextType::DeferredGraphics )
 		{}
 
 		virtual ~CommandContextDeferredGraphics() = default;

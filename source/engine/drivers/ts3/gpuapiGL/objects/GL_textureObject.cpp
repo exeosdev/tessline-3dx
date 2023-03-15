@@ -1,6 +1,6 @@
 
 #include "GL_textureObject.h"
-#include <ts3/gpuapiGL/GL_coreAPIProxy.h>
+#include <ts3/gpuapiGL/GL_apiTranslationLayer.h>
 
 namespace ts3::gpuapi
 {
@@ -197,7 +197,7 @@ namespace ts3::gpuapi
 			glGetTexLevelParameteriv( textureBindTarget, 0, GL_TEXTURE_INTERNAL_FORMAT, &textureInternalFormat );
 			ts3OpenGLHandleLastError();
 
-			auto internalFormatBPP = GLCoreAPIProxy::queryGLTextureInternalFormatBPP( textureInternalFormat );
+			auto internalFormatBPP = atl::queryGLTextureInternalFormatBPP( textureInternalFormat );
 			auto texturePixelCount = textureWidth * textureHeight * textureDepth;
 
 			textureImageSize = texturePixelCount * internalFormatBPP / 8;

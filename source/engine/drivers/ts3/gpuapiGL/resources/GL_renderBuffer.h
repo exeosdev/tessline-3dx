@@ -19,15 +19,15 @@ namespace ts3::gpuapi
 
 	public:
 		GLInternalRenderBuffer(
-				GLGPUDevice & pGLGPUDevice,
+				GLGPUDevice & pGPUDevice,
 				GLRenderbufferObjectHandle pGLRenderbufferObject );
 
 		GLInternalRenderBuffer(
-				GLGPUDevice & pGLGPUDevice,
+				GLGPUDevice & pGPUDevice,
 				GLTextureObjectHandle pGLTextureObject );
 
 		static GpaHandle<GLInternalRenderBuffer> createInstance(
-				GLGPUDevice & pGLGPUDevice,
+				GLGPUDevice & pGPUDevice,
 				const RenderTargetTextureCreateInfo & pCreateInfo );
 	};
 

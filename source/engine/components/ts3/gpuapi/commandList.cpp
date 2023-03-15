@@ -25,17 +25,18 @@ namespace ts3::gpuapi
 
 	CommandList::~CommandList() = default;
 
-	bool CommandList::checkContextSupport( ECommandContextType pContextType ) const noexcept
+	bool CommandList::checkCommandClassSupport( ECommandQueueClass pQueueClass ) const
 	{
-		return checkFeatureSupport( static_cast<ECommandListFlags>( pContextType ) );
+		return checkFeatureSupport( static_cast<ECommandObjectPropertyFlags>( pQueueClass ) );
 	}
 
-	bool CommandList::checkFeatureSupport( Bitmask<ECommandListFlags> pListFlags ) const noexcept
+	bool CommandList::checkFeatureSupport( Bitmask<ECommandObjectPropertyFlags> pCommandListFlags ) const noexcept
 	{
 		// Command list type (its value) is basically a bitwise OR of all supported bits.
-		Bitmask<ECommandListFlags> commandListFlags = static_cast<ECommandListFlags>( mListType );
+		Bitmask<ECommandObjectPropertyFlags> commandListPropertyFlags = static_cast<ECommandObjectPropertyFlags>( mListType );
+
 		// Check if the specified command classes and/or execution type matches those supported by the list.
-		return commandListFlags.isSet( pListFlags & E_COMMAND_LIST_FLAGS_ALL );
+		return commandListPropertyFlags.isSet( pCommandListFlags & E_COMMAND_OBJECT_PROPERTY_MASK_ALL );
 	}
 
 	bool CommandList::isRenderPassActive() const noexcept

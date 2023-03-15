@@ -1,27 +1,27 @@
 
 #include "GL_renderBuffer.h"
-#include <ts3/gpuapiGL/GL_coreAPIProxy.h>
+#include <ts3/gpuapiGL/GL_apiTranslationLayer.h>
 #include <ts3/gpuapiGL/GL_gpuDevice.h>
 
 namespace ts3::gpuapi
 {
 
 	GLInternalRenderBuffer::GLInternalRenderBuffer(
-			GLGPUDevice & pGLGPUDevice,
+			GLGPUDevice & pGPUDevice,
 			GLRenderbufferObjectHandle pGLRenderbufferObject )
-	: GPUDeviceChildObject( pGLGPUDevice )
+	: GPUDeviceChildObject( pGPUDevice )
 	, mGLRenderbufferObject( std::move( pGLRenderbufferObject ) )
 	{}
 
 	GLInternalRenderBuffer::GLInternalRenderBuffer(
-			GLGPUDevice & pGLGPUDevice,
+			GLGPUDevice & pGPUDevice,
 			GLTextureObjectHandle pGLTextureObject )
-	: GPUDeviceChildObject( pGLGPUDevice )
+	: GPUDeviceChildObject( pGPUDevice )
 	, mGLTextureObject( std::move( pGLTextureObject ) )
 	{}
 
 	GpaHandle<GLInternalRenderBuffer> GLInternalRenderBuffer::createInstance(
-			GLGPUDevice & pGLGPUDevice,
+			GLGPUDevice & pGPUDevice,
 			const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
 		GLRenderbufferCreateInfo openglRenderbufferCreateInfo;
@@ -29,7 +29,7 @@ namespace ts3::gpuapi
 		openglRenderbufferCreateInfo.dimensions.y = pCreateInfo.rttLayout.bufferSize.height;
 		openglRenderbufferCreateInfo.msaaLevel = pCreateInfo.rttLayout.msaaLevel;
 		openglRenderbufferCreateInfo.internalFormat =
-				GLCoreAPIProxy::translateGLTextureInternalFormat( pCreateInfo.rttLayout.internalDataFormat );
+				atl::translateGLTextureInternalFormat( pCreateInfo.rttLayout.internalDataFormat );
 
 		auto openglRenderbuffer = GLRenderbufferObject::create( openglRenderbufferCreateInfo );
 		if( !openglRenderbuffer )
@@ -37,7 +37,7 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
-		auto renderBuffer = createGPUAPIObject<GLInternalRenderBuffer>( pGLGPUDevice, std::move( openglRenderbuffer ) );
+		auto renderBuffer = createGPUAPIObject<GLInternalRenderBuffer>( pGPUDevice, std::move( openglRenderbuffer ) );
 
 		return renderBuffer;
 	}

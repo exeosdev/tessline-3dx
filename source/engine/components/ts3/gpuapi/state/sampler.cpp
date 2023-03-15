@@ -4,9 +4,8 @@
 namespace ts3::gpuapi
 {
 
-	Sampler::Sampler( GPUDevice & pGPUDevice, const SamplerDesc & pSamplerDesc )
+	Sampler::Sampler( GPUDevice & pGPUDevice )
 	: GPUDeviceChildObject( pGPUDevice )
-	, mSamplerDesc( pSamplerDesc )
 	{}
 
 	Sampler::~Sampler() = default;

@@ -39,7 +39,7 @@ int main( int argc, const char ** argv )
 	msurfaceCreateInfo.frameGeometry.size = {800, 600 };
 	msurfaceCreateInfo.frameGeometry.style = EFrameStyle::Caption;
 	msurfaceCreateInfo.visualConfig = vsxGetDefaultVisualConfigForSysWindow();
-	auto ms = md->createDisplaySurface( msurfaceCreateInfo );
+	auto ms = md->createDisplaySurface( md->getDefaultDevice(), msurfaceCreateInfo );
 
 	auto ed = ev->createEventDispatcher();
 	ed->setEventSystemConfigFlags( E_EVENT_SYSTEM_CONFIG_FLAG_ENABLE_AUTO_QUIT_ON_PRIMARY_SOURCE_DESTROY_BIT );

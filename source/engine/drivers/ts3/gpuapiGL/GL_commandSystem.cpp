@@ -18,8 +18,8 @@ namespace ts3::gpuapi
 		}
 	}
 
-	GLCommandSystem::GLCommandSystem( GLGPUDevice & pGLGPUDevice )
-	: CommandSystem( pGLGPUDevice )
+	GLCommandSystem::GLCommandSystem( GLGPUDevice & pGPUDevice )
+	: CommandSystem( pGPUDevice )
 	, _targetSysGLSurface( nullptr )
 	{}
 
@@ -29,11 +29,11 @@ namespace ts3::gpuapi
 	{
 		std::unique_ptr<CommandContext> commandContext;
 
-		auto contextExecutionMode = cxdefs::getCommandContextExecutionMode( pContextType );
+		auto contextExecutionMode = cxdefs::getCommandObjectExecutionMode( pContextType );
 		if( auto * commandList = acquireCommandList( contextExecutionMode ) )
 		{
 			ts3DebugAssert( contextExecutionMode == ECommandExecutionMode::Direct );
-			commandContext = std::make_unique<CommandContextDirectGraphics>( *this, *commandList );
+			commandContext = std::make_unique<CommandContextDirectGraphics>( *commandList );
 			commandList->mSysGLRenderContext->bindForCurrentThread( *_targetSysGLSurface );
 
 			// A dirty workaround. GLEW is no longer used at the system level (now we use only
@@ -123,7 +123,7 @@ namespace ts3::gpuapi
 		return true;
 	}
 
-	system::OpenGLRenderContextHandle GLCommandSystem::createSysGLRenderContext( GLGPUDevice & pGLGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
+	system::OpenGLRenderContextHandle GLCommandSystem::createSysGLRenderContext( GLGPUDevice & pGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
 	{
 		system::OpenGLRenderContextHandle sysGLRenderContext = nullptr;
 
@@ -142,7 +142,7 @@ namespace ts3::gpuapi
 			contextCreateInfo.runtimeVersionDesc.apiProfile = system::EGLAPIProfile::OpenGLES;
 		#endif
 
-			if( pGLGPUDevice.isDebugDevice() )
+			if( pGPUDevice.isDebugDevice() )
 			{
 				contextCreateInfo.flags.set( system::E_OPENGL_RENDER_CONTEXT_CREATE_FLAG_ENABLE_DEBUG_BIT );
 			}

@@ -4,7 +4,7 @@
 #ifndef __TS3DRIVER_GPUAPI_GLCOMMON_GPU_DEVICE_H__
 #define __TS3DRIVER_GPUAPI_GLCOMMON_GPU_DEVICE_H__
 
-#include "GL_coreAPIProxy.h"
+#include "GL_apiTranslationLayer.h"
 #include "state/GL_pipelineImmutableStateFactory.h"
 #include <ts3/gpuapi/gpuDevice.h>
 #include <ts3/gpuapi/state/pipelineImmutableStateCache.h>

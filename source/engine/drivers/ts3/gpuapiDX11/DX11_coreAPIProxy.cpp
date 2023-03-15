@@ -2,7 +2,7 @@
 #include "DX11_coreAPIProxy.h"
 #include <ts3/gpuapiDX11/DX11_gpuDevice.h>
 #include <ts3/gpuapi/resources/gpuBufferCommon.h>
-#include <ts3/gpuapi/resources/samplerCommon.h>
+#include <ts3/gpuapi/state/samplerCommon.h>
 #include <ts3/gpuapi/resources/shaderCommon.h>
 #include <ts3/gpuapi/resources/textureCommon.h>
 #include <ts3/system/windowNative.h>

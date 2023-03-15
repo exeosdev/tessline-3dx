@@ -72,6 +72,7 @@ namespace ts3::gpuapi
 	/// @brief Represents all valid targets for buffer resources. Corresponding E_GPU_BUFFER_BIND_FLAGs are used as values.
 	enum class EGPUBufferTarget : uint32
 	{
+		Unknown                = 0,
 		ConstantBuffer         = E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT,
 		VertexBuffer           = E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT,
 		IndexBuffer            = E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT,
@@ -82,7 +83,6 @@ namespace ts3::gpuapi
 		IndirectDrawBuffer     = E_GPU_BUFFER_BIND_FLAG_INDIRECT_DRAW_BUFFER_BIT,
 		TransferSourceBuffer   = E_GPU_BUFFER_BIND_FLAG_TRANSFER_SOURCE_BUFFER_BIT,
 		TransferTargetBuffer   = E_GPU_BUFFER_BIND_FLAG_TRANSFER_TARGET_BUFFER_BIT,
-		Unknown                = 0
 	};
 
 	struct GPUBufferInitDataDesc : public ResourceInputDataDesc

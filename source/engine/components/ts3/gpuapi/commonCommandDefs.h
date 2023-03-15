@@ -35,55 +35,84 @@ namespace ts3::gpuapi
         E_DEVICE_COMMAND_QUEUE_ID_UNKNOWN = Limits<gpu_cmd_device_queue_id_t>::maxValue,
     };
 
-	enum ECommandListFlags : uint32
+	enum ECommandObjectPropertyFlags : uint32
 	{
-		E_COMMAND_LIST_FLAG_COMMAND_CLASS_COMMON_BIT = 0x01,
-		E_COMMAND_LIST_FLAG_COMMAND_CLASS_TRANSFER_BIT = 0x02,
-		E_COMMAND_LIST_FLAG_COMMAND_CLASS_COMPUTE_BIT = 0x04,
-		E_COMMAND_LIST_FLAG_COMMAND_CLASS_GRAPHICS_BIT = 0x08,
-		E_COMMAND_LIST_FLAGS_COMMAND_CLASS_ALL = 0x0F,
-		E_COMMAND_LIST_FLAG_EXECUTION_MODE_DIRECT_BIT = 0x10,
-		E_COMMAND_LIST_FLAG_EXECUTION_MODE_DEFERRED_BIT = 0x20,
-		E_COMMAND_LIST_FLAGS_EXECUTION_MODE_ALL = 0x30,
-		E_COMMAND_LIST_FLAGS_ALL = E_COMMAND_LIST_FLAGS_COMMAND_CLASS_ALL | E_COMMAND_LIST_FLAGS_EXECUTION_MODE_ALL,
+		E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_COMMON_BIT = 0x01,
+		E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_TRANSFER_BIT = 0x02,
+		E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_COMPUTE_BIT = 0x04,
+		E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_GRAPHICS_BIT = 0x08,
+		E_COMMAND_OBJECT_PROPERTY_MASK_COMMAND_CLASS_ALL = 0x0F,
+
+		E_COMMAND_OBJECT_PROPERTY_FLAG_EXECUTION_MODE_DIRECT_BIT = 0x10,
+		E_COMMAND_OBJECT_PROPERTY_FLAG_EXECUTION_MODE_DEFERRED_BIT = 0x20,
+		E_COMMAND_OBJECT_PROPERTY_MASK_EXECUTION_MODE_ALL = 0x30,
+
+		E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DIRECT =
+			E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_COMMON_BIT |
+			E_COMMAND_OBJECT_PROPERTY_FLAG_EXECUTION_MODE_DIRECT_BIT,
+
+		E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DEFERRED =
+			E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_COMMON_BIT |
+			E_COMMAND_OBJECT_PROPERTY_FLAG_EXECUTION_MODE_DEFERRED_BIT,
+
+		E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DIRECT_TRANSFER =
+			E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DIRECT |
+			E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_TRANSFER_BIT,
+
+		E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DIRECT_COMPUTE =
+			E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DIRECT_TRANSFER |
+			E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_COMPUTE_BIT,
+
+		E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DIRECT_GRAPHICS =
+			E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DIRECT_COMPUTE |
+			E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_GRAPHICS_BIT,
+
+		E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DEFERRED_GRAPHICS =
+			E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DEFERRED |
+			E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_GRAPHICS_BIT,
+
+		E_COMMAND_OBJECT_PROPERTY_MASK_ALL =
+			E_COMMAND_OBJECT_PROPERTY_MASK_COMMAND_CLASS_ALL |
+			E_COMMAND_OBJECT_PROPERTY_MASK_EXECUTION_MODE_ALL,
 	};
 
 	enum class ECommandExecutionMode : uint32
 	{
-		Direct = E_COMMAND_LIST_FLAG_EXECUTION_MODE_DIRECT_BIT,
-		Deferred = E_COMMAND_LIST_FLAG_EXECUTION_MODE_DEFERRED_BIT
+		Direct = E_COMMAND_OBJECT_PROPERTY_FLAG_EXECUTION_MODE_DIRECT_BIT,
+		Deferred = E_COMMAND_OBJECT_PROPERTY_FLAG_EXECUTION_MODE_DEFERRED_BIT
 	};
 
-	enum class ECommandQueueType : uint32
+	enum class ECommandQueueClass : uint32
 	{
-		Transfer = E_COMMAND_LIST_FLAG_COMMAND_CLASS_COMMON_BIT | E_COMMAND_LIST_FLAG_COMMAND_CLASS_TRANSFER_BIT,
-		Compute = static_cast<uint32>( Transfer ) | E_COMMAND_LIST_FLAG_COMMAND_CLASS_COMPUTE_BIT,
-		Graphics = static_cast<uint32>( Compute ) | E_COMMAND_LIST_FLAG_COMMAND_CLASS_GRAPHICS_BIT,
+		Transfer = E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_COMMON_BIT | E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_TRANSFER_BIT,
+		Compute = static_cast<uint32>( Transfer ) | E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_COMPUTE_BIT,
+		Graphics = static_cast<uint32>( Compute ) | E_COMMAND_OBJECT_PROPERTY_FLAG_COMMAND_CLASS_GRAPHICS_BIT,
 		Default = 0,
 	};
 
-	enum class ECommandContextType : uint32
+	enum class ECommandObjectType : uint32
 	{
-		DirectTransfer = static_cast<uint32>( ECommandQueueType::Transfer ) | static_cast<uint32>( ECommandExecutionMode::Direct ),
-		DirectCompute = static_cast<uint32>( ECommandQueueType::Compute ) | static_cast<uint32>( ECommandExecutionMode::Direct ),
-		DirectGraphics = static_cast<uint32>( ECommandQueueType::Graphics ) | static_cast<uint32>( ECommandExecutionMode::Direct ),
-		DeferredGraphics = static_cast<uint32>( ECommandQueueType::Graphics ) | static_cast<uint32>( ECommandExecutionMode::Deferred ),
+		DirectTransfer = static_cast<uint32>( ECommandQueueClass::Transfer ) | static_cast<uint32>( ECommandExecutionMode::Direct ),
+		DirectCompute = static_cast<uint32>( ECommandQueueClass::Compute ) | static_cast<uint32>( ECommandExecutionMode::Direct ),
+		DirectGraphics = static_cast<uint32>( ECommandQueueClass::Graphics ) | static_cast<uint32>( ECommandExecutionMode::Direct ),
+		DeferredGraphics = static_cast<uint32>( ECommandQueueClass::Graphics ) | static_cast<uint32>( ECommandExecutionMode::Deferred ),
 		Undefined = 0
 	};
 
-	using ECommandListType = ECommandContextType;
+	using ECommandContextType = ECommandObjectType;
+	using ECommandListType = ECommandObjectType;
 
 	namespace cxdefs
 	{
 
-		inline constexpr ECommandQueueType getCommandContextQueueType( ECommandContextType pContextType ) noexcept
+		inline constexpr ECommandExecutionMode getCommandObjectExecutionMode( ECommandObjectType pType ) noexcept
 		{
-			return static_cast<ECommandQueueType>( static_cast<uint32>( pContextType ) & E_COMMAND_LIST_FLAGS_COMMAND_CLASS_ALL );
+			return static_cast<ECommandExecutionMode>( static_cast<uint32>( pType ) & E_COMMAND_OBJECT_PROPERTY_MASK_EXECUTION_MODE_ALL );
 		}
 
-		inline constexpr ECommandExecutionMode getCommandContextExecutionMode( ECommandContextType pContextType ) noexcept
+		inline constexpr Bitmask<ECommandObjectPropertyFlags> getCommandObjectPropertyFlags( ECommandObjectType pType ) noexcept
 		{
-			return static_cast<ECommandExecutionMode>( static_cast<uint32>( pContextType ) & E_COMMAND_LIST_FLAGS_EXECUTION_MODE_ALL );
+			return makeBitmask<uint32>( static_cast<uint32>( pType ) & E_COMMAND_OBJECT_PROPERTY_MASK_ALL );
 		}
 
 	}
@@ -120,7 +149,7 @@ namespace ts3::gpuapi
 
 	struct CommandContextSubmitInfo
 	{
-		ECommandQueueType queuePreference = ECommandQueueType::Default;
+		ECommandQueueClass queuePreference = ECommandQueueClass::Default;
 		ECommandSubmitStateOp stateOp = ECommandSubmitStateOp::Discard;
 		ECommandSubmitSyncMode syncMode = ECommandSubmitSyncMode::None;
 	};

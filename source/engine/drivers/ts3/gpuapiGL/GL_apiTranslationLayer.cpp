@@ -1,9 +1,9 @@
 
 #include "GL_apiTranslationLayer.h"
 #include <ts3/gpuapi/resources/gpuBufferCommon.h>
-#include <ts3/gpuapi/state/samplerCommon.h>
 #include <ts3/gpuapi/resources/shaderCommon.h>
 #include <ts3/gpuapi/resources/textureCommon.h>
+#include <ts3/gpuapi/state/samplerCommon.h>
 #include <ts3/stdext/stlHelperAlgo.h>
 #include <unordered_map>
 
@@ -259,21 +259,16 @@ namespace ts3::gpuapi
 		auto baseDataTypeIndex = cxdefs::getBaseDataTypeIndex( pBaseDataType );
 		switch( baseDataTypeIndex )
 		{
-			ts3CaseReturn( 0u, GL_BYTE                           );
-			ts3CaseReturn( 1u, GL_UNSIGNED_BYTE                  );
-			ts3CaseReturn( 2u, GL_SHORT                          );
-			ts3CaseReturn( 3u, GL_UNSIGNED_SHORT                 );
-			ts3CaseReturn( 4u, GL_INT                            );
-			ts3CaseReturn( 5u, GL_UNSIGNED_INT                   );
-			ts3CaseReturn( 6u, GL_HALF_FLOAT                     );
-			ts3CaseReturn( 7u, GL_FLOAT                          );
-			ts3CaseReturn( 8u, GL_UNSIGNED_INT_24_8              );
-			ts3CaseReturn( 9u, GL_FLOAT_32_UNSIGNED_INT_24_8_REV );
-
-			default:
-			{
-				break;
-			}
+			ts3CaseReturn( 0u, GL_INVALID_ENUM                   );
+			ts3CaseReturn( 1u, GL_BYTE                           );
+			ts3CaseReturn( 2u, GL_UNSIGNED_BYTE                  );
+			ts3CaseReturn( 3u, GL_SHORT                          );
+			ts3CaseReturn( 4u, GL_UNSIGNED_SHORT                 );
+			ts3CaseReturn( 5u, GL_INT                            );
+			ts3CaseReturn( 6u, GL_UNSIGNED_INT                   );
+			ts3CaseReturn( 7u, GL_HALF_FLOAT                     );
+			ts3CaseReturn( 8u, GL_FLOAT                          );
+			ts3CaseReturn( 9u, GL_UNSIGNED_INT_24_8              );
 		}
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -282,6 +277,7 @@ namespace ts3::gpuapi
 	{
 		switch( pBlendFactor )
 		{
+			ts3CaseReturn( EBlendFactor::Undefined   , GL_ZERO                     );
 			ts3CaseReturn( EBlendFactor::Zero        , GL_ZERO                     );
 			ts3CaseReturn( EBlendFactor::One         , GL_ONE                      );
 			ts3CaseReturn( EBlendFactor::Const       , GL_CONSTANT_COLOR           );
@@ -307,6 +303,7 @@ namespace ts3::gpuapi
 	{
 		switch( pBlendOp )
 		{
+			ts3CaseReturn( EBlendOp::Undefined   , GL_FUNC_ADD              );
 			ts3CaseReturn( EBlendOp::Add         , GL_FUNC_ADD              );
 			ts3CaseReturn( EBlendOp::Min         , GL_MIN                   );
 			ts3CaseReturn( EBlendOp::Max         , GL_MAX                   );
@@ -325,6 +322,7 @@ namespace ts3::gpuapi
 	{
 		switch( pBufferTarget )
 		{
+			ts3CaseReturn( EGPUBufferTarget::Unknown                , GL_INVALID_ENUM              );
 			ts3CaseReturn( EGPUBufferTarget::ConstantBuffer         , GL_UNIFORM_BUFFER            );
 			ts3CaseReturn( EGPUBufferTarget::VertexBuffer           , GL_ARRAY_BUFFER              );
 			ts3CaseReturn( EGPUBufferTarget::IndexBuffer            , GL_ELEMENT_ARRAY_BUFFER      );
@@ -384,6 +382,7 @@ namespace ts3::gpuapi
 	{
 		switch( pCompFunc )
 		{
+			ts3CaseReturn( ECompFunc::Undefined    , GL_INVALID_ENUM );
 			ts3CaseReturn( ECompFunc::Never        , GL_NEVER    );
 			ts3CaseReturn( ECompFunc::Always       , GL_ALWAYS   );
 			ts3CaseReturn( ECompFunc::Equal        , GL_EQUAL    );
@@ -400,9 +399,10 @@ namespace ts3::gpuapi
 	{
 		switch( pCullMode )
 		{
-			ts3CaseReturn( ECullMode::None  , 0 );
-			ts3CaseReturn( ECullMode::Back  , GL_BACK  );
-			ts3CaseReturn( ECullMode::Front , GL_FRONT );
+			ts3CaseReturn( ECullMode::Undefined  , GL_INVALID_ENUM );
+			ts3CaseReturn( ECullMode::None       , GL_NONE );
+			ts3CaseReturn( ECullMode::Back       , GL_BACK  );
+			ts3CaseReturn( ECullMode::Front      , GL_FRONT );
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -411,8 +411,9 @@ namespace ts3::gpuapi
 	{
 		switch( pIndexDataFormat )
 		{
-			ts3CaseReturn( EIndexDataFormat::Uint16, GL_UNSIGNED_SHORT );
-			ts3CaseReturn( EIndexDataFormat::Uint32, GL_UNSIGNED_INT   );
+			ts3CaseReturn( EIndexDataFormat::Undefined , GL_INVALID_ENUM   );
+			ts3CaseReturn( EIndexDataFormat::Uint16    , GL_UNSIGNED_SHORT );
+			ts3CaseReturn( EIndexDataFormat::Uint32    , GL_UNSIGNED_INT   );
 
 			default:
 			{
@@ -427,6 +428,7 @@ namespace ts3::gpuapi
 	#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
 		switch( pFillMode )
 		{
+			ts3CaseReturn( EPrimitiveFillMode::Undefined , GL_INVALID_ENUM );
 			ts3CaseReturn( EPrimitiveFillMode::Solid     , GL_FILL );
 			ts3CaseReturn( EPrimitiveFillMode::Wireframe , GL_LINE );
 		};
@@ -438,7 +440,7 @@ namespace ts3::gpuapi
 	{
 		switch( pTopology )
 		{
-			ts3CaseReturn( EPrimitiveTopology::Undefined        , 0u );
+			ts3CaseReturn( EPrimitiveTopology::Undefined        , GL_INVALID_ENUM );
 			ts3CaseReturn( EPrimitiveTopology::PointList        , GL_POINTS );
 			ts3CaseReturn( EPrimitiveTopology::LineList         , GL_LINES );
 			ts3CaseReturn( EPrimitiveTopology::LineStrip        , GL_LINE_STRIP );
@@ -461,6 +463,7 @@ namespace ts3::gpuapi
 	{
 		switch( pShaderType )
 		{
+			ts3CaseReturn( EShaderType::Unknown    , GL_INVALID_ENUM );
 			ts3CaseReturn( EShaderType::GSVertex   , GL_VERTEX_SHADER );
 			ts3CaseReturn( EShaderType::GSPixel    , GL_FRAGMENT_SHADER );
 		#if( TS3GX_GL_FEATURE_SUPPORT_SHADER_TYPE_GEOMETRY )
@@ -473,11 +476,6 @@ namespace ts3::gpuapi
 		#if( TS3GX_GL_FEATURE_SUPPORT_SHADER_TYPE_COMPUTE )
 			ts3CaseReturn( EShaderType::CSCompute , GL_COMPUTE_SHADER );
 		#endif
-
-			default:
-			{
-				break;
-			}
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -486,14 +484,15 @@ namespace ts3::gpuapi
 	{
 		switch( pStencilOp )
 		{
-			ts3CaseReturn( EStencilOp::Zero      , GL_ZERO      );
-			ts3CaseReturn( EStencilOp::Keep      , GL_KEEP      );
-			ts3CaseReturn( EStencilOp::Replace   , GL_REPLACE   );
-			ts3CaseReturn( EStencilOp::IncrClamp , GL_INCR      );
-			ts3CaseReturn( EStencilOp::IncrWrap  , GL_INCR_WRAP );
-			ts3CaseReturn( EStencilOp::DecrClamp , GL_DECR      );
-			ts3CaseReturn( EStencilOp::DecrWrap  , GL_DECR_WRAP );
-			ts3CaseReturn( EStencilOp::Invert    , GL_INVERT    );
+			ts3CaseReturn( EStencilOp::Undefined , GL_INVALID_ENUM );
+			ts3CaseReturn( EStencilOp::Zero      , GL_ZERO         );
+			ts3CaseReturn( EStencilOp::Keep      , GL_KEEP         );
+			ts3CaseReturn( EStencilOp::Replace   , GL_REPLACE      );
+			ts3CaseReturn( EStencilOp::IncrClamp , GL_INCR         );
+			ts3CaseReturn( EStencilOp::IncrWrap  , GL_INCR_WRAP    );
+			ts3CaseReturn( EStencilOp::DecrClamp , GL_DECR         );
+			ts3CaseReturn( EStencilOp::DecrWrap  , GL_DECR_WRAP    );
+			ts3CaseReturn( EStencilOp::Invert    , GL_INVERT       );
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -502,12 +501,14 @@ namespace ts3::gpuapi
 	{
 		switch( pAddressMode )
 		{
-			ts3CaseReturn( ETextureAddressMode::Clamp  , GL_CLAMP_TO_EDGE   );
-			ts3CaseReturn( ETextureAddressMode::Mirror , GL_MIRRORED_REPEAT );
-			ts3CaseReturn( ETextureAddressMode::Wrap   , GL_REPEAT          );
+			ts3CaseReturn( ETextureAddressMode::Undefined    , GL_INVALID_ENUM    );
+			ts3CaseReturn( ETextureAddressMode::ClampToEdge  , GL_CLAMP_TO_EDGE   );
+			ts3CaseReturn( ETextureAddressMode::MirrorRepeat , GL_MIRRORED_REPEAT );
+			ts3CaseReturn( ETextureAddressMode::Repeat       , GL_REPEAT          );
+
 		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_EXTENDED_ADDRESS_MODE )
-			ts3CaseReturn( ETextureAddressMode::BorderColor     , GL_CLAMP_TO_BORDER      );
-			ts3CaseReturn( ETextureAddressMode::MirrorOnceClamp , GL_MIRROR_CLAMP_TO_EDGE );
+			ts3CaseReturn( ETextureAddressMode::ClampToColor      , GL_CLAMP_TO_BORDER      );
+			ts3CaseReturn( ETextureAddressMode::MirrorClampToEdge , GL_MIRROR_CLAMP_TO_EDGE );
 		#endif
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
@@ -517,11 +518,13 @@ namespace ts3::gpuapi
 	{
 		switch( pTextureDimensionClass )
 		{
-			ts3CaseReturn( ETextureClass::T2D      , GL_TEXTURE_2D             );
-			ts3CaseReturn( ETextureClass::T2DArray , GL_TEXTURE_2D_ARRAY       );
-			ts3CaseReturn( ETextureClass::T2DMS    , GL_TEXTURE_2D_MULTISAMPLE );
-			ts3CaseReturn( ETextureClass::T3D      , GL_TEXTURE_3D             );
-			ts3CaseReturn( ETextureClass::TCubeMap , GL_TEXTURE_CUBE_MAP       );
+			ts3CaseReturn( ETextureClass::Unknown    , GL_INVALID_ENUM                 );
+			ts3CaseReturn( ETextureClass::T2D        , GL_TEXTURE_2D                   );
+			ts3CaseReturn( ETextureClass::T2DArray   , GL_TEXTURE_2D_ARRAY             );
+			ts3CaseReturn( ETextureClass::T2DMS      , GL_TEXTURE_2D_MULTISAMPLE       );
+			ts3CaseReturn( ETextureClass::T2DMSArray , GL_TEXTURE_2D_MULTISAMPLE_ARRAY );
+			ts3CaseReturn( ETextureClass::T3D        , GL_TEXTURE_3D                   );
+			ts3CaseReturn( ETextureClass::TCubeMap   , GL_TEXTURE_CUBE_MAP             );
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -530,6 +533,7 @@ namespace ts3::gpuapi
 	{
 		switch( pTextureFormat )
 		{
+			ts3CaseReturn( ETextureFormat::UNKNOWN    , GL_INVALID_ENUM );
 			ts3CaseReturn( ETextureFormat::R32F       , GL_R32F         );
 			ts3CaseReturn( ETextureFormat::R32I       , GL_R32I         );
 			ts3CaseReturn( ETextureFormat::R32U       , GL_R32UI        );
@@ -604,6 +608,7 @@ namespace ts3::gpuapi
 	{
 		switch( pTextureFormat )
 		{
+			ts3CaseReturn( ETextureFormat::UNKNOWN    , GL_INVALID_ENUM );
 			ts3CaseReturn( ETextureFormat::R32F       , GL_RED  );
 			ts3CaseReturn( ETextureFormat::R32I       , GL_RED  );
 			ts3CaseReturn( ETextureFormat::R32U       , GL_RED  );
@@ -688,9 +693,10 @@ namespace ts3::gpuapi
 	{
 		switch( pDebugOutputVersion )
 		{
-			ts3CaseReturn( GLDebugOutputVersion::AMDExt  , "GL_AMD_debug_outputr" );
-			ts3CaseReturn( GLDebugOutputVersion::ARBExt  , "GL_ARB_debug_output"  );
-			ts3CaseReturn( GLDebugOutputVersion::KHRCore , "GL_KHR_debug"         );
+			ts3CaseReturn( GLDebugOutputVersion::Unknown , "" );
+			ts3CaseReturn( GLDebugOutputVersion::AMDExt  , "GL_AMD_debug_output" );
+			ts3CaseReturn( GLDebugOutputVersion::ARBExt  , "GL_ARB_debug_output" );
+			ts3CaseReturn( GLDebugOutputVersion::KHRCore , "GL_KHR_debug"        );
 		}
 		return "Unknown";
 	}

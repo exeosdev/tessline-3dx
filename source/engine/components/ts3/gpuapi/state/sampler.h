@@ -12,9 +12,7 @@ namespace ts3::gpuapi
 	class TS3_GPUAPI_CLASS Sampler : public GPUDeviceChildObject
 	{
 	public:
-		SamplerDesc const mSamplerDesc;
-
-		Sampler( GPUDevice & pGPUDevice, const SamplerDesc & pSamplerDesc );
+		Sampler( GPUDevice & pGPUDevice );
 		virtual ~Sampler();
 	};
 

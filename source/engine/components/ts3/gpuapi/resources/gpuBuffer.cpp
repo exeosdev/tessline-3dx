@@ -38,7 +38,7 @@ namespace ts3::gpuapi
 			return false;
 		}
 
-		if( !GpuMem::checkMemoryMapAccess( pMapMode, mResourceMemory.memoryFlags ) )
+		if( !memutil::checkMemoryMapAccess( pMapMode, mResourceMemory.memoryFlags ) )
 		{
 			return false;
 		}

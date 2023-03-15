@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef __TS3DRIVER_GPUAPI_GLCOMMON_CORE_LAYER_H__
-#define __TS3DRIVER_GPUAPI_GLCOMMON_CORE_LAYER_H__
+#ifndef __TS3DRIVER_GPUAPI_GLCOMMON_API_TRANSLATION_LAYER_H__
+#define __TS3DRIVER_GPUAPI_GLCOMMON_API_TRANSLATION_LAYER_H__
 
 #include "GL_prerequisites.h"
 
@@ -99,4 +99,4 @@ namespace ts3::gpuapi
 
 } // namespace ts3::gpuapi
 
-#endif // __TS3DRIVER_GPUAPI_GLCOMMON_CORE_LAYER_H__
+#endif // __TS3DRIVER_GPUAPI_GLCOMMON_API_TRANSLATION_LAYER_H__

@@ -1,6 +1,6 @@
 
 #include "GL_inputAssembler.h"
-#include <ts3/gpuapiGL/GL_coreAPIProxy.h>
+#include <ts3/gpuapiGL/GL_apiTranslationLayer.h>
 #include <ts3/gpuapiGL/GL_gpuDevice.h>
 #include <ts3/gpuapiGL/objects/GL_vertexArrayObject.h>
 #include <ts3/gpuapiGL/resources/GL_gpuBuffer.h>
@@ -83,7 +83,7 @@ namespace ts3::gpuapi
 			glcAttributeInfo.byteSize = cxdefs::getVertexAttribFormatByteSize( pAttributeInfo.format );
 
 			const auto attributeFormatBaseType = cxdefs::getVertexAttribFormatBaseDataType( pAttributeInfo.format );
-			glcAttributeInfo.baseType = GLCoreAPIProxy::translateGLBaseDataType( attributeFormatBaseType );
+			glcAttributeInfo.baseType = atl::translateGLBaseDataType( attributeFormatBaseType );
 
 			const auto attributeFormatLength = cxdefs::getVertexAttribFormatLength( pAttributeInfo.format );
 			glcAttributeInfo.componentsNum = static_cast<uint32>( attributeFormatLength );
@@ -134,7 +134,7 @@ namespace ts3::gpuapi
 			}
 
 			glcInputLayoutDefinition.activeAttributesMask = pDefinition.activeAttributesMask;
-			glcInputLayoutDefinition.primitiveTopology = GLCoreAPIProxy::translateGLPrimitiveTopology( pDefinition.primitiveTopology );
+			glcInputLayoutDefinition.primitiveTopology = atl::translateGLPrimitiveTopology( pDefinition.primitiveTopology );
 
 			return glcInputLayoutDefinition;
 		}
@@ -225,7 +225,7 @@ namespace ts3::gpuapi
 
 				pOutGLBinding.handle = glcIndexBuffer->mGLBufferObject->mGLHandle;
 				pOutGLBinding.offset = pIBReference.dataOffset();
-				pOutGLBinding.format = GLCoreAPIProxy::translateGLIndexDataFormat( pIBReference.indexFormat );
+				pOutGLBinding.format = atl::translateGLIndexDataFormat( pIBReference.indexFormat );
 				pOutGLBinding.elementByteSize = cxdefs::getIndexDataFormatByteSize( pIBReference.indexFormat );
 
 				return true;

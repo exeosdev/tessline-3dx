@@ -25,18 +25,18 @@ namespace ts3::gpuapi
 		GLShader( GLGPUDevice & pGPUDevice, EShaderType pShaderType, GLShaderProgramObjectHandle pGLShaderProgramObject );
 		virtual ~GLShader();
 
-		static GLShaderHandle createShaderObjectWithBinary( GLGPUDevice & pGLGPUDevice, EShaderType pShaderType, const ShaderBinary & pShaderBinary );
-		static GLShaderHandle createShaderObjectWithSource( GLGPUDevice & pGLGPUDevice, EShaderType pShaderType, const void * pSource, size_t pSourceLength );
-		static GLShaderHandle createShaderSeparableStageWithBinary( GLGPUDevice & pGLGPUDevice, EShaderType pShaderType, const ShaderBinary & pShaderBinary );
-		static GLShaderHandle createShaderSeparableStageWithSource( GLGPUDevice & pGLGPUDevice, EShaderType pShaderType, const void * pSource, size_t pSourceLength );
+		static GLShaderHandle createShaderObjectWithBinary( GLGPUDevice & pGPUDevice, EShaderType pShaderType, const ShaderBinary & pShaderBinary );
+		static GLShaderHandle createShaderObjectWithSource( GLGPUDevice & pGPUDevice, EShaderType pShaderType, const void * pSource, size_t pSourceLength );
+		static GLShaderHandle createShaderSeparableStageWithBinary( GLGPUDevice & pGPUDevice, EShaderType pShaderType, const ShaderBinary & pShaderBinary );
+		static GLShaderHandle createShaderSeparableStageWithSource( GLGPUDevice & pGPUDevice, EShaderType pShaderType, const void * pSource, size_t pSourceLength );
 	};
 
 	namespace rcutil
 	{
 
-		GLShaderHandle createShaderObject( GLGPUDevice & pGLGPUDevice, const ShaderCreateInfo & pCreateInfo );
+		GLShaderHandle createShaderObject( GLGPUDevice & pGPUDevice, const ShaderCreateInfo & pCreateInfo );
 
-		GLShaderHandle createShaderSeparableStage( GLGPUDevice & pGLGPUDevice, const ShaderCreateInfo & pCreateInfo );
+		GLShaderHandle createShaderSeparableStage( GLGPUDevice & pGPUDevice, const ShaderCreateInfo & pCreateInfo );
 
 	}
 

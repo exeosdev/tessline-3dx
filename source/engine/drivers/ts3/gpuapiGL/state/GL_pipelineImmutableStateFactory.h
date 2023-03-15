@@ -14,7 +14,7 @@ namespace ts3::gpuapi
 		GLGPUDevice & mGLGPUDevice;
 
 	public:
-		GLPipelineImmutableStateFactory( GLGPUDevice & pGLGPUDevice );
+		GLPipelineImmutableStateFactory( GLGPUDevice & pGPUDevice );
 		virtual ~GLPipelineImmutableStateFactory();
 
 		virtual BlendImmutableStateHandle createBlendState( const BlendConfig & pConfig ) override final;

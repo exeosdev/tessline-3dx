@@ -1,6 +1,8 @@
 
 CMakeSettings.json
 
+*.pak
+
 .gradle/
 .idea/
 .vs/

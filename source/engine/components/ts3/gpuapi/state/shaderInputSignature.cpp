@@ -182,7 +182,7 @@ namespace ts3::gpuapi
 				else if( descriptorSetDesc.descriptorType == EShaderInputDescriptorType::Sampler )
 				{
 					descriptor.cParamType = EShaderInputParameterType::Sampler;
-					descriptor.uSamplerInfo.samplerBindingIndex = descriptorDesc.uSamplerDesc.samplerBindingIndex;
+					descriptor.uSamplerInfo.samplerBindingIndex = descriptorDesc.uSamplerConfig.samplerBindingIndex;
 				}
 
 				setDescriptorsNum += 1;

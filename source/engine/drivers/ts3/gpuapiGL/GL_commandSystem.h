@@ -21,7 +21,7 @@ namespace ts3::gpuapi
 	class TS3GX_GL_CLASS GLCommandSystem : public CommandSystem
 	{
 	public:
-		explicit GLCommandSystem( GLGPUDevice & pGLGPUDevice );
+		explicit GLCommandSystem( GLGPUDevice & pGPUDevice );
 		virtual ~GLCommandSystem();
 
 		virtual std::unique_ptr<CommandContext> acquireCommandContext( ECommandContextType pContextType ) override;
@@ -41,7 +41,7 @@ namespace ts3::gpuapi
 
 		bool initializeMainCommandList();
 
-		static system::OpenGLRenderContextHandle createSysGLRenderContext( GLGPUDevice & pGLGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface );
+		static system::OpenGLRenderContextHandle createSysGLRenderContext( GLGPUDevice & pGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface );
 
 	protected:
 		system::OpenGLDisplaySurfaceHandle _targetSysGLSurface;

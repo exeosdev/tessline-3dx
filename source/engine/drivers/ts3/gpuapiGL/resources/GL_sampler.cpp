@@ -1,22 +1,22 @@
 
 #include "GL_sampler.h"
-#include "../GL_coreAPIProxy.h"
+#include "../GL_apiTranslationLayer.h"
 #include "../GL_gpuDevice.h"
 
 namespace ts3::gpuapi
 {
 
-	GLSampler::GLSampler( GLGPUDevice & pGPUDevice, const SamplerDesc & pSamplerDesc, GLSamplerObjectHandle pGLSamplerObject )
-	: Sampler( pGPUDevice, pSamplerDesc )
+	GLSampler::GLSampler( GLGPUDevice & pGPUDevice, GLSamplerObjectHandle pGLSamplerObject )
+	: Sampler( pGPUDevice )
 	, mGLSamplerObject( std::move( pGLSamplerObject ) )
 	{ }
 
 	GLSampler::~GLSampler() = default;
 
-	GLSamplerHandle GLSampler::createSampler( GLGPUDevice & pGLGPUDevice, const SamplerCreateInfo & pCreateInfo )
+	GLSamplerHandle GLSampler::createSampler( GLGPUDevice & pGPUDevice, const SamplerCreateInfo & pCreateInfo )
 	{
 		GLSamplerState openglSamplerState;
-		if( !translateSamplerDesc( pCreateInfo.samplerDesc, openglSamplerState ) )
+		if( !translateSamplerConfig( pCreateInfo.samplerConfig, openglSamplerState ) )
 		{
 			return nullptr;
 		}
@@ -27,35 +27,35 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
-		auto sampler = createGPUAPIObject<GLSampler>( pGLGPUDevice, pCreateInfo.samplerDesc, std::move( openglSamplerObject ) );
+		auto sampler = createGPUAPIObject<GLSampler>( pGPUDevice, std::move( openglSamplerObject ) );
 
 		return sampler;
 	}
 
-	bool GLSampler::translateSamplerDesc( const SamplerDesc & pSamplerDesc, GLSamplerState & pOutSamplerState )
+	bool GLSampler::translateSamplerConfig( const SamplerConfig & pSamplerConfig, GLSamplerState & pOutSamplerState )
 	{
-		pOutSamplerState.borderColor = pSamplerDesc.borderColor;
-		pOutSamplerState.mipLODRange.first = pSamplerDesc.mipLODRange.begin;
-		pOutSamplerState.mipLODRange.second = pSamplerDesc.mipLODRange.end;
+		pOutSamplerState.borderColor = pSamplerConfig.borderColor;
+		pOutSamplerState.mipLODRange.first = pSamplerConfig.mipLODRange.begin;
+		pOutSamplerState.mipLODRange.second = pSamplerConfig.mipLODRange.end;
 
-		pOutSamplerState.addressModeS = GLCoreAPIProxy::translateGLETextureAddressMode( pSamplerDesc.addressModeConfig.coordU );
-		pOutSamplerState.addressModeT = GLCoreAPIProxy::translateGLETextureAddressMode( pSamplerDesc.addressModeConfig.coordV );
-		pOutSamplerState.addressModeR = GLCoreAPIProxy::translateGLETextureAddressMode( pSamplerDesc.addressModeConfig.coordW );
+		pOutSamplerState.addressModeS = atl::translateGLTextureAddressMode( pSamplerConfig.addressModeConfig.coordU );
+		pOutSamplerState.addressModeT = atl::translateGLTextureAddressMode( pSamplerConfig.addressModeConfig.coordV );
+		pOutSamplerState.addressModeR = atl::translateGLTextureAddressMode( pSamplerConfig.addressModeConfig.coordW );
 
-		pOutSamplerState.magFilter = GLCoreAPIProxy::chooseGLTextureMagFilter( pSamplerDesc.filterConfig.magFilter, pSamplerDesc.filterConfig.mipMode );
+		pOutSamplerState.magFilter = atl::chooseGLTextureMagFilter( pSamplerConfig.filterConfig.magFilter, pSamplerConfig.filterConfig.mipMode );
 		if( pOutSamplerState.magFilter == GL_INVALID_VALUE )
 		{
 			return false;
 		}
 
-		pOutSamplerState.minFilter = GLCoreAPIProxy::chooseGLTextureMinFilter( pSamplerDesc.filterConfig.minFilter, pSamplerDesc.filterConfig.mipMode );
+		pOutSamplerState.minFilter = atl::chooseGLTextureMinFilter( pSamplerConfig.filterConfig.minFilter, pSamplerConfig.filterConfig.mipMode );
 		if( pOutSamplerState.minFilter == GL_INVALID_VALUE )
 		{
 			return false;
 		}
 
 	#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_ANISOTROPIC_FILTER )
-		pOutSamplerState.anisotropyLevel = pSamplerDesc.filterConfig.anisotropyLevel;
+		pOutSamplerState.anisotropyLevel = pSamplerConfig.filterConfig.anisotropyLevel;
 		if( pOutSamplerState.anisotropyLevel > 0 )
 		{
 			GLint maxAnisotropy = 0;
@@ -70,10 +70,10 @@ namespace ts3::gpuapi
 		}
 	#endif
 
-		if( pSamplerDesc.textureCompareState == ETextureCompareState::Enabled )
+		if( pSamplerConfig.textureCompareMode == ETextureCompareMode::RefToTexture )
 		{
 			pOutSamplerState.textureCompareMode = GL_COMPARE_REF_TO_TEXTURE;
-			pOutSamplerState.textureCompareFunc = GLCoreAPIProxy::translateGLCompFunc( pSamplerDesc.textureCompareFunc );
+			pOutSamplerState.textureCompareFunc = atl::translateGLCompFunc( pSamplerConfig.textureCompareFunc );
 		}
 		else
 		{

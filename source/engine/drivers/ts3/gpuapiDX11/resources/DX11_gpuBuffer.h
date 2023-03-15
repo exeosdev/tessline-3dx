@@ -54,8 +54,6 @@ namespace ts3::gpuapi
 
 		static DX11GPUBufferDesc translateBufferDesc( const GPUBufferCreateInfo & pCreateInfo );
 
-		static ID3D11DeviceContext1 * getD3D11DeviceContext( void * pCommandObject );
-
 	private:
 		struct DX11BufferMapInfo
 		{

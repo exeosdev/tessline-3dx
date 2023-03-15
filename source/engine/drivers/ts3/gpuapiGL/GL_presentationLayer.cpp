@@ -6,8 +6,9 @@
 namespace ts3::gpuapi
 {
 
-	static system::OpenGLDisplaySurfaceHandle createSysGLSurface( system::OpenGLSystemDriverHandle pSysGLDriver,
-                                                                  const GLPresentationLayerCreateInfo & pPLCreateInfo )
+	static system::OpenGLDisplaySurfaceHandle createSysGLSurface(
+			system::OpenGLSystemDriverHandle pSysGLDriver,
+			const GLPresentationLayerCreateInfo & pPLCreateInfo )
 	{
 		try
 		{
@@ -55,8 +56,8 @@ namespace ts3::gpuapi
 		return nullptr;
 	}
 
-	GLPresentationLayer::GLPresentationLayer( GLGPUDevice & pDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
-	: PresentationLayer( pDevice )
+	GLPresentationLayer::GLPresentationLayer( GLGPUDevice & pGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
+	: PresentationLayer( pGPUDevice )
 	, mSysGLDisplaySurface( pSysGLDisplaySurface )
 	{ }
 
@@ -68,8 +69,8 @@ namespace ts3::gpuapi
 	}
 
 
-	GLScreenPresentationLayer::GLScreenPresentationLayer( GLGPUDevice & pDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
-	: GLPresentationLayer( pDevice, pSysGLDisplaySurface )
+	GLScreenPresentationLayer::GLScreenPresentationLayer( GLGPUDevice & pGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
+	: GLPresentationLayer( pGPUDevice, pSysGLDisplaySurface )
 	{ }
 
 	GLScreenPresentationLayer::~GLScreenPresentationLayer() = default;

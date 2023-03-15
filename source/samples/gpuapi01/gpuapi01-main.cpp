@@ -17,7 +17,7 @@
 #include <ts3/gpuapi/presentationLayer.h>
 #include <ts3/gpuapi/gpuUtils.h>
 #include <ts3/gpuapi/resources/gpuBuffer.h>
-#include <ts3/gpuapi/resources/sampler.h>
+#include <ts3/gpuapi/state/sampler.h>
 #include <ts3/gpuapi/resources/texture.h>
 #include <ts3/gpuapi/resources/renderTargetTexture.h>
 #include <ts3/gpuapi/state/shaderInputSignature.h>

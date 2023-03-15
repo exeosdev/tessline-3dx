@@ -1,7 +1,7 @@
 
 #include "GL_texture.h"
 #include "GL_renderBuffer.h"
-#include <ts3/gpuapiGL/GL_coreAPIProxy.h>
+#include <ts3/gpuapiGL/GL_apiTranslationLayer.h>
 #include <ts3/gpuapiGL/GL_gpuDevice.h>
 
 #include <ts3/gpuapi/resources/renderTargetTexture.h>
@@ -9,18 +9,18 @@
 namespace ts3::gpuapi
 {
 
-	GLTexture::GLTexture( GLGPUDevice & pGLGPUDevice,
+	GLTexture::GLTexture( GLGPUDevice & pGPUDevice,
 	                      const ResourceMemoryInfo & pResourceMemory,
 	                      const TextureProperties & pTextureProperties,
 	                      const TextureLayout & pTextureLayout,
 	                      GLTextureObjectHandle pGLTextureObject )
-	: Texture( pGLGPUDevice, pResourceMemory, pTextureProperties, pTextureLayout )
+	: Texture( pGPUDevice, pResourceMemory, pTextureProperties, pTextureLayout )
 	, mGLTextureObject( std::move( pGLTextureObject ) )
 	{ }
 
 	GLTexture::~GLTexture() = default;
 
-	GLTextureHandle GLTexture::create( GLGPUDevice & pGLGPUDevice, const TextureCreateInfo & pCreateInfo )
+	GLTextureHandle GLTexture::create( GLGPUDevice & pGPUDevice, const TextureCreateInfo & pCreateInfo )
 	{
 		auto createInfo = pCreateInfo;
 		if( !validateTextureCreateInfo( createInfo ) )
@@ -29,14 +29,14 @@ namespace ts3::gpuapi
 		}
 
 		GLTextureCreateInfo openglCreateInfo;
-		openglCreateInfo.bindTarget = GLCoreAPIProxy::translateGLTextureBindTarget( createInfo.texClass );
+		openglCreateInfo.bindTarget = atl::translateGLTextureBindTarget( createInfo.texClass );
 		openglCreateInfo.dimensions = createInfo.dimensions;
 		openglCreateInfo.msaaLevel = createInfo.msaaLevel;
-		openglCreateInfo.internalFormat = GLCoreAPIProxy::translateGLTextureInternalFormat( createInfo.pixelFormat );
+		openglCreateInfo.internalFormat = atl::translateGLTextureInternalFormat( createInfo.pixelFormat );
 		openglCreateInfo.openglInitDataDesc.subTextureInitDataPtr = std::move( createInfo.initDataDesc.subTextureInitDataBasePtr );
 		auto textureInitDataBaseType = cxdefs::getTextureFormatBaseDataType( createInfo.pixelFormat );
-		openglCreateInfo.openglInitDataDesc.openglPixelDataLayout = GLCoreAPIProxy::translateGLTexturePixelDataLayout( createInfo.pixelFormat );
-		openglCreateInfo.openglInitDataDesc.openglPixelDataType = GLCoreAPIProxy::translateGLBaseDataType( textureInitDataBaseType );
+		openglCreateInfo.openglInitDataDesc.openglPixelDataLayout = atl::translateGLTexturePixelDataLayout( createInfo.pixelFormat );
+		openglCreateInfo.openglInitDataDesc.openglPixelDataType = atl::translateGLBaseDataType( textureInitDataBaseType );
 
 		auto openglTextureObject = GLTextureObject::create( openglCreateInfo );
 		ts3DebugAssert( openglTextureObject );
@@ -59,9 +59,9 @@ namespace ts3::gpuapi
 		textureLayout.pixelFormat = createInfo.pixelFormat;
 		textureLayout.msaaLevel = createInfo.msaaLevel;
 		textureLayout.storageSize = numeric_cast<uint32>( textureSize );
-		textureLayout.bitsPerPixel = GLCoreAPIProxy::queryGLTextureInternalFormatBPP( textureInternalFormat );
+		textureLayout.bitsPerPixel = atl::queryGLTextureInternalFormatBPP( textureInternalFormat );
 
-		auto openglTexture = createDynamicInterfaceObject<GLTexture>( pGLGPUDevice,
+		auto openglTexture = createDynamicInterfaceObject<GLTexture>( pGPUDevice,
 		                                                              textureMemoryInfo,
 		                                                              textureProperties,
 		                                                              textureLayout,
@@ -70,7 +70,7 @@ namespace ts3::gpuapi
 		return openglTexture;
 	}
 
-	RenderTargetTextureHandle GLTexture::createRTT( GLGPUDevice & pGLGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo )
+	RenderTargetTextureHandle GLTexture::createRTT( GLGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
 		const auto renderBufferIncompatibleBindFlags =
 				E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT |
@@ -90,14 +90,14 @@ namespace ts3::gpuapi
 			textureCreateInfo.pixelFormat = pCreateInfo.rttLayout.internalDataFormat;
 			textureCreateInfo.initialTarget = rcutil::getTextureTargetFromResourceFlags( pCreateInfo.bindFlags );
 
-			auto glcTexture = GLTexture::create( pGLGPUDevice, textureCreateInfo );
+			auto glcTexture = GLTexture::create( pGPUDevice, textureCreateInfo );
 			if( !glcTexture )
 			{
 				return nullptr;
 			}
 
 			auto textureRTT = createGPUAPIObject<RenderTargetTexture>(
-					pGLGPUDevice,
+					pGPUDevice,
 					rttType,
 					pCreateInfo.rttLayout,
 					TextureReference{ glcTexture } );
@@ -106,14 +106,14 @@ namespace ts3::gpuapi
 		}
 		else
 		{
-			auto glcRenderBuffer = GLInternalRenderBuffer::createInstance( pGLGPUDevice, pCreateInfo );
+			auto glcRenderBuffer = GLInternalRenderBuffer::createInstance( pGPUDevice, pCreateInfo );
 			if( !glcRenderBuffer )
 			{
 				return nullptr;
 			}
 
 			auto renderBufferRTT = createGPUAPIObject<RenderTargetTexture>(
-					pGLGPUDevice,
+					pGPUDevice,
 					rttType,
 					pCreateInfo.rttLayout,
 					glcRenderBuffer,

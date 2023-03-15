@@ -4,26 +4,41 @@
 #ifndef __TS3_GPUAPI_SAMPLER_COMMON_H__
 #define __TS3_GPUAPI_SAMPLER_COMMON_H__
 
-#include "../state/commonGraphicsConfig.h"
+#include "commonGraphicsConfig.h"
 
 namespace ts3::gpuapi
 {
 
 	ts3DeclareClassHandle( Sampler );
 
-	using ETextureCompareState = EActiveState;
-
 	enum class ETextureAddressMode : enum_default_value_t
 	{
-		BorderColor,
-		Clamp,
-		Mirror,
-		MirrorOnceClamp,
-		Wrap,
+		Undefined,
+		ClampToColor,
+		ClampToEdge,
+		MirrorClampToEdge,
+		MirrorRepeat,
+		Repeat,
+	};
+
+	enum class ETextureCompareMode : enum_default_value_t
+	{
+		Undefined,
+		None,
+		RefToTexture,
+	};
+
+	enum class ETextureBorderPredefinedColor : enum_default_value_t
+	{
+		Undefined,
+		OpaqueBlack,
+		OpaqueWhite,
+		TransparentBlack,
 	};
 
 	enum class ETextureFilter : enum_default_value_t
 	{
+		Undefined,
 		Point,
 		Linear,
 		Anisotropic,
@@ -31,6 +46,7 @@ namespace ts3::gpuapi
 
 	enum class ETextureMipMode : enum_default_value_t
 	{
+		Undefined,
 		Disable,
 		Nearest,
 		Linear,
@@ -43,7 +59,7 @@ namespace ts3::gpuapi
 		ETextureAddressMode coordW;
 	};
 
-	struct ETextureFilterConfig
+	struct TextureFilterConfig
 	{
 		uint32 anisotropyLevel;
 		ETextureFilter magFilter;
@@ -51,25 +67,26 @@ namespace ts3::gpuapi
 		ETextureMipMode mipMode;
 	};
 
-	struct SamplerDesc
+	struct SamplerConfig
 	{
 		using MipLODRange = InclusiveRange<float>;
 		TextureCoordAddressModeConfig addressModeConfig;
 		math::RGBAColorR32Norm borderColor;
-		ETextureFilterConfig filterConfig;
+		ETextureBorderPredefinedColor borderPredefinedColor;
+		TextureFilterConfig filterConfig;
 		MipLODRange mipLODRange;
 		float mipLODBias;
-		ETextureCompareState textureCompareState;
+		ETextureCompareMode textureCompareMode;
 		ECompFunc textureCompareFunc;
 	};
 
 	struct SamplerCreateInfo
 	{
-		SamplerDesc samplerDesc;
+		SamplerConfig samplerConfig;
 	};
 
 
-	TS3_GPUAPI_OBJ const SamplerDesc cvSamplerDescDefault;
+	TS3_GPUAPI_OBJ const SamplerConfig cvSamplerConfigDefault;
 
 } // namespace ts3::gpuapi
 

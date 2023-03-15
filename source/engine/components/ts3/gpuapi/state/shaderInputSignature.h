@@ -111,7 +111,7 @@ namespace ts3::gpuapi
 				shader_input_index_t resourceArraySize;
 			};
 
-			struct SamplerDesc
+			struct SamplerConfig
 			{
 				shader_input_index_t samplerBindingIndex;
 			};
@@ -123,7 +123,7 @@ namespace ts3::gpuapi
 			union
 			{
 				ResourceDesc uResourceDesc;
-				SamplerDesc uSamplerDesc;
+				SamplerConfig uSamplerConfig;
 			};
 		};
 

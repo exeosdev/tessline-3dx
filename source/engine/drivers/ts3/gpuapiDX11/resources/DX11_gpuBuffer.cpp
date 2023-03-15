@@ -153,7 +153,13 @@ namespace ts3::gpuapi
 
 	void DX11GPUBuffer::updateSubDataCopy( void * pCommandObject, GPUBuffer & pSource, const GPUBufferSubDataCopyDesc & pCopyDesc )
 	{
-		auto * d3d11DeviceContext1 = getD3D11DeviceContext( pCommandObject );
+		auto * dx11CommandList = reinterpret_cast<DX11CommandList *>( pCommandObject );
+		if( !dx11CommandList->checkCommandClassSupport( ECommandQueueClass::Transfer ) )
+		{
+			ts3Throw( 0 );
+		}
+
+		auto * d3d11DeviceContext1 = dx11CommandList->mD3D11DeviceContext1.Get();
 
 		Bitmask<UINT> copyFlags = 0;
 		if( ( pCopyDesc.sourceBufferRegion.size == mBufferProperties.byteSize ) || pCopyDesc.flags.isSet( E_GPU_BUFFER_DATA_COPY_FLAG_MODE_INVALIDATE_BIT ) )
@@ -178,7 +184,13 @@ namespace ts3::gpuapi
 
 	void DX11GPUBuffer::updateSubDataUpload( void * pCommandObject, const GPUBufferSubDataUploadDesc & pUploadDesc )
 	{
-		auto * d3d11DeviceContext1 = getD3D11DeviceContext( pCommandObject );
+		auto * dx11CommandList = reinterpret_cast<DX11CommandList *>( pCommandObject );
+		if( !dx11CommandList->checkCommandClassSupport( ECommandQueueClass::Transfer ) )
+		{
+			ts3Throw( 0 );
+		}
+
+		auto * d3d11DeviceContext1 = dx11CommandList->mD3D11DeviceContext1.Get();
 
 		Bitmask<UINT> updateFlags = 0;
 		if( ( pUploadDesc.bufferRegion.size == mBufferProperties.byteSize ) || pUploadDesc.flags.isSet( E_GPU_BUFFER_DATA_COPY_FLAG_MODE_INVALIDATE_BIT ) )
@@ -265,11 +277,6 @@ namespace ts3::gpuapi
 		}
 
 		return dx11GPUBufferDesc;
-	}
-
-	ID3D11DeviceContext1 * DX11GPUBuffer::getD3D11DeviceContext( void * pCommandObject )
-	{
-		return reinterpret_cast<DX11CommandList *>( pCommandObject )->mD3D11DeviceContext1.Get();
 	}
 
 } // namespace ts3::gpuapi

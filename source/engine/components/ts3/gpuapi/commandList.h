@@ -6,7 +6,7 @@
 
 #include "commonCommandDefs.h"
 #include "resources/gpuBufferCommon.h"
-#include "resources/samplerCommon.h"
+#include "state/samplerCommon.h"
 
 namespace ts3::gpuapi
 {
@@ -24,8 +24,11 @@ namespace ts3::gpuapi
 	class TS3_GPUAPI_CLASS CommandList : public GPUDeviceChildObject
 	{
 	public:
-		CommandSystem * const mCommandSystem = nullptr;
-		ECommandListType const mListType = ECommandListType::Undefined;
+		CommandSystem * const mCommandSystem;
+
+		ECommandListType const mListType;
+
+		Bitmask<ECommandObjectPropertyFlags> const mCommandFlags;
 
 		CommandList(
 			CommandSystem & pCommandSystem,
@@ -34,9 +37,9 @@ namespace ts3::gpuapi
 
 		virtual ~CommandList();
 
-		TS3_ATTR_NO_DISCARD bool checkContextSupport( ECommandContextType pContextType ) const noexcept;
+		TS3_ATTR_NO_DISCARD bool checkCommandClassSupport( ECommandQueueClass pQueueClass ) const;
 
-		TS3_ATTR_NO_DISCARD bool checkFeatureSupport( Bitmask<ECommandListFlags> pListFlags ) const noexcept;
+		TS3_ATTR_NO_DISCARD bool checkFeatureSupport( Bitmask<ECommandObjectPropertyFlags> pCommandListFlags ) const noexcept;
 
 		TS3_ATTR_NO_DISCARD bool isRenderPassActive() const noexcept;
 

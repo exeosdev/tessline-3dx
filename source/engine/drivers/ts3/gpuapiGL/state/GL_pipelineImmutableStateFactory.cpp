@@ -9,9 +9,9 @@
 namespace ts3::gpuapi
 {
 
-	GLPipelineImmutableStateFactory::GLPipelineImmutableStateFactory( GLGPUDevice & pGLGPUDevice )
+	GLPipelineImmutableStateFactory::GLPipelineImmutableStateFactory( GLGPUDevice & pGPUDevice )
 	: PipelineImmutableStateFactory()
-	, mGLGPUDevice( pGLGPUDevice )
+	, mGLGPUDevice( pGPUDevice )
 	{}
 
 	GLPipelineImmutableStateFactory::~GLPipelineImmutableStateFactory() = default;

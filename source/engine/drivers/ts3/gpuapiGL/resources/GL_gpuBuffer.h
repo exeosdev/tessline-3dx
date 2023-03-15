@@ -21,15 +21,16 @@ namespace ts3::gpuapi
 		void * const mPersistentMapPtr = nullptr;
 
 	public:
-		GLGPUBuffer( GLGPUDevice & pGLGPUDevice,
-		             const ResourceMemoryInfo & pResourceMemory,
-		             const GPUBufferProperties & pBufferProperties,
-		             GLBufferObjectHandle pGLBufferObject,
-		             void * pPersistentMapPtr );
+		GLGPUBuffer(
+			GLGPUDevice & pGPUDevice,
+			const ResourceMemoryInfo & pResourceMemory,
+			const GPUBufferProperties & pBufferProperties,
+			GLBufferObjectHandle pGLBufferObject,
+			void * pPersistentMapPtr );
 
 		virtual ~GLGPUBuffer();
 
-		static GLGPUBufferHandle create( GLGPUDevice & pGLGPUDevice, const GPUBufferCreateInfo & pCreateInfo );
+		static GLGPUBufferHandle create( GLGPUDevice & pGPUDevice, const GPUBufferCreateInfo & pCreateInfo );
 
 	private:
 	    virtual bool mapRegion( void * pCommandObject, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode ) override;

@@ -136,6 +136,7 @@ namespace ts3::gpuapi
 
 	enum class EPrimitiveFillMode : uint16
 	{
+		Undefined,
 		Solid,
 		Wireframe
 	};

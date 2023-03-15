@@ -1,6 +1,6 @@
 
 #include "GL_commonGraphicsConfig.h"
-#include <ts3/gpuapiGL/GL_coreAPIProxy.h>
+#include <ts3/gpuapiGL/GL_apiTranslationLayer.h>
 #include <ts3/gpuapiGL/GL_gpuDevice.h>
 
 namespace ts3::gpuapi
@@ -111,23 +111,23 @@ namespace ts3::gpuapi
 			GLDepthStencilConfig openglDepthStencilConfig{};
 
 			auto & depthSettings = pConfig.depthTestSettings;
-			openglDepthStencilConfig.depthSettings.depthCompFunc = GLCoreAPIProxy::translateGLCompFunc( depthSettings.depthCompFunc );
+			openglDepthStencilConfig.depthSettings.depthCompFunc = atl::translateGLCompFunc( depthSettings.depthCompFunc );
 			openglDepthStencilConfig.depthSettings.writeMask = ( depthSettings.depthWriteMask == EDepthWriteMask::All ) ? GL_TRUE : GL_FALSE;
 
 			auto & stencilBackFaceDesc = pConfig.stencilTestSettings.backFace;
-			openglDepthStencilConfig.stencilSettings.backFace.compFunc = GLCoreAPIProxy::translateGLCompFunc( stencilBackFaceDesc.compFunc );
-			openglDepthStencilConfig.stencilSettings.backFace.opFail = GLCoreAPIProxy::translateGLStencilOp( stencilBackFaceDesc.opFail );
-			openglDepthStencilConfig.stencilSettings.backFace.opPassDepthFail = GLCoreAPIProxy::translateGLStencilOp( stencilBackFaceDesc.opPassDepthFail );
-			openglDepthStencilConfig.stencilSettings.backFace.opPassDepthPass = GLCoreAPIProxy::translateGLStencilOp( stencilBackFaceDesc.opPassDepthPass );
+			openglDepthStencilConfig.stencilSettings.backFace.compFunc = atl::translateGLCompFunc( stencilBackFaceDesc.compFunc );
+			openglDepthStencilConfig.stencilSettings.backFace.opFail = atl::translateGLStencilOp( stencilBackFaceDesc.opFail );
+			openglDepthStencilConfig.stencilSettings.backFace.opPassDepthFail = atl::translateGLStencilOp( stencilBackFaceDesc.opPassDepthFail );
+			openglDepthStencilConfig.stencilSettings.backFace.opPassDepthPass = atl::translateGLStencilOp( stencilBackFaceDesc.opPassDepthPass );
 			openglDepthStencilConfig.stencilSettings.backFace.readMask = pConfig.stencilTestSettings.readMask;
 			openglDepthStencilConfig.stencilSettings.backFace.refValue = pConfig.stencilTestSettings.refValue;
 			openglDepthStencilConfig.stencilSettings.backFace.writeMask = pConfig.stencilTestSettings.writeMask;
 
 			auto & stencilFrontFaceDesc = pConfig.stencilTestSettings.frontFace;
-			openglDepthStencilConfig.stencilSettings.frontFace.compFunc = GLCoreAPIProxy::translateGLCompFunc( stencilFrontFaceDesc.compFunc );
-			openglDepthStencilConfig.stencilSettings.frontFace.opFail = GLCoreAPIProxy::translateGLStencilOp( stencilFrontFaceDesc.opFail );
-			openglDepthStencilConfig.stencilSettings.frontFace.opPassDepthFail = GLCoreAPIProxy::translateGLStencilOp( stencilFrontFaceDesc.opPassDepthFail );
-			openglDepthStencilConfig.stencilSettings.frontFace.opPassDepthPass = GLCoreAPIProxy::translateGLStencilOp( stencilFrontFaceDesc.opPassDepthPass );
+			openglDepthStencilConfig.stencilSettings.frontFace.compFunc = atl::translateGLCompFunc( stencilFrontFaceDesc.compFunc );
+			openglDepthStencilConfig.stencilSettings.frontFace.opFail = atl::translateGLStencilOp( stencilFrontFaceDesc.opFail );
+			openglDepthStencilConfig.stencilSettings.frontFace.opPassDepthFail = atl::translateGLStencilOp( stencilFrontFaceDesc.opPassDepthFail );
+			openglDepthStencilConfig.stencilSettings.frontFace.opPassDepthPass = atl::translateGLStencilOp( stencilFrontFaceDesc.opPassDepthPass );
 			openglDepthStencilConfig.stencilSettings.frontFace.readMask = pConfig.stencilTestSettings.readMask;
 			openglDepthStencilConfig.stencilSettings.frontFace.refValue = pConfig.stencilTestSettings.refValue;
 			openglDepthStencilConfig.stencilSettings.frontFace.writeMask = pConfig.stencilTestSettings.writeMask;
@@ -140,10 +140,10 @@ namespace ts3::gpuapi
 			GLRasterizerConfig rasterizerConfig{};
 
 			rasterizerConfig.flags = ( pConfig.flags & E_RASTERIZER_CONFIG_MASK_ALL );
-			rasterizerConfig.cullMode = GLCoreAPIProxy::translateGLCullMode( pConfig.cullMode );
-			rasterizerConfig.frontFaceVerticesOrder = GLCoreAPIProxy::translateGLTriangleVerticesOrder( pConfig.frontFaceVerticesOrder );
+			rasterizerConfig.cullMode = atl::translateGLCullMode( pConfig.cullMode );
+			rasterizerConfig.frontFaceVerticesOrder = atl::translateGLTriangleVerticesOrder( pConfig.frontFaceVerticesOrder );
 		#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
-			rasterizerConfig.primitiveFillMode = GLCoreAPIProxy::translateGLPrimitiveFillMode( pConfig.primitiveFillMode );
+			rasterizerConfig.primitiveFillMode = atl::translateGLPrimitiveFillMode( pConfig.primitiveFillMode );
 		#endif
 
 			return rasterizerConfig;
@@ -153,12 +153,12 @@ namespace ts3::gpuapi
 		{
 			GLRTColorAttachmentBlendSettings openglBlendSettings{};
 
-			openglBlendSettings.colorEquation = GLCoreAPIProxy::translateGLBlendOp( pSettings.opColor );
-			openglBlendSettings.alphaEquation = GLCoreAPIProxy::translateGLBlendOp( pSettings.opAlpha );
-			openglBlendSettings.srcColorFactor = GLCoreAPIProxy::translateGLBlendFactor( pSettings.factorSrcColor );
-			openglBlendSettings.dstColorFactor = GLCoreAPIProxy::translateGLBlendFactor( pSettings.factorDstColor );
-			openglBlendSettings.srcAlphaFactor = GLCoreAPIProxy::translateGLBlendFactor( pSettings.factorSrcAlpha );
-			openglBlendSettings.dstAlphaFactor = GLCoreAPIProxy::translateGLBlendFactor( pSettings.factorDstAlpha );
+			openglBlendSettings.colorEquation = atl::translateGLBlendOp( pSettings.opColor );
+			openglBlendSettings.alphaEquation = atl::translateGLBlendOp( pSettings.opAlpha );
+			openglBlendSettings.srcColorFactor = atl::translateGLBlendFactor( pSettings.factorSrcColor );
+			openglBlendSettings.dstColorFactor = atl::translateGLBlendFactor( pSettings.factorDstColor );
+			openglBlendSettings.srcAlphaFactor = atl::translateGLBlendFactor( pSettings.factorSrcAlpha );
+			openglBlendSettings.dstAlphaFactor = atl::translateGLBlendFactor( pSettings.factorDstAlpha );
 
 			return openglBlendSettings;
 		}
