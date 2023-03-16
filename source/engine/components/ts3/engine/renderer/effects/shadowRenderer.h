@@ -43,6 +43,7 @@ namespace ts3
 		struct CurrentState
 		{
 			math::Vec3f vLightPosition;
+			math::Vec3f vLightTarget;
 			math::Vec3f vLightDiffuseColor;
 			math::Mat4f mModel;
 			math::Mat4f mView;
@@ -68,13 +69,14 @@ namespace ts3
 		};
 
 	public:
-		ShadowRenderer( ShaderLibraryHandle pShaderLibrary, const ShadowConfig & pShadowConfig );
+		ShadowRenderer( ShaderLibrary & pShaderLibrary, const ShadowConfig & pShadowConfig );
 		virtual ~ShadowRenderer();
 
 		virtual void createRendererResources();
 
 		void setCSLightDiffuseColor( math::Vec3f pColor );
 		void setCSLightPosition( math::Vec3f pLightPosition );
+		void setCSLightTarget( math::Vec3f pLightTarget );
 
 		void setCSProjectionMatrix( math::Mat4f pProjectionMatrix );
 		void setCSProjectionMatrixLightOrthoDefault();
@@ -104,7 +106,7 @@ namespace ts3
 
 	protected:
 		gpuapi::GPUDevice & _gpuDevice;
-		ShaderLibraryHandle _shaderLibrary;
+		ShaderLibrary & _shaderLibrary;
 		ShadowConfig _shadowConfig;
 		GpuAPIState _gpuAPIState;
 		Resources _resources;

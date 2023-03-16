@@ -175,7 +175,7 @@ namespace ts3::gpuapi
 
 		glBufferSubData( bufferBindTarget,
                          numeric_cast<GLintptr>( pUploadDesc.bufferRegion.offset ),
-                         numeric_cast<GLsizeiptr>( pUploadDesc.bufferRegion.size ),
+                         numeric_cast<GLsizeiptr>( pUploadDesc.inputDataDesc.size ),
 		                 pUploadDesc.inputDataDesc.pointer );
 		ts3OpenGLHandleLastError();
 	}

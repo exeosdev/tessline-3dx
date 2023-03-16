@@ -12,4 +12,3 @@ void main()
 	vec4 sampledColor = texture( uSampler0, psTexCoord0 );
 	outPixelColor = vec4( sampledColor.xyz, 1.0f );
 }
-

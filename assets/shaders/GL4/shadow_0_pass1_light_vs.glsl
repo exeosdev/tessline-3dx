@@ -3,10 +3,12 @@
 
 layout( location = 0 ) in vec3 vPosition;
 
-layout( std140, binding = 7 ) uniform CBShadowPass1
+layout( std140, binding = 7 ) uniform CBLightPass
 {
-	layout(row_major) mat4 cbs1ModelMatrix;
-	layout(row_major) mat4 cbs1LightSpaceMatrix;
+	vec3 cblObjectSpaceLightPos;
+	vec3 cblLightDiffuseColor;
+	layout(row_major) mat4 cblModelMatrix;
+	layout(row_major) mat4 cblSpaceMatrix;
 };
 
 out gl_PerVertex
@@ -18,5 +20,5 @@ out gl_PerVertex
 
 void main()
 {
-	gl_Position = cbs1LightSpaceMatrix * cbs1ModelMatrix * vec4( vPosition , 1.0 );
+	gl_Position = cblSpaceMatrix * cblModelMatrix * vec4( vPosition , 1.0 );
 }

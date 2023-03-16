@@ -78,6 +78,13 @@ namespace ts3::system
 		return createSysObject<Win32WindowManager>( pDisplayManager->getHandle<Win32DisplayManager>() );
 	}
 
+	std::string Win32SysContext::queryCurrentProcessWorkingDirectory() const
+	{
+		char workingDirStrBuffer[2048];
+		_getcwd( workingDirStrBuffer, 2048 );
+		return std::string( workingDirStrBuffer );
+	}
+
 	std::string Win32SysContext::queryCurrentProcessExecutableFilePath() const
 	{
 		std::string executableFilePath;

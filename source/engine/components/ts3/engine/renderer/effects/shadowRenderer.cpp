@@ -12,12 +12,13 @@
 namespace ts3
 {
 
-	ShadowRenderer::ShadowRenderer( ShaderLibraryHandle pShaderLibrary, const ShadowConfig & pShadowConfig )
-	: _gpuDevice( pShaderLibrary->gpuDevice() )
+	ShadowRenderer::ShadowRenderer( ShaderLibrary & pShaderLibrary, const ShadowConfig & pShadowConfig )
+	: _gpuDevice( pShaderLibrary.gpuDevice() )
 	, _shaderLibrary( pShaderLibrary )
 	, _shadowConfig( pShadowConfig )
 	{
-		setCSLightPosition( {-3.0f, 2.0f, 0.0f} );
+		setCSLightPosition( { -2.0f, 3.0f, -2.0f } );
+		setCSLightTarget( { 0.0f, 0.0f,  5.0f } );
 		setCSModelMatrix( math::identity4<float>() );
 	}
 
@@ -38,6 +39,11 @@ namespace ts3
 	void ShadowRenderer::setCSLightPosition( math::Vec3f pLightPosition )
 	{
 		_currentState.vLightPosition = pLightPosition;
+	}
+
+	void ShadowRenderer::setCSLightTarget( math::Vec3f pLightTarget )
+	{
+		_currentState.vLightTarget = pLightTarget;
 	}
 
 	void ShadowRenderer::setCSProjectionMatrixLightOrthoDefault()
@@ -67,8 +73,8 @@ namespace ts3
 
 	void ShadowRenderer::updateMatricesForLightPass()
 	{
-		_currentState.mView = math::lookAtLH( _currentState.vLightPosition, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f} );
-		_currentState.mSpace = math::mul( _currentState.mProjection, _currentState.mSpace );
+		_currentState.mView = math::lookAtLH( _currentState.vLightPosition, _currentState.vLightTarget, {0.0f, 1.0f, 0.0f} );
+		_currentState.mSpace = math::mul( _currentState.mProjection, _currentState.mView );
 	}
 
 	void ShadowRenderer::updateMatricesForShadowPass()
@@ -98,6 +104,8 @@ namespace ts3
 
 		directGraphicsContext->cmdSetViewport( viewportDescLight );
 		directGraphicsContext->cmdSetShaderConstantBuffer( 17, *_resources.constantBuffer );
+
+		updateMatricesForLightPass();
 
 		Pass1LightConstantBufferData constantBufferData;
 		constantBufferData.v3fLightDiffuseColor = _currentState.vLightDiffuseColor;
@@ -135,8 +143,8 @@ namespace ts3
 
 		directGraphicsContext->cmdSetViewport( viewportDescLight );
 		directGraphicsContext->cmdSetShaderConstantBuffer( 17, *( _resources.constantBuffer ) );
-		directGraphicsContext->cmdSetShaderTextureImage( 27, *( _resources.shadowMapTexture ) );
-		directGraphicsContext->cmdSetShaderTextureSampler( 77, *( _gpuAPIState.samplerPass2Shadow ) );
+		// directGraphicsContext->cmdSetShaderTextureImage( 27, *( _resources.shadowMapTexture ) );
+		// directGraphicsContext->cmdSetShaderTextureSampler( 77, *( _gpuAPIState.samplerPass2Shadow ) );
 	}
 
 	void ShadowRenderer::endRenderPass( gpuapi::CommandContext & pCommandContext )
@@ -180,6 +188,9 @@ namespace ts3
 			shadowMapRTTCreateInfo.targetTexture = _resources.shadowMapTexture;
 
 			_resources.shadowMapRTT = _gpuDevice.createRenderTargetTexture( shadowMapRTTCreateInfo );
+
+			auto & depthStencilAttachment = _gpuAPIState.rtBindingPass1Light.setDepthStencilAttachmentBinding();
+			depthStencilAttachment.attachmentTexture = _resources.shadowMapRTT;
 		}
 
 		{
@@ -233,8 +244,8 @@ namespace ts3
 		using namespace ts3::gpuapi;
 
 		{
-			auto vertexShaderPass1 = _shaderLibrary->getShader( "SID_SHADOW_0_PASS1_LIGHT_VS" );
-			auto pixelShaderPass1 = _shaderLibrary->getShader( "SID_SHADOW_0_PASS1_LIGHT_PS" );
+			auto vertexShaderPass1 = _shaderLibrary.getShader( "SID_SHADOW_0_PASS1_LIGHT_VS" );
+			auto pixelShaderPass1 = _shaderLibrary.getShader( "SID_SHADOW_0_PASS1_LIGHT_PS" );
 
 			gpuapi::GraphicsPipelineStateObjectCreateInfo psoPass1LightCreateInfo;
 			psoPass1LightCreateInfo.renderTargetLayout.activeAttachmentsMask = E_RT_ATTACHMENT_MASK_DEFAULT_DS_ONLY;
@@ -268,8 +279,8 @@ namespace ts3
 		}
 
 		{
-			auto vertexShaderPass2 = _shaderLibrary->getShader( "SID_SHADOW_0_PASS2_SHADOW_VS" );
-			auto pixelShaderPass2 = _shaderLibrary->getShader( "SID_SHADOW_0_PASS2_SHADOW_PS" );
+			auto vertexShaderPass2 = _shaderLibrary.getShader( "SID_SHADOW_0_PASS2_SHADOW_VS" );
+			auto pixelShaderPass2 = _shaderLibrary.getShader( "SID_SHADOW_0_PASS2_SHADOW_PS" );
 
 			gpuapi::GraphicsPipelineStateObjectCreateInfo psoPass2ShadowCreateInfo;
 			psoPass2ShadowCreateInfo.renderTargetLayout.activeAttachmentsMask = E_RT_ATTACHMENT_MASK_DEFAULT_C0_DS;

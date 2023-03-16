@@ -47,7 +47,7 @@ namespace ts3::gpuapi
 			auto * openglGPUDevice = mGPUDevice.queryInterface<GLGPUDevice>();
 			auto * openglDebugOutput = openglGPUDevice->getDebugOutputInterface();
 
-			const auto enableDebugOutput = false;
+			const auto enableDebugOutput = true;
 
 			if( openglDebugOutput && enableDebugOutput )
 			{

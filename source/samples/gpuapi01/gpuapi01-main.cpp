@@ -74,7 +74,9 @@ DynamicMemoryBuffer loadShaderSourceDefault( AssetLoader & pAssetLoader, const s
 			E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
 
 	DynamicMemoryBuffer resultBuffer;
-	psAsset->readAll( resultBuffer );
+	const auto sourceLength = psAsset->readAll( resultBuffer, 1 );
+
+	resultBuffer[sourceLength] = 0;
 
 	return resultBuffer;
 }
@@ -127,7 +129,7 @@ int main( int pArgc, const char ** pArgv )
 	auto sysContext = platform::createSysContext( sysContextCreateInfo );
 
 	platform::AssetLoaderCreateInfoNativeParams aslCreateInfoNP;
-	aslCreateInfoNP.relativeAssetRootDir = "../../../../../../../tessline-3dx/assets";
+	aslCreateInfoNP.relativeAssetRootDir = "assets";
 	AssetLoaderCreateInfo aslCreateInfo;
 	aslCreateInfo.nativeParams = &aslCreateInfoNP;
 	auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
@@ -275,7 +277,7 @@ int main( int pArgc, const char ** pArgv )
 
 	const auto rtSize = gxDriverState.presentationLayer->queryRenderTargetSize();
 
-	auto shaderLibrary = ts3::createDynamicInterfaceObject<ShaderLibrary>( gxDriverState.device );
+	auto shaderLibrary = std::make_unique<ShaderLibrary>( gxDriverState.device );
 	shaderLibrary->loadShaders( {
 		{ "SID_DEFAULT_PASSTHROUGH_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_vs" ) },
 		{ "SID_DEFAULT_PASSTHROUGH_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_ps" ) },
@@ -288,9 +290,9 @@ int main( int pArgc, const char ** pArgv )
 	ts3::ShadowConfig shadowConfig;
 	shadowConfig.screenSize.width = rtSize.x;
 	shadowConfig.screenSize.height = rtSize.y;
-	shadowConfig.shadowMapSize.width = 2048;
-	shadowConfig.shadowMapSize.height = 2048;
-	auto shadowRenderer = std::make_unique<ts3::ShadowRenderer>( shaderLibrary, shadowConfig );
+	shadowConfig.shadowMapSize.width = rtSize.x;
+	shadowConfig.shadowMapSize.height = rtSize.y;
+	auto shadowRenderer = std::make_unique<ts3::ShadowRenderer>( *shaderLibrary, shadowConfig );
 
     AppSharedResources appResources;
     {
@@ -569,6 +571,19 @@ int main( int pArgc, const char ** pArgv )
                 return true;
             });
 
+	math::Vec3f lightPosition{ -2.0f, 3.0f, -2.0f };
+	math::Vec3f lightTarget{ 0.0f, 0.0f,  5.0f };
+
+	auto ts3ViewLight = lookAtLH(
+		lightPosition,
+		lightTarget,
+		math::Vec3f{ 0.0f, 1.0f,  0.0f } );
+
+	shadowRenderer->createRendererResources();
+	shadowRenderer->setCSLightPosition( lightPosition );
+	shadowRenderer->setCSLightTarget( lightTarget );
+	shadowRenderer->setCSProjectionMatrixLightPerspectiveDefault();
+
     while( runApp )
     {
         if( gxDriverState.pauseAnimation )
@@ -594,6 +609,43 @@ int main( int pArgc, const char ** pArgv )
 
 			gxDriverState.cmdContext->beginCommandSequence();
 
+			{
+				const auto modelMatrix = math::mul(
+					math::translation<float>( 0, 0, 3.0f ),
+					math::scaling( 2.0f, 2.0f, 2.0f ) );
+
+				gxDriverState.cmdContext->setIAVertexStreamState( vsds );
+				shadowRenderer->setCSModelMatrix( modelMatrix );
+				shadowRenderer->beginRenderPass1Light( *gxDriverState.cmdContext );
+				gxDriverState.cmdContext->cmdDrawDirectIndexed( VNUM, 0 );
+				shadowRenderer->endRenderPass( *gxDriverState.cmdContext );
+
+				auto ts3ViewScreen = cameraController.computeViewMatrixLH();
+
+				gxDriverState.presentationLayer->bindRenderTarget( gxDriverState.cmdContext.get() );
+
+				gxDriverState.cmdContext->setGraphicsPipelineStateObject( *mainPSO );
+				gxDriverState.cmdContext->setIAVertexStreamState( vsds );
+
+				gxDriverState.cmdContext->beginRenderPass( *fboRenderPassState, 0 );
+				{
+					gxDriverState.cmdContext->cmdSetViewport( vpDescScreen );
+					gxDriverState.cmdContext->cmdSetShaderConstantBuffer( 0, *cbuffer0 );
+					gxDriverState.cmdContext->cmdSetShaderTextureSampler( 10, *defaultSampler );
+					gxDriverState.cmdContext->cmdSetShaderTextureImage( 1, *tex0 );
+					{
+						cb0Data.projectionMatrix = math::perspectiveAspectLH<float>(
+							cameraController.getPerspectiveFOVAngle(), ( float )rtSize.x / ( float )rtSize.y, 0.1f, 1000.0f );
+						cb0Data.viewMatrix = ts3ViewLight;
+						cb0Data.modelMatrix = modelMatrix;
+						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0DataUploadDesc );
+						gxDriverState.cmdContext->cmdDrawDirectIndexed( VNUM, 0 );
+					}
+				}
+				gxDriverState.cmdContext->endRenderPass();
+			}
+
+			if( false )
 			{
 
 				cb0Data.modelMatrix = math::mul(
