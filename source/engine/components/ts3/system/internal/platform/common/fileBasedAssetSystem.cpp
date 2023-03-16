@@ -168,7 +168,8 @@ namespace ts3::system
 				pFileManager = pSysContext->createFileManager();
 			}
 
-			auto assetDirectory = pSysContext->queryCurrentProcessExecutableDirectory();
+			auto assetDirectory = pSysContext->queryCurrentProcessWorkingDirectory();
+			// auto assetDirectory = pSysContext->queryCurrentProcessExecutableDirectory();
 			assetDirectory.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
 			assetDirectory.append( pRootDirectory );
 			assetDirectory = FSUtilityAPI::normalizePath( assetDirectory );

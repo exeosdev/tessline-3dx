@@ -20,7 +20,15 @@ namespace ts3
 	class ShadowRenderer
 	{
 	public:
-		struct ConstantBufferData
+		struct Pass1LightConstantBufferData
+		{
+			math::Vec3f v3fObjectSpaceLightPos;
+			math::Vec3f v3fLightDiffuseColor;
+			math::Mat4f m4fModel;
+			math::Mat4f m4fSpace;
+		};
+
+		struct Pass2ShadowConstantBufferData
 		{
 			math::Vec3f v3fObjectSpaceLightPos;
 			math::Vec3f v3fLightDiffuseColor;
@@ -34,9 +42,12 @@ namespace ts3
 
 		struct CurrentState
 		{
-			math::Vec3f lightPosition;
-			math::Mat4f lightModelView;
-			math::Mat4f lightProjection;
+			math::Vec3f vLightPosition;
+			math::Vec3f vLightDiffuseColor;
+			math::Mat4f mModel;
+			math::Mat4f mView;
+			math::Mat4f mProjection;
+			math::Mat4f mSpace;
 		};
 
 		struct GpuAPIState
@@ -60,7 +71,21 @@ namespace ts3
 		ShadowRenderer( ShaderLibraryHandle pShaderLibrary, const ShadowConfig & pShadowConfig );
 		virtual ~ShadowRenderer();
 
-		void updateLightPosition( math::Vec3f pLightPosition );
+		virtual void createRendererResources();
+
+		void setCSLightDiffuseColor( math::Vec3f pColor );
+		void setCSLightPosition( math::Vec3f pLightPosition );
+
+		void setCSProjectionMatrix( math::Mat4f pProjectionMatrix );
+		void setCSProjectionMatrixLightOrthoDefault();
+		void setCSProjectionMatrixLightPerspectiveDefault();
+
+		void setCSModelMatrix( math::Mat4f pModelMatrix );
+		void setCSViewMatrix( math::Mat4f pViewMatrix );
+
+		void updateMatricesForLightPass();
+
+		void updateMatricesForShadowPass();
 
 		void beginRenderPass1Light( gpuapi::CommandContext & pCommandContext );
 
@@ -71,8 +96,6 @@ namespace ts3
 		void endRenderPass( gpuapi::CommandContext & pCommandContext );
 
 	private:
-		void initializeResources();
-
 		void initializeResources();
 
 		void initializeRenderPassStates();

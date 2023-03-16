@@ -17,18 +17,63 @@ namespace ts3
 	, _shaderLibrary( pShaderLibrary )
 	, _shadowConfig( pShadowConfig )
 	{
-		updateLightPosition( {-3.0f, 2.0f, 0.0f} );
+		setCSLightPosition( {-3.0f, 2.0f, 0.0f} );
+		setCSModelMatrix( math::identity4<float>() );
 	}
 
 	ShadowRenderer::~ShadowRenderer() = default;
 
-	void ShadowRenderer::updateLightPosition( math::Vec3f pLightPosition )
+	void ShadowRenderer::createRendererResources()
 	{
-		_currentState.lightPosition = pLightPosition;
-		_currentState.lightModelView  =math::lookAtLH( _currentState.lightPosition, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f} );
-		_currentState.lightProjection = math::perspectiveAspectLH( 60.0f, 1.0f, 1.0f, 64.0f );
+		initializeResources();
+		initializeRenderPassStates();
+		initializePipelineStateObjects();
+	}
 
-		math::matr
+	void ShadowRenderer::setCSLightDiffuseColor( math::Vec3f pColor )
+	{
+		_currentState.vLightDiffuseColor = pColor;
+	}
+
+	void ShadowRenderer::setCSLightPosition( math::Vec3f pLightPosition )
+	{
+		_currentState.vLightPosition = pLightPosition;
+	}
+
+	void ShadowRenderer::setCSProjectionMatrixLightOrthoDefault()
+	{
+		setCSProjectionMatrix( math::orthoOffCenterLH( -32.0f, 32.0f, -32.0f, 32.0f, 1.0f, 64.0f ) );
+	}
+
+	void ShadowRenderer::setCSProjectionMatrixLightPerspectiveDefault()
+	{
+		setCSProjectionMatrix( math::perspectiveAspectLH( 60.0f, 1.0f, 1.0f, 64.0f ) );
+	}
+
+	void ShadowRenderer::setCSProjectionMatrix( math::Mat4f pProjectionMatrix )
+	{
+		_currentState.mProjection = pProjectionMatrix;
+	}
+
+	void ShadowRenderer::setCSModelMatrix( math::Mat4f pModelMatrix )
+	{
+		_currentState.mModel = pModelMatrix;
+	}
+
+	void ShadowRenderer::setCSViewMatrix( math::Mat4f pViewMatrix )
+	{
+		_currentState.mView = pViewMatrix;
+	}
+
+	void ShadowRenderer::updateMatricesForLightPass()
+	{
+		_currentState.mView = math::lookAtLH( _currentState.vLightPosition, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f} );
+		_currentState.mSpace = math::mul( _currentState.mProjection, _currentState.mSpace );
+	}
+
+	void ShadowRenderer::updateMatricesForShadowPass()
+	{
+		_currentState.mSpace = math::mul( _currentState.mProjection, _currentState.mSpace );
 	}
 
 	void ShadowRenderer::beginRenderPass1Light( gpuapi::CommandContext & pCommandContext )
@@ -52,7 +97,19 @@ namespace ts3
 		directGraphicsContext->beginRenderPass( *( _gpuAPIState.renderPass1Light ), 0 );
 
 		directGraphicsContext->cmdSetViewport( viewportDescLight );
-		directGraphicsContext->cmdSetShaderConstantBuffer( 17, *( _resources.constantBuffer ) );
+		directGraphicsContext->cmdSetShaderConstantBuffer( 17, *_resources.constantBuffer );
+
+		Pass1LightConstantBufferData constantBufferData;
+		constantBufferData.v3fLightDiffuseColor = _currentState.vLightDiffuseColor;
+		constantBufferData.v3fObjectSpaceLightPos = _currentState.vLightPosition;
+		constantBufferData.m4fModel = _currentState.mModel;
+		constantBufferData.m4fSpace = _currentState.mSpace;
+
+		GPUBufferDataUploadDesc constantBufferDataUploadDesc;
+		constantBufferDataUploadDesc.inputDataDesc.pointer = &constantBufferData;
+		constantBufferDataUploadDesc.inputDataDesc.size = sizeof( Pass1LightConstantBufferData );
+
+		directGraphicsContext->updateBufferDataUpload( *_resources.constantBuffer, constantBufferDataUploadDesc );
 	}
 
 	void ShadowRenderer::beginRenderPass2Shadow(
@@ -101,7 +158,7 @@ namespace ts3
 			constantBufferCreateInfo.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
 			constantBufferCreateInfo.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
 			constantBufferCreateInfo.initialTarget = ts3::gpuapi::EGPUBufferTarget::ConstantBuffer;
-			constantBufferCreateInfo.bufferSize = sizeof( ConstantBufferData );
+			constantBufferCreateInfo.bufferSize = 64 * 1024;
 
 			_resources.constantBuffer = _gpuDevice.createGPUBuffer( constantBufferCreateInfo );
 		}
@@ -176,8 +233,8 @@ namespace ts3
 		using namespace ts3::gpuapi;
 
 		{
-			auto vertexShaderPass1 = _shaderLibrary->getShader( "SID_SHADOW0_VS_PASS1_LIGHT" );
-			auto pixelShaderPass1 = _shaderLibrary->getShader( "SID_SHADOW0_PS_PASS1_LIGHT" );
+			auto vertexShaderPass1 = _shaderLibrary->getShader( "SID_SHADOW_0_PASS1_LIGHT_VS" );
+			auto pixelShaderPass1 = _shaderLibrary->getShader( "SID_SHADOW_0_PASS1_LIGHT_PS" );
 
 			gpuapi::GraphicsPipelineStateObjectCreateInfo psoPass1LightCreateInfo;
 			psoPass1LightCreateInfo.renderTargetLayout.activeAttachmentsMask = E_RT_ATTACHMENT_MASK_DEFAULT_DS_ONLY;
@@ -211,8 +268,8 @@ namespace ts3
 		}
 
 		{
-			auto vertexShaderPass2 = _shaderLibrary->getShader( "SID_SHADOW0_VS_PASS2_SHADOW" );
-			auto pixelShaderPass2 = _shaderLibrary->getShader( "SID_SHADOW0_PS_PASS2_SHADOW" );
+			auto vertexShaderPass2 = _shaderLibrary->getShader( "SID_SHADOW_0_PASS2_SHADOW_VS" );
+			auto pixelShaderPass2 = _shaderLibrary->getShader( "SID_SHADOW_0_PASS2_SHADOW_PS" );
 
 			gpuapi::GraphicsPipelineStateObjectCreateInfo psoPass2ShadowCreateInfo;
 			psoPass2ShadowCreateInfo.renderTargetLayout.activeAttachmentsMask = E_RT_ATTACHMENT_MASK_DEFAULT_C0_DS;

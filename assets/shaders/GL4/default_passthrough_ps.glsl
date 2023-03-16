@@ -3,7 +3,7 @@
 
 in vec2 psTexCoord0;
 
-layout( binding = 1 ) uniform sampler2D uSampler0;
+layout( binding = 0 ) uniform sampler2D uSampler0;
 
 layout( location = 0 ) out vec4 outPixelColor;
 

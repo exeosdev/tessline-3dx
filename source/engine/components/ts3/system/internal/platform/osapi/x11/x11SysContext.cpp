@@ -121,6 +121,14 @@ namespace ts3::system
 		mNativeData.xSessionData.sessionInfo.displayString.clear();
 	}
 
+	std::string X11SysContext::queryCurrentProcessWorkingDirectory() const
+	{
+		char workingDirStrBuffer[2048];
+		getcwd( workingDirStrBuffer, 2048 );
+
+		return std::string( workingDirStrBuffer );
+	}
+
 	std::string X11SysContext::queryCurrentProcessExecutableFilePath() const
 	{
 		pid_t currentProcessID = getpid();

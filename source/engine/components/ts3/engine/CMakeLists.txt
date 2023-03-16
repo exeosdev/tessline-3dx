@@ -24,6 +24,8 @@ set( TS3_ENGINE_SRC_FILES
         # "gpuapi/vertexFormatDefs.cpp"
 
 		"renderer/commonRendererDefs.h"
+		"renderer/renderer.h"
+		"renderer/renderer.cpp"
 		"renderer/shaderLibrary.h"
 		"renderer/shaderLibrary.cpp"
 		"renderer/effects/shadowRenderer.h"

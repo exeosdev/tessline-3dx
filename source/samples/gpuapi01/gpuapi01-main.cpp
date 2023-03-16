@@ -31,6 +31,7 @@
 #include <ts3/engine/res/image/bitmapCommon.h>
 
 #include <ts3/engine/renderer/shaderLibrary.h>
+#include <ts3/engine/renderer/effects/shadowRenderer.h>
 
 #include "gpuapi01-meshDefs.h"
 
@@ -38,6 +39,8 @@ using namespace ts3;
 using namespace ts3::gpuapi;
 using namespace ts3::system;
 namespace math = ts3::math;
+
+std::string sGxDriverName;
 
 struct GraphicsDriverState
 {
@@ -59,16 +62,15 @@ void initializeGraphicsDriver( SysContextHandle pSysContext, GraphicsDriverState
 
 struct CB0Data
 {
-    math::Vec4f scolor;
     math::Mat4x4f modelMatrix;
     math::Mat4x4f viewMatrix;
     math::Mat4x4f projectionMatrix;
 };
 
-DynamicMemoryBuffer loadShaderSourceDefault( AssetLoader & pAssetLoader, const std::string & pDriverID, const std::string & pShaderFile )
+DynamicMemoryBuffer loadShaderSourceDefault( AssetLoader & pAssetLoader, const std::string & pShaderFile )
 {
 	auto psAsset = pAssetLoader.openSubAsset(
-			"shaders/" + pDriverID + "/" + pShaderFile,
+			"shaders/" + sGxDriverName + "/" + pShaderFile,
 			E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
 
 	DynamicMemoryBuffer resultBuffer;
@@ -77,13 +79,9 @@ DynamicMemoryBuffer loadShaderSourceDefault( AssetLoader & pAssetLoader, const s
 	return resultBuffer;
 }
 
-std::function<DynamicMemoryBuffer()> bindShaderSourceLoadCallbackDefault( AssetLoader & pAssetLoader, const std::string & pDriverID, const std::string & pShaderFile )
+std::function<DynamicMemoryBuffer()> bindShaderSourceLoadCallbackDefault( AssetLoader & pAssetLoader, const std::string & pShaderFile )
 {
-	return std::bind(
-		loadShaderSourceDefault,
-		std::ref( pAssetLoader ),
-		std::ref( pDriverID ),
-		std::ref( pShaderFile ) );
+	return std::bind( loadShaderSourceDefault, std::ref( pAssetLoader ), std::ref( pShaderFile ) );
 }
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
@@ -93,7 +91,7 @@ std::function<DynamicMemoryBuffer()> bindShaderSourceLoadCallbackDefault( AssetL
 
 int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 {
-    const std::string sGxDriverName = "GLES3";
+    sGxDriverName = "GLES3";
 
     SysContextCreateInfo sysContextCreateInfo {};
     sysContextCreateInfo.nativeParams.aCommonAppState = pAppState;
@@ -120,7 +118,7 @@ int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 
 int main( int pArgc, const char ** pArgv )
 {
-    const std::string sGxDriverName = "GL4";
+    sGxDriverName = "GL4";
 
 	SysContextCreateInfo sysContextCreateInfo;
 	platform::SysContextCreateInfoNativeParams sysContextCreateInfoNP;
@@ -158,13 +156,13 @@ int main( int pArgc, const char ** pArgv )
 
 int main( int pArgc, const char ** pArgv )
 {
-    const std::string sGxDriverName = "GL4";
+    sGxDriverName = "GL4";
 
     SysContextCreateInfo sysContextCreateInfo;
     auto sysContext = platform::createSysContext( sysContextCreateInfo );
 
     platform::AssetLoaderCreateInfoNativeParams aslCreateInfoNP;
-    aslCreateInfoNP.relativeAssetRootDir = "../../../../../tessline-3dx/assets";
+    aslCreateInfoNP.relativeAssetRootDir = "assets";
     AssetLoaderCreateInfo aslCreateInfo;
     aslCreateInfo.nativeParams = &aslCreateInfoNP;
     auto assetLoader = sysContext->createAssetLoader( aslCreateInfo );
@@ -179,7 +177,7 @@ int main( int pArgc, const char ** pArgv )
 
 int main( int pArgc, const char ** pArgv )
 {
-    const std::string sGxDriverName = "MTL";
+    sGxDriverName = "MTL";
 
     SysContextCreateInfo sysContextCreateInfo;
     auto sysContext = platform::createSysContext( sysContextCreateInfo );
@@ -275,11 +273,24 @@ int main( int pArgc, const char ** pArgv )
 
 	initializeGraphicsDriver( sysContext, gxDriverState );
 
-	auto shaderLibrary = std::make_unique<ShaderLibrary>( gxDriverState.device );
+	const auto rtSize = gxDriverState.presentationLayer->queryRenderTargetSize();
+
+	auto shaderLibrary = ts3::createDynamicInterfaceObject<ShaderLibrary>( gxDriverState.device );
 	shaderLibrary->loadShaders( {
-		{ "SID_DEFAULT_PASSTHROUGH_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, sGxDriverName, "fx_passthrough_vs" ) },
-		{ "SID_DEFAULT_PASSTHROUGH_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, sGxDriverName, "fx_passthrough_ps" ) },
+		{ "SID_DEFAULT_PASSTHROUGH_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_vs" ) },
+		{ "SID_DEFAULT_PASSTHROUGH_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_ps" ) },
+		{ "SID_SHADOW_0_PASS1_LIGHT_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass1_light_vs" ) },
+		{ "SID_SHADOW_0_PASS1_LIGHT_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass1_light_ps" ) },
+		{ "SID_SHADOW_0_PASS2_SHADOW_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass2_shadow_vs" ) },
+		{ "SID_SHADOW_0_PASS2_SHADOW_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass2_shadow_ps" ) },
 	} );
+
+	ts3::ShadowConfig shadowConfig;
+	shadowConfig.screenSize.width = rtSize.x;
+	shadowConfig.screenSize.height = rtSize.y;
+	shadowConfig.shadowMapSize.width = 2048;
+	shadowConfig.shadowMapSize.height = 2048;
+	auto shadowRenderer = std::make_unique<ts3::ShadowRenderer>( shaderLibrary, shadowConfig );
 
     AppSharedResources appResources;
     {
@@ -471,8 +482,6 @@ int main( int pArgc, const char ** pArgv )
 	ib.relativeOffset = 0;
 	ib.indexFormat = EIndexDataFormat::Uint32;
 
-	const auto rtSize = gxDriverState.presentationLayer->queryRenderTargetSize();
-
     math::Vec3f cameraOriginPoint{ 0.0f, 1.0f,  -2.0f };
     math::Vec3f cameraTargetPoint{ 0.0f, 0.0f,  4.0f };
 
@@ -505,7 +514,6 @@ int main( int pArgc, const char ** pArgv )
 	
 	CB0Data cb0Data =
 	{
-	    math::Vec4f{0.12f,0.56f,0.92f,1.0f},
 	    math::identity4<float>(),
 	    math::identity4<float>(),
 	    math::identity4<float>(),

@@ -58,6 +58,8 @@ namespace ts3::system
 
 		virtual WindowManagerHandle createWindowManager( DisplayManagerHandle pDisplayManager ) = 0;
 
+		virtual std::string queryCurrentProcessWorkingDirectory() const = 0;
+
 		virtual std::string queryCurrentProcessExecutableFilePath() const = 0;
 
 		std::string queryCurrentProcessExecutableDirectory() const;

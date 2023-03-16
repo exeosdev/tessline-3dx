@@ -107,10 +107,10 @@ namespace ts3::math
 		const TVal det = pMatrix[0][0] * pMatrix[1][1] - pMatrix[1][0] * pMatrix[0][1];
 
 		return Matrix2x2<TVal> {
-			+ pMatrix[1][1] / det,
-			- pMatrix[0][1] / det,
-			- pMatrix[1][0] / det,
-			+ pMatrix[0][0] / det
+			+ ( pMatrix[1][1] / det ),
+			- ( pMatrix[0][1] / det ),
+			- ( pMatrix[1][0] / det ),
+			+ ( pMatrix[0][0] / det )
 		};
 	}
 
@@ -180,10 +180,10 @@ namespace ts3::math
 		tmpInv[3][3] = + ( pMatrix[0][0] * tmp14 - pMatrix[0][1] * tmp16 + pMatrix[0][2] * tmp17 );
 
 		const TVal det =
-				+ pMatrix[0][0] * tmpInv[0][0]
-				+ pMatrix[0][1] * tmpInv[0][1]
-				+ pMatrix[0][2] * tmpInv[0][2]
-				+ pMatrix[0][3] * tmpInv[0][3];
+			+ ( pMatrix[0][0] * tmpInv[0][0] )
+			+ ( pMatrix[0][1] * tmpInv[0][1] )
+			+ ( pMatrix[0][2] * tmpInv[0][2] )
+			+ ( pMatrix[0][3] * tmpInv[0][3] );
 
 		return tmpInv / det;
 	}
