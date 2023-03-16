@@ -30,6 +30,8 @@
 #include <ts3/engine/camera/cameraController.h>
 #include <ts3/engine/res/image/bitmapCommon.h>
 
+#include <ts3/engine/renderer/shaderLibrary.h>
+
 #include "gpuapi01-meshDefs.h"
 
 using namespace ts3;
@@ -50,8 +52,6 @@ struct GraphicsDriverState
 
 struct AppSharedResources
 {
-    std::string fxSrcPassThroughPs;
-    std::string fxSrcPassThroughVs;
     ImageData txROG512Data;
 };
 
@@ -64,6 +64,27 @@ struct CB0Data
     math::Mat4x4f viewMatrix;
     math::Mat4x4f projectionMatrix;
 };
+
+DynamicMemoryBuffer loadShaderSourceDefault( AssetLoader & pAssetLoader, const std::string & pDriverID, const std::string & pShaderFile )
+{
+	auto psAsset = pAssetLoader.openSubAsset(
+			"shaders/" + pDriverID + "/" + pShaderFile,
+			E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
+
+	DynamicMemoryBuffer resultBuffer;
+	psAsset->readAll( resultBuffer );
+
+	return resultBuffer;
+}
+
+std::function<DynamicMemoryBuffer()> bindShaderSourceLoadCallbackDefault( AssetLoader & pAssetLoader, const std::string & pDriverID, const std::string & pShaderFile )
+{
+	return std::bind(
+		loadShaderSourceDefault,
+		std::ref( pAssetLoader ),
+		std::ref( pDriverID ),
+		std::ref( pShaderFile ) );
+}
 
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_ANDROID )
 
@@ -223,7 +244,7 @@ int main( int pArgc, const char ** pArgv )
 
     evtDispatcher->setEventHandler(
             EEventCodeIndex::AppActivityQuit,
-            [&runApp,&gxDriverState](const EventObject & pEvt) -> bool {
+            [&runApp](const EventObject & pEvt) -> bool {
                 runApp = false;
                 return true;
             });
@@ -252,16 +273,15 @@ int main( int pArgc, const char ** pArgv )
                 return true;
             });
 
-    AppSharedResources appResources;
+	initializeGraphicsDriver( sysContext, gxDriverState );
 
-    {
-        auto psAsset = assetLoader->openSubAsset( "shaders/"+sGxDriverName+"/fx_passthrough_ps", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
-        psAsset->readAll( appResources.fxSrcPassThroughPs );
-    }
-    {
-        auto vsAsset = assetLoader->openSubAsset( "shaders/"+sGxDriverName+"/fx_passthrough_vs", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
-        vsAsset->readAll( appResources.fxSrcPassThroughVs );
-    }
+	auto shaderLibrary = std::make_unique<ShaderLibrary>( gxDriverState.device );
+	shaderLibrary->loadShaders( {
+		{ "SID_DEFAULT_PASSTHROUGH_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, sGxDriverName, "fx_passthrough_vs" ) },
+		{ "SID_DEFAULT_PASSTHROUGH_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, sGxDriverName, "fx_passthrough_ps" ) },
+	} );
+
+    AppSharedResources appResources;
     {
         auto txROG512Asset = assetLoader->openSubAsset( "bitmaps/rog-logo1-512", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
 
@@ -270,8 +290,6 @@ int main( int pArgc, const char ** pArgv )
         appResources.txROG512Data = loadBitmapFromMemory( tmpBuffer.data(), tmpBuffer.size() );
     }
 
-    initializeGraphicsDriver( sysContext, gxDriverState );
-
     if( auto * eventSource = gxDriverState.presentationLayer->getInternalSystemEventSource() )
     {
         evtController->registerEventSource( *eventSource );
@@ -279,13 +297,8 @@ int main( int pArgc, const char ** pArgv )
 
 	auto * gpuDevicePtr = gxDriverState.device.get();
 
-    auto vertexShader = utils::createShaderFromSource( *(gxDriverState.device),
-                                                       EShaderType::GSVertex,
-                                                       appResources.fxSrcPassThroughVs );
-
-    auto pixelShader = utils::createShaderFromSource( *(gxDriverState.device),
-                                                      EShaderType::GSPixel,
-                                                      appResources.fxSrcPassThroughPs );
+    auto vertexShader = shaderLibrary->getShader( "SID_DEFAULT_PASSTHROUGH_VS" );
+    auto pixelShader = shaderLibrary->getShader( "SID_DEFAULT_PASSTHROUGH_PS" );
 
     ts3::gpuapi::RenderPassConfiguration rednerPassConfig;
 
@@ -300,24 +313,26 @@ int main( int pArgc, const char ** pArgv )
     }
     ts3::gpuapi::GPUBufferHandle vbuffer;
     {
+		const auto vertexData = generateVertexPNT0Data();
         ts3::gpuapi::GPUBufferCreateInfo vbci;
         vbci.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
         vbci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT;
         vbci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
         vbci.initialTarget = ts3::gpuapi::EGPUBufferTarget::VertexBuffer;
-        vbci.initDataDesc.pointer = cvMeshTexUnitCubeVertexData;
-        vbci.initDataDesc.size    = cvMeshTexUnitCubeVertexDataSize;
+        vbci.initDataDesc.pointer = vertexData.data();
+        vbci.initDataDesc.size    = vertexData.size() * sizeof( VertexPNT0 );
         vbuffer = gxDriverState.device->createGPUBuffer( vbci );
     }
     ts3::gpuapi::GPUBufferHandle ibuffer;
     {
+	    const auto indexData = generateIndexPNT0Data();
         ts3::gpuapi::GPUBufferCreateInfo ibci;
         ibci.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
         ibci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT;
         ibci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
         ibci.initialTarget = ts3::gpuapi::EGPUBufferTarget::IndexBuffer;
-        ibci.initDataDesc.pointer = cvMeshTexUnitCubeIndexData;
-        ibci.initDataDesc.size    = cvMeshTexUnitCubeIndexDataSize;
+	    ibci.initDataDesc.pointer = indexData.data();
+	    ibci.initDataDesc.size    = indexData.size() * sizeof( uint32 );
         ibuffer = gxDriverState.device->createGPUBuffer( ibci );
     }
 
@@ -379,8 +394,8 @@ int main( int pArgc, const char ** pArgv )
     ts3::gpuapi::RenderPassConfigurationImmutableStateHandle scrRenderPassState;
     {
         RenderPassConfiguration rpConfig;
-        rpConfig.activeAttachmentsMask = E_RT_ATTACHMENT_FLAGS_DEFAULT_C0_DS;
-        rpConfig.attachmentsActionClearMask = E_RT_ATTACHMENT_FLAGS_DEFAULT_C0_DS;
+        rpConfig.activeAttachmentsMask = E_RT_ATTACHMENT_MASK_DEFAULT_C0_DS;
+        rpConfig.attachmentsActionClearMask = E_RT_ATTACHMENT_MASK_DEFAULT_C0_DS;
         rpConfig.colorAttachments[0].renderPassLoadAction = ERenderPassAttachmentLoadAction::Clear;
         rpConfig.colorAttachments[0].renderPassStoreAction = ERenderPassAttachmentStoreAction::Keep;
         rpConfig.colorAttachments[0].clearConfig.colorValue = { 0.12f, 0.36f, 0.88f, 1.0f };
@@ -402,12 +417,12 @@ int main( int pArgc, const char ** pArgv )
 	GraphicsPipelineStateObjectHandle mainPSO;
     {
 		RenderTargetLayout rtLayout;
-		rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAGS_DEFAULT_C0_DS;
+		rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_MASK_DEFAULT_C0_DS;
 		rtLayout.colorAttachments[0].format = ETextureFormat::BGRA8UN;
 		rtLayout.depthStencilAttachment.format = ETextureFormat::D24UNS8U;
 
 		GraphicsPipelineStateObjectCreateInfo psoci;
-		psoci.renderTargetLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAGS_DEFAULT_C0_DS;
+		psoci.renderTargetLayout.activeAttachmentsMask = E_RT_ATTACHMENT_MASK_DEFAULT_C0_DS;
 		psoci.renderTargetLayout.colorAttachments[0].format = ETextureFormat::BGRA8UN;
 		psoci.renderTargetLayout.depthStencilAttachment.format = ETextureFormat::D24UNS8U;
 		psoci.blendConfig = defaults::cvPipelineBlendConfigDefault;
@@ -417,10 +432,11 @@ int main( int pArgc, const char ** pArgv )
 		psoci.rasterizerConfig.primitiveFillMode = ts3::gpuapi::EPrimitiveFillMode::Solid;
 		psoci.rasterizerConfig.frontFaceVerticesOrder = ts3::gpuapi::ETriangleVerticesOrder::CounterClockwise;
 		psoci.renderTargetLayout = rtLayout;
-		psoci.inputLayoutDefinition.activeAttributesMask = E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_0_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_1_BIT;
+		psoci.inputLayoutDefinition.activeAttributesMask = E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_0_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_1_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_2_BIT;
 		psoci.inputLayoutDefinition.primitiveTopology = EPrimitiveTopology::TriangleList;
 		psoci.inputLayoutDefinition.attributeArray[0] = { 0, "POSITION", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, 0 };
-		psoci.inputLayoutDefinition.attributeArray[1] = { 0, "TEXCOORD", 0, ts3::gpuapi::EVertexAttribFormat::Vec2F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+		psoci.inputLayoutDefinition.attributeArray[1] = { 0, "NORMAL", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+		psoci.inputLayoutDefinition.attributeArray[2] = { 0, "TEXCOORD", 0, ts3::gpuapi::EVertexAttribFormat::Vec2F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
 		psoci.shaderSet.addShader( vertexShader );
 		psoci.shaderSet.addShader( pixelShader );
 		psoci.shaderInputSignatureDesc.activeShaderStagesMask = ts3::gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT | ts3::gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT;
@@ -449,7 +465,7 @@ int main( int pArgc, const char ** pArgv )
 	auto & vb0 = vsds.setVertexBufferRef( 0 );
 	vb0.sourceBuffer = vbuffer;
 	vb0.relativeOffset = 0;
-	vb0.vertexStride = sizeof( TexturedMeshVertex );
+	vb0.vertexStride = sizeof( VertexPNT0 );
 	auto & ib = vsds.setIndexBufferRef();
 	ib.sourceBuffer = ibuffer;
 	ib.relativeOffset = 0;
@@ -457,8 +473,8 @@ int main( int pArgc, const char ** pArgv )
 
 	const auto rtSize = gxDriverState.presentationLayer->queryRenderTargetSize();
 
-    math::Vec3f cameraOriginPoint{ 0.0f, 1.0f,  0.0f };
-    math::Vec3f cameraTargetPoint{ 0.0f, 0.0f,  2.0f };
+    math::Vec3f cameraOriginPoint{ 0.0f, 1.0f,  -2.0f };
+    math::Vec3f cameraTargetPoint{ 0.0f, 0.0f,  4.0f };
 
     ts3::CameraController cameraController;
     cameraController.initialize( cameraOriginPoint, cameraTargetPoint, 60.0f );
@@ -514,7 +530,7 @@ int main( int pArgc, const char ** pArgv )
 
 	    evtDispatcher->setEventHandler(
             ts3::system::EEventCodeIndex::InputMouseButton,
-            [&cameraController,&rotate]( const ts3::system::EventObject & pEvt ) -> bool {
+            [&rotate]( const ts3::system::EventObject & pEvt ) -> bool {
                 const auto & eButton = pEvt.eInputMouseButton;
                 if( eButton.buttonAction == EMouseButtonActionType::Click )
                 {
@@ -628,8 +644,8 @@ int main( int pArgc, const char ** pArgv )
 							cameraController.getPerspectiveFOVAngle(), ( float )rtSize.x / ( float )rtSize.y, 0.1f, 1000.0f );
 						cb0Data.viewMatrix = ts3ViewScreen;
 						cb0Data.modelMatrix = math::mul(
-							math::translation<float>( -3, 0, 6.0f ),
-							math::rotationAxisY( -1.0f ) );
+								math::scaling( 2.0f, 2.0f, 1.0f ),
+								math::mul( math::translation<float>( -2, 0, 6.0f ), math::rotationAxisY( -1.0f ) ) );
 						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0DataUploadDesc );
 						gxDriverState.cmdContext->cmdDrawDirectIndexed( 6, 36 );
 					}
@@ -638,8 +654,8 @@ int main( int pArgc, const char ** pArgv )
 							cameraController.getPerspectiveFOVAngle(), ( float )rtSize.x / ( float )rtSize.y, 0.1f, 1000.0f );
 						cb0Data.viewMatrix = ts3ViewScreen;
 						cb0Data.modelMatrix = math::mul(
-							math::translation<float>( 3, 0, 6.0f ),
-							math::rotationAxisY( 1.0f ) );
+								math::scaling( 2.0f, 2.0f, 1.0f ),
+								math::mul( math::translation<float>( 2, 0, 6.0f ), math::rotationAxisY( 1.0f ) ) );
 						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0DataUploadDesc );
 						gxDriverState.cmdContext->cmdDrawDirectIndexed( 6, 36 );
 					}

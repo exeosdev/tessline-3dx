@@ -120,7 +120,7 @@ namespace ts3::gpuapi
 		E_SHADER_STAGE_MASK_GRAPHICS_ALL = 0x007F,
 
 		/// Mask with required stages for vertex-based shader setup (vertex shader and pixel shader).
-		E_SHADER_STAGE_MASK_GRAPHICS_REQUIRED_VERT = E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT | E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT,
+		E_SHADER_STAGE_MASK_GRAPHICS_VS_PS = E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT | E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT,
 
 		/// Mask with all bits for all supported stages (for both graphics and compute) set.
 		E_SHADER_STAGE_MASK_ALL = E_SHADER_STAGE_MASK_GRAPHICS_ALL | E_SHADER_STAGE_FLAG_COMPUTE_BIT,

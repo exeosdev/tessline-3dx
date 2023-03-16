@@ -22,6 +22,11 @@ namespace ts3::gpuapi
 		return mCommandList->checkCommandClassSupport( pQueueClass );
 	}
 
+	bool CommandContext::checkFeatureSupport( Bitmask<ECommandObjectPropertyFlags> pCommandContextFlags ) const
+	{
+		return mCommandList->checkFeatureSupport( pCommandContextFlags );
+	}
+
 	void CommandContext::beginCommandSequence()
 	{
 		return mCommandList->beginCommandSequence();

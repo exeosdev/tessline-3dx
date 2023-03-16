@@ -475,6 +475,12 @@ namespace ts3::math
 	using Mat2u64 = Mat2x2u64;
 	using Mat2f   = Mat2x2f;
 
+	using Mat3i   = Mat3x3i;
+	using Mat3u   = Mat3x3u;
+	using Mat3i64 = Mat3x3i64;
+	using Mat3u64 = Mat3x3u64;
+	using Mat3f   = Mat3x3f;
+
 	using Mat4i   = Mat4x4i;
 	using Mat4u   = Mat4x4u;
 	using Mat4i64 = Mat4x4i64;

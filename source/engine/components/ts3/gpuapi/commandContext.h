@@ -31,6 +31,8 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD bool checkCommandClassSupport( ECommandQueueClass pQueueClass ) const;
 
+		TS3_ATTR_NO_DISCARD bool checkFeatureSupport( Bitmask<ECommandObjectPropertyFlags> pCommandContextFlags ) const;
+
 		void beginCommandSequence();
 		void endCommandSequence();
 

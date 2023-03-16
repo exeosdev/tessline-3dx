@@ -102,6 +102,93 @@ namespace ts3::math
 	}
 
 	template <typename TVal>
+	inline Matrix2x2<TVal> inverseTranspose( const Matrix2x2<TVal> & pMatrix )
+	{
+		const TVal det = pMatrix[0][0] * pMatrix[1][1] - pMatrix[1][0] * pMatrix[0][1];
+
+		return Matrix2x2<TVal> {
+			+ pMatrix[1][1] / det,
+			- pMatrix[0][1] / det,
+			- pMatrix[1][0] / det,
+			+ pMatrix[0][0] / det
+		};
+	}
+
+	template <typename TVal>
+	inline Matrix3x3<TVal> inverseTranspose( const Matrix3x3<TVal> & pMatrix )
+	{
+		const TVal det =
+			+ pMatrix[0][0] * ( pMatrix[1][1] * pMatrix[2][2] - pMatrix[1][2] * pMatrix[2][1] )
+			- pMatrix[0][1] * ( pMatrix[1][0] * pMatrix[2][2] - pMatrix[1][2] * pMatrix[2][0] )
+			+ pMatrix[0][2] * ( pMatrix[1][0] * pMatrix[2][1] - pMatrix[1][1] * pMatrix[2][0] );
+
+		return Matrix2x2<TVal> {
+			( + ( pMatrix[1][1] * pMatrix[2][2] - pMatrix[2][1] * pMatrix[1][2] ) / det ),
+			( - ( pMatrix[1][0] * pMatrix[2][2] - pMatrix[2][0] * pMatrix[1][2] ) / det ),
+			( + ( pMatrix[1][0] * pMatrix[2][1] - pMatrix[2][0] * pMatrix[1][1] ) / det ),
+			( - ( pMatrix[0][1] * pMatrix[2][2] - pMatrix[2][1] * pMatrix[0][2] ) / det ),
+			( + ( pMatrix[0][0] * pMatrix[2][2] - pMatrix[2][0] * pMatrix[0][2] ) / det ),
+			( - ( pMatrix[0][0] * pMatrix[2][1] - pMatrix[2][0] * pMatrix[0][1] ) / det ),
+			( + ( pMatrix[0][1] * pMatrix[1][2] - pMatrix[1][1] * pMatrix[0][2] ) / det ),
+			( - ( pMatrix[0][0] * pMatrix[1][2] - pMatrix[1][0] * pMatrix[0][2] ) / det ),
+			( + ( pMatrix[0][0] * pMatrix[1][1] - pMatrix[1][0] * pMatrix[0][1] ) / det ),
+		};
+	}
+
+	template <typename TVal>
+	inline Matrix4x4<TVal> inverseTranspose( const Matrix4x4<TVal> & pMatrix )
+	{
+		const TVal tmp00 = pMatrix[2][2] * pMatrix[3][3] - pMatrix[3][2] * pMatrix[2][3];
+		const TVal tmp01 = pMatrix[2][1] * pMatrix[3][3] - pMatrix[3][1] * pMatrix[2][3];
+		const TVal tmp02 = pMatrix[2][1] * pMatrix[3][2] - pMatrix[3][1] * pMatrix[2][2];
+		const TVal tmp03 = pMatrix[2][0] * pMatrix[3][3] - pMatrix[3][0] * pMatrix[2][3];
+		const TVal tmp04 = pMatrix[2][0] * pMatrix[3][2] - pMatrix[3][0] * pMatrix[2][2];
+		const TVal tmp05 = pMatrix[2][0] * pMatrix[3][1] - pMatrix[3][0] * pMatrix[2][1];
+		const TVal tmp06 = pMatrix[1][2] * pMatrix[3][3] - pMatrix[3][2] * pMatrix[1][3];
+		const TVal tmp07 = pMatrix[1][1] * pMatrix[3][3] - pMatrix[3][1] * pMatrix[1][3];
+		const TVal tmp08 = pMatrix[1][1] * pMatrix[3][2] - pMatrix[3][1] * pMatrix[1][2];
+		const TVal tmp09 = pMatrix[1][0] * pMatrix[3][3] - pMatrix[3][0] * pMatrix[1][3];
+		const TVal tmp10 = pMatrix[1][0] * pMatrix[3][2] - pMatrix[3][0] * pMatrix[1][2];
+		const TVal tmp11 = pMatrix[1][0] * pMatrix[3][1] - pMatrix[3][0] * pMatrix[1][1];
+		const TVal tmp12 = pMatrix[1][2] * pMatrix[2][3] - pMatrix[2][2] * pMatrix[1][3];
+		const TVal tmp13 = pMatrix[1][1] * pMatrix[2][3] - pMatrix[2][1] * pMatrix[1][3];
+		const TVal tmp14 = pMatrix[1][1] * pMatrix[2][2] - pMatrix[2][1] * pMatrix[1][2];
+		const TVal tmp15 = pMatrix[1][0] * pMatrix[2][3] - pMatrix[2][0] * pMatrix[1][3];
+		const TVal tmp16 = pMatrix[1][0] * pMatrix[2][2] - pMatrix[2][0] * pMatrix[1][2];
+		const TVal tmp17 = pMatrix[1][0] * pMatrix[2][1] - pMatrix[2][0] * pMatrix[1][1];
+
+		Matrix4x4<TVal> tmpInv;
+
+		tmpInv[0][0] = + ( pMatrix[1][1] * tmp00 - pMatrix[1][2] * tmp01 + pMatrix[1][3] * tmp02 );
+		tmpInv[0][1] = - ( pMatrix[1][0] * tmp00 - pMatrix[1][2] * tmp03 + pMatrix[1][3] * tmp04 );
+		tmpInv[0][2] = + ( pMatrix[1][0] * tmp01 - pMatrix[1][1] * tmp03 + pMatrix[1][3] * tmp05 );
+		tmpInv[0][3] = - ( pMatrix[1][0] * tmp02 - pMatrix[1][1] * tmp04 + pMatrix[1][2] * tmp05 );
+
+		tmpInv[1][0] = - ( pMatrix[0][1] * tmp00 - pMatrix[0][2] * tmp01 + pMatrix[0][3] * tmp02 );
+		tmpInv[1][1] = + ( pMatrix[0][0] * tmp00 - pMatrix[0][2] * tmp03 + pMatrix[0][3] * tmp04 );
+		tmpInv[1][2] = - ( pMatrix[0][0] * tmp01 - pMatrix[0][1] * tmp03 + pMatrix[0][3] * tmp05 );
+		tmpInv[1][3] = + ( pMatrix[0][0] * tmp02 - pMatrix[0][1] * tmp04 + pMatrix[0][2] * tmp05 );
+
+		tmpInv[2][0] = + ( pMatrix[0][1] * tmp06 - pMatrix[0][2] * tmp07 + pMatrix[0][3] * tmp08 );
+		tmpInv[2][1] = - ( pMatrix[0][0] * tmp06 - pMatrix[0][2] * tmp09 + pMatrix[0][3] * tmp10 );
+		tmpInv[2][2] = + ( pMatrix[0][0] * tmp07 - pMatrix[0][1] * tmp09 + pMatrix[0][3] * tmp11 );
+		tmpInv[2][3] = - ( pMatrix[0][0] * tmp08 - pMatrix[0][1] * tmp10 + pMatrix[0][2] * tmp11 );
+
+		tmpInv[3][0] = - ( pMatrix[0][1] * tmp12 - pMatrix[0][2] * tmp13 + pMatrix[0][3] * tmp14 );
+		tmpInv[3][1] = + ( pMatrix[0][0] * tmp12 - pMatrix[0][2] * tmp15 + pMatrix[0][3] * tmp16 );
+		tmpInv[3][2] = - ( pMatrix[0][0] * tmp13 - pMatrix[0][1] * tmp15 + pMatrix[0][3] * tmp17 );
+		tmpInv[3][3] = + ( pMatrix[0][0] * tmp14 - pMatrix[0][1] * tmp16 + pMatrix[0][2] * tmp17 );
+
+		const TVal det =
+				+ pMatrix[0][0] * tmpInv[0][0]
+				+ pMatrix[0][1] * tmpInv[0][1]
+				+ pMatrix[0][2] * tmpInv[0][2]
+				+ pMatrix[0][3] * tmpInv[0][3];
+
+		return tmpInv / det;
+	}
+
+	template <typename TVal>
 	inline Matrix4x4<TVal> lookAtLH( const Vec3<TVal> & pEyePos, const Vec3<TVal> & pLookAt, const Vec3<TVal> & pUpVec )
 	{
 		const auto zAxis = normalize( pLookAt - pEyePos );
