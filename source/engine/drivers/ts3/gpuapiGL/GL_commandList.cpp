@@ -17,9 +17,11 @@ namespace ts3::gpuapi
 	GLCommandList::GLCommandList(
 			GLCommandSystem & pGLCommandSystem,
 			ECommandListType pListType,
-			system::OpenGLRenderContextHandle pSysGLRenderContext )
-	: CommandList( pGLCommandSystem, pListType, _stateController )
+			system::OpenGLRenderContextHandle pSysGLRenderContext,
+			GLGraphicsPipelineStateController & pStateController )
+	: CommandList( pGLCommandSystem, pListType, pStateController )
 	, mSysGLRenderContext( pSysGLRenderContext )
+	, _graphicsPipelineStateControllerGL( &pStateController )
 	{}
 
 	GLCommandList::~GLCommandList() = default;
@@ -81,9 +83,9 @@ namespace ts3::gpuapi
 
 	void GLCommandList::cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset )
 	{
-		_stateController.applyStateChanges();
+		_graphicsPipelineStateControllerGL->applyStateChanges();
 
-		const auto & drawTopologyProperties = _stateController.getGLDrawTopologyProperties();
+		const auto & drawTopologyProperties = _graphicsPipelineStateControllerGL->getGLDrawTopologyProperties();
 		const auto relativeIndexDataOffset = pIndicesOffset * drawTopologyProperties.indexBufferElementByteSize;
 		const auto * baseIndexDataOffset = reinterpret_cast<void *>( drawTopologyProperties.indexBufferBaseOffset + relativeIndexDataOffset );
 
@@ -101,9 +103,9 @@ namespace ts3::gpuapi
 
 	void GLCommandList::cmdDrawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset )
 	{
-		_stateController.applyStateChanges();
+		_graphicsPipelineStateControllerGL->applyStateChanges();
 
-		const auto & drawTopologyProperties = _stateController.getGLDrawTopologyProperties();
+		const auto & drawTopologyProperties = _graphicsPipelineStateControllerGL->getGLDrawTopologyProperties();
 
 		glDrawArrays(
 			drawTopologyProperties.primitiveTopology,
@@ -134,8 +136,8 @@ namespace ts3::gpuapi
 		if( _currentRenderPassConfiguration.attachmentsActionResolveMask != 0 )
 		{
 			smutil::resolveRenderPassFramebuffer(
-					_stateController.getCurrentRenderTargetBindingInfo(),
-					_currentRenderPassConfiguration );
+				_graphicsPipelineStateControllerGL->getCurrentRenderTargetBindingInfo(),
+				_currentRenderPassConfiguration );
 		}
 	}
 

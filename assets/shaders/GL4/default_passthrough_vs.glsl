@@ -19,7 +19,7 @@ out gl_PerVertex
 	float gl_ClipDistance[];
 };
 
-out smooth vec2 psTexCoord0;
+out vec2 psTexCoord0;
 
 void main()
 {

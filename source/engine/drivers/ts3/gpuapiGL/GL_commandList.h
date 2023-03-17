@@ -14,7 +14,7 @@ namespace ts3::gpuapi
 	class GLShaderProgramObject;
 
 	/// @brief
-	class TS3_GPUAPI_CLASS GLCommandList : public CommandList
+	class GLCommandList : public CommandList
 	{
 	public:
 		system::OpenGLRenderContextHandle const mSysGLRenderContext;
@@ -23,7 +23,8 @@ namespace ts3::gpuapi
 		GLCommandList(
 			GLCommandSystem & pGLCommandSystem,
 			ECommandListType pListType,
-			system::OpenGLRenderContextHandle pSysGLRenderContext );
+			system::OpenGLRenderContextHandle pSysGLRenderContext,
+			GLGraphicsPipelineStateController & pStateController );
 
 		virtual ~GLCommandList();
 
@@ -52,8 +53,36 @@ namespace ts3::gpuapi
 		void executeRenderPassStoreActions();
 
 	private:
-		GLGraphicsPipelineStateController _stateController;
+		GLGraphicsPipelineStateController * _graphicsPipelineStateControllerGL;
 		RenderPassConfiguration _currentRenderPassConfiguration;
+	};
+
+	class GLCommandListCore : public GLCommandList
+	{
+	public:
+		GLCommandListCore(
+				GLCommandSystem & pGLCommandSystem,
+				ECommandListType pListType,
+				system::OpenGLRenderContextHandle pSysGLRenderContext )
+		: GLCommandList( pGLCommandSystem, pListType, pSysGLRenderContext, _graphicsPipelineStateControllerCore )
+		{}
+
+	private:
+		GLGraphicsPipelineStateControllerCore _graphicsPipelineStateControllerCore;
+	};
+
+	class GLCommandListCompat : public GLCommandList
+	{
+	public:
+		GLCommandListCompat(
+				GLCommandSystem & pGLCommandSystem,
+				ECommandListType pListType,
+				system::OpenGLRenderContextHandle pSysGLRenderContext )
+		: GLCommandList( pGLCommandSystem, pListType, pSysGLRenderContext, _graphicsPipelineStateControllerCompat )
+		{}
+
+	private:
+		GLGraphicsPipelineStateControllerCore _graphicsPipelineStateControllerCompat;
 	};
 
 } // namespace ts3::gpuapi

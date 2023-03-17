@@ -1,6 +1,7 @@
 
 setInternal( TS3_DRIVER_GPUAPI_GLCOMMON_SRC_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/prerequisites/GL_commonDefs.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/prerequisites/GL_commonDefs.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/prerequisites/GL_debugOutput.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/prerequisites/GL_debugOutput.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/prerequisites/GL_object.h"
@@ -32,6 +33,8 @@ setInternal( TS3_DRIVER_GPUAPI_GLCOMMON_SRC_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/objects/GL_renderbufferObject.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/objects/GL_samplerObject.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/objects/GL_samplerObject.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/objects/GL_shaderCommon.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/objects/GL_shaderCommon.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/objects/GL_shaderObject.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/objects/GL_shaderObject.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/objects/GL_shaderPipelineObject.h"
@@ -68,4 +71,6 @@ setInternal( TS3_DRIVER_GPUAPI_GLCOMMON_SRC_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_pipelineStateObject.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_renderTarget.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_renderTarget.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_vertexArrayObjectCache.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_vertexArrayObjectCache.cpp"
 )

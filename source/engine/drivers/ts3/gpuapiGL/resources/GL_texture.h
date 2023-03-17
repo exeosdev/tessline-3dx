@@ -28,7 +28,7 @@ namespace ts3::gpuapi
 
 		virtual ~GLTexture();
 
-		static GLTextureHandle create( GLGPUDevice & pGPUDevice, const TextureCreateInfo & pCreateInfo );
+		static GLTextureHandle createInstance( GLGPUDevice & pGPUDevice, const TextureCreateInfo & pCreateInfo );
 
 		static RenderTargetTextureHandle createRTT( GLGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo );
 	};

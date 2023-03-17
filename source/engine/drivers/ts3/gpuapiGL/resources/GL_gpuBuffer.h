@@ -17,23 +17,23 @@ namespace ts3::gpuapi
 		friend class GLCommandContext;
 
 	public:
-		GLBufferObjectHandle const mGLBufferObject = nullptr;
-		void * const mPersistentMapPtr = nullptr;
+		GLBufferObjectHandle const mGLBufferObject;
 
 	public:
 		GLGPUBuffer(
 			GLGPUDevice & pGPUDevice,
 			const ResourceMemoryInfo & pResourceMemory,
 			const GPUBufferProperties & pBufferProperties,
-			GLBufferObjectHandle pGLBufferObject,
-			void * pPersistentMapPtr );
+			GLBufferObjectHandle pGLBufferObject );
 
 		virtual ~GLGPUBuffer();
 
-		static GLGPUBufferHandle create( GLGPUDevice & pGPUDevice, const GPUBufferCreateInfo & pCreateInfo );
+		static GLGPUBufferHandle createInstance( GLGPUDevice & pGPUDevice, const GPUBufferCreateInfo & pCreateInfo );
 
-	private:
-	    virtual bool mapRegion( void * pCommandObject, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode ) override;
+	protected:
+		static bool validateBufferCreateInfo( GPUBufferCreateInfo & pCreateInfo );
+
+		virtual bool mapRegion( void * pCommandObject, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode ) override;
 
 		virtual void unmap( void * pCommandObject ) override;
 
@@ -46,8 +46,6 @@ namespace ts3::gpuapi
 		virtual void updateSubDataUpload( void * pCommandObject, const GPUBufferSubDataUploadDesc & pUploadDesc ) override;
 		
 		virtual bool validateMapRequest( const GPUMemoryRegion & pRegion, const EGPUMemoryMapMode & pMapMode ) override;
-
-		static bool validateBufferCreateInfo( GPUBufferCreateInfo & pCreateInfo );
 	};
 
 } // namespace ts3::gpuapi

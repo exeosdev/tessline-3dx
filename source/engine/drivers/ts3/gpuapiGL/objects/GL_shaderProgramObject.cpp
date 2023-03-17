@@ -49,6 +49,60 @@ namespace ts3::gpuapi
 		return programObject;
 	}
 
+	GLShaderProgramObjectHandle GLShaderProgramObject::createSeparableModule( GLShaderObject & pShader, const GLShaderDataLayoutMap & pLayoutMap )
+	{
+		auto programObject = GLShaderProgramObject::create( GLShaderProgramType::Separable );
+		programObject->attachShader( pShader );
+		setProgramPreLinkBindings( *programObject, pLayoutMap );
+		programObject->link();
+		programObject->validate();
+		setProgramPostLinkBindings( *programObject, pLayoutMap );
+		programObject->detachShader( pShader );
+		return programObject;
+	}
+
+	void GLShaderProgramObject::setProgramPreLinkBindings( GLShaderProgramObject & pProgram, const GLShaderDataLayoutMap & pLayoutMap )
+	{
+		for( const auto & attributeLocation : pLayoutMap.attributeLocations )
+		{
+			glBindAttribLocation( pProgram.mGLHandle, attributeLocation.second, attributeLocation.first.data() );
+			ts3OpenGLHandleLastError();
+		}
+
+		for( const auto & fragDataLocation : pLayoutMap.fragDataLocations )
+		{
+			glBindFragDataLocation( pProgram.mGLHandle, fragDataLocation.second, fragDataLocation.first.data() );
+			ts3OpenGLHandleLastError();
+		}
+	}
+
+	void GLShaderProgramObject::setProgramPostLinkBindings( GLShaderProgramObject & pProgram, const GLShaderDataLayoutMap & pLayoutMap )
+	{
+		glUseProgram( pProgram.mGLHandle );
+		ts3OpenGLHandleLastError();
+
+		for( const auto & samplerBinding : pLayoutMap.samplerBindings )
+		{
+			GLint samplerVariableLocation = glGetUniformLocation( pProgram.mGLHandle, samplerBinding.first.data() );
+			ts3OpenGLHandleLastError();
+
+			glUniform1i( samplerVariableLocation, samplerBinding.second );
+			ts3OpenGLHandleLastError();
+		}
+
+		for( const auto & uniformBlockBinding : pLayoutMap.uniformBlockBindings )
+		{
+			GLint blockIndex = glGetUniformBlockIndex( pProgram.mGLHandle, uniformBlockBinding.first.data() );
+			ts3OpenGLHandleLastError();
+
+			glUniformBlockBinding( pProgram.mGLHandle, blockIndex, uniformBlockBinding.second );
+			ts3OpenGLHandleLastError();
+		}
+
+		glUseProgram( 0u );
+		ts3OpenGLHandleLastError();
+	}
+
 	bool GLShaderProgramObject::release()
 	{
 		auto deleteStatus = queryParameter( GL_DELETE_STATUS );
@@ -130,6 +184,7 @@ namespace ts3::gpuapi
 	{
 		glValidateProgram( mGLHandle );
 		ts3OpenGLHandleLastError();
+		auto infoLog = getInfoLog();
 
 		auto validateStatus = queryParameter( GL_VALIDATE_STATUS );
 		if( validateStatus == GL_FALSE )

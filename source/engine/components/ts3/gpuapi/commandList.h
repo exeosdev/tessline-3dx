@@ -98,7 +98,7 @@ namespace ts3::gpuapi
 
 		virtual void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext ) = 0;
 
-	private:
+	protected:
 		std::atomic<bool> _listLockStatus = ATOMIC_VAR_INIT( false );
 
 		Bitmask<uint32> _internalStateMask;

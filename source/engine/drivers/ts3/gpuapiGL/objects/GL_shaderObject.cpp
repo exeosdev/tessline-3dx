@@ -107,6 +107,16 @@ namespace ts3::gpuapi
 		return true;
 	}
 
+	void GLShaderObject::setDataLayoutMap( GLShaderDataLayoutMap pLayoutMap )
+	{
+		_dataLayoutMap = std::make_unique<GLShaderDataLayoutMap>( std::move( pLayoutMap ) );
+	}
+
+	GLShaderDataLayoutMap * GLShaderObject::getDataLayoutMap() const noexcept
+	{
+		return _dataLayoutMap.get();
+	}
+
 	GLint GLShaderObject::queryParameter( GLenum pParameter ) const
 	{
 		GLint parameterValue = GL_INVALID_VALUE;

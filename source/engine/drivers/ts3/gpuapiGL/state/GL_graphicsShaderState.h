@@ -19,19 +19,47 @@ namespace ts3::gpuapi
 	class GLGraphicsShaderLinkageImmutableState : public GraphicsShaderLinkageImmutableState
 	{
 	public:
+		GLGraphicsShaderLinkageImmutableState(
+				GLGPUDevice & pGPUDevice,
+				const GraphicsShaderLinkageCommonProperties & pCommonProperties );
+
+		virtual ~GLGraphicsShaderLinkageImmutableState();
+	};
+
+	/// @brief
+	class GLGraphicsShaderLinkageImmutableStateCore : public GLGraphicsShaderLinkageImmutableState
+	{
+	public:
 		GLShaderPipelineObjectHandle const mGLShaderPipelineObject;
+
+	public:
+		GLGraphicsShaderLinkageImmutableStateCore(
+				GLGPUDevice & pGPUDevice,
+				const GraphicsShaderLinkageCommonProperties & pCommonProperties,
+				GLShaderPipelineObjectHandle pGLShaderPipelineObject );
+
+		virtual ~GLGraphicsShaderLinkageImmutableStateCore();
+
+		TS3_ATTR_NO_DISCARD static GpaHandle<GLGraphicsShaderLinkageImmutableStateCore> createInstance(
+				GLGPUDevice & pGPUDevice,
+				const GraphicsShaderSet & pShaderSet );
+	};
+
+	/// @brief
+	class GLGraphicsShaderLinkageImmutableStateCompat : public GLGraphicsShaderLinkageImmutableState
+	{
+	public:
 		GLShaderProgramObjectHandle const mGLShaderProgramObject;
 
 	public:
-		GLGraphicsShaderLinkageImmutableState(
+		GLGraphicsShaderLinkageImmutableStateCompat(
 				GLGPUDevice & pGPUDevice,
 				const GraphicsShaderLinkageCommonProperties & pCommonProperties,
-				GLShaderPipelineObjectHandle pGLShaderPipelineObject,
 				GLShaderProgramObjectHandle pGLShaderProgramObject );
 
-		virtual ~GLGraphicsShaderLinkageImmutableState();
+		virtual ~GLGraphicsShaderLinkageImmutableStateCompat();
 
-		TS3_ATTR_NO_DISCARD static GpaHandle<GLGraphicsShaderLinkageImmutableState> createInstance(
+		TS3_ATTR_NO_DISCARD static GpaHandle<GLGraphicsShaderLinkageImmutableStateCompat> createInstance(
 				GLGPUDevice & pGPUDevice,
 				const GraphicsShaderSet & pShaderSet );
 	};

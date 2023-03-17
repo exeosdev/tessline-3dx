@@ -11,11 +11,17 @@
 namespace ts3::gpuapi
 {
 
+#if( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_MACOS )
+	using GL4GPUDeviceBase = GLGPUDeviceCompat;
+#else
+	using GL4GPUDeviceBase = GLGPUDeviceCore;
+#endif
+
 	struct GL4GPUDeviceCreateInfo : public GPUDeviceCreateInfo
 	{
 	};
 
-	class TS3GX_GL4_CLASS GL4GPUDevice final : public GLGPUDevice
+	class TS3GX_GL4_CLASS GL4GPUDevice final : public GL4GPUDeviceBase
 	{
 	public:
 		explicit GL4GPUDevice( GL4GPUDriver & pDriver );

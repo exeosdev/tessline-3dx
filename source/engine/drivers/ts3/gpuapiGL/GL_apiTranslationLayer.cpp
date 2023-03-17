@@ -10,15 +10,6 @@
 namespace ts3::gpuapi
 {
 
-	GLenum atl::chooseGLBufferInitFlagsCoreES( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags )
-	{
-	#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
-		return chooseGLBufferUsagePolicy( pBindTarget, pBufferFlags );
-	#else
-		return chooseGLBufferStorageFlags( pBindTarget, pBufferFlags, pMemoryFlags );
-	#endif
-	}
-
 #if( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL43 )
 	GLenum atl::chooseGLBufferStorageFlags( GLenum pBindTarget, Bitmask<resource_flags_value_t> pBufferFlags, Bitmask<EGPUMemoryFlags> pMemoryFlags )
 	{
@@ -656,9 +647,9 @@ namespace ts3::gpuapi
 			ts3CaseReturn( ETextureFormat::RGB10A2UN  , GL_RGB10_A2           );
 			ts3CaseReturn( ETextureFormat::R11G11B10F , GL_R11F_G11F_B10F     );
 			ts3CaseReturn( ETextureFormat::D16UN      , GL_DEPTH_COMPONENT16  );
-			ts3CaseReturn( ETextureFormat::D24UNS8U   , GL_DEPTH24_STENCIL8   );
-			ts3CaseReturn( ETextureFormat::D24UNX8    , GL_DEPTH_COMPONENT24  );
-			ts3CaseReturn( ETextureFormat::D32F       , GL_DEPTH_COMPONENT32F );
+			ts3CaseReturn( ETextureFormat::D24UNS8U   , GL_DEPTH_STENCIL   );
+			ts3CaseReturn( ETextureFormat::D24UNX8    , GL_DEPTH_STENCIL  );
+			ts3CaseReturn( ETextureFormat::D32F       , GL_DEPTH_COMPONENT );
 		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_COMPRESSED_BCX )
 			ts3CaseReturn( ETextureFormat::BC1        , GL_TEX_FORMAT_COMPRESSED_BC1         );
 			ts3CaseReturn( ETextureFormat::BC1SRGB    , GL_TEX_FORMAT_COMPRESSED_BC1_SRGBA   );

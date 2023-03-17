@@ -33,6 +33,10 @@ namespace ts3::gpuapi
 
 		virtual bool applyStateChanges() = 0;
 
+		TS3_ATTR_NO_DISCARD bool isIAVertexStreamStateDynamic() const noexcept;
+
+		TS3_ATTR_NO_DISCARD bool isRenderTargetStateDynamic() const noexcept;
+
 		/// @brief Binds the specified state object to the pipeline. Returns true if any change has been made.
 		/// @return True if anything has been changed or false otherwise.
 		/// @note Sub-classes should always call the base method first and check the result before doing the actual update.

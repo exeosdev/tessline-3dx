@@ -20,7 +20,7 @@ namespace ts3::gpuapi
 
 	GLTexture::~GLTexture() = default;
 
-	GLTextureHandle GLTexture::create( GLGPUDevice & pGPUDevice, const TextureCreateInfo & pCreateInfo )
+	GLTextureHandle GLTexture::createInstance( GLGPUDevice & pGPUDevice, const TextureCreateInfo & pCreateInfo )
 	{
 		auto createInfo = pCreateInfo;
 		if( !validateTextureCreateInfo( createInfo ) )
@@ -38,8 +38,17 @@ namespace ts3::gpuapi
 		openglCreateInfo.openglInitDataDesc.openglPixelDataLayout = atl::translateGLTexturePixelDataLayout( createInfo.pixelFormat );
 		openglCreateInfo.openglInitDataDesc.openglPixelDataType = atl::translateGLBaseDataType( textureInitDataBaseType );
 
-		auto openglTextureObject = GLTextureObject::create( openglCreateInfo );
-		ts3DebugAssert( openglTextureObject );
+		GLTextureObjectHandle openglTextureObject = nullptr;
+		if( pGPUDevice.isCompatibilityDevice() )
+		{
+			openglTextureObject = GLTextureObject::createCompat( openglCreateInfo );
+			ts3DebugAssert( openglTextureObject );
+		}
+		else
+		{
+			openglTextureObject = GLTextureObject::createCore( openglCreateInfo );
+			ts3DebugAssert( openglTextureObject );
+		}
 
 		const auto textureInternalFormat = openglTextureObject->queryInternalFormat();
 		const auto textureSize = openglTextureObject->querySize();
@@ -61,11 +70,12 @@ namespace ts3::gpuapi
 		textureLayout.storageSize = numeric_cast<uint32>( textureSize );
 		textureLayout.bitsPerPixel = atl::queryGLTextureInternalFormatBPP( textureInternalFormat );
 
-		auto openglTexture = createDynamicInterfaceObject<GLTexture>( pGPUDevice,
-		                                                              textureMemoryInfo,
-		                                                              textureProperties,
-		                                                              textureLayout,
-		                                                              std::move( openglTextureObject ) );
+		auto openglTexture = createDynamicInterfaceObject<GLTexture>(
+			pGPUDevice,
+			textureMemoryInfo,
+			textureProperties,
+			textureLayout,
+			std::move( openglTextureObject ) );
 
 		return openglTexture;
 	}
@@ -90,7 +100,7 @@ namespace ts3::gpuapi
 			textureCreateInfo.pixelFormat = pCreateInfo.rttLayout.internalDataFormat;
 			textureCreateInfo.initialTarget = rcutil::getTextureTargetFromResourceFlags( pCreateInfo.bindFlags );
 
-			auto glcTexture = GLTexture::create( pGPUDevice, textureCreateInfo );
+			auto glcTexture = GLTexture::createInstance( pGPUDevice, textureCreateInfo );
 			if( !glcTexture )
 			{
 				return nullptr;

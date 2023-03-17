@@ -37,6 +37,22 @@ namespace ts3::gpuapi
 
 	constexpr GLuint cvGLInvalidProgramLocation = Limits<GLuint>::maxValue;
 
+	enum EGLRuntimeSupportFlags : uint32
+	{
+		E_GL_RUNTIME_SUPPORT_FLAG_BUFFER_IMMUTABLE_STORAGE_BIT = 1 << 4,
+		E_GL_RUNTIME_SUPPORT_FLAG_EXPLICIT_SHADER_ATTRIBUTE_LOCATION_BIT = 1 << 0,
+		E_GL_RUNTIME_SUPPORT_FLAG_EXPLICIT_SHADER_FRAG_DATA_LOCATION_BIT = 1 << 1,
+		E_GL_RUNTIME_SUPPORT_FLAG_EXPLICIT_SHADER_UNIFORM_BINDING_BIT    = 1 << 2,
+		E_GL_RUNTIME_SUPPORT_FLAG_SEPARATE_SHADER_STAGES_BIT             = 1 << 3,
+	};
+
+	namespace coreutil
+	{
+
+		TS3_ATTR_NO_DISCARD Bitmask<EGLRuntimeSupportFlags> queryGLRuntimeSupportFlags( const system::OpenGLVersionSupportInfo & pSupportInfo );
+
+	}
+
 } // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_GLCOMMON_COMMON_DEFS_H__

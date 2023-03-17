@@ -14,9 +14,14 @@ namespace ts3::gpuapi
 
 	GraphicsPipelineStateController::~GraphicsPipelineStateController() = default;
 
-	bool GraphicsPipelineStateController::applyStateChanges()
+	bool GraphicsPipelineStateController::isIAVertexStreamStateDynamic() const noexcept
 	{
-		return false;
+		return _currentCommonState.iaVertexStreamState && _currentCommonState.iaVertexStreamState->isDynamicOverrideState();
+	}
+
+	bool GraphicsPipelineStateController::isRenderTargetStateDynamic() const noexcept
+	{
+		return _currentCommonState.renderTargetBindingState && _currentCommonState.renderTargetBindingState->isDynamicOverrideState();
 	}
 
 	bool GraphicsPipelineStateController::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO )

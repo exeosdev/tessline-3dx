@@ -47,7 +47,7 @@ namespace ts3::gpuapi
 			auto * openglGPUDevice = mGPUDevice.queryInterface<GLGPUDevice>();
 			auto * openglDebugOutput = openglGPUDevice->getDebugOutputInterface();
 
-			const auto enableDebugOutput = true;
+			const auto enableDebugOutput = false;
 
 			if( openglDebugOutput && enableDebugOutput )
 			{
@@ -120,7 +120,14 @@ namespace ts3::gpuapi
 		auto sysGLRenderContext = GLCommandSystem::createSysGLRenderContext( *openglGPUDevice, _targetSysGLSurface );
 		ts3DebugAssert( sysGLRenderContext );
 
-		_mainCommandList = createGPUAPIObject<GLCommandList>( *this, ECommandListType::DirectGraphics, sysGLRenderContext );
+		if( !openglGPUDevice->isCompatibilityDevice() )
+		{
+			_mainCommandList = createGPUAPIObject<GLCommandListCore>( *this, ECommandListType::DirectGraphics, sysGLRenderContext );
+		}
+		else
+		{
+			_mainCommandList = createGPUAPIObject<GLCommandListCompat>( *this, ECommandListType::DirectGraphics, sysGLRenderContext );
+		}
 
 		return true;
 	}
@@ -136,7 +143,7 @@ namespace ts3::gpuapi
 
 		#if( TS3GX_GL_TARGET == TS3GX_GL_TARGET_GL43 )
 			contextCreateInfo.requestedAPIVersion.major = 4;
-			contextCreateInfo.requestedAPIVersion.minor = 1;
+			contextCreateInfo.requestedAPIVersion.minor = 3;
 			contextCreateInfo.contextAPIProfile = system::EOpenGLAPIProfile::Core;
 		#elif( TS3GX_GL_TARGET == TS3GX_GL_TARGET_ES31 )
 			contextCreateInfo.runtimeVersionDesc.apiVersion.major = 3;

@@ -116,6 +116,9 @@ namespace ts3::gpuapi
 				return nullptr;
 			}
 
+			GLsizei colorBuffersNum = 0;
+			GLenum colorBuffersArray[cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM];
+
 			for( uint32 caIndex = 0; cxdefs::isRTColorAttachmentIndexValid( caIndex ); ++caIndex )
 			{
 				const auto attachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
@@ -129,8 +132,18 @@ namespace ts3::gpuapi
 							caIndex,
 							*( openglTexture->mGLTextureObject ),
 							textureReference.getRefSubResource() );
+
+					// colorBuffersArray[colorBuffersNum++] = GL_COLOR_ATTACHMENT0 + caIndex;
+					colorBuffersArray[caIndex] = GL_COLOR_ATTACHMENT0 + caIndex;
+				}
+				else
+				{
+					colorBuffersArray[caIndex] = GL_NONE;
 				}
 			}
+
+			glDrawBuffers( colorBuffersNum, colorBuffersArray );
+			ts3OpenGLHandleLastError();
 
 			if( pAttachmentMask.isSet( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT ) )
 			{
@@ -224,9 +237,11 @@ namespace ts3::gpuapi
 
 				GLint drawFramebufferHandle = -1;
 				glGetIntegerv( GL_DRAW_FRAMEBUFFER_BINDING, &drawFramebufferHandle );
+				ts3OpenGLHandleLastError();
 
 				GLint readFramebufferHandle = -1;
 				glGetIntegerv( GL_READ_FRAMEBUFFER_BINDING, &readFramebufferHandle );
+				ts3OpenGLHandleLastError();
 
 				const auto & fboImageSize = pRTBindingInfo.rtLayout->sharedImageSize;
 

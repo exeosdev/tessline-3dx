@@ -33,7 +33,6 @@ namespace ts3
 		for( auto & shaderDefinition : pShaderDefinitions )
 		{
 			auto shaderSource = shaderDefinition.sourceLoadCallback();
-			ts3DebugOutput( shaderSource.data() );
 			if( !shaderSource.empty() )
 			{
 				auto shaderObject = gpuapi::utils::createShaderFromSource(
