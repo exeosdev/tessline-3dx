@@ -624,9 +624,17 @@ namespace ts3::gpuapi
 				}
 				else
 				{
+					const auto & inputLayoutState = glcGraphicsPSO->getIAInputLayoutState();
+					const auto & currentVertexStreamDefinition = _dynamicIAVertexStreamDefinition;
 
+					const auto & vertexArrayObject = getTransientVertexArrayObject( inputLayoutState.mGLInputLayoutDefinition, currentVertexStreamDefinition );
+
+					applyGLCombinedInputAssemblerState(
+						vertexArrayObject,
+						inputLayoutState.mGLInputLayoutDefinition,
+						currentVertexStreamDefinition,
+						_currentDrawTopologyProperties );
 				}
-				const auto & currentIAVertexStreamDefinition = getCurrentIAVertexStreamDefinition();
 
 
 				executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_MASK_COMBINED_INPUT_ASSEMBLER );

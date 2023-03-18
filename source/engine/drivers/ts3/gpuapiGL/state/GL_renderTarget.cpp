@@ -133,17 +133,21 @@ namespace ts3::gpuapi
 							*( openglTexture->mGLTextureObject ),
 							textureReference.getRefSubResource() );
 
-					// colorBuffersArray[colorBuffersNum++] = GL_COLOR_ATTACHMENT0 + caIndex;
-					colorBuffersArray[caIndex] = GL_COLOR_ATTACHMENT0 + caIndex;
-				}
-				else
-				{
-					colorBuffersArray[caIndex] = GL_NONE;
+					colorBuffersArray[colorBuffersNum++] = GL_COLOR_ATTACHMENT0 + caIndex;
 				}
 			}
 
-			glDrawBuffers( colorBuffersNum, colorBuffersArray );
-			ts3OpenGLHandleLastError();
+			if( colorBuffersNum != 0 )
+			{
+				glDrawBuffers( colorBuffersNum, colorBuffersArray );
+				ts3OpenGLHandleLastError();
+			}
+			else
+			{
+				glDrawBuffer( GL_NONE );
+				ts3OpenGLHandleLastError();
+			}
+
 
 			if( pAttachmentMask.isSet( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT ) )
 			{

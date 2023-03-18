@@ -609,6 +609,7 @@ int main( int pArgc, const char ** pArgv )
 
 			gxDriverState.cmdContext->beginCommandSequence();
 
+			if( false )
 			{
 				const auto modelMatrix = math::mul(
 					math::translation<float>( 0, 0, 3.0f ),
@@ -645,7 +646,7 @@ int main( int pArgc, const char ** pArgv )
 				gxDriverState.cmdContext->endRenderPass();
 			}
 
-			if( false )
+			if( true )
 			{
 
 				cb0Data.modelMatrix = math::mul(
