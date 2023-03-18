@@ -120,13 +120,13 @@ namespace ts3::gpuapi
 		auto sysGLRenderContext = GLCommandSystem::createSysGLRenderContext( *openglGPUDevice, _targetSysGLSurface );
 		ts3DebugAssert( sysGLRenderContext );
 
-		if( !openglGPUDevice->isCompatibilityDevice() )
+		if( openglGPUDevice->isCompatibilityDevice() )
 		{
-			_mainCommandList = createGPUAPIObject<GLCommandListCore>( *this, ECommandListType::DirectGraphics, sysGLRenderContext );
+			_mainCommandList = createGPUAPIObject<GLCommandListCompat>( *this, ECommandListType::DirectGraphics, sysGLRenderContext );
 		}
 		else
 		{
-			_mainCommandList = createGPUAPIObject<GLCommandListCompat>( *this, ECommandListType::DirectGraphics, sysGLRenderContext );
+			_mainCommandList = createGPUAPIObject<GLCommandListCore>( *this, ECommandListType::DirectGraphics, sysGLRenderContext );
 		}
 
 		return true;

@@ -82,7 +82,7 @@ namespace ts3::gpuapi
 		{}
 
 	private:
-		GLGraphicsPipelineStateControllerCore _graphicsPipelineStateControllerCompat;
+		GLGraphicsPipelineStateControllerCompat _graphicsPipelineStateControllerCompat;
 	};
 
 } // namespace ts3::gpuapi

@@ -177,8 +177,10 @@ namespace ts3::gpuapi
 
 		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
 			pOutGLBindings.interleavedBindings = {};
+			pOutGLBindings.bindingType = EGLVertexBufferBindingType::Interleaved;
 		#else
 			pOutGLBindings.separateBindings = {};
+			pOutGLBindings.bindingType = EGLVertexBufferBindingType::Separate;
 		#endif
 
 			for( input_assembler_index_t streamIndex = 0; streamIndex < cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )

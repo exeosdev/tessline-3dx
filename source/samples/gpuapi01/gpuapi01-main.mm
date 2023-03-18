@@ -646,7 +646,6 @@ int main( int pArgc, const char ** pArgv )
 				gxDriverState.cmdContext->endRenderPass();
 			}
 
-			// if( false )
 			{
 
 				cb0Data.modelMatrix = math::mul(
