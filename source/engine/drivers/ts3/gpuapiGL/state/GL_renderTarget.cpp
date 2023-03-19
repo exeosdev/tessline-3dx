@@ -116,7 +116,6 @@ namespace ts3::gpuapi
 				return nullptr;
 			}
 
-			GLsizei colorBuffersNum = 0;
 			GLenum colorBuffersArray[cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM];
 
 			for( uint32 caIndex = 0; cxdefs::isRTColorAttachmentIndexValid( caIndex ); ++caIndex )
@@ -132,22 +131,8 @@ namespace ts3::gpuapi
 							caIndex,
 							*( openglTexture->mGLTextureObject ),
 							textureReference.getRefSubResource() );
-
-					colorBuffersArray[colorBuffersNum++] = GL_COLOR_ATTACHMENT0 + caIndex;
 				}
 			}
-
-			if( colorBuffersNum != 0 )
-			{
-				glDrawBuffers( colorBuffersNum, colorBuffersArray );
-				ts3OpenGLHandleLastError();
-			}
-			else
-			{
-				glDrawBuffer( GL_NONE );
-				ts3OpenGLHandleLastError();
-			}
-
 
 			if( pAttachmentMask.isSet( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT ) )
 			{
@@ -169,6 +154,12 @@ namespace ts3::gpuapi
 							*( openglTexture->mGLTextureObject ),
 							textureReference.getRefSubResource() );
 				}
+			}
+
+			if( !pAttachmentMask.isSetAnyOf( E_RT_ATTACHMENT_MASK_COLOR_ALL ) )
+			{
+				glDrawBuffer( GL_NONE );
+				ts3OpenGLHandleLastError();
 			}
 
 			if( !framebufferObject->checkStatus() )

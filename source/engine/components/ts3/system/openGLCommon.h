@@ -24,6 +24,8 @@
 #  include <GLES3/gl31.h>
 #endif
 
+#define TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS 1
+
 /// @def TS3_SYSTEM_GL_ENABLE_ERROR_CHECKS
 /// @brief Controls the GL error-checking macros. If TRUE, they are replaced with appropriate calls. Otherwise, all calls are no-ops.
 /// @see ts3OpenGLCheckLastResult

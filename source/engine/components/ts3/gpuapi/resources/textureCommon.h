@@ -77,6 +77,11 @@ namespace ts3::gpuapi
 				E_TEXTURE_BIND_FLAG_COMMON_TEXTURE_BIT |
 				E_GPU_RESOURCE_USAGE_FLAG_TRANSFER_TARGET_BIT,
 	};
+	
+	enum ETextureInitFlags : uint32
+	{
+		E_TEXTURE_INIT_FLAG_GENERATE_MIPMAPS_BIT = 0x01
+	};
 
 	/// @brief Represents all valid targets for texture resources. Corresponding E_TEXTURE_BIND_FLAGs are used as values.
 	enum class ETextureTarget : resource_flags_value_t
@@ -150,6 +155,8 @@ namespace ts3::gpuapi
 		// (arraySize=1) in order to prevent dynamic allocation of memory. In few cases where the engine
 		// is used for allocating huge number of small non-array textures, this turned out to be an issue.
 		TextureSubTextureInitDataDesc * subTextureInitDataBasePtr = nullptr;
+
+		Bitmask<ETextureInitFlags> textureInitFlags = E_TEXTURE_INIT_FLAG_GENERATE_MIPMAPS_BIT;
 
 		explicit operator bool() const
 		{

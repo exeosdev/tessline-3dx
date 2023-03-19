@@ -31,6 +31,14 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
+		if( ( pGLCreateInfo.dimensions.mipLevelsNum > 1 ) && pGLCreateInfo.openglInitDataDesc.textureInitFlags.isSet( E_TEXTURE_INIT_FLAG_GENERATE_MIPMAPS_BIT ) )
+		{
+			openglTextureObject->setAutoMipGeneration( true );
+
+			glGenerateMipmap( GL_TEXTURE_2D );
+			ts3OpenGLHandleLastError();
+		}
+
 		return openglTextureObject;
 	}
 
@@ -44,13 +52,32 @@ namespace ts3::gpuapi
 		glBindTexture( pGLCreateInfo.bindTarget, textureHandle );
 		ts3OpenGLHandleLastError();
 
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0 );
+		ts3OpenGLHandleLastError();
+
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, pGLCreateInfo.dimensions.mipLevelsNum - 1 );
+		ts3OpenGLHandleLastError();
+
 		GLTextureObjectHandle openglTextureObject{ new GLTextureObject( textureHandle, pGLCreateInfo ) };
 		if( !openglTextureObject->initializeCompat( pGLCreateInfo ) )
 		{
 			return nullptr;
 		}
 
+		if( ( pGLCreateInfo.dimensions.mipLevelsNum > 1 ) && pGLCreateInfo.openglInitDataDesc.textureInitFlags.isSet( E_TEXTURE_INIT_FLAG_GENERATE_MIPMAPS_BIT ) )
+		{
+			openglTextureObject->setAutoMipGeneration( true );
+
+			glGenerateMipmap( GL_TEXTURE_2D );
+			ts3OpenGLHandleLastError();
+		}
+
 		return openglTextureObject;
+	}
+
+	bool GLTextureObject::isAutoMipGenerationEnabled() const
+	{
+		return _autoMipGenerationStatus;
 	}
 
 	GLenum GLTextureObject::queryInternalFormat( GLenum pActiveBindTarget ) const
@@ -227,6 +254,11 @@ namespace ts3::gpuapi
 			pGLUploadDesc.openglInputDataDesc.openglPixelDataType,
 			pGLUploadDesc.openglInputDataDesc.pointer );
 		ts3OpenGLHandleLastError();
+	}
+
+	void GLTextureObject::setAutoMipGeneration( bool pEnable )
+	{
+		_autoMipGenerationStatus = pEnable;
 	}
 
 	bool GLTextureObject::initializeCore( const GLTextureCreateInfo & pGLCreateInfo )
@@ -458,7 +490,7 @@ namespace ts3::gpuapi
 			subDataUploadDesc.openglInputDataDesc.openglPixelDataLayout = pGLCreateInfo.openglInitDataDesc.openglPixelDataLayout;
 			subDataUploadDesc.openglInputDataDesc.openglPixelDataType = pGLCreateInfo.openglInitDataDesc.openglPixelDataType;
 
-			for( uint32 mipLevelIndex = 0; mipLevelIndex < pGLCreateInfo.dimensions.mipLevelsNum; ++mipLevelIndex )
+			for( uint32 mipLevelIndex = 0; mipLevelIndex < pGLCreateInfo.getInitMipLevelsNum(); ++mipLevelIndex )
 			{
 				const auto & mipLevelInitData = textureInitData.mipLevelInitDataArray[mipLevelIndex];
 
@@ -504,7 +536,7 @@ namespace ts3::gpuapi
 				const auto & textureInitData = pGLCreateInfo.openglInitDataDesc.subTextureInitDataPtr[arraySubTextureIndex];
 				subDataUploadDesc.textureSubRegion.uSubReg2DArray.offset.arrayIndex = textureInitData.subTextureIndex;
 
-				for( uint32 mipLevelIndex = 0; mipLevelIndex < pGLCreateInfo.dimensions.mipLevelsNum; ++mipLevelIndex )
+				for( uint32 mipLevelIndex = 0; mipLevelIndex < pGLCreateInfo.getInitMipLevelsNum(); ++mipLevelIndex )
 				{
 					const auto & mipLevelInitData = textureInitData.mipLevelInitDataArray[mipLevelIndex];
 
@@ -550,7 +582,7 @@ namespace ts3::gpuapi
 			subDataUploadDesc.openglInputDataDesc.openglPixelDataLayout = pGLCreateInfo.openglInitDataDesc.openglPixelDataLayout;
 			subDataUploadDesc.openglInputDataDesc.openglPixelDataType = pGLCreateInfo.openglInitDataDesc.openglPixelDataType;
 
-			for( uint32 mipLevelIndex = 0; mipLevelIndex < pGLCreateInfo.dimensions.mipLevelsNum; ++mipLevelIndex )
+			for( uint32 mipLevelIndex = 0; mipLevelIndex < pGLCreateInfo.getInitMipLevelsNum(); ++mipLevelIndex )
 			{
 				const auto & mipLevelInitData = textureInitData.mipLevelInitDataArray[mipLevelIndex];
 
@@ -598,7 +630,7 @@ namespace ts3::gpuapi
 				const auto & cubeMapInitData = pGLCreateInfo.openglInitDataDesc.subTextureInitDataPtr[cubeMapFaceIndex];
 				subDataUploadDesc.textureSubRegion.uSubRegCubeMap.offset.faceIndex = cubeMapInitData.subTextureIndex;
 
-				for( uint32 mipLevelIndex = 0; mipLevelIndex < pGLCreateInfo.dimensions.mipLevelsNum; ++mipLevelIndex )
+				for( uint32 mipLevelIndex = 0; mipLevelIndex < pGLCreateInfo.getInitMipLevelsNum(); ++mipLevelIndex )
 				{
 					const auto & mipLevelInitData = cubeMapInitData.mipLevelInitDataArray[mipLevelIndex];
 

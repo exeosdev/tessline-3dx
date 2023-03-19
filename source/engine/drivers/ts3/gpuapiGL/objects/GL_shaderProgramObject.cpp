@@ -44,7 +44,6 @@ namespace ts3::gpuapi
 		auto programObject = GLShaderProgramObject::create( GLShaderProgramType::Separable );
 		programObject->attachShader( pShader );
 		programObject->link();
-		programObject->validate();
 		programObject->detachShader( pShader );
 		return programObject;
 	}
@@ -55,7 +54,6 @@ namespace ts3::gpuapi
 		programObject->attachShader( pShader );
 		setProgramPreLinkBindings( *programObject, pLayoutMap );
 		programObject->link();
-		programObject->validate();
 		setProgramPostLinkBindings( *programObject, pLayoutMap );
 		programObject->detachShader( pShader );
 		return programObject;
@@ -78,15 +76,12 @@ namespace ts3::gpuapi
 
 	void GLShaderProgramObject::setProgramPostLinkBindings( GLShaderProgramObject & pProgram, const GLShaderDataLayoutMap & pLayoutMap )
 	{
-		glUseProgram( pProgram.mGLHandle );
-		ts3OpenGLHandleLastError();
-
 		for( const auto & samplerBinding : pLayoutMap.samplerBindings )
 		{
 			GLint samplerVariableLocation = glGetUniformLocation( pProgram.mGLHandle, samplerBinding.first.data() );
 			ts3OpenGLHandleLastError();
 
-			glUniform1i( samplerVariableLocation, samplerBinding.second );
+			glProgramUniform1i( pProgram.mGLHandle, samplerVariableLocation, samplerBinding.second );
 			ts3OpenGLHandleLastError();
 		}
 
@@ -98,9 +93,6 @@ namespace ts3::gpuapi
 			glUniformBlockBinding( pProgram.mGLHandle, blockIndex, uniformBlockBinding.second );
 			ts3OpenGLHandleLastError();
 		}
-
-		glUseProgram( 0u );
-		ts3OpenGLHandleLastError();
 	}
 
 	bool GLShaderProgramObject::release()
@@ -326,7 +318,7 @@ namespace ts3::gpuapi
 
 	size_t GLShaderProgramObject::getInfoLogLength() const
 	{
-		auto infoLogLength = queryParameter( GL_ATTACHED_SHADERS );
+		auto infoLogLength = queryParameter( GL_INFO_LOG_LENGTH );
 		return infoLogLength;
 	}
 

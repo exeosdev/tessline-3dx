@@ -33,7 +33,8 @@ namespace ts3::gpuapi
 		openglCreateInfo.dimensions = createInfo.dimensions;
 		openglCreateInfo.msaaLevel = createInfo.msaaLevel;
 		openglCreateInfo.internalFormat = atl::translateGLTextureInternalFormat( createInfo.pixelFormat );
-		openglCreateInfo.openglInitDataDesc.subTextureInitDataPtr = std::move( createInfo.initDataDesc.subTextureInitDataBasePtr );
+		openglCreateInfo.openglInitDataDesc.subTextureInitDataPtr = createInfo.initDataDesc.subTextureInitDataBasePtr;
+		openglCreateInfo.openglInitDataDesc.textureInitFlags = createInfo.initDataDesc.textureInitFlags;
 		auto textureInitDataBaseType = cxdefs::getTextureFormatBaseDataType( createInfo.pixelFormat );
 		openglCreateInfo.openglInitDataDesc.openglPixelDataLayout = atl::translateGLTexturePixelDataLayout( createInfo.pixelFormat );
 		openglCreateInfo.openglInitDataDesc.openglPixelDataType = atl::translateGLBaseDataType( textureInitDataBaseType );

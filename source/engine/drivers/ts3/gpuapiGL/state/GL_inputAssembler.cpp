@@ -382,6 +382,9 @@ namespace ts3::gpuapi
 					glEnableVertexAttribArray( attributeIndex );
 					ts3OpenGLHandleLastError();
 
+					glVertexAttribDivisor( attributeIndex, glcAttribute.instanceRate );
+					ts3OpenGLHandleLastError();
+
 					glVertexAttribPointer(
 						attributeIndex,
 						glcAttribute.componentsNum,

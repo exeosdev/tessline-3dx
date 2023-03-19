@@ -600,13 +600,6 @@ namespace ts3::gpuapi
 		{
 			const auto * glcGraphicsPSO = _currentCommonState.graphicsPSO->queryInterface<GLGraphicsPipelineStateObject>();
 
-			if( _stateUpdateMask.isSetAnyOf( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_SHADER_LINKAGE_BIT ) )
-			{
-				const auto * shaderLinkageState = glcGraphicsPSO->getGraphicsShaderLinkageState().queryInterface<GLGraphicsShaderLinkageImmutableStateCompat>();
-				applyGLShaderLinkageState( *shaderLinkageState );
-				executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_SHADER_LINKAGE_BIT );
-			}
-
 			if( _stateUpdateMask.isSetAnyOf( E_GRAPHICS_STATE_UPDATE_MASK_COMBINED_INPUT_ASSEMBLER ) )
 			{
 				if( !isIAVertexStreamStateDynamic() )
@@ -639,6 +632,14 @@ namespace ts3::gpuapi
 
 				executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_MASK_COMBINED_INPUT_ASSEMBLER );
 			}
+
+			if( _stateUpdateMask.isSetAnyOf( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_SHADER_LINKAGE_BIT ) )
+			{
+				const auto * shaderLinkageState = glcGraphicsPSO->getGraphicsShaderLinkageState().queryInterface<GLGraphicsShaderLinkageImmutableStateCompat>();
+				applyGLShaderLinkageState( *shaderLinkageState );
+				executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_SHADER_LINKAGE_BIT );
+			}
+
 		}
 
 		_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_MASK_COMMON_ALL | E_GRAPHICS_STATE_UPDATE_MASK_SEPARABLE_ALL );
