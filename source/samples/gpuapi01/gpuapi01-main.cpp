@@ -489,7 +489,7 @@ int main( int pArgc, const char ** pArgv )
 	ib.relativeOffset = 0;
 	ib.indexFormat = EIndexDataFormat::Uint32;
 
-    math::Vec3f cameraOriginPoint{ 0.0f, 1.0f,  -2.0f };
+    math::Vec3f cameraOriginPoint{ 0.0f, 2.0f,  -4.0f };
     math::Vec3f cameraTargetPoint{ 0.0f, 0.0f,  4.0f };
 
     ts3::CameraController cameraController;
@@ -576,18 +576,15 @@ int main( int pArgc, const char ** pArgv )
                 return true;
             });
 
-	math::Vec3f lightPosition{ -2.0f, 3.0f, -2.0f };
-	math::Vec3f lightTarget{ 2.0f, 0.0f,  5.0f };
-
-	auto ts3ViewLight = lookAtLH(
-		lightPosition,
-		lightTarget,
-		math::Vec3f{ 0.0f, 1.0f,  0.0f } );
+	math::Vec3f lightPosition{ 2.0f, 1.0f, 0.0f };
+	math::Vec3f lightTarget{ 0.0f, 0.0f,  4.0f };
 
 	shadowRenderer->createRendererResources();
 	shadowRenderer->setCSLightPosition( lightPosition );
 	shadowRenderer->setCSLightTarget( lightTarget );
 	shadowRenderer->setCSProjectionMatrixLightPerspectiveDefault();
+
+	uint32 viewAngle = 0;
 
     while( runApp )
     {
@@ -595,6 +592,12 @@ int main( int pArgc, const char ** pArgv )
         {
             continue;
         }
+
+		lightPosition.x = 3 * std::cos( ( float )( viewAngle * math::constants::cxFloatRad1Degree ) );
+		lightPosition.x = 3 * std::sin( ( float )( viewAngle * math::constants::cxFloatRad1Degree ) );
+		shadowRenderer->setCSLightPosition( lightPosition );
+
+		++viewAngle;
 
         try
         {
@@ -626,13 +629,15 @@ int main( int pArgc, const char ** pArgv )
 
 				CB0Data cb0Data;
 
-				gxDriverState.cmdContext->setIAVertexStreamState( vsds );
+				 auto & cmdContext = *gxDriverState.cmdContext;
+
+				cmdContext.setIAVertexStreamState( vsds );
 
 				shadowRenderer->beginRenderPass1Light( *gxDriverState.cmdContext );
 				{
-					gxDriverState.cmdContext->cmdSetShaderConstantBuffer( 10, *cbuffer0 );
+					cmdContext.cmdSetShaderConstantBuffer( 10, *cbuffer0 );
 
-					shadowRenderer->updateMatricesForLightPass();
+					shadowRenderer->updateMatricesForLightPass( cmdContext );
 
 					const auto & lightViewMatrix = shadowRenderer->getLightViewMatrix();
 					const auto & lightProjectionMatrix = shadowRenderer->getLightProjectionMatrix();
@@ -641,20 +646,20 @@ int main( int pArgc, const char ** pArgv )
 					cb0Data.projectionMatrix = lightProjectionMatrix;
 
 					cb0Data.modelMatrix = math::identity4<float>();
-					gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0Data );
-					gxDriverState.cmdContext->cmdDrawDirectIndexed( 6, 42 );
+					cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
+					cmdContext.cmdDrawDirectIndexed( 6, 42 );
 
 					cb0Data.modelMatrix = modelMatrix1;
-					gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0Data );
-					gxDriverState.cmdContext->cmdDrawDirectIndexed( VNUM, 0 );
+					cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
+					cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
 
 					cb0Data.modelMatrix = modelMatrix2;
-					gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0Data );
-					gxDriverState.cmdContext->cmdDrawDirectIndexed( VNUM, 0 );
-
+					cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
+					cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
+					
 					cb0Data.modelMatrix = modelMatrix3;
-					gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0Data );
-					gxDriverState.cmdContext->cmdDrawDirectIndexed( VNUM, 0 );
+					cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
+					cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
 				}
 				shadowRenderer->endRenderPass( *gxDriverState.cmdContext );
 
@@ -662,37 +667,35 @@ int main( int pArgc, const char ** pArgv )
 
 				shadowRenderer->beginRenderPass2Shadow( *gxDriverState.cmdContext );
 				{
-					gxDriverState.cmdContext->cmdSetViewport( vpDescScreen );
-					gxDriverState.cmdContext->cmdSetShaderConstantBuffer( 10, *cbuffer0 );
-					gxDriverState.cmdContext->cmdSetShaderTextureSampler( 70, *defaultSampler );
-					gxDriverState.cmdContext->cmdSetShaderTextureImage( 20, *tex0 );
+					cmdContext.cmdSetViewport( vpDescScreen );
+					cmdContext.cmdSetShaderConstantBuffer( 10, *cbuffer0 );
+					cmdContext.cmdSetShaderTextureSampler( 70, *defaultSampler );
+					cmdContext.cmdSetShaderTextureImage( 20, *tex0 );
 					{
+						shadowRenderer->updateMatricesForShadowPass( *gxDriverState.cmdContext );
+
 						cb0Data.viewMatrix = cameraViewMatrix;
 						cb0Data.projectionMatrix = cameraProjectionMatrix;
 
 						cb0Data.modelMatrix = math::identity4<float>();
-						shadowRenderer->updateMatricesForShadowPass( *gxDriverState.cmdContext, cb0Data.modelMatrix, cameraViewMatrix );
-						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0Data );
-						gxDriverState.cmdContext->cmdDrawDirectIndexed( 6, 42 );
+						cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
+						cmdContext.cmdDrawDirectIndexed( 6, 42 );
 
 						cb0Data.modelMatrix = modelMatrix1;
-						shadowRenderer->updateMatricesForShadowPass( *gxDriverState.cmdContext, cb0Data.modelMatrix, cameraViewMatrix );
-						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0Data );
-						gxDriverState.cmdContext->cmdDrawDirectIndexed( VNUM, 0 );
+						cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
+						cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
 
 						cb0Data.modelMatrix = modelMatrix2;
-						shadowRenderer->updateMatricesForShadowPass( *gxDriverState.cmdContext, cb0Data.modelMatrix, cameraViewMatrix );
-						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0Data );
-						gxDriverState.cmdContext->cmdDrawDirectIndexed( VNUM, 0 );
-
+						cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
+						cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
+						
 						cb0Data.modelMatrix = modelMatrix3;
-						shadowRenderer->updateMatricesForShadowPass( *gxDriverState.cmdContext, cb0Data.modelMatrix, cameraViewMatrix );
-						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0Data );
-						gxDriverState.cmdContext->cmdDrawDirectIndexed( VNUM, 0 );
+						cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
+						cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
 					}
 					gxDriverState.presentationLayer->invalidateRenderTarget( gxDriverState.cmdContext.get() );
 				}
-				gxDriverState.cmdContext->endRenderPass();
+				cmdContext.endRenderPass();
 
 				/*auto ts3ViewScreen = cameraController.computeViewMatrixLH();
 
@@ -814,7 +817,7 @@ int main( int pArgc, const char ** pArgv )
 
 			gxDriverState.presentationLayer->present();
 
-			std::this_thread::sleep_for( std::chrono::milliseconds( 16 ) );
+			std::this_thread::sleep_for( std::chrono::milliseconds( 33 ) );
         }
         catch( ... )
         {

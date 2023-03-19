@@ -13,10 +13,8 @@ namespace ts3
 
 	struct CBShadowData
 	{
-		math::Vec3f v3fObjectSpaceLightPos;
-		math::Vec3f v3fLightDiffuseColor;
-		math::Mat3f m3fNormal;
-		math::Mat4f m4fShadow;
+		math::Mat4f m4fLightSpaceMatrix;
+		math::Vec2f v2fShadowMapSize;
 	};
 
 	struct ShadowConfig
@@ -32,7 +30,6 @@ namespace ts3
 		{
 			math::Vec3f vLightPosition;
 			math::Vec3f vLightTarget;
-			math::Vec3f vLightDiffuseColor;
 			math::Mat4f mLightView;
 			math::Mat4f mLightProjection;
 			math::Mat4f mLightSpace;
@@ -81,16 +78,15 @@ namespace ts3
 			return _currentState.vLightPosition;
 		}
 
-		void setCSLightDiffuseColor( math::Vec3f pColor );
 		void setCSLightPosition( math::Vec3f pLightPosition );
 		void setCSLightTarget( math::Vec3f pLightTarget );
 
 		void setCSProjectionMatrixLightOrthoDefault();
 		void setCSProjectionMatrixLightPerspectiveDefault();
 
-		void updateMatricesForLightPass();
+		void updateMatricesForLightPass( gpuapi::CommandContext & pCommandContext );
 
-		void updateMatricesForShadowPass( gpuapi::CommandContext & pCommandContext , const math::Mat4f & pModelMatrix, const math::Mat4f & pViewMatrix );
+		void updateMatricesForShadowPass( gpuapi::CommandContext & pCommandContext );
 
 		void beginRenderPass1Light( gpuapi::CommandContext & pCommandContext );
 

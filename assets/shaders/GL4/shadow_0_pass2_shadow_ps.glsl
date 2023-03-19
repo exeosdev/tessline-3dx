@@ -1,16 +1,14 @@
 
 #version 430 core
 
-smooth in vec4 psColor;
-smooth in vec2 psTexCoord0;
-smooth in vec3 psEyeSpaceNormal;
-smooth in vec3 psEyeSpacePosition;
-smooth in vec4 psShadowCoords;
+in vec4 psColor;
+in vec2 psTexCoord0;
+in vec4 psLightSpacePosition;
 
 layout( location = 0 ) out vec4 outPixelColor;
 
 layout( binding = 0 ) uniform sampler2D uSampler0;
-layout( binding = 7 ) uniform sampler2DShadow uSamplerShadow;
+layout( binding = 7 ) uniform sampler2D uSamplerShadow;
 
 layout( std140, binding = 0 ) uniform CB0
 {
@@ -21,45 +19,47 @@ layout( std140, binding = 0 ) uniform CB0
 
 layout( std140, binding = 7 ) uniform CBShadow
 {
-	vec3 cblObjectSpaceLightPos;
-	vec3 cblLightDiffuseColor;
-	layout(row_major) mat3 cbsNormalMatrix;
-	layout(row_major) mat4 cbsShadowMatrix;
+	layout(row_major) mat4 cbsLightSpaceMatrix;
+	vec2 cbsShadowMapSize;
 };
 
-const float k0 = 1.0;
-const float k1 = 0.0;
-const float k2 = 0.0;
-
-void main()
+float calculateShadowfactor( vec4 pLightSpacePos )
 {
-	mat4 modelViewMatrix = cb0ViewMatrix * cb0ModelMatrix;
+	vec3 projCoords = pLightSpacePos.xyz / pLightSpacePos.w;
 
-	vec4 vEyeSpaceLightPosition = modelViewMatrix * vec4( cblObjectSpaceLightPos, 1.0f );
+	vec2 uvCoords;
+	uvCoords.x = 0.5 * projCoords.x + 0.5;
+	uvCoords.y = 0.5 * projCoords.y + 0.5;
 
-	vec3 L = ( vEyeSpaceLightPosition.xyz - psEyeSpacePosition );
+	float zValue = 0.5 * projCoords.z + 0.5;
+	float depth = texture( uSamplerShadow, uvCoords ).x;
 
-	float D = length( L );
+	const float depthBias = 0.0025;
 
-	L = normalize( L );
-	
-	float attenuationAmount = 1.0 / ( k0 + ( k1 * D ) + ( k2 * D * D ) );
-
-	float diffuse = max( 0, dot( psEyeSpaceNormal, L ) ) * attenuationAmount;
-
-	if( psShadowCoords.w > 1 ) 
+	if( depth + depthBias < zValue )
 	{
-		float shadow = textureProj( uSamplerShadow, psShadowCoords );
-		diffuse = mix( diffuse, diffuse * shadow, 0.5 ); 
-	}
-
-	if( psColor.a > 0.0f )
-	{
-		outPixelColor = psColor;
+		return 0.25f;
 	}
 	else
 	{
-		vec4 textureColor = texture( uSampler0, psTexCoord0 );
-		outPixelColor = diffuse * textureColor;
+		return 1.0f;
 	}
+}
+
+void main()
+{
+    vec3 textureColor0;
+	if( psColor.a > 0.0f )
+	{
+		textureColor0 = psColor.rgb;
+	}
+	else
+	{
+		textureColor0 = texture( uSampler0, psTexCoord0 ).rgb;
+	}
+
+	vec3 fixedLightColor = vec3( 1.0f );
+	float shadowFactor = calculateShadowfactor( psLightSpacePosition );
+
+	outPixelColor = vec4( shadowFactor * textureColor0 * fixedLightColor, 1.0 );
 }

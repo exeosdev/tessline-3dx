@@ -1,17 +1,17 @@
 
 #version 430 core
 
+layout( location = 0 ) in vec3 vPosition;
+layout( location = 1 ) in vec4 vColor;
+layout( location = 2 ) in vec3 vNormal;
+layout( location = 3 ) in vec2 vTexCoord0;
+
 layout( std140, binding = 0 ) uniform CB0
 {
 	layout(row_major) mat4 cb0ModelMatrix;
 	layout(row_major) mat4 cb0ViewMatrix;
 	layout(row_major) mat4 cb0ProjectionMatrix;
 };
-
-layout( location = 0 ) in vec3 vPosition;
-layout( location = 1 ) in vec4 vColor;
-layout( location = 2 ) in vec3 vNormal;
-layout( location = 3 ) in vec2 vTexCoord0;
 
 out gl_PerVertex
 {

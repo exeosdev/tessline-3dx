@@ -30,11 +30,6 @@ namespace ts3
 		initializePipelineStateObjects();
 	}
 
-	void ShadowRenderer::setCSLightDiffuseColor( math::Vec3f pColor )
-	{
-		_currentState.vLightDiffuseColor = pColor;
-	}
-
 	void ShadowRenderer::setCSLightPosition( math::Vec3f pLightPosition )
 	{
 		_currentState.vLightPosition = pLightPosition;
@@ -52,28 +47,38 @@ namespace ts3
 
 	void ShadowRenderer::setCSProjectionMatrixLightPerspectiveDefault()
 	{
-		_currentState.mLightProjection = math::perspectiveAspectLH( math::constants::cxFloatRad60Degree, 1.0f, 1.0f, 16.0f );
+		_currentState.mLightProjection = math::perspectiveAspectLH( math::constants::cxFloatRad60Degree, 1.0f, 1.0f, 64.0f );
 	}
 
-	void ShadowRenderer::updateMatricesForLightPass()
-	{
-		_currentState.mLightView = math::lookAtLH( _currentState.vLightPosition, _currentState.vLightTarget, { 0.0f, 1.0f, 0.0f } );
-		_currentState.mLightSpace = math::mul( _currentState.mLightProjection, _currentState.mLightView );
-	}
-
-	void ShadowRenderer::updateMatricesForShadowPass( gpuapi::CommandContext & pCommandContext , const math::Mat4f & pModelMatrix, const math::Mat4f & pViewMatrix )
+	void ShadowRenderer::updateMatricesForLightPass( gpuapi::CommandContext & pCommandContext )
 	{
 		using namespace ts3::gpuapi;
 
 		ts3DebugAssert( pCommandContext.checkFeatureSupport( E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DIRECT_GRAPHICS ) );
 		auto * directGraphicsContext = pCommandContext.queryInterface<CommandContextDirectGraphics>();
 
-		const auto modelViewMatrix = math::mul( pViewMatrix, pModelMatrix );
+		_currentState.mLightView = math::lookAtLH( _currentState.vLightPosition, _currentState.vLightTarget, { 0.0f, 1.0f, 0.0f } );
+		_currentState.mLightSpace = math::mul( _currentState.mLightProjection, _currentState.mLightView );
 
 		CBShadowData cbShadowData;
-		cbShadowData.v3fObjectSpaceLightPos = getLightPosition();
-		cbShadowData.m4fShadow = math::mul( _currentState.mLightProjection, _currentState.mLightView );
-		cbShadowData.m3fNormal = math::inverseTranspose( math::matrixTrim3( modelViewMatrix ) );
+		cbShadowData.m4fLightSpaceMatrix = _currentState.mLightSpace;
+		cbShadowData.v2fShadowMapSize.x = _shadowConfig.shadowMapSize.width;
+		cbShadowData.v2fShadowMapSize.y = _shadowConfig.shadowMapSize.height;
+
+		directGraphicsContext->updateBufferDataUpload( *_resources.constantBuffer, cbShadowData );
+	}
+
+	void ShadowRenderer::updateMatricesForShadowPass( gpuapi::CommandContext & pCommandContext )
+	{
+		using namespace ts3::gpuapi;
+
+		ts3DebugAssert( pCommandContext.checkFeatureSupport( E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DIRECT_GRAPHICS ) );
+		auto * directGraphicsContext = pCommandContext.queryInterface<CommandContextDirectGraphics>();
+
+		CBShadowData cbShadowData;
+		cbShadowData.m4fLightSpaceMatrix = _currentState.mLightSpace;
+		cbShadowData.v2fShadowMapSize.x = _shadowConfig.shadowMapSize.width;
+		cbShadowData.v2fShadowMapSize.y = _shadowConfig.shadowMapSize.height;
 
 		directGraphicsContext->updateBufferDataUpload( *_resources.constantBuffer, cbShadowData );
 	}
@@ -117,13 +122,13 @@ namespace ts3
 		viewportDescLight.depthRange.zNear = 0.0f;
 		viewportDescLight.depthRange.zFar = 1.0f;
 
-		directGraphicsContext->setGraphicsPipelineStateObject( *( _gpuAPIState.psoPass2Shadow ) );
+		directGraphicsContext->setGraphicsPipelineStateObject( *_gpuAPIState.psoPass2Shadow );
 
-		directGraphicsContext->beginRenderPass( *( _gpuAPIState.renderPass2Shadow ), 0 );
+		directGraphicsContext->beginRenderPass( *_gpuAPIState.renderPass2Shadow, 0 );
 
-		directGraphicsContext->cmdSetShaderConstantBuffer( 17, *( _resources.constantBuffer ) );
-		directGraphicsContext->cmdSetShaderTextureImage( 27, *( _resources.shadowMapTexture ) );
-		directGraphicsContext->cmdSetShaderTextureSampler( 77, *( _gpuAPIState.samplerPass2Shadow ) );
+		directGraphicsContext->cmdSetShaderConstantBuffer( 17, *_resources.constantBuffer );
+		directGraphicsContext->cmdSetShaderTextureImage( 27, *_resources.shadowMapTexture );
+		directGraphicsContext->cmdSetShaderTextureSampler( 77, *_gpuAPIState.samplerPass2Shadow );
 	}
 
 	void ShadowRenderer::endRenderPass( gpuapi::CommandContext & pCommandContext )

@@ -6,13 +6,6 @@ layout( location = 1 ) in vec4 vColor;
 layout( location = 2 ) in vec3 vNormal;
 layout( location = 3 ) in vec2 vTexCoord0;
 
-out gl_PerVertex
-{
-	vec4  gl_Position;
-	float gl_PointSize;
-	float gl_ClipDistance[];
-};
-
 layout( std140, binding = 0 ) uniform CB0
 {
 	layout(row_major) mat4 cb0ModelMatrix;
@@ -22,30 +15,29 @@ layout( std140, binding = 0 ) uniform CB0
 
 layout( std140, binding = 7 ) uniform CBShadow
 {
-	vec3 cblObjectSpaceLightPos;
-	vec3 cblLightDiffuseColor;
-	layout(row_major) mat3 cbsNormalMatrix;
-	layout(row_major) mat4 cbsShadowMatrix;
+	layout(row_major) mat4 cbsLightSpaceMatrix;
+	vec2 cbsShadowMapSize;
 };
 
-smooth out vec4 psColor;
-smooth out vec2 psTexCoord0;
-smooth out vec3 psEyeSpaceNormal;
-smooth out vec3 psEyeSpacePosition;
-smooth out vec4 psShadowCoords;
+out gl_PerVertex
+{
+	vec4  gl_Position;
+	float gl_PointSize;
+	float gl_ClipDistance[];
+};
+
+out vec4 psColor;
+out vec2 psTexCoord0;
+out vec4 psLightSpacePosition;
 
 void main()
 {
-	mat4 modelViewMatrix = cb0ViewMatrix * cb0ModelMatrix;
-	
+    const vec4 worldPosition = cb0ModelMatrix * vec4( vPosition, 1.0 );
+	const vec4 lightSpacePosition = cbsLightSpaceMatrix * vec4( worldPosition.xyz, 1.0f );
+
 	psColor = vColor;
 	psTexCoord0 = vTexCoord0;
+	psLightSpacePosition = lightSpacePosition;
 
-	psEyeSpacePosition = ( modelViewMatrix * vec4( vPosition, 1.0f ) ).xyz; 
-
-	psEyeSpaceNormal = cbsNormalMatrix * vNormal;
-
-	psShadowCoords = cbsShadowMatrix * ( cb0ModelMatrix * vec4( vPosition, 1.0f ) );
-
-	gl_Position = cb0ProjectionMatrix * cb0ViewMatrix * cb0ModelMatrix * vec4( vPosition , 1.0 );
+	gl_Position = cb0ProjectionMatrix * cb0ViewMatrix  * worldPosition;
 }

@@ -10,6 +10,12 @@ layout( std140, binding = 0 ) uniform CB0
 	layout(row_major) mat4 cb0ProjectionMatrix;
 };
 
+layout( std140, binding = 7 ) uniform CBShadow
+{
+	layout(row_major) mat4 cbsLightSpaceMatrix;
+	vec2 cbsShadowMapSize;
+};
+
 out gl_PerVertex
 {
 	vec4  gl_Position;
