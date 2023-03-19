@@ -38,9 +38,7 @@ namespace ts3::system
 	
 	AssetLoaderHandle Win32SysContext::createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo )
 	{
-		return platform::createFileAssetLoader( getHandle<Win32SysContext>(),
-		                                        pCreateInfo.nativeParams->fileManager,
-		                                        pCreateInfo.nativeParams->relativeAssetRootDir );
+		return platform::createFileAssetLoader( getHandle<Win32SysContext>(), *pCreateInfo.nativeParams );
 	}
 
 	DisplayManagerHandle Win32SysContext::createDisplayManager()

@@ -36,9 +36,7 @@ namespace ts3::system
 
 	AssetLoaderHandle X11SysContext::createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo )
 	{
-		return platform::createFileAssetLoader( getHandle<X11SysContext>(),
-		                                        pCreateInfo.nativeParams->fileManager,
-		                                        pCreateInfo.nativeParams->relativeAssetRootDir );
+		return platform::createFileAssetLoader( getHandle<X11SysContext>(), *pCreateInfo.nativeParams );
 	}
 
 	DisplayManagerHandle X11SysContext::createDisplayManager()

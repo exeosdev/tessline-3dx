@@ -40,7 +40,7 @@ namespace ts3::system
     AssetLoaderHandle OSXSysContext::createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo )
     {
 		ts3DebugAssert( pCreateInfo.nativeParams );
-        return platform::createFileAssetLoader( getHandle<SysContext>(), *( pCreateInfo.nativeParams ) );
+        return platform::createFileAssetLoader( getHandle<SysContext>(), *pCreateInfo.nativeParams );
     }
 
     DisplayManagerHandle OSXSysContext::createDisplayManager()

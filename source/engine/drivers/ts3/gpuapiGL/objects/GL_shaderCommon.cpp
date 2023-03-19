@@ -109,8 +109,6 @@ namespace ts3::gpuapi
 			versionStr.append( 1, '0' );
 			pShaderSource = std::regex_replace( pShaderSource, cvRegexUtilVersion, versionStr );
 
-			ts3DebugOutput( pShaderSource.c_str() );
-
 			return !pOutputLayoutMap.empty();
 		}
 
