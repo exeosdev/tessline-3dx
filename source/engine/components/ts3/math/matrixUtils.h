@@ -122,7 +122,7 @@ namespace ts3::math
 			- pMatrix[0][1] * ( pMatrix[1][0] * pMatrix[2][2] - pMatrix[1][2] * pMatrix[2][0] )
 			+ pMatrix[0][2] * ( pMatrix[1][0] * pMatrix[2][1] - pMatrix[1][1] * pMatrix[2][0] );
 
-		return Matrix2x2<TVal> {
+		return Matrix3x3<TVal> {
 			( + ( pMatrix[1][1] * pMatrix[2][2] - pMatrix[2][1] * pMatrix[1][2] ) / det ),
 			( - ( pMatrix[1][0] * pMatrix[2][2] - pMatrix[2][0] * pMatrix[1][2] ) / det ),
 			( + ( pMatrix[1][0] * pMatrix[2][1] - pMatrix[2][0] * pMatrix[1][1] ) / det ),

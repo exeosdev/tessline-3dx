@@ -58,6 +58,12 @@ namespace ts3::gpuapi
 		return GLRenderPassConfigurationImmutableState::createInstance( mGLGPUDevice, pConfiguration );
 	}
 
+	RenderTargetBindingImmutableStateHandle GLPipelineImmutableStateFactory::createScreenRenderTargetBindingState(
+		const RenderTargetLayout & pRenderTargetLayout )
+	{
+		return GLRenderTargetBindingImmutableState::createForScreen( mGLGPUDevice, pRenderTargetLayout );
+	}
+
 
 	GLPipelineImmutableStateFactoryCore::GLPipelineImmutableStateFactoryCore( GLGPUDevice & pGPUDevice )
 	: GLPipelineImmutableStateFactory( pGPUDevice )

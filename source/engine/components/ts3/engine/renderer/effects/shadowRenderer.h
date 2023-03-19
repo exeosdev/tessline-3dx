@@ -11,6 +11,14 @@
 namespace ts3
 {
 
+	struct CBShadowData
+	{
+		math::Vec3f v3fObjectSpaceLightPos;
+		math::Vec3f v3fLightDiffuseColor;
+		math::Mat3f m3fNormal;
+		math::Mat4f m4fShadow;
+	};
+
 	struct ShadowConfig
 	{
 		gpuapi::TextureSize2D screenSize;
@@ -20,35 +28,14 @@ namespace ts3
 	class ShadowRenderer
 	{
 	public:
-		struct Pass1LightConstantBufferData
-		{
-			math::Vec3f v3fObjectSpaceLightPos;
-			math::Vec3f v3fLightDiffuseColor;
-			math::Mat4f m4fModel;
-			math::Mat4f m4fSpace;
-		};
-
-		struct Pass2ShadowConstantBufferData
-		{
-			math::Vec3f v3fObjectSpaceLightPos;
-			math::Vec3f v3fLightDiffuseColor;
-
-			math::Mat4f m4fModel;
-			math::Mat4f m4fModelView;
-			math::Mat4f m4fModelViewProjection;
-			math::Mat3f m4fNormal;
-			math::Mat4f m4fShadow;
-		};
-
 		struct CurrentState
 		{
 			math::Vec3f vLightPosition;
 			math::Vec3f vLightTarget;
 			math::Vec3f vLightDiffuseColor;
-			math::Mat4f mModel;
-			math::Mat4f mView;
-			math::Mat4f mProjection;
-			math::Mat4f mSpace;
+			math::Mat4f mLightView;
+			math::Mat4f mLightProjection;
+			math::Mat4f mLightSpace;
 		};
 
 		struct GpuAPIState
@@ -74,26 +61,40 @@ namespace ts3
 
 		virtual void createRendererResources();
 
+		const math::Mat4f & getLightProjectionMatrix() const
+		{
+			return _currentState.mLightProjection;
+		}
+
+		const math::Mat4f & getLightViewMatrix() const
+		{
+			return _currentState.mLightView;
+		}
+
+		const math::Mat4f & getLightSpaceMatrix() const
+		{
+			return _currentState.mLightSpace;
+		}
+
+		const math::Vec3f & getLightPosition() const
+		{
+			return _currentState.vLightPosition;
+		}
+
 		void setCSLightDiffuseColor( math::Vec3f pColor );
 		void setCSLightPosition( math::Vec3f pLightPosition );
 		void setCSLightTarget( math::Vec3f pLightTarget );
 
-		void setCSProjectionMatrix( math::Mat4f pProjectionMatrix );
 		void setCSProjectionMatrixLightOrthoDefault();
 		void setCSProjectionMatrixLightPerspectiveDefault();
 
-		void setCSModelMatrix( math::Mat4f pModelMatrix );
-		void setCSViewMatrix( math::Mat4f pViewMatrix );
-
 		void updateMatricesForLightPass();
 
-		void updateMatricesForShadowPass();
+		void updateMatricesForShadowPass( gpuapi::CommandContext & pCommandContext , const math::Mat4f & pModelMatrix, const math::Mat4f & pViewMatrix );
 
 		void beginRenderPass1Light( gpuapi::CommandContext & pCommandContext );
 
-		void beginRenderPass2Shadow(
-				gpuapi::CommandContext & pCommandContext,
-				const gpuapi::RenderTargetBindingDynamicState & pRenderTargetBinding );
+		void beginRenderPass2Shadow( gpuapi::CommandContext & pCommandContext );
 
 		void endRenderPass( gpuapi::CommandContext & pCommandContext );
 

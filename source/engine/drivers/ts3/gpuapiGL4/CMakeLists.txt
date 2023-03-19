@@ -10,6 +10,13 @@ set( TS3_DRIVER_GPUAPI_GL4_SRC_FILES
         "GL4_gpuDriver.cpp"
         "GL4_gpuDriverAPI.h"
         "GL4_gpuDriverAPI.cpp"
+
+		"../../../../../assets/shaders/GL4/default_passthrough_vs.glsl"
+		"../../../../../assets/shaders/GL4/default_passthrough_ps.glsl"
+		"../../../../../assets/shaders/GL4/shadow_0_pass1_light_vs.glsl"
+		"../../../../../assets/shaders/GL4/shadow_0_pass1_light_ps.glsl"
+		"../../../../../assets/shaders/GL4/shadow_0_pass2_shadow_vs.glsl"
+		"../../../../../assets/shaders/GL4/shadow_0_pass2_shadow_ps.glsl"
         )
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )

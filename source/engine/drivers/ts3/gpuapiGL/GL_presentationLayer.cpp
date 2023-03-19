@@ -2,6 +2,7 @@
 #include "GL_presentationLayer.h"
 #include "GL_commandList.h"
 #include "GL_gpuDevice.h"
+#include <ts3/gpuapi/commandContext.h>
 
 namespace ts3::gpuapi
 {
@@ -80,14 +81,28 @@ namespace ts3::gpuapi
 		auto sysGLSurface = createSysGLSurface( pDevice.mSysGLDriver, pCreateInfo );
 		ts3DebugAssert( sysGLSurface );
 
+		const auto surfaceVisualConfig = sysGLSurface->queryVisualConfig();
+		const auto screenRTLayout = smutil::translateSystemVisualConfigToRenderTargetLayout( surfaceVisualConfig );
+
 		auto presentationLayer = createGPUAPIObject<GLScreenPresentationLayer>( pDevice, sysGLSurface );
+		auto renderTargetState = pDevice.createScreenRenderTargetBindingState( screenRTLayout );
+
+		presentationLayer->setScreenRenderTargetBindingState( renderTargetState );
 
 		return presentationLayer;
 	}
 
 	void GLScreenPresentationLayer::bindRenderTarget( CommandContext * pCmdContext )
 	{
+		ts3DebugAssert( _screenRenderTargetBindingState );
+
+		auto * directGraphicsContext = pCmdContext->queryInterface<CommandContextDirectGraphics>();
+		directGraphicsContext->setRenderTargetBindingState( *_screenRenderTargetBindingState );
+
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+		ts3OpenGLHandleLastError();
+
+		glDrawBuffer( GL_BACK );
 		ts3OpenGLHandleLastError();
 	}
 
@@ -112,6 +127,11 @@ namespace ts3::gpuapi
 	ts3::math::Vec2u32 GLScreenPresentationLayer::queryRenderTargetSize() const
 	{
 		return mSysGLDisplaySurface->queryRenderAreaSize();
+	}
+
+	void GLScreenPresentationLayer::setScreenRenderTargetBindingState( RenderTargetBindingImmutableStateHandle pRenderTargetState )
+	{
+		_screenRenderTargetBindingState = pRenderTargetState;
 	}
 
 } // namespace ts3::gpuapi

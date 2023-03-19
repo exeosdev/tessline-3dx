@@ -19,22 +19,23 @@ namespace ts3::gpuapi
 		glGenFramebuffers( 1, &framebufferHandle );
 		ts3OpenGLHandleLastError();
 
-		glBindFramebuffer( GL_FRAMEBUFFER, framebufferHandle );
-		ts3OpenGLHandleLastError();
-
 		GLFramebufferObjectHandle openglFramebufferObject{ new GLFramebufferObject( framebufferHandle ) };
-		if( !openglFramebufferObject->initialize() )
-		{
-			return nullptr;
-		}
 
 		return openglFramebufferObject;
 	}
 
+	GLFramebufferObjectHandle GLFramebufferObject::createForDefaultFramebuffer()
+	{
+		return GLFramebufferObjectHandle{ new GLFramebufferObject( 0u ) };
+	}
+
 	bool GLFramebufferObject::release()
 	{
-		glDeleteFramebuffers( 1, &mGLHandle );
-		ts3OpenGLHandleLastError();
+		if( mGLHandle != 0 )
+		{
+			glDeleteFramebuffers( 1, &mGLHandle );
+			ts3OpenGLHandleLastError();
+		}
 
 		return true;
 	}
@@ -246,11 +247,6 @@ namespace ts3::gpuapi
 			return false;
 		}
 
-		return true;
-	}
-
-	bool GLFramebufferObject::initialize()
-	{
 		return true;
 	}
 

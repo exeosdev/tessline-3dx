@@ -48,9 +48,9 @@ namespace ts3::gpuapi
 
 		static GLFramebufferObjectHandle create();
 
-	private:
-		bool initialize();
+		static GLFramebufferObjectHandle createForDefaultFramebuffer();
 
+	private:
 		GLenum checkActiveBindTarget( GLenum pBindTarget ) const;
 	};
 

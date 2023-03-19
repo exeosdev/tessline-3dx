@@ -48,8 +48,12 @@ namespace ts3::gpuapi
 		TS3_ATTR_NO_DISCARD GLRenderTargetBindingInfo getGLRenderTargetBindingInfo() const;
 
 		static GpaHandle<GLRenderTargetBindingImmutableState> createInstance(
-				GLGPUDevice & pGPUDevice,
-				const RenderTargetBindingDefinition & pBindingDefinition );
+			GLGPUDevice & pGPUDevice,
+			const RenderTargetBindingDefinition & pBindingDefinition );
+
+		static GpaHandle<GLRenderTargetBindingImmutableState> createForScreen(
+			GLGPUDevice & pGPUDevice,
+			const RenderTargetLayout & pRenderTargetLayout );
 	};
 
 	class GLRenderPassConfigurationImmutableState : public RenderPassConfigurationImmutableState
@@ -81,6 +85,8 @@ namespace ts3::gpuapi
 		TS3_ATTR_NO_DISCARD GLFramebufferObjectHandle createFramebufferObject(
 				const RenderTargetBindingDefinition & pBindingDefinition,
 				Bitmask<ERTAttachmentFlags> pAttachmentMask );
+
+		TS3_ATTR_NO_DISCARD RenderTargetLayout translateSystemVisualConfigToRenderTargetLayout( const system::VisualConfig & pSysVisualConfig );
 
 		void clearRenderPassFramebuffer( const RenderPassConfiguration & pRenderPassConfiguration );
 

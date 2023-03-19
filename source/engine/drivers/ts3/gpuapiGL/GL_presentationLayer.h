@@ -6,6 +6,7 @@
 
 #include "GL_prerequisites.h"
 #include <ts3/gpuapi/presentationLayer.h>
+#include <ts3/gpuapi/state/commonGPUStateDefs.h>
 
 namespace ts3::gpuapi
 {
@@ -32,6 +33,8 @@ namespace ts3::gpuapi
 
 	class GLScreenPresentationLayer final : public GLPresentationLayer
 	{
+		friend GLGPUDevice;
+
 	public:
 	    GLScreenPresentationLayer( GLGPUDevice & pGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface );
 		virtual ~GLScreenPresentationLayer();
@@ -50,6 +53,12 @@ namespace ts3::gpuapi
 
 		/// @brief Creates new swap chain using provided create params.
 		static GLScreenPresentationLayerHandle create( GLGPUDevice & pDevice, const GLPresentationLayerCreateInfo & pCreateInfo );
+
+	private:
+		void setScreenRenderTargetBindingState( RenderTargetBindingImmutableStateHandle pRenderTargetState );
+
+	private:
+		RenderTargetBindingImmutableStateHandle _screenRenderTargetBindingState;
 	};
 
 } // namespace ts3::gpuapi

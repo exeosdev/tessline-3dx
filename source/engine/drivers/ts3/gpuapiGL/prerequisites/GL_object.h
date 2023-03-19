@@ -52,9 +52,6 @@ namespace ts3::gpuapi
 		virtual bool validateHandle() const;
 
 		bool checkHandle() const;
-
-	protected:
-		void invalidateHandle();
 	};
 
 	inline bool GLObject::checkHandle() const

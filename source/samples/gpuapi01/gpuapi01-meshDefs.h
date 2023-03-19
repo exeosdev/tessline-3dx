@@ -5,9 +5,14 @@
 #include <ts3/math/vector.h>
 #include <ts3/math/color.h>
 
+#define V3( pVal ) ts3::math::Vec3f{ pVal, pVal, pVal }
+#define V4( pVal ) ts3::math::Vec4f{ pVal, pVal, pVal, pVal }
+#define VCOL() ts3::math::colorVector(ts3::math::colors::cxColorBlueFacebookLight)
+
 struct VertexPNT0
 {
 	ts3::math::Vec3f position;
+	ts3::math::Vec4f color;
 	ts3::math::Vec3f normal;
 	ts3::math::Vec2f texCoord0;
 };
@@ -15,48 +20,56 @@ struct VertexPNT0
 inline const VertexPNT0 cvMeshTexUnitCubeVertexData[] =
 {
 	// Front face
-	VertexPNT0 { ts3::math::Vec3f{ -0.5f, -0.5f, -0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  0.5f, -0.5f, -0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  0.5f,  0.5f, -0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 0.0f } },
-	VertexPNT0 { ts3::math::Vec3f{ -0.5f,  0.5f, -0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -0.5f, -0.5f, -0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  0.5f, -0.5f, -0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  0.5f,  0.5f, -0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -0.5f,  0.5f, -0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
 
 	// Right face
-	VertexPNT0 { ts3::math::Vec3f{  0.5f, -0.5f, -0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  0.5f, -0.5f,  0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  0.5f,  0.5f,  0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 0.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  0.5f,  0.5f, -0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  0.5f, -0.5f, -0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  0.5f, -0.5f,  0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  0.5f,  0.5f,  0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  0.5f,  0.5f, -0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
 
 	// Back face
-	VertexPNT0 { ts3::math::Vec3f{  0.5f, -0.5f, 0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{ -0.5f, -0.5f, 0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{ -0.5f,  0.5f, 0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 0.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  0.5f,  0.5f, 0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  0.5f, -0.5f, 0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -0.5f, -0.5f, 0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -0.5f,  0.5f, 0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  0.5f,  0.5f, 0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
 
 	// Left face
-	VertexPNT0 { ts3::math::Vec3f{ -0.5f, -0.5f,  0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{ -0.5f, -0.5f, -0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{ -0.5f,  0.5f, -0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 0.0f } },
-	VertexPNT0 { ts3::math::Vec3f{ -0.5f,  0.5f,  0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -0.5f, -0.5f,  0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -0.5f, -0.5f, -0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -0.5f,  0.5f, -0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -0.5f,  0.5f,  0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
 
 	// Top face
-	VertexPNT0 { ts3::math::Vec3f{ -0.5f,  0.5f, -0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  0.5f,  0.5f, -0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  0.5f,  0.5f,  0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 0.0f } },
-	VertexPNT0 { ts3::math::Vec3f{ -0.5f,  0.5f,  0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -0.5f,  0.5f, -0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  0.5f,  0.5f, -0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  0.5f,  0.5f,  0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -0.5f,  0.5f,  0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
 
 	// Bottom face
-	VertexPNT0 { ts3::math::Vec3f{ -0.5f, -0.5f,  0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  0.5f, -0.5f,  0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  0.5f, -0.5f, -0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 0.0f } },
-	VertexPNT0 { ts3::math::Vec3f{ -0.5f, -0.5f, -0.5f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -0.5f, -0.5f,  0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  0.5f, -0.5f,  0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  0.5f, -0.5f, -0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -0.5f, -0.5f, -0.5f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Render rectangle
-	VertexPNT0 { ts3::math::Vec3f{ -1.92f, -1.08f,  0.0f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 0.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  1.92f, -1.08f,  0.0f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 0.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  1.92f,  1.08f,  0.0f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 1.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{ -1.92f,  1.08f,  0.0f }, ts3::math::Vec3f{}, ts3::math::Vec2f{ 0.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -1.92f, -1.08f,  0.0f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  1.92f, -1.08f,  0.0f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  1.92f,  1.08f,  0.0f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -1.92f,  1.08f,  0.0f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 1.0f } },
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// Plane rectangle
+	VertexPNT0 { ts3::math::Vec3f{ -8.0f, -1.0f,  -2.0f }, VCOL(), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  8.0f, -1.0f,  -2.0f }, VCOL(), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  8.0f, -1.0f,   8.0f }, VCOL(), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -8.0f, -1.0f,   8.0f }, VCOL(), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
 };
 
 inline const ts3::math::Vec3f cvMeshTexUnitCubeNormals[] =
@@ -79,7 +92,9 @@ inline const uint32 cvMeshTexUnitCubeIndexData[] =
 	16, 17, 18, 18, 19, 16,
 	20, 21, 22, 22, 23, 20,
 	///////////////////////
-	24, 25, 26, 26, 27, 24
+	24, 25, 26, 26, 27, 24,
+	///////////////////////
+	28, 29, 30, 30, 31, 28
 };
 
 std::vector<VertexPNT0> generateVertexPNT0Data()

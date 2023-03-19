@@ -2,7 +2,7 @@
 #ifndef __TS3_MATH_COLOR_H__
 #define __TS3_MATH_COLOR_H__
 
-#include "prerequisites.h"
+#include "vector.h"
 #include <ts3/stdext/staticLimits.h>
 
 #if( TS3_PCL_COMPILER & TS3_PCL_COMPILER_CLANG )
@@ -124,6 +124,17 @@ namespace ts3::math
 	inline bool operator!=( const RGBAColorNorm<TReal> & pLhs, const RGBAColorNorm<TReal> & pRhs )
 	{
 		return ( pLhs.fpRed != pRhs.fpRed ) || ( pLhs.fpGreen != pRhs.fpGreen ) || ( pLhs.fpBlue != pRhs.fpBlue ) || ( pLhs.fpAlpha != pRhs.fpAlpha );
+	}
+
+	template <typename TReal>
+	inline Vec4f colorVector( const RGBAColorNorm<TReal> & pColor )
+	{
+		return { pColor.fpRed, pColor.fpGreen, pColor.fpBlue, pColor.fpAlpha };
+	}
+
+	inline Vec4f colorVector( const RGBAColorU8 & pColor )
+	{
+		return colorVector( RGBAColorR32Norm( pColor ) );
 	}
 
 	RGBAColorU8 generateRandomColor();

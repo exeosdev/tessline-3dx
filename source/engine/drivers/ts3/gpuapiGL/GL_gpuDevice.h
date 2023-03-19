@@ -47,11 +47,13 @@ namespace ts3::gpuapi
 
 		GLDebugOutput * getDebugOutputInterface() const;
 
-		bool initializeGLDebugOutput();
+		RenderTargetBindingImmutableStateHandle createScreenRenderTargetBindingState( const RenderTargetLayout & pRenderTargetLayout );
 
 		virtual void waitForCommandSync( CommandSync & pCommandSync ) override;
 
 	protected:
+		bool initializeGLDebugOutput();
+
 		virtual void initializeCommandSystem() override;
 
 	private:

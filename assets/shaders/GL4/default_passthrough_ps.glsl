@@ -1,7 +1,8 @@
 
 #version 430 core
 
-in vec2 psTexCoord0;
+smooth in vec4 psColor;
+smooth in vec2 psTexCoord0;
 
 layout( binding = 0 ) uniform sampler2D uSampler0;
 

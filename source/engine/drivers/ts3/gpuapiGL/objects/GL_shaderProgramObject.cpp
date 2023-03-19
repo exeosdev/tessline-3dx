@@ -162,7 +162,7 @@ namespace ts3::gpuapi
 		if( linkStatus == GL_FALSE )
 		{
 			auto infoLog = getInfoLog();
-			// print info log
+			ts3DebugOutput( infoLog.data() );
 			ts3DebugInterrupt();
 			return false;
 		}

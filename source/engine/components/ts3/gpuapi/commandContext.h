@@ -84,6 +84,30 @@ namespace ts3::gpuapi
 		bool updateBufferDataUpload( GPUBuffer & pBuffer, const GPUBufferDataUploadDesc & pUploadDesc );
 		bool updateBufferSubDataUpload( GPUBuffer & pBuffer, const GPUBufferSubDataUploadDesc & pUploadDesc );
 
+		template <typename TData>
+		void updateBufferDataUpload( GPUBuffer & pBuffer, const TData & pData )
+		{
+			GPUBufferDataUploadDesc dataUploadDesc;
+			dataUploadDesc.flags = E_GPU_BUFFER_DATA_COPY_FLAG_MODE_INVALIDATE_BIT;
+			dataUploadDesc.inputDataDesc.pointer = &pData;
+			dataUploadDesc.inputDataDesc.size = sizeof( TData );
+
+			updateBufferDataUpload( pBuffer, dataUploadDesc );
+		}
+
+		template <typename TData>
+		void updateBufferSubDataUpload( GPUBuffer & pBuffer, const TData & pData, gpu_memory_size_t pOffset )
+		{
+			GPUBufferSubDataUploadDesc subDataUploadDesc;
+			subDataUploadDesc.flags = E_GPU_BUFFER_DATA_COPY_FLAG_MODE_INVALIDATE_BIT;
+			subDataUploadDesc.inputDataDesc.pointer = &pData;
+			subDataUploadDesc.inputDataDesc.size = sizeof( pData );
+			subDataUploadDesc.bufferRegion.offset = pOffset;
+			subDataUploadDesc.bufferRegion.size = sizeof( TData );
+
+			updateBufferSubDataUpload( pBuffer, subDataUploadDesc );
+		}
+
 	protected:
 		CommandContextDirectTransfer( CommandList & pCommandList, ECommandContextType pContextType )
 		: CommandContextDirect( pCommandList, pContextType )

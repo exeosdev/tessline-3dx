@@ -48,6 +48,23 @@ namespace ts3::gpuapi
 		return immutableState;
 	}
 
+	GpaHandle<GLRenderTargetBindingImmutableState> GLRenderTargetBindingImmutableState::createForScreen(
+			GLGPUDevice & pGPUDevice,
+			const RenderTargetLayout & pRenderTargetLayout )
+	{
+		GLRenderTargetBindingDefinition glcRenderTargetBindingDefinition;
+		glcRenderTargetBindingDefinition.fboData.renderFBO = GLFramebufferObject::createForDefaultFramebuffer();
+		glcRenderTargetBindingDefinition.fboData.resolveFBO = nullptr;
+		glcRenderTargetBindingDefinition.rtLayout = pRenderTargetLayout;
+
+		auto immutableState = createGPUAPIObject<GLRenderTargetBindingImmutableState>(
+			pGPUDevice,
+			glcRenderTargetBindingDefinition.rtLayout,
+			std::move( glcRenderTargetBindingDefinition.fboData ) );
+
+		return immutableState;
+	}
+
 
 	GLRenderPassConfigurationImmutableState::GLRenderPassConfigurationImmutableState(
 			GLGPUDevice & pGPUDevice,
@@ -169,6 +186,15 @@ namespace ts3::gpuapi
 			}
 
 			return framebufferObject;
+		}
+
+		RenderTargetLayout translateSystemVisualConfigToRenderTargetLayout( const system::VisualConfig & pSysVisualConfig )
+		{
+			RenderTargetLayout renderTargetLayout;
+			renderTargetLayout.activeAttachmentsMask = E_RT_ATTACHMENT_MASK_DEFAULT_C0_DS;
+			renderTargetLayout.colorAttachments[0].format = ETextureFormat::BGRA8UN;
+			renderTargetLayout.depthStencilAttachment.format = ETextureFormat::D24UNS8U;
+			return renderTargetLayout;
 		}
 
 		void clearRenderPassFramebuffer( const RenderPassConfiguration & pRenderPassConfiguration )

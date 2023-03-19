@@ -175,7 +175,10 @@ namespace ts3::system
 		void swapBuffers();
 
 		///
-		EOpenGLAPIClass querySupportedAPIClass() const;
+		TS3_ATTR_NO_DISCARD EOpenGLAPIClass querySupportedAPIClass() const;
+
+		///
+		TS3_ATTR_NO_DISCARD VisualConfig queryVisualConfig() const;
 
 		/// @brief
 		TS3_ATTR_NO_DISCARD FrameSize queryRenderAreaSize() const;
@@ -219,6 +222,8 @@ namespace ts3::system
 		virtual void _nativeSwapBuffers() = 0;
 
 		virtual EOpenGLAPIClass _nativeQuerySupportedAPIClass() const noexcept = 0;
+
+		virtual VisualConfig _nativeQueryVisualConfig() const = 0;
 
 		virtual FrameSize _nativeQueryRenderAreaSize() const = 0;
 

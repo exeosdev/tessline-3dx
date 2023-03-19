@@ -86,7 +86,7 @@ namespace ts3::gpuapi
 		if ( compileStatus != GL_TRUE )
 		{
 			auto infoLog = getInfoLog();
-			// print info log
+			ts3DebugOutput( infoLog.data() );
 			ts3DebugInterrupt();
 			return false;
 		}

@@ -19,7 +19,6 @@ namespace ts3
 	{
 		setCSLightPosition( { -2.0f, 3.0f, -2.0f } );
 		setCSLightTarget( { 0.0f, 0.0f,  5.0f } );
-		setCSModelMatrix( math::identity4<float>() );
 	}
 
 	ShadowRenderer::~ShadowRenderer() = default;
@@ -48,38 +47,35 @@ namespace ts3
 
 	void ShadowRenderer::setCSProjectionMatrixLightOrthoDefault()
 	{
-		setCSProjectionMatrix( math::orthoOffCenterLH( -32.0f, 32.0f, -32.0f, 32.0f, 1.0f, 64.0f ) );
+		_currentState.mLightProjection = math::orthoOffCenterLH( -32.0f, 32.0f, -32.0f, 32.0f, 1.0f, 64.0f );
 	}
 
 	void ShadowRenderer::setCSProjectionMatrixLightPerspectiveDefault()
 	{
-		setCSProjectionMatrix( math::perspectiveAspectLH( 60.0f, 1.0f, 1.0f, 64.0f ) );
-	}
-
-	void ShadowRenderer::setCSProjectionMatrix( math::Mat4f pProjectionMatrix )
-	{
-		_currentState.mProjection = pProjectionMatrix;
-	}
-
-	void ShadowRenderer::setCSModelMatrix( math::Mat4f pModelMatrix )
-	{
-		_currentState.mModel = pModelMatrix;
-	}
-
-	void ShadowRenderer::setCSViewMatrix( math::Mat4f pViewMatrix )
-	{
-		_currentState.mView = pViewMatrix;
+		_currentState.mLightProjection = math::perspectiveAspectLH( math::constants::cxFloatRad60Degree, 1.0f, 1.0f, 16.0f );
 	}
 
 	void ShadowRenderer::updateMatricesForLightPass()
 	{
-		_currentState.mView = math::lookAtLH( _currentState.vLightPosition, _currentState.vLightTarget, {0.0f, 1.0f, 0.0f} );
-		_currentState.mSpace = math::mul( _currentState.mProjection, _currentState.mView );
+		_currentState.mLightView = math::lookAtLH( _currentState.vLightPosition, _currentState.vLightTarget, { 0.0f, 1.0f, 0.0f } );
+		_currentState.mLightSpace = math::mul( _currentState.mLightProjection, _currentState.mLightView );
 	}
 
-	void ShadowRenderer::updateMatricesForShadowPass()
+	void ShadowRenderer::updateMatricesForShadowPass( gpuapi::CommandContext & pCommandContext , const math::Mat4f & pModelMatrix, const math::Mat4f & pViewMatrix )
 	{
-		_currentState.mSpace = math::mul( _currentState.mProjection, _currentState.mSpace );
+		using namespace ts3::gpuapi;
+
+		ts3DebugAssert( pCommandContext.checkFeatureSupport( E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DIRECT_GRAPHICS ) );
+		auto * directGraphicsContext = pCommandContext.queryInterface<CommandContextDirectGraphics>();
+
+		const auto modelViewMatrix = math::mul( pViewMatrix, pModelMatrix );
+
+		CBShadowData cbShadowData;
+		cbShadowData.v3fObjectSpaceLightPos = getLightPosition();
+		cbShadowData.m4fShadow = math::mul( _currentState.mLightProjection, _currentState.mLightView );
+		cbShadowData.m3fNormal = math::inverseTranspose( math::matrixTrim3( modelViewMatrix ) );
+
+		directGraphicsContext->updateBufferDataUpload( *_resources.constantBuffer, cbShadowData );
 	}
 
 	void ShadowRenderer::beginRenderPass1Light( gpuapi::CommandContext & pCommandContext )
@@ -98,31 +94,15 @@ namespace ts3
 		viewportDescLight.depthRange.zFar = 1.0f;
 
 		directGraphicsContext->setRenderTargetBindingState( _gpuAPIState.rtBindingPass1Light );
-		directGraphicsContext->setGraphicsPipelineStateObject( *( _gpuAPIState.psoPass1Light ) );
+		directGraphicsContext->setGraphicsPipelineStateObject( *_gpuAPIState.psoPass1Light );
 
-		directGraphicsContext->beginRenderPass( *( _gpuAPIState.renderPass1Light ), 0 );
+		directGraphicsContext->beginRenderPass( *_gpuAPIState.renderPass1Light, 0 );
 
 		directGraphicsContext->cmdSetViewport( viewportDescLight );
 		directGraphicsContext->cmdSetShaderConstantBuffer( 17, *_resources.constantBuffer );
-
-		updateMatricesForLightPass();
-
-		Pass1LightConstantBufferData constantBufferData;
-		constantBufferData.v3fLightDiffuseColor = _currentState.vLightDiffuseColor;
-		constantBufferData.v3fObjectSpaceLightPos = _currentState.vLightPosition;
-		constantBufferData.m4fModel = _currentState.mModel;
-		constantBufferData.m4fSpace = _currentState.mSpace;
-
-		GPUBufferDataUploadDesc constantBufferDataUploadDesc;
-		constantBufferDataUploadDesc.inputDataDesc.pointer = &constantBufferData;
-		constantBufferDataUploadDesc.inputDataDesc.size = sizeof( Pass1LightConstantBufferData );
-
-		directGraphicsContext->updateBufferDataUpload( *_resources.constantBuffer, constantBufferDataUploadDesc );
 	}
 
-	void ShadowRenderer::beginRenderPass2Shadow(
-			gpuapi::CommandContext & pCommandContext,
-			const gpuapi::RenderTargetBindingDynamicState & pRenderTargetBinding )
+	void ShadowRenderer::beginRenderPass2Shadow( gpuapi::CommandContext & pCommandContext )
 	{
 		using namespace ts3::gpuapi;
 
@@ -139,12 +119,11 @@ namespace ts3
 
 		directGraphicsContext->setGraphicsPipelineStateObject( *( _gpuAPIState.psoPass2Shadow ) );
 
-		directGraphicsContext->beginRenderPass( *( _gpuAPIState.renderPass1Light ), 0 );
+		directGraphicsContext->beginRenderPass( *( _gpuAPIState.renderPass2Shadow ), 0 );
 
-		directGraphicsContext->cmdSetViewport( viewportDescLight );
 		directGraphicsContext->cmdSetShaderConstantBuffer( 17, *( _resources.constantBuffer ) );
-		// directGraphicsContext->cmdSetShaderTextureImage( 27, *( _resources.shadowMapTexture ) );
-		// directGraphicsContext->cmdSetShaderTextureSampler( 77, *( _gpuAPIState.samplerPass2Shadow ) );
+		directGraphicsContext->cmdSetShaderTextureImage( 27, *( _resources.shadowMapTexture ) );
+		directGraphicsContext->cmdSetShaderTextureSampler( 77, *( _gpuAPIState.samplerPass2Shadow ) );
 	}
 
 	void ShadowRenderer::endRenderPass( gpuapi::CommandContext & pCommandContext )
@@ -256,23 +235,37 @@ namespace ts3
 			psoPass1LightCreateInfo.rasterizerConfig.cullMode = ECullMode::Back;
 			psoPass1LightCreateInfo.rasterizerConfig.primitiveFillMode = EPrimitiveFillMode::Solid;
 			psoPass1LightCreateInfo.rasterizerConfig.frontFaceVerticesOrder = ETriangleVerticesOrder::CounterClockwise;
-			psoPass1LightCreateInfo.inputLayoutDefinition.activeAttributesMask = E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_0_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_1_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_2_BIT;
 			psoPass1LightCreateInfo.inputLayoutDefinition.primitiveTopology = EPrimitiveTopology::TriangleList;
-			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[0] = { 0, "POSITION", 0, EVertexAttribFormat::Vec3F32, 0 };
-			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[1] = { 0, "NORMAL", 0, EVertexAttribFormat::Vec3F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
-			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[2] = { 0, "TEXCOORD", 0, EVertexAttribFormat::Vec2F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			psoPass1LightCreateInfo.inputLayoutDefinition.activeAttributesMask =
+				E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_0_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_1_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_2_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_3_BIT;
+			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[0] = { 0, "POSITION", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, 0 };
+			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[1] = { 0, "COLOR", 0, ts3::gpuapi::EVertexAttribFormat::Vec4F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[2] = { 0, "NORMAL", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[3] = { 0, "TEXCOORD", 0, ts3::gpuapi::EVertexAttribFormat::Vec2F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			// psoPass1LightCreateInfo.inputLayoutDefinition.activeAttributesMask = E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_0_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_1_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_2_BIT;
+			// psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[0] = { 0, "POSITION", 0, EVertexAttribFormat::Vec3F32, 0 };
+			// psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[1] = { 0, "NORMAL", 0, EVertexAttribFormat::Vec3F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			// psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[2] = { 0, "TEXCOORD", 0, EVertexAttribFormat::Vec2F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
 			psoPass1LightCreateInfo.shaderSet.addShader( vertexShaderPass1 );
 			psoPass1LightCreateInfo.shaderSet.addShader( pixelShaderPass1 );
-			psoPass1LightCreateInfo.shaderInputSignatureDesc.activeShaderStagesMask = E_SHADER_STAGE_MASK_GRAPHICS_VS_PS;
+			psoPass1LightCreateInfo.shaderInputSignatureDesc.activeShaderStagesMask = E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT;
 			psoPass1LightCreateInfo.shaderInputSignatureDesc.descriptorSetsNum = 1;
 			{
 				psoPass1LightCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorType = EShaderInputDescriptorType::Resource;
-				psoPass1LightCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorsNum = 1;
+				psoPass1LightCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorsNum = 2;
 
-				psoPass1LightCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0] =
-						{17, EShaderInputDescriptorType::Resource, E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT };
-				psoPass1LightCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0].uResourceDesc =
-						{ EShaderInputResourceType::CBVConstantBuffer, 7, 1 };
+				psoPass1LightCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0] = {
+					10, EShaderInputDescriptorType::Resource, E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT
+				};
+				psoPass1LightCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0].uResourceDesc = {
+					EShaderInputResourceType::CBVConstantBuffer, 0, 1
+				};
+				psoPass1LightCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[1] = {
+					17, EShaderInputDescriptorType::Resource, E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT
+				};
+				psoPass1LightCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[1].uResourceDesc = {
+					EShaderInputResourceType::CBVConstantBuffer, 7, 1
+				};
 			}
 
 			_gpuAPIState.psoPass1Light = _gpuDevice.createGraphicsPipelineStateObject( psoPass1LightCreateInfo );
@@ -292,36 +285,53 @@ namespace ts3
 			psoPass2ShadowCreateInfo.rasterizerConfig.cullMode = ECullMode::Back;
 			psoPass2ShadowCreateInfo.rasterizerConfig.primitiveFillMode = EPrimitiveFillMode::Solid;
 			psoPass2ShadowCreateInfo.rasterizerConfig.frontFaceVerticesOrder = ETriangleVerticesOrder::CounterClockwise;
-			psoPass2ShadowCreateInfo.inputLayoutDefinition.activeAttributesMask = E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_0_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_1_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_2_BIT;
 			psoPass2ShadowCreateInfo.inputLayoutDefinition.primitiveTopology = EPrimitiveTopology::TriangleList;
-			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[0] = { 0, "POSITION", 0, EVertexAttribFormat::Vec3F32, 0 };
-			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[1] = { 0, "NORMAL", 0, EVertexAttribFormat::Vec3F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
-			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[2] = { 0, "TEXCOORD", 0, EVertexAttribFormat::Vec2F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			psoPass2ShadowCreateInfo.inputLayoutDefinition.activeAttributesMask =
+				E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_0_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_1_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_2_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_3_BIT;
+			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[0] = { 0, "POSITION", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, 0 };
+			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[1] = { 0, "COLOR", 0, ts3::gpuapi::EVertexAttribFormat::Vec4F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[2] = { 0, "NORMAL", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[3] = { 0, "TEXCOORD", 0, ts3::gpuapi::EVertexAttribFormat::Vec2F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
 			psoPass2ShadowCreateInfo.shaderSet.addShader( vertexShaderPass2 );
 			psoPass2ShadowCreateInfo.shaderSet.addShader( pixelShaderPass2 );
 			psoPass2ShadowCreateInfo.shaderInputSignatureDesc.activeShaderStagesMask = E_SHADER_STAGE_MASK_GRAPHICS_VS_PS;
 			psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetsNum = 2;
 			{
 				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorType = EShaderInputDescriptorType::Resource;
-				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorsNum = 2;
+				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorsNum = 4;
 
-				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0] =
-						{ 17, EShaderInputDescriptorType::Resource, E_SHADER_STAGE_MASK_GRAPHICS_VS_PS };
-				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0].uResourceDesc =
-						{ EShaderInputResourceType::CBVConstantBuffer, 7, 1 };
-
-				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[1] =
-						{ 27, EShaderInputDescriptorType::Resource, E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT };
-				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[1].uResourceDesc =
-						{ EShaderInputResourceType::SRVTextureImage, 7, 1 };
+				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0] = {
+					10, EShaderInputDescriptorType::Resource, E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT
+				};
+				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0].uResourceDesc = {
+					EShaderInputResourceType::CBVConstantBuffer, 0, 1
+				};
+				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[1] = {
+					17, EShaderInputDescriptorType::Resource, E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT
+				};
+				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[1].uResourceDesc = {
+					EShaderInputResourceType::CBVConstantBuffer, 7, 1
+				};
+				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[2] = {
+					20, EShaderInputDescriptorType::Resource, E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT
+				};
+				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[2].uResourceDesc = {
+					EShaderInputResourceType::SRVTextureImage, 0, 1
+				};
+				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[3] = {
+					27, EShaderInputDescriptorType::Resource, E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT
+				};
+				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[3].uResourceDesc = {
+					EShaderInputResourceType::SRVTextureImage, 7, 1
+				};
 			}
 			{
 				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[1].descriptorType = EShaderInputDescriptorType::Sampler;
 				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[1].descriptorsNum = 2;
 
 				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[1].descriptorList[0] =
-						{ 71, EShaderInputDescriptorType::Sampler, E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT };
-				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[1].descriptorList[0].uSamplerConfig = { 1 };
+						{ 70, EShaderInputDescriptorType::Sampler, E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT };
+				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[1].descriptorList[0].uSamplerConfig = { 0 };
 
 				psoPass2ShadowCreateInfo.shaderInputSignatureDesc.descriptorSetArray[1].descriptorList[1] =
 						{ 77, EShaderInputDescriptorType::Sampler, E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT };

@@ -49,17 +49,10 @@ namespace ts3::gpuapi
 		return _glDebugOutput.get();
 	}
 
-	bool GLGPUDevice::initializeGLDebugOutput()
+	RenderTargetBindingImmutableStateHandle GLGPUDevice::createScreenRenderTargetBindingState(
+		const RenderTargetLayout & pRenderTargetLayout )
 	{
-		if( !_glDebugOutput )
-		{
-			auto glcDebugOutput = GLDebugOutput::createInterface( GLDebugOutputVersion::ARBExt );
-			if( glcDebugOutput )
-			{
-				_glDebugOutput = std::move( glcDebugOutput );
-			}
-		}
-		return _glDebugOutput ? true : false;
+		return _immutableStateFactory->createScreenRenderTargetBindingState( pRenderTargetLayout );
 	}
 
 	void GLGPUDevice::waitForCommandSync( CommandSync & pCommandSync )
@@ -74,6 +67,19 @@ namespace ts3::gpuapi
 			releaseGLCommandSyncData( pCommandSync.syncData );
 			pCommandSync.syncData = nullptr;
 		}
+	}
+
+	bool GLGPUDevice::initializeGLDebugOutput()
+	{
+		if( !_glDebugOutput )
+		{
+			auto glcDebugOutput = GLDebugOutput::createInterface( GLDebugOutputVersion::ARBExt );
+			if( glcDebugOutput )
+			{
+				_glDebugOutput = std::move( glcDebugOutput );
+			}
+		}
+		return _glDebugOutput ? true : false;
 	}
 
 	void GLGPUDevice::initializeCommandSystem()

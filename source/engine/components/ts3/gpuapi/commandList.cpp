@@ -182,7 +182,7 @@ namespace ts3::gpuapi
 		subDataUploadDesc.flags.set( E_GPU_BUFFER_DATA_COPY_FLAG_MODE_INVALIDATE_BIT );
 		subDataUploadDesc.flags.unset( E_GPU_BUFFER_DATA_COPY_FLAG_MODE_APPEND_BIT );
 		subDataUploadDesc.bufferRegion.offset = 0;
-		subDataUploadDesc.bufferRegion.size = pBuffer.mBufferProperties.byteSize;
+		subDataUploadDesc.bufferRegion.size = getMinOf( pUploadDesc.inputDataDesc.size, pBuffer.mBufferProperties.byteSize );
 		subDataUploadDesc.inputDataDesc = pUploadDesc.inputDataDesc;
 
 		return updateBufferSubDataUpload( pBuffer, subDataUploadDesc );
