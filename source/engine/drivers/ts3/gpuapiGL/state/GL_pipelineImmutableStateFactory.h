@@ -21,7 +21,6 @@ namespace ts3::gpuapi
 
 		virtual BlendImmutableStateHandle createBlendState( const BlendConfig & pConfig ) override final;
 		virtual DepthStencilImmutableStateHandle createDepthStencilState( const DepthStencilConfig & pConfig ) override final;
-		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & pDefinition ) override final;
 		virtual IAVertexStreamImmutableStateHandle createIAVertexStreamState( const IAVertexStreamDefinition & pDefinition ) override final;
 		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerConfig & pConfig ) override final;
 		virtual RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & pDefinition ) override final;
@@ -37,6 +36,7 @@ namespace ts3::gpuapi
 		virtual ~GLPipelineImmutableStateFactoryCore();
 
 		virtual GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageState( const GraphicsShaderSet & pShaderSet ) override final;
+		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & pDefinition ) override final;
 	};
 
 	class GLPipelineImmutableStateFactoryCompat : public GLPipelineImmutableStateFactory
@@ -46,6 +46,7 @@ namespace ts3::gpuapi
 		virtual ~GLPipelineImmutableStateFactoryCompat();
 
 		virtual GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageState( const GraphicsShaderSet & pShaderSet ) override final;
+		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & pDefinition ) override final;
 	};
 
 }

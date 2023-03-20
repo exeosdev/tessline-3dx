@@ -28,12 +28,6 @@ namespace ts3::gpuapi
 		return GLDepthStencilImmutableState::createInstance( mGLGPUDevice, pConfig );
 	}
 
-	IAInputLayoutImmutableStateHandle GLPipelineImmutableStateFactory::createIAInputLayoutState(
-			const IAInputLayoutDefinition & pDefinition )
-	{
-		return GLIAInputLayoutImmutableState::createInstance( mGLGPUDevice, pDefinition );
-	}
-
 	IAVertexStreamImmutableStateHandle GLPipelineImmutableStateFactory::createIAVertexStreamState(
 			const IAVertexStreamDefinition & pDefinition )
 	{
@@ -76,6 +70,12 @@ namespace ts3::gpuapi
 		return GLGraphicsShaderLinkageImmutableStateCore::createInstance( mGLGPUDevice, pShaderSet );
 	}
 
+	IAInputLayoutImmutableStateHandle GLPipelineImmutableStateFactoryCore::createIAInputLayoutState(
+			const IAInputLayoutDefinition & pDefinition )
+	{
+		return GLIAInputLayoutImmutableStateCore::createInstance( mGLGPUDevice, pDefinition );
+	}
+
 
 	GLPipelineImmutableStateFactoryCompat::GLPipelineImmutableStateFactoryCompat( GLGPUDevice & pGPUDevice )
 	: GLPipelineImmutableStateFactory( pGPUDevice )
@@ -86,6 +86,12 @@ namespace ts3::gpuapi
 	GraphicsShaderLinkageImmutableStateHandle GLPipelineImmutableStateFactoryCompat::createGraphicsShaderLinkageState( const GraphicsShaderSet & pShaderSet )
 	{
 		return GLGraphicsShaderLinkageImmutableStateCompat::createInstance( mGLGPUDevice, pShaderSet );
+	}
+
+	IAInputLayoutImmutableStateHandle GLPipelineImmutableStateFactoryCompat::createIAInputLayoutState(
+			const IAInputLayoutDefinition & pDefinition )
+	{
+		return GLIAInputLayoutImmutableStateCompat::createInstance( mGLGPUDevice, pDefinition );
 	}
 
 }

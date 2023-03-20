@@ -61,15 +61,6 @@ namespace ts3::gpuapi
 		void resetDynamicIAVertexStreamState();
 		void resetDynamicRenderTargetBindingState();
 
-		const GLVertexArrayObject & getCachedVertexArrayObject(
-			const GLIAInputLayoutImmutableState & pInputLayoutState,
-			const GLIAVertexStreamImmutableState & pVertexStreamState );
-
-		// Apply functions: Vertex Stream (VB/IB bindings)
-		static void applyGLIAIndexBufferBinding(
-				const GLIAIndexBufferBinding & pIndexBufferBinding,
-				GLDrawTopologyProperties & pDrawTopologyProperties );
-
 		// Apply functions: Render Target (Attachment bindings)
 		static void applyGLRenderTargetBinding( const GLRenderTargetBindingInfo & pGLRenderTargetBinding );
 
@@ -83,7 +74,6 @@ namespace ts3::gpuapi
 		GLDrawTopologyProperties _currentDrawTopologyProperties;
 		GLIAVertexStreamDefinition _dynamicIAVertexStreamDefinition;
 		GLRenderTargetBindingDefinition _dynamicRenderTargetBindingDefinition;
-		GLVertexArrayObjectCache _vaoCache;
 		GLGlobalStateCache _globalStateCache;
 	};
 
@@ -98,16 +88,6 @@ namespace ts3::gpuapi
 				const ShaderInputParameterConstant & pConstantInfo,
 				const void * pConstantData ) override final;
 
-		static void applyGLShaderLinkageState( const GLGraphicsShaderLinkageImmutableStateCore & pShaderLinkageState );
-
-		static void applyGLIAInputLayoutState(
-				const GLIAInputLayoutImmutableState & pInputLayoutState,
-				GLDrawTopologyProperties & pDrawTopologyProperties );
-
-		static void applyGLIAVertexStreamState(
-				const GLIAVertexStreamDefinition & pVertexStreamDefinition,
-				GLDrawTopologyProperties & pDrawTopologyProperties );
-
 		static void applyGLIAVertexBufferBindings( const GLIAVertexBuffersBindings & pVertexBufferBindings );
 	};
 
@@ -117,25 +97,21 @@ namespace ts3::gpuapi
 		virtual bool applyStateChanges() override final;
 
 	private:
-		const GLVertexArrayObject & getTransientVertexArrayObject(
-				const GLIAInputLayoutDefinition & pInputLayoutDefinition,
-				const GLIAVertexStreamDefinition & pVertexStreamDefinition );
-
 		virtual void updateShaderInputInlineConstantData(
 				const GLGraphicsShaderLinkageImmutableState & pShaderState,
 				const ShaderInputParameterConstant & pConstantInfo,
 				const void * pConstantData ) override final;
 
-		static void applyGLShaderLinkageState( const GLGraphicsShaderLinkageImmutableStateCompat & pShaderLinkageState );
+		const GLVertexArrayObject & getCachedVertexArrayObject(
+				const GLIAInputLayoutImmutableStateCompat & pInputLayoutState,
+				const GLIAVertexStreamImmutableState & pVertexStreamState );
 
-		static void applyGLCombinedInputAssemblerState(
-				const GLVertexArrayObject & pVertexArrayObject,
+		const GLVertexArrayObject & getCachedVertexArrayObject(
 				const GLIAInputLayoutDefinition & pInputLayoutDefinition,
-				const GLIAVertexStreamDefinition & pVertexStreamDefinition,
-				GLDrawTopologyProperties & pDrawTopologyProperties );
+				const GLIAVertexStreamDefinition & pVertexStreamDefinition );
 
 	private:
-		GLVertexArrayObjectHandle _transientVertexArrayObject;
+		GLVertexArrayObjectCache _vaoCache;
 	};
 
 } // namespace ts3::gpuapi

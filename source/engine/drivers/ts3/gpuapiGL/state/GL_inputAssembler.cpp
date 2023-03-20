@@ -71,45 +71,6 @@ namespace ts3::gpuapi
 	}
 
 
-	GLIAInputLayoutImmutableState::GLIAInputLayoutImmutableState(
-			GLGPUDevice & pGPUDevice,
-			const IAInputLayoutStateCommonProperties & pCommonProperties,
-			const GLIAInputLayoutDefinition & pGLInputLayoutDefinition,
-			GLVertexArrayObjectHandle pVertexArrayObject )
-	: IAInputLayoutImmutableState( pGPUDevice, pCommonProperties )
-	, mGLInputLayoutDefinition( pGLInputLayoutDefinition )
-	, mVertexArrayObject( std::move( pVertexArrayObject ) )
-	{}
-
-	GLIAInputLayoutImmutableState::~GLIAInputLayoutImmutableState() = default;
-
-	GpaHandle<GLIAInputLayoutImmutableState> GLIAInputLayoutImmutableState::createInstance(
-			GLGPUDevice & pGPUDevice,
-			const IAInputLayoutDefinition & pInputLayoutDefinition )
-	{
-		const auto inputLayoutCommonProperties = smutil::getIAInputLayoutStateCommonProperties( pInputLayoutDefinition );
-		const auto glcInputLayoutDefinition = smutil::translateIAInputLayoutDefinition( pInputLayoutDefinition );
-
-		GLVertexArrayObjectHandle vertexArrayObject = nullptr;
-		if( !pGPUDevice.isCompatibilityDevice() )
-		{
-			vertexArrayObject = smutil::createGLVertexArrayObjectLayoutOnly( glcInputLayoutDefinition );
-			if( !vertexArrayObject )
-			{
-				return nullptr;
-			}
-		}
-
-		auto immutableState = createGPUAPIObject<GLIAInputLayoutImmutableState>(
-			pGPUDevice,
-			inputLayoutCommonProperties,
-			glcInputLayoutDefinition,
-			std::move( vertexArrayObject ) );
-
-		return immutableState;
-	}
-
-
 	GLIAVertexStreamImmutableState::GLIAVertexStreamImmutableState(
 			GLGPUDevice & pGPUDevice,
 			const IAVertexStreamStateCommonProperties & pCommonProperties,
@@ -131,6 +92,76 @@ namespace ts3::gpuapi
 			pGPUDevice,
 			vertexStreamCommonProperties,
 			glcVertexStreamDefinition );
+
+		return immutableState;
+	}
+
+
+	GLIAInputLayoutImmutableState::GLIAInputLayoutImmutableState(
+			GLGPUDevice & pGPUDevice,
+			const IAInputLayoutStateCommonProperties & pCommonProperties )
+	: IAInputLayoutImmutableState( pGPUDevice, pCommonProperties )
+	{}
+
+	GLIAInputLayoutImmutableState::~GLIAInputLayoutImmutableState() = default;
+
+
+	GLIAInputLayoutImmutableStateCore::GLIAInputLayoutImmutableStateCore(
+			GLGPUDevice & pGPUDevice,
+			const IAInputLayoutStateCommonProperties & pCommonProperties,
+			GLVertexArrayObjectHandle pVertexArrayObject,
+			GLenum pGLPrimitiveTopology )
+	: GLIAInputLayoutImmutableState( pGPUDevice, pCommonProperties )
+	, mVertexArrayObject( std::move( pVertexArrayObject ) )
+	, mGLPrimitiveTopology( pGLPrimitiveTopology )
+	{}
+
+	GLIAInputLayoutImmutableStateCore::~GLIAInputLayoutImmutableStateCore() = default;
+
+	GpaHandle<GLIAInputLayoutImmutableStateCore> GLIAInputLayoutImmutableStateCore::createInstance(
+			GLGPUDevice & pGPUDevice,
+			const IAInputLayoutDefinition & pInputLayoutDefinition )
+	{
+		const auto inputLayoutCommonProperties = smutil::getIAInputLayoutStateCommonProperties( pInputLayoutDefinition );
+		const auto glcInputLayoutDefinition = smutil::translateIAInputLayoutDefinition( pInputLayoutDefinition );
+
+		auto vertexArrayObject = smutil::createGLVertexArrayObjectLayoutOnly( glcInputLayoutDefinition );
+		if( !vertexArrayObject )
+		{
+			return nullptr;
+		}
+
+		auto immutableState = createGPUAPIObject<GLIAInputLayoutImmutableStateCore>(
+			pGPUDevice,
+			inputLayoutCommonProperties,
+			std::move( vertexArrayObject ),
+			glcInputLayoutDefinition.primitiveTopology);
+
+		return immutableState;
+	}
+
+
+	GLIAInputLayoutImmutableStateCompat::GLIAInputLayoutImmutableStateCompat(
+			GLGPUDevice & pGPUDevice,
+			const IAInputLayoutStateCommonProperties & pCommonProperties,
+			const GLIAInputLayoutDefinition & pGLInputLayoutDefinition )
+	: GLIAInputLayoutImmutableState( pGPUDevice, pCommonProperties )
+	, mGLInputLayoutDefinition( pGLInputLayoutDefinition )
+	{}
+
+	GLIAInputLayoutImmutableStateCompat::~GLIAInputLayoutImmutableStateCompat() = default;
+
+	GpaHandle<GLIAInputLayoutImmutableStateCompat> GLIAInputLayoutImmutableStateCompat::createInstance(
+			GLGPUDevice & pGPUDevice,
+			const IAInputLayoutDefinition & pInputLayoutDefinition )
+	{
+		const auto inputLayoutCommonProperties = smutil::getIAInputLayoutStateCommonProperties( pInputLayoutDefinition );
+		const auto glcInputLayoutDefinition = smutil::translateIAInputLayoutDefinition( pInputLayoutDefinition );
+
+		auto immutableState = createGPUAPIObject<GLIAInputLayoutImmutableStateCompat>(
+			pGPUDevice,
+			inputLayoutCommonProperties,
+			glcInputLayoutDefinition );
 
 		return immutableState;
 	}

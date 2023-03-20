@@ -130,27 +130,6 @@ namespace ts3::gpuapi
 	};
 
 	///
-	class GLIAInputLayoutImmutableState : public IAInputLayoutImmutableState
-	{
-	public:
-		GLIAInputLayoutDefinition const mGLInputLayoutDefinition;
-		GLVertexArrayObjectHandle const mVertexArrayObject;
-
-	public:
-		GLIAInputLayoutImmutableState(
-				GLGPUDevice & pGPUDevice,
-				const IAInputLayoutStateCommonProperties & pCommonProperties,
-				const GLIAInputLayoutDefinition & pGLInputLayoutDefinition,
-				GLVertexArrayObjectHandle pVertexArrayObject );
-
-		virtual ~GLIAInputLayoutImmutableState();
-
-		static GpaHandle<GLIAInputLayoutImmutableState> createInstance(
-				GLGPUDevice & pGPUDevice,
-				const IAInputLayoutDefinition & pInputLayoutDefinition );
-	};
-
-	///
 	class GLIAVertexStreamImmutableState : public IAVertexStreamImmutableState
 	{
 	public:
@@ -167,6 +146,57 @@ namespace ts3::gpuapi
 		static GpaHandle<GLIAVertexStreamImmutableState> createInstance(
 				GLGPUDevice & pGPUDevice,
 				const IAVertexStreamDefinition & pVertexStreamDefinition );
+	};
+
+	///
+	class GLIAInputLayoutImmutableState : public IAInputLayoutImmutableState
+	{
+	public:
+		GLIAInputLayoutImmutableState(
+				GLGPUDevice & pGPUDevice,
+				const IAInputLayoutStateCommonProperties & pCommonProperties );
+
+		virtual ~GLIAInputLayoutImmutableState();
+	};
+
+	///
+	class GLIAInputLayoutImmutableStateCore : public GLIAInputLayoutImmutableState
+	{
+	public:
+		GLVertexArrayObjectHandle const mVertexArrayObject;
+		GLenum const mGLPrimitiveTopology;
+
+	public:
+		GLIAInputLayoutImmutableStateCore(
+				GLGPUDevice & pGPUDevice,
+				const IAInputLayoutStateCommonProperties & pCommonProperties,
+				GLVertexArrayObjectHandle pVertexArrayObject,
+				GLenum pGLPrimitiveTopology );
+
+		virtual ~GLIAInputLayoutImmutableStateCore();
+
+		static GpaHandle<GLIAInputLayoutImmutableStateCore> createInstance(
+				GLGPUDevice & pGPUDevice,
+				const IAInputLayoutDefinition & pInputLayoutDefinition );
+	};
+
+	///
+	class GLIAInputLayoutImmutableStateCompat : public GLIAInputLayoutImmutableState
+	{
+	public:
+		GLIAInputLayoutDefinition const mGLInputLayoutDefinition;
+
+	public:
+		GLIAInputLayoutImmutableStateCompat(
+				GLGPUDevice & pGPUDevice,
+				const IAInputLayoutStateCommonProperties & pCommonProperties,
+				const GLIAInputLayoutDefinition & pGLInputLayoutDefinition );
+
+		virtual ~GLIAInputLayoutImmutableStateCompat();
+
+		static GpaHandle<GLIAInputLayoutImmutableStateCompat> createInstance(
+				GLGPUDevice & pGPUDevice,
+				const IAInputLayoutDefinition & pInputLayoutDefinition );
 	};
 
 	namespace smutil

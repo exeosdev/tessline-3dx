@@ -16,10 +16,10 @@ namespace ts3::gpuapi
 	using UniqueGPUObjectID = HFSIdentifier;
 	using UniqueGPUObjectName = std::string;
 
-	template <typename TStrInput>
-	inline UniqueGPUObjectID generateUniqueGPUObjectID( TStrInput && pStrInput )
+	template <typename TInput>
+	inline UniqueGPUObjectID generateUniqueGPUObjectID( const TInput & pInput )
 	{
-		return generateHFSIdentifier( pStrInput );
+		return generateHFSIdentifier( pInput );
 	}
 
 #define ts3GpaDeclareClassHandle( pClassName ) \

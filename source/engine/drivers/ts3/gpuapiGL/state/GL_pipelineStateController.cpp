@@ -322,25 +322,6 @@ namespace ts3::gpuapi
 		_dynamicRenderTargetBindingDefinition.fboData.resolveFBO.reset();
 	}
 
-	const GLVertexArrayObject & GLGraphicsPipelineStateController::getCachedVertexArrayObject(
-		const GLIAInputLayoutImmutableState & pInputLayoutState,
-		const GLIAVertexStreamImmutableState & pVertexStreamState )
-	{
-		return _vaoCache.getOrCreate( pInputLayoutState, pVertexStreamState );
-	}
-
-	void GLGraphicsPipelineStateController::applyGLIAIndexBufferBinding(
-			const GLIAIndexBufferBinding & pIndexBufferBinding,
-			GLDrawTopologyProperties & pDrawTopologyProperties )
-	{
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, pIndexBufferBinding.handle );
-		ts3OpenGLHandleLastError();
-
-		pDrawTopologyProperties.indexBufferBaseOffset = pIndexBufferBinding.offset;
-		pDrawTopologyProperties.indexBufferDataType = pIndexBufferBinding.format;
-		pDrawTopologyProperties.indexBufferElementByteSize = pIndexBufferBinding.elementByteSize;
-	}
-
 	void GLGraphicsPipelineStateController::applyGLRenderTargetBinding( const GLRenderTargetBindingInfo & pGLRenderTargetBinding )
 	{
 		glBindFramebuffer( GL_FRAMEBUFFER, pGLRenderTargetBinding.renderFBO->mGLHandle );
@@ -360,21 +341,26 @@ namespace ts3::gpuapi
 			if( _stateUpdateMask.isSetAnyOf( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_SHADER_LINKAGE_BIT ) )
 			{
 				const auto * shaderLinkageState = glcGraphicsPSO->getGraphicsShaderLinkageState().queryInterface<GLGraphicsShaderLinkageImmutableStateCore>();
-				applyGLShaderLinkageState( *shaderLinkageState );
+				_globalStateCache.applyShaderPipelineBinding( shaderLinkageState->mGLShaderPipelineObject->mGLHandle );
 				executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_SHADER_LINKAGE_BIT );
 			}
 
 			if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_IA_INPUT_LAYOUT_BIT ) )
 			{
-				const auto & inputLayoutState = glcGraphicsPSO->getIAInputLayoutState();
-				applyGLIAInputLayoutState( inputLayoutState, _currentDrawTopologyProperties );
+				const auto * inputLayoutState = glcGraphicsPSO->getIAInputLayoutState().queryInterface<GLIAInputLayoutImmutableStateCore>();
+				_globalStateCache.applyVertexArrayObjectBinding( inputLayoutState->mVertexArrayObject->mGLHandle );
+				_currentDrawTopologyProperties.primitiveTopology = inputLayoutState->mGLPrimitiveTopology;
 				executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_IA_INPUT_LAYOUT_BIT );
 			}
 
 			if( _stateUpdateMask.isSetAnyOf( E_GRAPHICS_STATE_UPDATE_MASK_COMBINED_INPUT_ASSEMBLER ) )
 			{
 				const auto & currentIAVertexStreamDefinition = getCurrentIAVertexStreamDefinition();
-				applyGLIAVertexStreamState( currentIAVertexStreamDefinition, _currentDrawTopologyProperties );
+				applyGLIAVertexBufferBindings( currentIAVertexStreamDefinition.vertexBufferBindings );
+				_globalStateCache.applyIndexBufferBinding( currentIAVertexStreamDefinition.indexBufferBinding.handle );
+				_currentDrawTopologyProperties.indexBufferBaseOffset = currentIAVertexStreamDefinition.indexBufferBinding.offset;
+				_currentDrawTopologyProperties.indexBufferDataType = currentIAVertexStreamDefinition.indexBufferBinding.format;
+				_currentDrawTopologyProperties.indexBufferElementByteSize = currentIAVertexStreamDefinition.indexBufferBinding.elementByteSize;
 				executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_MASK_COMBINED_INPUT_ASSEMBLER );
 			}
 		}
@@ -400,31 +386,6 @@ namespace ts3::gpuapi
 				constantBaseType,
 				constantLength,
 				pConstantData );
-	}
-
-	void GLGraphicsPipelineStateControllerCore::applyGLShaderLinkageState(
-			const GLGraphicsShaderLinkageImmutableStateCore & pShaderLinkageState )
-	{
-		glBindProgramPipeline( pShaderLinkageState.mGLShaderPipelineObject->mGLHandle );
-		ts3OpenGLHandleLastError();
-	}
-
-	void GLGraphicsPipelineStateControllerCore::applyGLIAInputLayoutState(
-			const GLIAInputLayoutImmutableState & pInputLayoutState,
-			GLDrawTopologyProperties & pDrawTopologyProperties )
-	{
-		glBindVertexArray( pInputLayoutState.mVertexArrayObject->mGLHandle );
-		ts3OpenGLHandleLastError();
-
-		pDrawTopologyProperties.primitiveTopology = pInputLayoutState.mGLInputLayoutDefinition.primitiveTopology;
-	}
-
-	void GLGraphicsPipelineStateControllerCore::applyGLIAVertexStreamState(
-			const GLIAVertexStreamDefinition & pVertexStreamDefinition,
-			GLDrawTopologyProperties & pDrawTopologyProperties )
-	{
-		applyGLIAIndexBufferBinding( pVertexStreamDefinition.indexBufferBinding, pDrawTopologyProperties );
-		applyGLIAVertexBufferBindings( pVertexStreamDefinition.vertexBufferBindings );
 	}
 
 	void GLGraphicsPipelineStateControllerCore::applyGLIAVertexBufferBindings( const GLIAVertexBuffersBindings & pVertexBufferBindings )
@@ -474,44 +435,48 @@ namespace ts3::gpuapi
 		{
 			const auto * glcGraphicsPSO = _currentCommonState.graphicsPSO->queryInterface<GLGraphicsPipelineStateObject>();
 
+			if( _stateUpdateMask.isSetAnyOf( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_SHADER_LINKAGE_BIT ) )
+			{
+				const auto * shaderLinkageState = glcGraphicsPSO->getGraphicsShaderLinkageState().queryInterface<GLGraphicsShaderLinkageImmutableStateCompat>();
+				_globalStateCache.applyShaderProgramBinding( shaderLinkageState->mGLShaderProgramObject->mGLHandle );
+				executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_SHADER_LINKAGE_BIT );
+			}
+
 			if( _stateUpdateMask.isSetAnyOf( E_GRAPHICS_STATE_UPDATE_MASK_COMBINED_INPUT_ASSEMBLER ) )
 			{
 				if( !isIAVertexStreamStateDynamic() )
 				{
-					const auto & inputLayoutState = glcGraphicsPSO->getIAInputLayoutState();
+					const auto * inputLayoutState = glcGraphicsPSO->getIAInputLayoutState().queryInterface<GLIAInputLayoutImmutableStateCompat>();
 					const auto * vertexStreamState = _currentCommonState.iaVertexStreamState->queryInterface<GLIAVertexStreamImmutableState>();
 
-					const auto & vertexArrayObject = getCachedVertexArrayObject( inputLayoutState, *vertexStreamState );
+					const auto & vertexArrayObject = getCachedVertexArrayObject( *inputLayoutState, *vertexStreamState );
 
-					applyGLCombinedInputAssemblerState(
-						vertexArrayObject,
-						inputLayoutState.mGLInputLayoutDefinition,
-						vertexStreamState->mGLVertexStreamDefinition,
-						_currentDrawTopologyProperties );
+					_globalStateCache.applyVertexArrayObjectBinding( vertexArrayObject.mGLHandle );
+					_currentDrawTopologyProperties.primitiveTopology = inputLayoutState->mGLInputLayoutDefinition.primitiveTopology;
+
+					_globalStateCache.applyIndexBufferBinding( vertexStreamState->mGLVertexStreamDefinition.indexBufferBinding.handle );
+					_currentDrawTopologyProperties.indexBufferBaseOffset = vertexStreamState->mGLVertexStreamDefinition.indexBufferBinding.offset;
+					_currentDrawTopologyProperties.indexBufferDataType = vertexStreamState->mGLVertexStreamDefinition.indexBufferBinding.format;
+					_currentDrawTopologyProperties.indexBufferElementByteSize = vertexStreamState->mGLVertexStreamDefinition.indexBufferBinding.elementByteSize;
+
 				}
 				else
 				{
-					const auto & inputLayoutState = glcGraphicsPSO->getIAInputLayoutState();
+					const auto * inputLayoutState = glcGraphicsPSO->getIAInputLayoutState().queryInterface<GLIAInputLayoutImmutableStateCompat>();
 					const auto & currentVertexStreamDefinition = _dynamicIAVertexStreamDefinition;
 
-					const auto & vertexArrayObject = getTransientVertexArrayObject( inputLayoutState.mGLInputLayoutDefinition, currentVertexStreamDefinition );
+					const auto & vertexArrayObject = getCachedVertexArrayObject( inputLayoutState->mGLInputLayoutDefinition, currentVertexStreamDefinition );
 
-					applyGLCombinedInputAssemblerState(
-						vertexArrayObject,
-						inputLayoutState.mGLInputLayoutDefinition,
-						currentVertexStreamDefinition,
-						_currentDrawTopologyProperties );
+					_globalStateCache.applyVertexArrayObjectBinding( vertexArrayObject.mGLHandle );
+					_currentDrawTopologyProperties.primitiveTopology = inputLayoutState->mGLInputLayoutDefinition.primitiveTopology;
+
+					_globalStateCache.applyIndexBufferBinding( currentVertexStreamDefinition.indexBufferBinding.handle );
+					_currentDrawTopologyProperties.indexBufferBaseOffset = currentVertexStreamDefinition.indexBufferBinding.offset;
+					_currentDrawTopologyProperties.indexBufferDataType = currentVertexStreamDefinition.indexBufferBinding.format;
+					_currentDrawTopologyProperties.indexBufferElementByteSize = currentVertexStreamDefinition.indexBufferBinding.elementByteSize;
 				}
 
-
 				executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_MASK_COMBINED_INPUT_ASSEMBLER );
-			}
-
-			if( _stateUpdateMask.isSetAnyOf( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_SHADER_LINKAGE_BIT ) )
-			{
-				const auto * shaderLinkageState = glcGraphicsPSO->getGraphicsShaderLinkageState().queryInterface<GLGraphicsShaderLinkageImmutableStateCompat>();
-				applyGLShaderLinkageState( *shaderLinkageState );
-				executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_SHADER_LINKAGE_BIT );
 			}
 
 		}
@@ -519,20 +484,6 @@ namespace ts3::gpuapi
 		_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_MASK_COMMON_ALL | E_GRAPHICS_STATE_UPDATE_MASK_SEPARABLE_ALL );
 
 		return !executedUpdatesMask.empty();
-	}
-
-	const GLVertexArrayObject & GLGraphicsPipelineStateControllerCompat::getTransientVertexArrayObject(
-			const GLIAInputLayoutDefinition & pInputLayoutDefinition,
-			const GLIAVertexStreamDefinition & pVertexStreamDefinition )
-	{
-		if( !_transientVertexArrayObject )
-		{
-			_transientVertexArrayObject = GLVertexArrayObject::create();
-		}
-
-		smutil::updateGLVertexArrayObjectLayoutStreamCombined( *_transientVertexArrayObject, pInputLayoutDefinition, pVertexStreamDefinition );
-
-		return *_transientVertexArrayObject;
 	}
 
 	void GLGraphicsPipelineStateControllerCompat::updateShaderInputInlineConstantData(
@@ -553,30 +504,18 @@ namespace ts3::gpuapi
 				pConstantData );
 	}
 
-	void GLGraphicsPipelineStateControllerCompat::applyGLShaderLinkageState(
-			const GLGraphicsShaderLinkageImmutableStateCompat & pShaderLinkageState )
+	const GLVertexArrayObject & GLGraphicsPipelineStateControllerCompat::getCachedVertexArrayObject(
+			const GLIAInputLayoutImmutableStateCompat & pInputLayoutState,
+			const GLIAVertexStreamImmutableState & pVertexStreamState )
 	{
-		glUseProgram( pShaderLinkageState.mGLShaderProgramObject->mGLHandle );
-		ts3OpenGLHandleLastError();
+		return _vaoCache.getOrCreate( pInputLayoutState, pVertexStreamState );
 	}
 
-	void GLGraphicsPipelineStateControllerCompat::applyGLCombinedInputAssemblerState(
-			const GLVertexArrayObject & pVertexArrayObject,
+	const GLVertexArrayObject & GLGraphicsPipelineStateControllerCompat::getCachedVertexArrayObject(
 			const GLIAInputLayoutDefinition & pInputLayoutDefinition,
-			const GLIAVertexStreamDefinition & pVertexStreamDefinition,
-			GLDrawTopologyProperties & pDrawTopologyProperties )
+			const GLIAVertexStreamDefinition & pVertexStreamDefinition )
 	{
-		glBindVertexArray( pVertexArrayObject.mGLHandle );
-		ts3OpenGLHandleLastError();
-
-		pDrawTopologyProperties.primitiveTopology = pInputLayoutDefinition.primitiveTopology;
-
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, pVertexStreamDefinition.indexBufferBinding.handle );
-		ts3OpenGLHandleLastError();
-
-		pDrawTopologyProperties.indexBufferBaseOffset = pVertexStreamDefinition.indexBufferBinding.offset;
-		pDrawTopologyProperties.indexBufferDataType = pVertexStreamDefinition.indexBufferBinding.format;
-		pDrawTopologyProperties.indexBufferElementByteSize = pVertexStreamDefinition.indexBufferBinding.elementByteSize;
+		return _vaoCache.getOrCreate( pInputLayoutDefinition, pVertexStreamDefinition );
 	}
 
 } // namespace ts3::gpuapi

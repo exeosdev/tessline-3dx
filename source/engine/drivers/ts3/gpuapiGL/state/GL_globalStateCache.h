@@ -24,16 +24,16 @@ namespace ts3::gpuapi
 		using SamplerBindings = std::array<GLuint, gpm::RES_MAX_TEXTURE_UNITS_NUM>;
 		using TextureUnitBindings = std::array<TextureUnitBinding, gpm::RES_MAX_TEXTURE_UNITS_NUM>;
 
+		GLuint shaderPipelineBinding;
+		GLuint shaderProgramBinding;
+		GLuint vertexArrayObjectBinding;
+		GLuint indexBufferBinding;
+
 		BlendConfig blendConfig;
 		GLDepthStencilConfig depthStencilConfig;
 		GLRasterizerConfig rasterizerConfig;
 		SamplerBindings samplerBindings;
 		TextureUnitBindings textureUnitBindings;
-		GLuint vertexArrayObjectBinding;
-		GLIAInputLayoutDefinition vertexArrayObjectInputLayout;
-		GLIAVertexStreamDefinition vertexArrayObjectVertexStream;
-		GLuint shaderPipelineBinding;
-		GLuint shaderProgramBinding;
 	};
 
 	class GLGlobalStateCache
@@ -47,12 +47,14 @@ namespace ts3::gpuapi
 
 		void reset();
 
+		void applyShaderPipelineBinding( GLuint pShaderPipelineHandle );
+		void applyShaderProgramBinding( GLuint pShaderProgramHandle );
+		void applyIndexBufferBinding( GLuint pIndexBufferObjectHandle );
+		void applyVertexArrayObjectBinding( GLuint pVertexArrayObjectHandle );
+
 		void applyBlendState( const GLBlendConfig & pBlendConfig );
 		void applyDepthStencilState( const GLDepthStencilConfig & pDepthStencilConfig );
 		void applyRasterizerState( const GLRasterizerConfig & pRasterizerConfig );
-
-		void applyShaderPipelineBinding( GLuint pShaderPipelineHandle );
-		void applyShaderProgramBinding( GLuint pShaderProgramHandle );
 
 		static GLGlobalState getDefaultGlobalState();
 

@@ -16,6 +16,46 @@ namespace ts3::gpuapi
 		_cachedState = sDefaultState;
 	}
 
+	void GLGlobalStateCache::applyShaderPipelineBinding( GLuint pShaderPipelineHandle )
+	{
+		if( pShaderPipelineHandle != _cachedState.shaderPipelineBinding )
+		{
+			glBindProgramPipeline( pShaderPipelineHandle );
+			ts3OpenGLHandleLastError();
+			_cachedState.shaderPipelineBinding = pShaderPipelineHandle;
+		}
+	}
+
+	void GLGlobalStateCache::applyShaderProgramBinding( GLuint pShaderProgramHandle )
+	{
+		if( pShaderProgramHandle != _cachedState.shaderProgramBinding )
+		{
+			glUseProgram( pShaderProgramHandle );
+			ts3OpenGLHandleLastError();
+			_cachedState.shaderProgramBinding = pShaderProgramHandle;
+		}
+	}
+
+	void GLGlobalStateCache::applyIndexBufferBinding( GLuint pIndexBufferObjectHandle )
+	{
+		if( pIndexBufferObjectHandle != _cachedState.indexBufferBinding )
+		{
+			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, pIndexBufferObjectHandle );
+			ts3OpenGLHandleLastError();
+			_cachedState.indexBufferBinding = pIndexBufferObjectHandle;
+		}
+	}
+
+	void GLGlobalStateCache::applyVertexArrayObjectBinding( GLuint pVertexArrayObjectHandle )
+	{
+		if( pVertexArrayObjectHandle != _cachedState.vertexArrayObjectBinding )
+		{
+			glBindVertexArray( pVertexArrayObjectHandle );
+			ts3OpenGLHandleLastError();
+			_cachedState.vertexArrayObjectBinding = pVertexArrayObjectHandle;
+		}
+	}
+
 	void GLGlobalStateCache::applyBlendState( const GLBlendConfig & pBlendConfig )
 	{
 		auto & cachedBlendConfig = _cachedState.blendConfig;
@@ -274,6 +314,10 @@ namespace ts3::gpuapi
 	{
 		GLGlobalState defaultGlobalState;
 
+		defaultGlobalState.shaderPipelineBinding = 0;
+		defaultGlobalState.shaderProgramBinding = 0;
+		defaultGlobalState.vertexArrayObjectBinding = 0;
+
 		// BlendConfig
 		{
 			defaultGlobalState.blendConfig.blendActiveGlobal = false;
@@ -324,13 +368,6 @@ namespace ts3::gpuapi
 
 		memZero( defaultGlobalState.samplerBindings );
 		memZero( defaultGlobalState.textureUnitBindings );
-
-		defaultGlobalState.vertexArrayObjectBinding = 0;
-		defaultGlobalState.vertexArrayObjectInputLayout.reset();
-		defaultGlobalState.vertexArrayObjectVertexStream.reset();
-
-		defaultGlobalState.shaderPipelineBinding = 0;
-		defaultGlobalState.shaderProgramBinding = 0;
 
 		return defaultGlobalState;
 	}

@@ -8,7 +8,10 @@
 namespace ts3::gpuapi
 {
 
-	class GLIAInputLayoutImmutableState;
+	struct GLIAInputLayoutDefinition;
+	struct GLIAVertexStreamDefinition;
+
+	class GLIAInputLayoutImmutableStateCompat;
 	class GLIAVertexStreamImmutableState;
 
 	ts3GLDeclareOpenGLObjectHandle( GLVertexArrayObject );
@@ -37,14 +40,21 @@ namespace ts3::gpuapi
 		~GLVertexArrayObjectCache();
 
 		const GLVertexArrayObject & getOrCreate(
-				const GLIAInputLayoutImmutableState & pInputLayoutState,
+				const GLIAInputLayoutImmutableStateCompat & pInputLayoutState,
 				const GLIAVertexStreamImmutableState & pVertexStreamState );
+
+		const GLVertexArrayObject & getOrCreate(
+				const GLIAInputLayoutDefinition & pInputLayoutDefinition,
+				const GLIAVertexStreamDefinition & pVertexStreamDefinition );
 
 		void reset();
 
 	private:
-		using VertexArrayObjectMap = std::map<GLVertexArrayObjectCachedID, GLVertexArrayObjectHandle>;
-		VertexArrayObjectMap _vertexArrayObjectMap;
+		using PersistentVertexArrayObjectMap = std::map<GLVertexArrayObjectCachedID, GLVertexArrayObjectHandle>;
+		PersistentVertexArrayObjectMap _persistentVertexArrayObjectMap;
+
+		using TransientVertexArrayObjectMap = std::map<UniqueGPUObjectID, GLVertexArrayObjectHandle>;
+		TransientVertexArrayObjectMap _transientVertexArrayObjectMap;
 	};
 
 }
