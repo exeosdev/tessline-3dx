@@ -8,6 +8,61 @@
 namespace ts3::gpuapi
 {
 
+	void GLIAVertexBuffersBindings::initializeInterleaved()
+	{
+		bindingType = EGLVertexBufferBindingType::Interleaved;
+		interleavedBindings = {};
+	}
+
+	void GLIAVertexBuffersBindings::initializeSeparate()
+	{
+		bindingType = EGLVertexBufferBindingType::Separate;
+		separateBindings = {};
+	}
+
+	void GLIAVertexBuffersBindings::reset()
+	{
+		if( bindingType == EGLVertexBufferBindingType::Interleaved )
+		{
+			memZero( interleavedBindings );
+		}
+		else if( bindingType == EGLVertexBufferBindingType::Separate )
+		{
+			memZero( separateBindings );
+		}
+
+		bindingType = EGLVertexBufferBindingType::Undefined;
+	}
+
+	GLIAVertexBufferBinding GLIAVertexBuffersBindings::getBinding( native_uint pStreamIndex ) const
+	{
+		if( bindingType == EGLVertexBufferBindingType::Interleaved )
+		{
+			return interleavedBindings[pStreamIndex];
+		}
+		else if( bindingType == EGLVertexBufferBindingType::Separate )
+		{
+			return {
+				separateBindings.handleArray[pStreamIndex],
+				separateBindings.offsetArray[pStreamIndex],
+				separateBindings.strideArray[pStreamIndex]
+			};
+		}
+		else
+		{
+			return { 0, 0, 0 };
+		}
+	}
+
+
+	void GLIAVertexStreamDefinition::reset()
+	{
+		activeBindingsMask = 0;
+		indexBufferBinding.reset();
+		vertexBufferBindings.reset();
+	}
+
+
 	GLIAInputLayoutImmutableState::GLIAInputLayoutImmutableState(
 			GLGPUDevice & pGPUDevice,
 			const IAInputLayoutStateCommonProperties & pCommonProperties,
@@ -164,6 +219,7 @@ namespace ts3::gpuapi
 			}
 
 			glcVertexStreamDefinition.activeBindingsMask = ( pDefinition.activeBindingsMask & E_IA_VERTEX_STREAM_BINDING_MASK_ALL );
+			glcVertexStreamDefinition.vertexBufferBindings.activeRanges = smutil::generateActiveVertexBufferRanges( pDefinition.vertexBufferReferences );
 
 			return glcVertexStreamDefinition;
 		}
@@ -176,11 +232,9 @@ namespace ts3::gpuapi
 			uint32 activeBindingsNum = 0;
 
 		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
-			pOutGLBindings.interleavedBindings = {};
-			pOutGLBindings.bindingType = EGLVertexBufferBindingType::Interleaved;
+			pOutGLBindings.initializeInterleaved();
 		#else
-			pOutGLBindings.separateBindings = {};
-			pOutGLBindings.bindingType = EGLVertexBufferBindingType::Separate;
+			pOutGLBindings.initializeSeparate();
 		#endif
 
 			for( input_assembler_index_t streamIndex = 0; streamIndex < cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )

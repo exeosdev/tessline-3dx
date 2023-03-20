@@ -6,6 +6,7 @@
 
 #include "GL_inputAssembler.h"
 #include "GL_renderTarget.h"
+#include "GL_vertexArrayObjectCache.h"
 #include "../objects/GL_vertexArrayObject.h"
 #include <ts3/gpuapi/state/separablePipelineState.h>
 
@@ -59,6 +60,10 @@ namespace ts3::gpuapi
 		void resetDynamicIAVertexStreamState();
 		void resetDynamicRenderTargetBindingState();
 
+		const GLVertexArrayObject & getCachedVertexArrayObject(
+			const GLIAInputLayoutImmutableState & pInputLayoutState,
+			const GLIAVertexStreamImmutableState & pVertexStreamState );
+
 		// Apply functions: PSO States
 		static void applyGLBlendState( const GLBlendImmutableState & pBlendState );
 		static void applyGLDepthStencilState( const GLDepthStencilImmutableState & pDepthStencilState );
@@ -82,6 +87,7 @@ namespace ts3::gpuapi
 		GLDrawTopologyProperties _currentDrawTopologyProperties;
 		GLIAVertexStreamDefinition _dynamicIAVertexStreamDefinition;
 		GLRenderTargetBindingDefinition _dynamicRenderTargetBindingDefinition;
+		GLVertexArrayObjectCache _vaoCache;
 	};
 
 	class GLGraphicsPipelineStateControllerCore : public GLGraphicsPipelineStateController
@@ -114,10 +120,6 @@ namespace ts3::gpuapi
 		virtual bool applyStateChanges() override final;
 
 	private:
-		const GLVertexArrayObject & getCachedVertexArrayObject(
-				const GLIAInputLayoutImmutableState & pInputLayoutState,
-				const GLIAVertexStreamImmutableState & pVertexStreamState );
-
 		const GLVertexArrayObject & getTransientVertexArrayObject(
 				const GLIAInputLayoutDefinition & pInputLayoutDefinition,
 				const GLIAVertexStreamDefinition & pVertexStreamDefinition );

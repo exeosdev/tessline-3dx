@@ -45,9 +45,19 @@ namespace ts3::gpuapi
 		GLintptr offset;
 		GLenum format;
 		GLuint elementByteSize;
+
+		void reset()
+		{
+			memZero( *this );
+		}
+
+		explicit operator bool() const noexcept
+		{
+			return handle != 0;
+		}
 	};
 
-	struct GLIAVertexBuffersBinding
+	struct GLIAVertexBufferBinding
 	{
 		GLuint handle;
 		GLintptr offset;
@@ -73,36 +83,22 @@ namespace ts3::gpuapi
 		};
 
 		/// Interleaved VB bindings (an array of structs).
-		using InterleavedBindingsArray = std::array<GLIAVertexBuffersBinding, cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM>;
+		using InterleavedBindingsArray = std::array<GLIAVertexBufferBinding, cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM>;
 
 		union
 		{
 			InterleavedBindingsArray interleavedBindings;
-
 			SeparateBindings separateBindings;
 		};
 
+		IAVertexBufferRangeList activeRanges;
+
 		EGLVertexBufferBindingType bindingType = EGLVertexBufferBindingType::Undefined;
 
-		GLIAVertexBuffersBinding getBinding( native_uint pStreamIndex ) const
-		{
-			if( bindingType == EGLVertexBufferBindingType::Interleaved )
-			{
-				return interleavedBindings[pStreamIndex];
-			}
-			else if( bindingType == EGLVertexBufferBindingType::Separate )
-			{
-				return {
-					separateBindings.handleArray[pStreamIndex],
-					separateBindings.offsetArray[pStreamIndex],
-					separateBindings.strideArray[pStreamIndex]
-				};
-			}
-			else
-			{
-				return { 0, 0, 0 };
-			}
-		}
+		void initializeInterleaved();
+		void initializeSeparate();
+		void reset();
+		GLIAVertexBufferBinding getBinding( native_uint pStreamIndex ) const;
 	};
 
 	/// @brief
@@ -111,6 +107,8 @@ namespace ts3::gpuapi
 		Bitmask<EIAVertexStreamBindingFlags> activeBindingsMask;
 		GLIAVertexBuffersBindings vertexBufferBindings;
 		GLIAIndexBufferBinding indexBufferBinding;
+
+		void reset();
 	};
 
 	struct GLDrawTopologyProperties

@@ -11,7 +11,7 @@
 namespace ts3::gpuapi
 {
 
-#if!( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_MACOS )
+#if( TS3GX_GL4_USE_COMPAT_API )
 	using GL4GPUDeviceBase = GLGPUDeviceCompat;
 #else
 	using GL4GPUDeviceBase = GLGPUDeviceCore;

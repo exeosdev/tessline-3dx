@@ -322,6 +322,13 @@ namespace ts3::gpuapi
 		_dynamicRenderTargetBindingDefinition.fboData.resolveFBO.reset();
 	}
 
+	const GLVertexArrayObject & GLGraphicsPipelineStateController::getCachedVertexArrayObject(
+		const GLIAInputLayoutImmutableState & pInputLayoutState,
+		const GLIAVertexStreamImmutableState & pVertexStreamState )
+	{
+		return _vaoCache.getOrCreate( pInputLayoutState, pVertexStreamState );
+	}
+
 	void GLGraphicsPipelineStateController::applyGLBlendState( const GLBlendImmutableState & pBlendState )
 	{
 		if( pBlendState.mGLBlendConfig.attachmentsMask.isSetAnyOf( E_RT_ATTACHMENT_MASK_COLOR_ALL ) )
@@ -570,24 +577,38 @@ namespace ts3::gpuapi
 	void GLGraphicsPipelineStateControllerCore::applyGLIAVertexBufferBindings( const GLIAVertexBuffersBindings & pVertexBufferBindings )
 	{
 	#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
-		for( uint32 streamIndex = 0; streamIndex < cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )
+		for( const auto & activeVBRange : pVertexBufferBindings.activeRanges )
 		{
-			const auto & vbBinding = pVertexBufferBindings.interleavedBindings[streamIndex];
+			for( uint32 entryOffset = 0; entryOffset < activeVBRange.length; ++entryOffset )
+			{
+				const auto & vbBinding = pVertexBufferBindings.interleavedBindings[activeVBRange.firstIndex + entryOffset];
 
-			glBindVertexBuffer( streamIndex, vbBinding.handle, vbBinding.offset, vbBinding.stride );
-			ts3OpenGLHandleLastError();
+				glBindVertexBuffer( streamIndex, vbBinding.handle, vbBinding.offset, vbBinding.stride );
+				ts3OpenGLHandleLastError();
+			}
 		}
 	#else
 		// Bind all vertex buffers at once using multi-bind. Note, that this also updates the unused bind slots,
 		// to properly have buffer object '0' set as the source VBO (deactivating it). Doing that makes profiling
 		// and debugging a lot easier (unused buffers from previous passes did some confusion in few cases).
-		glBindVertexBuffers(
-			0u,
-			cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM,
-			&( pVertexBufferBindings.separateBindings.handleArray[0] ),
-			&( pVertexBufferBindings.separateBindings.offsetArray[0] ),
-			&( pVertexBufferBindings.separateBindings.strideArray[0] ) );
-		ts3OpenGLHandleLastError();
+		// glBindVertexBuffers(
+		// 	0u,
+		// 	cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM,
+		// 	&( pVertexBufferBindings.separateBindings.handleArray[0] ),
+		// 	&( pVertexBufferBindings.separateBindings.offsetArray[0] ),
+		// 	&( pVertexBufferBindings.separateBindings.strideArray[0] ) );
+		// ts3OpenGLHandleLastError();
+
+		for( const auto & activeVBRange : pVertexBufferBindings.activeRanges )
+		{
+			glBindVertexBuffers(
+				activeVBRange.firstIndex,
+				activeVBRange.length,
+				&( pVertexBufferBindings.separateBindings.handleArray[activeVBRange.firstIndex] ),
+				&( pVertexBufferBindings.separateBindings.offsetArray[activeVBRange.firstIndex] ),
+				&( pVertexBufferBindings.separateBindings.strideArray[activeVBRange.firstIndex] ) );
+			ts3OpenGLHandleLastError();
+		}
 	#endif
 	}
 
@@ -645,13 +666,6 @@ namespace ts3::gpuapi
 		_stateUpdateMask.unset( E_GRAPHICS_STATE_UPDATE_MASK_COMMON_ALL | E_GRAPHICS_STATE_UPDATE_MASK_SEPARABLE_ALL );
 
 		return !executedUpdatesMask.empty();
-	}
-
-	const GLVertexArrayObject & GLGraphicsPipelineStateControllerCompat::getCachedVertexArrayObject(
-			const GLIAInputLayoutImmutableState & pInputLayoutState,
-			const GLIAVertexStreamImmutableState & pVertexStreamState )
-	{
-		return getCachedVertexArrayObject( pInputLayoutState, pVertexStreamState );
 	}
 
 	const GLVertexArrayObject & GLGraphicsPipelineStateControllerCompat::getTransientVertexArrayObject(
