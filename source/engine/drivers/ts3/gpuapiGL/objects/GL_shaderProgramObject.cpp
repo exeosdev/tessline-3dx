@@ -81,8 +81,11 @@ namespace ts3::gpuapi
 			GLint samplerVariableLocation = glGetUniformLocation( pProgram.mGLHandle, samplerBinding.first.data() );
 			ts3OpenGLHandleLastError();
 
-			glProgramUniform1i( pProgram.mGLHandle, samplerVariableLocation, samplerBinding.second );
-			ts3OpenGLHandleLastError();
+			if( samplerVariableLocation != -1 )
+			{
+				glProgramUniform1i( pProgram.mGLHandle, samplerVariableLocation, samplerBinding.second );
+				ts3OpenGLHandleLastError();
+			}
 		}
 
 		for( const auto & uniformBlockBinding : pLayoutMap.uniformBlockBindings )
@@ -90,8 +93,11 @@ namespace ts3::gpuapi
 			GLint blockIndex = glGetUniformBlockIndex( pProgram.mGLHandle, uniformBlockBinding.first.data() );
 			ts3OpenGLHandleLastError();
 
-			glUniformBlockBinding( pProgram.mGLHandle, blockIndex, uniformBlockBinding.second );
-			ts3OpenGLHandleLastError();
+			if( blockIndex != -1 )
+			{
+				glUniformBlockBinding( pProgram.mGLHandle, blockIndex, uniformBlockBinding.second );
+				ts3OpenGLHandleLastError();
+			}
 		}
 	}
 

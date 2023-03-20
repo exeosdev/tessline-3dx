@@ -27,6 +27,30 @@ namespace ts3::gpuapi
     using pClassName##Handle = SharedHandle<pClassName>; \
     using pClassName##WeakHandle = WeakHandle<pClassName>
 
+	// GpuAPI Metrics
+	namespace gpm
+	{
+
+		constexpr uint32 IA_MAX_VERTEX_ATTRIBUTES_NUM = 16;
+		constexpr uint32 IA_MAX_VERTEX_BUFFER_BINDINGS_NUM = 16;
+
+		constexpr uint32 RT_MAX_COLOR_ATTACHMENTS_NUM = 8;
+		constexpr uint32 RT_MAX_COMBINED_ATTACHMENTS_NUM = 9;
+
+		constexpr uint32 IS_MAX_CONSTANT_GROUP_SIZE = 32;
+		constexpr uint32 IS_MAX_DESCRIPTOR_SET_SIZE = 16;
+		constexpr uint32 IS_MAX_DESCRIPTOR_SETS_NUM = 4;
+		constexpr uint32 IS_MAX_DWORD_SIZE = 64;
+
+		constexpr uint32 SHADER_COMBINED_STAGES_NUM = 6;
+		constexpr uint32 SHADER_GRAPHICS_STAGES_NUM = 5;
+
+		constexpr uint32 RES_MAX_TEXTURE_UNITS_NUM = 32;
+
+		constexpr uint32 TEXTURE_MAX_MIP_LEVELS_NUM = 16;
+
+	}
+
 	namespace cxdefs
 	{
 
@@ -40,6 +64,7 @@ namespace ts3::gpuapi
 		constexpr uint32 GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SET_SIZE = 16;
 		constexpr uint32 GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM = 4;
 		constexpr uint32 GPU_SYSTEM_METRIC_IS_MAX_DWORD_SIZE = 64;
+		constexpr uint32 GPU_SYSTEM_METRIC_RES_MAX_TEXTURE_UNITS_NUM = 32;
 		constexpr uint32 GPU_SYSTEM_METRIC_TEXTURE_MAX_MIP_LEVELS_NUM = 16;
 
 		/// A special constant which can be used for object IDs to indicate that ID should be assigned automatically.

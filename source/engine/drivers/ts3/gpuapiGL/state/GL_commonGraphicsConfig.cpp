@@ -97,6 +97,7 @@ namespace ts3::gpuapi
 					{
 						openglAttachmentSettings = commonBlendSettings;
 					}
+					openglAttachmentSettings.blendActive = 1;
 					return true;
 				} );
 
@@ -111,8 +112,11 @@ namespace ts3::gpuapi
 			GLDepthStencilConfig openglDepthStencilConfig{};
 
 			auto & depthSettings = pConfig.depthTestSettings;
+			openglDepthStencilConfig.depthTestActive = pConfig.commonFlags.isSet( E_DEPTH_STENCIL_CONFIG_FLAG_ENABLE_DEPTH_TEST_BIT );
 			openglDepthStencilConfig.depthSettings.depthCompFunc = atl::translateGLCompFunc( depthSettings.depthCompFunc );
 			openglDepthStencilConfig.depthSettings.writeMask = ( depthSettings.depthWriteMask == EDepthWriteMask::All ) ? GL_TRUE : GL_FALSE;
+
+			openglDepthStencilConfig.stencilTestActive = pConfig.commonFlags.isSet( E_DEPTH_STENCIL_CONFIG_FLAG_ENABLE_STENCIL_TEST_BIT );
 
 			auto & stencilBackFaceDesc = pConfig.stencilTestSettings.backFace;
 			openglDepthStencilConfig.stencilSettings.backFace.compFunc = atl::translateGLCompFunc( stencilBackFaceDesc.compFunc );
@@ -139,7 +143,7 @@ namespace ts3::gpuapi
 		{
 			GLRasterizerConfig rasterizerConfig{};
 
-			rasterizerConfig.flags = ( pConfig.flags & E_RASTERIZER_CONFIG_MASK_ALL );
+			rasterizerConfig.scissorTestActive = pConfig.flags.isSet( E_RASTERIZER_CONFIG_FLAG_ENABLE_SCISSOR_TEST_BIT );
 			rasterizerConfig.cullMode = atl::translateGLCullMode( pConfig.cullMode );
 			rasterizerConfig.frontFaceVerticesOrder = atl::translateGLTriangleVerticesOrder( pConfig.frontFaceVerticesOrder );
 		#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
@@ -153,12 +157,12 @@ namespace ts3::gpuapi
 		{
 			GLRTColorAttachmentBlendSettings openglBlendSettings{};
 
-			openglBlendSettings.colorEquation = atl::translateGLBlendOp( pSettings.opColor );
-			openglBlendSettings.alphaEquation = atl::translateGLBlendOp( pSettings.opAlpha );
-			openglBlendSettings.srcColorFactor = atl::translateGLBlendFactor( pSettings.factorSrcColor );
-			openglBlendSettings.dstColorFactor = atl::translateGLBlendFactor( pSettings.factorDstColor );
-			openglBlendSettings.srcAlphaFactor = atl::translateGLBlendFactor( pSettings.factorSrcAlpha );
-			openglBlendSettings.dstAlphaFactor = atl::translateGLBlendFactor( pSettings.factorDstAlpha );
+			openglBlendSettings.equation.rgb = atl::translateGLBlendOp( pSettings.opColor );
+			openglBlendSettings.equation.alpha = atl::translateGLBlendOp( pSettings.opAlpha );
+			openglBlendSettings.factor.rgbSrc = atl::translateGLBlendFactor( pSettings.factorSrcColor );
+			openglBlendSettings.factor.rgbDst = atl::translateGLBlendFactor( pSettings.factorDstColor );
+			openglBlendSettings.factor.alphaSrc = atl::translateGLBlendFactor( pSettings.factorSrcAlpha );
+			openglBlendSettings.factor.alphaDst = atl::translateGLBlendFactor( pSettings.factorDstAlpha );
 
 			return openglBlendSettings;
 		}

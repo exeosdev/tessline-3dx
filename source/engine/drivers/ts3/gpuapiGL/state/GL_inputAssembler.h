@@ -30,13 +30,15 @@ namespace ts3::gpuapi
 		uint32 instanceRate;
 	};
 
-	using GLIAVertexAttributeInfoArray = std::array<GLIAVertexAttributeInfo, cxdefs::IA_MAX_VERTEX_ATTRIBUTES_NUM>;
+	using GLIAVertexAttributeInfoArray = std::array<GLIAVertexAttributeInfo, gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM>;
 
 	struct GLIAInputLayoutDefinition
 	{
 		Bitmask<EIAVertexAttributeFlags> activeAttributesMask;
 		GLIAVertexAttributeInfoArray attributeArray;
 		GLenum primitiveTopology;
+
+		void reset();
 	};
 
 	struct GLIAIndexBufferBinding
@@ -75,15 +77,15 @@ namespace ts3::gpuapi
 		struct SeparateBindings
 		{
 			/// Array of GL-specific handles. Zero at index N means the binding for stream N is not active.
-			GLuint handleArray[cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM];
+			GLuint handleArray[gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM];
 			/// Array of offsets, in bytes, from the beginning of each buffer storage. Undefined for inactive bindings.
-			GLintptr offsetArray[cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM];
+			GLintptr offsetArray[gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM];
 			/// Array of data strides, in bytes, of the data in each buffer. Undefined for inactive bindings.
-			GLsizei strideArray[cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM];
+			GLsizei strideArray[gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM];
 		};
 
 		/// Interleaved VB bindings (an array of structs).
-		using InterleavedBindingsArray = std::array<GLIAVertexBufferBinding, cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM>;
+		using InterleavedBindingsArray = std::array<GLIAVertexBufferBinding, gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM>;
 
 		union
 		{

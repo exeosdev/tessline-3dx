@@ -59,6 +59,8 @@ setInternal( TS3_DRIVER_GPUAPI_GLCOMMON_SRC_FILES
 
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_commonGraphicsConfig.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_commonGraphicsConfig.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_globalStateCache.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_globalStateCache.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_graphicsShaderState.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_graphicsShaderState.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/state/GL_inputAssembler.h"

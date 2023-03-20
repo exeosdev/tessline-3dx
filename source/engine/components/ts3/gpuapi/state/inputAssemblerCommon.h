@@ -20,22 +20,16 @@ namespace ts3::gpuapi
 	{
 
 		///
-		constexpr auto IA_MAX_VERTEX_ATTRIBUTES_NUM = static_cast<input_assembler_index_t>( GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM );
-
-		///
 		constexpr auto IA_VERTEX_ATTRIBUTE_INDEX_UNDEFINED = Limits<input_assembler_index_t>::maxValue;
-
-		///
-		constexpr auto IA_VERTEX_ATTRIBUTE_MASK_ALL = makeLSFBitmask<input_assembler_index_t>( IA_MAX_VERTEX_ATTRIBUTES_NUM );
-
-		///
-		constexpr auto IA_MAX_VERTEX_BUFFER_BINDINGS_NUM = static_cast<input_assembler_index_t>( GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM );
 
 		///
 		constexpr auto IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED = Limits<input_assembler_index_t>::maxValue;
 
 		///
-		constexpr auto IA_VERTEX_BUFFER_BINDING_MASK_ALL = makeLSFBitmask<input_assembler_index_t>( IA_MAX_VERTEX_BUFFER_BINDINGS_NUM );
+		constexpr auto IA_VERTEX_ATTRIBUTE_MASK_ALL = makeLSFBitmask<input_assembler_index_t>( gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM );
+
+		///
+		constexpr auto IA_VERTEX_BUFFER_BINDING_MASK_ALL = makeLSFBitmask<input_assembler_index_t>( gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM );
 
 		///
 		constexpr auto IA_INPUT_STREAM_BINDING_MASK_ALL = IA_VERTEX_BUFFER_BINDING_MASK_ALL | 0x10000u;
@@ -43,31 +37,31 @@ namespace ts3::gpuapi
 		/// @brief
 		inline constexpr bool isIAVertexAttributeIndexValid( native_uint pIndex )
 		{
-			return pIndex < IA_MAX_VERTEX_ATTRIBUTES_NUM;
+			return pIndex < gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM;
 		}
 
 		/// @brief
 		inline constexpr uint32 makeIAVertexAttributeFlag( native_uint pAttribIndex )
 		{
-			return ( pAttribIndex < IA_MAX_VERTEX_ATTRIBUTES_NUM ) ? ( 1 << static_cast<input_assembler_index_t>( pAttribIndex ) ) : 0u;
+			return ( pAttribIndex < gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM ) ? ( 1 << static_cast<input_assembler_index_t>( pAttribIndex ) ) : 0u;
 		}
 
 		/// @brief
 		inline constexpr bool isIAVertexBufferIndexValid( native_uint pStreamIndex )
 		{
-			return pStreamIndex < IA_MAX_VERTEX_BUFFER_BINDINGS_NUM;
+			return pStreamIndex < gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM;
 		}
 
 		/// @brief Returns
 		inline constexpr uint32 makeIAVertexBufferFlag( native_uint pStreamIndex )
 		{
-			return ( pStreamIndex < IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) ? ( 1 << static_cast<input_assembler_index_t> ( pStreamIndex ) ) : 0u;
+			return ( pStreamIndex < gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) ? ( 1 << static_cast<input_assembler_index_t> ( pStreamIndex ) ) : 0u;
 		}
 
 		/// @brief Returns
 		inline constexpr uint32 makeIAIndexBufferFlag()
 		{
-			return ( 1 << static_cast<input_assembler_index_t>( IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) );
+			return ( 1 << static_cast<input_assembler_index_t>( gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) );
 		}
 
 	}
@@ -83,7 +77,7 @@ namespace ts3::gpuapi
 		E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_5_BIT = cxdefs::makeIAVertexAttributeFlag( 5 ),
 		E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_6_BIT = cxdefs::makeIAVertexAttributeFlag( 6 ),
 		E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_7_BIT = cxdefs::makeIAVertexAttributeFlag( 7 ),
-		E_IA_VERTEX_ATTRIBUTE_MASK_ALL = makeLSFBitmask<uint32>( cxdefs::IA_MAX_VERTEX_ATTRIBUTES_NUM ),
+		E_IA_VERTEX_ATTRIBUTE_MASK_ALL = makeLSFBitmask<uint32>( gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM ),
 	};
 
 	/// @brief
@@ -101,7 +95,7 @@ namespace ts3::gpuapi
 		E_IA_VERTEX_STREAM_BINDING_FLAG_INDEX_BUFFER_BIT = cxdefs::makeIAIndexBufferFlag(),
 
 		E_IA_VERTEX_STREAM_BINDING_MASK_VERTEX_BUFFER_ALL_BITS =
-				makeLSFBitmask<uint32>( cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ),
+				makeLSFBitmask<uint32>( gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ),
 
 		E_IA_VERTEX_STREAM_BINDING_MASK_ALL =
 				E_IA_VERTEX_STREAM_BINDING_MASK_VERTEX_BUFFER_ALL_BITS | E_IA_VERTEX_STREAM_BINDING_FLAG_INDEX_BUFFER_BIT
@@ -138,7 +132,7 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief Typedef for ordered, fixed-size array of vertex attribute definitions.
-	using IAVertexAttributeInfoArray = std::array<IAVertexAttributeInfo, cxdefs::IA_MAX_VERTEX_ATTRIBUTES_NUM>;
+	using IAVertexAttributeInfoArray = std::array<IAVertexAttributeInfo, gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM>;
 
 	/// @brief
 	struct IAInputLayoutDefinition
@@ -188,7 +182,7 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief
-	using IAVertexBufferReferenceArray = std::array<IAVertexBufferReference, cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM>;
+	using IAVertexBufferReferenceArray = std::array<IAVertexBufferReference, gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM>;
 
 	/// @brief
 	struct IAVertexStreamDefinition

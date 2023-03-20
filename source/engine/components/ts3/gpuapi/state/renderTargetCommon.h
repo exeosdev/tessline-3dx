@@ -34,18 +34,21 @@ namespace ts3::gpuapi
 		/// @brief
 		inline constexpr uint32 getRTAttachmentRequiredUsageFlag( native_uint pAttachmentIndex )
 		{
-			return ( pAttachmentIndex < RT_MAX_COLOR_ATTACHMENTS_NUM ) ? E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT : E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT;
+			return
+				( pAttachmentIndex < gpm::RT_MAX_COLOR_ATTACHMENTS_NUM ) ?
+				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT :
+				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT;
 		}
 
 	}
 
 	template <typename TAttachmentProperty>
-	using RenderTargetColorAttachmentPropertyArray = std::array<TAttachmentProperty, cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM>;
+	using RenderTargetColorAttachmentPropertyArray = std::array<TAttachmentProperty, gpm::RT_MAX_COLOR_ATTACHMENTS_NUM>;
 
 	template <typename TAttachmentProperty>
 	struct RenderTargetAttachmentPropertySet
 	{
-		using AttachmentPropertyArray = std::array<TAttachmentProperty, cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM>;
+		using AttachmentPropertyArray = std::array<TAttachmentProperty, gpm::RT_MAX_COMBINED_ATTACHMENTS_NUM>;
 
 		AttachmentPropertyArray attachments;
 
@@ -56,14 +59,14 @@ namespace ts3::gpuapi
 		TAttachmentProperty & depthStencilAttachment;
 
 		RenderTargetAttachmentPropertySet()
-		: colorAttachments( bindArrayView( attachments.data(), cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ) )
+		: colorAttachments( bindArrayView( attachments.data(), gpm::RT_MAX_COLOR_ATTACHMENTS_NUM ) )
 		, depthStencilAttachment( attachments[E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL] )
 		{}
 
 		RenderTargetAttachmentPropertySet( const RenderTargetAttachmentPropertySet<TAttachmentProperty> & pSource )
 		: attachments( pSource.attachments )
 		, activeAttachmentsMask( pSource.activeAttachmentsMask )
-		, colorAttachments( bindArrayView( attachments.data(), cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ) )
+		, colorAttachments( bindArrayView( attachments.data(), gpm::RT_MAX_COLOR_ATTACHMENTS_NUM ) )
 		, depthStencilAttachment( attachments[E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL] )
 		{}
 
@@ -81,7 +84,7 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD uint32 countActiveColorAttachments() const noexcept
 		{
-			return popCount( activeAttachmentsMask & E_RT_ATTACHMENT_MASK_COLOR_ALL );
+			return popCount( static_cast<uint32>( activeAttachmentsMask & E_RT_ATTACHMENT_MASK_COLOR_ALL ) );
 		}
 
 		TS3_ATTR_NO_DISCARD bool isColorAttachmentActive( uint32 pAttachmentIndex ) const noexcept
@@ -108,7 +111,7 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD uint32 countAttachmentsActionResolve() const noexcept
 		{
-			return popCount( attachmentsActionResolveMask & E_RT_ATTACHMENT_MASK_COLOR_ALL );
+			return popCount( static_cast<uint32>( attachmentsActionResolveMask & E_RT_ATTACHMENT_MASK_COLOR_ALL ) );
 		}
 	};
 

@@ -11,7 +11,7 @@ namespace ts3::gpuapi
 				const IAVertexAttributeInfoArray & pVertexAttributes ) noexcept
 		{
 			Bitmask<EIAVertexAttributeFlags> activeAttributesMask = 0;
-			for( uint32 attributeIndex = 0; attributeIndex < cxdefs::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
+			for( uint32 attributeIndex = 0; attributeIndex < gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
 			{
 				if( pVertexAttributes[attributeIndex].valid() )
 				{
@@ -40,7 +40,7 @@ namespace ts3::gpuapi
 			IAVertexBufferRange currentVBRange{};
 			currentVBRange.firstIndex = cxdefs::IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED;
 
-			for( input_assembler_index_t streamIndex = 0; streamIndex < cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )
+			for( input_assembler_index_t streamIndex = 0; streamIndex < gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )
 			{
 				const auto & currentVBReference = pVBReferences[streamIndex];
 
@@ -58,7 +58,7 @@ namespace ts3::gpuapi
 					++currentVBRange.length;
 				}
 
-				if( currentVBReference.empty() || ( streamIndex + 1 == cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) )
+				if( currentVBReference.empty() || ( streamIndex + 1 == gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) )
 				{
 					// If the range is not empty, add it to the list of active ranges.
 					if( currentVBRange.length > 0 )

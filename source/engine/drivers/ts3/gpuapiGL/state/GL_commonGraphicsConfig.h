@@ -10,20 +10,33 @@ namespace ts3::gpuapi
 
 	struct GLRTColorAttachmentBlendSettings
 	{
+		struct Equation
+		{
+			GLenum rgb;
+			GLenum alpha;
+		};
+
+		struct Factor
+		{
+			GLenum rgbSrc;
+			GLenum rgbDst;
+			GLenum alphaSrc;
+			GLenum alphaDst;
+		};
+
 		uint32 blendActive;
-		GLenum colorEquation;
-		GLenum alphaEquation;
-		GLenum srcColorFactor;
-		GLenum dstColorFactor;
-		GLenum srcAlphaFactor;
-		GLenum dstAlphaFactor;
+		Equation equation;
+		Factor factor;
+
+		static constexpr auto sEquationDataSize = sizeof( Equation );
+		static constexpr auto sFactorDataSize = sizeof( Factor );
 	};
 
 	struct GLBlendConfig
 	{
 		Bitmask<ERTAttachmentFlags> attachmentsMask;
 		Bitmask<EBlendConfigFlags> flags;
-		GLRTColorAttachmentBlendSettings attachments[cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+		GLRTColorAttachmentBlendSettings attachments[gpm::RT_MAX_COLOR_ATTACHMENTS_NUM];
 		math::RGBAColorR32Norm constantColor;
 	};
 
@@ -38,11 +51,11 @@ namespace ts3::gpuapi
 		struct GLStencilFaceDesc
 		{
 			GLenum compFunc;
+			GLint  refValue;
+			GLuint readMask;
 			GLenum opFail;
 			GLenum opPassDepthFail;
 			GLenum opPassDepthPass;
-			GLint  refValue;
-			GLuint readMask;
 			GLuint writeMask;
 		};
 
@@ -52,13 +65,15 @@ namespace ts3::gpuapi
 			GLStencilFaceDesc backFace;
 		};
 
+		uint16 depthTestActive;
+		uint16 stencilTestActive;
 		GLDepthSettings depthSettings;
 		GLStencilSettings stencilSettings;
 	};
 
 	struct GLRasterizerConfig
 	{
-		Bitmask<ERasterizerConfigFlags> flags;
+		uint32 scissorTestActive;
 		GLenum cullMode;
 		GLenum frontFaceVerticesOrder;
 	#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )

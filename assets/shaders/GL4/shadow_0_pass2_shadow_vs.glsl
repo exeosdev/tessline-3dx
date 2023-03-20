@@ -32,8 +32,8 @@ out vec4 psLightSpacePosition;
 
 void main()
 {
-    const vec4 worldPosition = cb0ModelMatrix * vec4( vPosition, 1.0 );
-	const vec4 lightSpacePosition = cbsLightSpaceMatrix * vec4( worldPosition.xyz, 1.0f );
+    vec4 worldPosition = cb0ModelMatrix * vec4( vPosition, 1.0 );
+	vec4 lightSpacePosition = cbsLightSpaceMatrix * vec4( worldPosition.xyz, 1.0f );
 
 	psColor = vColor;
 	psTexCoord0 = vTexCoord0;

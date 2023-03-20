@@ -167,7 +167,7 @@ namespace ts3::gpuapi
 		/// If ENABLE_MRT_SEPARATE_CONFIG_BIT is set, each active target uses its corresponding entry.
 		/// Otherwise, attachments[0] is used for all targets and rest of the array is ignored.
 		/// @see EBlendConfigFlags
-		RTColorAttachmentBlendSettings attachments[cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+		RTColorAttachmentBlendSettings attachments[gpm::RT_MAX_COLOR_ATTACHMENTS_NUM];
 
 		math::RGBAColorR32Norm constantColor;
 	};

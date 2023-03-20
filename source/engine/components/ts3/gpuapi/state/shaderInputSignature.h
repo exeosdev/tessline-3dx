@@ -96,7 +96,7 @@ namespace ts3::gpuapi
 
 		struct ConstantGroup
 		{
-			using ConstantList = std::array<ConstantDesc, cxdefs::GPU_SYSTEM_METRIC_IS_MAX_CONSTANT_GROUP_SIZE>;
+			using ConstantList = std::array<ConstantDesc, gpm::IS_MAX_CONSTANT_GROUP_SIZE>;
 			EShaderConstantAccessClass accessClass;
 			ConstantList constantList;
 			uint32 constantsNum = 0;
@@ -129,14 +129,14 @@ namespace ts3::gpuapi
 
 		struct DescriptorSet
 		{
-			using DescriptorList = std::array<DescriptorDesc, cxdefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SET_SIZE>;
+			using DescriptorList = std::array<DescriptorDesc, gpm::IS_MAX_DESCRIPTOR_SET_SIZE>;
 			EShaderInputDescriptorType descriptorType;
 			DescriptorList descriptorList;
 			uint32 descriptorsNum = 0;
 		};
 
-		using ConstantGroupArray = std::array<ConstantGroup, cxdefs::GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM>;
-		using DescriptorSetArray = std::array<DescriptorSet, cxdefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM>;
+		using ConstantGroupArray = std::array<ConstantGroup, gpm::SHADER_COMBINED_STAGES_NUM>;
+		using DescriptorSetArray = std::array<DescriptorSet, gpm::IS_MAX_DESCRIPTOR_SETS_NUM>;
 
 		Bitmask<EShaderStageFlags> activeShaderStagesMask;
 		ConstantGroupArray constantGroupArray;

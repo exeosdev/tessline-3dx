@@ -8,6 +8,14 @@
 namespace ts3::gpuapi
 {
 
+	void GLIAInputLayoutDefinition::reset()
+	{
+		activeAttributesMask = 0;
+		primitiveTopology = 0;
+		memZero( attributeArray );
+	}
+
+
 	void GLIAVertexBuffersBindings::initializeInterleaved()
 	{
 		bindingType = EGLVertexBufferBindingType::Interleaved;
@@ -163,7 +171,7 @@ namespace ts3::gpuapi
 			uint32 currentVertexAttributesNum = 0;
 			uint64 currentAttributePackedRelativeOffset = 0;
 
-			for( uint32 attributeIndex = 0; attributeIndex < cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
+			for( uint32 attributeIndex = 0; attributeIndex < gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
 			{
 				const auto attributeBit = cxdefs::makeIAVertexAttributeFlag( attributeIndex );
 				if( pDefinition.activeAttributesMask.isSet( attributeBit ) )
@@ -237,7 +245,7 @@ namespace ts3::gpuapi
 			pOutGLBindings.initializeSeparate();
 		#endif
 
-			for( input_assembler_index_t streamIndex = 0; streamIndex < cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )
+			for( input_assembler_index_t streamIndex = 0; streamIndex < gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )
 			{
 				const auto & inputVertexBufferRef = pVBReferences[streamIndex];
 				const auto vbBindingFlag = cxdefs::makeIAVertexBufferFlag( streamIndex );
@@ -344,7 +352,7 @@ namespace ts3::gpuapi
 			glBindVertexArray( pVertexArrayObject.mGLHandle );
 			ts3OpenGLHandleLastError();
 
-			for( uint32 attributeIndex = 0; attributeIndex < cxdefs::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
+			for( uint32 attributeIndex = 0; attributeIndex < gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
 			{
 				const auto attributeBit = cxdefs::makeIAVertexAttributeFlag( attributeIndex );
 				if( pInputLayoutDefinition.activeAttributesMask.isSet( attributeBit ) )
@@ -415,7 +423,7 @@ namespace ts3::gpuapi
 
 			GLuint currentVBBinding = 0;
 
-			for( uint32 attributeIndex = 0; attributeIndex < cxdefs::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
+			for( uint32 attributeIndex = 0; attributeIndex < gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
 			{
 				const auto attributeBit = cxdefs::makeIAVertexAttributeFlag( attributeIndex );
 				if( pInputLayoutDefinition.activeAttributesMask.isSet( attributeBit ) )

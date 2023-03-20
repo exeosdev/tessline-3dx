@@ -46,7 +46,7 @@ namespace ts3::gpuapi
 	using shader_input_ref_id_t = uint64;
 	using shader_input_index_t = uint32;
 
-	using GraphicsShaderArray = std::array<ShaderHandle, cxdefs::GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM>;
+	using GraphicsShaderArray = std::array<ShaderHandle, gpm::SHADER_GRAPHICS_STAGES_NUM>;
 
 	namespace cxdefs
 	{
@@ -58,12 +58,6 @@ namespace ts3::gpuapi
 		constexpr auto VERTEX_ATTRIBUTE_OFFSET_APPEND = Limits<gpu_memory_size_t>::maxValue;
 
 		///
-		constexpr auto RT_MAX_COLOR_ATTACHMENTS_NUM = static_cast<render_target_index_t>( GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM );
-
-		///
-		constexpr auto RT_MAX_COMBINED_ATTACHMENTS_NUM = static_cast<render_target_index_t>( GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM );
-
-		///
 		constexpr auto RT_ATTACHMENT_MSAA_LEVEL_INVALID = Limits<uint32>::maxValue;
 
 		///
@@ -72,19 +66,19 @@ namespace ts3::gpuapi
 		/// @brief
 		inline constexpr uint32 makeRTAttachmentFlag( native_uint pAttachmentIndex )
 		{
-			return ( pAttachmentIndex < RT_MAX_COMBINED_ATTACHMENTS_NUM ) ? ( 1 << static_cast<render_target_index_t>( pAttachmentIndex ) ) : 0u;
+			return ( pAttachmentIndex < gpm::RT_MAX_COMBINED_ATTACHMENTS_NUM ) ? ( 1 << static_cast<render_target_index_t>( pAttachmentIndex ) ) : 0u;
 		}
 
 		/// @brief
 		inline constexpr bool isRTAttachmentIndexValid( native_uint pIndex )
 		{
-			return pIndex < cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM;
+			return pIndex < gpm::RT_MAX_COMBINED_ATTACHMENTS_NUM;
 		}
 
 		/// @brief
 		inline constexpr bool isRTColorAttachmentIndexValid( native_uint pIndex )
 		{
-			return pIndex < cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM;
+			return pIndex < gpm::RT_MAX_COLOR_ATTACHMENTS_NUM;
 		}
 
 	}
@@ -129,7 +123,7 @@ namespace ts3::gpuapi
 		E_RT_ATTACHMENT_FLAG_COLOR_7_BIT       = cxdefs::makeRTAttachmentFlag( E_RT_ATTACHMENT_INDEX_COLOR_7 ),
 		E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT = cxdefs::makeRTAttachmentFlag( E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL ),
 
-		E_RT_ATTACHMENT_MASK_COLOR_ALL = makeLSFBitmask<uint32>( cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ),
+		E_RT_ATTACHMENT_MASK_COLOR_ALL = makeLSFBitmask<uint32>( gpm::RT_MAX_COLOR_ATTACHMENTS_NUM ),
 		E_RT_ATTACHMENT_MASK_ALL = E_RT_ATTACHMENT_MASK_COLOR_ALL | E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT,
 
 		E_RT_ATTACHMENT_MASK_DEFAULT_C0_DS =

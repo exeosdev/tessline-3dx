@@ -248,8 +248,8 @@ namespace ts3
 		return Bitmask<TIntegral>( pValue );
 	}
 
-	template <typename TVal, typename TInput = TVal>
-	TS3_ATTR_NO_DISCARD inline constexpr Bitmask<TVal> makeBitmaskEx( TInput pValue = static_cast<TVal>( 0 ) ) noexcept
+	template <typename TVal, typename TInput>
+	TS3_ATTR_NO_DISCARD inline constexpr Bitmask<TVal> makeBitmaskEx( TInput pValue = static_cast<TInput>( 0 ) ) noexcept
 	{
 		return Bitmask<TVal>( pValue );
 	}

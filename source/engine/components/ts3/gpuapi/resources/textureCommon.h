@@ -131,7 +131,7 @@ namespace ts3::gpuapi
 
 	struct TextureSubTextureInitDataDesc
 	{
-		using MipLevelInitDataDescArray = std::array<TextureMipSubLevelInitDataDesc, cxdefs::GPU_SYSTEM_METRIC_TEXTURE_MAX_MIP_LEVELS_NUM>;
+		using MipLevelInitDataDescArray = std::array<TextureMipSubLevelInitDataDesc, gpm::TEXTURE_MAX_MIP_LEVELS_NUM>;
 		MipLevelInitDataDescArray mipLevelInitDataArray;
 		uint32 subTextureIndex;
 	};

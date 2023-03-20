@@ -86,7 +86,7 @@ namespace ts3::gpuapi
 
 	void RenderTargetBindingDynamicState::resetColorAttachmentBindings()
 	{
-		_resetColorAttachmentBindings( 0, cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM );
+		_resetColorAttachmentBindings( 0, gpm::RT_MAX_COLOR_ATTACHMENTS_NUM );
 	}
 
 	void RenderTargetBindingDynamicState::resetDepthStencilAttachmentBinding()
@@ -211,7 +211,7 @@ namespace ts3::gpuapi
 
 	void RenderPassConfigurationDynamicState::resetColorAttachmentUsages()
 	{
-		_resetColorAttachmentUsages( 0, cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM );
+		_resetColorAttachmentUsages( 0, gpm::RT_MAX_COLOR_ATTACHMENTS_NUM );
 	}
 
 	void RenderPassConfigurationDynamicState::resetDepthStencilAttachmentUsage()

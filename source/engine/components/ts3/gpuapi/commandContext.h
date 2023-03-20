@@ -5,7 +5,7 @@
 #define __TS3_GPUAPI_GPU_CMD_CONTEXT_H__
 
 #include "commonCommandDefs.h"
-#include "resources/commonGPUResourceDefs.h"
+#include "resources/gpuBufferCommon.h"
 
 namespace ts3::gpuapi
 {

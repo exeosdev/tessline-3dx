@@ -80,7 +80,7 @@ namespace ts3::gpuapi
 
 	void IAVertexStreamDynamicState::resetVertexBufferRefs()
 	{
-		_resetVertexBufferRefs( 0, cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM );
+		_resetVertexBufferRefs( 0, gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM );
 	}
 
 	void IAVertexStreamDynamicState::resetIndexBufferRef()
@@ -97,7 +97,7 @@ namespace ts3::gpuapi
 
 	void IAVertexStreamDynamicState::_setVertexBufferRefs( native_uint pFirstIndex, native_uint pCount, const IAVertexBufferReference * pVBReferences )
 	{
-		for( native_uint vbIndex = pFirstIndex; ( vbIndex < cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) && ( pCount != 0 ); ++vbIndex, --pCount )
+		for( native_uint vbIndex = pFirstIndex; ( vbIndex < gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) && ( pCount != 0 ); ++vbIndex, --pCount )
 		{
 			const auto & sourceVBReference = pVBReferences[vbIndex - pFirstIndex];
 
@@ -110,7 +110,7 @@ namespace ts3::gpuapi
 
 	void IAVertexStreamDynamicState::_resetVertexBufferRefs( native_uint pFirstIndex, native_uint pCount )
 	{
-		for( native_uint vbIndex = pFirstIndex; ( vbIndex < cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) && ( pCount != 0 ); ++vbIndex, --pCount )
+		for( native_uint vbIndex = pFirstIndex; ( vbIndex < gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM ) && ( pCount != 0 ); ++vbIndex, --pCount )
 		{
 			const auto vertexBufferBit = cxdefs::makeIAVertexBufferFlag( vbIndex );
 
