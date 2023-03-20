@@ -80,21 +80,21 @@ namespace ts3::gpuapi
 				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_BLEND_BIT ) )
 				{
 					const auto & blendState = glcGraphicsPSO->getBlendState();
-					applyGLBlendState( blendState );
+					_globalStateCache.applyBlendState( blendState.mGLBlendConfig );
 					executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_BLEND_BIT );
 				}
 
 				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_DEPTH_STENCIL_BIT ) )
 				{
 					const auto & depthStencilState = glcGraphicsPSO->getDepthStencilState();
-					applyGLDepthStencilState( depthStencilState );
+					_globalStateCache.applyDepthStencilState( depthStencilState.mGLDepthStencilConfig );
 					executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_DEPTH_STENCIL_BIT );
 				}
 
 				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_RASTERIZER_BIT ) )
 				{
 					const auto & rasterizerState = glcGraphicsPSO->getRasterizerState();
-					applyGLRasterizerState( rasterizerState );
+					_globalStateCache.applyRasterizerState( rasterizerState.mGLRasterizerConfig );
 					executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_RASTERIZER_BIT );
 				}
 			}
@@ -329,153 +329,6 @@ namespace ts3::gpuapi
 		return _vaoCache.getOrCreate( pInputLayoutState, pVertexStreamState );
 	}
 
-	void GLGraphicsPipelineStateController::applyGLBlendState( const GLBlendImmutableState & pBlendState )
-	{
-		if( pBlendState.mGLBlendConfig.attachmentsMask.isSetAnyOf( E_RT_ATTACHMENT_MASK_COLOR_ALL ) )
-		{
-			if( pBlendState.mBlendFlags.isSet( E_BLEND_CONFIG_FLAG_ENABLE_MRT_INDEPENDENT_BLENDING_BIT ) )
-			{
-				for( uint32 caIndex = 0; cxdefs::isRTColorAttachmentIndexValid( caIndex ); ++caIndex )
-				{
-					const auto attachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );
-					if( pBlendState.mGLBlendConfig.attachmentsMask.isSet( attachmentBit ) )
-					{
-						glEnablei( GL_BLEND, caIndex );
-						ts3OpenGLHandleLastError();
-
-						const auto & blendProps = pBlendState.mGLBlendConfig.attachments[caIndex];
-
-						glBlendFuncSeparatei( caIndex, blendProps.srcColorFactor, blendProps.dstColorFactor, blendProps.srcAlphaFactor, blendProps.dstAlphaFactor );
-						ts3OpenGLHandleLastError();
-
-						glBlendEquationSeparatei( caIndex, blendProps.colorEquation, blendProps.alphaEquation );
-						ts3OpenGLHandleLastError();
-					}
-					else
-					{
-						glDisablei( GL_BLEND, caIndex );
-						ts3OpenGLHandleLastError();
-					}
-				}
-			}
-			else
-			{
-				glEnable( GL_BLEND );
-				ts3OpenGLHandleLastError();
-
-				const auto & blendProps = pBlendState.mGLBlendConfig.attachments[0];
-
-				glBlendFuncSeparate( blendProps.srcColorFactor, blendProps.dstColorFactor, blendProps.srcAlphaFactor, blendProps.dstAlphaFactor );
-				ts3OpenGLHandleLastError();
-
-				glBlendEquationSeparate( blendProps.colorEquation, blendProps.alphaEquation );
-				ts3OpenGLHandleLastError();
-			}
-
-			if( pBlendState.mGLBlendConfig.flags.isSetAnyOf( E_BLEND_CONFIG_FLAG_SET_FIXED_BLEND_CONSTANTS_BIT ) )
-			{
-				const auto & blendFactor = pBlendState.mGLBlendConfig.constantColor;
-
-				glBlendColor( blendFactor.fpRed, blendFactor.fpGreen, blendFactor.fpBlue, blendFactor.fpAlpha );
-				ts3OpenGLHandleLastError();
-			}
-		}
-		else
-		{
-			glDisable( GL_BLEND );
-			ts3OpenGLHandleLastError();
-		}
-	}
-
-	void GLGraphicsPipelineStateController::applyGLDepthStencilState( const GLDepthStencilImmutableState & pDepthStencilState )
-	{
-		if( pDepthStencilState.mDepthStencilFlags.isSet( E_DEPTH_STENCIL_CONFIG_FLAG_ENABLE_DEPTH_TEST_BIT ) )
-		{
-			glEnable( GL_DEPTH_TEST );
-			ts3OpenGLHandleLastError();
-
-			glDepthFunc( pDepthStencilState.mGLDepthStencilConfig.depthSettings.depthCompFunc );
-			ts3OpenGLHandleLastError();
-
-			glDepthMask( pDepthStencilState.mGLDepthStencilConfig.depthSettings.writeMask ? GL_TRUE : GL_FALSE );
-			ts3OpenGLHandleLastError();
-		}
-		else
-		{
-			glDisable( GL_DEPTH_TEST );
-			ts3OpenGLHandleLastError();
-		}
-
-		if( pDepthStencilState.mDepthStencilFlags.isSet( E_DEPTH_STENCIL_CONFIG_FLAG_ENABLE_STENCIL_TEST_BIT ) )
-		{
-			glEnable( GL_STENCIL_TEST );
-			ts3OpenGLHandleLastError();
-			{
-				const auto & frontFace = pDepthStencilState.mGLDepthStencilConfig.stencilSettings.frontFace;
-				glStencilFuncSeparate( GL_FRONT, frontFace.compFunc, frontFace.refValue, frontFace.readMask );
-				ts3OpenGLHandleLastError();
-
-				glStencilMaskSeparate( GL_FRONT, frontFace.writeMask );
-				ts3OpenGLHandleLastError();
-
-				glStencilOpSeparate( GL_FRONT, frontFace.opFail, frontFace.opPassDepthFail, frontFace.opPassDepthPass );
-				ts3OpenGLHandleLastError();
-			}
-			{
-				const auto & backFace = pDepthStencilState.mGLDepthStencilConfig.stencilSettings.backFace;
-				glStencilFuncSeparate( GL_FRONT, backFace.compFunc, backFace.refValue, backFace.readMask );
-				ts3OpenGLHandleLastError();
-
-				glStencilMaskSeparate( GL_FRONT, backFace.writeMask );
-				ts3OpenGLHandleLastError();
-
-				glStencilOpSeparate( GL_FRONT, backFace.opFail, backFace.opPassDepthFail, backFace.opPassDepthPass );
-				ts3OpenGLHandleLastError();
-			}
-		}
-		else
-		{
-			glDisable( GL_STENCIL_TEST );
-			ts3OpenGLHandleLastError();
-		}
-	}
-
-	void GLGraphicsPipelineStateController::applyGLRasterizerState( const GLRasterizerImmutableState & pRasterizerState )
-	{
-		if( pRasterizerState.mGLRasterizerConfig.flags.isSet( E_RASTERIZER_CONFIG_FLAG_ENABLE_SCISSOR_TEST_BIT ) )
-		{
-			glEnable( GL_SCISSOR_TEST );
-			ts3OpenGLHandleLastError();
-		}
-		else
-		{
-			glDisable( GL_SCISSOR_TEST );
-			ts3OpenGLHandleLastError();
-		}
-
-		if( pRasterizerState.mGLRasterizerConfig.cullMode != 0 )
-		{
-			glEnable( GL_CULL_FACE );
-			ts3OpenGLHandleLastError();
-
-			glCullFace( pRasterizerState.mGLRasterizerConfig.cullMode );
-			ts3OpenGLHandleLastError();
-		}
-		else
-		{
-			glDisable( GL_CULL_FACE );
-			ts3OpenGLHandleLastError();
-		}
-
-		glFrontFace( pRasterizerState.mGLRasterizerConfig.frontFaceVerticesOrder );
-		ts3OpenGLHandleLastError();
-
-	#if( TS3GX_GL_FEATURE_SUPPORT_PRIMITIVE_FILL_MODE )
-		glPolygonMode( GL_FRONT_AND_BACK, pRasterizerState.mGLRasterizerConfig.primitiveFillMode );
-		ts3OpenGLHandleLastError();
-	#endif
-	}
-
 	void GLGraphicsPipelineStateController::applyGLIAIndexBufferBinding(
 			const GLIAIndexBufferBinding & pIndexBufferBinding,
 			GLDrawTopologyProperties & pDrawTopologyProperties )
@@ -593,7 +446,7 @@ namespace ts3::gpuapi
 		// and debugging a lot easier (unused buffers from previous passes did some confusion in few cases).
 		// glBindVertexBuffers(
 		// 	0u,
-		// 	cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_BUFFER_BINDINGS_NUM,
+		// 	gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM,
 		// 	&( pVertexBufferBindings.separateBindings.handleArray[0] ),
 		// 	&( pVertexBufferBindings.separateBindings.offsetArray[0] ),
 		// 	&( pVertexBufferBindings.separateBindings.strideArray[0] ) );
