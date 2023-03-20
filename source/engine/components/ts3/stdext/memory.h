@@ -115,6 +115,18 @@ namespace ts3
 		return allocInfo;
 	}
 
+	template <typename TVal>
+	bool memCompareEqual( const TVal & pFirst, const TVal & pSecond )
+	{
+		return memcmp( &pFirst, &pSecond, sizeof (TVal ) ) == 0;
+	}
+
+	template <typename TVal>
+	bool memCompareNotEqual( const TVal & pFirst, const TVal & pSecond )
+	{
+		return memcmp( &pFirst, &pSecond, sizeof (TVal ) ) != 0;
+	}
+
 	///
 	/// @param pMemory1
 	/// @param pSize1
