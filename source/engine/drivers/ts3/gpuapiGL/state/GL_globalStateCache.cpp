@@ -53,6 +53,7 @@ namespace ts3::gpuapi
 			glBindVertexArray( pVertexArrayObjectHandle );
 			ts3OpenGLHandleLastError();
 			_cachedState.vertexArrayObjectBinding = pVertexArrayObjectHandle;
+			_cachedState.indexBufferBinding = 0;
 		}
 	}
 

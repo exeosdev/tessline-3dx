@@ -22,7 +22,7 @@ set( TS3_ENGINE_SRC_FILES
 		# "gpuapi/hwGeometryBuffer.cpp"
 		# "gpuapi/vertexFormatDefs.h"
         # "gpuapi/vertexFormatDefs.cpp"
-		"gpuapi/shaderResourceDefs.h"
+		#"gpuapi/shaderResourceDefs.h"
 
 		"renderer/commonRendererDefs.h"
 		"renderer/renderer.h"

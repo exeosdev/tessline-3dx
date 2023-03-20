@@ -62,8 +62,6 @@ namespace ts3
 
 		CBShadowData cbShadowData;
 		cbShadowData.m4fLightSpaceMatrix = _currentState.mLightSpace;
-		cbShadowData.v2fShadowMapSize.x = _shadowConfig.shadowMapSize.width;
-		cbShadowData.v2fShadowMapSize.y = _shadowConfig.shadowMapSize.height;
 
 		directGraphicsContext->updateBufferDataUpload( *_resources.constantBuffer, cbShadowData );
 	}
@@ -77,8 +75,6 @@ namespace ts3
 
 		CBShadowData cbShadowData;
 		cbShadowData.m4fLightSpaceMatrix = _currentState.mLightSpace;
-		cbShadowData.v2fShadowMapSize.x = _shadowConfig.shadowMapSize.width;
-		cbShadowData.v2fShadowMapSize.y = _shadowConfig.shadowMapSize.height;
 
 		directGraphicsContext->updateBufferDataUpload( *_resources.constantBuffer, cbShadowData );
 	}

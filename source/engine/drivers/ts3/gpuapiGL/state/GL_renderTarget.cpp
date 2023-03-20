@@ -133,8 +133,6 @@ namespace ts3::gpuapi
 				return nullptr;
 			}
 
-			GLenum colorBuffersArray[gpm::RT_MAX_COLOR_ATTACHMENTS_NUM];
-
 			for( uint32 caIndex = 0; cxdefs::isRTColorAttachmentIndexValid( caIndex ); ++caIndex )
 			{
 				const auto attachmentBit = cxdefs::makeRTAttachmentFlag( caIndex );

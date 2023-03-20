@@ -182,13 +182,12 @@ namespace ts3::gpuapi
 	{
 		glValidateProgram( mGLHandle );
 		ts3OpenGLHandleLastError();
-		auto infoLog = getInfoLog();
 
 		auto validateStatus = queryParameter( GL_VALIDATE_STATUS );
 		if( validateStatus == GL_FALSE )
 		{
 			auto infoLog = getInfoLog();
-			// print info log
+			ts3DebugOutput( infoLog.data() );
 			ts3DebugInterrupt();
 			return false;
 		}

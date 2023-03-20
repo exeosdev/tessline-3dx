@@ -22,7 +22,7 @@
 #  endif
 #endif
 
-#define TS3GX_GL4_USE_COMPAT_API 0
+#define TS3GX_GL4_USE_COMPAT_API 1
 
 #if defined( TS3GX_GL4_USE_COMPAT_API )
 #  if( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_MACOS )
