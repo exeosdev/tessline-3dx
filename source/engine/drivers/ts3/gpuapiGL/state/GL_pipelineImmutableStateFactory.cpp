@@ -49,7 +49,7 @@ namespace ts3::gpuapi
 	RenderPassConfigurationImmutableStateHandle GLPipelineImmutableStateFactory::createRenderPassState(
 			const RenderPassConfiguration & pConfiguration )
 	{
-		return GLRenderPassConfigurationImmutableState::createInstance( mGLGPUDevice, pConfiguration );
+		return createRenderPassStateDefault( mGLGPUDevice, pConfiguration );
 	}
 
 	RenderTargetBindingImmutableStateHandle GLPipelineImmutableStateFactory::createScreenRenderTargetBindingState(

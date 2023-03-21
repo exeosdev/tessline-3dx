@@ -1,6 +1,6 @@
 
 #include "DX11_pipelineStateDesc.h"
-#include <ts3/gpuapiDX11/DX11_coreAPIProxy.h>
+#include <ts3/gpuapiDX11/DX11_apiTranslationLayer.h>
 #include <ts3/gpuapiDX11/DX11_gpuDevice.h>
 #include <ts3/gpuapiDX11/resources/DX11_gpuBuffer.h>
 #include <ts3/gpuapiDX11/resources/DX11_shader.h>
@@ -19,9 +19,9 @@ namespace ts3::gpuapi
 		if( pBinding.indexBufferBinding.bufferObject )
 		{
 			auto * dx11IBStorage = pBinding.indexBufferBinding.bufferObject->queryInterface<DX11GPUBuffer>();
-			auto dx11IBDataFormat = DX11CoreAPIProxy::translateDXBaseDataType( static_cast<EBaseDataType>( pBinding.indexBufferBinding.format ) );
+			auto dx11IBDataFormat = atl::translateDXBaseDataType( static_cast<EBaseDataType>( pBinding.indexBufferBinding.format ) );
 			dx11VertexDataSourceBinding.indexBufferBinding.buffer = dx11IBStorage->mD3D11Buffer.Get();
-			dx11VertexDataSourceBinding.indexBufferBinding.offset = trunc_numeric_cast<uint32>( pBinding.indexBufferBinding.dataOffset );
+			dx11VertexDataSourceBinding.indexBufferBinding.offset = numeric_cast<uint32>( pBinding.indexBufferBinding.dataOffset );
 			dx11VertexDataSourceBinding.indexBufferBinding.format = dx11IBDataFormat;
 		}
 
@@ -32,8 +32,8 @@ namespace ts3::gpuapi
 			{
 				auto * dx11VBStorage = vbBindingDesc.bufferObject->queryInterface<DX11GPUBuffer>();
 				dx11VertexDataSourceBinding.vertexBufferBinding.bufferArray[vertexInputStreamIndex] = dx11VBStorage->mD3D11Buffer.Get();
-				dx11VertexDataSourceBinding.vertexBufferBinding.offsetArray[vertexInputStreamIndex] = trunc_numeric_cast<UINT>( vbBindingDesc.dataOffset );
-				dx11VertexDataSourceBinding.vertexBufferBinding.strideArray[vertexInputStreamIndex] = trunc_numeric_cast<UINT>( vbBindingDesc.dataStride );
+				dx11VertexDataSourceBinding.vertexBufferBinding.offsetArray[vertexInputStreamIndex] = numeric_cast<UINT>( vbBindingDesc.dataOffset );
+				dx11VertexDataSourceBinding.vertexBufferBinding.strideArray[vertexInputStreamIndex] = numeric_cast<UINT>( vbBindingDesc.dataStride );
 				dx11VertexDataSourceBinding.vertexBufferActiveIndicesNum += 1;
 			}
 		}
@@ -48,32 +48,6 @@ namespace ts3::gpuapi
 	                                                                            pipeline_input_desc_hash_t pDescHash,
 	                                                                            DX11GPUDevice & pGPUDevice )
 	{
-		DX11BlendStateDescriptor dx11BSDescriptor;
-
-		dx11BSDescriptor.configDesc.AlphaToCoverageEnable = FALSE;
-		dx11BSDescriptor.configDesc.IndependentBlendEnable = FALSE;
-
-		dx11BSDescriptor.configDesc.RenderTarget[0].BlendEnable = ( pConfigDesc.blendState == EBlendState::Enabled ) ? TRUE : FALSE;
-		dx11BSDescriptor.configDesc.RenderTarget[0].SrcBlend = DX11CoreAPIProxy::translateDX11BlendFactor( pConfigDesc.factorSrcColor );
-		dx11BSDescriptor.configDesc.RenderTarget[0].DestBlend = DX11CoreAPIProxy::translateDX11BlendFactor( pConfigDesc.factorDstColor );
-		dx11BSDescriptor.configDesc.RenderTarget[0].BlendOp = DX11CoreAPIProxy::translateDX11BlendOp( pConfigDesc.opColor );
-		dx11BSDescriptor.configDesc.RenderTarget[0].SrcBlendAlpha = DX11CoreAPIProxy::translateDX11BlendFactor( pConfigDesc.factorSrcAlpha );
-		dx11BSDescriptor.configDesc.RenderTarget[0].DestBlendAlpha = DX11CoreAPIProxy::translateDX11BlendFactor( pConfigDesc.factorDstAlpha );
-		dx11BSDescriptor.configDesc.RenderTarget[0].BlendOpAlpha = DX11CoreAPIProxy::translateDX11BlendOp( pConfigDesc.opAlpha );
-		dx11BSDescriptor.configDesc.RenderTarget[0].RenderTargetWriteMask = DX11CoreAPIProxy::translateDX11BlendRenderTargetWriteMask( pConfigDesc.renderTargetWriteMask );
-		dx11BSDescriptor.configDesc.ConstantFactor = pConfigDesc.constantFactor;
-
-		auto hResult = pGPUDevice.mD3D11Device1->CreateBlendState( &( dx11BSDescriptor.configDesc ), dx11BSDescriptor.d3d11BlendState.GetAddressOf() );
-		if( FAILED( hResult ) )
-		{
-			ts3DebugInterrupt();
-			return nullptr;
-		}
-
-		dx11BSDescriptor.inputDescHash = pDescHash;
-		dx11BSDescriptor.descriptorID = computePipelineStateDescriptorID( dx11BSDescriptor.configDesc );
-
-		return dx11BSDescriptor;
 	}
 
 	DX11DepthStencilStateDescriptor DX11GraphicsPSDCacheTraits::createDepthStencilDescriptor( const DepthStencilConfigDesc & pConfigDesc,
@@ -84,23 +58,23 @@ namespace ts3::gpuapi
 
 		dx11DSSDescriptor.configDesc.DepthEnable = ( pConfigDesc.depthTestState == EDepthTestState::Enabled ) ? TRUE : FALSE;
 		auto & depthSettings = pConfigDesc.depthSettings;
-		dx11DSSDescriptor.configDesc.DepthFunc = DX11CoreAPIProxy::translateDX11CompFunc( depthSettings.depthCompFunc );
-		dx11DSSDescriptor.configDesc.DepthWriteMask = DX11CoreAPIProxy::translateDX11DepthWriteMask( depthSettings.depthWriteMask );
+		dx11DSSDescriptor.configDesc.DepthFunc = atl::translateDX11CompFunc( depthSettings.depthCompFunc );
+		dx11DSSDescriptor.configDesc.DepthWriteMask = atl::translateDX11DepthWriteMask( depthSettings.depthWriteMask );
 
 		dx11DSSDescriptor.configDesc.StencilEnable = ( pConfigDesc.stencilTestState == EStencilTestState::Enabled ) ? TRUE : FALSE;
 		dx11DSSDescriptor.configDesc.StencilReadMask = pConfigDesc.stencilSettings.readMask;
 		dx11DSSDescriptor.configDesc.StencilWriteMask = pConfigDesc.stencilSettings.writeMask;
 		dx11DSSDescriptor.configDesc.StencilRefValue = pConfigDesc.stencilSettings.refValue;
 		auto & stencilBackFaceDesc = pConfigDesc.stencilSettings.backFace;
-		dx11DSSDescriptor.configDesc.BackFace.StencilFunc = DX11CoreAPIProxy::translateDX11CompFunc( stencilBackFaceDesc.compFunc );
-		dx11DSSDescriptor.configDesc.BackFace.StencilFailOp = DX11CoreAPIProxy::translateDX11StencilOp( stencilBackFaceDesc.opFail );
-		dx11DSSDescriptor.configDesc.BackFace.StencilDepthFailOp = DX11CoreAPIProxy::translateDX11StencilOp( stencilBackFaceDesc.opPassDepthFail );
-		dx11DSSDescriptor.configDesc.BackFace.StencilPassOp = DX11CoreAPIProxy::translateDX11StencilOp( stencilBackFaceDesc.opPassDepthPass );
+		dx11DSSDescriptor.configDesc.BackFace.StencilFunc = atl::translateDX11CompFunc( stencilBackFaceDesc.compFunc );
+		dx11DSSDescriptor.configDesc.BackFace.StencilFailOp = atl::translateDX11StencilOp( stencilBackFaceDesc.opFail );
+		dx11DSSDescriptor.configDesc.BackFace.StencilDepthFailOp = atl::translateDX11StencilOp( stencilBackFaceDesc.opPassDepthFail );
+		dx11DSSDescriptor.configDesc.BackFace.StencilPassOp = atl::translateDX11StencilOp( stencilBackFaceDesc.opPassDepthPass );
 		auto & stencilFrontFaceDesc = pConfigDesc.stencilSettings.frontFace;
-		dx11DSSDescriptor.configDesc.FrontFace.StencilFunc = DX11CoreAPIProxy::translateDX11CompFunc( stencilFrontFaceDesc.compFunc );
-		dx11DSSDescriptor.configDesc.FrontFace.StencilFailOp = DX11CoreAPIProxy::translateDX11StencilOp( stencilFrontFaceDesc.opFail );
-		dx11DSSDescriptor.configDesc.FrontFace.StencilDepthFailOp = DX11CoreAPIProxy::translateDX11StencilOp( stencilFrontFaceDesc.opPassDepthFail );
-		dx11DSSDescriptor.configDesc.FrontFace.StencilPassOp = DX11CoreAPIProxy::translateDX11StencilOp( stencilFrontFaceDesc.opPassDepthPass );
+		dx11DSSDescriptor.configDesc.FrontFace.StencilFunc = atl::translateDX11CompFunc( stencilFrontFaceDesc.compFunc );
+		dx11DSSDescriptor.configDesc.FrontFace.StencilFailOp = atl::translateDX11StencilOp( stencilFrontFaceDesc.opFail );
+		dx11DSSDescriptor.configDesc.FrontFace.StencilDepthFailOp = atl::translateDX11StencilOp( stencilFrontFaceDesc.opPassDepthFail );
+		dx11DSSDescriptor.configDesc.FrontFace.StencilPassOp = atl::translateDX11StencilOp( stencilFrontFaceDesc.opPassDepthPass );
 
 		auto hResult = pGPUDevice.mD3D11Device1->CreateDepthStencilState( &( dx11DSSDescriptor.configDesc ), dx11DSSDescriptor.d3d11DepthStencilState.GetAddressOf() );
 		if( FAILED( hResult ) )
@@ -121,8 +95,8 @@ namespace ts3::gpuapi
 	{
 		DX11RasterizerStateDescriptor dx11RSDescriptor;
 
-		dx11RSDescriptor.configDesc.CullMode = DX11CoreAPIProxy::translateDX11CullMode( pConfigDesc.cullMode );
-		dx11RSDescriptor.configDesc.FillMode = DX11CoreAPIProxy::translateDX11PrimitiveFillMode( pConfigDesc.primitiveFillMode );
+		dx11RSDescriptor.configDesc.CullMode = atl::translateDX11CullMode( pConfigDesc.cullMode );
+		dx11RSDescriptor.configDesc.FillMode = atl::translateDX11PrimitiveFillMode( pConfigDesc.primitiveFillMode );
 		dx11RSDescriptor.configDesc.DepthClipEnable = TRUE;
 		dx11RSDescriptor.configDesc.MultisampleEnable = FALSE;
 		dx11RSDescriptor.configDesc.FrontCounterClockwise = FALSE;
@@ -172,10 +146,10 @@ namespace ts3::gpuapi
 				}
 
 				auto & dx11VertexAttribute = dx11VIFDescriptor.inputFormatDesc.vertexAttributeArray[vertexAttributeDesc.attributeIndex];
-				dx11VertexAttribute.AlignedByteOffset = trunc_numeric_cast<UINT>( attributeRelativeOffset );
+				dx11VertexAttribute.AlignedByteOffset = numeric_cast<UINT>( attributeRelativeOffset );
 				dx11VertexAttribute.SemanticName = vertexAttributeDesc.semanticName;
 				dx11VertexAttribute.SemanticIndex = vertexAttributeDesc.semanticIndex;
-				dx11VertexAttribute.Format = DX11CoreAPIProxy::translateDXVertexAttribFormat( vertexAttributeDesc.format );
+				dx11VertexAttribute.Format = atl::translateDXVertexAttribFormat( vertexAttributeDesc.format );
 				dx11VertexAttribute.InputSlot = vertexAttributeDesc.streamIndex;
 				dx11VertexAttribute.InputSlotClass = ( vertexAttributeDesc.instanceRate == 0 ) ? D3D11_INPUT_PER_VERTEX_DATA : D3D11_INPUT_PER_INSTANCE_DATA;
 				dx11VertexAttribute.InstanceDataStepRate = vertexAttributeDesc.instanceRate;
@@ -197,7 +171,7 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
-		dx11VIFDescriptor.inputFormatDesc.primitiveTopology = DX11CoreAPIProxy::translateDX11PrimitiveTopology( pInputFormatDesc.primitiveTopology );
+		dx11VIFDescriptor.inputFormatDesc.primitiveTopology = atl::translateDX11PrimitiveTopology( pInputFormatDesc.primitiveTopology );
 		dx11VIFDescriptor.inputFormatDesc.activeVertexAttributesNum = activeVertexAttributesNum;
 		dx11VIFDescriptor.inputDescHash = pDescHash;
 		dx11VIFDescriptor.descriptorID = computePipelineStateDescriptorID( dx11VIFDescriptor.inputFormatDesc );

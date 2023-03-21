@@ -86,7 +86,7 @@ namespace ts3::gpuapi
 			const IAVertexStreamDefinition & pVertexStreamDefinition )
 	{
 		const auto vertexStreamCommonProperties = smutil::getIAVertexStreamStateCommonProperties( pVertexStreamDefinition );
-		const auto glcVertexStreamDefinition = smutil::translateIAVertexStreamDefinition( pVertexStreamDefinition );
+		const auto glcVertexStreamDefinition = smutil::translateIAVertexStreamDefinitionGL( pVertexStreamDefinition );
 
 		auto immutableState = createGPUAPIObject<GLIAVertexStreamImmutableState>(
 			pGPUDevice,
@@ -123,9 +123,9 @@ namespace ts3::gpuapi
 			const IAInputLayoutDefinition & pInputLayoutDefinition )
 	{
 		const auto inputLayoutCommonProperties = smutil::getIAInputLayoutStateCommonProperties( pInputLayoutDefinition );
-		const auto glcInputLayoutDefinition = smutil::translateIAInputLayoutDefinition( pInputLayoutDefinition );
+		const auto glcInputLayoutDefinition = smutil::translateIAInputLayoutDefinitionGL( pInputLayoutDefinition );
 
-		auto vertexArrayObject = smutil::createGLVertexArrayObjectLayoutOnly( glcInputLayoutDefinition );
+		auto vertexArrayObject = smutil::createGLVertexArrayObjectLayoutOnlyGL( glcInputLayoutDefinition );
 		if( !vertexArrayObject )
 		{
 			return nullptr;
@@ -156,7 +156,7 @@ namespace ts3::gpuapi
 			const IAInputLayoutDefinition & pInputLayoutDefinition )
 	{
 		const auto inputLayoutCommonProperties = smutil::getIAInputLayoutStateCommonProperties( pInputLayoutDefinition );
-		const auto glcInputLayoutDefinition = smutil::translateIAInputLayoutDefinition( pInputLayoutDefinition );
+		const auto glcInputLayoutDefinition = smutil::translateIAInputLayoutDefinitionGL( pInputLayoutDefinition );
 
 		auto immutableState = createGPUAPIObject<GLIAInputLayoutImmutableStateCompat>(
 			pGPUDevice,
@@ -170,7 +170,7 @@ namespace ts3::gpuapi
 	namespace smutil
 	{
 
-		GLIAVertexAttributeInfo translateIAVertexAttributeInfo(
+		GLIAVertexAttributeInfo translateIAVertexAttributeInfoGL(
 				const IAVertexAttributeInfo & pAttributeInfo )
 		{
 			GLIAVertexAttributeInfo glcAttributeInfo{};
@@ -192,7 +192,7 @@ namespace ts3::gpuapi
 			return glcAttributeInfo;
 		}
 
-		GLIAInputLayoutDefinition translateIAInputLayoutDefinition(
+		GLIAInputLayoutDefinition translateIAInputLayoutDefinitionGL(
 				const IAInputLayoutDefinition & pDefinition )
 		{
 			GLIAInputLayoutDefinition glcInputLayoutDefinition{};
@@ -211,7 +211,7 @@ namespace ts3::gpuapi
 					auto & glcAttributeInfo = glcInputLayoutDefinition.attributeArray[attributeIndex];
 
 					// Translate the attribute data. This includes the relative offset.
-					glcAttributeInfo = translateIAVertexAttributeInfo( inputAttributeInfo );
+					glcAttributeInfo = translateIAVertexAttributeInfoGL( inputAttributeInfo );
 
 					if( inputAttributeInfo.relativeOffset == cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND )
 					{
@@ -237,14 +237,14 @@ namespace ts3::gpuapi
 			return glcInputLayoutDefinition;
 		}
 
-		GLIAVertexStreamDefinition translateIAVertexStreamDefinition(
+		GLIAVertexStreamDefinition translateIAVertexStreamDefinitionGL(
 				const IAVertexStreamDefinition & pDefinition )
 		{
 			GLIAVertexStreamDefinition glcVertexStreamDefinition{};
 
 			if( pDefinition.activeBindingsMask.isSetAnyOf( E_IA_VERTEX_STREAM_BINDING_MASK_VERTEX_BUFFER_ALL_BITS ) )
 			{
-				translateVertexBufferReferences(
+				translateVertexBufferReferencesGL(
 					pDefinition.vertexBufferReferences,
 					pDefinition.activeBindingsMask,
 					glcVertexStreamDefinition.vertexBufferBindings );
@@ -252,7 +252,7 @@ namespace ts3::gpuapi
 
 			if( pDefinition.activeBindingsMask.isSet( E_IA_VERTEX_STREAM_BINDING_FLAG_INDEX_BUFFER_BIT ) )
 			{
-				translateIndexBufferReference(
+				translateIndexBufferReferenceGL(
 					pDefinition.indexBufferReference,
 					glcVertexStreamDefinition.indexBufferBinding );
 			}
@@ -263,7 +263,7 @@ namespace ts3::gpuapi
 			return glcVertexStreamDefinition;
 		}
 
-		uint32 translateVertexBufferReferences(
+		uint32 translateVertexBufferReferencesGL(
 				const IAVertexBufferReferenceArray & pVBReferences,
 				Bitmask<EIAVertexStreamBindingFlags> pBindingMask,
 				GLIAVertexBuffersBindings & pOutGLBindings)
@@ -276,7 +276,7 @@ namespace ts3::gpuapi
 			pOutGLBindings.initializeSeparate();
 		#endif
 
-			for( input_assembler_index_t streamIndex = 0; streamIndex < gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )
+			for( native_uint streamIndex = 0; streamIndex < gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )
 			{
 				const auto & inputVertexBufferRef = pVBReferences[streamIndex];
 				const auto vbBindingFlag = cxdefs::makeIAVertexBufferFlag( streamIndex );
@@ -314,7 +314,7 @@ namespace ts3::gpuapi
 			return activeBindingsNum;
 		}
 
-		bool translateIndexBufferReference(
+		bool translateIndexBufferReferenceGL(
 				const IAIndexBufferReference & pIBReference,
 				GLIAIndexBufferBinding & pOutGLBinding )
 		{
@@ -340,24 +340,24 @@ namespace ts3::gpuapi
 			}
 		}
 
-		GLIAVertexBuffersBindings translateVertexBufferReferences(
+		GLIAVertexBuffersBindings translateVertexBufferReferencesGL(
 				const IAVertexBufferReferenceArray & pVBReferences,
 				Bitmask<EIAVertexStreamBindingFlags> pBindingMask )
 		{
 			GLIAVertexBuffersBindings glcVertexBufferBindings{};
-			translateVertexBufferReferences( pVBReferences, pBindingMask, glcVertexBufferBindings );
+			translateVertexBufferReferencesGL( pVBReferences, pBindingMask, glcVertexBufferBindings );
 			return glcVertexBufferBindings;
 		}
 
-		GLIAIndexBufferBinding translateIndexBufferReference(
+		GLIAIndexBufferBinding translateIndexBufferReferenceGL(
 				const IAIndexBufferReference & pIBReference )
 		{
 			GLIAIndexBufferBinding glcIndexBufferBinding{};
-			translateIndexBufferReference( pIBReference, glcIndexBufferBinding );
+			translateIndexBufferReferenceGL( pIBReference, glcIndexBufferBinding );
 			return glcIndexBufferBinding;
 		}
 
-		GLVertexArrayObjectHandle createGLVertexArrayObjectLayoutOnly(
+		GLVertexArrayObjectHandle createGLVertexArrayObjectLayoutOnlyGL(
 				const GLIAInputLayoutDefinition & pInputLayoutDefinition ) noexcept
 		{
 			if( !pInputLayoutDefinition.activeAttributesMask.isSetAnyOf( E_IA_VERTEX_ATTRIBUTE_MASK_ALL ) )
@@ -366,12 +366,12 @@ namespace ts3::gpuapi
 			}
 
 			auto vertexArrayObject = GLVertexArrayObject::create();
-			updateGLVertexArrayObjectLayoutOnly( *vertexArrayObject, pInputLayoutDefinition );
+			updateGLVertexArrayObjectLayoutOnlyGL( *vertexArrayObject, pInputLayoutDefinition );
 
 			return vertexArrayObject;
 		}
 
-		bool updateGLVertexArrayObjectLayoutOnly(
+		bool updateGLVertexArrayObjectLayoutOnlyGL(
 				GLVertexArrayObject & pVertexArrayObject,
 				const GLIAInputLayoutDefinition & pInputLayoutDefinition ) noexcept
 		{
@@ -424,7 +424,7 @@ namespace ts3::gpuapi
 			return true;
 		}
 
-		GLVertexArrayObjectHandle createGLVertexArrayObjectLayoutStreamCombined(
+		GLVertexArrayObjectHandle createGLVertexArrayObjectLayoutStreamCombinedGL(
 				const GLIAInputLayoutDefinition & pInputLayoutDefinition,
 				const GLIAVertexStreamDefinition & pVertexStreamDefinition ) noexcept
 		{
@@ -434,12 +434,12 @@ namespace ts3::gpuapi
 			}
 
 			auto vertexArrayObject = GLVertexArrayObject::create();
-			updateGLVertexArrayObjectLayoutStreamCombined( *vertexArrayObject, pInputLayoutDefinition, pVertexStreamDefinition );
+			updateGLVertexArrayObjectLayoutStreamCombinedGL( *vertexArrayObject, pInputLayoutDefinition, pVertexStreamDefinition );
 
 			return vertexArrayObject;
 		}
 
-		bool updateGLVertexArrayObjectLayoutStreamCombined(
+		bool updateGLVertexArrayObjectLayoutStreamCombinedGL(
 				GLVertexArrayObject & pVertexArrayObject,
 				const GLIAInputLayoutDefinition & pInputLayoutDefinition,
 				const GLIAVertexStreamDefinition & pVertexStreamDefinition ) noexcept

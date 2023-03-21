@@ -1,5 +1,5 @@
 
-#include "DX_coreAPIProxy.h"
+#include "DX_apiTranslationLayer.h"
 #include <ts3/gpuapi/resources/shaderCommon.h>
 #include <ts3/gpuapi/resources/textureCommon.h>
 #include <ts3/stdext/stlHelperAlgo.h>
@@ -8,7 +8,7 @@
 namespace ts3::gpuapi
 {
 
-	DXGIGetDebugInterfaceType DXCoreAPIProxy::loadDXGIDebugLegacyLoader()
+	DXGIGetDebugInterfaceType atl::loadDXGIDebugLegacyLoader()
 	{
 		HMODULE dxgiDebugLib = ::LoadLibraryExA( "dxgidebug.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32 );
 		if( !dxgiDebugLib )
@@ -25,7 +25,7 @@ namespace ts3::gpuapi
 		return reinterpret_cast<DXGIGetDebugInterfaceType>( dxgiProcAddress );
 	}
 
-	ComPtr<IDXGIDebug> DXCoreAPIProxy::queryDXGIDebugInterface( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags )
+	ComPtr<IDXGIDebug> atl::queryDXGIDebugInterface( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags )
 	{
 		if( !pDriverConfigFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
 		{
@@ -54,7 +54,7 @@ namespace ts3::gpuapi
 		return dxgiDebugInterface;
 	}
 
-	ComPtr<IDXGIInfoQueue> DXCoreAPIProxy::queryDXGIDebugInfoQueue( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags )
+	ComPtr<IDXGIInfoQueue> atl::queryDXGIDebugInfoQueue( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags )
 	{
 		if( !pDriverConfigFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
 		{
@@ -81,7 +81,7 @@ namespace ts3::gpuapi
 		return dxgiInfoQueue;
 	}
 
-	uint32 DXCoreAPIProxy::getDXGITextureFormatBPP( DXGI_FORMAT pDXGIFormat )
+	uint32 atl::getDXGITextureFormatBPP( DXGI_FORMAT pDXGIFormat )
 	{
 	    switch( pDXGIFormat )
 		{
@@ -189,7 +189,7 @@ namespace ts3::gpuapi
 		return DXGI_FORMAT_UNKNOWN;
 	}
 
-	const char * DXCoreAPIProxy::getDXShaderTargetStr( DXShaderTarget pShaderTarget )
+	const char * atl::getDXShaderTargetStr( DXShaderTarget pShaderTarget )
 	{
 		static const char * const shaderTargetStrArray[] =
 		{
@@ -207,7 +207,7 @@ namespace ts3::gpuapi
 		return staticArrayElement( shaderTargetStrArray, pShaderTarget );
 	}
 
-	uint32 DXCoreAPIProxy::computeDXTextureMemoryByteSize( const TextureDimensions & pTextDimensions, DXGI_FORMAT pFormat )
+	uint32 atl::computeDXTextureMemoryByteSize( const TextureDimensions & pTextDimensions, DXGI_FORMAT pFormat )
 	{
 		const uint64 formatBitSize = getDXGITextureFormatBPP( pFormat );
 		const uint64 totalPixelCount = pTextDimensions.width * pTextDimensions.height * pTextDimensions.depth * pTextDimensions.arraySize;
@@ -224,7 +224,7 @@ namespace ts3::gpuapi
 		return static_cast<uint32>( ( double )totalBaseBitSize / ( double )byteSizeDivisor );
 	}
 
-	Bitmask<UINT> DXCoreAPIProxy::translateDXShaderCompileFlags( Bitmask<uint32> pShaderCreateFlags, bool pDebugDevice )
+	Bitmask<UINT> atl::translateDXShaderCompileFlags( Bitmask<uint32> pShaderCreateFlags, bool pDebugDevice )
 	{
 		Bitmask<UINT> compileFlags = 0;
 		if( pDebugDevice || pShaderCreateFlags.isSet( E_SHADER_CREATE_FLAG_DEBUG_BIT ) )
@@ -246,7 +246,7 @@ namespace ts3::gpuapi
 		return compileFlags;
 	}
 
-	DXGI_FORMAT DXCoreAPIProxy::translateDXBaseDataType( EBaseDataType pBaseDataType )
+	DXGI_FORMAT atl::translateDXBaseDataType( EBaseDataType pBaseDataType )
 	{
 		static const DXGI_FORMAT baseDataTypeArray[] =
 		{
@@ -264,121 +264,122 @@ namespace ts3::gpuapi
 		return staticArrayElement( baseDataTypeArray, baseDataTypeIndex );
 	}
 
-	DXGI_FORMAT DXCoreAPIProxy::translateDXTextureFormat( ETextureFormat pTextureFormat )
+	DXGI_FORMAT atl::translateDXTextureFormat( ETextureFormat pTextureFormat )
 	{
 	    switch( pTextureFormat )
 		{
-			ts3CaseReturn( ETextureFormat::R32_FLOAT           , DXGI_FORMAT_R32_FLOAT            );
-			ts3CaseReturn( ETextureFormat::R32_SINT            , DXGI_FORMAT_R32_SINT             );
-			ts3CaseReturn( ETextureFormat::R32_UINT            , DXGI_FORMAT_R32_UINT             );
-			ts3CaseReturn( ETextureFormat::R32G32_FLOAT        , DXGI_FORMAT_R32G32_FLOAT         );
-			ts3CaseReturn( ETextureFormat::R32G32_SINT         , DXGI_FORMAT_R32G32_SINT          );
-			ts3CaseReturn( ETextureFormat::R32G32_UINT         , DXGI_FORMAT_R32G32_UINT          );
-			ts3CaseReturn( ETextureFormat::R32G32B32_FLOAT     , DXGI_FORMAT_R32G32B32_FLOAT      );
-			ts3CaseReturn( ETextureFormat::R32G32B32_SINT      , DXGI_FORMAT_R32G32B32_SINT       );
-			ts3CaseReturn( ETextureFormat::R32G32B32_UINT      , DXGI_FORMAT_R32G32B32_UINT       );
-			ts3CaseReturn( ETextureFormat::R32G32B32A32_FLOAT  , DXGI_FORMAT_R32G32B32A32_FLOAT   );
-			ts3CaseReturn( ETextureFormat::R32G32B32A32_SINT   , DXGI_FORMAT_R32G32B32A32_SINT    );
-			ts3CaseReturn( ETextureFormat::R32G32B32A32_UINT   , DXGI_FORMAT_R32G32B32A32_UINT    );
-			ts3CaseReturn( ETextureFormat::R16_FLOAT           , DXGI_FORMAT_R16_FLOAT            );
-			ts3CaseReturn( ETextureFormat::R16_SINT            , DXGI_FORMAT_R16_SINT             );
-			ts3CaseReturn( ETextureFormat::R16_UINT            , DXGI_FORMAT_R16_UINT             );
-			ts3CaseReturn( ETextureFormat::R16G16_FLOAT        , DXGI_FORMAT_R16G16_FLOAT         );
-			ts3CaseReturn( ETextureFormat::R16G16_SINT         , DXGI_FORMAT_R16G16_SINT          );
-			ts3CaseReturn( ETextureFormat::R16G16_UINT         , DXGI_FORMAT_R16G16_UINT          );
-			ts3CaseReturn( ETextureFormat::R16G16B16A16_FLOAT  , DXGI_FORMAT_R16G16B16A16_FLOAT   );
-			ts3CaseReturn( ETextureFormat::R16G16B16A16_SINT   , DXGI_FORMAT_R16G16B16A16_SINT    );
-			ts3CaseReturn( ETextureFormat::R16G16B16A16_UINT   , DXGI_FORMAT_R16G16B16A16_UINT    );
-			ts3CaseReturn( ETextureFormat::R8_SINT             , DXGI_FORMAT_R8_SINT              );
-			ts3CaseReturn( ETextureFormat::R8_UINT             , DXGI_FORMAT_R8_UINT              );
-			ts3CaseReturn( ETextureFormat::R8_SNORM            , DXGI_FORMAT_R8_SNORM             );
-			ts3CaseReturn( ETextureFormat::R8_UNORM            , DXGI_FORMAT_R8_UNORM             );
-			ts3CaseReturn( ETextureFormat::R8G8_SINT           , DXGI_FORMAT_R8G8_SINT            );
-			ts3CaseReturn( ETextureFormat::R8G8_UINT           , DXGI_FORMAT_R8G8_UINT            );
-			ts3CaseReturn( ETextureFormat::R8G8_SNORM          , DXGI_FORMAT_R8G8_SNORM           );
-			ts3CaseReturn( ETextureFormat::R8G8_UNORM          , DXGI_FORMAT_R8G8_UNORM           );
-			ts3CaseReturn( ETextureFormat::B8G8R8X8_UNORM      , DXGI_FORMAT_B8G8R8X8_UNORM       );
-			ts3CaseReturn( ETextureFormat::B8G8R8X8_SRGB       , DXGI_FORMAT_B8G8R8X8_UNORM_SRGB  );
-			ts3CaseReturn( ETextureFormat::B8G8R8A8_UNORM      , DXGI_FORMAT_B8G8R8A8_UNORM       );
-			ts3CaseReturn( ETextureFormat::B8G8R8A8_SRGB       , DXGI_FORMAT_B8G8R8A8_UNORM_SRGB  );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_SINT       , DXGI_FORMAT_R8G8B8A8_SINT        );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_UINT       , DXGI_FORMAT_R8G8B8A8_UINT        );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_SNORM      , DXGI_FORMAT_R8G8B8A8_SNORM       );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_UNORM      , DXGI_FORMAT_R8G8B8A8_UNORM       );
-			ts3CaseReturn( ETextureFormat::R8G8B8A8_SRGB       , DXGI_FORMAT_R8G8B8A8_UNORM_SRGB  );
+            ts3CaseReturn( ETextureFormat::UNKNOWN             , DXGI_FORMAT_UNKNOWN              );
+			ts3CaseReturn( ETextureFormat::R32F                , DXGI_FORMAT_R32_FLOAT            );
+			ts3CaseReturn( ETextureFormat::R32I                , DXGI_FORMAT_R32_SINT             );
+			ts3CaseReturn( ETextureFormat::R32U                , DXGI_FORMAT_R32_UINT             );
+			ts3CaseReturn( ETextureFormat::RG32F               , DXGI_FORMAT_R32G32_FLOAT         );
+			ts3CaseReturn( ETextureFormat::RG32I               , DXGI_FORMAT_R32G32_SINT          );
+			ts3CaseReturn( ETextureFormat::RG32U               , DXGI_FORMAT_R32G32_UINT          );
+			ts3CaseReturn( ETextureFormat::RGB32F              , DXGI_FORMAT_R32G32B32_FLOAT      );
+			ts3CaseReturn( ETextureFormat::RGB32I              , DXGI_FORMAT_R32G32B32_SINT       );
+			ts3CaseReturn( ETextureFormat::RGB32U              , DXGI_FORMAT_R32G32B32_UINT       );
+			ts3CaseReturn( ETextureFormat::RGBA32F             , DXGI_FORMAT_R32G32B32A32_FLOAT   );
+			ts3CaseReturn( ETextureFormat::RGBA32I             , DXGI_FORMAT_R32G32B32A32_SINT    );
+			ts3CaseReturn( ETextureFormat::RGBA32U             , DXGI_FORMAT_R32G32B32A32_UINT    );
+			ts3CaseReturn( ETextureFormat::R16F                , DXGI_FORMAT_R16_FLOAT            );
+			ts3CaseReturn( ETextureFormat::R16I                , DXGI_FORMAT_R16_SINT             );
+			ts3CaseReturn( ETextureFormat::R16U                , DXGI_FORMAT_R16_UINT             );
+			ts3CaseReturn( ETextureFormat::RG16F               , DXGI_FORMAT_R16G16_FLOAT         );
+			ts3CaseReturn( ETextureFormat::RG16I               , DXGI_FORMAT_R16G16_SINT          );
+			ts3CaseReturn( ETextureFormat::RG16U               , DXGI_FORMAT_R16G16_UINT          );
+			ts3CaseReturn( ETextureFormat::RGBA16F             , DXGI_FORMAT_R16G16B16A16_FLOAT   );
+			ts3CaseReturn( ETextureFormat::RGBA16I             , DXGI_FORMAT_R16G16B16A16_SINT    );
+			ts3CaseReturn( ETextureFormat::RGBA16U             , DXGI_FORMAT_R16G16B16A16_UINT    );
+			ts3CaseReturn( ETextureFormat::R8I                 , DXGI_FORMAT_R8_SINT              );
+			ts3CaseReturn( ETextureFormat::R8U                 , DXGI_FORMAT_R8_UINT              );
+			ts3CaseReturn( ETextureFormat::R8IN                , DXGI_FORMAT_R8_SNORM             );
+			ts3CaseReturn( ETextureFormat::R8UN                , DXGI_FORMAT_R8_UNORM             );
+			ts3CaseReturn( ETextureFormat::RG8I                , DXGI_FORMAT_R8G8_SINT            );
+			ts3CaseReturn( ETextureFormat::RG8U                , DXGI_FORMAT_R8G8_UINT            );
+			ts3CaseReturn( ETextureFormat::RG8IN               , DXGI_FORMAT_R8G8_SNORM           );
+			ts3CaseReturn( ETextureFormat::RG8UN               , DXGI_FORMAT_R8G8_UNORM           );
+            ts3CaseReturn( ETextureFormat::BGRX8UN             , DXGI_FORMAT_B8G8R8X8_UNORM       );
+            ts3CaseReturn( ETextureFormat::BGRX8SRGB           , DXGI_FORMAT_B8G8R8X8_UNORM_SRGB  );
+            ts3CaseReturn( ETextureFormat::BGRA8UN             , DXGI_FORMAT_B8G8R8A8_UNORM       );
+            ts3CaseReturn( ETextureFormat::BGRA8SRGB           , DXGI_FORMAT_B8G8R8A8_UNORM_SRGB  );
+            ts3CaseReturn( ETextureFormat::RGBA8I              , DXGI_FORMAT_R8G8B8A8_SINT        );
+            ts3CaseReturn( ETextureFormat::RGBA8U              , DXGI_FORMAT_R8G8B8A8_UINT        );
+            ts3CaseReturn( ETextureFormat::RGBA8IN             , DXGI_FORMAT_R8G8B8A8_SNORM       );
+            ts3CaseReturn( ETextureFormat::RGBA8UN             , DXGI_FORMAT_R8G8B8A8_UNORM       );
+            ts3CaseReturn( ETextureFormat::RGBA8SRGB           , DXGI_FORMAT_R8G8B8A8_UNORM_SRGB  );
 
 			ts3CaseReturn( ETextureFormat::R5G5B5A1            , DXGI_FORMAT_B5G5R5A1_UNORM     );
 			ts3CaseReturn( ETextureFormat::R5G6B5              , DXGI_FORMAT_B5G6R5_UNORM       );
 			ts3CaseReturn( ETextureFormat::R9G9B9E5            , DXGI_FORMAT_R9G9B9E5_SHAREDEXP );
-			ts3CaseReturn( ETextureFormat::R10G10B10A2_UINT    , DXGI_FORMAT_R10G10B10A2_UINT   );
-			ts3CaseReturn( ETextureFormat::R10G10B10A2_UNORM   , DXGI_FORMAT_R10G10B10A2_UNORM  );
-			ts3CaseReturn( ETextureFormat::R11G11B10_FLOAT32   , DXGI_FORMAT_R11G11B10_FLOAT    );
-			ts3CaseReturn( ETextureFormat::D16_UNORM           , DXGI_FORMAT_D16_UNORM          );
-			ts3CaseReturn( ETextureFormat::D24_UNORM_S8_UINT   , DXGI_FORMAT_D24_UNORM_S8_UINT  );
-			ts3CaseReturn( ETextureFormat::D24_UNORM_X8        , DXGI_FORMAT_D24_UNORM_S8_UINT  );
-			ts3CaseReturn( ETextureFormat::D32_FLOAT           , DXGI_FORMAT_D32_FLOAT          );
+			ts3CaseReturn( ETextureFormat::RGB10A2U            , DXGI_FORMAT_R10G10B10A2_UINT   );
+			ts3CaseReturn( ETextureFormat::RGB10A2UN           , DXGI_FORMAT_R10G10B10A2_UNORM  );
+			ts3CaseReturn( ETextureFormat::R11G11B10F          , DXGI_FORMAT_R11G11B10_FLOAT    );
+			ts3CaseReturn( ETextureFormat::D16UN               , DXGI_FORMAT_D16_UNORM          );
+			ts3CaseReturn( ETextureFormat::D24UNS8U            , DXGI_FORMAT_D24_UNORM_S8_UINT  );
+			ts3CaseReturn( ETextureFormat::D24UNX8             , DXGI_FORMAT_D24_UNORM_S8_UINT  );
+			ts3CaseReturn( ETextureFormat::D32F                , DXGI_FORMAT_D32_FLOAT          );
 
-			ts3CaseReturn( ETextureFormat::BC1_RGBA_UNORM      , DXGI_FORMAT_BC1_UNORM      );
-			ts3CaseReturn( ETextureFormat::BC1_RGBA_UNORM_SRGB , DXGI_FORMAT_BC1_UNORM_SRGB );
-			ts3CaseReturn( ETextureFormat::BC2_UNORM           , DXGI_FORMAT_BC2_UNORM      );
-			ts3CaseReturn( ETextureFormat::BC2_UNORM_SRGB      , DXGI_FORMAT_BC2_UNORM_SRGB );
-			ts3CaseReturn( ETextureFormat::BC3_UNORM           , DXGI_FORMAT_BC3_UNORM      );
-			ts3CaseReturn( ETextureFormat::BC3_UNORM_SRGB      , DXGI_FORMAT_BC3_UNORM_SRGB );
-			ts3CaseReturn( ETextureFormat::BC4_SNORM           , DXGI_FORMAT_BC4_SNORM      );
-			ts3CaseReturn( ETextureFormat::BC4_UNORM           , DXGI_FORMAT_BC4_UNORM      );
-			ts3CaseReturn( ETextureFormat::BC5_SNORM           , DXGI_FORMAT_BC5_SNORM      );
-			ts3CaseReturn( ETextureFormat::BC5_UNORM           , DXGI_FORMAT_BC5_UNORM      );
-			ts3CaseReturn( ETextureFormat::BC6H_SFLOAT         , DXGI_FORMAT_BC6H_SF16      );
-			ts3CaseReturn( ETextureFormat::BC6H_UFLOAT         , DXGI_FORMAT_BC6H_UF16      );
-			ts3CaseReturn( ETextureFormat::BC7_UNORM           , DXGI_FORMAT_BC7_UNORM      );
-			ts3CaseReturn( ETextureFormat::BC7_UNORM_SRGB      , DXGI_FORMAT_BC7_UNORM_SRGB );
+			ts3CaseReturn( ETextureFormat::BC1                 , DXGI_FORMAT_BC1_UNORM      );
+			ts3CaseReturn( ETextureFormat::BC1SRGB             , DXGI_FORMAT_BC1_UNORM_SRGB );
+			ts3CaseReturn( ETextureFormat::BC2                 , DXGI_FORMAT_BC2_UNORM      );
+			ts3CaseReturn( ETextureFormat::BC2SRGB             , DXGI_FORMAT_BC2_UNORM_SRGB );
+			ts3CaseReturn( ETextureFormat::BC3                 , DXGI_FORMAT_BC3_UNORM      );
+			ts3CaseReturn( ETextureFormat::BC3SRGB             , DXGI_FORMAT_BC3_UNORM_SRGB );
+			ts3CaseReturn( ETextureFormat::BC4IN               , DXGI_FORMAT_BC4_SNORM      );
+			ts3CaseReturn( ETextureFormat::BC4UN               , DXGI_FORMAT_BC4_UNORM      );
+			ts3CaseReturn( ETextureFormat::BC5IN               , DXGI_FORMAT_BC5_SNORM      );
+			ts3CaseReturn( ETextureFormat::BC5UN               , DXGI_FORMAT_BC5_UNORM      );
+			ts3CaseReturn( ETextureFormat::BC6HSF              , DXGI_FORMAT_BC6H_SF16      );
+			ts3CaseReturn( ETextureFormat::BC6HUF              , DXGI_FORMAT_BC6H_UF16      );
+			ts3CaseReturn( ETextureFormat::BC7                 , DXGI_FORMAT_BC7_UNORM      );
+			ts3CaseReturn( ETextureFormat::BC7SRGB             , DXGI_FORMAT_BC7_UNORM_SRGB );
 		};
 		return DXGI_FORMAT_UNKNOWN;
 	}
 
-	DXGI_FORMAT DXCoreAPIProxy::translateDXVertexAttribFormat( EVertexAttribFormat pVertexAttribFormat )
+	DXGI_FORMAT atl::translateDXVertexAttribFormat( EVertexAttribFormat pVertexAttribFormat )
 	{
 	    switch( pVertexAttribFormat )
 		{
-			ts3CaseReturn( EVertexAttribFormat::FLOAT16          , DXGI_FORMAT_R16_FLOAT          );
-			ts3CaseReturn( EVertexAttribFormat::FLOAT32          , DXGI_FORMAT_R32_FLOAT          );
-			ts3CaseReturn( EVertexAttribFormat::SBYTE            , DXGI_FORMAT_R8_SINT            );
-			ts3CaseReturn( EVertexAttribFormat::SINT16           , DXGI_FORMAT_R16_SINT           );
-			ts3CaseReturn( EVertexAttribFormat::SINT32           , DXGI_FORMAT_R32_SINT           );
-			ts3CaseReturn( EVertexAttribFormat::UBYTE            , DXGI_FORMAT_R8_UINT            );
-			ts3CaseReturn( EVertexAttribFormat::UINT16           , DXGI_FORMAT_R16_UINT           );
-			ts3CaseReturn( EVertexAttribFormat::UINT32           , DXGI_FORMAT_R32_UINT           );
-			ts3CaseReturn( EVertexAttribFormat::SBYTE_NORM       , DXGI_FORMAT_R8_SNORM           );
-			ts3CaseReturn( EVertexAttribFormat::SINT16_NORM      , DXGI_FORMAT_R16_SNORM          );
-			ts3CaseReturn( EVertexAttribFormat::UBYTE_NORM       , DXGI_FORMAT_R8_UNORM           );
-			ts3CaseReturn( EVertexAttribFormat::UINT16_NORM      , DXGI_FORMAT_R16_UNORM          );
-			ts3CaseReturn( EVertexAttribFormat::VEC2_FLOAT16     , DXGI_FORMAT_R16G16_FLOAT       );
-			ts3CaseReturn( EVertexAttribFormat::VEC2_FLOAT32     , DXGI_FORMAT_R32G32_FLOAT       );
-			ts3CaseReturn( EVertexAttribFormat::VEC2_SBYTE       , DXGI_FORMAT_R8G8_SINT          );
-			ts3CaseReturn( EVertexAttribFormat::VEC2_SINT16      , DXGI_FORMAT_R16G16_SINT        );
-			ts3CaseReturn( EVertexAttribFormat::VEC2_SINT32      , DXGI_FORMAT_R32G32_SINT        );
-			ts3CaseReturn( EVertexAttribFormat::VEC2_UBYTE       , DXGI_FORMAT_R8G8_UINT          );
-			ts3CaseReturn( EVertexAttribFormat::VEC2_UINT16      , DXGI_FORMAT_R16G16_UINT        );
-			ts3CaseReturn( EVertexAttribFormat::VEC2_UINT32      , DXGI_FORMAT_R32G32_UINT        );
-			ts3CaseReturn( EVertexAttribFormat::VEC2_SBYTE_NORM  , DXGI_FORMAT_R8G8_SNORM         );
-			ts3CaseReturn( EVertexAttribFormat::VEC2_SINT16_NORM , DXGI_FORMAT_R16G16_SNORM       );
-			ts3CaseReturn( EVertexAttribFormat::VEC2_UBYTE_NORM  , DXGI_FORMAT_R8G8_UNORM         );
-			ts3CaseReturn( EVertexAttribFormat::VEC2_UINT16_NORM , DXGI_FORMAT_R16G16_UNORM       );
-			ts3CaseReturn( EVertexAttribFormat::VEC3_FLOAT32     , DXGI_FORMAT_R32G32B32_FLOAT    );
-			ts3CaseReturn( EVertexAttribFormat::VEC3_SINT32      , DXGI_FORMAT_R32G32B32_SINT     );
-			ts3CaseReturn( EVertexAttribFormat::VEC3_UINT32      , DXGI_FORMAT_R32G32B32_UINT     );
-			ts3CaseReturn( EVertexAttribFormat::VEC4_FLOAT16     , DXGI_FORMAT_R16G16B16A16_FLOAT );
-			ts3CaseReturn( EVertexAttribFormat::VEC4_FLOAT32     , DXGI_FORMAT_R32G32B32A32_FLOAT );
-			ts3CaseReturn( EVertexAttribFormat::VEC4_SBYTE       , DXGI_FORMAT_R8G8B8A8_SINT      );
-			ts3CaseReturn( EVertexAttribFormat::VEC4_SINT16      , DXGI_FORMAT_R16G16B16A16_SINT  );
-			ts3CaseReturn( EVertexAttribFormat::VEC4_SINT32      , DXGI_FORMAT_R32G32B32A32_SINT  );
-			ts3CaseReturn( EVertexAttribFormat::VEC4_UBYTE       , DXGI_FORMAT_R8G8B8A8_UINT      );
-			ts3CaseReturn( EVertexAttribFormat::VEC4_UINT16      , DXGI_FORMAT_R16G16B16A16_UINT  );
-			ts3CaseReturn( EVertexAttribFormat::VEC4_UINT32      , DXGI_FORMAT_R32G32B32A32_UINT  );
-			ts3CaseReturn( EVertexAttribFormat::VEC4_SBYTE_NORM  , DXGI_FORMAT_R8G8B8A8_SNORM     );
-			ts3CaseReturn( EVertexAttribFormat::VEC4_SINT16_NORM , DXGI_FORMAT_R16G16B16A16_SNORM );
-			ts3CaseReturn( EVertexAttribFormat::VEC4_UBYTE_NORM  , DXGI_FORMAT_R8G8B8A8_UNORM     );
-			ts3CaseReturn( EVertexAttribFormat::VEC4_UINT16_NORM , DXGI_FORMAT_R16G16B16A16_UNORM );
+			ts3CaseReturn( EVertexAttribFormat::F16      , DXGI_FORMAT_R16_FLOAT          );
+			ts3CaseReturn( EVertexAttribFormat::F32      , DXGI_FORMAT_R32_FLOAT          );
+			ts3CaseReturn( EVertexAttribFormat::I8       , DXGI_FORMAT_R8_SINT            );
+			ts3CaseReturn( EVertexAttribFormat::I16      , DXGI_FORMAT_R16_SINT           );
+			ts3CaseReturn( EVertexAttribFormat::I32      , DXGI_FORMAT_R32_SINT           );
+			ts3CaseReturn( EVertexAttribFormat::U8       , DXGI_FORMAT_R8_UINT            );
+			ts3CaseReturn( EVertexAttribFormat::U16      , DXGI_FORMAT_R16_UINT           );
+			ts3CaseReturn( EVertexAttribFormat::U32      , DXGI_FORMAT_R32_UINT           );
+			ts3CaseReturn( EVertexAttribFormat::I8N      , DXGI_FORMAT_R8_SNORM           );
+			ts3CaseReturn( EVertexAttribFormat::I16N     , DXGI_FORMAT_R16_SNORM          );
+			ts3CaseReturn( EVertexAttribFormat::U8N      , DXGI_FORMAT_R8_UNORM           );
+			ts3CaseReturn( EVertexAttribFormat::U16N     , DXGI_FORMAT_R16_UNORM          );
+			ts3CaseReturn( EVertexAttribFormat::Vec2F16  , DXGI_FORMAT_R16G16_FLOAT       );
+			ts3CaseReturn( EVertexAttribFormat::Vec2F32  , DXGI_FORMAT_R32G32_FLOAT       );
+			ts3CaseReturn( EVertexAttribFormat::Vec2I8   , DXGI_FORMAT_R8G8_SINT          );
+			ts3CaseReturn( EVertexAttribFormat::Vec2I16  , DXGI_FORMAT_R16G16_SINT        );
+			ts3CaseReturn( EVertexAttribFormat::Vec2I32  , DXGI_FORMAT_R32G32_SINT        );
+			ts3CaseReturn( EVertexAttribFormat::Vec2U8   , DXGI_FORMAT_R8G8_UINT          );
+			ts3CaseReturn( EVertexAttribFormat::Vec2U16  , DXGI_FORMAT_R16G16_UINT        );
+			ts3CaseReturn( EVertexAttribFormat::Vec2U32  , DXGI_FORMAT_R32G32_UINT        );
+			ts3CaseReturn( EVertexAttribFormat::Vec2I8N  , DXGI_FORMAT_R8G8_SNORM         );
+			ts3CaseReturn( EVertexAttribFormat::Vec2I16N , DXGI_FORMAT_R16G16_SNORM       );
+			ts3CaseReturn( EVertexAttribFormat::Vec2U8N  , DXGI_FORMAT_R8G8_UNORM         );
+			ts3CaseReturn( EVertexAttribFormat::Vec2U16N , DXGI_FORMAT_R16G16_UNORM       );
+			ts3CaseReturn( EVertexAttribFormat::Vec3F32  , DXGI_FORMAT_R32G32B32_FLOAT    );
+			ts3CaseReturn( EVertexAttribFormat::Vec3I32  , DXGI_FORMAT_R32G32B32_SINT     );
+			ts3CaseReturn( EVertexAttribFormat::Vec3U32  , DXGI_FORMAT_R32G32B32_UINT     );
+			ts3CaseReturn( EVertexAttribFormat::Vec4F16  , DXGI_FORMAT_R16G16B16A16_FLOAT );
+			ts3CaseReturn( EVertexAttribFormat::Vec4F32  , DXGI_FORMAT_R32G32B32A32_FLOAT );
+			ts3CaseReturn( EVertexAttribFormat::Vec4I8   , DXGI_FORMAT_R8G8B8A8_SINT      );
+			ts3CaseReturn( EVertexAttribFormat::Vec4I16  , DXGI_FORMAT_R16G16B16A16_SINT  );
+			ts3CaseReturn( EVertexAttribFormat::Vec4I32  , DXGI_FORMAT_R32G32B32A32_SINT  );
+			ts3CaseReturn( EVertexAttribFormat::Vec4U8   , DXGI_FORMAT_R8G8B8A8_UINT      );
+			ts3CaseReturn( EVertexAttribFormat::Vec4U16  , DXGI_FORMAT_R16G16B16A16_UINT  );
+			ts3CaseReturn( EVertexAttribFormat::Vec4U32  , DXGI_FORMAT_R32G32B32A32_UINT  );
+			ts3CaseReturn( EVertexAttribFormat::Vec4I8N  , DXGI_FORMAT_R8G8B8A8_SNORM     );
+			ts3CaseReturn( EVertexAttribFormat::Vec4I16N , DXGI_FORMAT_R16G16B16A16_SNORM );
+			ts3CaseReturn( EVertexAttribFormat::Vec4U8N  , DXGI_FORMAT_R8G8B8A8_UNORM     );
+			ts3CaseReturn( EVertexAttribFormat::Vec4U16N , DXGI_FORMAT_R16G16B16A16_UNORM );
 		};
 	    return DXGI_FORMAT_UNKNOWN;
 	}

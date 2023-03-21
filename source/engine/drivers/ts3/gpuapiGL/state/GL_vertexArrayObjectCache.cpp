@@ -22,7 +22,7 @@ namespace ts3::gpuapi
 		auto cachedEntryIter = _persistentVertexArrayObjectMap.find( cachedID );
 		if( cachedEntryIter == _persistentVertexArrayObjectMap.end() )
 		{
-			auto vertexArrayObject = smutil::createGLVertexArrayObjectLayoutOnly( pInputLayoutState.mGLInputLayoutDefinition );
+			auto vertexArrayObject = smutil::createGLVertexArrayObjectLayoutOnlyGL( pInputLayoutState.mGLInputLayoutDefinition );
 
 			auto insertResult = _persistentVertexArrayObjectMap.emplace( cachedID, std::move( vertexArrayObject ) );
 
@@ -45,7 +45,7 @@ namespace ts3::gpuapi
 		auto cachedEntryIter = _transientVertexArrayObjectMap.find( vaoRefID );
 		if( cachedEntryIter == _transientVertexArrayObjectMap.end() )
 		{
-			auto vertexArrayObject = smutil::createGLVertexArrayObjectLayoutStreamCombined(
+			auto vertexArrayObject = smutil::createGLVertexArrayObjectLayoutStreamCombinedGL(
 					pInputLayoutDefinition,
 					pVertexStreamDefinition );
 

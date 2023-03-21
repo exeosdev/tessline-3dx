@@ -1,6 +1,6 @@
 
 #include "DX11_renderBuffer.h"
-#include <ts3/gpuapiDX11/DX11_coreAPIProxy.h>
+#include <ts3/gpuapiDX11/DX11_apiTranslationLayer.h>
 #include <ts3/gpuapiDX11/DX11_gpuDevice.h>
 #include <ts3/gpuapiDX11/resources/DX11_texture.h>
 
@@ -40,7 +40,7 @@ namespace ts3::gpuapi
 		dx11TextureCreateInfo.dimensions.arraySize = 1;
 		dx11TextureCreateInfo.dimensions.mipLevelsNum = 1;
 		dx11TextureCreateInfo.msaaLevel = pCreateInfo.layout.msaaLevel;
-		dx11TextureCreateInfo.dxgiTextureFormat = DX11CoreAPIProxy::translateDXTextureFormat( pCreateInfo.layout.internalDataFormat );
+		dx11TextureCreateInfo.dxgiTextureFormat = atl::translateDXTextureFormat( pCreateInfo.layout.internalDataFormat );
 		dx11TextureCreateInfo.dx11UsageDesc.bindFlags = D3D11_BIND_RENDER_TARGET;
 		dx11TextureCreateInfo.dx11UsageDesc.cpuAccessFlags = 0;
 		dx11TextureCreateInfo.dx11UsageDesc.resourceMiscFlags = 0;

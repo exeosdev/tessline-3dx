@@ -32,7 +32,7 @@ namespace ts3::gpuapi
 	{
 		const auto & commonProperties = smutil::getGraphicsShaderLinkageCommonPropertiesForShaderSet( pShaderSet );
 
-		auto shaderPipelineObject = smutil::createGraphicsShaderPipelineObject( pShaderSet );
+		auto shaderPipelineObject = smutil::createGraphicsShaderPipelineObjectGL( pShaderSet );
 		if( !shaderPipelineObject )
 		{
 			return nullptr;
@@ -63,7 +63,7 @@ namespace ts3::gpuapi
 	{
 		const auto & commonProperties = smutil::getGraphicsShaderLinkageCommonPropertiesForShaderSet( pShaderSet );
 
-		auto shaderProgramObject = smutil::createGraphicsShaderProgramObject( pShaderSet );
+		auto shaderProgramObject = smutil::createGraphicsShaderProgramObjectGL( pShaderSet );
 		if( !shaderProgramObject )
 		{
 			return nullptr;
@@ -81,7 +81,7 @@ namespace ts3::gpuapi
 	namespace smutil
 	{
 
-		GLShaderPipelineObjectHandle createGraphicsShaderPipelineObject( const GraphicsShaderSet & pShaderSet )
+		GLShaderPipelineObjectHandle createGraphicsShaderPipelineObjectGL( const GraphicsShaderSet & pShaderSet )
 		{
 			auto shaderPipelineObject = GLShaderPipelineObject::create();
 			if( !shaderPipelineObject )
@@ -108,7 +108,7 @@ namespace ts3::gpuapi
 			return shaderPipelineObject;
 		}
 
-		GLShaderProgramObjectHandle createGraphicsShaderProgramObject( const GraphicsShaderSet & pShaderSet )
+		GLShaderProgramObjectHandle createGraphicsShaderProgramObjectGL( const GraphicsShaderSet & pShaderSet )
 		{
 			auto shaderProgramObject = GLShaderProgramObject::create( GLShaderProgramType::Combined );
 			if( !shaderProgramObject )
@@ -160,7 +160,7 @@ namespace ts3::gpuapi
 			return shaderProgramObject;
 		}
 
-		void updateUniformDataCurrent(
+		void updateUniformDataCurrentGL(
 				GLShaderPipelineObject & pShaderPipeline,
 				uint32 pUniformIndex,
 				EBaseDataType pBaseType,
@@ -213,7 +213,7 @@ namespace ts3::gpuapi
 			}
 		}
 
-		void updateUniformDataExplicit(
+		void updateUniformDataExplicitGL(
 				GLShaderProgramObject & pShaderProgram,
 				uint32 pUniformIndex,
 				EBaseDataType pBaseType,

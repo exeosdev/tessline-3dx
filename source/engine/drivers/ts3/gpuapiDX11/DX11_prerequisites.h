@@ -32,11 +32,24 @@
 namespace ts3::gpuapi
 {
 
-	ts3DeclareClassHandle( DX11CommandList );
-	ts3DeclareClassHandle( DX11CommandSystem );
-	ts3DeclareClassHandle( DX11GPUDevice );
-	ts3DeclareClassHandle( DX11GPUDriver );
-	ts3DeclareClassHandle( DX11PresentationLayer );
+	class GraphicsShaderLinkageImmutableStateSeparable;
+	class RenderPassConfigurationImmutableStateDefault;
+
+	class DX11BlendImmutableState;
+	class DX11DepthStencilImmutableState;
+	class DX11RasterizerImmutableState;
+	class DX11IAInputLayoutImmutableState;
+	class DX11IAVertexStreamImmutableState;
+	class DX11RenderTargetBindingImmutableState;
+
+	ts3GpaDeclareClassHandle( DX11CommandList );
+	ts3GpaDeclareClassHandle( DX11CommandSystem );
+	ts3GpaDeclareClassHandle( DX11GPUDevice );
+	ts3GpaDeclareClassHandle( DX11GPUDriver );
+	ts3GpaDeclareClassHandle( DX11PresentationLayer );
+
+	ts3GpaDeclareTypedefHandle( DX11GraphicsShaderLinkageImmutableState, GraphicsShaderLinkageImmutableStateSeparable );
+	ts3GpaDeclareTypedefHandle( DX11RenderPassConfigurationImmutableState, RenderPassConfigurationImmutableStateDefault );
 
 } // namespace ts3::gpuapi
 

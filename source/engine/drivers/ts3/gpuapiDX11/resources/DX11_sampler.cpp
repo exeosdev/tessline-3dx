@@ -1,6 +1,6 @@
 
 #include "DX11_sampler.h"
-#include "../DX11_coreAPIProxy.h"
+#include "../DX11_apiTranslationLayer.h"
 #include "../DX11_gpuDevice.h"
 
 namespace ts3::gpuapi
@@ -36,10 +36,10 @@ namespace ts3::gpuapi
 
 	bool DX11Sampler::translateSamplerConfig( const SamplerConfig & pSamplerConfig, D3D11_SAMPLER_DESC & pOutD3D11SamplerConfig )
 	{
-		pOutD3D11SamplerConfig.AddressU = DX11CoreAPIProxy::translateDX11ETextureAddressMode( pSamplerConfig.addressModeConfig.coordU );
-		pOutD3D11SamplerConfig.AddressV = DX11CoreAPIProxy::translateDX11ETextureAddressMode( pSamplerConfig.addressModeConfig.coordV );
-		pOutD3D11SamplerConfig.AddressW = DX11CoreAPIProxy::translateDX11ETextureAddressMode( pSamplerConfig.addressModeConfig.coordW );
-		pOutD3D11SamplerConfig.ComparisonFunc = DX11CoreAPIProxy::translateDX11CompFunc( pSamplerConfig.textureCompareFunc );
+		pOutD3D11SamplerConfig.AddressU = atl::translateDX11ETextureAddressMode( pSamplerConfig.addressModeConfig.coordU );
+		pOutD3D11SamplerConfig.AddressV = atl::translateDX11ETextureAddressMode( pSamplerConfig.addressModeConfig.coordV );
+		pOutD3D11SamplerConfig.AddressW = atl::translateDX11ETextureAddressMode( pSamplerConfig.addressModeConfig.coordW );
+		pOutD3D11SamplerConfig.ComparisonFunc = atl::translateDX11CompFunc( pSamplerConfig.textureCompareFunc );
 
 		pOutD3D11SamplerConfig.MaxAnisotropy = pSamplerConfig.filterConfig.anisotropyLevel;
 		pOutD3D11SamplerConfig.MinLOD = pSamplerConfig.mipLODRange.begin;
@@ -51,7 +51,7 @@ namespace ts3::gpuapi
 		pOutD3D11SamplerConfig.BorderColor[2] = pSamplerConfig.borderColor.rgbaArray[2];
 		pOutD3D11SamplerConfig.BorderColor[3] = pSamplerConfig.borderColor.rgbaArray[3];
 
-		pOutD3D11SamplerConfig.Filter = DX11CoreAPIProxy::translateDX11ETextureFilter( pSamplerConfig.filterConfig.magFilter,
+		pOutD3D11SamplerConfig.Filter = atl::translateDX11ETextureFilter( pSamplerConfig.filterConfig.magFilter,
 		                                                                         pSamplerConfig.filterConfig.minFilter,
 		                                                                         pSamplerConfig.filterConfig.mipMode,
 		                                                                         pSamplerConfig.filterConfig.anisotropyLevel );

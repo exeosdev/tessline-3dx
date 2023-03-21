@@ -1,5 +1,5 @@
 
-#include "DX11_coreAPIProxy.h"
+#include "DX11_apiTranslationLayer.h"
 #include <ts3/gpuapiDX11/DX11_gpuDevice.h>
 #include <ts3/gpuapi/resources/gpuBufferCommon.h>
 #include <ts3/gpuapi/state/samplerCommon.h>
@@ -11,7 +11,7 @@
 namespace ts3::gpuapi
 {
 
-	ComPtr<ID3D11Device1> DX11CoreAPIProxy::createD3D11Device( D3D_DRIVER_TYPE pDeviceType, Bitmask<UINT> pCreateFlags )
+	ComPtr<ID3D11Device1> atl::createD3D11Device( D3D_DRIVER_TYPE pDeviceType, Bitmask<UINT> pCreateFlags )
 	{
 		Bitmask<UINT> createDeviceFlags = 0;
 		if( pCreateFlags.isSet( D3D11_CREATE_DEVICE_DEBUG ) )
@@ -108,7 +108,7 @@ namespace ts3::gpuapi
 		return d3d11Device1;
 	}
 
-	ComPtr<ID3D11Debug> DX11CoreAPIProxy::queryD3D11DebugInterfaceForD3D11Device( const ComPtr<ID3D11Device1> & pD3D11Device1 )
+	ComPtr<ID3D11Debug> atl::queryD3D11DebugInterfaceForD3D11Device( const ComPtr<ID3D11Device1> & pD3D11Device1 )
 	{
 		ComPtr<ID3D11Debug> d3d11DebugInterface;
 		auto hResult = pD3D11Device1->QueryInterface( IID_PPV_ARGS( &d3d11DebugInterface ) );
@@ -120,7 +120,7 @@ namespace ts3::gpuapi
 		return d3d11DebugInterface;
 	}
 
-	ComPtr<IDXGIFactory2> DX11CoreAPIProxy::queryDXGIFactoryForD3D11Device( const ComPtr<ID3D11Device1> & pD3D11Device1 )
+	ComPtr<IDXGIFactory2> atl::queryDXGIFactoryForD3D11Device( const ComPtr<ID3D11Device1> & pD3D11Device1 )
 	{
 		ComPtr<IDXGIDevice2> dxgiDevice2;
 		auto hResult = pD3D11Device1->QueryInterface( IID_PPV_ARGS( &dxgiDevice2 ) );
@@ -146,7 +146,7 @@ namespace ts3::gpuapi
 		return dxgiFactory2;
 	}
 
-	ComPtr<IDXGISwapChain1> DX11CoreAPIProxy::createD3D11SwapChainForSystemWindow( DX11GPUDevice & pDX11GPUDevice, void * pSysWindow )
+	ComPtr<IDXGISwapChain1> atl::createD3D11SwapChainForSystemWindow( DX11GPUDevice & pDX11GPUDevice, void * pSysWindow )
 	{
 	    auto * sysWindowPtr = static_cast<system::Window *>( pSysWindow )->queryInterface<system::Win32Window>();
 		auto presentationLayerSize = sysWindowPtr->getClientAreaSize();
@@ -178,7 +178,7 @@ namespace ts3::gpuapi
 		return dxgiSwapChain1;
 	}
 
-	UINT DX11CoreAPIProxy::translateDX11GPUDeviceCreateFlags( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags )
+	UINT atl::translateDX11GPUDeviceCreateFlags( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags )
 	{
 		Bitmask<UINT> deviceCreateFlags = 0;
 		if( pDriverConfigFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_ENABLE_DEBUG_LAYER_BIT ) )
@@ -196,7 +196,7 @@ namespace ts3::gpuapi
 		return deviceCreateFlags;
 	}
 
-	D3D11_BLEND DX11CoreAPIProxy::translateDX11BlendFactor( EBlendFactor pBlendFactor )
+	D3D11_BLEND atl::translateDX11BlendFactor( EBlendFactor pBlendFactor )
 	{
 		static const D3D11_BLEND blendFactorArray[] =
 		{
@@ -216,7 +216,7 @@ namespace ts3::gpuapi
 		return staticArrayElement( blendFactorArray, pBlendFactor );
 	}
 
-	D3D11_BLEND_OP DX11CoreAPIProxy::translateDX11BlendOp( EBlendOp pBlendOp )
+	D3D11_BLEND_OP atl::translateDX11BlendOp( EBlendOp pBlendOp )
 	{
 		static const D3D11_BLEND_OP blendOpArray[] =
 		{
@@ -229,33 +229,45 @@ namespace ts3::gpuapi
 		return staticArrayElement( blendOpArray, pBlendOp );
 	}
 
-	UINT8 DX11CoreAPIProxy::translateDX11BlendRenderTargetWriteMask( EBlendRenderTargetWriteMask pRenderTargetWriteMask )
+	UINT8 atl::translateDX11BlendRenderTargetWriteMask( Bitmask<EBlendWriteMaskFlags> pWriteMask )
 	{
-		if( pRenderTargetWriteMask == EBlendRenderTargetWriteMask::All )
+		auto d3d11WriteMask = makeBitmask<D3D11_COLOR_WRITE_ENABLE>();
+
+		if( pWriteMask.isSet( E_BLEND_WRITE_MASK_CHANNEL_RED ) )
 		{
-			return D3D11_COLOR_WRITE_ENABLE_ALL;
+			return d3d11WriteMask.set( D3D11_COLOR_WRITE_ENABLE_RED );
 		}
-		else
+		if( pWriteMask.isSet( E_BLEND_WRITE_MASK_CHANNEL_GREEN ) )
 		{
-			return 0;
+			return d3d11WriteMask.set( D3D11_COLOR_WRITE_ENABLE_GREEN );
 		}
+		if( pWriteMask.isSet( E_BLEND_WRITE_MASK_CHANNEL_BLUE ) )
+		{
+			return d3d11WriteMask.set( D3D11_COLOR_WRITE_ENABLE_BLUE );
+		}
+		if( pWriteMask.isSet( E_BLEND_WRITE_MASK_CHANNEL_ALPHA ) )
+		{
+			return d3d11WriteMask.set( D3D11_COLOR_WRITE_ENABLE_ALPHA );
+		}
+
+		return d3d11WriteMask;
 	}
 
-	Bitmask<D3D11_CLEAR_FLAG> DX11CoreAPIProxy::translateDX11ClearDSFlags( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask )
+	Bitmask<D3D11_CLEAR_FLAG> atl::translateDX11RTClearDepthStencilFlags( Bitmask<ERenderTargetBufferFlags> pClearFlags )
 	{
 		Bitmask<D3D11_CLEAR_FLAG> d3d11ClearDSFlags = 0;
-		if( pAttachmentMask.isSet( E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_BIT ) )
+		if( pClearFlags.isSet( E_RENDER_TARGET_BUFFER_FLAG_DEPTH_BIT ) )
 		{
 			d3d11ClearDSFlags.set( D3D11_CLEAR_DEPTH );
 		}
-		if( pAttachmentMask.isSet( E_RENDER_TARGET_ATTACHMENT_FLAG_STENCIL_BIT ) )
+		if( pClearFlags.isSet( E_RENDER_TARGET_BUFFER_FLAG_STENCIL_BIT ) )
 		{
 			d3d11ClearDSFlags.set( D3D11_CLEAR_STENCIL );
 		}
 		return d3d11ClearDSFlags;
 	}
 
-	UINT DX11CoreAPIProxy::translateDX11BufferBindFlags( Bitmask<resource_flags_value_t> pBufferFlags )
+	UINT atl::translateDX11BufferBindFlags( Bitmask<resource_flags_value_t> pBufferFlags )
 	{
 		Bitmask<UINT> d3d11BindFlags = 0;
 		if( pBufferFlags.isSet( E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT ) )
@@ -285,7 +297,7 @@ namespace ts3::gpuapi
 		return d3d11BindFlags;
 	}
 
-	D3D11_MAP DX11CoreAPIProxy::translateDX11BufferMapFlags( EGPUMemoryMapMode pMapMode, Bitmask<EGPUMemoryFlags> /* pMemoryFlags */ )
+	D3D11_MAP atl::translateDX11BufferMapFlags( EGPUMemoryMapMode pMapMode, Bitmask<EGPUMemoryFlags> /* pMemoryFlags */ )
 	{
 		static const std::unordered_map<EGPUMemoryMapMode, D3D11_MAP> mapModeMap =
 		{
@@ -298,7 +310,7 @@ namespace ts3::gpuapi
 		return stdx::getMapValueRefOrDefault( mapModeMap, pMapMode, static_cast<D3D11_MAP>( 0 ) );
 	}
 
-	D3D11_COMPARISON_FUNC DX11CoreAPIProxy::translateDX11CompFunc( ECompFunc pCompFunc )
+	D3D11_COMPARISON_FUNC atl::translateDX11CompFunc( ECompFunc pCompFunc )
 	{
 		static const D3D11_COMPARISON_FUNC compFuncArray[] =
 		{
@@ -314,7 +326,7 @@ namespace ts3::gpuapi
 		return staticArrayElement( compFuncArray, pCompFunc );
 	}
 
-	D3D11_CULL_MODE DX11CoreAPIProxy::translateDX11CullMode( ECullMode pCullMode )
+	D3D11_CULL_MODE atl::translateDX11CullMode( ECullMode pCullMode )
 	{
 		static const D3D11_CULL_MODE cullModeArray[] =
 		{
@@ -325,7 +337,7 @@ namespace ts3::gpuapi
 		return staticArrayElement( cullModeArray, pCullMode );
 	}
 
-	D3D11_DEPTH_WRITE_MASK DX11CoreAPIProxy::translateDX11DepthWriteMask( EDepthWriteMask pDepthWriteMask )
+	D3D11_DEPTH_WRITE_MASK atl::translateDX11DepthWriteMask( EDepthWriteMask pDepthWriteMask )
 	{
 		if( pDepthWriteMask == EDepthWriteMask::All )
 		{
@@ -337,7 +349,7 @@ namespace ts3::gpuapi
 		}
 	}
 
-	D3D11_FILL_MODE DX11CoreAPIProxy::translateDX11PrimitiveFillMode( EPrimitiveFillMode pFillMode )
+	D3D11_FILL_MODE atl::translateDX11PrimitiveFillMode( EPrimitiveFillMode pFillMode )
 	{
 		static const D3D11_FILL_MODE fillModeArray[] =
 		{
@@ -347,7 +359,7 @@ namespace ts3::gpuapi
 		return staticArrayElement( fillModeArray, pFillMode );
 	}
 
-	D3D11_PRIMITIVE_TOPOLOGY DX11CoreAPIProxy::translateDX11PrimitiveTopology( EPrimitiveTopology pTopology )
+	D3D11_PRIMITIVE_TOPOLOGY atl::translateDX11PrimitiveTopology( EPrimitiveTopology pTopology )
 	{
 		static const D3D11_PRIMITIVE_TOPOLOGY primitiveTopologyArray[] =
 		{
@@ -366,7 +378,7 @@ namespace ts3::gpuapi
 		return staticArrayElement( primitiveTopologyArray, pTopology );
 	}
 
-	D3D11_SHADER_TYPE DX11CoreAPIProxy::translateDX11EShaderType( EShaderType pShaderType )
+	D3D11_SHADER_TYPE atl::translateDX11EShaderType( EShaderType pShaderType )
 	{
 		static const D3D11_SHADER_TYPE shaderTypeArray[] =
 		{
@@ -380,7 +392,7 @@ namespace ts3::gpuapi
 		return staticArrayElement( shaderTypeArray, pShaderType );
 	}
 
-	D3D11_STENCIL_OP DX11CoreAPIProxy::translateDX11StencilOp( EStencilOp pStencilOp )
+	D3D11_STENCIL_OP atl::translateDX11StencilOp( EStencilOp pStencilOp )
 	{
 		static const D3D11_STENCIL_OP stencilOpArray[] =
 		{
@@ -396,7 +408,7 @@ namespace ts3::gpuapi
 		return staticArrayElement( stencilOpArray, pStencilOp );
 	}
 
-	D3D11_TEXTURE_ADDRESS_MODE DX11CoreAPIProxy::translateDX11ETextureAddressMode( ETextureAddressMode pAddressMode )
+	D3D11_TEXTURE_ADDRESS_MODE atl::translateDX11ETextureAddressMode( ETextureAddressMode pAddressMode )
 	{
 		static const D3D11_TEXTURE_ADDRESS_MODE textureAddressModeArray[] =
 		{
@@ -409,7 +421,7 @@ namespace ts3::gpuapi
 		return staticArrayElement( textureAddressModeArray, pAddressMode );
 	}
 
-	UINT DX11CoreAPIProxy::translateDX11ETextureBindFlags( Bitmask<resource_flags_value_t> pTextureFlags )
+	UINT atl::translateDX11ETextureBindFlags( Bitmask<resource_flags_value_t> pTextureFlags )
 	{
 		Bitmask<UINT> d3d11BindFlags = 0;
 		if( pTextureFlags.isSet( E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT ) )
@@ -427,7 +439,7 @@ namespace ts3::gpuapi
 		return d3d11BindFlags;
 	}
 
-	D3D11_FILTER DX11CoreAPIProxy::translateDX11ETextureFilter( ETextureFilter magFilter, ETextureFilter minFilter, ETextureMipMode mipMode, uint32 anisotropyLevel )
+	D3D11_FILTER atl::translateDX11ETextureFilter( ETextureFilter magFilter, ETextureFilter minFilter, ETextureMipMode mipMode, uint32 anisotropyLevel )
 	{
 		return D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	}

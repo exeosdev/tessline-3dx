@@ -119,7 +119,7 @@ namespace ts3::gpuapi
 		EBlendFactor factorDstAlpha;
 		EBlendOp opColor;
 		EBlendOp opAlpha;
-		Bitmask<EBlendWriteMaskFlags> renderTargetWriteMask;
+		Bitmask<EBlendWriteMaskFlags> writeMask;
 	};
 
 	/// @brief A configuration of the depth test for the depth-stencil stage.

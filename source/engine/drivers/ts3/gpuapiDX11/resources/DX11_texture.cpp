@@ -1,6 +1,6 @@
 
 #include "DX11_texture.h"
-#include <ts3/gpuapiDX11/DX11_coreAPIProxy.h>
+#include <ts3/gpuapiDX11/DX11_apiTranslationLayer.h>
 #include <ts3/gpuapiDX11/DX11_gpuDevice.h>
 #include <ts3/gpuapiDX11/DX11_commandList.h>
 
@@ -47,7 +47,7 @@ namespace ts3::gpuapi
 		dx11CreateInfo.dimensionClass = createInfo.dimensionClass;
 		dx11CreateInfo.dimensions = createInfo.dimensions;
 		dx11CreateInfo.msaaLevel = createInfo.msaaLevel;
-		dx11CreateInfo.dxgiTextureFormat = DX11CoreAPIProxy::translateDXTextureFormat( createInfo.pixelFormat );
+		dx11CreateInfo.dxgiTextureFormat = atl::translateDXTextureFormat( createInfo.pixelFormat );
 		dx11CreateInfo.dx11UsageDesc = translateTextureUsageDesc( createInfo );
 		dx11CreateInfo.dx11InitDataDesc = translateTextureInitDataDesc( pCreateInfo );
 
@@ -79,7 +79,7 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
-		auto textureMemoryByteSize = DX11CoreAPIProxy::computeDXTextureMemoryByteSize( dx11CreateInfo.dimensions, dx11CreateInfo.dxgiTextureFormat );
+		auto textureMemoryByteSize = atl::computeDXTextureMemoryByteSize( dx11CreateInfo.dimensions, dx11CreateInfo.dxgiTextureFormat );
 
 		ResourceMemoryInfo textureMemoryInfo;
 		textureMemoryInfo.sourceHeapRegion.offset = 0;
@@ -96,7 +96,7 @@ namespace ts3::gpuapi
 		textureLayout.pixelFormat = createInfo.pixelFormat;
 		textureLayout.msaaLevel = createInfo.msaaLevel;
 		textureLayout.storageSize = textureMemoryByteSize;
-		textureLayout.bitsPerPixel = DX11CoreAPIProxy::getDXGITextureFormatBPP( dx11CreateInfo.dxgiTextureFormat );
+		textureLayout.bitsPerPixel = atl::getDXGITextureFormatBPP( dx11CreateInfo.dxgiTextureFormat );
 
 		DX11TextureHandle dx11Texture;
 
@@ -288,7 +288,7 @@ namespace ts3::gpuapi
 	DX11TextureUsageDesc DX11Texture::translateTextureUsageDesc( const TextureCreateInfo & pCreateInfo )
 	{
 		DX11TextureUsageDesc dx11UsageDesc;
-		dx11UsageDesc.bindFlags = DX11CoreAPIProxy::translateDX11ETextureBindFlags( pCreateInfo.resourceFlags );
+		dx11UsageDesc.bindFlags = atl::translateDX11ETextureBindFlags( pCreateInfo.resourceFlags );
 		dx11UsageDesc.cpuAccessFlags = 0;
 		dx11UsageDesc.resourceMiscFlags = 0;
 		dx11UsageDesc.usage = D3D11_USAGE_DEFAULT;

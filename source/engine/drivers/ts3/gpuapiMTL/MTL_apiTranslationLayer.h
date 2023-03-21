@@ -19,13 +19,11 @@ namespace ts3::gpuapi
 	enum class EBlendOp : uint16;
 	enum class ECompFunc : uint16;
 	enum class ECullMode : uint16;
+    enum class EDepthWriteMask : uint16;
 	enum class EStencilOp : uint16;
 	enum class EPrimitiveFillMode : uint16;
 	enum class EPrimitiveTopology : uint16;
 	enum class ETriangleVerticesOrder : uint16;
-
-	enum class EBlendRenderTargetWriteMask : uint32;
-	enum class EDepthWriteMask : uint16;
 
 	enum class EGPUBufferTarget : enum_default_value_t;
 	enum class EIndexDataFormat : base_data_type_value_t;

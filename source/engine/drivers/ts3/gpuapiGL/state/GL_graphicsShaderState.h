@@ -5,7 +5,6 @@
 #define __TS3DRIVER_GPUAPI_GLCOMMON_GRAPHICS_SHADER_STATE_H__
 
 #include "../GL_prerequisites.h"
-#include <ts3/gpuapi/state/graphicsShaderState.h>
 #include <ts3/gpuapi/state/graphicsShaderLinkageImmutableState.h>
 #include <ts3/gpuapi/state/separablePipelineState.h>
 
@@ -67,20 +66,20 @@ namespace ts3::gpuapi
 	namespace smutil
 	{
 
-		TS3_ATTR_NO_DISCARD GLShaderPipelineObjectHandle createGraphicsShaderPipelineObject(
+		TS3_ATTR_NO_DISCARD GLShaderPipelineObjectHandle createGraphicsShaderPipelineObjectGL(
 				const GraphicsShaderSet & pShaderSet );
 
-		TS3_ATTR_NO_DISCARD GLShaderProgramObjectHandle createGraphicsShaderProgramObject(
+		TS3_ATTR_NO_DISCARD GLShaderProgramObjectHandle createGraphicsShaderProgramObjectGL(
 				const GraphicsShaderSet & pShaderSet );
 
-		void updateUniformDataCurrent(
+		void updateUniformDataCurrentGL(
 				GLShaderPipelineObject & pShaderPipeline,
 				uint32 pUniformIndex,
 				EBaseDataType pBaseType,
 				uint32 pLength,
 				const void * pData );
 
-		void updateUniformDataExplicit(
+		void updateUniformDataExplicitGL(
 				GLShaderProgramObject & pShaderProgram,
 				uint32 pUniformIndex,
 				EBaseDataType pBaseType,

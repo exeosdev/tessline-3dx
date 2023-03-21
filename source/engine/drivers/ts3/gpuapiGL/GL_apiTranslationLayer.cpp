@@ -554,17 +554,18 @@ namespace ts3::gpuapi
 			ts3CaseReturn( ETextureFormat::RG8U       , GL_RG8UI        );
 			ts3CaseReturn( ETextureFormat::RG8IN      , GL_RG8_SNORM    );
 			ts3CaseReturn( ETextureFormat::RG8UN      , GL_RG8          );
-			ts3CaseReturn( ETextureFormat::RGBA8I     , GL_RGBA8I       );
-			ts3CaseReturn( ETextureFormat::RGBA8U     , GL_RGBA8UI      );
-			ts3CaseReturn( ETextureFormat::RGBA8IN    , GL_RGBA8_SNORM  );
-			ts3CaseReturn( ETextureFormat::RGBA8UN    , GL_RGBA8        );
-			ts3CaseReturn( ETextureFormat::RGBA8SRGB  , GL_SRGB8_ALPHA8 );
 		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_BGR )
 			ts3CaseReturn( ETextureFormat::BGRX8UN    , GL_RGB8         );
 			ts3CaseReturn( ETextureFormat::BGRX8SRGB  , GL_SRGB8        );
 			ts3CaseReturn( ETextureFormat::BGRA8UN    , GL_RGBA8        );
 			ts3CaseReturn( ETextureFormat::BGRA8SRGB  , GL_SRGB8_ALPHA8 );
 		#endif
+			ts3CaseReturn( ETextureFormat::RGBA8I     , GL_RGBA8I       );
+			ts3CaseReturn( ETextureFormat::RGBA8U     , GL_RGBA8UI      );
+			ts3CaseReturn( ETextureFormat::RGBA8IN    , GL_RGBA8_SNORM  );
+			ts3CaseReturn( ETextureFormat::RGBA8UN    , GL_RGBA8        );
+			ts3CaseReturn( ETextureFormat::RGBA8SRGB  , GL_SRGB8_ALPHA8 );
+
 			ts3CaseReturn( ETextureFormat::R5G5B5A1   , GL_RGB5_A1            );
 			ts3CaseReturn( ETextureFormat::R5G6B5     , GL_RGB565             );
 			ts3CaseReturn( ETextureFormat::R9G9B9E5   , GL_RGB9_E5            );

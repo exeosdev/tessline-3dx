@@ -1,7 +1,7 @@
 
 #include "DX11_commandList.h"
 #include "DX11_commandSystem.h"
-#include "DX11_coreAPIProxy.h"
+#include "DX11_apiTranslationLayer.h"
 #include "DX11_gpuDevice.h"
 #include "resources/DX11_gpuBuffer.h"
 #include "resources/DX11_sampler.h"
@@ -107,7 +107,7 @@ namespace ts3::gpuapi
 		if( pAttachmentMask.isSetAnyOf( E_RENDER_TARGET_ATTACHMENT_FLAG_DEPTH_BIT | E_RENDER_TARGET_ATTACHMENT_FLAG_STENCIL_BIT ) )
 		{
 			ts3DebugAssert( depthStencilView );
-			auto dx11DSClearFlags = DX11CoreAPIProxy::translateDX11ClearDSFlags( pAttachmentMask );
+			auto dx11DSClearFlags = atl::translateDX11ClearDSFlags( pAttachmentMask );
 			mD3D11DeviceContext1->ClearDepthStencilView( depthStencilView.Get(),
 			                                             dx11DSClearFlags,
 			                                             static_cast<FLOAT>( renderTargetClearConfig.depthClearValue ),

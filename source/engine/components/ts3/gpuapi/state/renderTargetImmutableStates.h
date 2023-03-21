@@ -38,6 +38,23 @@ namespace ts3::gpuapi
 		virtual ~RenderPassConfigurationImmutableState();
 	};
 
+	class RenderPassConfigurationImmutableStateDefault : public RenderPassConfigurationImmutableState
+	{
+	public:
+		RenderPassConfiguration const mRenderPassConfiguration;
+
+	public:
+		RenderPassConfigurationImmutableStateDefault(
+				GPUDevice & pGPUDevice,
+				const RenderPassConfiguration & pRenderPassConfiguration );
+
+		virtual ~RenderPassConfigurationImmutableStateDefault();
+
+		static GpaHandle<RenderPassConfigurationImmutableStateDefault> createInstance(
+				GPUDevice & pGPUDevice,
+				const RenderPassConfiguration & pConfiguration );
+	};
+
 } // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_RENDER_TARGET_IMMUTABLE_STATES_H__

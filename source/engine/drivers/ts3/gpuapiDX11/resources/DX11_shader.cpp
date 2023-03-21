@@ -1,6 +1,6 @@
 
 #include "DX11_shader.h"
-#include <ts3/gpuapiDX11/DX11_coreAPIProxy.h>
+#include <ts3/gpuapiDX11/DX11_apiTranslationLayer.h>
 #include <ts3/gpuapiDX11/DX11_gpuDevice.h>
 #include <ts3/stdext/memory.h>
 
@@ -49,7 +49,7 @@ namespace ts3::gpuapi
 	{
 		const char * entryPoint = pCreateInfo.entryPointName ? pCreateInfo.entryPointName : "main";
 
-		auto compileFlags = DXCoreAPIProxy::translateDXShaderCompileFlags( pCreateInfo.createFlags, pDX11GPUDevice.isDebugDevice() );
+		auto compileFlags = atl::translateDXShaderCompileFlags( pCreateInfo.createFlags, pDX11GPUDevice.isDebugDevice() );
 
 		DX11ShaderHandle dx11Shader;
 
@@ -149,7 +149,7 @@ namespace ts3::gpuapi
 
 	ShaderBinary DX11Shader::compileShader( const void * pCode, size_t pCodeLength, const char * pEntryPoint, DXShaderTarget pShaderTarget, Bitmask<UINT> pCompileFlags )
 	{
-		const char * shaderTargetStr = DX11CoreAPIProxy::getDXShaderTargetStr( pShaderTarget );
+		const char * shaderTargetStr = atl::getDXShaderTargetStr( pShaderTarget );
 
 		ComPtr<ID3DBlob> compiledBinaryBuffer;
 		ComPtr<ID3DBlob> errorMessagesBuffer;
@@ -187,7 +187,7 @@ namespace ts3::gpuapi
 		ShaderBinary binary;
 		binary.driverSpecificID = 0;
 		binary.driverSpecificType = static_cast<uint64>( pShaderTarget );
-		binary.rawBufferSize = trunc_numeric_cast<uint32>( binarySize );
+		binary.rawBufferSize = numeric_cast<uint32>( binarySize );
 		binary.rawBuffer.resize( binarySize );
 		memCopy( binary.rawBuffer.data(), binary.rawBuffer.size(), compiledBinaryBuffer->GetBufferPointer(), binarySize );
 

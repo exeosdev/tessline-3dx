@@ -8,8 +8,8 @@ namespace ts3::gpuapi
 
 	GLBlendImmutableState::GLBlendImmutableState(
 			GLGPUDevice & pGPUDevice,
-			const GLBlendConfig & pGLBlendConfig,
-			Bitmask<EBlendConfigFlags> pBlendFlags )
+			Bitmask<EBlendConfigFlags> pBlendFlags,
+			const GLBlendConfig & pGLBlendConfig )
 	: BlendImmutableState( pGPUDevice, pBlendFlags )
 	, mGLBlendConfig( pGLBlendConfig )
 	{}
@@ -20,19 +20,21 @@ namespace ts3::gpuapi
 			GLGPUDevice & pGPUDevice,
 			const BlendConfig & pBlendConfig )
 	{
-		const auto glcBlendConfig = smutil::translateBlendConfig( pBlendConfig );
+		const auto glcBlendConfig = smutil::translateBlendConfigGL( pBlendConfig );
+
 		auto immutableState = createGPUAPIObject<GLBlendImmutableState>(
 				pGPUDevice,
-				glcBlendConfig,
-				pBlendConfig.flags & E_BLEND_CONFIG_MASK_ALL );
+				pBlendConfig.flags,
+				glcBlendConfig );
+
 		return immutableState;
 	}
 
 
 	GLDepthStencilImmutableState::GLDepthStencilImmutableState(
 			GLGPUDevice & pGPUDevice,
-			const GLDepthStencilConfig & pGLDepthStencilConfig,
-			Bitmask<EDepthStencilConfigFlags> pDepthStencilFlags  )
+			Bitmask<EDepthStencilConfigFlags> pDepthStencilFlags,
+			const GLDepthStencilConfig & pGLDepthStencilConfig  )
 	: DepthStencilImmutableState( pGPUDevice, pDepthStencilFlags )
 	, mGLDepthStencilConfig( pGLDepthStencilConfig )
 	{}
@@ -43,19 +45,21 @@ namespace ts3::gpuapi
 			GLGPUDevice & pGPUDevice,
 			const DepthStencilConfig & pDepthStencilConfig  )
 	{
-		const auto glcDepthStencilConfig = smutil::translateDepthStencilConfig( pDepthStencilConfig );
+		const auto glcDepthStencilConfig = smutil::translateDepthStencilConfigGL( pDepthStencilConfig );
+
 		auto immutableState = createGPUAPIObject<GLDepthStencilImmutableState>(
 				pGPUDevice,
-				glcDepthStencilConfig,
-				pDepthStencilConfig.commonFlags & E_DEPTH_STENCIL_CONFIG_MASK_ALL );
+				pDepthStencilConfig.commonFlags,
+				glcDepthStencilConfig );
+
 		return immutableState;
 	}
 
 
 	GLRasterizerImmutableState::GLRasterizerImmutableState(
 			GLGPUDevice & pGPUDevice,
-			const GLRasterizerConfig & pGLRasterizerConfig,
-			Bitmask<ERasterizerConfigFlags> pRasterizerFlags )
+			Bitmask<ERasterizerConfigFlags> pRasterizerFlags,
+			const GLRasterizerConfig & pGLRasterizerConfig )
 	: RasterizerImmutableState( pGPUDevice, pRasterizerFlags )
 	, mGLRasterizerConfig( pGLRasterizerConfig )
 	{}
@@ -66,11 +70,13 @@ namespace ts3::gpuapi
 			GLGPUDevice & pGPUDevice,
 			const RasterizerConfig & pRasterizerConfig )
 	{
-		const auto glcRasterizerConfig = smutil::translateRasterizerConfig( pRasterizerConfig );
+		const auto glcRasterizerConfig = smutil::translateRasterizerConfigGL( pRasterizerConfig );
+
 		auto immutableState = createGPUAPIObject<GLRasterizerImmutableState>(
 				pGPUDevice,
-				glcRasterizerConfig,
-				pRasterizerConfig.flags & E_RASTERIZER_CONFIG_MASK_ALL );
+				pRasterizerConfig.flags,
+				glcRasterizerConfig );
+
 		return immutableState;
 	}
 
@@ -78,36 +84,37 @@ namespace ts3::gpuapi
 	namespace smutil
 	{
 
-		GLBlendConfig translateBlendConfig( const BlendConfig & pConfig )
+		GLBlendConfig translateBlendConfigGL( const BlendConfig & pConfig )
 		{
 			GLBlendConfig openglBlendConfig{};
-
-			const auto commonBlendSettings = smutil::translateRTColorAttachmentBlendSettings( pConfig.attachments[0] );
-
-			foreachRTAttachmentIndex( pConfig.attachmentsMask,
-				[&]( native_uint pIndex, ERTAttachmentFlags pAttachmentBit )
-				{
-					auto & openglAttachmentSettings = openglBlendConfig.attachments[pIndex];
-					if( pConfig.flags.isSet( E_BLEND_CONFIG_FLAG_ENABLE_MRT_INDEPENDENT_BLENDING_BIT ) )
-					{
-						const auto & inputAttachmentSettings = pConfig.attachments[pIndex];
-						openglAttachmentSettings = smutil::translateRTColorAttachmentBlendSettings( inputAttachmentSettings );
-					}
-					else
-					{
-						openglAttachmentSettings = commonBlendSettings;
-					}
-					openglAttachmentSettings.blendActive = 1;
-					return true;
-				} );
-
-			openglBlendConfig.constantColor = pConfig.constantColor;
+			openglBlendConfig.attachmentsMask = pConfig.attachmentsMask;
 			openglBlendConfig.flags = pConfig.flags;
+
+			if( pConfig.attachmentsMask != 0 )
+			{
+				if( !pConfig.flags.isSet( E_BLEND_CONFIG_FLAG_ENABLE_MRT_INDEPENDENT_BLENDING_BIT ) )
+				{
+					openglBlendConfig.attachments[0] = smutil::translateRTColorAttachmentBlendSettingsGL( pConfig.attachments[0] );
+				}
+				else
+				{
+					foreachRTAttachmentIndex( pConfig.attachmentsMask,
+						[&]( native_uint pIndex, ERTAttachmentFlags pAttachmentBit )
+						{
+							auto & openglAttachmentSettings = openglBlendConfig.attachments[pIndex];
+							openglAttachmentSettings = smutil::translateRTColorAttachmentBlendSettingsGL( pConfig.attachments[pIndex] );
+							openglAttachmentSettings.blendActive = true;
+							return true;
+						} );
+				}
+
+				openglBlendConfig.constantColor = pConfig.constantColor;
+			}
 
 			return openglBlendConfig;
 		}
 
-		GLDepthStencilConfig translateDepthStencilConfig( const DepthStencilConfig & pConfig )
+		GLDepthStencilConfig translateDepthStencilConfigGL( const DepthStencilConfig & pConfig )
 		{
 			GLDepthStencilConfig openglDepthStencilConfig{};
 
@@ -139,7 +146,7 @@ namespace ts3::gpuapi
 			return openglDepthStencilConfig;
 		}
 
-		GLRasterizerConfig translateRasterizerConfig( const RasterizerConfig & pConfig )
+		GLRasterizerConfig translateRasterizerConfigGL( const RasterizerConfig & pConfig )
 		{
 			GLRasterizerConfig rasterizerConfig{};
 
@@ -153,10 +160,9 @@ namespace ts3::gpuapi
 			return rasterizerConfig;
 		}
 
-		GLRTColorAttachmentBlendSettings translateRTColorAttachmentBlendSettings( const RTColorAttachmentBlendSettings & pSettings )
+		GLRTColorAttachmentBlendSettings translateRTColorAttachmentBlendSettingsGL( const RTColorAttachmentBlendSettings & pSettings )
 		{
-			GLRTColorAttachmentBlendSettings openglBlendSettings{};
-
+			GLRTColorAttachmentBlendSettings openglBlendSettings;
 			openglBlendSettings.equation.rgb = atl::translateGLBlendOp( pSettings.opColor );
 			openglBlendSettings.equation.alpha = atl::translateGLBlendOp( pSettings.opAlpha );
 			openglBlendSettings.factor.rgbSrc = atl::translateGLBlendFactor( pSettings.factorSrcColor );

@@ -1,8 +1,8 @@
 
 #pragma once
 
-#ifndef __TS3DRIVER_GPUAPI_DX_CORE_LAYER_H__
-#define __TS3DRIVER_GPUAPI_DX_CORE_LAYER_H__
+#ifndef __TS3DRIVER_GPUAPI_DXCOMMON_API_TRANSLATION_LAYER_H__
+#define __TS3DRIVER_GPUAPI_DXCOMMON_API_TRANSLATION_LAYER_H__
 
 #include "DX_prerequisites.h"
 
@@ -11,9 +11,15 @@ namespace ts3::gpuapi
 
 	struct TextureDimensions;
 
+    using resource_flags_value_t = uint32;
+
+    enum EGPUDriverConfigFlags : uint32;
+    enum ERenderTargetAttachmentFlags : uint32;
+    enum ETextureCubeMapFace : uint32;
+
 	using DXGIGetDebugInterfaceType = HRESULT ( WINAPI * )( const GUID &, void ** );
 
-	namespace DXCoreAPIProxy
+	namespace atl
 	{
 
 		DXGIGetDebugInterfaceType loadDXGIDebugLegacyLoader();
@@ -40,4 +46,4 @@ namespace ts3::gpuapi
 
 } // namespace ts3::gpuapi
 
-#endif // __TS3DRIVER_GPUAPI_DX_CORE_LAYER_H__
+#endif // __TS3DRIVER_GPUAPI_DXCOMMON_API_TRANSLATION_LAYER_H__

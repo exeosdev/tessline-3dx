@@ -100,7 +100,8 @@ namespace ts3::gpuapi
 		void initializeInterleaved();
 		void initializeSeparate();
 		void reset();
-		GLIAVertexBufferBinding getBinding( native_uint pStreamIndex ) const;
+
+		TS3_ATTR_NO_DISCARD GLIAVertexBufferBinding getBinding( native_uint pStreamIndex ) const;
 	};
 
 	/// @brief
@@ -202,43 +203,43 @@ namespace ts3::gpuapi
 	namespace smutil
 	{
 
-		TS3_ATTR_NO_DISCARD GLIAVertexAttributeInfo translateIAVertexAttributeInfo(
+		TS3_ATTR_NO_DISCARD GLIAVertexAttributeInfo translateIAVertexAttributeInfoGL(
 				const IAVertexAttributeInfo & pAttributeInfo );
 
-		TS3_ATTR_NO_DISCARD GLIAInputLayoutDefinition translateIAInputLayoutDefinition(
+		TS3_ATTR_NO_DISCARD GLIAInputLayoutDefinition translateIAInputLayoutDefinitionGL(
 				const IAInputLayoutDefinition & pDefinition );
 
-		TS3_ATTR_NO_DISCARD GLIAVertexStreamDefinition translateIAVertexStreamDefinition(
+		TS3_ATTR_NO_DISCARD GLIAVertexStreamDefinition translateIAVertexStreamDefinitionGL(
 				const IAVertexStreamDefinition & pDefinition );
 
-		uint32 translateVertexBufferReferences(
+		uint32 translateVertexBufferReferencesGL(
 				const IAVertexBufferReferenceArray & pVBReferences,
 				Bitmask<EIAVertexStreamBindingFlags> pBindingMask,
 				GLIAVertexBuffersBindings & pOutGLBindings);
 
-		bool translateIndexBufferReference(
+		bool translateIndexBufferReferenceGL(
 				const IAIndexBufferReference & pIBReference,
 				GLIAIndexBufferBinding & pOutGLBinding );
 
-		TS3_ATTR_NO_DISCARD GLIAVertexBuffersBindings translateVertexBufferReferences(
+		TS3_ATTR_NO_DISCARD GLIAVertexBuffersBindings translateVertexBufferReferencesGL(
 				const IAVertexBufferReferenceArray & pVBReferences,
 				Bitmask<EIAVertexStreamBindingFlags> pBindingMask );
 
-		TS3_ATTR_NO_DISCARD GLIAIndexBufferBinding translateIndexBufferReference(
+		TS3_ATTR_NO_DISCARD GLIAIndexBufferBinding translateIndexBufferReferenceGL(
 				const IAIndexBufferReference & pIBReference );
 
-		TS3_ATTR_NO_DISCARD GLVertexArrayObjectHandle createGLVertexArrayObjectLayoutOnly(
+		TS3_ATTR_NO_DISCARD GLVertexArrayObjectHandle createGLVertexArrayObjectLayoutOnlyGL(
 				const GLIAInputLayoutDefinition & pInputLayoutDefinition ) noexcept;
 
-		bool updateGLVertexArrayObjectLayoutOnly(
+		bool updateGLVertexArrayObjectLayoutOnlyGL(
 				GLVertexArrayObject & pVertexArrayObject,
 				const GLIAInputLayoutDefinition & pInputLayoutDefinition ) noexcept;
 
-		TS3_ATTR_NO_DISCARD GLVertexArrayObjectHandle createGLVertexArrayObjectLayoutStreamCombined(
+		TS3_ATTR_NO_DISCARD GLVertexArrayObjectHandle createGLVertexArrayObjectLayoutStreamCombinedGL(
 				const GLIAInputLayoutDefinition & pInputLayoutDefinition,
 				const GLIAVertexStreamDefinition & pVertexStreamDefinition ) noexcept;
 
-		bool updateGLVertexArrayObjectLayoutStreamCombined(
+		bool updateGLVertexArrayObjectLayoutStreamCombinedGL(
 				GLVertexArrayObject & pVertexArrayObject,
 				const GLIAInputLayoutDefinition & pInputLayoutDefinition,
 				const GLIAVertexStreamDefinition & pVertexStreamDefinition ) noexcept;

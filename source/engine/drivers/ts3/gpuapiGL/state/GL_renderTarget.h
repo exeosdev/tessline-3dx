@@ -56,22 +56,6 @@ namespace ts3::gpuapi
 			const RenderTargetLayout & pRenderTargetLayout );
 	};
 
-	class GLRenderPassConfigurationImmutableState : public RenderPassConfigurationImmutableState
-	{
-	public:
-		RenderPassConfiguration const mRenderPassConfiguration;
-
-	public:
-		GLRenderPassConfigurationImmutableState(
-				GLGPUDevice & pGPUDevice,
-				const RenderPassConfiguration & pRenderPassConfiguration );
-
-		virtual ~GLRenderPassConfigurationImmutableState();
-
-		static GpaHandle<GLRenderPassConfigurationImmutableState> createInstance(
-				GLGPUDevice & pGPUDevice,
-				const RenderPassConfiguration & pConfiguration );
-	};
 
 	namespace smutil
 	{

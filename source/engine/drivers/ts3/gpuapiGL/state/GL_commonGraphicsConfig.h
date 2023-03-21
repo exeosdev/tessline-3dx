@@ -81,6 +81,7 @@ namespace ts3::gpuapi
 	#endif
 	};
 
+
 	///
 	class GLBlendImmutableState : public BlendImmutableState
 	{
@@ -88,7 +89,11 @@ namespace ts3::gpuapi
 		GLBlendConfig const mGLBlendConfig;
 
 	public:
-		GLBlendImmutableState( GLGPUDevice & pGPUDevice, const GLBlendConfig & pGLBlendConfig, Bitmask<EBlendConfigFlags> pBlendFlags );
+		GLBlendImmutableState(
+				GLGPUDevice & pGPUDevice,
+				Bitmask<EBlendConfigFlags> pBlendFlags,
+				const GLBlendConfig & pGLBlendConfig );
+
 		virtual ~GLBlendImmutableState();
 
 		static GpaHandle<GLBlendImmutableState> createInstance( GLGPUDevice & pGPUDevice, const BlendConfig & pBlendConfig );
@@ -101,7 +106,11 @@ namespace ts3::gpuapi
 		GLDepthStencilConfig const mGLDepthStencilConfig;
 
 	public:
-		GLDepthStencilImmutableState( GLGPUDevice & pGPUDevice, const GLDepthStencilConfig & pGLDepthStencilConfig, Bitmask<EDepthStencilConfigFlags> pDepthStencilFlags  );
+		GLDepthStencilImmutableState(
+				GLGPUDevice & pGPUDevice,
+				Bitmask<EDepthStencilConfigFlags> pDepthStencilFlags,
+				const GLDepthStencilConfig & pGLDepthStencilConfig );
+
 		virtual ~GLDepthStencilImmutableState();
 
 		static GpaHandle<GLDepthStencilImmutableState> createInstance( GLGPUDevice & pGPUDevice, const DepthStencilConfig & pDepthStencilConfig );
@@ -114,22 +123,27 @@ namespace ts3::gpuapi
 		GLRasterizerConfig const mGLRasterizerConfig;
 
 	public:
-		GLRasterizerImmutableState( GLGPUDevice & pGPUDevice, const GLRasterizerConfig & pGLRasterizerConfig, Bitmask<ERasterizerConfigFlags> pRasterizerFlags );
+		GLRasterizerImmutableState(
+				GLGPUDevice & pGPUDevice,
+				Bitmask<ERasterizerConfigFlags> pRasterizerFlags,
+				const GLRasterizerConfig & pGLRasterizerConfig );
+
 		virtual ~GLRasterizerImmutableState();
 
 		static GpaHandle<GLRasterizerImmutableState> createInstance( GLGPUDevice & pGPUDevice, const RasterizerConfig & pRasterizerConfig );
 	};
 
+
 	namespace smutil
 	{
 
-		TS3_ATTR_NO_DISCARD GLBlendConfig translateBlendConfig( const BlendConfig & pConfig );
+		TS3_ATTR_NO_DISCARD GLBlendConfig translateBlendConfigGL( const BlendConfig & pConfig );
 
-		TS3_ATTR_NO_DISCARD GLDepthStencilConfig translateDepthStencilConfig( const DepthStencilConfig & pConfig );
+		TS3_ATTR_NO_DISCARD GLDepthStencilConfig translateDepthStencilConfigGL( const DepthStencilConfig & pConfig );
 
-		TS3_ATTR_NO_DISCARD GLRasterizerConfig translateRasterizerConfig( const RasterizerConfig & pConfig );
+		TS3_ATTR_NO_DISCARD GLRasterizerConfig translateRasterizerConfigGL( const RasterizerConfig & pConfig );
 
-		TS3_ATTR_NO_DISCARD GLRTColorAttachmentBlendSettings translateRTColorAttachmentBlendSettings(
+		TS3_ATTR_NO_DISCARD GLRTColorAttachmentBlendSettings translateRTColorAttachmentBlendSettingsGL(
 				const RTColorAttachmentBlendSettings & pSettings );
 
 	}

@@ -52,6 +52,11 @@ namespace ts3::gpuapi
 		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerConfig & pConfig ) = 0;
 		virtual RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & pDefinition ) = 0;
 		virtual RenderPassConfigurationImmutableStateHandle createRenderPassState( const RenderPassConfiguration & pConfiguration ) = 0;
+
+	protected:
+		virtual RenderPassConfigurationImmutableStateHandle createRenderPassStateDefault(
+				GPUDevice & pGPUDevice,
+				const RenderPassConfiguration & pConfiguration );
 	};
 
 	/// @brief

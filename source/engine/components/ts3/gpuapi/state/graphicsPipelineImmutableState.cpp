@@ -1,6 +1,7 @@
 
 #include "graphicsPipelineImmutableState.h"
 #include "graphicsShaderLinkageImmutableState.h"
+#include "renderTargetImmutableStates.h"
 
 namespace ts3::gpuapi
 {
@@ -43,12 +44,20 @@ namespace ts3::gpuapi
 
 		const auto stateCommonProperties = smutil::getGraphicsShaderLinkageCommonPropertiesForShaderSet( pShaderSet );
 
-		const auto shaderImmutableState = createGPUAPIObject<GraphicsShaderImmutableStateSeparable>(
+		const auto shaderImmutableState = createGPUAPIObject<GraphicsShaderLinkageImmutableStateSeparable>(
 				mGPUDevice,
-				std::move( pShaderSet ),
-				stateCommonProperties );
+				stateCommonProperties,
+				std::move( pShaderSet ) );
 
 		return shaderImmutableState;
+	}
+
+
+	RenderPassConfigurationImmutableStateHandle PipelineImmutableStateFactory::createRenderPassStateDefault(
+			GPUDevice & pGPUDevice,
+			const RenderPassConfiguration & pConfiguration )
+	{
+		return RenderPassConfigurationImmutableStateDefault::createInstance( pGPUDevice, pConfiguration );
 	}
 
 

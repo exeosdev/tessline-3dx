@@ -14,14 +14,15 @@ namespace ts3::gpuapi
 	GraphicsShaderLinkageImmutableState::~GraphicsShaderLinkageImmutableState() = default;
 
 
-	GraphicsShaderImmutableStateSeparable::GraphicsShaderImmutableStateSeparable(
+	GraphicsShaderLinkageImmutableStateSeparable::GraphicsShaderLinkageImmutableStateSeparable(
 			GPUDevice & pGPUDevice,
-			const GraphicsShaderSet & pShaderSet,
-			const GraphicsShaderLinkageCommonProperties & pCommonProperties )
-			: GraphicsShaderLinkageImmutableState( pGPUDevice, pCommonProperties )
+			const GraphicsShaderLinkageCommonProperties & pCommonProperties,
+			const GraphicsShaderSet & pShaderSet )
+	: GraphicsShaderLinkageImmutableState( pGPUDevice, pCommonProperties )
+	, mShaderSet( pShaderSet )
 	{}
 
-	GraphicsShaderImmutableStateSeparable::~GraphicsShaderImmutableStateSeparable() = default;
+	GraphicsShaderLinkageImmutableStateSeparable::~GraphicsShaderLinkageImmutableStateSeparable() = default;
 
 
 	namespace smutil

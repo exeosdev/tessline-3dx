@@ -38,7 +38,7 @@ namespace ts3::gpuapi
 		virtual ts3::math::Vec2u32 queryRenderTargetSize() const override;
 
 	protected:
-	    static system::WindowHandle createSysWindow( DXGPUDevice & pDevice, const PresentationLayerCreateInfo & pCreateInfo );
+	    static system::WindowHandle createSysWindow( DXGPUDevice & pGPUDevice, const PresentationLayerCreateInfo & pCreateInfo );
 	};
 
 } // namespace ts3::gpuapi

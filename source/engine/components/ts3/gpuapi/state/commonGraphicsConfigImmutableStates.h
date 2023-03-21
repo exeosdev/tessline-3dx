@@ -21,7 +21,7 @@ namespace ts3::gpuapi
 		BlendImmutableState & operator=( const BlendImmutableState & ) = delete;
 
 		BlendImmutableState( GPUDevice & pGPUDevice, Bitmask<EBlendConfigFlags> pBlendFlags );
-		virtual ~BlendImmutableState() ;
+		virtual ~BlendImmutableState();
 	};
 
 	/// @brief

@@ -1,43 +1,42 @@
 
 #pragma once
 
-#ifndef __TS3DRIVER_GPUAPI_DX11_CORE_LAYER_H__
-#define __TS3DRIVER_GPUAPI_DX11_CORE_LAYER_H__
+#ifndef __TS3DRIVER_GPUAPI_DX11_API_TRANSLATION_LAYER_H__
+#define __TS3DRIVER_GPUAPI_DX11_API_TRANSLATION_LAYER_H__
 
 #include "DX11_prerequisites.h"
-#include <ts3/gpuapiDX/DX_coreAPIProxy.h>
+#include <ts3/gpuapiDX/DX_apiTranslationLayer.h>
 
 namespace ts3::gpuapi
 {
 
 	using resource_flags_value_t = uint32 ;
 
+	enum EBlendWriteMaskFlags : uint16;
 	enum EGPUDriverConfigFlags : uint32;
-	enum ERenderTargetAttachmentFlags : uint32;
+    enum ERenderTargetBufferFlags : uint32;
 
-	enum class EBlendFactor : enum_default_value_t;
-	enum class EBlendOp : enum_default_value_t;
-	enum class EBlendRenderTargetWriteMask : enum_default_value_t;
-	enum class ECompFunc : enum_default_value_t;
-	enum class ECullMode : enum_default_value_t;
-	enum class EDepthWriteMask : enum_default_value_t;
-	enum class GPUBufferType : enum_default_value_t;
-	enum class EPrimitiveFillMode : enum_default_value_t;
-	enum class EPrimitiveTopology : enum_default_value_t;
-	enum class EShaderType : uint32;
-	enum class EStencilOp : enum_default_value_t;
-	enum class ETextureAddressMode : enum_default_value_t;
-	enum class ETextureCubeMapFace : size_t;
-	enum class ETextureDimensionClass : enum_default_value_t;
-	enum class ETextureFilter : enum_default_value_t;
-	enum class ETextureFormat : gpu_pixel_format_value_t;
-	enum class ETextureMipMode : enum_default_value_t;
-	enum class ETriangleVerticesOrder : enum_default_value_t;
+    enum class EBlendFactor : uint16;
+    enum class EBlendOp : uint16;
+    enum class ECompFunc : uint16;
+    enum class ECullMode : uint16;
+    enum class EDepthWriteMask : uint16;
+    enum class EStencilOp : uint16;
+    enum class EPrimitiveFillMode : uint16;
+    enum class EPrimitiveTopology : uint16;
+    enum class ETriangleVerticesOrder : uint16;
 
-	namespace DX11CoreAPIProxy
+    enum class EGPUBufferTarget : enum_default_value_t;
+    enum class EIndexDataFormat : base_data_type_value_t;
+    enum class EShaderType : uint32;
+    enum class ETextureAddressMode : enum_default_value_t;
+    enum class ETextureClass : enum_default_value_t;
+    enum class ETextureFilter : enum_default_value_t;
+    enum class ETextureFormat : gpu_pixel_format_value_t;
+    enum class ETextureMipMode : enum_default_value_t;
+
+	namespace atl
 	{
-
-		using namespace DXCoreAPIProxy;
 
 		ComPtr<ID3D11Device1> createD3D11Device( D3D_DRIVER_TYPE pDeviceType, Bitmask<UINT> pCreateFlags );
 
@@ -45,8 +44,7 @@ namespace ts3::gpuapi
 
 		ComPtr<IDXGIFactory2> queryDXGIFactoryForD3D11Device( const ComPtr<ID3D11Device1> & pD3D11Device1 );
 
-		ComPtr<IDXGISwapChain1> createD3D11SwapChainForSystemWindow( DX11GPUDevice & pDX11GPUDevice,
-		                                                          void * pSysWindow /* It must be a ts3::system::Window */ );
+		ComPtr<IDXGISwapChain1> createD3D11SwapChainForSystemWindow( DX11GPUDevice & pDX11GPUDevice, void * pSysWindow /* It must be a ts3::system::Window */ );
 
 		UINT translateDX11GPUDeviceCreateFlags( Bitmask<EGPUDriverConfigFlags> pDriverConfigFlags );
 
@@ -56,9 +54,9 @@ namespace ts3::gpuapi
 
 		D3D11_BLEND_OP translateDX11BlendOp( EBlendOp pBlendOp );
 
-		UINT8 translateDX11BlendRenderTargetWriteMask( EBlendRenderTargetWriteMask pRenderTargetWriteMask );
+		UINT8 translateDX11BlendRenderTargetWriteMask( Bitmask<EBlendWriteMaskFlags> pWriteMask );
 
-		Bitmask<D3D11_CLEAR_FLAG> translateDX11ClearDSFlags( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask );
+		Bitmask<D3D11_CLEAR_FLAG> translateDX11RTClearDepthStencilFlags( Bitmask<ERenderTargetBufferFlags> pClearFlags );
 
 		D3D11_COMPARISON_FUNC translateDX11CompFunc( ECompFunc pCompFunc );
 
@@ -88,4 +86,4 @@ namespace ts3::gpuapi
 
 } // namespace ts3::gpuapi
 
-#endif // __TS3DRIVER_GPUAPI_DX11_CORE_LAYER_H__
+#endif // __TS3DRIVER_GPUAPI_DX11_API_TRANSLATION_LAYER_H__

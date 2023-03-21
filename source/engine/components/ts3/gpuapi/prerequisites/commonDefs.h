@@ -22,10 +22,8 @@ namespace ts3::gpuapi
 		return generateHFSIdentifier( pInput );
 	}
 
-#define ts3GpaDeclareClassHandle( pClassName ) \
-    class pClassName; \
-    using pClassName##Handle = SharedHandle<pClassName>; \
-    using pClassName##WeakHandle = WeakHandle<pClassName>
+#define ts3GpaDeclareClassHandle( pClassName ) ts3DeclareClassHandle( pClassName )
+#define ts3GpaDeclareTypedefHandle( pAliasName, pTypeName ) ts3DeclareTypedefHandle( pAliasName, pTypeName )
 
 	// GpuAPI Metrics
 	namespace gpm

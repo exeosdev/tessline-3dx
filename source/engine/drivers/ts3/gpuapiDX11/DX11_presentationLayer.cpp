@@ -1,7 +1,7 @@
 
 #include "DX11_presentationLayer.h"
 #include "DX11_commandList.h"
-#include "DX11_coreAPIProxy.h"
+#include "DX11_apiTranslationLayer.h"
 #include "DX11_gpuDevice.h"
 #include <ts3/gpuapi/commandContext.h>
 
@@ -22,7 +22,7 @@ namespace ts3::gpuapi
 		auto sysWindow = createSysWindow( pDevice, pCreateInfo );
 		ts3DebugAssert( sysWindow );
 
-		auto dxgiSwapChain = DX11CoreAPIProxy::createD3D11SwapChainForSystemWindow( pDevice, sysWindow.get() );
+		auto dxgiSwapChain = atl::createD3D11SwapChainForSystemWindow( pDevice, sysWindow.get() );
 		ts3DebugAssert( dxgiSwapChain );
 
 		auto presentationLayer = createGPUAPIObject<DX11ScreenPresentationLayer>( pDevice, sysWindow, std::move( dxgiSwapChain ) );

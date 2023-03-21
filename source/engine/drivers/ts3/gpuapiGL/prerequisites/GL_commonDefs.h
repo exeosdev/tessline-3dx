@@ -24,15 +24,6 @@
 namespace ts3::gpuapi
 {
 
-	class GLBlendImmutableState;
-	class GLDepthStencilImmutableState;
-	class GLRasterizerImmutableState;
-	class GLGraphicsShaderLinkageImmutableState;
-	class GLIAInputLayoutImmutableState;
-	class GLIAVertexStreamImmutableState;
-	class GLRenderTargetBindingImmutableState;
-	class GLRenderPassConfigurationImmutableState;
-
 	constexpr GLenum cvGLInvalidValue = Limits<GLenum>::maxValue;
 
 	constexpr GLuint cvGLInvalidProgramLocation = Limits<GLuint>::maxValue;

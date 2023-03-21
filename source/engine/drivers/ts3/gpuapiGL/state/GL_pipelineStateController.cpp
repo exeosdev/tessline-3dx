@@ -127,7 +127,7 @@ namespace ts3::gpuapi
 		if( updateResult )
 		{
 			auto glcVertexStreamDefinition =
-					smutil::translateIAVertexStreamDefinition( pIAVertexStreamState.getVertexStreamDefinition() );
+					smutil::translateIAVertexStreamDefinitionGL( pIAVertexStreamState.getVertexStreamDefinition() );
 
 			_dynamicIAVertexStreamDefinition = glcVertexStreamDefinition;
 		}
@@ -380,7 +380,7 @@ namespace ts3::gpuapi
 		auto constantBaseType = cxdefs::getVertexAttribFormatBaseDataType( pConstantInfo.iFormat );
 		auto constantLength = cxdefs::getVertexAttribFormatLength( pConstantInfo.iFormat );
 
-		smutil::updateUniformDataCurrent(
+		smutil::updateUniformDataCurrentGL(
 				*shaderStateCore->mGLShaderPipelineObject,
 				pConstantInfo.iStageIndex,
 				constantBaseType,
@@ -496,7 +496,7 @@ namespace ts3::gpuapi
 		auto constantBaseType = cxdefs::getVertexAttribFormatBaseDataType( pConstantInfo.iFormat );
 		auto constantLength = cxdefs::getVertexAttribFormatLength( pConstantInfo.iFormat );
 
-		smutil::updateUniformDataExplicit(
+		smutil::updateUniformDataExplicitGL(
 				*shaderStateCompat->mGLShaderProgramObject,
 				pConstantInfo.iStageIndex,
 				constantBaseType,

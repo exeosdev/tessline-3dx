@@ -52,21 +52,21 @@ namespace ts3::gpuapi
 	};
 
 	/// @brief
-	class GraphicsShaderImmutableStateSeparable : public GraphicsShaderLinkageImmutableState
+	class GraphicsShaderLinkageImmutableStateSeparable : public GraphicsShaderLinkageImmutableState
 	{
 	public:
 		GraphicsShaderSet const mShaderSet;
 
 	public:
-		GraphicsShaderImmutableStateSeparable( const GraphicsShaderImmutableStateSeparable & ) = delete;
-		GraphicsShaderImmutableStateSeparable & operator=( const GraphicsShaderImmutableStateSeparable & ) = delete;
+		GraphicsShaderLinkageImmutableStateSeparable( const GraphicsShaderLinkageImmutableStateSeparable & ) = delete;
+		GraphicsShaderLinkageImmutableStateSeparable & operator=( const GraphicsShaderLinkageImmutableStateSeparable & ) = delete;
 
-		GraphicsShaderImmutableStateSeparable(
+		GraphicsShaderLinkageImmutableStateSeparable(
 				GPUDevice & pGPUDevice,
-				const GraphicsShaderSet & pShaderSet,
-				const GraphicsShaderLinkageCommonProperties & pCommonProperties );
+				const GraphicsShaderLinkageCommonProperties & pCommonProperties,
+				const GraphicsShaderSet & pShaderSet );
 
-		virtual ~GraphicsShaderImmutableStateSeparable();
+		virtual ~GraphicsShaderLinkageImmutableStateSeparable();
 	};
 
 	namespace smutil

@@ -1,7 +1,7 @@
 
 #include "DX11_gpuDevice.h"
 #include "DX11_gpuDriver.h"
-#include "DX11_coreAPIProxy.h"
+#include "DX11_apiTranslationLayer.h"
 #include "DX11_commandList.h"
 #include "DX11_commandSystem.h"
 #include "resources/DX11_gpuBuffer.h"
@@ -21,7 +21,7 @@ namespace ts3::gpuapi
 	DX11GPUDevice::DX11GPUDevice( DX11GPUDriver & pDriver,
 	                              ComPtr<ID3D11Device1> pD3D11Device1,
 	                              ComPtr<ID3D11Debug> pD3D11Debug )
-	: DXGPUDevice( pDriver, DX11CoreAPIProxy::queryDXGIFactoryForD3D11Device( pD3D11Device1 ) )
+	: DXGPUDevice( pDriver, atl::queryDXGIFactoryForD3D11Device( pD3D11Device1 ) )
 	, mD3D11Device1( std::move( pD3D11Device1 ) )
 	, mD3D11DebugInterface( std::move( pD3D11Debug ) )
 	{}
@@ -31,7 +31,7 @@ namespace ts3::gpuapi
 	DX11GPUDeviceHandle DX11GPUDevice::create( DX11GPUDriver & pDriver, const DX11GPUDeviceCreateInfo & pCreateInfo )
 	{
 		auto driverConfigFlags = pDriver.getConfigFlags();
-		auto deviceCreateFlags = DX11CoreAPIProxy::translateDX11GPUDeviceCreateFlags( driverConfigFlags );
+		auto deviceCreateFlags = atl::translateDX11GPUDeviceCreateFlags( driverConfigFlags );
 
 		D3D_DRIVER_TYPE deviceDriverType = D3D_DRIVER_TYPE_HARDWARE;
 		if( driverConfigFlags.isSet( E_GPU_DRIVER_CONFIG_FLAG_USE_REFERENCE_DRIVER_BIT ) )
@@ -39,10 +39,10 @@ namespace ts3::gpuapi
 			deviceDriverType = D3D_DRIVER_TYPE_REFERENCE;
 		}
 
-		auto d3d11Device1 = DX11CoreAPIProxy::createD3D11Device( deviceDriverType, deviceCreateFlags );
+		auto d3d11Device1 = atl::createD3D11Device( deviceDriverType, deviceCreateFlags );
 		ts3DebugAssert( d3d11Device1 );
 
-		auto d3d11DebugInterface = DX11CoreAPIProxy::queryD3D11DebugInterfaceForD3D11Device( d3d11Device1 );
+		auto d3d11DebugInterface = atl::queryD3D11DebugInterfaceForD3D11Device( d3d11Device1 );
 		ts3DebugAssert( d3d11DebugInterface );
 
 		auto dx11GPUDevice = createGPUAPIObject<DX11GPUDevice>( pDriver, d3d11Device1, d3d11DebugInterface );

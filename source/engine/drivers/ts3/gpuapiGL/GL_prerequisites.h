@@ -106,17 +106,23 @@
 namespace ts3::gpuapi
 {
 
-	ts3DeclareClassHandle( GLCommandList );
-	ts3DeclareClassHandle( GLCommandSystem );
-	ts3DeclareClassHandle( GLGPUDevice );
-	ts3DeclareClassHandle( GLGPUDriver );
-	ts3DeclareClassHandle( GLPresentationLayer );
+	class RenderPassConfigurationImmutableStateDefault;
 
-	struct GLRenderContextSpecification
-	{
-		Version apiVersion;
-		system::EOpenGLAPIProfile targetProfile;
-	};
+	class GLBlendImmutableState;
+	class GLDepthStencilImmutableState;
+	class GLRasterizerImmutableState;
+	class GLGraphicsShaderLinkageImmutableState;
+	class GLIAInputLayoutImmutableState;
+	class GLIAVertexStreamImmutableState;
+	class GLRenderTargetBindingImmutableState;
+
+	ts3GpaDeclareClassHandle( GLCommandList );
+	ts3GpaDeclareClassHandle( GLCommandSystem );
+	ts3GpaDeclareClassHandle( GLGPUDevice );
+	ts3GpaDeclareClassHandle( GLGPUDriver );
+	ts3GpaDeclareClassHandle( GLPresentationLayer );
+
+	ts3GpaDeclareTypedefHandle( GLRenderPassConfigurationImmutableState, RenderPassConfigurationImmutableStateDefault );
 
 } // namespace ts3::gpuapi
 

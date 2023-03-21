@@ -1,6 +1,5 @@
 
 #include "GL_renderTarget.h"
-#include <ts3/gpuapi/resources/texture.h>
 #include <ts3/gpuapiGL/GL_gpuDevice.h>
 #include <ts3/gpuapiGL/objects/GL_framebufferObject.h>
 #include <ts3/gpuapiGL/objects/GL_renderbufferObject.h>
@@ -61,27 +60,6 @@ namespace ts3::gpuapi
 			pGPUDevice,
 			glcRenderTargetBindingDefinition.rtLayout,
 			std::move( glcRenderTargetBindingDefinition.fboData ) );
-
-		return immutableState;
-	}
-
-
-	GLRenderPassConfigurationImmutableState::GLRenderPassConfigurationImmutableState(
-			GLGPUDevice & pGPUDevice,
-			const RenderPassConfiguration & pRenderPassConfiguration )
-	: RenderPassConfigurationImmutableState( pGPUDevice )
-	, mRenderPassConfiguration( pRenderPassConfiguration )
-	{}
-
-	GLRenderPassConfigurationImmutableState::~GLRenderPassConfigurationImmutableState() = default;
-
-	GpaHandle<GLRenderPassConfigurationImmutableState> GLRenderPassConfigurationImmutableState::createInstance(
-			GLGPUDevice & pGPUDevice,
-			const RenderPassConfiguration & pConfiguration )
-	{
-		auto immutableState = createGPUAPIObject<GLRenderPassConfigurationImmutableState>(
-				pGPUDevice,
-				pConfiguration );
 
 		return immutableState;
 	}

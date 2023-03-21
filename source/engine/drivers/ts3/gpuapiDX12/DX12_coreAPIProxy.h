@@ -5,7 +5,7 @@
 #define __TS3DRIVER_GPUAPI_DX12_CORE_LAYER_H__
 
 #include "DX12_prerequisites.h"
-#include <ts3/gpuapiDX/DX_coreAPIProxy.h>
+#include <ts3/gpuapiDX/DX_apiTranslationLayer.h>
 #include <ts3/gpuapi/cmds/commonCommandDefs.h>
 
 namespace ts3::gpuapi
@@ -25,7 +25,7 @@ namespace ts3::gpuapi
 	namespace DX12CoreAPIProxy
 	{
 
-		using namespace DXCoreAPIProxy;
+		using namespace atl;
 
 		inline constexpr bool checkDescriptorEmpty( const D3D12_CPU_DESCRIPTOR_HANDLE & pDescriptor )
 		{
