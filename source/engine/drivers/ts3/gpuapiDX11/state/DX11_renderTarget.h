@@ -5,29 +5,71 @@
 #define __TS3DRIVER_GPUAPI_DX11_RENDER_TARGET_H__
 
 #include "../DX11_prerequisites.h"
+#include <ts3/gpuapi/resources/textureReference.h>
 #include <ts3/gpuapi/state/renderTargetImmutableStates.h>
 
 namespace ts3::gpuapi
 {
 
-	struct DX11RenderTargetResourceState
+	class DX11Texture;
+
+	struct DX11RenderTargetColorAttachment
 	{
-		ComPtr<ID3D11View> colorAttachmentViewRef[gpm::RT_MAX_COLOR_ATTACHMENTS_NUM];
-		ID3D11RenderTargetView * colorAttachmentRTVArray[gpm::RT_MAX_COLOR_ATTACHMENTS_NUM];
-		ComPtr<ID3D11View> depthStencilAttachmentViewRef;
-		ID3D11DepthStencilView * depthStencilAttachmentDSV;
+		ID3D11Resource * d3d11Resource = nullptr;
+		UINT d3d11SubResourceIndex;
+		ComPtr<ID3D11RenderTargetView> d3d11RTView;
+
+		explicit operator bool() const noexcept
+		{
+			return d3d11Resource != nullptr;
+		}
+	};
+
+	struct DX11RenderTargetDepthStencilAttachment
+	{
+		ID3D11Resource * d3d11Resource = nullptr;
+		UINT d3d11SubResourceIndex;
+		ComPtr<ID3D11DepthStencilView> d3d11DSView;
+
+		explicit operator bool() const noexcept
+		{
+			return d3d11Resource != nullptr;
+		}
+	};
+
+	struct DX11RenderTargetResolveAttachment
+	{
+		ID3D11Resource * d3d11Resource = nullptr;
+		UINT d3d11SubResourceIndex;
+
+		explicit operator bool() const noexcept
+		{
+			return d3d11Resource != nullptr;
+		}
+	};
+
+	struct DX11RenderTargetBindingData
+	{
+		Bitmask<ERTAttachmentFlags> activeAttachmentsMask = 0;
+
+		DX11RenderTargetColorAttachment colorAttachments[gpm::RT_MAX_COLOR_ATTACHMENTS_NUM];
+		DX11RenderTargetDepthStencilAttachment depthStencilAttachment;
+		DX11RenderTargetResolveAttachment resolveAttachments[gpm::RT_MAX_COMBINED_ATTACHMENTS_NUM];
+
+		ID3D11RenderTargetView * d3d11ColorAttachmentRTViewArray[gpm::RT_MAX_COLOR_ATTACHMENTS_NUM];
+		ID3D11DepthStencilView * d3d11DepthStencilAttachmentDSView;
 	};
 
 	class DX11RenderTargetBindingImmutableState : public RenderTargetBindingImmutableState
 	{
 	public:
-		DX11RenderTargetResourceState const mDX11RTResourceState;
+		DX11RenderTargetBindingData const mDX11RTBindingData;
 
 	public:
 		DX11RenderTargetBindingImmutableState(
 				DX11GPUDevice & pGPUDevice,
 				const RenderTargetLayout & pRenderTargetLayout,
-				DX11RenderTargetResourceState pDX11RTResourceState );
+				DX11RenderTargetBindingData pDX11RTBindingData );
 
 		virtual ~DX11RenderTargetBindingImmutableState();
 
@@ -37,20 +79,32 @@ namespace ts3::gpuapi
 
 		static GpaHandle<DX11RenderTargetBindingImmutableState> createForScreen(
 				DX11GPUDevice & pGPUDevice,
-				ComPtr<IDXGISwapChain1> pDXGISwapChain );
+				ComPtr<ID3D11Texture2D> pColorBuffer,
+				ComPtr<ID3D11Texture2D> pDepthStencilBuffer );
 	};
 
 
 	namespace smutil
 	{
 
-		ComPtr<ID3D11RenderTargetView> createTextureColorAttachmentView(
-				DX11Texture & pDX11Texture,
-				const RenderTargetAttachmentBinding & pAttachmentBinding );
+		TS3_ATTR_NO_DISCARD RenderTargetLayout getRenderTargetLayoutForScreenDX11(
+				ID3D11Texture2D * pColorBuffer,
+				ID3D11Texture2D * pDepthStencilBuffer );
 
-		ComPtr<ID3D11DepthStencilView> createTextureDepthStencilAttachmentView(
-				DX11Texture & pDX11Texture,
-				const RenderTargetAttachmentBinding & pAttachmentBinding );
+		TS3_ATTR_NO_DISCARD DX11RenderTargetColorAttachment createRenderTargetColorAttachmentDX11(
+				DX11GPUDevice & pGPUDevice,
+				const TextureReference & pAttachmentTextureRef );
+
+		TS3_ATTR_NO_DISCARD DX11RenderTargetDepthStencilAttachment createRenderTargetDepthStencilAttachmentDX11(
+				DX11GPUDevice & pGPUDevice,
+				const TextureReference & pAttachmentTextureRef );
+
+		TS3_ATTR_NO_DISCARD DX11RenderTargetResolveAttachment createRenderTargetResolveAttachmentDX11(
+				const TextureReference & pAttachmentTextureRef );
+
+		TS3_ATTR_NO_DISCARD DX11RenderTargetBindingData createRenderTargetBindingDataDX11(
+				DX11GPUDevice & pGPUDevice,
+				const RenderTargetBindingDefinition & pBindingDefinition );
 
 	}
 	

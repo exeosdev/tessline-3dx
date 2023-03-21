@@ -89,7 +89,7 @@ namespace ts3::gpuapi
 			d3D11InputElementDesc.AlignedByteOffset = numeric_cast<UINT>( pAttributeInfo.relativeOffset );
 			d3D11InputElementDesc.SemanticName = pAttributeInfo.semanticName;
 			d3D11InputElementDesc.SemanticIndex = pAttributeInfo.semanticIndex;
-			d3D11InputElementDesc.Format = atl::translateDXVertexAttribFormat( pAttributeInfo.format );
+			d3D11InputElementDesc.Format = atl::translateVertexAttribFormatDX( pAttributeInfo.format );
 			d3D11InputElementDesc.InputSlot = pAttributeInfo.streamIndex;
 			d3D11InputElementDesc.InputSlotClass = ( pAttributeInfo.instanceRate == 0 ) ? D3D11_INPUT_PER_VERTEX_DATA : D3D11_INPUT_PER_INSTANCE_DATA;
 			d3D11InputElementDesc.InstanceDataStepRate = pAttributeInfo.instanceRate;
@@ -158,7 +158,7 @@ namespace ts3::gpuapi
 						numeric_cast<uint32>( pDefinition.indexBufferReference.relativeOffset );
 
 				dx11IaVertexStreamDefinition.indexBufferBinding.format =
-						atl::translateDXBaseDataType( static_cast<EBaseDataType>( pDefinition.indexBufferReference.indexFormat ) );
+						atl::translateBaseDataTypeDX( static_cast<EBaseDataType>( pDefinition.indexBufferReference.indexFormat ) );
 			}
 
 			for( native_uint vertexInputStreamIndex = 0; vertexInputStreamIndex < gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++vertexInputStreamIndex )

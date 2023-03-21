@@ -49,7 +49,7 @@ namespace ts3::gpuapi
 	{
 		const char * entryPoint = pCreateInfo.entryPointName ? pCreateInfo.entryPointName : "main";
 
-		auto compileFlags = atl::translateDXShaderCompileFlags( pCreateInfo.createFlags, pDX11GPUDevice.isDebugDevice() );
+		auto compileFlags = atl::translateShaderCompileFlagsDX( pCreateInfo.createFlags, pDX11GPUDevice.isDebugDevice() );
 
 		DX11ShaderHandle dx11Shader;
 

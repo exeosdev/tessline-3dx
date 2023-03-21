@@ -34,13 +34,15 @@ namespace ts3::gpuapi
 
 		uint32 computeDXTextureMemoryByteSize( const TextureDimensions & pTextDimensions, DXGI_FORMAT pFormat );
 
-		Bitmask<UINT> translateDXShaderCompileFlags( Bitmask<uint32> pShaderCreateFlags, bool pDebugDevice );
+		Bitmask<UINT> translateShaderCompileFlagsDX( Bitmask<uint32> pShaderCreateFlags, bool pDebugDevice );
 
-		DXGI_FORMAT translateDXBaseDataType( EBaseDataType pBaseDataType );
+		DXGI_FORMAT translateBaseDataTypeDX( EBaseDataType pBaseDataType );
 
-		DXGI_FORMAT translateDXTextureFormat( ETextureFormat pTextureFormat );
+		DXGI_FORMAT translateTextureFormatDX( ETextureFormat pTextureFormat );
 
-		DXGI_FORMAT translateDXVertexAttribFormat( EVertexAttribFormat pVertexAttribFormat );
+		ETextureFormat translateTextureFormatInvDX( DXGI_FORMAT pDXGIFormat );
+
+		DXGI_FORMAT translateVertexAttribFormatDX( EVertexAttribFormat pVertexAttribFormat );
 
 	};
 

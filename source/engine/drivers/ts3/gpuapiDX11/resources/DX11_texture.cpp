@@ -47,7 +47,7 @@ namespace ts3::gpuapi
 		dx11CreateInfo.dimensionClass = createInfo.dimensionClass;
 		dx11CreateInfo.dimensions = createInfo.dimensions;
 		dx11CreateInfo.msaaLevel = createInfo.msaaLevel;
-		dx11CreateInfo.dxgiTextureFormat = atl::translateDXTextureFormat( createInfo.pixelFormat );
+		dx11CreateInfo.dxgiTextureFormat = atl::translateTextureFormatDX( createInfo.pixelFormat );
 		dx11CreateInfo.dx11UsageDesc = translateTextureUsageDesc( createInfo );
 		dx11CreateInfo.dx11InitDataDesc = translateTextureInitDataDesc( pCreateInfo );
 
