@@ -50,18 +50,21 @@ namespace ts3::gpuapi
 		virtual bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState ) override;
 		virtual bool resetRenderTargetBindingState() override;
 
-		virtual bool setBlendConstantColor( const math::RGBAColorR32Norm & pColor ) override;
 		virtual bool setViewport( const ViewportDesc & pViewportDesc ) override;
 		virtual bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData ) override;
 		virtual bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer ) override;
 		virtual bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture ) override;
 		virtual bool setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler ) override;
 
-	protected:
+	private:
 		void resetDynamicIAVertexStreamState();
+
 		void resetDynamicRenderTargetBindingState();
 
-		// Apply functions: Render Target (Attachment bindings)
+		Bitmask<uint32> applyCommonGraphicsConfigState( const GLGraphicsPipelineStateObject & pGraphicsPSO );
+
+		static void applyGraphicsPipelineDynamicState( const GraphicsPipelineDynamicState & pDynamicState );
+
 		static void applyGLRenderTargetBinding( const GLRenderTargetBindingInfo & pGLRenderTargetBinding );
 
 	private:

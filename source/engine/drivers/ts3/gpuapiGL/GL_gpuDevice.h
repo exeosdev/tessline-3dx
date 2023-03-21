@@ -71,7 +71,7 @@ namespace ts3::gpuapi
 				const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) override final;
 
 	private:
-		GLPipelineImmutableStateFactory * _immutableStateFactory;
+		GLPipelineImmutableStateFactory * _immutableStateFactoryGL;
 		PipelineImmutableStateCache _immutableStateCache;
 		std::unique_ptr<GLDebugOutput> _glDebugOutput;
 	};

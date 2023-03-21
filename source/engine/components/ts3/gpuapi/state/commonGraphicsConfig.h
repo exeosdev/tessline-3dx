@@ -148,7 +148,6 @@ namespace ts3::gpuapi
 
 		FaceOp frontFace;
 		FaceOp backFace;
-		uint8 refValue;
 		uint8 readMask;
 		uint8 writeMask;
 	};

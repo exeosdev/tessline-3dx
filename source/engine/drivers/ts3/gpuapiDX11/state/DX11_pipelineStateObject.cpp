@@ -1,5 +1,8 @@
 
 #include "DX11_pipelineStateObject.h"
+#include "DX11_commonGraphicsConfig.h"
+#include "DX11_inputAssembler.h"
+#include "DX11_graphicsShaderState.h"
 #include "../DX11_gpuDevice.h"
 #include "../resources/DX11_shader.h"
 #include <ts3/gpuapi/resources/shader.h>
@@ -7,42 +10,88 @@
 namespace ts3::gpuapi
 {
 
-	DX11GraphicsPipelineStateObject::DX11GraphicsPipelineStateObject( DX11GPUDevice & pGPUDevice,
-	                                                                  RenderTargetLayout pRenderTargetLayout,
-	                                                                  GraphicsShaderBinding pShaderBinding,
-	                                                                  ShaderInputSignature pShaderInputSignature,
-	                                                                  const SeparableGraphicsStateDescriptorSet & pStateDescriptors )
-	: SeparableGraphicsPipelineStateObject( pGPUDevice, std::move( pRenderTargetLayout ), std::move( pShaderBinding ), std::move( pShaderInputSignature ), pStateDescriptors )
+	DX11GraphicsPipelineStateObject::DX11GraphicsPipelineStateObject(
+			DX11GPUDevice & pGPUDevice,
+			RenderTargetLayout pRenderTargetLayout,
+			ShaderInputSignature pShaderInputSignature,
+			const SeparablePSOStateSet & pPSOImmutableStates,
+			const GraphicsShaderSet & pSeparableShaders )
+	: GraphicsPipelineStateObjectSeparableShader(
+			pGPUDevice,
+			std::move( pRenderTargetLayout ),
+			std::move( pShaderInputSignature ),
+			pPSOImmutableStates,
+			pSeparableShaders )
 	{}
 
 	DX11GraphicsPipelineStateObject::~DX11GraphicsPipelineStateObject() = default;
 
-	GpaHandle<DX11GraphicsPipelineStateObject> DX11GraphicsPipelineStateObject::create( DX11GPUDevice & pGPUDevice,
-	                                                                                    const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
+	const DX11BlendImmutableState & DX11GraphicsPipelineStateObject::getBlendState() const noexcept
 	{
-		CommonPSOState commonPSOState;
-		if( !createCommonPSOState( pCreateInfo, commonPSOState ) )
+		ts3DebugAssert( mSeparableStates.blendState );
+		return *( mSeparableStates.blendState->queryInterface<DX11BlendImmutableState>() );
+	}
+
+	const DX11DepthStencilImmutableState & DX11GraphicsPipelineStateObject::getDepthStencilState() const noexcept
+	{
+		ts3DebugAssert( mSeparableStates.depthStencilState );
+		return *( mSeparableStates.depthStencilState->queryInterface<DX11DepthStencilImmutableState>() );
+	}
+
+	const DX11RasterizerImmutableState & DX11GraphicsPipelineStateObject::getRasterizerState() const noexcept
+	{
+		ts3DebugAssert( mSeparableStates.rasterizerState );
+		return *( mSeparableStates.rasterizerState->queryInterface<DX11RasterizerImmutableState>() );
+	}
+
+	const DX11GraphicsShaderLinkageImmutableState & DX11GraphicsPipelineStateObject::getGraphicsShaderLinkageState() const noexcept
+	{
+		ts3DebugAssert( mSeparableStates.shaderLinkageState );
+		return *( mSeparableStates.shaderLinkageState->queryInterface<DX11GraphicsShaderLinkageImmutableState>() );
+	}
+
+	const DX11IAInputLayoutImmutableState & DX11GraphicsPipelineStateObject::getIAInputLayoutState() const noexcept
+	{
+		ts3DebugAssert( mSeparableStates.iaInputLayoutState );
+		return *( mSeparableStates.iaInputLayoutState->queryInterface<DX11IAInputLayoutImmutableState>() );
+	}
+
+	GpaHandle<DX11GraphicsPipelineStateObject> DX11GraphicsPipelineStateObject::create(
+			DX11GPUDevice & pGPUDevice,
+			const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
+	{
+		if( pCreateInfo.shaderSet.empty() && !pCreateInfo.shaderLinkageState )
 		{
 			return nullptr;
 		}
 
-		auto * vertexShader = commonPSOState.shaderBinding[EShaderType::VertexShader];
-		if( !vertexShader )
+		SeparablePSOStateSet separableStates{};
+		separableStates.blendState = pCreateInfo.blendState;
+		separableStates.depthStencilState = pCreateInfo.depthStencilState;
+		separableStates.rasterizerState = pCreateInfo.rasterizerState;
+		separableStates.shaderLinkageState = pCreateInfo.shaderLinkageState;
+		separableStates.iaInputLayoutState = pCreateInfo.inputLayoutState;
+
+		auto & renderTargetLayout = pCreateInfo.renderTargetLayout;
+		auto & shaderInputSignature = pCreateInfo.shaderInputSignature;
+
+		const GraphicsShaderSet * graphicsShaderSet = nullptr;
+		if( !pCreateInfo.shaderSet.empty() )
 		{
-			return nullptr;
+			graphicsShaderSet = &pCreateInfo.shaderSet;
+		}
+		else
+		{
+			auto * separableShaderState = pCreateInfo.shaderLinkageState->queryInterface<GraphicsShaderLinkageImmutableStateSeparable>();
+			graphicsShaderSet = &separableShaderState->mShaderSet;
 		}
 
-		SeparableGraphicsStateDescriptorSet sstateDescriptors;
-		sstateDescriptors.blendDescriptorID = pGPUDevice.createBlendDescriptor( pCreateInfo.blendDesc );
-		sstateDescriptors.depthStencilDescriptorID = pGPUDevice.createDepthStencilDescriptor( pCreateInfo.depthStencilDesc );
-		sstateDescriptors.rasterizerDescriptorID = pGPUDevice.createRasterizerDescriptor( pCreateInfo.rasterizerDesc );
-		sstateDescriptors.vertexInputFormatDescriptorID = pGPUDevice.createVertexInputFormatDescriptor( pCreateInfo.vertexInputFormatDesc, *vertexShader );
-
-		auto pipelineStateObject = createDynamicInterfaceObject<DX11GraphicsPipelineStateObject>( pGPUDevice,
-		                                                                                          std::move( commonPSOState.renderTargetLayout ),
-		                                                                                          std::move( commonPSOState.shaderBinding ),
-		                                                                                          std::move( commonPSOState.shaderInputSignature ),
-		                                                                                          sstateDescriptors );
+		auto pipelineStateObject = createDynamicInterfaceObject<DX11GraphicsPipelineStateObject>(
+				pGPUDevice,
+				std::move( renderTargetLayout ),
+				std::move( shaderInputSignature ),
+				separableStates,
+				*graphicsShaderSet );
 
 		return pipelineStateObject;
 	}

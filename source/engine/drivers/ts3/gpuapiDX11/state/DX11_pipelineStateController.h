@@ -5,32 +5,48 @@
 #define __TS3DRIVER_GPUAPI_DXCOMMON_PIPELINE_STATE_CONTROLLER_H__
 
 #include "../DX11_prerequisites.h"
-#include <ts3/gpuapi/state/pipelineStateController.h>
-#include <ts3/gpuapiDX11/state/DX11_pipelineStateDesc.h>
+#include <ts3/gpuapi/state/separablePipelineState.h>
 
 namespace ts3::gpuapi
 {
 
+	class DX11GraphicsPipelineStateObject;
+
 	/// @brief
-	class DX11GraphicsPipelineStateController : public SeparableGraphicsPipelineStateController
+	class DX11GraphicsPipelineStateController : public GraphicsPipelineStateControllerSeparableShader
 	{
 		friend class DX11CommandList;
 
 	public:
 		DX11CommandList * const mDX11CommandList = nullptr;
 
-		DX11GraphicsPipelineStateController( DX11CommandList & pDX11CommandList, DX11GraphicsPipelineStateDescriptorCache & pDescriptorCache );
+	public:
+		DX11GraphicsPipelineStateController( DX11CommandList & pDX11CommandList );
 		~DX11GraphicsPipelineStateController();
 
-		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO ) override;
+		virtual bool applyStateChanges() override;
 
-		virtual bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO ) override;
+		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO ) override;
+		virtual bool resetGraphicsPipelineStateObject() override;
 
-	protected:
-		virtual bool updatePipelineState() override;
+		virtual bool setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState ) override;
+		virtual bool setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState ) override;
+		virtual bool resetIAVertexStreamState() override;
 
-	protected:
-		DX11GraphicsPipelineStateDescriptorCache * _descriptorCache;
+		virtual bool setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState ) override;
+		virtual bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState ) override;
+		virtual bool resetRenderTargetBindingState() override;
+
+		virtual bool setViewport( const ViewportDesc & pViewportDesc ) override;
+		virtual bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData ) override;
+		virtual bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer ) override;
+		virtual bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture ) override;
+		virtual bool setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler ) override;
+
+	private:
+		Bitmask<uint32> applyCommonGraphicsConfigState( const DX11GraphicsPipelineStateObject & pGraphicsPSO );
+		Bitmask<uint32> applyGraphicsShaderState( const SeparableShaderCache & pSeparableShaders );
+		void applyIAVertexStreamState( const DX11IAVertexStreamImmutableState & pVertexStreamState );
 	};
 
 } // namespace ts3::gpuapi

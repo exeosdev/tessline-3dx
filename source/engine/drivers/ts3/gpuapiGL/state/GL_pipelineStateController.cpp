@@ -1,5 +1,9 @@
 
 #include "GL_pipelineStateController.h"
+#include "GL_commonGraphicsConfig.h"
+#include "GL_inputAssembler.h"
+#include "GL_graphicsShaderState.h"
+#include "GL_renderTarget.h"
 #include "GL_pipelineStateObject.h"
 #include "GL_vertexArrayObjectCache.h"
 #include "../objects/GL_framebufferObject.h"
@@ -9,11 +13,6 @@
 #include "../resources/GL_sampler.h"
 #include "../resources/GL_shader.h"
 #include "../resources/GL_texture.h"
-#include "../state/GL_pipelineStateObject.h"
-#include "../state/GL_commonGraphicsConfig.h"
-#include "../state/GL_inputAssembler.h"
-#include "../state/GL_graphicsShaderState.h"
-#include "../state/GL_renderTarget.h"
 
 #include <ts3/gpuapi/state/inputAssemblerDynamicStates.h>
 #include <ts3/gpuapi/state/renderTargetDynamicStates.h>
@@ -73,30 +72,11 @@ namespace ts3::gpuapi
 
 		if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_PSO_BIT ) )
 		{
-			const auto * glcGraphicsPSO = _currentCommonState.graphicsPSO->queryInterface<GLGraphicsPipelineStateObject>();
-
 			if( _stateUpdateMask.isSetAnyOf( E_GRAPHICS_STATE_UPDATE_MASK_SEPARABLE_STATES_ALL ) )
 			{
-				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_BLEND_BIT ) )
-				{
-					const auto & blendState = glcGraphicsPSO->getBlendState();
-					_globalStateCache.applyBlendState( blendState.mGLBlendConfig );
-					executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_BLEND_BIT );
-				}
-
-				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_DEPTH_STENCIL_BIT ) )
-				{
-					const auto & depthStencilState = glcGraphicsPSO->getDepthStencilState();
-					_globalStateCache.applyDepthStencilState( depthStencilState.mGLDepthStencilConfig );
-					executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_DEPTH_STENCIL_BIT );
-				}
-
-				if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_RASTERIZER_BIT ) )
-				{
-					const auto & rasterizerState = glcGraphicsPSO->getRasterizerState();
-					_globalStateCache.applyRasterizerState( rasterizerState.mGLRasterizerConfig );
-					executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_RASTERIZER_BIT );
-				}
+				const auto * glcGraphicsPSO = _currentCommonState.graphicsPSO->queryInterface<GLGraphicsPipelineStateObject>();
+				const auto commonPSOUpdateMask = applyCommonGraphicsConfigState( *glcGraphicsPSO );
+				executedUpdatesMask.set( commonPSOUpdateMask );
 			}
 		}
 
@@ -106,6 +86,8 @@ namespace ts3::gpuapi
 			applyGLRenderTargetBinding( currentRenderTargetBindingInfo );
 			executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_RENDER_TARGET_BINDING_BIT );
 		}
+
+		applyGraphicsPipelineDynamicState( getRenderPassDynamicState() );
 
 		return !executedUpdatesMask.empty();
 	}
@@ -169,19 +151,6 @@ namespace ts3::gpuapi
 	bool GLGraphicsPipelineStateController::resetRenderTargetBindingState()
 	{
 		return GraphicsPipelineStateControllerSeparable::resetRenderTargetBindingState();
-	}
-
-	bool GLGraphicsPipelineStateController::setBlendConstantColor( const math::RGBAColorR32Norm & pColor )
-	{
-		bool baseResult = GraphicsPipelineStateController::setBlendConstantColor( pColor );
-
-		if( baseResult )
-		{
-			glBlendColor( pColor.fpRed, pColor.fpGreen, pColor.fpBlue, pColor.fpAlpha );
-			ts3OpenGLHandleLastError();
-		}
-
-		return baseResult;
 	}
 
 	bool GLGraphicsPipelineStateController::setViewport( const ViewportDesc & pViewportDesc )
@@ -320,6 +289,58 @@ namespace ts3::gpuapi
 	{
 		_dynamicRenderTargetBindingDefinition.fboData.renderFBO.reset();
 		_dynamicRenderTargetBindingDefinition.fboData.resolveFBO.reset();
+	}
+
+	Bitmask<uint32> GLGraphicsPipelineStateController::applyCommonGraphicsConfigState( const GLGraphicsPipelineStateObject & pGraphicsPSO )
+	{
+		Bitmask<uint32> executedUpdatesMask = 0;
+
+		if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_BLEND_BIT ) )
+		{
+			const auto & blendState = pGraphicsPSO.getBlendState();
+			_globalStateCache.applyBlendState( blendState.mGLBlendConfig );
+			executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_BLEND_BIT );
+		}
+
+		if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_DEPTH_STENCIL_BIT ) )
+		{
+			const auto & depthStencilState = pGraphicsPSO.getDepthStencilState();
+			const auto & dynamicState = getRenderPassDynamicState();
+
+			if( dynamicState.activeStateMask.isSet( E_GRAPHICS_PIPELINE_DYNAMIC_STATE_FLAG_BLEND_CONSTANT_COLOR_BIT ) )
+			{
+				_globalStateCache.applyDepthStencilState( depthStencilState.mGLDepthStencilConfig, dynamicState.stencilTestRefValue );
+			}
+			else
+			{
+				_globalStateCache.applyDepthStencilState( depthStencilState.mGLDepthStencilConfig, 0x00 );
+			}
+
+			executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_DEPTH_STENCIL_BIT );
+		}
+
+		if( _stateUpdateMask.isSet( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_RASTERIZER_BIT ) )
+		{
+			const auto & rasterizerState = pGraphicsPSO.getRasterizerState();
+			_globalStateCache.applyRasterizerState( rasterizerState.mGLRasterizerConfig );
+			executedUpdatesMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_SEPARABLE_STATE_RASTERIZER_BIT );
+		}
+
+		return executedUpdatesMask;
+	}
+
+	void GLGraphicsPipelineStateController::applyGraphicsPipelineDynamicState( const GraphicsPipelineDynamicState & pDynamicState )
+	{
+		if( pDynamicState.activeStateMask.isSet( E_GRAPHICS_PIPELINE_DYNAMIC_STATE_FLAG_BLEND_CONSTANT_COLOR_BIT ) )
+		{
+
+			glBlendColor(
+					pDynamicState.blendConstantColor.fpRed,
+					pDynamicState.blendConstantColor.fpGreen,
+					pDynamicState.blendConstantColor.fpBlue,
+					pDynamicState.blendConstantColor.fpAlpha );
+			ts3OpenGLHandleLastError();
+		}
 	}
 
 	void GLGraphicsPipelineStateController::applyGLRenderTargetBinding( const GLRenderTargetBindingInfo & pGLRenderTargetBinding )

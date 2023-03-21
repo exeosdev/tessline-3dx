@@ -33,7 +33,6 @@ namespace ts3::gpuapi
 		virtual bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState ) override;
 		virtual bool resetRenderTargetBindingState() override;
 
-		virtual bool setBlendConstantColor( const math::RGBAColorR32Norm & pColor ) override;
 		virtual bool setViewport( const ViewportDesc & pViewportDesc ) override;
 		virtual bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData ) override;
 		virtual bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer ) override;

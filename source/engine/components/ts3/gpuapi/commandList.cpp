@@ -10,7 +10,7 @@ namespace ts3::gpuapi
 
 	enum ECommandListInternalStateFlags : uint32
 	{
-		E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT = 0x01
+		E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT = 0x10000
 	};
 
 	CommandList::CommandList(
@@ -25,7 +25,7 @@ namespace ts3::gpuapi
 
 	CommandList::~CommandList() = default;
 
-	bool CommandList::checkCommandClassSupport( ECommandQueueClass pQueueClass ) const
+	bool CommandList::checkCommandClassSupport( ECommandQueueClass pQueueClass ) const noexcept
 	{
 		return checkFeatureSupport( static_cast<ECommandObjectPropertyFlags>( pQueueClass ) );
 	}
@@ -211,43 +211,24 @@ namespace ts3::gpuapi
 			const RenderPassConfigurationImmutableState & pRenderPassState,
 			Bitmask<ECommandListActionFlags> pFlags )
 	{
-		if( isRenderPassActive() )
-		{
-			return false;
-		}
-
-		_internalStateMask.set( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
-
-		if( pFlags.isSet( E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT ) )
-		{
-			_graphicsPipelineStateController->applyStateChanges();
-		}
-
-		return true;
+		return onBeginRenderPass( pFlags );
 	}
 	
 	bool CommandList::beginRenderPass(
 			const RenderPassConfigurationDynamicState & pRenderPassState,
 			Bitmask<ECommandListActionFlags> pFlags )
 	{
-		if( isRenderPassActive() )
-		{
-			return false;
-		}
-
-		_internalStateMask.set( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
-
-		if( pFlags.isSet( E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT ) )
-		{
-			_graphicsPipelineStateController->applyStateChanges();
-		}
-
-		return true;
+		return onBeginRenderPass( pFlags );
 	}
 
 	void CommandList::endRenderPass()
 	{
-		_internalStateMask.unset( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
+		onEndRenderPass();
+	}
+
+	void CommandList::setRenderPassDynamicState( const GraphicsPipelineDynamicState & pDynamicState )
+	{
+		_graphicsPipelineStateController->setRenderPassDynamicState( pDynamicState );
 	}
 
 	bool CommandList::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO )
@@ -273,17 +254,6 @@ namespace ts3::gpuapi
 	bool CommandList::setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState )
 	{
 		return _graphicsPipelineStateController->setRenderTargetBindingState( pRenderTargetBindingState );
-	}
-
-	bool CommandList::cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor )
-	{
-		if( !isRenderPassActive() )
-		{
-			ts3DebugInterrupt();
-			return false;
-		}
-
-		return _graphicsPipelineStateController->setBlendConstantColor( pColor );
 	}
 
 	bool CommandList::cmdSetViewport( const ViewportDesc & pViewportDesc )
@@ -339,6 +309,37 @@ namespace ts3::gpuapi
 		}
 
 		return _graphicsPipelineStateController->setShaderTextureSampler( pParamRefID, pSampler );
+	}
+
+	bool CommandList::onBeginRenderPass( Bitmask<ECommandListActionFlags> pFlags )
+	{
+		if( isRenderPassActive() )
+		{
+			return false;
+		}
+
+		_internalStateMask.set( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
+
+		_internalStateMask.setOrUnset(
+				E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_PRESERVE_DYNAMIC_STATE_BIT,
+				pFlags.isSet( E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_PRESERVE_DYNAMIC_STATE_BIT ) );
+
+		if( pFlags.isSet( E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_APPLY_PIPELINE_STATE_BIT ) )
+		{
+			_graphicsPipelineStateController->applyStateChanges();
+		}
+
+		return true;
+	}
+
+	void CommandList::onEndRenderPass()
+	{
+		if( _internalStateMask.isSet( E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_PRESERVE_DYNAMIC_STATE_BIT ) )
+		{
+			_graphicsPipelineStateController->resetRenderPassDynamicState();
+		}
+
+		_internalStateMask.unset( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
 	}
 
 

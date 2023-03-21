@@ -159,7 +159,6 @@ namespace ts3::gpuapi
 			dx11DepthStencilConfig.StencilEnable = pConfig.commonFlags.isSet( E_DEPTH_STENCIL_CONFIG_FLAG_ENABLE_STENCIL_TEST_BIT );
 			dx11DepthStencilConfig.StencilReadMask = pConfig.stencilTestSettings.readMask;
 			dx11DepthStencilConfig.StencilWriteMask = pConfig.stencilTestSettings.writeMask;
-			dx11DepthStencilConfig.StencilRefValue = pConfig.stencilTestSettings.refValue;
 
 			auto & stencilBackFaceDesc = pConfig.stencilTestSettings.backFace;
 			dx11DepthStencilConfig.BackFace.StencilFunc = atl::translateDX11CompFunc( stencilBackFaceDesc.compFunc );

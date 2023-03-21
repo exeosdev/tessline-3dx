@@ -51,7 +51,6 @@ namespace ts3::gpuapi
 		struct GLStencilFaceDesc
 		{
 			GLenum compFunc;
-			GLint  refValue;
 			GLuint readMask;
 			GLenum opFail;
 			GLenum opPassDepthFail;

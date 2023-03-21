@@ -133,6 +133,12 @@ namespace ts3::gpuapi
 			E_RT_ATTACHMENT_FLAG_COLOR_0_BIT | E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT,
 	};
 
+	enum EGraphicsPipelineDynamicStateFlags : uint32
+	{
+		E_GRAPHICS_PIPELINE_DYNAMIC_STATE_FLAG_BLEND_CONSTANT_COLOR_BIT = 0x01,
+		E_GRAPHICS_PIPELINE_DYNAMIC_STATE_FLAG_STENCIL_REF_VALUE_BIT = 0x02,
+	};
+
 	enum class EPrimitiveFillMode : uint16
 	{
 		Undefined,
@@ -166,6 +172,13 @@ namespace ts3::gpuapi
 		math::RGBAColorR32Norm colorValue;
 		float depthValue;
 		uint8 stencilValue;
+	};
+
+	struct GraphicsPipelineDynamicState
+	{
+		Bitmask<EGraphicsPipelineDynamicStateFlags> activeStateMask = 0;
+		math::RGBAColorR32Norm blendConstantColor;
+		UINT8 stencilTestRefValue;
 	};
 
 } // namespace ts3::gpuapi

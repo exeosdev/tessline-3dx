@@ -53,7 +53,7 @@ namespace ts3::gpuapi
 		void applyVertexArrayObjectBinding( GLuint pVertexArrayObjectHandle );
 
 		void applyBlendState( const GLBlendConfig & pBlendConfig );
-		void applyDepthStencilState( const GLDepthStencilConfig & pDepthStencilConfig );
+		void applyDepthStencilState( const GLDepthStencilConfig & pDepthStencilConfig, uint8 pStencilRefValue );
 		void applyRasterizerState( const GLRasterizerConfig & pRasterizerConfig );
 
 		static GLGlobalState getDefaultGlobalState();

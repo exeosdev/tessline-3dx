@@ -162,7 +162,7 @@ namespace ts3::gpuapi
 		}
 	}
 
-	void GLGlobalStateCache::applyDepthStencilState( const GLDepthStencilConfig & pDepthStencilConfig )
+	void GLGlobalStateCache::applyDepthStencilState( const GLDepthStencilConfig & pDepthStencilConfig, uint8 pStencilRefValue )
 	{
 		auto & cachedDepthStencilConfig = _cachedState.depthStencilConfig;
 		auto & cachedDepthSettings = cachedDepthStencilConfig.depthSettings;
@@ -222,7 +222,7 @@ namespace ts3::gpuapi
 			const auto & frontFace = pDepthStencilConfig.stencilSettings.frontFace;
 			if( !memCompareEqual( frontFace, cachedStencilSettings.frontFace ) )
 			{
-				glStencilFuncSeparate( GL_FRONT, frontFace.compFunc, frontFace.refValue, frontFace.readMask );
+				glStencilFuncSeparate( GL_FRONT, frontFace.compFunc, pStencilRefValue, frontFace.readMask );
 				ts3OpenGLHandleLastError();
 
 				glStencilOpSeparate( GL_FRONT, frontFace.opFail, frontFace.opPassDepthFail, frontFace.opPassDepthPass );
@@ -237,7 +237,7 @@ namespace ts3::gpuapi
 			const auto & backFace = pDepthStencilConfig.stencilSettings.backFace;
 			if( !memCompareEqual( backFace, cachedStencilSettings.backFace ) )
 			{
-				glStencilFuncSeparate( GL_FRONT, backFace.compFunc, backFace.refValue, backFace.readMask );
+				glStencilFuncSeparate( GL_FRONT, backFace.compFunc, pStencilRefValue, backFace.readMask );
 				ts3OpenGLHandleLastError();
 
 				glStencilOpSeparate( GL_FRONT, backFace.opFail, backFace.opPassDepthFail, backFace.opPassDepthPass );
@@ -349,7 +349,6 @@ namespace ts3::gpuapi
 
 			defaultGlobalState.depthStencilConfig.stencilTestActive = false;
 			defaultGlobalState.depthStencilConfig.stencilSettings.frontFace.compFunc = GL_ALWAYS;
-			defaultGlobalState.depthStencilConfig.stencilSettings.frontFace.refValue = 0;
 			defaultGlobalState.depthStencilConfig.stencilSettings.frontFace.writeMask = 0xFFFFFFFF;
 			defaultGlobalState.depthStencilConfig.stencilSettings.frontFace.opFail = GL_KEEP;
 			defaultGlobalState.depthStencilConfig.stencilSettings.frontFace.opPassDepthFail = GL_KEEP;

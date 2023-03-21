@@ -161,7 +161,6 @@ namespace ts3::gpuapi
 		bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
 		bool setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState );
 
-		bool cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor );
 		bool cmdSetViewport( const ViewportDesc & pViewportDesc );
 		bool cmdSetShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
 		bool cmdSetShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
@@ -217,7 +216,6 @@ namespace ts3::gpuapi
 		bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
 		bool setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState );
 
-		bool cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor );
 		bool cmdSetViewport( const ViewportDesc & pViewportDesc );
 		bool cmdSetShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
 		bool cmdSetShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );

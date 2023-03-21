@@ -37,9 +37,6 @@ namespace ts3::gpuapi
 	bool MTLGraphicsPipelineStateController::resetRenderTargetBindingState()
 	{}
 
-	bool MTLGraphicsPipelineStateController::setBlendConstantColor( const math::RGBAColorR32Norm & pColor )
-	{}
-
 	bool MTLGraphicsPipelineStateController::setViewport( const ViewportDesc & pViewportDesc )
 	{}
 

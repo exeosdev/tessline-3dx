@@ -18,7 +18,7 @@ namespace ts3::gpuapi
 	, mSysGLDriver( pGPUDriver.mSysGLDriver )
 	, mSysGLSupportInfo( mSysGLDriver->getVersionSupportInfo() )
 	, mGLRuntimeSupportFlags( coreutil::queryGLRuntimeSupportFlags( mSysGLSupportInfo ) )
-	, _immutableStateFactory( &pImmutableStateFactory )
+	, _immutableStateFactoryGL( &pImmutableStateFactory )
 	, _immutableStateCache( pImmutableStateFactory )
 	{
 		setImmutableStateCache( _immutableStateCache );
@@ -52,7 +52,7 @@ namespace ts3::gpuapi
 	RenderTargetBindingImmutableStateHandle GLGPUDevice::createScreenRenderTargetBindingState(
 		const RenderTargetLayout & pRenderTargetLayout )
 	{
-		return _immutableStateFactory->createScreenRenderTargetBindingState( pRenderTargetLayout );
+		return _immutableStateFactoryGL->createScreenRenderTargetBindingState( pRenderTargetLayout );
 	}
 
 	void GLGPUDevice::waitForCommandSync( CommandSync & pCommandSync )
@@ -141,8 +141,14 @@ namespace ts3::gpuapi
 	GraphicsPipelineStateObjectHandle GLGPUDevice::_drvCreateGraphicsPipelineStateObject(
 			const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
 	{
+		if( !pCreateInfo.shaderLinkageState )
+		{
+			pCreateInfo.shaderLinkageState = _immutableStateFactoryGL->createGraphicsShaderLinkageState( pCreateInfo.shaderSet );
+		}
+
 		auto glcGraphicsPSO = GLGraphicsPipelineStateObject::create( *this, pCreateInfo );
 		ts3DebugAssert( glcGraphicsPSO );
+
 		return glcGraphicsPSO;
 	}
 

@@ -67,7 +67,7 @@ namespace ts3::gpuapi
 
 	PipelineImmutableStateFactory & GPUDevice::getPipelineStateFactory() const noexcept
 	{
-		return *_immutableStateFactoryPtr;
+		return *_immutableStateFactoryBase;
 	}
 
 	PresentationLayer * GPUDevice::getPresentationLayer() const noexcept
@@ -163,27 +163,27 @@ namespace ts3::gpuapi
 
 		if( !pCreateInfo.blendState )
 		{
-			pCreateInfo.blendState = _immutableStateFactoryPtr->createBlendState( pCreateInfo.blendConfig );
+			pCreateInfo.blendState = _immutableStateFactoryBase->createBlendState( pCreateInfo.blendConfig );
 		}
 
 		if( !pCreateInfo.depthStencilState )
 		{
-			pCreateInfo.depthStencilState = _immutableStateFactoryPtr->createDepthStencilState( pCreateInfo.depthStencilConfig );
+			pCreateInfo.depthStencilState = _immutableStateFactoryBase->createDepthStencilState( pCreateInfo.depthStencilConfig );
 		}
 
 		if( !pCreateInfo.rasterizerState )
 		{
-			pCreateInfo.rasterizerState = _immutableStateFactoryPtr->createRasterizerState( pCreateInfo.rasterizerConfig );
+			pCreateInfo.rasterizerState = _immutableStateFactoryBase->createRasterizerState( pCreateInfo.rasterizerConfig );
 		}
 
-		if( !pCreateInfo.shaderLinkageState )
-		{
-			pCreateInfo.shaderLinkageState = _immutableStateFactoryPtr->createGraphicsShaderLinkageState( pCreateInfo.shaderSet );
-		}
+		// if( !pCreateInfo.shaderLinkageState )
+		// {
+		// 	pCreateInfo.shaderLinkageState = _immutableStateFactoryBase->createGraphicsShaderLinkageState( pCreateInfo.shaderSet );
+		// }
 
 		if( !pCreateInfo.inputLayoutState )
 		{
-			pCreateInfo.inputLayoutState = _immutableStateFactoryPtr->createIAInputLayoutState( pCreateInfo.inputLayoutDefinition );
+			pCreateInfo.inputLayoutState = _immutableStateFactoryBase->createIAInputLayoutState( pCreateInfo.inputLayoutDefinition );
 		}
 
 		return _drvCreateGraphicsPipelineStateObject( pCreateInfo );
@@ -191,50 +191,50 @@ namespace ts3::gpuapi
 
 	BlendImmutableStateHandle GPUDevice::createBlendImmutableState( const BlendConfig & pConfig )
 	{
-		ts3DebugAssert( _immutableStateFactoryPtr );
-		return _immutableStateFactoryPtr->createBlendState( pConfig );
+		ts3DebugAssert( _immutableStateFactoryBase );
+		return _immutableStateFactoryBase->createBlendState( pConfig );
 	}
 
 	DepthStencilImmutableStateHandle GPUDevice::createDepthStencilImmutableState( const DepthStencilConfig & pConfig )
 	{
-		ts3DebugAssert( _immutableStateFactoryPtr );
-		return _immutableStateFactoryPtr->createDepthStencilState( pConfig );
+		ts3DebugAssert( _immutableStateFactoryBase );
+		return _immutableStateFactoryBase->createDepthStencilState( pConfig );
 	}
 
 	GraphicsShaderLinkageImmutableStateHandle GPUDevice::createGraphicsShaderLinkageImmutableState( const GraphicsShaderSet & pShaderSet )
 	{
-		ts3DebugAssert( _immutableStateFactoryPtr );
-		return _immutableStateFactoryPtr->createGraphicsShaderLinkageState( pShaderSet );
+		ts3DebugAssert( _immutableStateFactoryBase );
+		return _immutableStateFactoryBase->createGraphicsShaderLinkageState( pShaderSet );
 	}
 
 	IAInputLayoutImmutableStateHandle GPUDevice::createIAInputLayoutImmutableState( const IAInputLayoutDefinition & pDefinition )
 	{
-		ts3DebugAssert( _immutableStateFactoryPtr );
-		return _immutableStateFactoryPtr->createIAInputLayoutState( pDefinition );
+		ts3DebugAssert( _immutableStateFactoryBase );
+		return _immutableStateFactoryBase->createIAInputLayoutState( pDefinition );
 	}
 
 	IAVertexStreamImmutableStateHandle GPUDevice::createIAVertexStreamImmutableState( const IAVertexStreamDefinition & pDefinition )
 	{
-		ts3DebugAssert( _immutableStateFactoryPtr );
-		return _immutableStateFactoryPtr->createIAVertexStreamState( pDefinition );
+		ts3DebugAssert( _immutableStateFactoryBase );
+		return _immutableStateFactoryBase->createIAVertexStreamState( pDefinition );
 	}
 
 	RasterizerImmutableStateHandle GPUDevice::createRasterizerImmutableState( const RasterizerConfig & pConfig )
 	{
-		ts3DebugAssert( _immutableStateFactoryPtr );
-		return _immutableStateFactoryPtr->createRasterizerState( pConfig );
+		ts3DebugAssert( _immutableStateFactoryBase );
+		return _immutableStateFactoryBase->createRasterizerState( pConfig );
 	}
 
 	RenderTargetBindingImmutableStateHandle GPUDevice::createRenderTargetBindingImmutableState( const RenderTargetBindingDefinition & pDefinition )
 	{
-		ts3DebugAssert( _immutableStateFactoryPtr );
-		return _immutableStateFactoryPtr->createRenderTargetBindingState( pDefinition );
+		ts3DebugAssert( _immutableStateFactoryBase );
+		return _immutableStateFactoryBase->createRenderTargetBindingState( pDefinition );
 	}
 
 	RenderPassConfigurationImmutableStateHandle GPUDevice::createRenderPassConfigurationImmutableState( const RenderPassConfiguration & pConfiguration )
 	{
-		ts3DebugAssert( _immutableStateFactoryPtr );
-		return _immutableStateFactoryPtr->createRenderPassState( pConfiguration.getValidated() );
+		ts3DebugAssert( _immutableStateFactoryBase );
+		return _immutableStateFactoryBase->createRenderPassState( pConfiguration.getValidated() );
 	}
 
 	BlendImmutableStateHandle GPUDevice::createBlendImmutableStateCached(
@@ -330,7 +330,7 @@ namespace ts3::gpuapi
 	void GPUDevice::setImmutableStateCache( PipelineImmutableStateCache & pStateCache )
 	{
 		_immutableStateCachePtr = &pStateCache;
-		_immutableStateFactoryPtr = &( pStateCache.mStateFactory );
+		_immutableStateFactoryBase = &( pStateCache.mStateFactory );
 	}
 
 	bool GPUDevice::_drvOnSetPresentationLayer( PresentationLayerHandle pPresentationLayer )

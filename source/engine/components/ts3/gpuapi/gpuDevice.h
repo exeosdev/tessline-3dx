@@ -162,7 +162,7 @@ namespace ts3::gpuapi
 
 		/// Factory used to create immutable states. Set by the actual driver class during initialization.
 		/// This decouples the state creation from the GPUDevice class so it's easier to manage and extend.
-		PipelineImmutableStateFactory * _immutableStateFactoryPtr = nullptr;
+		PipelineImmutableStateFactory * _immutableStateFactoryBase = nullptr;
 
 		/// Immutable state cache. Holds created states and enables re-using them across all APIs.
 		/// Requires PipelineImmutableStateFactory to be specified when created.

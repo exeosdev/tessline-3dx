@@ -15,10 +15,11 @@ namespace ts3::gpuapi
 
 	enum ECommandListActionFlags : uint32
 	{
-		E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT = 0x01,
+		E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_APPLY_PIPELINE_STATE_BIT = 0x01,
+		E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_PRESERVE_DYNAMIC_STATE_BIT = 0x02,
 
 		E_COMMAND_LIST_ACTION_FLAGS_DEFAULT =
-			E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT,
+			E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_APPLY_PIPELINE_STATE_BIT,
 	};
 
 	class TS3_GPUAPI_CLASS CommandList : public GPUDeviceChildObject
@@ -37,7 +38,7 @@ namespace ts3::gpuapi
 
 		virtual ~CommandList();
 
-		TS3_ATTR_NO_DISCARD bool checkCommandClassSupport( ECommandQueueClass pQueueClass ) const;
+		TS3_ATTR_NO_DISCARD bool checkCommandClassSupport( ECommandQueueClass pQueueClass ) const noexcept;
 
 		TS3_ATTR_NO_DISCARD bool checkFeatureSupport( Bitmask<ECommandObjectPropertyFlags> pCommandListFlags ) const noexcept;
 
@@ -75,13 +76,14 @@ namespace ts3::gpuapi
 
 		virtual void endRenderPass();
 
+		void setRenderPassDynamicState( const GraphicsPipelineDynamicState & pDynamicState );
+
 		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO );
 		bool setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState );
 		bool setIAVertexStreamState( const IAVertexStreamDynamicState & pIAVertexStreamState );
 		bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
 		bool setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState );
 
-		bool cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor );
 		bool cmdSetViewport( const ViewportDesc & pViewportDesc );
 		bool cmdSetShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
 		bool cmdSetShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
@@ -97,6 +99,10 @@ namespace ts3::gpuapi
 		virtual void cmdDrawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset ) = 0;
 
 		virtual void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext ) = 0;
+
+	private:
+		bool onBeginRenderPass( Bitmask<ECommandListActionFlags> pFlags );
+		void onEndRenderPass();
 
 	protected:
 		std::atomic<bool> _listLockStatus = ATOMIC_VAR_INIT( false );

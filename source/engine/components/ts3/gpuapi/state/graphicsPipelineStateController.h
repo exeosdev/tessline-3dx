@@ -37,6 +37,12 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD bool isRenderTargetStateDynamic() const noexcept;
 
+		TS3_ATTR_NO_DISCARD const GraphicsPipelineDynamicState & getRenderPassDynamicState() const noexcept;
+
+		void setRenderPassDynamicState( const GraphicsPipelineDynamicState & pDynamicState );
+
+		void resetRenderPassDynamicState();
+
 		/// @brief Binds the specified state object to the pipeline. Returns true if any change has been made.
 		/// @return True if anything has been changed or false otherwise.
 		/// @note Sub-classes should always call the base method first and check the result before doing the actual update.
@@ -55,7 +61,6 @@ namespace ts3::gpuapi
 		virtual bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
 		virtual bool resetRenderTargetBindingState();
 
-		virtual bool setBlendConstantColor( const math::RGBAColorR32Norm & pColor );
 		virtual bool setViewport( const ViewportDesc & pViewportDesc );
 		virtual bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
 		virtual bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
@@ -143,6 +148,8 @@ namespace ts3::gpuapi
 		};
 
 		CurrentCommonState _currentCommonState;
+
+		GraphicsPipelineDynamicState _currentRenderPassDynamicState;
 
 		Bitmask<graphics_state_update_mask_value_t> _stateUpdateMask = 0;
 	};

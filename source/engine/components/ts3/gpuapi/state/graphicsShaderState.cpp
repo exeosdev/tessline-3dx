@@ -65,6 +65,11 @@ namespace ts3::gpuapi
 		return smutil::getActiveShaderStagesNum( commonShaderArray );
 	}
 
+	bool GraphicsShaderSet::empty() const noexcept
+	{
+		return !vertexShader || !pixelShader;
+	}
+
 	bool GraphicsShaderSet::validateShaders() const noexcept
 	{
 		for( uint32 stageIndex = 0; stageIndex < gpm::SHADER_GRAPHICS_STAGES_NUM; ++stageIndex )

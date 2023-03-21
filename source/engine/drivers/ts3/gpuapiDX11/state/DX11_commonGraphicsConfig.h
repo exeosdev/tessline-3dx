@@ -14,9 +14,7 @@ namespace ts3::gpuapi
 	};
 
 	struct DX11DepthStencilConfig : public D3D11_DEPTH_STENCIL_DESC
-	{
-		UINT8 StencilRefValue;
-	};
+	{};
 
 	struct DX11RasterizerConfig : public D3D11_RASTERIZER_DESC
 	{};

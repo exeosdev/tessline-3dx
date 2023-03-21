@@ -159,12 +159,6 @@ namespace ts3::gpuapi
 		return mCommandList->endRenderPass();
 	}
 
-	bool CommandContextDirectGraphics::cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor )
-	{
-		ts3DebugAssert( checkCommandListSupport( E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DIRECT_GRAPHICS ) );
-		return mCommandList->cmdSetBlendConstantColor( pColor );
-	}
-
 	bool CommandContextDirectGraphics::cmdSetViewport( const ViewportDesc & pViewportDesc )
 	{
 		ts3DebugAssert( checkCommandListSupport( E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DIRECT_GRAPHICS ) );
@@ -289,12 +283,6 @@ namespace ts3::gpuapi
 	{
 		ts3DebugAssert( checkCommandListSupport( E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DEFERRED_GRAPHICS ) );
 		return mCommandList->endRenderPass();
-	}
-
-	bool CommandContextDeferredGraphics::cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor )
-	{
-		ts3DebugAssert( checkCommandListSupport( E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DEFERRED_GRAPHICS ) );
-		return mCommandList->cmdSetBlendConstantColor( pColor );
 	}
 
 	bool CommandContextDeferredGraphics::cmdSetViewport( const ViewportDesc & pViewportDesc )

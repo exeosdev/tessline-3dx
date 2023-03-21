@@ -131,7 +131,6 @@ namespace ts3::gpuapi
 			openglDepthStencilConfig.stencilSettings.backFace.opPassDepthFail = atl::translateGLStencilOp( stencilBackFaceDesc.opPassDepthFail );
 			openglDepthStencilConfig.stencilSettings.backFace.opPassDepthPass = atl::translateGLStencilOp( stencilBackFaceDesc.opPassDepthPass );
 			openglDepthStencilConfig.stencilSettings.backFace.readMask = pConfig.stencilTestSettings.readMask;
-			openglDepthStencilConfig.stencilSettings.backFace.refValue = pConfig.stencilTestSettings.refValue;
 			openglDepthStencilConfig.stencilSettings.backFace.writeMask = pConfig.stencilTestSettings.writeMask;
 
 			auto & stencilFrontFaceDesc = pConfig.stencilTestSettings.frontFace;
@@ -140,7 +139,6 @@ namespace ts3::gpuapi
 			openglDepthStencilConfig.stencilSettings.frontFace.opPassDepthFail = atl::translateGLStencilOp( stencilFrontFaceDesc.opPassDepthFail );
 			openglDepthStencilConfig.stencilSettings.frontFace.opPassDepthPass = atl::translateGLStencilOp( stencilFrontFaceDesc.opPassDepthPass );
 			openglDepthStencilConfig.stencilSettings.frontFace.readMask = pConfig.stencilTestSettings.readMask;
-			openglDepthStencilConfig.stencilSettings.frontFace.refValue = pConfig.stencilTestSettings.refValue;
 			openglDepthStencilConfig.stencilSettings.frontFace.writeMask = pConfig.stencilTestSettings.writeMask;
 
 			return openglDepthStencilConfig;
