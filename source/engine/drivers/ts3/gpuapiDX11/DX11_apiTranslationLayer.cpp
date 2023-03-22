@@ -446,7 +446,7 @@ namespace ts3::gpuapi
 		{
 			d3d11BindFlags.set( D3D11_BIND_RENDER_TARGET );
 		}
-		if( pTextureFlags.isSet( E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT ) )
+		if( pTextureFlags.isSetAnyOf( E_GPU_RESOURCE_USAGE_MASK_RENDER_TARGET_DEPTH_STENCIL ) )
 		{
 			d3d11BindFlags.set( D3D11_BIND_DEPTH_STENCIL );
 		}

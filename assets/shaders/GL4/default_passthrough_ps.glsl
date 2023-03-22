@@ -10,6 +10,6 @@ layout( location = 0 ) out vec4 outPixelColor;
 
 void main()
 {
-	vec4 sampledColor = texture( uSampler0, psTexCoord0 );
+	vec4 sampledColor = texture( uSampler0, vec2( psTexCoord0.x, 1.0 - psTexCoord0.y ) );
 	outPixelColor = vec4( sampledColor.xyz, 1.0f );
 }

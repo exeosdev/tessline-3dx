@@ -14,6 +14,7 @@ namespace ts3
 	struct CBShadowData
 	{
 		math::Mat4f m4fLightSpaceMatrix;
+		math::Vec4f v4fShadowProperties;
 	};
 
 	struct ShadowConfig

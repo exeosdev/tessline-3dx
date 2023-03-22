@@ -39,7 +39,7 @@
 #include "gpuapi01-meshDefs.h"
 
 using namespace ts3;
-using namespace ts3::gpuapi;
+using namespace gpuapi;
 using namespace ts3::system;
 namespace math = ts3::math;
 
@@ -222,30 +222,32 @@ int main( int pArgc, const char ** pArgv )
         evtController->dispatchPendingEventsAuto();
     }
 
-//    evtDispatcher->setEventHandler(
-//            EEventCodeIndex::AppActivityDisplayInit,
-//            [&gfxState](const EventObject & pEvt) -> bool {
-//                initializeGraphicsGL( gfxState );
-//                gfxState.glContext->bindForCurrentThread( *(gfxState.glSurface) );
-//                gfxState.pauseAnimation = false;
-//                return true;
-//            });
-//
-//    evtDispatcher->setEventHandler(
-//            EEventCodeIndex::AppActivityDisplayTerm,
-//            [&gfxState](const EventObject & pEvt) -> bool {
-//                //gfxState.glSystemDriver->invalidate();
-//                gfxState.glContext = nullptr;
-//                gfxState.glSurface = nullptr;
-//                gfxState.glSystemDriver = nullptr;
-//                gfxState.pauseAnimation = true;
-//                return true;
-//            });
+    evtDispatcher->setEventHandler(
+            EEventCodeIndex::AppActivityDisplayInit,
+            [&gfxState](const EventObject & pEvt) -> bool {
+                initializeGraphicsGL( gfxState );
+                gfxState.glContext->bindForCurrentThread( *(gfxState.glSurface) );
+                gfxState.pauseAnimation = false;
+                return true;
+            });
+
+    evtDispatcher->setEventHandler(
+            EEventCodeIndex::AppActivityDisplayTerm,
+            [&gfxState](const EventObject & pEvt) -> bool {
+                //gfxState.glSystemDriver->invalidate();
+                gfxState.glContext = nullptr;
+                gfxState.glSurface = nullptr;
+                gfxState.glSystemDriver = nullptr;
+                gfxState.pauseAnimation = true;
+                return true;
+            });
 #endif
 
 	bool isFullscreen = true;
 
-    evtDispatcher->setEventHandler(
+	ts3::CameraController cameraController;
+
+	evtDispatcher->setEventHandler(
             EEventCodeIndex::AppActivityQuit,
             [&runApp](const EventObject & pEvt) -> bool {
                 runApp = false;
@@ -262,7 +264,7 @@ int main( int pArgc, const char ** pArgv )
             });
     evtDispatcher->setEventHandler(
             EEventCodeIndex::InputKeyboard,
-            [evtDispatcher,&gxDriverState,&isFullscreen](const EventObject & pEvt) -> bool {
+            [evtDispatcher,&gxDriverState,&isFullscreen,&cameraController](const EventObject & pEvt) -> bool {
             	auto & keyMap = pEvt.eInputKeyboard.inputKeyboardState->keyStateMap;
                 if( pEvt.eInputKeyboard.keyCode == EKeyCode::Escape )
                 {
@@ -272,6 +274,14 @@ int main( int pArgc, const char ** pArgv )
                 {
                 	isFullscreen = !isFullscreen;
                 	gxDriverState.presentationLayer->setFullscreenMode( isFullscreen );
+                }
+                else if( pEvt.eInputKeyboard.keyCode == EKeyCode::CharW )
+                {
+	                cameraController.move( 0.075f );
+                }
+                else if( pEvt.eInputKeyboard.keyCode == EKeyCode::CharS )
+                {
+	                cameraController.move( -0.075f );
                 }
                 return true;
             });
@@ -284,18 +294,20 @@ int main( int pArgc, const char ** pArgv )
 	shaderLibrary->loadShaders( {
 		{ "SID_DEFAULT_PASSTHROUGH_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_vs" ) },
 		{ "SID_DEFAULT_PASSTHROUGH_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_ps" ) },
-		// { "SID_SHADOW_0_PASS1_LIGHT_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass1_light_vs" ) },
-		// { "SID_SHADOW_0_PASS1_LIGHT_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass1_light_ps" ) },
-		// { "SID_SHADOW_0_PASS2_SHADOW_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass2_shadow_vs" ) },
-		// { "SID_SHADOW_0_PASS2_SHADOW_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass2_shadow_ps" ) },
+		{ "SID_SHADOW_0_PASS1_LIGHT_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass1_light_vs" ) },
+		{ "SID_SHADOW_0_PASS1_LIGHT_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass1_light_ps" ) },
+		{ "SID_SHADOW_0_PASS2_SHADOW_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass2_shadow_vs" ) },
+		{ "SID_SHADOW_0_PASS2_SHADOW_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass2_shadow_ps" ) },
+		//{ "SID_SHADOW_0_PASS2_SHADOW_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_vs" ) },
+		//{ "SID_SHADOW_0_PASS2_SHADOW_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_ps" ) },
 	} );
 
 	ts3::ShadowConfig shadowConfig;
 	shadowConfig.screenSize.width = rtSize.x;
 	shadowConfig.screenSize.height = rtSize.y;
-	shadowConfig.shadowMapSize.width = rtSize.x;
-	shadowConfig.shadowMapSize.height = rtSize.y;
-	auto shadowRenderer = (ts3::ShadowRenderer *)(nullptr);//std::make_unique<ts3::ShadowRenderer>( *shaderLibrary, shadowConfig );
+	shadowConfig.shadowMapSize.width = 2048;
+	shadowConfig.shadowMapSize.height = 2048;
+	auto shadowRenderer = std::make_unique<ts3::ShadowRenderer>( *shaderLibrary, shadowConfig );
 
     AppSharedResources appResources;
     {
@@ -316,99 +328,107 @@ int main( int pArgc, const char ** pArgv )
     auto vertexShader = shaderLibrary->getShader( "SID_DEFAULT_PASSTHROUGH_VS" );
     auto pixelShader = shaderLibrary->getShader( "SID_DEFAULT_PASSTHROUGH_PS" );
 
-    ts3::gpuapi::RenderPassConfiguration rednerPassConfig;
+    gpuapi::RenderPassConfiguration rednerPassConfig;
 
-    ts3::gpuapi::GPUBufferHandle cbuffer0;
+    gpuapi::GPUBufferHandle cbuffer0;
     {
-        ts3::gpuapi::GPUBufferCreateInfo cbci;
-        cbci.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-        cbci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
-        cbci.initialTarget = ts3::gpuapi::EGPUBufferTarget::ConstantBuffer;
+        gpuapi::GPUBufferCreateInfo cbci;
+        cbci.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+
+        cbci.resourceFlags = gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
+        cbci.resourceFlags |= gpuapi::E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT;
+
         cbci.bufferSize = sizeof( CB0Data );
         cbuffer0 = gxDriverState.device->createGPUBuffer( cbci );
     }
-    ts3::gpuapi::GPUBufferHandle vbuffer;
+    gpuapi::GPUBufferHandle vbuffer;
     {
 		const auto vertexData = generateVertexPNT0Data();
-        ts3::gpuapi::GPUBufferCreateInfo vbci;
-        vbci.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-        vbci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT;
-        vbci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
-        vbci.initialTarget = ts3::gpuapi::EGPUBufferTarget::VertexBuffer;
+        gpuapi::GPUBufferCreateInfo vbci;
+        vbci.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+
+        vbci.resourceFlags = gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
+	    vbci.resourceFlags |= gpuapi::E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT;
+
         vbci.initDataDesc.pointer = vertexData.data();
         vbci.initDataDesc.size    = vertexData.size() * sizeof( VertexPNT0 );
         vbuffer = gxDriverState.device->createGPUBuffer( vbci );
     }
-    ts3::gpuapi::GPUBufferHandle ibuffer;
+    gpuapi::GPUBufferHandle ibuffer;
     {
 	    const auto indexData = generateIndexPNT0Data();
-        ts3::gpuapi::GPUBufferCreateInfo ibci;
-        ibci.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-        ibci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT;
-        ibci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
-        ibci.initialTarget = ts3::gpuapi::EGPUBufferTarget::IndexBuffer;
+        gpuapi::GPUBufferCreateInfo ibci;
+        ibci.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+
+        ibci.resourceFlags = gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
+	    ibci.resourceFlags |= gpuapi::E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT;
+
 	    ibci.initDataDesc.pointer = indexData.data();
 	    ibci.initDataDesc.size    = indexData.size() * sizeof( uint32 );
         ibuffer = gxDriverState.device->createGPUBuffer( ibci );
     }
 
-    ts3::gpuapi::TextureHandle tex0;
+    gpuapi::TextureHandle tex0;
     {
-        ts3::gpuapi::TextureCreateInfo txci;
-        txci.texClass = ts3::gpuapi::ETextureClass::T2D;
+        gpuapi::TextureCreateInfo txci;
+        txci.texClass = gpuapi::ETextureClass::T2D;
         txci.dimensions.width = appResources.txROG512Data.formatInfo.dimensions.x;
         txci.dimensions.height = appResources.txROG512Data.formatInfo.dimensions.y;
-        txci.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-        txci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT;
-        txci.pixelFormat = ts3::gpuapi::ETextureFormat::RGBA8UN;
-        txci.initialTarget = ts3::gpuapi::ETextureTarget::ShaderInputSampledImage;
+        txci.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+        txci.resourceFlags =
+			gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT |
+			gpuapi::E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT;;
+        txci.internalFormat = gpuapi::ETextureFormat::RGBA8UN;
         txci.initDataDesc.initialize( txci.dimensions );
         txci.initDataDesc.subTextureInitDataBasePtr[0].mipLevelInitDataArray[0].pointer = appResources.txROG512Data.pixelBuffer.data();
         txci.initDataDesc.subTextureInitDataBasePtr[0].mipLevelInitDataArray[0].size = appResources.txROG512Data.sizeInBytes;
         tex0 = gpuDevicePtr->createTexture( txci );
     }
 
-    ts3::gpuapi::TextureHandle texRTColor0;
-    ts3::gpuapi::RenderTargetTextureHandle texRTColor0RT;
+    gpuapi::TextureHandle texRTColor0;
+    gpuapi::RenderTargetTextureHandle texRTColor0RT;
     {
-        ts3::gpuapi::TextureCreateInfo texRTColor0CI;
-        texRTColor0CI.texClass = ts3::gpuapi::ETextureClass::T2D;
+        gpuapi::TextureCreateInfo texRTColor0CI;
+        texRTColor0CI.texClass = gpuapi::ETextureClass::T2D;
         texRTColor0CI.dimensions.width = 1920;
         texRTColor0CI.dimensions.height = 1080;
-        texRTColor0CI.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+        texRTColor0CI.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
         texRTColor0CI.resourceFlags =
-                ts3::gpuapi::E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT |
-                ts3::gpuapi::E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT;
-        texRTColor0CI.pixelFormat = ts3::gpuapi::ETextureFormat::RGBA8UN;
-        texRTColor0CI.initialTarget = ts3::gpuapi::ETextureTarget::RenderTargetColorAttachment;
+                gpuapi::E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT |
+                gpuapi::E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT;
+        texRTColor0CI.internalFormat = gpuapi::ETextureFormat::RGBA8UN;
         texRTColor0 = gpuDevicePtr->createTexture( texRTColor0CI );
 
-		ts3::gpuapi::RenderTargetTextureCreateInfo texRTColor0RTCI;
+		gpuapi::RenderTargetTextureCreateInfo texRTColor0RTCI;
 		texRTColor0RTCI.targetTexture = texRTColor0;
+		texRTColor0RTCI.bindFlags =
+			E_TEXTURE_BIND_FLAG_RENDER_TARGET_COLOR_ATTACHMENT_BIT |
+			E_TEXTURE_BIND_FLAG_SHADER_INPUT_SAMPLED_IMAGE_BIT;
 		texRTColor0RT = gpuDevicePtr->createRenderTargetTexture( texRTColor0RTCI );
     }
 
-    ts3::gpuapi::TextureHandle texRTDepthStencil;
-	ts3::gpuapi::RenderTargetTextureHandle texRTDepthStencilRT;
+    gpuapi::TextureHandle texRTDepthStencil;
+	gpuapi::RenderTargetTextureHandle texRTDepthStencilRT;
     {
-        ts3::gpuapi::TextureCreateInfo texRTDepthStencilCI;
-        texRTDepthStencilCI.texClass = ts3::gpuapi::ETextureClass::T2D;
+        gpuapi::TextureCreateInfo texRTDepthStencilCI;
+        texRTDepthStencilCI.texClass = gpuapi::ETextureClass::T2D;
         texRTDepthStencilCI.dimensions.width = 1920;
         texRTDepthStencilCI.dimensions.height = 1080;
-        texRTDepthStencilCI.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+        texRTDepthStencilCI.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
 		texRTDepthStencilCI.resourceFlags =
-			ts3::gpuapi::E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT;
-        texRTDepthStencilCI.pixelFormat = ts3::gpuapi::ETextureFormat::D24UNS8U;
-        texRTDepthStencilCI.initialTarget = ts3::gpuapi::ETextureTarget::RenderTargetDepthStencilAttachment;
+			gpuapi::E_GPU_RESOURCE_USAGE_MASK_RENDER_TARGET_DEPTH_STENCIL;
+        texRTDepthStencilCI.internalFormat = gpuapi::ETextureFormat::D24UNS8U;
         texRTDepthStencil = gpuDevicePtr->createTexture( texRTDepthStencilCI );
 
-		ts3::gpuapi::RenderTargetTextureCreateInfo texRTDepthStencilRTCI;
+		gpuapi::RenderTargetTextureCreateInfo texRTDepthStencilRTCI;
 		texRTDepthStencilRTCI.targetTexture = texRTDepthStencil;
+		texRTDepthStencilRTCI.bindFlags =
+			E_TEXTURE_BIND_FLAG_RENDER_TARGET_DEPTH_STENCIL_ATTACHMENT_BIT;
 		texRTDepthStencilRT = gpuDevicePtr->createRenderTargetTexture( texRTDepthStencilRTCI );
     }
 
-    ts3::gpuapi::RenderPassConfigurationImmutableStateHandle fboRenderPassState;
-    ts3::gpuapi::RenderPassConfigurationImmutableStateHandle scrRenderPassState;
+    gpuapi::RenderPassConfigurationImmutableStateHandle fboRenderPassState;
+    gpuapi::RenderPassConfigurationImmutableStateHandle scrRenderPassState;
     {
         RenderPassConfiguration rpConfig;
         rpConfig.activeAttachmentsMask = E_RT_ATTACHMENT_MASK_DEFAULT_C0_DS;
@@ -426,8 +446,8 @@ int main( int pArgc, const char ** pArgv )
 		scrRenderPassState = gpuDevicePtr->createRenderPassConfigurationImmutableState( rpConfig );
     }
     
-    ts3::gpuapi::SamplerCreateInfo samplerCreateInfo;
-    samplerCreateInfo.samplerConfig = ts3::gpuapi::cvSamplerConfigDefault;
+    gpuapi::SamplerCreateInfo samplerCreateInfo;
+    samplerCreateInfo.samplerConfig = gpuapi::cvSamplerConfigDefault;
     
     auto defaultSampler = gxDriverState.device->createSampler( samplerCreateInfo );
 
@@ -445,30 +465,30 @@ int main( int pArgc, const char ** pArgv )
 		psoci.blendConfig = defaults::cvPipelineBlendConfigDefault;
 		psoci.depthStencilConfig = defaults::cvPipelineDepthStencilConfigEnableDepthTest;
 		psoci.rasterizerConfig = defaults::cvPipelineRasterizerConfigDefault;
-		psoci.rasterizerConfig.cullMode = ts3::gpuapi::ECullMode::Back;
-		psoci.rasterizerConfig.primitiveFillMode = ts3::gpuapi::EPrimitiveFillMode::Solid;
-		psoci.rasterizerConfig.frontFaceVerticesOrder = ts3::gpuapi::ETriangleVerticesOrder::CounterClockwise;
+		psoci.rasterizerConfig.cullMode = gpuapi::ECullMode::Back;
+		psoci.rasterizerConfig.primitiveFillMode = gpuapi::EPrimitiveFillMode::Solid;
+		psoci.rasterizerConfig.frontFaceVerticesOrder = gpuapi::ETriangleVerticesOrder::CounterClockwise;
 		psoci.renderTargetLayout = rtLayout;
 		psoci.inputLayoutDefinition.activeAttributesMask =
 			E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_0_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_1_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_2_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_3_BIT;
 		psoci.inputLayoutDefinition.primitiveTopology = EPrimitiveTopology::TriangleList;
-		psoci.inputLayoutDefinition.attributeArray[0] = { 0, "POSITION", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, 0 };
-		psoci.inputLayoutDefinition.attributeArray[1] = { 0, "COLOR", 0, ts3::gpuapi::EVertexAttribFormat::Vec4F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
-		psoci.inputLayoutDefinition.attributeArray[2] = { 0, "NORMAL", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
-		psoci.inputLayoutDefinition.attributeArray[3] = { 0, "TEXCOORD", 0, ts3::gpuapi::EVertexAttribFormat::Vec2F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+		psoci.inputLayoutDefinition.attributeArray[0] = { 0, "POSITION", 0, gpuapi::EVertexAttribFormat::Vec3F32, 0 };
+		psoci.inputLayoutDefinition.attributeArray[1] = { 0, "COLOR", 0, gpuapi::EVertexAttribFormat::Vec4F32, gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+		psoci.inputLayoutDefinition.attributeArray[2] = { 0, "NORMAL", 0, gpuapi::EVertexAttribFormat::Vec3F32, gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+		psoci.inputLayoutDefinition.attributeArray[3] = { 0, "TEXCOORD", 0, gpuapi::EVertexAttribFormat::Vec2F32, gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
 		psoci.shaderSet.addShader( vertexShader );
 		psoci.shaderSet.addShader( pixelShader );
-		psoci.shaderInputSignatureDesc.activeShaderStagesMask = ts3::gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT | ts3::gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT;
+		psoci.shaderInputSignatureDesc.activeShaderStagesMask = gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT | gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT;
 		psoci.shaderInputSignatureDesc.descriptorSetsNum = 2;
-		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorType = ts3::gpuapi::EShaderInputDescriptorType::Resource;
+		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorType = gpuapi::EShaderInputDescriptorType::Resource;
 		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorsNum = 2;
-		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0] = {0, ts3::gpuapi::EShaderInputDescriptorType::Resource, ts3::gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT };
-		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0].uResourceDesc = { ts3::gpuapi::EShaderInputResourceType::CBVConstantBuffer, 0, 1 };
-		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[1] = { 1, ts3::gpuapi::EShaderInputDescriptorType::Resource, ts3::gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT };
-		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[1].uResourceDesc = { ts3::gpuapi::EShaderInputResourceType::SRVTextureImage, 0, 1 };
-		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorType = ts3::gpuapi::EShaderInputDescriptorType::Sampler;
+		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0] = {0, gpuapi::EShaderInputDescriptorType::Resource, gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT };
+		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0].uResourceDesc = { gpuapi::EShaderInputResourceType::CBVConstantBuffer, 0, 1 };
+		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[1] = { 1, gpuapi::EShaderInputDescriptorType::Resource, gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT };
+		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[1].uResourceDesc = { gpuapi::EShaderInputResourceType::SRVTextureImage, 0, 1 };
+		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorType = gpuapi::EShaderInputDescriptorType::Sampler;
 		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorsNum = 1;
-		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorList[0] = { 10, ts3::gpuapi::EShaderInputDescriptorType::Sampler, ts3::gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT };
+		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorList[0] = { 10, gpuapi::EShaderInputDescriptorType::Sampler, gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT };
 		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorList[0].uSamplerConfig = { 0 };
 
 		mainPSO = gxDriverState.device->createGraphicsPipelineStateObject( psoci );
@@ -490,13 +510,11 @@ int main( int pArgc, const char ** pArgv )
 	ib.relativeOffset = 0;
 	ib.indexFormat = EIndexDataFormat::Uint32;
 
-    math::Vec3f cameraOriginPoint{ 0.0f, 2.0f,  -4.0f };
-    math::Vec3f cameraTargetPoint{ 0.0f, 0.0f,  4.0f };
+	math::Vec3f cameraOriginPoint{ 0.0f, 2.0f,  -4.0f };
+	math::Vec3f cameraTargetPoint{ 0.0f, 0.0f,  4.0f };
+	cameraController.initialize( cameraOriginPoint, cameraTargetPoint, 60.0f );
 
-    ts3::CameraController cameraController;
-    cameraController.initialize( cameraOriginPoint, cameraTargetPoint, 60.0f );
-	
-	ts3::gpuapi::ViewportDesc vpDescScreen{};
+	gpuapi::ViewportDesc vpDescScreen{};
 	vpDescScreen.origin.x = 0;
 	vpDescScreen.origin.y = 0;
 	vpDescScreen.size.x = rtSize.x;
@@ -504,7 +522,7 @@ int main( int pArgc, const char ** pArgv )
 	vpDescScreen.depthRange.zNear = 0.0f;
 	vpDescScreen.depthRange.zFar = 1.0f;
 
-	ts3::gpuapi::ViewportDesc vpDescTexture{};
+	gpuapi::ViewportDesc vpDescTexture{};
 	vpDescTexture.origin.x = 0;
 	vpDescTexture.origin.y = 0;
 	vpDescTexture.size.x = 1920;
@@ -577,13 +595,13 @@ int main( int pArgc, const char ** pArgv )
                 return true;
             });
 
-	math::Vec3f lightPosition{ 2.0f, 1.0f, 0.0f };
+	math::Vec3f lightPosition{ -2.0f, 2.0f, -2.0f };
 	math::Vec3f lightTarget{ 0.0f, 0.0f,  4.0f };
 
-	// shadowRenderer->createRendererResources();
-	// shadowRenderer->setCSLightPosition( lightPosition );
-	// shadowRenderer->setCSLightTarget( lightTarget );
-	// shadowRenderer->setCSProjectionMatrixLightPerspectiveDefault();
+	shadowRenderer->createRendererResources();
+	shadowRenderer->setCSLightPosition( lightPosition );
+	shadowRenderer->setCSLightTarget( lightTarget );
+	shadowRenderer->setCSProjectionMatrixLightPerspectiveDefault();
 
 	uint32 viewAngle = 0;
 
@@ -594,9 +612,9 @@ int main( int pArgc, const char ** pArgv )
             continue;
         }
 
-		// lightPosition.x = 3 * std::cos( ( float )( viewAngle * math::constants::cxFloatRad1Degree ) );
-		// lightPosition.x = 3 * std::sin( ( float )( viewAngle * math::constants::cxFloatRad1Degree ) );
-		// shadowRenderer->setCSLightPosition( lightPosition );
+		lightPosition.x = 3 * std::cos( ( float )( viewAngle * math::constants::cxFloatRad1Degree ) );
+		lightPosition.x = 3 * std::sin( ( float )( viewAngle * math::constants::cxFloatRad1Degree ) );
+		shadowRenderer->setCSLightPosition( lightPosition );
 
 		++viewAngle;
 
@@ -618,7 +636,7 @@ int main( int pArgc, const char ** pArgv )
 
 			gxDriverState.cmdContext->beginCommandSequence();
 
-			if( false )
+			if( true )
 			{
 				const auto cameraViewMatrix = cameraController.computeViewMatrixLH();
 				const auto cameraProjectionMatrix = math::perspectiveAspectLH<float>(
@@ -665,7 +683,7 @@ int main( int pArgc, const char ** pArgv )
 				shadowRenderer->endRenderPass( *gxDriverState.cmdContext );
 
 				gxDriverState.presentationLayer->bindRenderTarget( gxDriverState.cmdContext.get() );
-
+				
 				shadowRenderer->beginRenderPass2Shadow( *gxDriverState.cmdContext );
 				{
 					cmdContext.cmdSetViewport( vpDescScreen );
@@ -674,18 +692,18 @@ int main( int pArgc, const char ** pArgv )
 					cmdContext.cmdSetShaderTextureImage( 20, *tex0 );
 					{
 						shadowRenderer->updateMatricesForShadowPass( *gxDriverState.cmdContext );
-
+					
 						cb0Data.viewMatrix = cameraViewMatrix;
 						cb0Data.projectionMatrix = cameraProjectionMatrix;
-
+					
 						cb0Data.modelMatrix = math::identity4<float>();
 						cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
 						cmdContext.cmdDrawDirectIndexed( 6, 42 );
-
+					
 						cb0Data.modelMatrix = modelMatrix1;
 						cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
 						cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
-
+					
 						cb0Data.modelMatrix = modelMatrix2;
 						cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
 						cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
@@ -697,43 +715,9 @@ int main( int pArgc, const char ** pArgv )
 					gxDriverState.presentationLayer->invalidateRenderTarget( gxDriverState.cmdContext.get() );
 				}
 				cmdContext.endRenderPass();
-
-//				auto ts3ViewScreen = cameraController.computeViewMatrixLH();
-//
-//				gxDriverState.presentationLayer->bindRenderTarget( gxDriverState.cmdContext.get() );
-//
-//				gxDriverState.cmdContext->setIAVertexStreamState( vsds );
-//				gxDriverState.cmdContext->setGraphicsPipelineStateObject( *mainPSO );
-//
-//				gxDriverState.cmdContext->beginRenderPass( *fboRenderPassState, 0 );
-//				{
-//					gxDriverState.cmdContext->cmdSetViewport( vpDescScreen );
-//					gxDriverState.cmdContext->cmdSetShaderConstantBuffer( 0, *cbuffer0 );
-//					gxDriverState.cmdContext->cmdSetShaderTextureSampler( 10, *defaultSampler );
-//					gxDriverState.cmdContext->cmdSetShaderTextureImage( 1, *tex0 );
-//					{
-//						cb0Data.projectionMatrix = math::perspectiveAspectLH<float>(
-//							cameraController.getPerspectiveFOVAngle(), ( float )rtSize.x / ( float )rtSize.y, 1.0f, 10.0f );
-//						cb0Data.viewMatrix = ts3ViewLight;
-//
-//						cb0Data.modelMatrix = math::translation<float>( 0, 0, 2.0f );
-//						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0Data );
-//						gxDriverState.cmdContext->cmdDrawDirectIndexed( VNUM, 0 );
-//
-//						cb0Data.modelMatrix = math::translation<float>( 1.0f, 0, 4.0f );
-//						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0Data );
-//						gxDriverState.cmdContext->cmdDrawDirectIndexed( VNUM, 0 );
-//
-//						cb0Data.modelMatrix = math::translation<float>( 2.0f, 0, 6.0f );
-//						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0Data );
-//						gxDriverState.cmdContext->cmdDrawDirectIndexed( VNUM, 0 );
-//					}
-//					gxDriverState.presentationLayer->invalidateRenderTarget( gxDriverState.cmdContext.get() );
-//				}
-//				gxDriverState.cmdContext->endRenderPass();
 			}
 
-			if( true )
+			if( false )
 			{
 
 				cb0DataBase.modelMatrix = math::mul(
@@ -790,7 +774,7 @@ int main( int pArgc, const char ** pArgv )
 					gxDriverState.cmdContext->cmdSetViewport( vpDescScreen );
 					gxDriverState.cmdContext->cmdSetShaderConstantBuffer( 0, *cbuffer0 );
 					gxDriverState.cmdContext->cmdSetShaderTextureSampler( 10, *defaultSampler );
-					gxDriverState.cmdContext->cmdSetShaderTextureImage( 1, *( texRTColor0RT->getTargetTextureRef().getRefTexture() ) );
+					gxDriverState.cmdContext->cmdSetShaderTextureImage( 1, *texRTColor0RT->mTargetTexture.getRefTexture() );
 					{
 						cb0DataBase.projectionMatrix = math::perspectiveAspectLH<float>(
 							cameraController.getPerspectiveFOVAngle(), ( float )rtSize.x / ( float )rtSize.y, 0.1f, 1000.0f );
@@ -822,7 +806,7 @@ int main( int pArgc, const char ** pArgv )
 
 			gxDriverState.presentationLayer->present();
 
-			std::this_thread::sleep_for( std::chrono::milliseconds( 33 ) );
+			std::this_thread::sleep_for( std::chrono::milliseconds( 16 ) );
         }
         catch( ... )
         {

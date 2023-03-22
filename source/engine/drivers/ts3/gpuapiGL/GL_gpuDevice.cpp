@@ -31,12 +31,6 @@ namespace ts3::gpuapi
 		return _glDebugOutput.get();
 	}
 
-	RenderTargetBindingImmutableStateHandle GLGPUDevice::createScreenRenderTargetBindingState(
-		const RenderTargetLayout & pRenderTargetLayout )
-	{
-		return _immutableStateFactoryGL->createScreenRenderTargetBindingState( pRenderTargetLayout );
-	}
-
 	void GLGPUDevice::waitForCommandSync( CommandSync & pCommandSync )
 	{
 		if( pCommandSync )
@@ -115,9 +109,9 @@ namespace ts3::gpuapi
 	RenderTargetTextureHandle GLGPUDevice::_drvCreateRenderTargetTexture(
 			const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
-		auto glcRTTexture = GLTexture::createForRenderTarget( *this, pCreateInfo );
-		ts3DebugAssert( glcRTTexture );
-		return glcRTTexture;
+		auto glcRTTextureView = GLTexture::createRenderTargetTextureView( *this, pCreateInfo );
+		ts3DebugAssert( glcRTTextureView );
+		return glcRTTextureView;
 	}
 
 	GraphicsPipelineStateObjectHandle GLGPUDevice::_drvCreateGraphicsPipelineStateObject(

@@ -45,9 +45,6 @@ set( TS3_DRIVER_GPUAPI_DX11_SRC_FILES
 		"state/DX11_pipelineImmutableStateFactory.h"
 		"state/DX11_renderTarget.cpp"
 		"state/DX11_renderTarget.h"
-
-		"../../../../../assets/shaders/DX11/default_passthrough_vs.hlsl"
-		"../../../../../assets/shaders/DX11/default_passthrough_ps.hlsl"
 		
 		)
 

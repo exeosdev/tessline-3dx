@@ -57,24 +57,15 @@ namespace ts3::gpuapi
 	}
 
 
-	GPUResourceWrapper::GPUResourceWrapper(
+	GPUResourceView::GPUResourceView(
 			GPUDevice & pGPUDevice,
-			EGPUResourceBaseType pInternalResourceBaseType )
+			EGPUResourceBaseType pAliasedResourceType,
+			Bitmask<resource_flags_value_t> pResourceFlags )
 	: GPUDeviceChildObject( pGPUDevice )
-	, mInternalResourceBaseType( pInternalResourceBaseType )
-	, _internalResource( nullptr )
+	, mAliasedResourceType( pAliasedResourceType )
+	, mResourceFlags( pResourceFlags )
 	{}
 
-	GPUResourceWrapper::~GPUResourceWrapper() = default;
-
-	void GPUResourceWrapper::setInternalResource( GPUResource & pResource )
-	{
-		_internalResource = &pResource;
-	}
-
-	void GPUResourceWrapper::resetInternalResource()
-	{
-		_internalResource = nullptr;
-	}
+	GPUResourceView::~GPUResourceView() = default;
 
 } // namespace ts3::gpuapi

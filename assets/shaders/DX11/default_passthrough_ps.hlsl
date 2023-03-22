@@ -11,5 +11,5 @@ struct VSOutputData
 
 float4 main( VSOutputData pPSInput ) : SV_TARGET
 {
-	return txTexture0.Sample( smSampler0, float2( pPSInput.psTexCoord0.x, pPSInput.psTexCoord0.y ) );
+	return txTexture0.Sample( smSampler0, pPSInput.psTexCoord0 );
 }

@@ -58,10 +58,10 @@ inline const VertexPNT0 cvMeshTexUnitCubeVertexData[] =
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Render rectangle
-	VertexPNT0 { ts3::math::Vec3f{ -1.92f, -1.08f,  0.0f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  1.92f, -1.08f,  0.0f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 0.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  1.92f,  1.08f,  0.0f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 1.0f, 1.0f } },
-	VertexPNT0 { ts3::math::Vec3f{ -1.92f,  1.08f,  0.0f }, V4(0.0f), V3(0.0f), ts3::math::Vec2f{ 0.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -1.92f, -1.08f,  0.0f }, V4( 0.0f ), V3( 0.0f ), ts3::math::Vec2f{ 0.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  1.92f, -1.08f,  0.0f }, V4( 0.0f ), V3( 0.0f ), ts3::math::Vec2f{ 1.0f, 1.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  1.92f,  1.08f,  0.0f }, V4( 0.0f ), V3( 0.0f ), ts3::math::Vec2f{ 1.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -1.92f,  1.08f,  0.0f }, V4( 0.0f ), V3( 0.0f ), ts3::math::Vec2f{ 0.0f, 0.0f } },
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////
 

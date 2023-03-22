@@ -107,9 +107,9 @@ namespace ts3::gpuapi
 	RenderTargetTextureHandle DX11GPUDevice::_drvCreateRenderTargetTexture(
 			const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
-		auto dx11RenderTargetTexture = DX11Texture::createForRenderTarget( *this, pCreateInfo );
-		ts3DebugAssert( dx11RenderTargetTexture );
-		return dx11RenderTargetTexture;
+		auto dx11RTTextureView = DX11Texture::createRenderTargetTextureView( *this, pCreateInfo );
+		ts3DebugAssert( dx11RTTextureView );
+		return dx11RTTextureView;
 	}
 
 	GraphicsPipelineStateObjectHandle DX11GPUDevice::_drvCreateGraphicsPipelineStateObject(

@@ -117,7 +117,7 @@ namespace ts3::gpuapi
 				if( pAttachmentMask.isSet( attachmentBit ) )
 				{
 					auto & colorAttachmentBinding = pBindingDefinition.colorAttachments[caIndex];
-					auto & textureReference = colorAttachmentBinding.attachmentTexture->getTargetTextureRef();
+					auto & textureReference = colorAttachmentBinding.attachmentTexture->mTargetTexture;
 					auto * openglTexture = textureReference.getRefTexture()->queryInterface<GLTexture>();
 
 					framebufferObject->bindColorTexture(
@@ -133,19 +133,21 @@ namespace ts3::gpuapi
 
 				if( depthStencilAttachmentBinding.attachmentTexture->isDepthStencilRenderBuffer() )
 				{
-					auto * internalRenderBuffer = depthStencilAttachmentBinding.attachmentTexture->getInternalRenderBuffer();
-					auto * openglRenderBuffer = internalRenderBuffer->queryInterface<GLInternalRenderBuffer>();
+					auto * renderBuffer = depthStencilAttachmentBinding.attachmentTexture->getInternalRenderBuffer<GLInternalRenderBuffer>();
 
-					framebufferObject->bindDepthStencilRenderbuffer( *( openglRenderBuffer->mGLRenderbufferObject ) );
+					framebufferObject->bindDepthStencilRenderbuffer(
+							*renderBuffer->mGLRenderbufferObject,
+							depthStencilAttachmentBinding.attachmentTexture->mRTBufferMask );
 				}
 				else
 				{
-					auto & textureReference = depthStencilAttachmentBinding.attachmentTexture->getTargetTextureRef();
+					auto & textureReference = depthStencilAttachmentBinding.attachmentTexture->mTargetTexture;
 					auto * openglTexture = textureReference.getRefTexture()->queryInterface<GLTexture>();
 
 					framebufferObject->bindDepthStencilTexture(
-							*( openglTexture->mGLTextureObject ),
-							textureReference.getRefSubResource() );
+							*openglTexture->mGLTextureObject,
+							textureReference.getRefSubResource(),
+							depthStencilAttachmentBinding.attachmentTexture->mRTBufferMask );
 				}
 			}
 
@@ -240,7 +242,7 @@ namespace ts3::gpuapi
 				glGetIntegerv( GL_READ_FRAMEBUFFER_BINDING, &readFramebufferHandle );
 				ts3OpenGLHandleLastError();
 
-				const auto & fboImageSize = pRTBindingInfo.rtLayout->sharedImageSize;
+				const auto & fboImageSize = pRTBindingInfo.rtLayout->sharedImageRect;
 
 				glBindFramebuffer( GL_READ_FRAMEBUFFER, drawFramebufferHandle );
 				ts3OpenGLHandleLastError();

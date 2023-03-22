@@ -250,16 +250,16 @@ namespace ts3::gpuapi
 		auto baseDataTypeIndex = cxdefs::getBaseDataTypeIndex( pBaseDataType );
 		switch( baseDataTypeIndex )
 		{
-			ts3CaseReturn( 0u, GL_INVALID_ENUM                   );
-			ts3CaseReturn( 1u, GL_BYTE                           );
-			ts3CaseReturn( 2u, GL_UNSIGNED_BYTE                  );
-			ts3CaseReturn( 3u, GL_SHORT                          );
-			ts3CaseReturn( 4u, GL_UNSIGNED_SHORT                 );
-			ts3CaseReturn( 5u, GL_INT                            );
-			ts3CaseReturn( 6u, GL_UNSIGNED_INT                   );
-			ts3CaseReturn( 7u, GL_HALF_FLOAT                     );
-			ts3CaseReturn( 8u, GL_FLOAT                          );
-			ts3CaseReturn( 9u, GL_UNSIGNED_INT_24_8              );
+			ts3CaseReturn( 0u, GL_INVALID_ENUM      );
+			ts3CaseReturn( 1u, GL_BYTE              );
+			ts3CaseReturn( 2u, GL_UNSIGNED_BYTE     );
+			ts3CaseReturn( 3u, GL_SHORT             );
+			ts3CaseReturn( 4u, GL_UNSIGNED_SHORT    );
+			ts3CaseReturn( 5u, GL_INT               );
+			ts3CaseReturn( 6u, GL_UNSIGNED_INT      );
+			ts3CaseReturn( 7u, GL_HALF_FLOAT        );
+			ts3CaseReturn( 8u, GL_FLOAT             );
+			ts3CaseReturn( 9u, GL_UNSIGNED_INT_24_8 );
 		}
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -268,7 +268,7 @@ namespace ts3::gpuapi
 	{
 		switch( pBlendFactor )
 		{
-			ts3CaseReturn( EBlendFactor::Undefined   , GL_ZERO                     );
+			ts3CaseReturn( EBlendFactor::Undefined   , GL_INVALID_ENUM             );
 			ts3CaseReturn( EBlendFactor::Zero        , GL_ZERO                     );
 			ts3CaseReturn( EBlendFactor::One         , GL_ONE                      );
 			ts3CaseReturn( EBlendFactor::Const       , GL_CONSTANT_COLOR           );
@@ -289,7 +289,7 @@ namespace ts3::gpuapi
 	{
 		switch( pBlendOp )
 		{
-			ts3CaseReturn( EBlendOp::Undefined   , GL_FUNC_ADD              );
+			ts3CaseReturn( EBlendOp::Undefined   , GL_INVALID_ENUM          );
 			ts3CaseReturn( EBlendOp::Add         , GL_FUNC_ADD              );
 			ts3CaseReturn( EBlendOp::Min         , GL_MIN                   );
 			ts3CaseReturn( EBlendOp::Max         , GL_MAX                   );

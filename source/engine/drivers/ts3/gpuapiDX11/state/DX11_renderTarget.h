@@ -4,7 +4,7 @@
 #ifndef __TS3DRIVER_GPUAPI_DX11_RENDER_TARGET_H__
 #define __TS3DRIVER_GPUAPI_DX11_RENDER_TARGET_H__
 
-#include "../DX11_prerequisites.h"
+#include "../resources/DX11_texture.h"
 #include <ts3/gpuapi/resources/textureReference.h>
 #include <ts3/gpuapi/state/renderTargetImmutableStates.h>
 

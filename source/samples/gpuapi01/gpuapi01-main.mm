@@ -361,7 +361,6 @@ int main( int pArgc, const char ** pArgv )
         txci.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
         txci.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT;
         txci.pixelFormat = ts3::gpuapi::ETextureFormat::RGBA8UN;
-        txci.initialTarget = ts3::gpuapi::ETextureTarget::ShaderInputSampledImage;
         txci.initDataDesc.initialize( txci.dimensions );
         txci.initDataDesc.subTextureInitDataBasePtr[0].mipLevelInitDataArray[0].pointer = appResources.txROG512Data.pixelBuffer.data();
         txci.initDataDesc.subTextureInitDataBasePtr[0].mipLevelInitDataArray[0].size = appResources.txROG512Data.sizeInBytes;
@@ -380,7 +379,6 @@ int main( int pArgc, const char ** pArgv )
                 ts3::gpuapi::E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT |
                 ts3::gpuapi::E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT;
         texRTColor0CI.pixelFormat = ts3::gpuapi::ETextureFormat::RGBA8UN;
-        texRTColor0CI.initialTarget = ts3::gpuapi::ETextureTarget::RenderTargetColorAttachment;
         texRTColor0 = gpuDevicePtr->createTexture( texRTColor0CI );
 
 		ts3::gpuapi::RenderTargetTextureCreateInfo texRTColor0RTCI;
@@ -396,9 +394,8 @@ int main( int pArgc, const char ** pArgv )
         texRTDepthStencilCI.dimensions.width = 1920;
         texRTDepthStencilCI.dimensions.height = 1080;
         texRTDepthStencilCI.memoryFlags = ts3::gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-        texRTDepthStencilCI.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT;
+        texRTDepthStencilCI.resourceFlags = ts3::gpuapi::E_GPU_RESOURCE_USAGE_MASK_RENDER_TARGET_DEPTH_STENCIL;
         texRTDepthStencilCI.pixelFormat = ts3::gpuapi::ETextureFormat::D24UNS8U;
-        texRTDepthStencilCI.initialTarget = ts3::gpuapi::ETextureTarget::RenderTargetDepthStencilAttachment;
         texRTDepthStencil = gpuDevicePtr->createTexture( texRTDepthStencilCI );
 
 		ts3::gpuapi::RenderTargetTextureCreateInfo texRTDepthStencilRTCI;

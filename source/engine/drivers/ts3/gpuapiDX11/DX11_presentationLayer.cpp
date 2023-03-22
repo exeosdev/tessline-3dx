@@ -76,7 +76,7 @@ namespace ts3::gpuapi
 
 	void DX11ScreenPresentationLayer::present()
 	{
-		mDXGISwapChain1->Present( 1, 0 );
+		mDXGISwapChain1->Present( 0, 0 );
 	}
 
 	ID3D11RenderTargetView * DX11ScreenPresentationLayer::getBackBufferRTView()

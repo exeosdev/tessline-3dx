@@ -26,7 +26,6 @@ namespace ts3::gpuapi
     enum class EPrimitiveTopology : uint16;
     enum class ETriangleVerticesOrder : uint16;
 
-    enum class EGPUBufferTarget : enum_default_value_t;
     enum class EIndexDataFormat : base_data_type_value_t;
     enum class EShaderType : uint32;
     enum class ETextureAddressMode : enum_default_value_t;

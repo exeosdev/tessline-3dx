@@ -89,7 +89,7 @@ namespace ts3::gpuapi
 		const auto surfaceSize = sysGLSurface->getClientAreaSize();
 
 		auto screenRTLayout = smutil::translateSystemVisualConfigToRenderTargetLayout( surfaceVisualConfig );
-		screenRTLayout.sharedImageSize = { surfaceSize.x, surfaceSize.y };
+		screenRTLayout.sharedImageRect = { surfaceSize.x, surfaceSize.y };
 
 		auto renderTargetState = GLRenderTargetBindingImmutableState::createForScreen( pDevice, screenRTLayout );
 		ts3DebugAssert( renderTargetState );

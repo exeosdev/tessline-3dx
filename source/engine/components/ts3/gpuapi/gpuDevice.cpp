@@ -137,14 +137,20 @@ namespace ts3::gpuapi
 
 	RenderTargetTextureHandle GPUDevice::createRenderTargetTexture( const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
+		if( !pCreateInfo.bindFlags.isSetAnyOf( E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT | E_GPU_RESOURCE_USAGE_MASK_RENDER_TARGET_DEPTH_STENCIL ) )
+		{
+			ts3DebugOutput( "No RT attachment bind flags specified for the RT texture (E_GPU_RESOURCE_USAGE_xxx_RENDER_TARGET_yyy)." );
+			return nullptr;
+		}
+
 		if( pCreateInfo.targetTexture )
 		{
-			const auto rttType = rcutil::queryRenderTargetTextureType( pCreateInfo.targetTexture->mTextureLayout.pixelFormat );
-			const auto rttLayout = rcutil::queryRenderTargetTextureLayout( pCreateInfo.targetTexture->mTextureLayout );
-
-			auto existingTextureRTT = createGPUAPIObject<RenderTargetTexture>( *this, rttType, rttLayout, pCreateInfo.targetTexture );
-
-			return existingTextureRTT;
+			const auto & targetTextureResourceFlags = pCreateInfo.targetTexture->mTextureProperties.resourceFlags;
+			if( !targetTextureResourceFlags.isSet( pCreateInfo.bindFlags & E_GPU_RESOURCE_USAGE_MASK_ALL ) )
+			{
+				ts3DebugOutput( "Target texture for Render Target is not compatible with specified bind flags (E_GPU_RESOURCE_USAGE_xxx)." );
+				return nullptr;
+			}
 		}
 
 		return _drvCreateRenderTargetTexture( pCreateInfo );

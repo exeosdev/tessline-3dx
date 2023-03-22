@@ -218,8 +218,7 @@ namespace ts3
 		textureCreateInfo.gpuTextureCreateInfo.dimensions.height = pFontCreateInfo.fontDesc.textureDimensions.y;
 		textureCreateInfo.gpuTextureCreateInfo.memoryBaseAlignment = 256;
 		textureCreateInfo.gpuTextureCreateInfo.msaaLevel = 0;
-		textureCreateInfo.gpuTextureCreateInfo.pixelFormat = pFontCreateInfo.fontDesc.textureFormat;
-		textureCreateInfo.gpuTextureCreateInfo.initialTarget = gpuapi::ETextureTarget::ShaderInputSampledImage;
+		textureCreateInfo.gpuTextureCreateInfo.internalFormat = pFontCreateInfo.fontDesc.textureFormat;
 
 		if( cxDynamicSubTexturesNum == 0 )
 		{

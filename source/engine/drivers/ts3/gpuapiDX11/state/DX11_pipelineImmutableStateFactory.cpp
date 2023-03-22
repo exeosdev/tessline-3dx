@@ -59,11 +59,5 @@ namespace ts3::gpuapi
 	{
 		return DX11RenderPassConfigurationImmutableState::createInstance( mDX11GPUDevice, pConfiguration );
 	}
-
-	RenderTargetBindingImmutableStateHandle DX11PipelineImmutableStateFactory::createScreenRenderTargetBindingState(
-			ComPtr<IDXGISwapChain1> pDXGISwapChain )
-	{
-		return nullptr;// DX11RenderTargetBindingImmutableState::createForScreen( mDX11GPUDevice, pRenderTargetLayout );
-	}
 	
 }

@@ -25,8 +25,6 @@ namespace ts3::gpuapi
 		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerConfig & pConfig ) override final;
 		virtual RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & pDefinition ) override final;
 		virtual RenderPassConfigurationImmutableStateHandle createRenderPassState( const RenderPassConfiguration & pConfiguration ) override final;
-
-		RenderTargetBindingImmutableStateHandle createScreenRenderTargetBindingState( const RenderTargetLayout & pRenderTargetLayout );
 	};
 
 	class GLPipelineImmutableStateFactoryCore : public GLPipelineImmutableStateFactory

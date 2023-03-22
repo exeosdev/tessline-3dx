@@ -91,8 +91,8 @@ namespace ts3::gpuapi
 
 			RenderTargetLayout renderTargetLayout;
 			renderTargetLayout.activeAttachmentsMask = E_RT_ATTACHMENT_MASK_DEFAULT_C0_DS;
-			renderTargetLayout.sharedImageSize.width = colorBufferTextureDesc.Width;
-			renderTargetLayout.sharedImageSize.height = colorBufferTextureDesc.Height;
+			renderTargetLayout.sharedImageRect.width = colorBufferTextureDesc.Width;
+			renderTargetLayout.sharedImageRect.height = colorBufferTextureDesc.Height;
 			renderTargetLayout.sharedMSAALevel = colorBufferTextureDesc.SampleDesc.Count;
 			renderTargetLayout.colorAttachments[0].format = atl::translateTextureFormatInvDX( colorBufferTextureDesc.Format );
 			renderTargetLayout.depthStencilAttachment.format = atl::translateTextureFormatInvDX( depthStencilBufferTextureDesc.Format );
@@ -232,6 +232,11 @@ namespace ts3::gpuapi
 			d3d11DSViewDesc.ViewDimension = D3D11_DSV_DIMENSION_UNKNOWN;
 			d3d11DSViewDesc.Flags = 0;
 			d3d11DSViewDesc.Format = texture2DDesc.Format;
+
+			if( rcutil::checkIsDXGIFormatTypelessDX11( d3d11DSViewDesc.Format ) )
+			{
+				d3d11DSViewDesc.Format = rcutil::getDSVFormatForTypelessFormatDX11( d3d11DSViewDesc.Format );
+			}
 
 			if( dx11Texture->mTextureLayout.texClass == ETextureClass::T2D )
 			{
@@ -396,8 +401,8 @@ namespace ts3::gpuapi
 				{
 					if( const auto & attachmentBinding = pBindingDefinition.colorAttachments[caIndex] )
 					{
-						auto & attachmentTextureRef = attachmentBinding.attachmentTexture->getTargetTextureRef();
-						auto dx11ColorAttachment = smutil::createRenderTargetColorAttachmentDX11( pGPUDevice, attachmentTextureRef );
+						auto & colorAttachmentTextureRef = attachmentBinding.attachmentTexture->mTargetTexture;
+						auto dx11ColorAttachment = smutil::createRenderTargetColorAttachmentDX11( pGPUDevice, colorAttachmentTextureRef );
 
 						dx11RenderTargetBindingData.colorAttachments[caIndex] = dx11ColorAttachment;
 						dx11RenderTargetBindingData.d3d11ColorAttachmentRTViewArray[caIndex] = dx11ColorAttachment.d3d11RTView.Get();
@@ -407,8 +412,8 @@ namespace ts3::gpuapi
 						{
 							ts3DebugAssert( attachmentBinding.resolveTexture );
 
-							auto dx11ResolveAttachment = createRenderTargetResolveAttachmentDX11( attachmentBinding.resolveTexture->getTargetTextureRef() );
-							dx11RenderTargetBindingData.resolveAttachments[caIndex] = dx11ResolveAttachment;
+							auto dx11ResolveAttachmentTexture = createRenderTargetResolveAttachmentDX11( attachmentBinding.resolveTexture->mTargetTexture );
+							dx11RenderTargetBindingData.resolveAttachments[caIndex] = dx11ResolveAttachmentTexture;
 						}
 					}
 				}
@@ -422,8 +427,8 @@ namespace ts3::gpuapi
 			{
 				if( const auto & attachmentBinding = pBindingDefinition.depthStencilAttachment )
 				{
-					auto & attachmentTextureRef = attachmentBinding.attachmentTexture->getTargetTextureRef();
-					auto dx11DepthStencilAttachment = smutil::createRenderTargetDepthStencilAttachmentDX11( pGPUDevice, attachmentTextureRef );
+					auto & dsAttachmentTextureRef = attachmentBinding.attachmentTexture->mTargetTexture;
+					auto dx11DepthStencilAttachment = smutil::createRenderTargetDepthStencilAttachmentDX11( pGPUDevice, dsAttachmentTextureRef );
 
 					dx11RenderTargetBindingData.depthStencilAttachment = dx11DepthStencilAttachment;
 					dx11RenderTargetBindingData.d3d11DepthStencilAttachmentDSView = dx11DepthStencilAttachment.d3d11DSView.Get();
@@ -433,8 +438,8 @@ namespace ts3::gpuapi
 					{
 						ts3DebugAssert( attachmentBinding.resolveTexture );
 
-						auto dx11ResolveAttachment = createRenderTargetResolveAttachmentDX11( attachmentBinding.resolveTexture->getTargetTextureRef() );
-						dx11RenderTargetBindingData.resolveAttachments[E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL] = dx11ResolveAttachment;
+						auto dx11ResolveAttachmentTexture = createRenderTargetResolveAttachmentDX11( attachmentBinding.resolveTexture->mTargetTexture );
+						dx11RenderTargetBindingData.resolveAttachments[E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL] = dx11ResolveAttachmentTexture;
 					}
 				}
 			}

@@ -15,11 +15,11 @@ namespace ts3::gpuapi
 			const ResourceMemoryInfo & pResourceMemory,
 			const TextureProperties & pTextureProperties,
 			const TextureLayout & pTextureLayout,
-			DXGI_FORMAT pDXGITextureFormat,
+			DXGI_FORMAT pDXGIInternalFormat,
 			ComPtr<ID3D11Texture2D> pD3D11Texture2D,
 			ComPtr<ID3D11ShaderResourceView> pD3D11DefaultSRV )
 	: Texture( pDX11GPUDevice, pResourceMemory, pTextureProperties, pTextureLayout )
-	, mDXGITextureFormat( pDXGITextureFormat )
+	, mDXGIInternalFormat( pDXGIInternalFormat )
 	, mD3D11Device1( pDX11GPUDevice.mD3D11Device1 )
 	, mD3D11Texture2D( pD3D11Texture2D )
 	, mD3D11DefaultSRV( pD3D11DefaultSRV )
@@ -30,11 +30,11 @@ namespace ts3::gpuapi
 			const ResourceMemoryInfo & pResourceMemory,
 			const TextureProperties & pTextureProperties,
 			const TextureLayout & pTextureLayout,
-			DXGI_FORMAT pDXGITextureFormat,
+			DXGI_FORMAT pDXGIInternalFormat,
 			ComPtr<ID3D11Texture3D> pD3D11Texture3D,
 			ComPtr<ID3D11ShaderResourceView> pD3D11DefaultSRV )
 	: Texture( pDX11GPUDevice, pResourceMemory, pTextureProperties, pTextureLayout )
-	, mDXGITextureFormat( pDXGITextureFormat )
+	, mDXGIInternalFormat( pDXGIInternalFormat )
 	, mD3D11Device1( pDX11GPUDevice.mD3D11Device1 )
 	, mD3D11Texture3D( pD3D11Texture3D )
 	, mD3D11DefaultSRV( pD3D11DefaultSRV )
@@ -46,19 +46,20 @@ namespace ts3::gpuapi
 			DX11GPUDevice & pDX11GPUDevice,
 			const TextureCreateInfo & pCreateInfo )
 	{
-		auto createInfo = pCreateInfo;
-		if( !validateTextureCreateInfo( createInfo ) )
+		auto dxgiTextureFormat = atl::translateTextureFormatDX( pCreateInfo.internalFormat );
+		if( pCreateInfo.resourceFlags.isSetAnyOf( E_GPU_RESOURCE_USAGE_MASK_RENDER_TARGET_DEPTH_STENCIL ) && pCreateInfo.resourceFlags.isSet( E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT ) )
 		{
-			return nullptr;
+			dxgiTextureFormat = rcutil::getTypelessFormatForDpethStencilFormatDX11( dxgiTextureFormat );
 		}
 
 		DX11TextureCreateInfo dx11CreateInfo;
-		dx11CreateInfo.texClass = createInfo.texClass;
-		dx11CreateInfo.dimensions = createInfo.dimensions;
-		dx11CreateInfo.msaaLevel = createInfo.msaaLevel;
-		dx11CreateInfo.dxgiTextureFormat = atl::translateTextureFormatDX( createInfo.pixelFormat );
-		dx11CreateInfo.dx11UsageDesc = rcutil::translateTextureUsageDesc( createInfo );
-		dx11CreateInfo.dx11InitDataDesc = rcutil::translateTextureInitDataDesc( createInfo );
+		dx11CreateInfo.texClass = pCreateInfo.texClass;
+		dx11CreateInfo.dimensions = rcutil::getValidTextureDimensions( pCreateInfo.texClass, pCreateInfo.dimensions );
+		dx11CreateInfo.msaaLevel = pCreateInfo.msaaLevel;
+		dx11CreateInfo.resourceFlags = pCreateInfo.resourceFlags;
+		dx11CreateInfo.dxgiTextureFormat = dxgiTextureFormat;
+		dx11CreateInfo.dx11UsageDesc = rcutil::translateTextureUsageDescDX11( pCreateInfo );
+		dx11CreateInfo.dx11InitDataDesc = rcutil::translateTextureInitDataDescDX11( pCreateInfo );
 
 		auto dx11TextureData = rcutil::createTextureResourceDX11( pDX11GPUDevice, dx11CreateInfo );
 		if( !dx11TextureData )
@@ -71,17 +72,17 @@ namespace ts3::gpuapi
 		ResourceMemoryInfo textureMemoryInfo;
 		textureMemoryInfo.sourceHeapRegion.offset = 0;
 		textureMemoryInfo.sourceHeapRegion.size = textureMemoryByteSize;
-		textureMemoryInfo.baseAlignment = createInfo.memoryBaseAlignment;
-		textureMemoryInfo.memoryFlags = createInfo.memoryFlags;
+		textureMemoryInfo.baseAlignment = pCreateInfo.memoryBaseAlignment;
+		textureMemoryInfo.memoryFlags = pCreateInfo.memoryFlags;
 
 		TextureProperties textureProperties;
-		textureProperties.resourceFlags = createInfo.resourceFlags;
+		textureProperties.resourceFlags = pCreateInfo.resourceFlags;
 
 		TextureLayout textureLayout;
-		textureLayout.texClass = createInfo.texClass;
-		textureLayout.dimensions = createInfo.dimensions;
-		textureLayout.pixelFormat = createInfo.pixelFormat;
-		textureLayout.msaaLevel = createInfo.msaaLevel;
+		textureLayout.texClass = pCreateInfo.texClass;
+		textureLayout.dimensions = pCreateInfo.dimensions;
+		textureLayout.internalFormat = pCreateInfo.internalFormat;
+		textureLayout.msaaLevel = pCreateInfo.msaaLevel;
 		textureLayout.storageSize = textureMemoryByteSize;
 		textureLayout.bitsPerPixel = atl::getDXGITextureFormatBPP( dx11CreateInfo.dxgiTextureFormat );
 
@@ -90,9 +91,9 @@ namespace ts3::gpuapi
 		if( dx11TextureData.d3d11Texture2D )
 		{
 			ComPtr<ID3D11ShaderResourceView> d3d11TextureSRView = nullptr;
-			if( createInfo.resourceFlags.isSet( E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT ) )
+			if( pCreateInfo.resourceFlags.isSet( E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT ) )
 			{
-				d3d11TextureSRView = rcutil::create2DTextureDefaultShaderResourceView( createInfo.texClass, dx11TextureData.d3d11Texture2D );
+				d3d11TextureSRView = rcutil::create2DTextureDefaultShaderResourceViewDX11( pCreateInfo.texClass, dx11TextureData.d3d11Texture2D );
 			}
 
 			dx11Texture = createDynamicInterfaceObject<DX11Texture>(
@@ -107,9 +108,9 @@ namespace ts3::gpuapi
 		else if( dx11TextureData.d3d11Texture3D )
 		{
 			ComPtr<ID3D11ShaderResourceView> d3d11TextureSRView = nullptr;
-			if( createInfo.resourceFlags.isSet( E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT ) )
+			if( pCreateInfo.resourceFlags.isSet( E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT ) )
 			{
-				d3d11TextureSRView = rcutil::create3DTextureDefaultShaderResourceView( dx11TextureData.d3d11Texture3D );
+				d3d11TextureSRView = rcutil::create3DTextureDefaultShaderResourceViewDX11( dx11TextureData.d3d11Texture3D );
 			}
 
 			dx11Texture = createDynamicInterfaceObject<DX11Texture>(
@@ -125,7 +126,7 @@ namespace ts3::gpuapi
 		return dx11Texture;
 	}
 
-	RenderTargetTextureHandle DX11Texture::createForRenderTarget(
+	DX11TextureHandle DX11Texture::createForRenderTarget(
 			DX11GPUDevice & pDX11GPUDevice,
 			const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
@@ -133,23 +134,40 @@ namespace ts3::gpuapi
 		textureCreateInfo.texClass = ETextureClass::T2D;
 		textureCreateInfo.resourceFlags = static_cast<resource_flags_value_t>( pCreateInfo.bindFlags );
 		textureCreateInfo.memoryFlags = E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-		textureCreateInfo.pixelFormat = pCreateInfo.rttLayout.internalDataFormat;
-		textureCreateInfo.initialTarget = rcutil::getTextureTargetFromResourceFlags( pCreateInfo.bindFlags );
-		textureCreateInfo.msaaLevel = pCreateInfo.rttLayout.msaaLevel;
-		textureCreateInfo.dimensions.width = pCreateInfo.rttLayout.bufferSize.width;
-		textureCreateInfo.dimensions.height = pCreateInfo.rttLayout.bufferSize.height;
-		textureCreateInfo.dimensions.arraySize = 1;
-		textureCreateInfo.dimensions.depth = 1;
-		textureCreateInfo.dimensions.mipLevelsNum = 1;
+		textureCreateInfo.internalFormat = pCreateInfo.rtTextureLayout.internalFormat;
+		textureCreateInfo.msaaLevel = pCreateInfo.rtTextureLayout.msaaLevel;
+		textureCreateInfo.dimensions.width = pCreateInfo.rtTextureLayout.imageRect.width;
+		textureCreateInfo.dimensions.height = pCreateInfo.rtTextureLayout.imageRect.height;
 
 		auto dx11Texture = createDefault( pDX11GPUDevice, textureCreateInfo );
 
-		const auto rttType = rcutil::queryRenderTargetTextureType( dx11Texture->mTextureLayout.pixelFormat );
-		const auto rttLayout = rcutil::queryRenderTargetTextureLayout( dx11Texture->mTextureLayout );
+		return dx11Texture;
 
-		auto renderTargetTexture = createGPUAPIObject<RenderTargetTexture>( pDX11GPUDevice, rttType, rttLayout, pCreateInfo.targetTexture );
+	}
 
-		return renderTargetTexture;
+	RenderTargetTextureHandle DX11Texture::createRenderTargetTextureView(
+			DX11GPUDevice & pDX11GPUDevice,
+			const RenderTargetTextureCreateInfo & pCreateInfo )
+	{
+		if( pCreateInfo.targetTexture )
+		{
+			return createDefaultRenderTargetTextureView( pDX11GPUDevice, pCreateInfo );
+		}
+		else
+		{
+			auto dx11Texture = createForRenderTarget( pDX11GPUDevice, pCreateInfo );
+
+			const auto rtTextureType = rcutil::queryRenderTargetTextureType( dx11Texture->mTextureLayout.internalFormat );
+			const auto rtTextureLayout = rcutil::queryRenderTargetTextureLayout( dx11Texture->mTextureLayout );
+
+			auto renderTargetTexture = createGPUAPIObject<RenderTargetTexture>(
+					pDX11GPUDevice,
+					rtTextureType,
+					rtTextureLayout,
+					TextureReference{ dx11Texture } );
+
+			return renderTargetTexture;
+		}
 	}
 
 
@@ -251,7 +269,7 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
-		ComPtr<ID3D11ShaderResourceView> create2DTextureDefaultShaderResourceView(
+		ComPtr<ID3D11ShaderResourceView> create2DTextureDefaultShaderResourceViewDX11(
 				ETextureClass pTexClass,
 				const ComPtr<ID3D11Texture2D> & pD3D11Texture2D )
 		{
@@ -263,6 +281,11 @@ namespace ts3::gpuapi
 
 			D3D11_SHADER_RESOURCE_VIEW_DESC d3d11DefaultSRVDesc;
 			d3d11DefaultSRVDesc.Format = d3D11Texture2DDesc.Format;
+
+			if( rcutil::checkIsDXGIFormatTypelessDX11( d3d11DefaultSRVDesc.Format ) )
+			{
+				d3d11DefaultSRVDesc.Format = rcutil::getSRVFormatForTypelessFormatDX11( d3d11DefaultSRVDesc.Format, E_RENDER_TARGET_BUFFER_FLAG_DEPTH_BIT | E_RENDER_TARGET_BUFFER_FLAG_STENCIL_BIT );
+			}
 
 			if( pTexClass == ETextureClass::T2D )
 			{
@@ -300,7 +323,7 @@ namespace ts3::gpuapi
 			return d3d11TextureSRV;
 		}
 
-		ComPtr<ID3D11ShaderResourceView> create3DTextureDefaultShaderResourceView(
+		ComPtr<ID3D11ShaderResourceView> create3DTextureDefaultShaderResourceViewDX11(
 				const ComPtr<ID3D11Texture3D> & pD3D11Texture3D )
 		{
 			ComPtr<ID3D11Device> d3d11Device;
@@ -314,6 +337,11 @@ namespace ts3::gpuapi
 			d3d11DefaultSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
 			d3d11DefaultSRVDesc.Texture3D.MipLevels = d3D11Texture3DDesc.MipLevels;
 			d3d11DefaultSRVDesc.Texture3D.MostDetailedMip = 0;
+
+			if( rcutil::checkIsDXGIFormatTypelessDX11( d3d11DefaultSRVDesc.Format ) )
+			{
+				d3d11DefaultSRVDesc.Format = rcutil::getSRVFormatForTypelessFormatDX11( d3d11DefaultSRVDesc.Format, E_RENDER_TARGET_BUFFER_FLAG_DEPTH_BIT );
+			}
 
 			ComPtr<ID3D11ShaderResourceView> d3d11TextureSRV;
 			auto hResult = d3d11Device->CreateShaderResourceView(
@@ -330,7 +358,97 @@ namespace ts3::gpuapi
 			return d3d11TextureSRV;
 		}
 
-		DX11TextureInitDataDesc translateTextureInitDataDesc( const TextureCreateInfo & pCreateInfo )
+		bool checkIsDXGIFormatDepthStencilDX11( DXGI_FORMAT pDXGIFormat )
+		{
+			switch( pDXGIFormat )
+			{
+				case DXGI_FORMAT_D32_FLOAT:
+				case DXGI_FORMAT_D24_UNORM_S8_UINT:
+				case DXGI_FORMAT_D16_UNORM:
+					return true;
+			}
+
+			return false;
+		}
+
+		bool checkIsDXGIFormatTypelessDX11( DXGI_FORMAT pDXGIFormat )
+		{
+			switch( pDXGIFormat )
+			{
+			case DXGI_FORMAT_R32_TYPELESS:
+			case DXGI_FORMAT_R24G8_TYPELESS:
+			case DXGI_FORMAT_R16_TYPELESS:
+				return true;
+			}
+
+			return false;
+
+		}
+
+		DXGI_FORMAT getTypelessFormatForDpethStencilFormatDX11( DXGI_FORMAT pDXGIFormat )
+		{
+			switch( pDXGIFormat )
+			{
+				ts3CaseReturn( DXGI_FORMAT_D32_FLOAT            , DXGI_FORMAT_R32_TYPELESS );
+				ts3CaseReturn( DXGI_FORMAT_D24_UNORM_S8_UINT    , DXGI_FORMAT_R24G8_TYPELESS );
+				ts3CaseReturn( DXGI_FORMAT_D16_UNORM            , DXGI_FORMAT_R16_TYPELESS );
+			}
+
+			return DXGI_FORMAT_UNKNOWN;
+		}
+
+		DXGI_FORMAT getDSVFormatForTypelessFormatDX11( DXGI_FORMAT pDXGIFormat )
+		{
+			if( pDXGIFormat == DXGI_FORMAT_R32_TYPELESS )
+			{
+				return DXGI_FORMAT_D32_FLOAT;
+			}
+
+			if( pDXGIFormat == DXGI_FORMAT_R24G8_TYPELESS )
+			{
+				return DXGI_FORMAT_D24_UNORM_S8_UINT;
+			}
+
+			if( pDXGIFormat == DXGI_FORMAT_R16_TYPELESS )
+			{
+				return DXGI_FORMAT_D16_UNORM;
+			}
+
+			return DXGI_FORMAT_UNKNOWN;
+		}
+
+		DXGI_FORMAT getSRVFormatForTypelessFormatDX11( DXGI_FORMAT pDXGIFormat, Bitmask<ERenderTargetBufferFlags> pRTBufferMask )
+		{
+			if( pDXGIFormat == DXGI_FORMAT_R32_TYPELESS )
+			{
+				return DXGI_FORMAT_R32_FLOAT;
+			}
+
+			if( pDXGIFormat == DXGI_FORMAT_R24G8_TYPELESS )
+			{
+				if( pRTBufferMask.isSet( E_RENDER_TARGET_BUFFER_FLAG_DEPTH_BIT | E_RENDER_TARGET_BUFFER_FLAG_STENCIL_BIT ) )
+				{
+					return DXGI_FORMAT_D24_UNORM_S8_UINT;
+				}
+				if( pRTBufferMask.isSet( E_RENDER_TARGET_BUFFER_FLAG_DEPTH_BIT ) )
+				{
+					return DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+				}
+				if( pRTBufferMask.isSet( E_RENDER_TARGET_BUFFER_FLAG_STENCIL_BIT ) )
+				{
+					return DXGI_FORMAT_X24_TYPELESS_G8_UINT;
+				}
+			}
+
+			if( pDXGIFormat == DXGI_FORMAT_R16_TYPELESS )
+			{
+				return DXGI_FORMAT_R16_UNORM;
+			}
+
+			return DXGI_FORMAT_UNKNOWN;
+		}
+
+		DX11TextureInitDataDesc translateTextureInitDataDescDX11( const TextureCreateInfo & pCreateInfo )
 		{
 			DX11TextureInitDataDesc dx11InitDataDesc;
 
@@ -339,7 +457,7 @@ namespace ts3::gpuapi
 				auto subResourcesNum = pCreateInfo.dimensions.arraySize * pCreateInfo.dimensions.mipLevelsNum;
 				dx11InitDataDesc.textureSubResourcesNum = subResourcesNum;
 				dx11InitDataDesc.d3d11SubResourceDataArray.resize( subResourcesNum );
-				dx11InitDataDesc.pixelByteSize = cxdefs::getTextureFormatByteSize( pCreateInfo.pixelFormat );
+				dx11InitDataDesc.pixelByteSize = cxdefs::getTextureFormatByteSize( pCreateInfo.internalFormat );
 
 				for( uint32 subTextureIndex = 0; subTextureIndex < pCreateInfo.dimensions.arraySize; ++subTextureIndex )
 				{
@@ -361,7 +479,7 @@ namespace ts3::gpuapi
 			return dx11InitDataDesc;
 		}
 
-		DX11TextureUsageDesc translateTextureUsageDesc( const TextureCreateInfo & pCreateInfo )
+		DX11TextureUsageDesc translateTextureUsageDescDX11( const TextureCreateInfo & pCreateInfo )
 		{
 			DX11TextureUsageDesc dx11UsageDesc;
 			dx11UsageDesc.bindFlags = atl::translateDX11ETextureBindFlags( pCreateInfo.resourceFlags );

@@ -30,7 +30,9 @@ namespace ts3::gpuapi
 
 		static GLTextureHandle createDefault( GLGPUDevice & pGPUDevice, const TextureCreateInfo & pCreateInfo );
 
-		static RenderTargetTextureHandle createForRenderTarget( GLGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo );
+		static GLTextureHandle createForRenderTarget( GLGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo );
+
+		static RenderTargetTextureHandle createRenderTargetTextureView( GLGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo );
 	};
 
 } // namespace ts3::gpuapi

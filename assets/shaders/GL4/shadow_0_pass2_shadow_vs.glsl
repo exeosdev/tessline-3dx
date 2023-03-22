@@ -16,6 +16,7 @@ layout( std140, binding = 0 ) uniform CB0
 layout( std140, binding = 7 ) uniform CBShadow
 {
 	layout(row_major) mat4 cbsLightSpaceMatrix;
+	vec4 cbsShadowProperties;
 };
 
 out gl_PerVertex

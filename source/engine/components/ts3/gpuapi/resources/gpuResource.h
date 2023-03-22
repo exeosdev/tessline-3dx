@@ -62,31 +62,19 @@ namespace ts3::gpuapi
 		return _mappedMemory;
 	}
 
-	class GPUResourceWrapper : public GPUDeviceChildObject
+	class GPUResourceView : public GPUDeviceChildObject
 	{
 	public:
-		EGPUResourceBaseType const mInternalResourceBaseType;
+		EGPUResourceBaseType const mAliasedResourceType;
+		Bitmask<resource_flags_value_t> const mResourceFlags;
 
-		GPUResourceWrapper(
+		GPUResourceView(
 			GPUDevice & pGPUDevice,
-			EGPUResourceBaseType pInternalResourceBaseType );
+			EGPUResourceBaseType pAliasedResourceType,
+			Bitmask<resource_flags_value_t> pResourceFlags );
 
-		virtual ~GPUResourceWrapper();
-
-		TS3_ATTR_NO_DISCARD GPUResource * getInternalResource() const noexcept;
-
-	protected:
-		void setInternalResource( GPUResource & pResource );
-		void resetInternalResource();
-
-	private:
-		GPUResource * _internalResource;
+		virtual ~GPUResourceView();
 	};
-
-	inline GPUResource * GPUResourceWrapper::getInternalResource() const noexcept
-	{
-		return _internalResource;
-	}
 
 } // namespace ts3::gpuapi
 

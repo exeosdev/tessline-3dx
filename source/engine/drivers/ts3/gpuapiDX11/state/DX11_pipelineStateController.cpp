@@ -453,10 +453,20 @@ namespace ts3::gpuapi
 
 	void DX11GraphicsPipelineStateController::applyRenderTargetBinding( const DX11RenderTargetBindingData & pRenderTargetBindingData )
 	{
-		mDX11CommandList->mD3D11DeviceContext1->OMSetRenderTargets(
+		if( !pRenderTargetBindingData.activeAttachmentsMask.isSetAnyOf( E_RT_ATTACHMENT_MASK_COLOR_ALL ) )
+		{
+			mDX11CommandList->mD3D11DeviceContext1->OMSetRenderTargets(
+				0u,
+				nullptr,
+				pRenderTargetBindingData.d3d11DepthStencilAttachmentDSView );
+		}
+		else
+		{
+			mDX11CommandList->mD3D11DeviceContext1->OMSetRenderTargets(
 				gpm::RT_MAX_COLOR_ATTACHMENTS_NUM,
 				pRenderTargetBindingData.d3d11ColorAttachmentRTViewArray,
 				pRenderTargetBindingData.d3d11DepthStencilAttachmentDSView );
+		}
 	}
 
 } // namespace ts3::gpuapi

@@ -65,7 +65,7 @@ namespace ts3::gpuapi
 		// Implies RENDER_TARGET_DEPTH_STENCIL usage bit.
 		E_TEXTURE_BIND_FLAG_RENDER_TARGET_DEPTH_STENCIL_ATTACHMENT_BIT =
 				E_TEXTURE_BIND_FLAG_COMMON_TEXTURE_BIT |
-				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT,
+				E_GPU_RESOURCE_USAGE_MASK_RENDER_TARGET_DEPTH_STENCIL,
 
 		// Bind flag for using a texture as a source in transfer operations. @See E_GPU_RESOURCE_USAGE_FLAG_TRANSFER_SOURCE_BIT.
 		E_TEXTURE_BIND_FLAG_TRANSFER_SOURCE_IMAGE_BIT =
@@ -96,24 +96,40 @@ namespace ts3::gpuapi
 
 	struct RenderTargetTextureLayout
 	{
-		ETextureFormat internalDataFormat = ETextureFormat::UNKNOWN;
-		uint32 msaaLevel;
-		TextureSize2D bufferSize;
+		ETextureFormat internalFormat = ETextureFormat::UNKNOWN;
+		TextureSize2D imageRect{ 0, 0 };
+		uint32 msaaLevel = 0;
 
 		explicit operator bool() const noexcept
 		{
-			return internalDataFormat != ETextureFormat::UNKNOWN;
+			return internalFormat != ETextureFormat::UNKNOWN;
+		}
+	};
+
+	struct ShaderInputTextureLayout
+	{
+		ETextureFormat internalFormat = ETextureFormat::UNKNOWN;
+		ETextureClass texClass = ETextureClass::Unknown;
+		TextureSize2D imageRect{ 0, 0 };
+		uint32 depth = 1;
+		uint32 arraySize = 1;
+		uint32 mipLevelsNum = 1;
+		uint32 msaaLevel = 0;
+
+		explicit operator bool() const noexcept
+		{
+			return internalFormat != ETextureFormat::UNKNOWN;
 		}
 	};
 
 	struct TextureLayout
 	{
 		ETextureClass texClass = ETextureClass::Unknown;
+		ETextureFormat internalFormat = ETextureFormat::UNKNOWN;
 		TextureDimensions dimensions;
 		uint32 msaaLevel;
 		uint32 bitsPerPixel;
 		uint32 storageSize;
-		ETextureFormat pixelFormat;
 
 		explicit operator bool() const noexcept
 		{
@@ -176,6 +192,7 @@ namespace ts3::gpuapi
 	private:
 		// Init data for single-layer (non-array) texture.
 		TextureSubTextureInitDataDesc _subTextureInitData;
+		
 		// Vector of init data structs for array textures.
 		SubTextureInitDataDescArray _subTextureInitDataArray;
 	};
@@ -191,13 +208,12 @@ namespace ts3::gpuapi
 		ETextureClass texClass;
 		uint32 msaaLevel = 0;
 		TextureDimensions dimensions{ 0, 0, 1, 1, 1 };
-		ETextureFormat pixelFormat;
-		ETextureTarget initialTarget;
+		ETextureFormat internalFormat;
 		TextureInitDataDesc initDataDesc;
 
 		explicit operator bool() const
 		{
-			return ( texClass != ETextureClass::Unknown ) && ( pixelFormat != ETextureFormat::UNKNOWN );
+			return ( texClass != ETextureClass::Unknown ) && ( internalFormat != ETextureFormat::UNKNOWN );
 		}
 	};
 
@@ -233,17 +249,15 @@ namespace ts3::gpuapi
 	namespace rcutil
 	{
 
-		TS3_GPUAPI_API_NO_DISCARD bool checkRenderTargetTextureColorFormat( ETextureFormat pFormat ) noexcept;
-
-		TS3_GPUAPI_API_NO_DISCARD bool checkRenderTargetTextureDepthStencilFormat( ETextureFormat pFormat ) noexcept;
+		TS3_GPUAPI_API_NO_DISCARD bool checkTextureFormatAndBindFlagsCompatibility(
+				ETextureFormat pTextureFormat,
+				Bitmask<resource_flags_value_t> pBindFlags );
 
 		TS3_GPUAPI_API_NO_DISCARD const TextureLayout & queryTextureLayout( TextureHandle pTexture ) noexcept;
 
 		TS3_GPUAPI_API_NO_DISCARD RenderTargetTextureLayout queryRenderTargetTextureLayoutForTexture( TextureHandle pTexture ) noexcept;
 
 		TS3_GPUAPI_API_NO_DISCARD RenderTargetTextureLayout queryRenderTargetTextureLayoutForTexture( const TextureLayout & pTextureLayout ) noexcept;
-
-		TS3_GPUAPI_API_NO_DISCARD ETextureTarget getTextureTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pTextureResourceFlags );
 
 	}
 

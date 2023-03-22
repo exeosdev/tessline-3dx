@@ -28,16 +28,33 @@ namespace ts3::gpuapi
 			E_RENDER_TARGET_BUFFER_MASK_DEPTH_STENCIL,
 	};
 
+	/// @brief
+	enum class ERenderTargetTextureType : uint32
+	{
+		Unknown = 0,
+		RTColor = E_RENDER_TARGET_BUFFER_FLAG_COLOR_BIT,
+		RTDepthOnly = E_RENDER_TARGET_BUFFER_FLAG_DEPTH_BIT,
+		RTDepthStencil = E_RENDER_TARGET_BUFFER_MASK_DEPTH_STENCIL,
+		RTStencilOnly = E_RENDER_TARGET_BUFFER_FLAG_STENCIL_BIT,
+	};
+
 	namespace cxdefs
 	{
 
 		/// @brief
-		inline constexpr uint32 getRTAttachmentRequiredUsageFlag( native_uint pAttachmentIndex )
+		TS3_ATTR_NO_DISCARD inline constexpr Bitmask<uint32> getRTBufferMaskForRenderTargetTextureType(
+				ERenderTargetTextureType pRenderTargetTextureType )
+		{
+			return static_cast<uint32>( pRenderTargetTextureType ) & E_RENDER_TARGET_BUFFER_MASK_ALL;
+		}
+
+		/// @brief
+		TS3_ATTR_NO_DISCARD inline constexpr uint32 getRTAttachmentRequiredUsageMask( native_uint pAttachmentIndex )
 		{
 			return
 				( pAttachmentIndex < gpm::RT_MAX_COLOR_ATTACHMENTS_NUM ) ?
 				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT :
-				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT;
+				E_GPU_RESOURCE_USAGE_MASK_RENDER_TARGET_DEPTH_STENCIL;
 		}
 
 	}
@@ -176,7 +193,7 @@ namespace ts3::gpuapi
 	/// @brief A definition of a vertex layout used to create a driver-specific RenderTargetLayout object.
 	struct RenderTargetLayout : public RenderTargetAttachmentPropertySet<RenderTargetAttachmentLayout>
 	{
-		TextureSize2D sharedImageSize = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
+		TextureSize2D sharedImageRect = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
 
 		uint32 sharedMSAALevel = 0;
 	};

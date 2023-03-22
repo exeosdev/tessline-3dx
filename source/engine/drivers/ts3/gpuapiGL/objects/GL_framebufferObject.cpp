@@ -2,6 +2,7 @@
 #include "GL_framebufferObject.h"
 #include "GL_renderbufferObject.h"
 #include "GL_textureObject.h"
+#include "../state/GL_commonStateDefs.h"
 
 namespace ts3::gpuapi
 {
@@ -53,7 +54,7 @@ namespace ts3::gpuapi
 			GLRenderbufferObject & pGLRenderbuffer,
 			GLenum pActiveBindTarget )
 	{
-		auto framebufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
+		const auto framebufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
 		glFramebufferRenderbuffer(
 				framebufferBindTarget,
@@ -65,13 +66,15 @@ namespace ts3::gpuapi
 
 	void GLFramebufferObject::bindDepthStencilRenderbuffer(
 			GLRenderbufferObject & pGLRenderbuffer,
+			Bitmask<uint32> pBufferMask,
 			GLenum pActiveBindTarget )
 	{
-		auto framebufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
+		const auto framebufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
+		const auto fboAttachmentID = smutil::getFramebufferDepthStencilAttachmentIDForRTBufferMask( pBufferMask );
 
 		glFramebufferRenderbuffer(
 				framebufferBindTarget,
-				GL_DEPTH_STENCIL_ATTACHMENT,
+				fboAttachmentID,
 				GL_RENDERBUFFER,
 				pGLRenderbuffer.mGLHandle );
 		ts3OpenGLHandleLastError();
@@ -83,7 +86,7 @@ namespace ts3::gpuapi
 			const TextureSubResource & pSubResource,
 			GLenum pActiveBindTarget )
 	{
-		auto framebufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
+		const auto framebufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
 
 		switch( pGLTexture.mGLTextureBindTarget )
 		{
@@ -94,7 +97,7 @@ namespace ts3::gpuapi
 						GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
 						GL_TEXTURE_2D,
 						pGLTexture.mGLHandle,
-						pSubResource.uSubRes2D.mipLevel );
+						numeric_cast<GLint>( pSubResource.uSubRes2D.mipLevel ) );
 				ts3OpenGLHandleLastError();
 				break;
 			}
@@ -104,8 +107,8 @@ namespace ts3::gpuapi
 						framebufferBindTarget,
 						GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
 						pGLTexture.mGLHandle,
-						pSubResource.uSubRes2DArray.mipLevel,
-						pSubResource.uSubRes2DArray.arrayIndex );
+						numeric_cast<GLint>( pSubResource.uSubRes2D.mipLevel ),
+						numeric_cast<GLint>( pSubResource.uSubRes2DArray.arrayIndex ) );
 				ts3OpenGLHandleLastError();
 				break;
 			}
@@ -116,7 +119,7 @@ namespace ts3::gpuapi
 						GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
 						GL_TEXTURE_2D_MULTISAMPLE,
 						pGLTexture.mGLHandle,
-						pSubResource.uSubRes2D.mipLevel );
+						numeric_cast<GLint>( pSubResource.uSubRes2D.mipLevel ) );
 				ts3OpenGLHandleLastError();
 				break;
 			}
@@ -126,8 +129,8 @@ namespace ts3::gpuapi
 						framebufferBindTarget,
 						GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
 						pGLTexture.mGLHandle,
-						pSubResource.uSubRes3D.mipLevel,
-						pSubResource.uSubRes3D.depthLayerIndex );
+						numeric_cast<GLint>( pSubResource.uSubRes3D.mipLevel ),
+						numeric_cast<GLint>( pSubResource.uSubRes3D.depthLayerIndex ) );
 				ts3OpenGLHandleLastError();
 				break;
 			}
@@ -138,7 +141,7 @@ namespace ts3::gpuapi
 						GL_COLOR_ATTACHMENT0 + pColorAttachmentIndex,
 						GL_TEXTURE_2D,
 						pGLTexture.mGLHandle,
-						pSubResource.uSubResCubeMap.mipLevel );
+						numeric_cast<GLint>( pSubResource.uSubResCubeMap.mipLevel ) );
 				ts3OpenGLHandleLastError();
 				break;
 			}
@@ -148,9 +151,11 @@ namespace ts3::gpuapi
 	void GLFramebufferObject::bindDepthStencilTexture(
 			GLTextureObject & pGLTexture,
 			const TextureSubResource & pSubResource,
+			Bitmask<uint32> pBufferMask,
 			GLenum pActiveBindTarget )
 	{
-		auto framebufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
+		const auto framebufferBindTarget = checkActiveBindTarget( pActiveBindTarget );
+		const auto fboAttachmentID = smutil::getFramebufferDepthStencilAttachmentIDForRTBufferMask( pBufferMask );
 
 		switch( pGLTexture.mGLTextureBindTarget )
 		{
@@ -158,10 +163,10 @@ namespace ts3::gpuapi
 			{
 				glFramebufferTexture2D(
 						framebufferBindTarget,
-						GL_DEPTH_STENCIL_ATTACHMENT,
+						fboAttachmentID,
 						GL_TEXTURE_2D,
 						pGLTexture.mGLHandle,
-						pSubResource.uSubRes2D.mipLevel );
+						numeric_cast<GLint>( pSubResource.uSubRes2D.mipLevel ) );
 				ts3OpenGLHandleLastError();
 				break;
 			}
@@ -169,10 +174,10 @@ namespace ts3::gpuapi
 			{
 				glFramebufferTextureLayer(
 						framebufferBindTarget,
-						GL_DEPTH_STENCIL_ATTACHMENT,
+						fboAttachmentID,
 						pGLTexture.mGLHandle,
-						pSubResource.uSubRes2DArray.mipLevel,
-						pSubResource.uSubRes2DArray.arrayIndex );
+						numeric_cast<GLint>( pSubResource.uSubRes2DArray.mipLevel ),
+						numeric_cast<GLint>( pSubResource.uSubRes2DArray.arrayIndex ) );
 				ts3OpenGLHandleLastError();
 				break;
 			}
@@ -180,10 +185,10 @@ namespace ts3::gpuapi
 			{
 				glFramebufferTexture2D(
 						framebufferBindTarget,
-						GL_DEPTH_STENCIL_ATTACHMENT,
+						fboAttachmentID,
 						GL_TEXTURE_2D_MULTISAMPLE,
 						pGLTexture.mGLHandle,
-						pSubResource.uSubRes2D.mipLevel );
+						numeric_cast<GLint>( pSubResource.uSubRes2D.mipLevel ) );
 				ts3OpenGLHandleLastError();
 				break;
 			}
@@ -191,10 +196,10 @@ namespace ts3::gpuapi
 			{
 				glFramebufferTextureLayer(
 						framebufferBindTarget,
-						GL_DEPTH_STENCIL_ATTACHMENT,
+						fboAttachmentID,
 						pGLTexture.mGLHandle,
-						pSubResource.uSubRes3D.mipLevel,
-						pSubResource.uSubRes3D.depthLayerIndex );
+						numeric_cast<GLint>( pSubResource.uSubRes3D.mipLevel ),
+						numeric_cast<GLint>( pSubResource.uSubRes3D.depthLayerIndex ) );
 				ts3OpenGLHandleLastError();
 				break;
 			}
@@ -202,10 +207,10 @@ namespace ts3::gpuapi
 			{
 				glFramebufferTexture2D(
 						GL_TEXTURE_CUBE_MAP_POSITIVE_X + pSubResource.uSubResCubeMap.faceIndex,
-						GL_DEPTH_STENCIL_ATTACHMENT,
+						fboAttachmentID,
 						GL_TEXTURE_2D,
 						pGLTexture.mGLHandle,
-						pSubResource.uSubResCubeMap.mipLevel );
+						numeric_cast<GLint>( pSubResource.uSubResCubeMap.mipLevel ) );
 				ts3OpenGLHandleLastError();
 				break;
 			}

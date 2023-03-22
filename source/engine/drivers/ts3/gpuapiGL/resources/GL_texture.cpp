@@ -9,11 +9,12 @@
 namespace ts3::gpuapi
 {
 
-	GLTexture::GLTexture( GLGPUDevice & pGPUDevice,
-	                      const ResourceMemoryInfo & pResourceMemory,
-	                      const TextureProperties & pTextureProperties,
-	                      const TextureLayout & pTextureLayout,
-	                      GLTextureObjectHandle pGLTextureObject )
+	GLTexture::GLTexture(
+			GLGPUDevice & pGPUDevice,
+			const ResourceMemoryInfo & pResourceMemory,
+			const TextureProperties & pTextureProperties,
+			const TextureLayout & pTextureLayout,
+			GLTextureObjectHandle pGLTextureObject )
 	: Texture( pGPUDevice, pResourceMemory, pTextureProperties, pTextureLayout )
 	, mGLTextureObject( std::move( pGLTextureObject ) )
 	{ }
@@ -22,21 +23,15 @@ namespace ts3::gpuapi
 
 	GLTextureHandle GLTexture::createDefault( GLGPUDevice & pGPUDevice, const TextureCreateInfo & pCreateInfo )
 	{
-		auto createInfo = pCreateInfo;
-		if( !validateTextureCreateInfo( createInfo ) )
-		{
-			return nullptr;
-		}
-
 		GLTextureCreateInfo openglCreateInfo;
-		openglCreateInfo.bindTarget = atl::translateGLTextureBindTarget( createInfo.texClass );
-		openglCreateInfo.dimensions = createInfo.dimensions;
-		openglCreateInfo.msaaLevel = createInfo.msaaLevel;
-		openglCreateInfo.internalFormat = atl::translateGLTextureInternalFormat( createInfo.pixelFormat );
-		openglCreateInfo.openglInitDataDesc.subTextureInitDataPtr = createInfo.initDataDesc.subTextureInitDataBasePtr;
-		openglCreateInfo.openglInitDataDesc.textureInitFlags = createInfo.initDataDesc.textureInitFlags;
-		auto textureInitDataBaseType = cxdefs::getTextureFormatBaseDataType( createInfo.pixelFormat );
-		openglCreateInfo.openglInitDataDesc.openglPixelDataLayout = atl::translateGLTexturePixelDataLayout( createInfo.pixelFormat );
+		openglCreateInfo.bindTarget = atl::translateGLTextureBindTarget( pCreateInfo.texClass );
+		openglCreateInfo.dimensions = rcutil::getValidTextureDimensions( pCreateInfo.texClass, pCreateInfo.dimensions );
+		openglCreateInfo.msaaLevel = pCreateInfo.msaaLevel;
+		openglCreateInfo.internalFormat = atl::translateGLTextureInternalFormat( pCreateInfo.internalFormat );
+		openglCreateInfo.openglInitDataDesc.subTextureInitDataPtr = pCreateInfo.initDataDesc.subTextureInitDataBasePtr;
+		openglCreateInfo.openglInitDataDesc.textureInitFlags = pCreateInfo.initDataDesc.textureInitFlags;
+		auto textureInitDataBaseType = cxdefs::getTextureFormatBaseDataType( pCreateInfo.internalFormat );
+		openglCreateInfo.openglInitDataDesc.openglPixelDataLayout = atl::translateGLTexturePixelDataLayout( pCreateInfo.internalFormat );
 		openglCreateInfo.openglInitDataDesc.openglPixelDataType = atl::translateGLBaseDataType( textureInitDataBaseType );
 
 		GLTextureObjectHandle openglTextureObject = nullptr;
@@ -51,25 +46,25 @@ namespace ts3::gpuapi
 			ts3DebugAssert( openglTextureObject );
 		}
 
-		const auto textureInternalFormat = openglTextureObject->queryInternalFormat();
-		const auto textureSize = openglTextureObject->querySize();
+		const auto glcTextureInternalFormat = openglTextureObject->queryInternalFormat();
+		const auto glcTextureByteSize = openglTextureObject->querySize();
 
 		ResourceMemoryInfo textureMemoryInfo;
 		textureMemoryInfo.sourceHeapRegion.offset = 0;
-		textureMemoryInfo.sourceHeapRegion.size = textureSize;
-		textureMemoryInfo.baseAlignment = createInfo.memoryBaseAlignment;
-		textureMemoryInfo.memoryFlags = createInfo.memoryFlags;
+		textureMemoryInfo.sourceHeapRegion.size = glcTextureByteSize;
+		textureMemoryInfo.baseAlignment = pCreateInfo.memoryBaseAlignment;
+		textureMemoryInfo.memoryFlags = pCreateInfo.memoryFlags;
 
 		TextureProperties textureProperties;
-		textureProperties.resourceFlags = createInfo.resourceFlags;
+		textureProperties.resourceFlags = pCreateInfo.resourceFlags;
 
 		TextureLayout textureLayout;
-		textureLayout.texClass = createInfo.texClass;
-		textureLayout.dimensions = createInfo.dimensions;
-		textureLayout.pixelFormat = createInfo.pixelFormat;
-		textureLayout.msaaLevel = createInfo.msaaLevel;
-		textureLayout.storageSize = numeric_cast<uint32>( textureSize );
-		textureLayout.bitsPerPixel = atl::queryGLTextureInternalFormatBPP( textureInternalFormat );
+		textureLayout.texClass = pCreateInfo.texClass;
+		textureLayout.dimensions = pCreateInfo.dimensions;
+		textureLayout.internalFormat = pCreateInfo.internalFormat;
+		textureLayout.msaaLevel = pCreateInfo.msaaLevel;
+		textureLayout.storageSize = numeric_cast<uint32>( glcTextureByteSize );
+		textureLayout.bitsPerPixel = atl::queryGLTextureInternalFormatBPP( glcTextureInternalFormat );
 
 		auto openglTexture = createDynamicInterfaceObject<GLTexture>(
 			pGPUDevice,
@@ -81,42 +76,53 @@ namespace ts3::gpuapi
 		return openglTexture;
 	}
 
-	RenderTargetTextureHandle GLTexture::createForRenderTarget( GLGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo )
+	GLTextureHandle GLTexture::createForRenderTarget( GLGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
+		TextureCreateInfo textureCreateInfo;
+		textureCreateInfo.texClass = ETextureClass::T2D;
+		textureCreateInfo.dimensions.width = pCreateInfo.rtTextureLayout.imageRect.width;
+		textureCreateInfo.dimensions.height = pCreateInfo.rtTextureLayout.imageRect.height;
+		textureCreateInfo.memoryFlags = E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
+		textureCreateInfo.resourceFlags = ( pCreateInfo.bindFlags & E_GPU_RESOURCE_USAGE_MASK_ALL );
+		textureCreateInfo.internalFormat = pCreateInfo.rtTextureLayout.internalFormat;
+		textureCreateInfo.dimensions.arraySize = 1;
+		textureCreateInfo.dimensions.depth = 1;
+		textureCreateInfo.dimensions.mipLevelsNum = 1;
+
+		auto glcTexture = GLTexture::createDefault( pGPUDevice, textureCreateInfo );
+
+		return glcTexture;
+	}
+
+	RenderTargetTextureHandle GLTexture::createRenderTargetTextureView( GLGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo )
+	{
+		if( pCreateInfo.targetTexture )
+		{
+			return createDefaultRenderTargetTextureView( pGPUDevice, pCreateInfo );
+		}
+
 		const auto renderBufferIncompatibleBindFlags =
 				E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT |
 				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT |
 				E_GPU_RESOURCE_USAGE_FLAG_TRANSFER_TARGET_BIT;
 
-		const auto rttType = rcutil::queryRenderTargetTextureType( pCreateInfo.targetTexture->mTextureLayout.pixelFormat );
+		const auto rtTextureType = rcutil::queryRenderTargetTextureType( pCreateInfo.targetTexture->mTextureLayout.internalFormat );
 
 		if( pCreateInfo.bindFlags.isSetAnyOf( renderBufferIncompatibleBindFlags ) )
 		{
-			TextureCreateInfo textureCreateInfo;
-			textureCreateInfo.texClass = ETextureClass::T2D;
-			textureCreateInfo.dimensions.width = pCreateInfo.rttLayout.bufferSize.width;
-			textureCreateInfo.dimensions.height = pCreateInfo.rttLayout.bufferSize.height;
-			textureCreateInfo.memoryFlags = E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-			textureCreateInfo.resourceFlags = ( pCreateInfo.bindFlags & E_GPU_RESOURCE_USAGE_MASK_ALL );
-			textureCreateInfo.pixelFormat = pCreateInfo.rttLayout.internalDataFormat;
-			textureCreateInfo.initialTarget = rcutil::getTextureTargetFromResourceFlags( pCreateInfo.bindFlags );
-			textureCreateInfo.dimensions.arraySize = 1;
-			textureCreateInfo.dimensions.depth = 1;
-			textureCreateInfo.dimensions.mipLevelsNum = 1;
-
-			auto glcTexture = GLTexture::createDefault( pGPUDevice, textureCreateInfo );
+			auto glcTexture = createForRenderTarget( pGPUDevice, pCreateInfo );
 			if( !glcTexture )
 			{
 				return nullptr;
 			}
 
-			auto textureRTT = createGPUAPIObject<RenderTargetTexture>(
+			auto textureRTView = createGPUAPIObject<RenderTargetTexture>(
 					pGPUDevice,
-					rttType,
-					pCreateInfo.rttLayout,
+					rtTextureType,
+					pCreateInfo.rtTextureLayout,
 					TextureReference{ glcTexture } );
 
-			return textureRTT;
+			return textureRTView;
 		}
 		else
 		{
@@ -126,14 +132,14 @@ namespace ts3::gpuapi
 				return nullptr;
 			}
 
-			auto renderBufferRTT = createGPUAPIObject<RenderTargetTexture>(
+			auto renderBufferRTView = createGPUAPIObject<RenderTargetTexture>(
 					pGPUDevice,
-					rttType,
-					pCreateInfo.rttLayout,
+					rtTextureType,
+					pCreateInfo.rtTextureLayout,
 					glcRenderBuffer,
 					pCreateInfo.bindFlags );
 
-			return renderBufferRTT;
+			return renderBufferRTView;
 		}
 	}
 

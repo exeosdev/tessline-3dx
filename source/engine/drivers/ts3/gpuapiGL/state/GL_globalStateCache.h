@@ -2,8 +2,8 @@
 #ifndef __TS3DRIVER_GPUAPI_GLCOMMON_GLOBAL_STATE_CACHE_H__
 #define __TS3DRIVER_GPUAPI_GLCOMMON_GLOBAL_STATE_CACHE_H__
 
-#include "../state/GL_commonGraphicsConfig.h"
-#include "../state/GL_inputAssembler.h"
+#include "GL_commonGraphicsConfig.h"
+#include "GL_inputAssembler.h"
 
 namespace ts3::gpuapi
 {

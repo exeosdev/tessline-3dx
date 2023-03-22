@@ -25,11 +25,11 @@ namespace ts3::gpuapi
 			const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
 		GLRenderbufferCreateInfo openglRenderbufferCreateInfo;
-		openglRenderbufferCreateInfo.dimensions.x = pCreateInfo.rttLayout.bufferSize.width;
-		openglRenderbufferCreateInfo.dimensions.y = pCreateInfo.rttLayout.bufferSize.height;
-		openglRenderbufferCreateInfo.msaaLevel = pCreateInfo.rttLayout.msaaLevel;
+		openglRenderbufferCreateInfo.dimensions.x = pCreateInfo.rtTextureLayout.imageRect.width;
+		openglRenderbufferCreateInfo.dimensions.y = pCreateInfo.rtTextureLayout.imageRect.height;
+		openglRenderbufferCreateInfo.msaaLevel = pCreateInfo.rtTextureLayout.msaaLevel;
 		openglRenderbufferCreateInfo.internalFormat =
-				atl::translateGLTextureInternalFormat( pCreateInfo.rttLayout.internalDataFormat );
+				atl::translateGLTextureInternalFormat( pCreateInfo.rtTextureLayout.internalFormat );
 
 		auto openglRenderbuffer = GLRenderbufferObject::create( openglRenderbufferCreateInfo );
 		if( !openglRenderbuffer )
