@@ -9,9 +9,9 @@
 namespace ts3::gpuapi
 {
 
-	GLPipelineImmutableStateFactory::GLPipelineImmutableStateFactory( GLGPUDevice & pGLGPUDevice )
+	GLPipelineImmutableStateFactory::GLPipelineImmutableStateFactory( GLGPUDevice & pGPUDevice )
 	: PipelineImmutableStateFactory()
-	, mGLGPUDevice( pGLGPUDevice )
+	, mGLGPUDevice( pGPUDevice )
 	{}
 
 	GLPipelineImmutableStateFactory::~GLPipelineImmutableStateFactory() = default;
@@ -26,18 +26,6 @@ namespace ts3::gpuapi
 			const DepthStencilConfig & pConfig )
 	{
 		return GLDepthStencilImmutableState::createInstance( mGLGPUDevice, pConfig );
-	}
-
-	GraphicsShaderLinkageImmutableStateHandle GLPipelineImmutableStateFactory::createGraphicsShaderLinkageState(
-			const GraphicsShaderSet & pShaderSet )
-	{
-		return GLGraphicsShaderLinkageImmutableState::createInstance( mGLGPUDevice, pShaderSet );
-	}
-
-	IAInputLayoutImmutableStateHandle GLPipelineImmutableStateFactory::createIAInputLayoutState(
-			const IAInputLayoutDefinition & pDefinition )
-	{
-		return GLIAInputLayoutImmutableState::createInstance( mGLGPUDevice, pDefinition );
 	}
 
 	IAVertexStreamImmutableStateHandle GLPipelineImmutableStateFactory::createIAVertexStreamState(
@@ -61,7 +49,45 @@ namespace ts3::gpuapi
 	RenderPassConfigurationImmutableStateHandle GLPipelineImmutableStateFactory::createRenderPassState(
 			const RenderPassConfiguration & pConfiguration )
 	{
-		return GLRenderPassConfigurationImmutableState::createInstance( mGLGPUDevice, pConfiguration );
+		return createRenderPassStateDefault( mGLGPUDevice, pConfiguration );
+	}
+
+
+	GLPipelineImmutableStateFactoryCore::GLPipelineImmutableStateFactoryCore( GLGPUDevice & pGPUDevice )
+	: GLPipelineImmutableStateFactory( pGPUDevice )
+	{}
+
+	GLPipelineImmutableStateFactoryCore::~GLPipelineImmutableStateFactoryCore() = default;
+
+	GraphicsShaderLinkageImmutableStateHandle GLPipelineImmutableStateFactoryCore::createGraphicsShaderLinkageState( const GraphicsShaderSet & pShaderSet )
+	{
+		return GLGraphicsShaderLinkageImmutableStateCore::createInstance( mGLGPUDevice, pShaderSet );
+	}
+
+	IAInputLayoutImmutableStateHandle GLPipelineImmutableStateFactoryCore::createIAInputLayoutState(
+			const IAInputLayoutDefinition & pDefinition,
+			Shader * pVertexShaderWithBinary )
+	{
+		return GLIAInputLayoutImmutableStateCore::createInstance( mGLGPUDevice, pDefinition );
+	}
+
+
+	GLPipelineImmutableStateFactoryCompat::GLPipelineImmutableStateFactoryCompat( GLGPUDevice & pGPUDevice )
+	: GLPipelineImmutableStateFactory( pGPUDevice )
+	{}
+
+	GLPipelineImmutableStateFactoryCompat::~GLPipelineImmutableStateFactoryCompat() = default;
+
+	GraphicsShaderLinkageImmutableStateHandle GLPipelineImmutableStateFactoryCompat::createGraphicsShaderLinkageState( const GraphicsShaderSet & pShaderSet )
+	{
+		return GLGraphicsShaderLinkageImmutableStateCompat::createInstance( mGLGPUDevice, pShaderSet );
+	}
+
+	IAInputLayoutImmutableStateHandle GLPipelineImmutableStateFactoryCompat::createIAInputLayoutState(
+			const IAInputLayoutDefinition & pDefinition,
+			Shader * pVertexShaderWithBinary )
+	{
+		return GLIAInputLayoutImmutableStateCompat::createInstance( mGLGPUDevice, pDefinition );
 	}
 
 }

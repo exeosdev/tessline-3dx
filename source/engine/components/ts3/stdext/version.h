@@ -81,7 +81,7 @@ namespace ts3
 
 	inline bool operator>=( const Version & pLhs, const Version & pRhs )
 	{
-		return ( pLhs.major >= pRhs.major ) || ( ( pLhs.major == pRhs.major ) && ( pLhs.minor >= pRhs.minor ) );
+		return ( pLhs > pRhs ) || ( pLhs == pRhs );
 	}
 
 	inline bool operator<( const Version & pLhs, const Version & pRhs )
@@ -91,7 +91,7 @@ namespace ts3
 
 	inline bool operator<=( const Version & pLhs, const Version & pRhs )
 	{
-		return ( pLhs.major <= pRhs.major ) || ( ( pLhs.major == pRhs.major ) && ( pLhs.minor <= pRhs.minor ) );
+		return ( pLhs < pRhs ) || ( pLhs == pRhs );
 	}
 
 }

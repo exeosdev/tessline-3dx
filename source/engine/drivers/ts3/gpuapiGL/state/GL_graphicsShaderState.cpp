@@ -9,52 +9,79 @@ namespace ts3::gpuapi
 
 	GLGraphicsShaderLinkageImmutableState::GLGraphicsShaderLinkageImmutableState(
 			GLGPUDevice & pGPUDevice,
-			const GraphicsShaderLinkageCommonProperties & pCommonProperties,
-			GLShaderPipelineObjectHandle pGLShaderPipelineObject,
-			GLShaderProgramObjectHandle pGLShaderProgramObject )
+			const GraphicsShaderLinkageCommonProperties & pCommonProperties )
 	: GraphicsShaderLinkageImmutableState( pGPUDevice, pCommonProperties )
-	, mGLShaderPipelineObject( std::move( pGLShaderPipelineObject ) )
-	, mGLShaderProgramObject( std::move( pGLShaderProgramObject ) )
 	{}
 
 	GLGraphicsShaderLinkageImmutableState::~GLGraphicsShaderLinkageImmutableState() = default;
 
-	GpaHandle<GLGraphicsShaderLinkageImmutableState> GLGraphicsShaderLinkageImmutableState::createInstance(
+
+	GLGraphicsShaderLinkageImmutableStateCore::GLGraphicsShaderLinkageImmutableStateCore(
+			GLGPUDevice & pGPUDevice,
+			const GraphicsShaderLinkageCommonProperties & pCommonProperties,
+			GLShaderPipelineObjectHandle pGLShaderPipelineObject )
+	: GLGraphicsShaderLinkageImmutableState( pGPUDevice, pCommonProperties )
+	, mGLShaderPipelineObject( std::move( pGLShaderPipelineObject ) )
+	{}
+
+	GLGraphicsShaderLinkageImmutableStateCore::~GLGraphicsShaderLinkageImmutableStateCore() = default;
+
+	GpaHandle<GLGraphicsShaderLinkageImmutableStateCore> GLGraphicsShaderLinkageImmutableStateCore::createInstance(
 			GLGPUDevice & pGPUDevice,
 			const GraphicsShaderSet & pShaderSet )
 	{
 		const auto & commonProperties = smutil::getGraphicsShaderLinkageCommonPropertiesForShaderSet( pShaderSet );
 
-		GLShaderPipelineObjectHandle shaderPipelineObject;
-		GLShaderProgramObjectHandle shaderProgramObject;
-
-	#if( TS3GX_GL_FEATURE_SUPPORT_SHADER_PIPELINE_OBJECT )
-		shaderPipelineObject = smutil::createGraphicsShaderPipelineObject( pShaderSet );
+		auto shaderPipelineObject = smutil::createGraphicsShaderPipelineObjectGL( pShaderSet );
 		if( !shaderPipelineObject )
 		{
 			return nullptr;
 		}
-	#else
-		shaderProgramObject = smutil::createGraphicsShaderProgramObject( pShaderSet );
+
+		auto immutableState = createGPUAPIObject<GLGraphicsShaderLinkageImmutableStateCore>(
+				pGPUDevice,
+				commonProperties,
+				std::move( shaderPipelineObject ) );
+
+		return immutableState;
+	}
+
+
+	GLGraphicsShaderLinkageImmutableStateCompat::GLGraphicsShaderLinkageImmutableStateCompat(
+			GLGPUDevice & pGPUDevice,
+			const GraphicsShaderLinkageCommonProperties & pCommonProperties,
+			GLShaderProgramObjectHandle pGLShaderProgramObject )
+	: GLGraphicsShaderLinkageImmutableState( pGPUDevice, pCommonProperties )
+	, mGLShaderProgramObject( std::move( pGLShaderProgramObject ) )
+	{}
+
+	GLGraphicsShaderLinkageImmutableStateCompat::~GLGraphicsShaderLinkageImmutableStateCompat() = default;
+
+	GpaHandle<GLGraphicsShaderLinkageImmutableStateCompat> GLGraphicsShaderLinkageImmutableStateCompat::createInstance(
+			GLGPUDevice & pGPUDevice,
+			const GraphicsShaderSet & pShaderSet )
+	{
+		const auto & commonProperties = smutil::getGraphicsShaderLinkageCommonPropertiesForShaderSet( pShaderSet );
+
+		auto shaderProgramObject = smutil::createGraphicsShaderProgramObjectGL( pShaderSet );
 		if( !shaderProgramObject )
 		{
 			return nullptr;
 		}
-	#endif
 
-		auto immutableState = createGPUAPIObject<GLGraphicsShaderLinkageImmutableState>(
+		auto immutableState = createGPUAPIObject<GLGraphicsShaderLinkageImmutableStateCompat>(
 				pGPUDevice,
 				commonProperties,
-				std::move( shaderPipelineObject ),
 				std::move( shaderProgramObject ) );
 
 		return immutableState;
 	}
 
+
 	namespace smutil
 	{
 
-		GLShaderPipelineObjectHandle createGraphicsShaderPipelineObject( const GraphicsShaderSet & pShaderSet )
+		GLShaderPipelineObjectHandle createGraphicsShaderPipelineObjectGL( const GraphicsShaderSet & pShaderSet )
 		{
 			auto shaderPipelineObject = GLShaderPipelineObject::create();
 			if( !shaderPipelineObject )
@@ -81,7 +108,7 @@ namespace ts3::gpuapi
 			return shaderPipelineObject;
 		}
 
-		GLShaderProgramObjectHandle createGraphicsShaderProgramObject( const GraphicsShaderSet & pShaderSet )
+		GLShaderProgramObjectHandle createGraphicsShaderProgramObjectGL( const GraphicsShaderSet & pShaderSet )
 		{
 			auto shaderProgramObject = GLShaderProgramObject::create( GLShaderProgramType::Combined );
 			if( !shaderProgramObject )
@@ -89,13 +116,21 @@ namespace ts3::gpuapi
 				return nullptr;
 			}
 
+			bool useShaderLayoutMaps = false;
+
 			for( auto & shaderHandle : pShaderSet.commonShaderArray )
 			{
 				if( shaderHandle )
 				{
 					auto * openglShader = shaderHandle->queryInterface<GLShader>();
-					ts3DebugAssert( openglShader->mGLShaderProgramObject );
+					ts3DebugAssert( openglShader->mGLShaderObject );
 					shaderProgramObject->attachShader( *( openglShader->mGLShaderObject ) );
+
+					if( const auto * shaderLayoutMap = openglShader->mGLShaderObject->getDataLayoutMap() )
+					{
+						GLShaderProgramObject::setProgramPreLinkBindings( *shaderProgramObject, *shaderLayoutMap );
+						useShaderLayoutMaps = true;
+					}
 				}
 			}
 
@@ -104,10 +139,20 @@ namespace ts3::gpuapi
 				ts3DebugInterrupt();
 				return nullptr;
 			}
-			if( !shaderProgramObject->validate() )
+
+			if( useShaderLayoutMaps )
 			{
-				ts3DebugInterrupt();
-				return nullptr;
+				for( auto & shaderHandle : pShaderSet.commonShaderArray )
+				{
+					if( shaderHandle )
+					{
+						auto * openglShader = shaderHandle->queryInterface<GLShader>();
+						if( const auto * shaderLayoutMap = openglShader->mGLShaderObject->getDataLayoutMap() )
+						{
+							GLShaderProgramObject::setProgramPostLinkBindings( *shaderProgramObject, *shaderLayoutMap );
+						}
+					}
+				}
 			}
 
 			shaderProgramObject->detachAllShaders();
@@ -115,7 +160,7 @@ namespace ts3::gpuapi
 			return shaderProgramObject;
 		}
 
-		void updateUniformDataCurrent(
+		void updateUniformDataCurrentGL(
 				GLShaderPipelineObject & pShaderPipeline,
 				uint32 pUniformIndex,
 				EBaseDataType pBaseType,
@@ -168,7 +213,7 @@ namespace ts3::gpuapi
 			}
 		}
 
-		void updateUniformDataExplicit(
+		void updateUniformDataExplicitGL(
 				GLShaderProgramObject & pShaderProgram,
 				uint32 pUniformIndex,
 				EBaseDataType pBaseType,

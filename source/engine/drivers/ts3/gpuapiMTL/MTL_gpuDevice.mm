@@ -9,8 +9,8 @@ namespace ts3::gpuapi
 	: GPUDevice( pGPUDriver )
 	, mSysMetalDevice( std::move( pSysMetalDevice ) )
 	, mMTLDevice( mSysMetalDevice->mDeviceData->mtlDevice )
-	, _immutableStateFactory( *this )
-	, _immutableStateCache( _immutableStateFactory )
+	, _immutableStateFactoryGL( *this )
+	, _immutableStateCache( _immutableStateFactoryGL )
 	{}
 
 	MetalGPUDevice::~MetalGPUDevice() = default;

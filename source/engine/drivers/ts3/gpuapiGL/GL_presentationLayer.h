@@ -6,6 +6,7 @@
 
 #include "GL_prerequisites.h"
 #include <ts3/gpuapi/presentationLayer.h>
+#include <ts3/gpuapi/state/commonGPUStateDefs.h>
 
 namespace ts3::gpuapi
 {
@@ -24,7 +25,7 @@ namespace ts3::gpuapi
 		system::OpenGLDisplaySurfaceHandle const mSysGLDisplaySurface;
 
 	public:
-	    GLPresentationLayer( GLGPUDevice & pDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface );
+	    GLPresentationLayer( GLGPUDevice & pGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface );
 		virtual ~GLPresentationLayer();
 
 		virtual system::EventSource * getInternalSystemEventSource() const noexcept override;
@@ -32,8 +33,17 @@ namespace ts3::gpuapi
 
 	class GLScreenPresentationLayer final : public GLPresentationLayer
 	{
+		friend GLGPUDevice;
+
 	public:
-	    GLScreenPresentationLayer( GLGPUDevice & pDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface );
+		RenderTargetBindingImmutableStateHandle const mScreenRenderTargetBindingState;
+
+	public:
+	    GLScreenPresentationLayer(
+			GLGPUDevice & pGPUDevice,
+			system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface,
+			RenderTargetBindingImmutableStateHandle pScreenRenderTargetBindingState );
+
 		virtual ~GLScreenPresentationLayer();
 
 		virtual void bindRenderTarget( CommandContext * pCmdContext ) override;

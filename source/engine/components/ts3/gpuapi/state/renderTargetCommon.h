@@ -28,24 +28,44 @@ namespace ts3::gpuapi
 			E_RENDER_TARGET_BUFFER_MASK_DEPTH_STENCIL,
 	};
 
+	/// @brief
+	enum class ERenderTargetTextureType : uint32
+	{
+		Unknown = 0,
+		RTColor = E_RENDER_TARGET_BUFFER_FLAG_COLOR_BIT,
+		RTDepthOnly = E_RENDER_TARGET_BUFFER_FLAG_DEPTH_BIT,
+		RTDepthStencil = E_RENDER_TARGET_BUFFER_MASK_DEPTH_STENCIL,
+		RTStencilOnly = E_RENDER_TARGET_BUFFER_FLAG_STENCIL_BIT,
+	};
+
 	namespace cxdefs
 	{
 
 		/// @brief
-		inline constexpr uint32 getRTAttachmentRequiredUsageFlag( native_uint pAttachmentIndex )
+		TS3_ATTR_NO_DISCARD inline constexpr Bitmask<uint32> getRTBufferMaskForRenderTargetTextureType(
+				ERenderTargetTextureType pRenderTargetTextureType )
 		{
-			return ( pAttachmentIndex < RT_MAX_COLOR_ATTACHMENTS_NUM ) ? E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT : E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT;
+			return static_cast<uint32>( pRenderTargetTextureType ) & E_RENDER_TARGET_BUFFER_MASK_ALL;
+		}
+
+		/// @brief
+		TS3_ATTR_NO_DISCARD inline constexpr uint32 getRTAttachmentRequiredUsageMask( native_uint pAttachmentIndex )
+		{
+			return
+				( pAttachmentIndex < gpm::RT_MAX_COLOR_ATTACHMENTS_NUM ) ?
+				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT :
+				E_GPU_RESOURCE_USAGE_MASK_RENDER_TARGET_DEPTH_STENCIL;
 		}
 
 	}
 
 	template <typename TAttachmentProperty>
-	using RenderTargetColorAttachmentPropertyArray = std::array<TAttachmentProperty, cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM>;
+	using RenderTargetColorAttachmentPropertyArray = std::array<TAttachmentProperty, gpm::RT_MAX_COLOR_ATTACHMENTS_NUM>;
 
 	template <typename TAttachmentProperty>
 	struct RenderTargetAttachmentPropertySet
 	{
-		using AttachmentPropertyArray = std::array<TAttachmentProperty, cxdefs::RT_MAX_COMBINED_ATTACHMENTS_NUM>;
+		using AttachmentPropertyArray = std::array<TAttachmentProperty, gpm::RT_MAX_COMBINED_ATTACHMENTS_NUM>;
 
 		AttachmentPropertyArray attachments;
 
@@ -56,14 +76,14 @@ namespace ts3::gpuapi
 		TAttachmentProperty & depthStencilAttachment;
 
 		RenderTargetAttachmentPropertySet()
-		: colorAttachments( bindArrayView( attachments.data(), cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ) )
+		: colorAttachments( bindArrayView( attachments.data(), gpm::RT_MAX_COLOR_ATTACHMENTS_NUM ) )
 		, depthStencilAttachment( attachments[E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL] )
 		{}
 
 		RenderTargetAttachmentPropertySet( const RenderTargetAttachmentPropertySet<TAttachmentProperty> & pSource )
 		: attachments( pSource.attachments )
 		, activeAttachmentsMask( pSource.activeAttachmentsMask )
-		, colorAttachments( bindArrayView( attachments.data(), cxdefs::RT_MAX_COLOR_ATTACHMENTS_NUM ) )
+		, colorAttachments( bindArrayView( attachments.data(), gpm::RT_MAX_COLOR_ATTACHMENTS_NUM ) )
 		, depthStencilAttachment( attachments[E_RT_ATTACHMENT_INDEX_DEPTH_STENCIL] )
 		{}
 
@@ -81,7 +101,7 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD uint32 countActiveColorAttachments() const noexcept
 		{
-			return popCount( activeAttachmentsMask & E_RT_ATTACHMENT_MASK_COLOR_ALL );
+			return popCount( static_cast<uint32>( activeAttachmentsMask & E_RT_ATTACHMENT_MASK_COLOR_ALL ) );
 		}
 
 		TS3_ATTR_NO_DISCARD bool isColorAttachmentActive( uint32 pAttachmentIndex ) const noexcept
@@ -108,7 +128,7 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD uint32 countAttachmentsActionResolve() const noexcept
 		{
-			return popCount( attachmentsActionResolveMask & E_RT_ATTACHMENT_MASK_COLOR_ALL );
+			return popCount( static_cast<uint32>( attachmentsActionResolveMask & E_RT_ATTACHMENT_MASK_COLOR_ALL ) );
 		}
 	};
 
@@ -173,7 +193,7 @@ namespace ts3::gpuapi
 	/// @brief A definition of a vertex layout used to create a driver-specific RenderTargetLayout object.
 	struct RenderTargetLayout : public RenderTargetAttachmentPropertySet<RenderTargetAttachmentLayout>
 	{
-		TextureSize2D sharedImageSize = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
+		TextureSize2D sharedImageRect = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
 
 		uint32 sharedMSAALevel = 0;
 	};
@@ -213,6 +233,39 @@ namespace ts3::gpuapi
 			native_uint attachmentIndex = 0;
 			// Stop after reaching the limit or when there are no active attachments to process.
 			cxdefs::isRTAttachmentIndexValid( attachmentIndex ) && !activeAttachmentsMask.empty();
+			// This is rather self-descriptive, but it looked bad without this third comment here :)
+			++attachmentIndex )
+		{
+			const auto attachmentBit = cxdefs::makeRTAttachmentFlag( attachmentIndex );
+			// Check if the attachments mask has this bit set.
+			if( activeAttachmentsMask.isSet( attachmentBit ) )
+			{
+				// The function returns false if there was some internal error condition
+				// and the processing should be aborted.
+				if( !pFunction( attachmentIndex, makeBitmaskEx<ERTAttachmentFlags>( attachmentBit ) ) )
+				{
+					return false;
+				}
+
+				// Update the control mask.
+				activeAttachmentsMask.unset( attachmentBit );
+			}
+		}
+
+		return true;
+	}
+
+	template <typename TFunction>
+	inline bool foreachRTColorAttachmentIndex( Bitmask<ERTAttachmentFlags> pActiveAttachmentsMask, TFunction pFunction )
+	{
+		// A local copy of the active attachments mask. Bits of already processed attachments
+		// are removed, so when the value reaches 0, we can immediately stop further processing.
+		auto activeAttachmentsMask = pActiveAttachmentsMask;
+
+		for( // Iterate using RTA (Render Target Attachment) index value.
+			native_uint attachmentIndex = 0;
+			// Stop after reaching the limit or when there are no active attachments to process.
+			cxdefs::isRTColorAttachmentIndexValid( attachmentIndex ) && !activeAttachmentsMask.empty();
 			// This is rather self-descriptive, but it looked bad without this third comment here :)
 			++attachmentIndex )
 		{

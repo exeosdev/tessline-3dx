@@ -72,6 +72,7 @@ namespace ts3::gpuapi
 	/// @brief Represents all valid targets for buffer resources. Corresponding E_GPU_BUFFER_BIND_FLAGs are used as values.
 	enum class EGPUBufferTarget : uint32
 	{
+		Unknown                = 0,
 		ConstantBuffer         = E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT,
 		VertexBuffer           = E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT,
 		IndexBuffer            = E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT,
@@ -82,14 +83,9 @@ namespace ts3::gpuapi
 		IndirectDrawBuffer     = E_GPU_BUFFER_BIND_FLAG_INDIRECT_DRAW_BUFFER_BIT,
 		TransferSourceBuffer   = E_GPU_BUFFER_BIND_FLAG_TRANSFER_SOURCE_BUFFER_BIT,
 		TransferTargetBuffer   = E_GPU_BUFFER_BIND_FLAG_TRANSFER_TARGET_BUFFER_BIT,
-		Unknown                = 0
 	};
 
 	struct GPUBufferInitDataDesc : public ResourceInputDataDesc
-	{
-	};
-
-	struct GPUBufferInputDataDesc : public ResourceInputDataDesc
 	{
 	};
 
@@ -98,15 +94,6 @@ namespace ts3::gpuapi
 		// Total size of the buffer, in bytes. The buffer, if created, will have at least the specified size.
 		// Additional alignment rules and memory requirements may cause the buffer to be larger than requested.
 		gpu_memory_size_t bufferSize = 0;
-
-		// Initial target for the buffer. Some drivers, like GL, require binding to a target in order to actually
-		// initialize the buffer. If the buffer has multiple bind targets specified (which is perfectly fine), this
-		// variable controls which one the buffer will be bound to in order to initialize it. Following rules apply:
-		// 1) If the target is NOT EGPUBufferTarget::Unknown, its corresponding E_GPU_BUFFER_BIND_FLAG must have been set
-		//    in ResourceCreateInfo::resourceFlags. Otherwise, the creation of a buffer will fail.
-		// 2) If the target is EGPUBufferTarget::Unknown, the driver will pick the first compatible target, in the order
-		//    of definition within EGPUBufferTarget enum.
-		EGPUBufferTarget initialTarget = EGPUBufferTarget::Unknown;
 
 		// Initial data for the buffer. If the buffer is created with E_GPU_RESOURCE_CONTENT_FLAG_IMMUTABLE_BIT,
 		// this has to contain a valid data specification.
@@ -121,7 +108,7 @@ namespace ts3::gpuapi
 	struct GPUBufferSubDataCopyDesc
 	{
 		GPUMemoryRegion sourceBufferRegion;
-		gpu_memory_size_t targetBufferOffset;
+		gpu_memory_size_t targetBufferOffset = cxdefs::GPU_MEMORY_OFFSET_INVALID;
 		Bitmask<EGPUBufferDataCopyFlags> flags = E_GPU_BUFFER_DATA_COPY_FLAGS_DEFAULT;
 	};
 
@@ -140,6 +127,8 @@ namespace ts3::gpuapi
 
 	namespace rcutil
 	{
+
+		TS3_GPUAPI_API_NO_DISCARD EGPUBufferTarget getGPUBufferDefaultTargetFromBindFlags( Bitmask<resource_flags_value_t> pBindFlags );
 
 		TS3_GPUAPI_API_NO_DISCARD gpu_memory_size_t queryGPUBufferByteSize( GPUBufferHandle pGPUBuffer );
 

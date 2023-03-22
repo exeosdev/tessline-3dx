@@ -65,13 +65,13 @@ namespace ts3::gpuapi
 						{
 							return false;
 						}
-						const auto requiredUsageFlags = cxdefs::getRTAttachmentRequiredUsageFlag( pIndex );
-						if( !attachmentBinding.attachmentTexture->mInternalResourceFlags.isSet( requiredUsageFlags ) )
+						const auto requiredUsageFlags = cxdefs::getRTAttachmentRequiredUsageMask( pIndex );
+						if( !attachmentBinding.attachmentTexture->mResourceFlags.isSetAnyOf( requiredUsageFlags ) )
 						{
 							return false;
 						}
 						const auto & textureLayout = attachmentBinding.attachmentTexture->mRTTextureLayout;
-						if( textureLayout.bufferSize != commonImageLayout.bufferSize )
+						if( textureLayout.imageRect != commonImageLayout.imageRect )
 						{
 							return false;
 						}
@@ -104,7 +104,7 @@ namespace ts3::gpuapi
 
 				RenderTargetLayout renderTargetLayout{};
 				renderTargetLayout.activeAttachmentsMask = 0;
-				renderTargetLayout.sharedImageSize = commonLayout.bufferSize;
+				renderTargetLayout.sharedImageRect = commonLayout.imageRect;
 				renderTargetLayout.sharedMSAALevel = commonLayout.msaaLevel;
 
 				const auto layoutValid = foreachRTAttachmentIndex( pBindingDefinition.activeAttachmentsMask,
@@ -119,12 +119,12 @@ namespace ts3::gpuapi
 						const auto & caTexture = attachmentBinding.attachmentTexture;
 						const auto & caLayout = caTexture->mRTTextureLayout;
 
-						if( ( caLayout.bufferSize != commonLayout.bufferSize ) || ( caLayout.msaaLevel != commonLayout.msaaLevel ) )
+						if( ( caLayout.imageRect != commonLayout.imageRect ) || ( caLayout.msaaLevel != commonLayout.msaaLevel ) )
 						{
 							return false;
 						}
 
-						renderTargetLayout.attachments[pIndex].format = caLayout.internalDataFormat;
+						renderTargetLayout.attachments[pIndex].format = caLayout.internalFormat;
 						renderTargetLayout.activeAttachmentsMask.set( pAttachmentBit );
 
 						return true;
@@ -147,7 +147,7 @@ namespace ts3::gpuapi
 		{
 			RenderTargetLayout rtLayout{};
 			rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAG_COLOR_0_BIT;
-			rtLayout.sharedImageSize = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
+			rtLayout.sharedImageRect = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
 			rtLayout.sharedMSAALevel = cxdefs::TEXTURE_MSAA_LEVEL_UNDEFINED;
 			rtLayout.colorAttachments[0].format = ETextureFormat::BGRA8UN;
 			return rtLayout;
@@ -157,7 +157,7 @@ namespace ts3::gpuapi
 		{
 			RenderTargetLayout rtLayout{};
 			rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAG_COLOR_0_BIT | E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT;
-			rtLayout.sharedImageSize = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
+			rtLayout.sharedImageRect = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
 			rtLayout.sharedMSAALevel = cxdefs::TEXTURE_MSAA_LEVEL_UNDEFINED;
 			rtLayout.colorAttachments[0].format = ETextureFormat::BGRA8UN;
 			rtLayout.depthStencilAttachment.format = ETextureFormat::D24UNS8U;
@@ -168,7 +168,7 @@ namespace ts3::gpuapi
 		{
 			RenderTargetLayout rtLayout{};
 			rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAG_COLOR_0_BIT;
-			rtLayout.sharedImageSize = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
+			rtLayout.sharedImageRect = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
 			rtLayout.sharedMSAALevel = cxdefs::TEXTURE_MSAA_LEVEL_UNDEFINED;
 			rtLayout.colorAttachments[0].format = ETextureFormat::RGBA8UN;
 			return rtLayout;
@@ -178,7 +178,7 @@ namespace ts3::gpuapi
 		{
 			RenderTargetLayout rtLayout{};
 			rtLayout.activeAttachmentsMask = E_RT_ATTACHMENT_FLAG_COLOR_0_BIT | E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT;
-			rtLayout.sharedImageSize = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
+			rtLayout.sharedImageRect = cxdefs::TEXTURE_SIZE_2D_UNDEFINED;
 			rtLayout.sharedMSAALevel = cxdefs::TEXTURE_MSAA_LEVEL_UNDEFINED;
 			rtLayout.colorAttachments[0].format = ETextureFormat::RGBA8UN;
 			rtLayout.depthStencilAttachment.format = ETextureFormat::D24UNS8U;
@@ -206,7 +206,7 @@ namespace ts3::gpuapi
 //			if( attachmentLayoutDesc )
 //			{
 //				auto attachmentIndex = static_cast<uint32>( attachmentLayoutDesc.attachmentID );
-//				if( attachmentIndex < cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM )
+//				if( attachmentIndex < gpm::RT_MAX_COLOR_ATTACHMENTS_NUM )
 //				{
 //					renderTargetLayout.colorAttachmentArray[attachmentIndex].format = attachmentLayoutDesc.format;
 //					renderTargetLayout.colorAttachmentActiveCount += 1;
@@ -257,7 +257,7 @@ namespace ts3::gpuapi
 //			if( attachmentResourceBindingDesc )
 //			{
 //				auto attachmentIndex = static_cast<uint32>( attachmentResourceBindingDesc.attachmentID );
-//				if( attachmentIndex >= cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COMBINED_ATTACHMENTS_NUM )
+//				if( attachmentIndex >= gpm::RT_MAX_COMBINED_ATTACHMENTS_NUM )
 //				{
 //					ts3DebugInterrupt();
 //					return false;
@@ -266,7 +266,7 @@ namespace ts3::gpuapi
 //				RenderTargetAttachmentLayout * attachmentLayoutPtr = nullptr;
 //				RenderTargetAttachmentResourceBinding * attachmentResourceBindingPtr = nullptr;
 //
-//				if( attachmentIndex < cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM )
+//				if( attachmentIndex < gpm::RT_MAX_COLOR_ATTACHMENTS_NUM )
 //				{
 //					attachmentLayoutPtr = &( renderTargetLayout.colorAttachmentArray[attachmentIndex] );
 //					attachmentResourceBindingPtr = &( rtResourceBinding.colorAttachmentArray[attachmentIndex] );
@@ -288,7 +288,7 @@ namespace ts3::gpuapi
 //					}
 //
 //					auto * renderBuffer = attachmentResourceBindingDesc.renderBufferRef.renderBuffer;
-//					attachmentLayoutPtr->format = renderBuffer->mRenderBufferLayout.internalDataFormat;
+//					attachmentLayoutPtr->format = renderBuffer->mRenderBufferLayout.internalFormat;
 //					attachmentResourceBindingPtr->attachmentResourceType = ERenderTargetResourceType::RenderBuffer;
 //					attachmentResourceBindingPtr->format = attachmentLayoutPtr->format;
 //					attachmentResourceBindingPtr->uRenderBufferRef.renderBuffer = renderBuffer;
@@ -325,7 +325,7 @@ namespace ts3::gpuapi
 //	                                           const RenderTargetLayout & pRTLayout )
 //	{
 //
-//		for( uint32 caIndex = 0; caIndex < cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM; ++caIndex )
+//		for( uint32 caIndex = 0; caIndex < gpm::RT_MAX_COLOR_ATTACHMENTS_NUM; ++caIndex )
 //		{
 //			auto & caResourceBinding = pRTResourceBinding.colorAttachmentArray[caIndex];
 //			auto & caLayout = pRTLayout.colorAttachmentArray[caIndex];

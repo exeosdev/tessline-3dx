@@ -33,8 +33,6 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD virtual const GPUResourceProperties & getProperties() const override final;
 
-		TS3_ATTR_NO_DISCARD bool checkBufferTargetSupport( EGPUBufferTarget pBufferTarget ) const;
-
 		TS3_ATTR_NO_DISCARD GPUMemoryRegion getWholeBufferRegion() const;
 
 	protected:

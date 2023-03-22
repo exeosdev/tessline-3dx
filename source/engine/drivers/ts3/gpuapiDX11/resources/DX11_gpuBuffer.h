@@ -25,17 +25,21 @@ namespace ts3::gpuapi
 	public:
 		ComPtr<ID3D11Buffer> const mD3D11Buffer;
 
-		DX11GPUBuffer( DX11GPUDevice & pDX11GPUDevice,
-		               const ResourceMemoryInfo & pResourceMemory,
-		               const GPUBufferProperties & pBufferProperties,
-		               ComPtr<ID3D11Buffer> pD3D11Buffer );
+		DX11GPUBuffer(
+			DX11GPUDevice & pDX11GPUDevice,
+			const ResourceMemoryInfo & pResourceMemory,
+			const GPUBufferProperties & pBufferProperties,
+			ComPtr<ID3D11Buffer> pD3D11Buffer );
 
 		virtual ~DX11GPUBuffer();
 
-		static DX11GPUBufferHandle create( DX11GPUDevice & pDX11GPUDevice,
-		                                   const GPUBufferCreateInfo & pCreateInfo );
+		static DX11GPUBufferHandle create( DX11GPUDevice & pDX11GPUDevice, const GPUBufferCreateInfo & pCreateInfo );
 
 	private:
+		static bool validateBufferCreateInfo( GPUBufferCreateInfo & pCreateInfo );
+
+		static DX11GPUBufferDesc translateBufferDesc( const GPUBufferCreateInfo & pCreateInfo );
+
 	    virtual bool mapRegion( void * pCommandObject, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode ) override;
 
 		virtual void unmap( void * pCommandObject ) override;
@@ -49,12 +53,6 @@ namespace ts3::gpuapi
 		virtual void updateSubDataUpload( void * pCommandObject, const GPUBufferSubDataUploadDesc & pUploadDesc ) override;
 
 		virtual bool validateMapRequest( const GPUMemoryRegion & pRegion, const EGPUMemoryMapMode & pMapMode ) override;
-
-		static bool validateBufferCreateInfo( GPUBufferCreateInfo & pCreateInfo );
-
-		static DX11GPUBufferDesc translateBufferDesc( const GPUBufferCreateInfo & pCreateInfo );
-
-		static ID3D11DeviceContext1 * getD3D11DeviceContext( void * pCommandObject );
 
 	private:
 		struct DX11BufferMapInfo

@@ -5,7 +5,6 @@
 #define __TS3DRIVER_GPUAPI_GLCOMMON_GRAPHICS_SHADER_STATE_H__
 
 #include "../GL_prerequisites.h"
-#include <ts3/gpuapi/state/graphicsShaderState.h>
 #include <ts3/gpuapi/state/graphicsShaderLinkageImmutableState.h>
 #include <ts3/gpuapi/state/separablePipelineState.h>
 
@@ -19,19 +18,47 @@ namespace ts3::gpuapi
 	class GLGraphicsShaderLinkageImmutableState : public GraphicsShaderLinkageImmutableState
 	{
 	public:
+		GLGraphicsShaderLinkageImmutableState(
+				GLGPUDevice & pGPUDevice,
+				const GraphicsShaderLinkageCommonProperties & pCommonProperties );
+
+		virtual ~GLGraphicsShaderLinkageImmutableState();
+	};
+
+	/// @brief
+	class GLGraphicsShaderLinkageImmutableStateCore : public GLGraphicsShaderLinkageImmutableState
+	{
+	public:
 		GLShaderPipelineObjectHandle const mGLShaderPipelineObject;
+
+	public:
+		GLGraphicsShaderLinkageImmutableStateCore(
+				GLGPUDevice & pGPUDevice,
+				const GraphicsShaderLinkageCommonProperties & pCommonProperties,
+				GLShaderPipelineObjectHandle pGLShaderPipelineObject );
+
+		virtual ~GLGraphicsShaderLinkageImmutableStateCore();
+
+		TS3_ATTR_NO_DISCARD static GpaHandle<GLGraphicsShaderLinkageImmutableStateCore> createInstance(
+				GLGPUDevice & pGPUDevice,
+				const GraphicsShaderSet & pShaderSet );
+	};
+
+	/// @brief
+	class GLGraphicsShaderLinkageImmutableStateCompat : public GLGraphicsShaderLinkageImmutableState
+	{
+	public:
 		GLShaderProgramObjectHandle const mGLShaderProgramObject;
 
 	public:
-		GLGraphicsShaderLinkageImmutableState(
+		GLGraphicsShaderLinkageImmutableStateCompat(
 				GLGPUDevice & pGPUDevice,
 				const GraphicsShaderLinkageCommonProperties & pCommonProperties,
-				GLShaderPipelineObjectHandle pGLShaderPipelineObject,
 				GLShaderProgramObjectHandle pGLShaderProgramObject );
 
-		virtual ~GLGraphicsShaderLinkageImmutableState();
+		virtual ~GLGraphicsShaderLinkageImmutableStateCompat();
 
-		TS3_ATTR_NO_DISCARD static GpaHandle<GLGraphicsShaderLinkageImmutableState> createInstance(
+		TS3_ATTR_NO_DISCARD static GpaHandle<GLGraphicsShaderLinkageImmutableStateCompat> createInstance(
 				GLGPUDevice & pGPUDevice,
 				const GraphicsShaderSet & pShaderSet );
 	};
@@ -39,20 +66,20 @@ namespace ts3::gpuapi
 	namespace smutil
 	{
 
-		TS3_ATTR_NO_DISCARD GLShaderPipelineObjectHandle createGraphicsShaderPipelineObject(
+		TS3_ATTR_NO_DISCARD GLShaderPipelineObjectHandle createGraphicsShaderPipelineObjectGL(
 				const GraphicsShaderSet & pShaderSet );
 
-		TS3_ATTR_NO_DISCARD GLShaderProgramObjectHandle createGraphicsShaderProgramObject(
+		TS3_ATTR_NO_DISCARD GLShaderProgramObjectHandle createGraphicsShaderProgramObjectGL(
 				const GraphicsShaderSet & pShaderSet );
 
-		void updateUniformDataCurrent(
+		void updateUniformDataCurrentGL(
 				GLShaderPipelineObject & pShaderPipeline,
 				uint32 pUniformIndex,
 				EBaseDataType pBaseType,
 				uint32 pLength,
 				const void * pData );
 
-		void updateUniformDataExplicit(
+		void updateUniformDataExplicitGL(
 				GLShaderProgramObject & pShaderProgram,
 				uint32 pUniformIndex,
 				EBaseDataType pBaseType,

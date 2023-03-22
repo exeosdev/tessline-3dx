@@ -54,6 +54,9 @@ namespace ts3::system
 		/// @copybrief SysContext::createWindowManager
 		virtual WindowManagerHandle createWindowManager( DisplayManagerHandle pDisplayManager ) override final;
 
+		/// @copybrief SysContext::queryCurrentProcessWorkingDirectory
+		virtual std::string queryCurrentProcessWorkingDirectory() const override final;
+
 		/// @copybrief SysContext::queryCurrentProcessExecutableFilePath
 		virtual std::string queryCurrentProcessExecutableFilePath() const override final;
 

@@ -8,15 +8,15 @@
 namespace ts3::gpuapi
 {
 
-	DXPresentationLayer::DXPresentationLayer( GPUDevice & pDevice )
-	: PresentationLayer( pDevice )
+	DXPresentationLayer::DXPresentationLayer( GPUDevice & pGPUDevice )
+	: PresentationLayer( pGPUDevice )
 	{}
 
 	DXPresentationLayer::~DXPresentationLayer() = default;
 
 
-	DXScreenPresentationLayer::DXScreenPresentationLayer( GPUDevice & pDevice, system::WindowHandle pSysWindow, ComPtr<IDXGISwapChain1> pDXGISwapChain1 ) noexcept
-	: DXPresentationLayer( pDevice )
+	DXScreenPresentationLayer::DXScreenPresentationLayer( GPUDevice & pGPUDevice, system::WindowHandle pSysWindow, ComPtr<IDXGISwapChain1> pDXGISwapChain1 ) noexcept
+	: DXPresentationLayer( pGPUDevice )
 	, mSysWindow( pSysWindow )
 	, mDXGISwapChain1( std::move( pDXGISwapChain1 ) )
 	{}
@@ -41,7 +41,7 @@ namespace ts3::gpuapi
 		return mSysWindow->getClientAreaSize();
 	}
 
-	system::WindowHandle DXScreenPresentationLayer::createSysWindow( DXGPUDevice & pDevice, const PresentationLayerCreateInfo & pCreateInfo )
+	system::WindowHandle DXScreenPresentationLayer::createSysWindow( DXGPUDevice & pGPUDevice, const PresentationLayerCreateInfo & pCreateInfo )
 	{
 		try
 		{
@@ -51,11 +51,11 @@ namespace ts3::gpuapi
 			    auto sysDisplayManager = pCreateInfo.sysDisplayManager;
 			    if( !sysDisplayManager )
 			    {
-			        ts3DebugAssert( pDevice.mSysContext );
-			        sysDisplayManager = pDevice.mSysContext->createDisplayManager();
+			        ts3DebugAssert( pGPUDevice.mSysContext );
+			        sysDisplayManager = pGPUDevice.mSysContext->createDisplayManager();
 			    }
-			    ts3DebugAssert( pDevice.mSysContext );
-			    sysWindowManager = pDevice.mSysContext->createWindowManager( sysDisplayManager );
+			    ts3DebugAssert( pGPUDevice.mSysContext );
+			    sysWindowManager = pGPUDevice.mSysContext->createWindowManager( sysDisplayManager );
 			}
 
 			system::WindowCreateInfo windowCreateInfo;

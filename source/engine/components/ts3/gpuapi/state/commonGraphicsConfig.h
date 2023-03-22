@@ -44,6 +44,7 @@ namespace ts3::gpuapi
 
 	enum class EBlendFactor : uint16
 	{
+		Undefined,
 		Zero,
 		One,
 		Const,
@@ -60,6 +61,7 @@ namespace ts3::gpuapi
 
 	enum class EBlendOp : uint16
 	{
+		Undefined,
 		Add,
 		Min,
 		Max,
@@ -69,6 +71,7 @@ namespace ts3::gpuapi
 
 	enum class ECompFunc : uint16
 	{
+		Undefined,
 		Never,
 		Always,
 		Equal,
@@ -81,6 +84,7 @@ namespace ts3::gpuapi
 
 	enum class ECullMode : uint16
 	{
+		Undefined,
 		None,
 		Back,
 		Front
@@ -94,6 +98,7 @@ namespace ts3::gpuapi
 
 	enum class EStencilOp : uint16
 	{
+		Undefined,
 		Zero,
 		Keep,
 		Replace,
@@ -101,7 +106,7 @@ namespace ts3::gpuapi
 		IncrWrap,
 		DecrClamp,
 		DecrWrap,
-		Invert
+		Invert,
 	};
 
 	/// @brief Blend configuration for a single render target attachment (texture/render buffer).
@@ -114,7 +119,7 @@ namespace ts3::gpuapi
 		EBlendFactor factorDstAlpha;
 		EBlendOp opColor;
 		EBlendOp opAlpha;
-		Bitmask<EBlendWriteMaskFlags> renderTargetWriteMask;
+		Bitmask<EBlendWriteMaskFlags> writeMask;
 	};
 
 	/// @brief A configuration of the depth test for the depth-stencil stage.
@@ -143,7 +148,6 @@ namespace ts3::gpuapi
 
 		FaceOp frontFace;
 		FaceOp backFace;
-		uint8 refValue;
 		uint8 readMask;
 		uint8 writeMask;
 	};
@@ -162,7 +166,7 @@ namespace ts3::gpuapi
 		/// If ENABLE_MRT_SEPARATE_CONFIG_BIT is set, each active target uses its corresponding entry.
 		/// Otherwise, attachments[0] is used for all targets and rest of the array is ignored.
 		/// @see EBlendConfigFlags
-		RTColorAttachmentBlendSettings attachments[cxdefs::GPU_SYSTEM_METRIC_RT_MAX_COLOR_ATTACHMENTS_NUM];
+		RTColorAttachmentBlendSettings attachments[gpm::RT_MAX_COLOR_ATTACHMENTS_NUM];
 
 		math::RGBAColorR32Norm constantColor;
 	};

@@ -86,7 +86,7 @@ namespace ts3::gpuapi
 		if ( compileStatus != GL_TRUE )
 		{
 			auto infoLog = getInfoLog();
-			// print info log
+			ts3DebugOutput( infoLog.data() );
 			ts3DebugInterrupt();
 			return false;
 		}
@@ -105,6 +105,16 @@ namespace ts3::gpuapi
 		ts3OpenGLHandleLastError();
 
 		return true;
+	}
+
+	void GLShaderObject::setDataLayoutMap( GLShaderDataLayoutMap pLayoutMap )
+	{
+		_dataLayoutMap = std::make_unique<GLShaderDataLayoutMap>( std::move( pLayoutMap ) );
+	}
+
+	GLShaderDataLayoutMap * GLShaderObject::getDataLayoutMap() const noexcept
+	{
+		return _dataLayoutMap.get();
 	}
 
 	GLint GLShaderObject::queryParameter( GLenum pParameter ) const

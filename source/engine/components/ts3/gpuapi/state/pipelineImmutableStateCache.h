@@ -98,7 +98,7 @@ namespace ts3::gpuapi
 				}
 			}
 
-			auto newImmutableState = _stateFactoryAdapter.createState( pCreateInfo.inputDesc );
+			auto newImmutableState = _stateFactoryAdapter.createState( pCreateInfo.inputDesc, std::forward<TArgs>( pArgs )... );
 
 			if( !newImmutableState )
 			{

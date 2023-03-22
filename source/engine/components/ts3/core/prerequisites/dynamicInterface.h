@@ -153,7 +153,9 @@ namespace ts3
     using pClassName##WeakHandle = WeakHandle<pClassName>
 
 #define ts3DeclareTypedefHandle( pAliasName, pTypeName ) \
-    using pAliasName = pTypeName; using pAliasName##Handle = SharedHandle<pAliasName>
+    using pAliasName = pTypeName; \
+    using pAliasName##Handle = SharedHandle<pAliasName>; \
+    using pAliasName##WeakHandle = WeakHandle<pAliasName>
 
 }
 

@@ -4,7 +4,7 @@
 #ifndef __TS3DRIVER_GPUAPI_GLCOMMON_SHADER_PROGRAM_OBJECT_H__
 #define __TS3DRIVER_GPUAPI_GLCOMMON_SHADER_PROGRAM_OBJECT_H__
 
-#include "../GL_prerequisites.h"
+#include "GL_shaderCommon.h"
 #include <ts3/stdext/memoryBuffer.h>
 
 namespace ts3::gpuapi
@@ -62,6 +62,10 @@ namespace ts3::gpuapi
 		static GLShaderProgramObjectHandle create( GLShaderProgramType pProgramType );
 
 		static GLShaderProgramObjectHandle createSeparableModule( GLShaderObject & pShader );
+		static GLShaderProgramObjectHandle createSeparableModule( GLShaderObject & pShader, const GLShaderDataLayoutMap & pLayoutMap );
+
+		static void setProgramPreLinkBindings( GLShaderProgramObject & pProgram, const GLShaderDataLayoutMap & pLayoutMap );
+		static void setProgramPostLinkBindings( GLShaderProgramObject & pProgram, const GLShaderDataLayoutMap & pLayoutMap );
 
 	private:
 		GLbitfield _linkedShadersStageMask;

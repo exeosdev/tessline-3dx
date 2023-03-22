@@ -1,6 +1,7 @@
 
 #include "osxOpenGLDriver.h"
 #include "osxDisplaySystem.h"
+#include "nsOSXWindow.h"
 #include "nsOSXOpenGL.h"
 #include <ts3/core/exception.h>
 
@@ -212,9 +213,19 @@ namespace ts3::system
 		return EOpenGLAPIClass::OpenGLDesktop;
 	}
 
-	FrameSize OSXOpenGLDisplaySurface::_nativeQueryRenderAreaSize() const
+	VisualConfig OSXOpenGLDisplaySurface::_nativeQueryVisualConfig() const
 	{
 		return {};
+	}
+
+	FrameSize OSXOpenGLDisplaySurface::_nativeQueryRenderAreaSize() const
+	{
+		const auto windowFrame = [mNativeData.nsWindow frame];
+		const auto windowStyle = [mNativeData.nsWindow styleMask];
+		const auto surfaceSize = [NSWindow contentRectForFrameRect:windowFrame
+		                                                 styleMask:windowStyle];
+
+		return { surfaceSize.size.width, surfaceSize.size.height };
 	}
 
 	bool OSXOpenGLDisplaySurface::_nativeSysValidate() const
@@ -242,7 +253,8 @@ namespace ts3::system
 
 	FrameSize OSXOpenGLDisplaySurface::_nativeGetSize( EFrameSizeMode pSizeMode ) const
 	{
-		return {};
+		const auto windowFrame = [mNativeData.nsWindow frame];
+		return { windowFrame.size.width, windowFrame.size.height };
 	}
 
 	bool OSXOpenGLDisplaySurface::_nativeIsFullscreen() const

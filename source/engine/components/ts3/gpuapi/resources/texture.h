@@ -33,15 +33,20 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD virtual const GPUResourceProperties & getProperties() const override final;
 
-		TS3_ATTR_NO_DISCARD bool checkTextureTargetSupport( ETextureTarget pTextureTarget ) const;
-
 		TS3_ATTR_NO_DISCARD TextureSubResource getAllSubResourcesRef() const;
 
 		TS3_ATTR_NO_DISCARD TextureSubResource getDefaultSubResourceRef() const;
 
-	protected:
-		static bool validateTextureCreateInfo( TextureCreateInfo & pCreateInfo );
+		static RenderTargetTextureHandle createDefaultRenderTargetTextureView( GPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo );
 	};
+
+
+	namespace rcutil
+	{
+
+		TS3_ATTR_NO_DISCARD TextureDimensions getValidTextureDimensions( ETextureClass pTexClass, const TextureDimensions & pDimensions );
+
+	}
 
 } // namespace ts3::gpuapi
 

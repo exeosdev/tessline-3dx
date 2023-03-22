@@ -44,7 +44,7 @@ namespace ts3::gpuapi
 				const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) override final;
 
 	private:
-		MetalPipelineImmutableStateFactory _immutableStateFactory;
+		MetalPipelineImmutableStateFactory _immutableStateFactoryGL;
 		PipelineImmutableStateCache _immutableStateCache;
 	};
 

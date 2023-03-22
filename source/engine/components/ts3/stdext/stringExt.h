@@ -45,7 +45,7 @@ namespace ts3
 	struct ToStringProxy<char>
 	{
 		template <class _T>
-		std::basic_string<char> toString( const _T & pValue )
+		static std::basic_string<char> toString( const _T & pValue )
 		{
 			return std::to_string( pValue );
 		}
@@ -55,7 +55,7 @@ namespace ts3
 	struct ToStringProxy<wchar_t>
 	{
 		template <class _T>
-		std::basic_string<wchar_t> toString( const _T & pValue )
+		static std::basic_string<wchar_t> toString( const _T & pValue )
 		{
 			return std::to_wstring( pValue );
 		}

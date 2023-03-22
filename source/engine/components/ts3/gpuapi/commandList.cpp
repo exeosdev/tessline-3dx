@@ -4,13 +4,15 @@
 #include "gpuDevice.h"
 #include "resources/gpuBuffer.h"
 #include "state/graphicsPipelineStateController.h"
+#include "state/renderTargetDynamicStates.h"
+#include "state/renderTargetImmutableStates.h"
 
 namespace ts3::gpuapi
 {
 
 	enum ECommandListInternalStateFlags : uint32
 	{
-		E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT = 0x01
+		E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT = 0x10000
 	};
 
 	CommandList::CommandList(
@@ -25,17 +27,18 @@ namespace ts3::gpuapi
 
 	CommandList::~CommandList() = default;
 
-	bool CommandList::checkContextSupport( ECommandContextType pContextType ) const noexcept
+	bool CommandList::checkCommandClassSupport( ECommandQueueClass pQueueClass ) const noexcept
 	{
-		return checkFeatureSupport( static_cast<ECommandListFlags>( pContextType ) );
+		return checkFeatureSupport( static_cast<ECommandObjectPropertyFlags>( pQueueClass ) );
 	}
 
-	bool CommandList::checkFeatureSupport( Bitmask<ECommandListFlags> pListFlags ) const noexcept
+	bool CommandList::checkFeatureSupport( Bitmask<ECommandObjectPropertyFlags> pCommandListFlags ) const noexcept
 	{
 		// Command list type (its value) is basically a bitwise OR of all supported bits.
-		Bitmask<ECommandListFlags> commandListFlags = static_cast<ECommandListFlags>( mListType );
+		Bitmask<ECommandObjectPropertyFlags> commandListPropertyFlags = static_cast<ECommandObjectPropertyFlags>( mListType );
+
 		// Check if the specified command classes and/or execution type matches those supported by the list.
-		return commandListFlags.isSet( pListFlags & E_COMMAND_LIST_FLAGS_ALL );
+		return commandListPropertyFlags.isSet( pCommandListFlags & E_COMMAND_OBJECT_PROPERTY_MASK_ALL );
 	}
 
 	bool CommandList::isRenderPassActive() const noexcept
@@ -181,7 +184,7 @@ namespace ts3::gpuapi
 		subDataUploadDesc.flags.set( E_GPU_BUFFER_DATA_COPY_FLAG_MODE_INVALIDATE_BIT );
 		subDataUploadDesc.flags.unset( E_GPU_BUFFER_DATA_COPY_FLAG_MODE_APPEND_BIT );
 		subDataUploadDesc.bufferRegion.offset = 0;
-		subDataUploadDesc.bufferRegion.size = pBuffer.mBufferProperties.byteSize;
+		subDataUploadDesc.bufferRegion.size = getMinOf( pUploadDesc.inputDataDesc.size, pBuffer.mBufferProperties.byteSize );
 		subDataUploadDesc.inputDataDesc = pUploadDesc.inputDataDesc;
 
 		return updateBufferSubDataUpload( pBuffer, subDataUploadDesc );
@@ -210,43 +213,24 @@ namespace ts3::gpuapi
 			const RenderPassConfigurationImmutableState & pRenderPassState,
 			Bitmask<ECommandListActionFlags> pFlags )
 	{
-		if( isRenderPassActive() )
-		{
-			return false;
-		}
-
-		_internalStateMask.set( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
-
-		if( pFlags.isSet( E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT ) )
-		{
-			_graphicsPipelineStateController->applyStateChanges();
-		}
-
-		return true;
+		return onBeginRenderPass( pFlags );
 	}
 	
 	bool CommandList::beginRenderPass(
 			const RenderPassConfigurationDynamicState & pRenderPassState,
 			Bitmask<ECommandListActionFlags> pFlags )
 	{
-		if( isRenderPassActive() )
-		{
-			return false;
-		}
-
-		_internalStateMask.set( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
-
-		if( pFlags.isSet( E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT ) )
-		{
-			_graphicsPipelineStateController->applyStateChanges();
-		}
-
-		return true;
+		return onBeginRenderPass( pFlags );
 	}
 
 	void CommandList::endRenderPass()
 	{
-		_internalStateMask.unset( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
+		onEndRenderPass();
+	}
+
+	void CommandList::setRenderPassDynamicState( const GraphicsPipelineDynamicState & pDynamicState )
+	{
+		_graphicsPipelineStateController->setRenderPassDynamicState( pDynamicState );
 	}
 
 	bool CommandList::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO )
@@ -272,17 +256,6 @@ namespace ts3::gpuapi
 	bool CommandList::setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState )
 	{
 		return _graphicsPipelineStateController->setRenderTargetBindingState( pRenderTargetBindingState );
-	}
-
-	bool CommandList::cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor )
-	{
-		if( !isRenderPassActive() )
-		{
-			ts3DebugInterrupt();
-			return false;
-		}
-
-		return _graphicsPipelineStateController->setBlendConstantColor( pColor );
 	}
 
 	bool CommandList::cmdSetViewport( const ViewportDesc & pViewportDesc )
@@ -338,6 +311,97 @@ namespace ts3::gpuapi
 		}
 
 		return _graphicsPipelineStateController->setShaderTextureSampler( pParamRefID, pSampler );
+	}
+
+	bool CommandList::onBeginRenderPass( Bitmask<ECommandListActionFlags> pFlags )
+	{
+		if( isRenderPassActive() )
+		{
+			return false;
+		}
+
+		_internalStateMask.set( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
+
+		_internalStateMask.setOrUnset(
+				E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_PRESERVE_DYNAMIC_STATE_BIT,
+				pFlags.isSet( E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_PRESERVE_DYNAMIC_STATE_BIT ) );
+
+		if( pFlags.isSet( E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_APPLY_PIPELINE_STATE_BIT ) )
+		{
+			_graphicsPipelineStateController->applyStateChanges();
+		}
+
+		return true;
+	}
+
+	void CommandList::onEndRenderPass()
+	{
+		ts3DebugAssert( isRenderPassActive() );
+
+		if( _internalStateMask.isSet( E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_PRESERVE_DYNAMIC_STATE_BIT ) )
+		{
+			_graphicsPipelineStateController->resetRenderPassDynamicState();
+		}
+
+		_internalStateMask.unset( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
+	}
+
+
+	CommandListRenderPassDefault::CommandListRenderPassDefault(
+			CommandSystem & pCommandSystem,
+			ECommandListType pListType,
+			GraphicsPipelineStateController & pPipelineStateController )
+	: CommandList( pCommandSystem, pListType, pPipelineStateController )
+	{}
+
+	CommandListRenderPassDefault::~CommandListRenderPassDefault() = default;
+
+	const RenderPassConfiguration & CommandListRenderPassDefault::getRenderPassConfiguration() const noexcept
+	{
+		return _currentRenderPassConfiguration;
+	}
+
+	bool CommandListRenderPassDefault::beginRenderPass(
+			const RenderPassConfigurationImmutableState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags )
+	{
+		if( CommandList::beginRenderPass( pRenderPassState, pFlags ) )
+		{
+			const auto * defaultRenderPassState = pRenderPassState.queryInterface<RenderPassConfigurationImmutableStateDefault>();
+			_currentRenderPassConfiguration = defaultRenderPassState->mRenderPassConfiguration;
+
+			executeRenderPassLoadActions( _currentRenderPassConfiguration );
+
+			return true;
+		}
+
+		return false;
+	}
+
+	bool CommandListRenderPassDefault::beginRenderPass(
+			const RenderPassConfigurationDynamicState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags )
+	{
+		if( CommandList::beginRenderPass( pRenderPassState, pFlags ) )
+		{
+			_currentRenderPassConfiguration = pRenderPassState.getRenderPassConfiguration();
+
+			executeRenderPassLoadActions( _currentRenderPassConfiguration );
+
+			return true;
+		}
+
+		return false;
+	}
+
+	void CommandListRenderPassDefault::endRenderPass()
+	{
+		if( isRenderPassActive() )
+		{
+			executeRenderPassStoreActions( _currentRenderPassConfiguration );
+
+			CommandList::endRenderPass();
+		}
 	}
 
 

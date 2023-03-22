@@ -142,30 +142,36 @@ namespace ts3::gpuapi
 
 		static const TextureLayout sInvalidTextureLayout {
 			ETextureClass::Unknown,
+			ETextureFormat::UNKNOWN,
 			TextureDimensions {
 				0, 0, 0, 0, 0
 			},
 			0,
 			0,
-			0,
-			ETextureFormat::UNKNOWN
+			0
 		};
 
-		bool checkRenderTargetTextureColorFormat( ETextureFormat pFormat ) noexcept
+		bool checkTextureFormatAndBindFlagsCompatibility(
+				ETextureFormat pTextureFormat,
+				Bitmask<resource_flags_value_t> pBindFlags )
 		{
-			const Bitmask<uint8> pixelFormatFlags = cxdefs::getTextureFormatFlags( pFormat );
+			if( pBindFlags.isSet( E_GPU_RESOURCE_USAGE_MASK_RENDER_TARGET_DEPTH_STENCIL ) )
+			{
+				return ( pTextureFormat == ETextureFormat::D24UNS8U );
+			}
+			else if( pBindFlags.isSet( E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_BIT ) )
+			{
+				return
+					( pTextureFormat == ETextureFormat::D16UN ) ||
+					( pTextureFormat == ETextureFormat::D24UNX8 ) ||
+					( pTextureFormat == ETextureFormat::D32F );
+			}
+			else if( pBindFlags.isSet( E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_STENCIL_BIT ) )
+			{
+				return ( pTextureFormat == ETextureFormat::X24S8U );
+			}
 
-			// RT textures for color attachments can have any format except for compressed
-			// formats and those specifically meant for depth/stencil attachments.
-			return !pixelFormatFlags.isSetAnyOf( E_GPU_DATA_FORMAT_FLAG_DEPTH_STENCIL_BIT | E_GPU_DATA_FORMAT_FLAG_COMPRESSED_BIT );
-		}
-
-		bool checkRenderTargetTextureDepthStencilFormat( ETextureFormat pFormat ) noexcept
-		{
-			const Bitmask<uint8> pixelFormatFlags = cxdefs::getTextureFormatFlags( pFormat );
-
-			// Only depth and combined depth/stencil formats are valid for depth/stencil textures.
-			return pixelFormatFlags.isSetAnyOf( E_GPU_DATA_FORMAT_FLAG_DEPTH_STENCIL_BIT );
+			return false;
 		}
 
 		const TextureLayout & queryTextureLayout( TextureHandle pTexture ) noexcept
@@ -181,34 +187,11 @@ namespace ts3::gpuapi
 		RenderTargetTextureLayout queryRenderTargetTextureLayoutForTexture( const TextureLayout & pTextureLayout ) noexcept
 		{
 			RenderTargetTextureLayout rttLayout{};
-			rttLayout.internalDataFormat = pTextureLayout.pixelFormat;
+			rttLayout.internalFormat = pTextureLayout.internalFormat;
 			rttLayout.msaaLevel = pTextureLayout.msaaLevel;
-			rttLayout.bufferSize.width = pTextureLayout.dimensions.width;
-			rttLayout.bufferSize.height = pTextureLayout.dimensions.height;
+			rttLayout.imageRect.width = pTextureLayout.dimensions.width;
+			rttLayout.imageRect.height = pTextureLayout.dimensions.height;
 			return rttLayout;
-		}
-
-		ETextureTarget getTextureTargetFromResourceFlags( const Bitmask<resource_flags_value_t> & pTextureResourceFlags )
-		{
-			static const ETextureTarget textureTargetArray[] =
-					{
-							ETextureTarget::RenderTargetColorAttachment,
-							ETextureTarget::RenderTargetDepthStencilAttachment,
-							ETextureTarget::ShaderInputSampledImage,
-							ETextureTarget::TransferSourceImage,
-							ETextureTarget::TransferSourceImage,
-					};
-
-			for( auto textureTarget : textureTargetArray )
-			{
-				auto textureTargetResourceFlags = static_cast<resource_flags_value_t>( textureTarget );
-				if( pTextureResourceFlags.isSet( textureTargetResourceFlags ) )
-				{
-					return textureTarget;
-				}
-			}
-
-			return ETextureTarget::Unknown;
 		}
 
 	}

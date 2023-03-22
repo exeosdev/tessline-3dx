@@ -161,16 +161,37 @@ namespace ts3::system
 	namespace platform
 	{
 
-		AssetLoaderHandle createFileAssetLoader( SysContextHandle pSysContext, FileManagerHandle pFileManager, const std::string & pRootDirectory )
+		AssetLoaderHandle createFileAssetLoaderExplicit(
+				SysContextHandle pSysContext,
+				FileManagerHandle pFileManager,
+				const std::string & pAbsoluteAssetDirectory )
 		{
 			if( !pFileManager )
 			{
 				pFileManager = pSysContext->createFileManager();
 			}
 
-			auto assetDirectory = pSysContext->queryCurrentProcessExecutableDirectory();
+			auto assetDirectory = FSUtilityAPI::normalizePath( pAbsoluteAssetDirectory );
+			auto assetLoader = createSysObject<FileAssetLoader>( pFileManager );
+			assetLoader->setRootDir( std::move( assetDirectory ) );
+
+			return assetLoader;
+		}
+
+		AssetLoaderHandle createFileAssetLoaderResolve(
+				SysContextHandle pSysContext,
+				FileManagerHandle pFileManager,
+				const std::string & pRelativeAssetDirectory )
+		{
+			if( !pFileManager )
+			{
+				pFileManager = pSysContext->createFileManager();
+			}
+
+			auto assetDirectory = pSysContext->queryCurrentProcessWorkingDirectory();
+			// auto assetDirectory = pSysContext->queryCurrentProcessExecutableDirectory();
 			assetDirectory.append( 1, TS3_PCL_ENV_DEFAULT_PATH_DELIMITER );
-			assetDirectory.append( pRootDirectory );
+			assetDirectory.append( pRelativeAssetDirectory );
 			assetDirectory = FSUtilityAPI::normalizePath( assetDirectory );
 
 			auto assetLoader = createSysObject<FileAssetLoader>( pFileManager );
@@ -179,13 +200,18 @@ namespace ts3::system
 			return assetLoader;
 		}
 
-
 		AssetLoaderHandle createFileAssetLoader( SysContextHandle pSysContext, const AssetLoaderCreateInfoNativeParams & pCreateParams )
 		{
 			const auto & fileManager = pCreateParams.fileManager;
-			const auto & rootDir = pCreateParams.relativeAssetRootDir;
 
-			return createFileAssetLoader( std::move( pSysContext ), fileManager, rootDir );
+			if( !pCreateParams.absoluteAssetRootDir.empty() )
+			{
+				return createFileAssetLoaderExplicit( std::move( pSysContext ), fileManager, pCreateParams.absoluteAssetRootDir );
+			}
+			else
+			{
+				return createFileAssetLoaderResolve( std::move( pSysContext ), fileManager, pCreateParams.relativeAssetRootDir );
+			}
 		}
 
 

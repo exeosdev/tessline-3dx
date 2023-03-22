@@ -349,6 +349,56 @@ namespace ts3::system
         return EOpenGLAPIClass::OpenGLDesktop;
     }
 
+	VisualConfig X11OpenGLDisplaySurface::_nativeQueryVisualConfig() const
+	{
+		auto & xSessionData = platform::x11GetXSessionData( *this );
+
+		XWindowAttributes windowAttributes;
+		XGetWindowAttributes( xSessionData.display, mNativeData.windowXID, &windowAttributes );
+
+		int glxFBRenderType = 0;
+		int glxFBDepthBits = 0;
+		int glxFBStencilBits = 0;
+
+		glXGetFBConfigAttrib( xSessionData.display, mNativeData.fbConfig, GLX_RENDER_TYPE, &glxFBRenderType );
+		glXGetFBConfigAttrib( xSessionData.display, mNativeData.fbConfig, GLX_DEPTH_SIZE, &glxFBDepthBits );
+		glXGetFBConfigAttrib( xSessionData.display, mNativeData.fbConfig, GLX_STENCIL_SIZE, &glxFBStencilBits );
+
+		VisualConfig visualConfig;
+
+		if( glxFBRenderType == GLX_RGBA_BIT )
+		{
+			visualConfig.colorFormat = EColorFormat::B8G8R8A8;
+		}
+		else
+		{
+			visualConfig.colorFormat = EColorFormat::Unknown;
+		}
+
+		if( ( glxFBDepthBits == 24 ) && ( glxFBStencilBits == 8 ) )
+		{
+			visualConfig.depthStencilFormat = EDepthStencilFormat::D24S8;
+		}
+		else if( ( glxFBDepthBits == 24 ) && ( glxFBStencilBits == 0 ) )
+		{
+			visualConfig.depthStencilFormat = EDepthStencilFormat::D24X8;
+		}
+		else if( ( glxFBDepthBits == 32 ) && ( glxFBStencilBits == 0 ) )
+		{
+			visualConfig.depthStencilFormat = EDepthStencilFormat::D32F;
+		}
+		else if( ( glxFBDepthBits == 32 ) && ( glxFBStencilBits == 8 ) )
+		{
+			visualConfig.depthStencilFormat = EDepthStencilFormat::D32FS8;
+		}
+		else
+		{
+			visualConfig.depthStencilFormat = EDepthStencilFormat::Unknown;
+		}
+
+		return visualConfig;
+	}
+
 	FrameSize X11OpenGLDisplaySurface::_nativeQueryRenderAreaSize() const
 	{
 		return platform::x11GetFrameSize( mNativeData, EFrameSizeMode::ClientArea );
@@ -560,7 +610,7 @@ namespace ts3::system
 			};
 
 			int fbConfigListSize = 0;
-			auto * fbConfigList = glXChooseFBConfig( pDisplay, pScreenIndex, cvDefaultVisualAttribs, &fbConfigListSize );
+			auto * fbConfigList = ::glXChooseFBConfig( pDisplay, pScreenIndex, cvDefaultVisualAttribs, &fbConfigListSize );
 
 			if( ( fbConfigList == nullptr ) || ( fbConfigListSize == 0 ) )
 			{

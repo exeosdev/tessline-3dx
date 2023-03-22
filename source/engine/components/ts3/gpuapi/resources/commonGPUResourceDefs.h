@@ -106,10 +106,15 @@ namespace ts3::gpuapi
 		//
 		E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_BIT = 0x0200,
 
+		//
+		E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_STENCIL_BIT = 0x0400,
+
 		// Resource can be used as a depth/stencil attachment in the render target state. This enables
 		// writing to such resource in the pixel shader stage and using it as depth/stencil buffer in
 		// the depth and/or stencil tests. DS resources require a depth/stencil-compatible format.
-		E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT = 0x0400 | E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_BIT,
+		E_GPU_RESOURCE_USAGE_MASK_RENDER_TARGET_DEPTH_STENCIL =
+				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_STENCIL_BIT |
+				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_BIT,
 
 		// Resource can be used as a source in transfer operations. Typical usage will be an upload
 		// resource with CPU_WRITE access, used to write the data and copy it to the target resource.
@@ -134,7 +139,7 @@ namespace ts3::gpuapi
 				E_GPU_RESOURCE_USAGE_FLAG_SHADER_UAV_BIT |
 				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_COLOR_BIT |
 				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_BIT |
-				E_GPU_RESOURCE_USAGE_FLAG_RENDER_TARGET_DEPTH_STENCIL_BIT |
+				E_GPU_RESOURCE_USAGE_MASK_RENDER_TARGET_DEPTH_STENCIL |
 				E_GPU_RESOURCE_USAGE_FLAG_TRANSFER_SOURCE_BIT |
 				E_GPU_RESOURCE_USAGE_FLAG_TRANSFER_TARGET_BIT,
 

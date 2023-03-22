@@ -182,7 +182,7 @@ namespace ts3::gpuapi
 				else if( descriptorSetDesc.descriptorType == EShaderInputDescriptorType::Sampler )
 				{
 					descriptor.cParamType = EShaderInputParameterType::Sampler;
-					descriptor.uSamplerInfo.samplerBindingIndex = descriptorDesc.uSamplerDesc.samplerBindingIndex;
+					descriptor.uSamplerInfo.samplerBindingIndex = descriptorDesc.uSamplerConfig.samplerBindingIndex;
 				}
 
 				setDescriptorsNum += 1;
@@ -209,7 +209,7 @@ namespace ts3::gpuapi
 		size_t constantsNum = 0;
 		size_t totalDwordSize = 0;
 
-		if( pInputSignatureDesc.constantGroupsNum > cxdefs::GPU_SYSTEM_METRIC_SHADER_COMBINED_STAGES_NUM + 1 )
+		if( pInputSignatureDesc.constantGroupsNum > gpm::SHADER_COMBINED_STAGES_NUM + 1 )
 		{
 			ts3DebugInterrupt();
 			return false;
@@ -236,7 +236,7 @@ namespace ts3::gpuapi
 				auto constantDwordSize = computeConstantDwordSize( constantByteSize );
 				totalDwordSize += constantDwordSize;
 
-				if( totalDwordSize > cxdefs::GPU_SYSTEM_METRIC_IS_MAX_DWORD_SIZE )
+				if( totalDwordSize > gpm::IS_MAX_DWORD_SIZE )
 				{
 					ts3DebugInterrupt();
 					return false;
@@ -256,7 +256,7 @@ namespace ts3::gpuapi
 		size_t descriptorsNum = 0;
 		size_t descriptorSetsNum = pInputSignatureDesc.descriptorSetsNum;
 
-		if( descriptorSetsNum > cxdefs::GPU_SYSTEM_METRIC_IS_MAX_DESCRIPTOR_SETS_NUM )
+		if( descriptorSetsNum > gpm::IS_MAX_DESCRIPTOR_SETS_NUM )
 		{
 			ts3DebugInterrupt();
 			return false;

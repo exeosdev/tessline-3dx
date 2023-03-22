@@ -65,9 +65,14 @@ namespace ts3::gpuapi
 		return smutil::getActiveShaderStagesNum( commonShaderArray );
 	}
 
+	bool GraphicsShaderSet::empty() const noexcept
+	{
+		return !vertexShader || !pixelShader;
+	}
+
 	bool GraphicsShaderSet::validateShaders() const noexcept
 	{
-		for( uint32 stageIndex = 0; stageIndex < cxdefs::GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM; ++stageIndex )
+		for( uint32 stageIndex = 0; stageIndex < gpm::SHADER_GRAPHICS_STAGES_NUM; ++stageIndex )
 		{
 			if( auto shader = _shaderArray[stageIndex] )
 			{
@@ -93,7 +98,7 @@ namespace ts3::gpuapi
 
 	void GraphicsShaderSet::setShaders( const GraphicsShaderArray & pShaderArray ) noexcept
 	{
-		for( uint32 stageIndex = 0; stageIndex < cxdefs::GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM; ++stageIndex )
+		for( uint32 stageIndex = 0; stageIndex < gpm::SHADER_GRAPHICS_STAGES_NUM; ++stageIndex )
 		{
 			if( const auto shader = pShaderArray[stageIndex] )
 			{
@@ -127,7 +132,7 @@ namespace ts3::gpuapi
 		{
 			Bitmask<EShaderStageFlags> activeStagesMask = 0;
 
-			for( uint32 stageIndex = 0; stageIndex < cxdefs::GPU_SYSTEM_METRIC_SHADER_GRAPHICS_STAGES_NUM; ++stageIndex )
+			for( uint32 stageIndex = 0; stageIndex < gpm::SHADER_GRAPHICS_STAGES_NUM; ++stageIndex )
 			{
 				if( const auto shader = pShaderArray[stageIndex] )
 				{

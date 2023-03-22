@@ -38,7 +38,6 @@ namespace ts3::gpuapi
 				EStencilOp::Keep,
 				EStencilOp::Keep
 			},
-			0,
 			0xFF,
 			0xFF
 		};

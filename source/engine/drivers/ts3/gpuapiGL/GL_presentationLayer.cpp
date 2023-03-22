@@ -2,12 +2,14 @@
 #include "GL_presentationLayer.h"
 #include "GL_commandList.h"
 #include "GL_gpuDevice.h"
+#include <ts3/gpuapi/commandContext.h>
 
 namespace ts3::gpuapi
 {
 
-	static system::OpenGLDisplaySurfaceHandle createSysGLSurface( system::OpenGLSystemDriverHandle pSysGLDriver,
-                                                                  const GLPresentationLayerCreateInfo & pPLCreateInfo )
+	static system::OpenGLDisplaySurfaceHandle createSysGLSurface(
+			system::OpenGLSystemDriverHandle pSysGLDriver,
+			const GLPresentationLayerCreateInfo & pPLCreateInfo )
 	{
 		try
 		{
@@ -55,8 +57,8 @@ namespace ts3::gpuapi
 		return nullptr;
 	}
 
-	GLPresentationLayer::GLPresentationLayer( GLGPUDevice & pDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
-	: PresentationLayer( pDevice )
+	GLPresentationLayer::GLPresentationLayer( GLGPUDevice & pGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
+	: PresentationLayer( pGPUDevice )
 	, mSysGLDisplaySurface( pSysGLDisplaySurface )
 	{ }
 
@@ -68,8 +70,12 @@ namespace ts3::gpuapi
 	}
 
 
-	GLScreenPresentationLayer::GLScreenPresentationLayer( GLGPUDevice & pDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
-	: GLPresentationLayer( pDevice, pSysGLDisplaySurface )
+	GLScreenPresentationLayer::GLScreenPresentationLayer(
+		GLGPUDevice & pGPUDevice,
+		system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface,
+		RenderTargetBindingImmutableStateHandle pScreenRenderTargetBindingState )
+	: GLPresentationLayer( pGPUDevice, pSysGLDisplaySurface )
+	, mScreenRenderTargetBindingState( pScreenRenderTargetBindingState )
 	{ }
 
 	GLScreenPresentationLayer::~GLScreenPresentationLayer() = default;
@@ -79,14 +85,29 @@ namespace ts3::gpuapi
 		auto sysGLSurface = createSysGLSurface( pDevice.mSysGLDriver, pCreateInfo );
 		ts3DebugAssert( sysGLSurface );
 
-		auto presentationLayer = createGPUAPIObject<GLScreenPresentationLayer>( pDevice, sysGLSurface );
+		const auto surfaceVisualConfig = sysGLSurface->queryVisualConfig();
+		const auto surfaceSize = sysGLSurface->getClientAreaSize();
+
+		auto screenRTLayout = smutil::translateSystemVisualConfigToRenderTargetLayout( surfaceVisualConfig );
+		screenRTLayout.sharedImageRect = { surfaceSize.x, surfaceSize.y };
+
+		auto renderTargetState = GLRenderTargetBindingImmutableState::createForScreen( pDevice, screenRTLayout );
+		ts3DebugAssert( renderTargetState );
+		
+		auto presentationLayer = createGPUAPIObject<GLScreenPresentationLayer>( pDevice, sysGLSurface, renderTargetState );
 
 		return presentationLayer;
 	}
 
 	void GLScreenPresentationLayer::bindRenderTarget( CommandContext * pCmdContext )
 	{
+		auto * directGraphicsContext = pCmdContext->queryInterface<CommandContextDirectGraphics>();
+		directGraphicsContext->setRenderTargetBindingState( *mScreenRenderTargetBindingState );
+
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+		ts3OpenGLHandleLastError();
+
+		glDrawBuffer( GL_BACK );
 		ts3OpenGLHandleLastError();
 	}
 

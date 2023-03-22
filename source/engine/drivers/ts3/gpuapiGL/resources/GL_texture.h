@@ -20,7 +20,7 @@ namespace ts3::gpuapi
 		GLTextureObjectHandle const mGLTextureObject = nullptr;
 
 	public:
-		GLTexture( GLGPUDevice & pGLGPUDevice,
+		GLTexture( GLGPUDevice & pGPUDevice,
 		           const ResourceMemoryInfo & pResourceMemory,
 		           const TextureProperties & pTextureProperties,
 		           const TextureLayout & pTextureLayout,
@@ -28,9 +28,11 @@ namespace ts3::gpuapi
 
 		virtual ~GLTexture();
 
-		static GLTextureHandle create( GLGPUDevice & pGLGPUDevice, const TextureCreateInfo & pCreateInfo );
+		static GLTextureHandle createDefault( GLGPUDevice & pGPUDevice, const TextureCreateInfo & pCreateInfo );
 
-		static RenderTargetTextureHandle createRTT( GLGPUDevice & pGLGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo );
+		static GLTextureHandle createForRenderTarget( GLGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo );
+
+		static RenderTargetTextureHandle createRenderTargetTextureView( GLGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo );
 	};
 
 } // namespace ts3::gpuapi

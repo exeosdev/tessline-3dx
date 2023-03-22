@@ -10,6 +10,8 @@
 namespace ts3::gpuapi
 {
 
+	class Shader;
+
 	enum class EGraphicsPipelineImmutableStateType : uint16
 	{
 		Blend,
@@ -47,11 +49,16 @@ namespace ts3::gpuapi
 		virtual BlendImmutableStateHandle createBlendState( const BlendConfig & pConfig ) = 0;
 		virtual DepthStencilImmutableStateHandle createDepthStencilState( const DepthStencilConfig & pConfig ) = 0;
 		virtual GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageState( const GraphicsShaderSet & pShaderSet ) = 0;
-		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & pDefinition ) = 0;
+		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & pDefinition, Shader * pVertexShaderWithBinary ) = 0;
 		virtual IAVertexStreamImmutableStateHandle createIAVertexStreamState( const IAVertexStreamDefinition & pDefinition ) = 0;
 		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerConfig & pConfig ) = 0;
 		virtual RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & pDefinition ) = 0;
 		virtual RenderPassConfigurationImmutableStateHandle createRenderPassState( const RenderPassConfiguration & pConfiguration ) = 0;
+
+	protected:
+		virtual RenderPassConfigurationImmutableStateHandle createRenderPassStateDefault(
+				GPUDevice & pGPUDevice,
+				const RenderPassConfiguration & pConfiguration );
 	};
 
 	/// @brief
@@ -64,7 +71,7 @@ namespace ts3::gpuapi
 		virtual BlendImmutableStateHandle createBlendState( const BlendConfig & ) override final;
 		virtual DepthStencilImmutableStateHandle createDepthStencilState( const DepthStencilConfig & ) override final;
 		virtual GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageState( const GraphicsShaderSet & ) override final;
-		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & ) override final;
+		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition &, Shader * ) override final;
 		virtual IAVertexStreamImmutableStateHandle createIAVertexStreamState( const IAVertexStreamDefinition & ) override final;
 		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerConfig & ) override final;
 		virtual RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & ) override final;
@@ -93,7 +100,7 @@ namespace ts3::gpuapi
 		BlendImmutableStateHandle createState( const BlendConfig & pConfig );
 		DepthStencilImmutableStateHandle createState( const DepthStencilConfig & pConfig );
 		GraphicsShaderLinkageImmutableStateHandle createState( const GraphicsShaderSet & pShaderSet );
-		IAInputLayoutImmutableStateHandle createState( const IAInputLayoutDefinition & pDefinition );
+		IAInputLayoutImmutableStateHandle createState( const IAInputLayoutDefinition & pDefinition, Shader * pVertexShaderWithBinary );
 		IAVertexStreamImmutableStateHandle createState( const IAVertexStreamDefinition & pDefinition );
 		RasterizerImmutableStateHandle createState( const RasterizerConfig & pConfig );
 		RenderTargetBindingImmutableStateHandle createState( const RenderTargetBindingDefinition & pDefinition );

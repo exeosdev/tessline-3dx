@@ -41,16 +41,43 @@ namespace ts3::system
 	}
 
 
-	MetalSystemDriver::MetalSystemDriver( DisplayManagerHandle pDisplayManager, MetalDeviceHandle pMetalDevice )
+	MetalSystemDriver::MetalSystemDriver( DisplayManagerHandle pDisplayManager )
 	: SysObject( pDisplayManager->mSysContext )
 	, mDriverData( std::make_unique<MetalSystemDriverData>() )
 	, mDisplayManager( std::move( pDisplayManager ) )
-	, mMetalDevice( std::move( pMetalDevice ) )
 	{}
 
 	MetalSystemDriver::~MetalSystemDriver() noexcept = default;
 
-	MetalDisplaySurfaceHandle MetalSystemDriver::createDisplaySurface( const MetalDisplaySurfaceCreateInfo & pCreateInfo )
+	MetalDevice & MetalSystemDriver::initializeDefaultDevice()
+	{
+		ts3DebugAssert( !_defaultMetalDevice );
+		_defaultMetalDevice = MetalDevice::createDefault( mSysContext );
+		return *_defaultMetalDevice;
+	}
+
+	MetalDevice & MetalSystemDriver::getDefaultDevice() noexcept
+	{
+		if( !_defaultMetalDevice )
+		{
+			_defaultMetalDevice = MetalDevice::createDefault( mSysContext );
+		}
+
+		return *_defaultMetalDevice;
+	}
+
+	MetalDevice & MetalSystemDriver::getDefaultDevice() const
+	{
+		if( !_defaultMetalDevice )
+		{
+			ts3Throw( 0 );
+		}
+		return *_defaultMetalDevice;
+	}
+
+	MetalDisplaySurfaceHandle MetalSystemDriver::createDisplaySurface(
+			MetalDevice & pMetalDevice,
+			const MetalDisplaySurfaceCreateInfo & pCreateInfo )
 	{
 		MetalDisplaySurfaceCreateInfo surfaceCreateInfo = pCreateInfo;
 
@@ -68,21 +95,13 @@ namespace ts3::system
 
 		surfaceCreateInfo.frameGeometry = mDisplayManager->validateFrameGeometry( surfaceCreateInfo.frameGeometry );
 
-		auto displaySurface = _nativeCreateDisplaySurface( surfaceCreateInfo );
+		auto displaySurface = _nativeCreateDisplaySurface( pMetalDevice, surfaceCreateInfo );
 
 		auto * caMetalLayer = displaySurface->mSurfaceData->caMetalLayer;
 		ts3DebugAssert( caMetalLayer != nil );
 
-		auto mtlDevice = mMetalDevice->mDeviceData->mtlDevice;
+		auto mtlDevice = pMetalDevice.mDeviceData->mtlDevice;
 		[caMetalLayer setDevice:mtlDevice];
-
-		MTLRenderPassDescriptor * clearRPDescriptor = [MTLRenderPassDescriptor new];
-		clearRPDescriptor.colorAttachments[0].texture = nil;
-		clearRPDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
-		clearRPDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-		clearRPDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.12, 0.42, 0.92, 1.0);
-
-		displaySurface->mSurfaceData->mtlClearRPDescriptor = clearRPDescriptor;
 
 		return displaySurface;
 	}
@@ -92,7 +111,6 @@ namespace ts3::system
 	: Frame( pMTLSystemDriver->mSysContext )
 	, mSurfaceData( std::make_unique<MetalDisplaySurfaceData>() )
 	, mMetalDriver( std::move( pMTLSystemDriver ) )
-	, mMetalDevice( mMetalDriver->mMetalDevice )
 	{
 		setEventSourceNativeData( pNativeData );
 	}
@@ -113,8 +131,11 @@ namespace ts3::system
 		id<CAMetalDrawable> currentDrawable = [caMetalLayer nextDrawable];
 		id<MTLTexture> texture = currentDrawable.texture;
 
-		auto * clearRPDescriptor = mSurfaceData->mtlClearRPDescriptor;
+		MTLRenderPassDescriptor * clearRPDescriptor = [MTLRenderPassDescriptor new];
 		clearRPDescriptor.colorAttachments[0].texture = texture;
+		clearRPDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
+		clearRPDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
+		clearRPDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.12, 0.42, 0.92, 1.0);
 
 		id<MTLCommandBuffer> commandBuffer = [mtlCommandQueue commandBuffer];
 		id<MTLRenderCommandEncoder> commandEncoder = [commandBuffer renderCommandEncoderWithDescriptor:clearRPDescriptor];

@@ -22,6 +22,15 @@ set( TS3_ENGINE_SRC_FILES
 		# "gpuapi/hwGeometryBuffer.cpp"
 		# "gpuapi/vertexFormatDefs.h"
         # "gpuapi/vertexFormatDefs.cpp"
+		#"gpuapi/shaderResourceDefs.h"
+
+		"renderer/commonRendererDefs.h"
+		"renderer/renderer.h"
+		"renderer/renderer.cpp"
+		"renderer/shaderLibrary.h"
+		"renderer/shaderLibrary.cpp"
+		"renderer/effects/shadowRenderer.h"
+		"renderer/effects/shadowRenderer.cpp"
 
 		"res/font.h"
 		"res/font.cpp"

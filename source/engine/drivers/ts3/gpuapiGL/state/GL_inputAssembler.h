@@ -30,13 +30,15 @@ namespace ts3::gpuapi
 		uint32 instanceRate;
 	};
 
-	using GLIAVertexAttributeInfoArray = std::array<GLIAVertexAttributeInfo, cxdefs::IA_MAX_VERTEX_ATTRIBUTES_NUM>;
+	using GLIAVertexAttributeInfoArray = std::array<GLIAVertexAttributeInfo, gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM>;
 
 	struct GLIAInputLayoutDefinition
 	{
 		Bitmask<EIAVertexAttributeFlags> activeAttributesMask;
 		GLIAVertexAttributeInfoArray attributeArray;
 		GLenum primitiveTopology;
+
+		void reset();
 	};
 
 	struct GLIAIndexBufferBinding
@@ -45,42 +47,61 @@ namespace ts3::gpuapi
 		GLintptr offset;
 		GLenum format;
 		GLuint elementByteSize;
+
+		void reset()
+		{
+			memZero( *this );
+		}
+
+		explicit operator bool() const noexcept
+		{
+			return handle != 0;
+		}
+	};
+
+	struct GLIAVertexBufferBinding
+	{
+		GLuint handle;
+		GLintptr offset;
+		GLsizei stride;
+
+		explicit operator bool() const noexcept
+		{
+			return handle != 0;
+		}
 	};
 
 	struct GLIAVertexBuffersBindings
 	{
-		struct InterleavedBinding
-		{
-			/// GL-specific handle of the buffer object. Zero means the binding is not active.
-			GLuint handle;
-			/// Offset, in bytes, from the beginning of the buffer storage.
-			GLintptr offset;
-			/// Stride, in bytes, of the data in the buffer.
-			GLsizei stride;
-		};
-
 		/// Separate VB bindings (a struct with per-property arrays).
 		struct SeparateBindings
 		{
 			/// Array of GL-specific handles. Zero at index N means the binding for stream N is not active.
-			GLuint handleArray[cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM];
+			GLuint handleArray[gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM];
 			/// Array of offsets, in bytes, from the beginning of each buffer storage. Undefined for inactive bindings.
-			GLintptr offsetArray[cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM];
+			GLintptr offsetArray[gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM];
 			/// Array of data strides, in bytes, of the data in each buffer. Undefined for inactive bindings.
-			GLsizei strideArray[cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM];
+			GLsizei strideArray[gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM];
 		};
 
 		/// Interleaved VB bindings (an array of structs).
-		using InterleavedBindingsArray = std::array<InterleavedBinding, cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM>;
+		using InterleavedBindingsArray = std::array<GLIAVertexBufferBinding, gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM>;
 
 		union
 		{
 			InterleavedBindingsArray interleavedBindings;
-
 			SeparateBindings separateBindings;
 		};
 
+		IAVertexBufferRangeList activeRanges;
+
 		EGLVertexBufferBindingType bindingType = EGLVertexBufferBindingType::Undefined;
+
+		void initializeInterleaved();
+		void initializeSeparate();
+		void reset();
+
+		TS3_ATTR_NO_DISCARD GLIAVertexBufferBinding getBinding( native_uint pStreamIndex ) const;
 	};
 
 	/// @brief
@@ -89,6 +110,8 @@ namespace ts3::gpuapi
 		Bitmask<EIAVertexStreamBindingFlags> activeBindingsMask;
 		GLIAVertexBuffersBindings vertexBufferBindings;
 		GLIAIndexBufferBinding indexBufferBinding;
+
+		void reset();
 	};
 
 	struct GLDrawTopologyProperties
@@ -105,27 +128,6 @@ namespace ts3::gpuapi
 			indexBufferElementByteSize = 0;
 			primitiveTopology = 0;
 		}
-	};
-
-	///
-	class GLIAInputLayoutImmutableState : public IAInputLayoutImmutableState
-	{
-	public:
-		GLIAInputLayoutDefinition const mGLInputLayoutDefinition;
-		GLVertexArrayObjectHandle const mVertexArrayObject;
-
-	public:
-		GLIAInputLayoutImmutableState(
-				GLGPUDevice & pGPUDevice,
-				const IAInputLayoutStateCommonProperties & pCommonProperties,
-				const GLIAInputLayoutDefinition & pGLInputLayoutDefinition,
-				GLVertexArrayObjectHandle pVertexArrayObject );
-
-		virtual ~GLIAInputLayoutImmutableState();
-
-		static GpaHandle<GLIAInputLayoutImmutableState> createInstance(
-				GLGPUDevice & pGPUDevice,
-				const IAInputLayoutDefinition & pInputLayoutDefinition );
 	};
 
 	///
@@ -147,39 +149,100 @@ namespace ts3::gpuapi
 				const IAVertexStreamDefinition & pVertexStreamDefinition );
 	};
 
+	///
+	class GLIAInputLayoutImmutableState : public IAInputLayoutImmutableState
+	{
+	public:
+		GLIAInputLayoutImmutableState(
+				GLGPUDevice & pGPUDevice,
+				const IAInputLayoutStateCommonProperties & pCommonProperties );
+
+		virtual ~GLIAInputLayoutImmutableState();
+	};
+
+	///
+	class GLIAInputLayoutImmutableStateCore : public GLIAInputLayoutImmutableState
+	{
+	public:
+		GLVertexArrayObjectHandle const mVertexArrayObject;
+		GLenum const mGLPrimitiveTopology;
+
+	public:
+		GLIAInputLayoutImmutableStateCore(
+				GLGPUDevice & pGPUDevice,
+				const IAInputLayoutStateCommonProperties & pCommonProperties,
+				GLVertexArrayObjectHandle pVertexArrayObject,
+				GLenum pGLPrimitiveTopology );
+
+		virtual ~GLIAInputLayoutImmutableStateCore();
+
+		static GpaHandle<GLIAInputLayoutImmutableStateCore> createInstance(
+				GLGPUDevice & pGPUDevice,
+				const IAInputLayoutDefinition & pInputLayoutDefinition );
+	};
+
+	///
+	class GLIAInputLayoutImmutableStateCompat : public GLIAInputLayoutImmutableState
+	{
+	public:
+		GLIAInputLayoutDefinition const mGLInputLayoutDefinition;
+
+	public:
+		GLIAInputLayoutImmutableStateCompat(
+				GLGPUDevice & pGPUDevice,
+				const IAInputLayoutStateCommonProperties & pCommonProperties,
+				const GLIAInputLayoutDefinition & pGLInputLayoutDefinition );
+
+		virtual ~GLIAInputLayoutImmutableStateCompat();
+
+		static GpaHandle<GLIAInputLayoutImmutableStateCompat> createInstance(
+				GLGPUDevice & pGPUDevice,
+				const IAInputLayoutDefinition & pInputLayoutDefinition );
+	};
+
 	namespace smutil
 	{
 
-		TS3_ATTR_NO_DISCARD GLIAVertexAttributeInfo translateIAVertexAttributeInfo(
+		TS3_ATTR_NO_DISCARD GLIAVertexAttributeInfo translateIAVertexAttributeInfoGL(
 				const IAVertexAttributeInfo & pAttributeInfo );
 
-		TS3_ATTR_NO_DISCARD GLIAInputLayoutDefinition translateIAInputLayoutDefinition(
+		TS3_ATTR_NO_DISCARD GLIAInputLayoutDefinition translateIAInputLayoutDefinitionGL(
 				const IAInputLayoutDefinition & pDefinition );
 
-		TS3_ATTR_NO_DISCARD GLIAVertexStreamDefinition translateIAVertexStreamDefinition(
+		TS3_ATTR_NO_DISCARD GLIAVertexStreamDefinition translateIAVertexStreamDefinitionGL(
 				const IAVertexStreamDefinition & pDefinition );
 
-		uint32 translateVertexBufferReferences(
+		uint32 translateVertexBufferReferencesGL(
 				const IAVertexBufferReferenceArray & pVBReferences,
 				Bitmask<EIAVertexStreamBindingFlags> pBindingMask,
 				GLIAVertexBuffersBindings & pOutGLBindings);
 
-		bool translateIndexBufferReference(
+		bool translateIndexBufferReferenceGL(
 				const IAIndexBufferReference & pIBReference,
 				GLIAIndexBufferBinding & pOutGLBinding );
 
-		TS3_ATTR_NO_DISCARD GLIAVertexBuffersBindings translateVertexBufferReferences(
+		TS3_ATTR_NO_DISCARD GLIAVertexBuffersBindings translateVertexBufferReferencesGL(
 				const IAVertexBufferReferenceArray & pVBReferences,
 				Bitmask<EIAVertexStreamBindingFlags> pBindingMask );
 
-		TS3_ATTR_NO_DISCARD GLIAIndexBufferBinding translateIndexBufferReference(
+		TS3_ATTR_NO_DISCARD GLIAIndexBufferBinding translateIndexBufferReferenceGL(
 				const IAIndexBufferReference & pIBReference );
 
-		TS3_ATTR_NO_DISCARD GLVertexArrayObjectHandle createGLVertexArrayObjectFromLayoutDefinition(
-				const GLIAInputLayoutDefinition & pGLLayoutDefinition ) noexcept;
+		TS3_ATTR_NO_DISCARD GLVertexArrayObjectHandle createGLVertexArrayObjectLayoutOnlyGL(
+				const GLIAInputLayoutDefinition & pInputLayoutDefinition ) noexcept;
 
-		TS3_ATTR_NO_DISCARD GLVertexArrayObjectHandle createGLVertexArrayObjectFromLayoutDefinition(
-				const GLIAInputLayoutDefinition & pGLLayoutDefinition ) noexcept;
+		bool updateGLVertexArrayObjectLayoutOnlyGL(
+				GLVertexArrayObject & pVertexArrayObject,
+				const GLIAInputLayoutDefinition & pInputLayoutDefinition ) noexcept;
+
+		TS3_ATTR_NO_DISCARD GLVertexArrayObjectHandle createGLVertexArrayObjectLayoutStreamCombinedGL(
+				const GLIAInputLayoutDefinition & pInputLayoutDefinition,
+				const GLIAVertexStreamDefinition & pVertexStreamDefinition ) noexcept;
+
+		bool updateGLVertexArrayObjectLayoutStreamCombinedGL(
+				GLVertexArrayObject & pVertexArrayObject,
+				const GLIAInputLayoutDefinition & pInputLayoutDefinition,
+				const GLIAVertexStreamDefinition & pVertexStreamDefinition ) noexcept;
 
 	}
 

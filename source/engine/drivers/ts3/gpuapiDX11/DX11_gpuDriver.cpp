@@ -24,22 +24,22 @@ namespace ts3::gpuapi
 		return dx11GPUDriver;
 	}
 
-	DisplayManagerHandle DX11GPUDriver::createDefaultDisplayManager()
+	EGPUDriverID DX11GPUDriver::queryGPUDriverID() const noexcept
+	{
+		return EGPUDriverID::GDIDirectX11;
+	}
+
+	DisplayManagerHandle DX11GPUDriver::_drvCreateDefaultDisplayManager()
 	{
 		return nullptr;
 	}
 
-	GPUDeviceHandle DX11GPUDriver::createDevice( const GPUDeviceCreateInfo & pCreateInfo )
+	GPUDeviceHandle DX11GPUDriver::_drvCreateDevice( const GPUDeviceCreateInfo & pCreateInfo )
 	{
 		DX11GPUDeviceCreateInfo createInfo;
 		createInfo.adapterID = pCreateInfo.adapterID;
 		createInfo.flags = pCreateInfo.flags;
 		return DX11GPUDevice::create( *this, createInfo );
-	}
-
-	EGPUDriverID DX11GPUDriver::queryGPUDriverID() const
-	{
-		return EGPUDriverID::GDIDDX11;
 	}
 
 } // namespace ts3::gpuapi

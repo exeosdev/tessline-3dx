@@ -12,7 +12,7 @@ namespace ts3::gpuapi
 {
 
 	/// @brief
-	class TS3_GPUAPI_CLASS DX11CommandList : public CommandList
+	class TS3_GPUAPI_CLASS DX11CommandList : public CommandListRenderPassDefault
 	{
 		friend class DX11CommandSystem;
 
@@ -26,34 +26,26 @@ namespace ts3::gpuapi
 		virtual void beginCommandSequence() override;
 		virtual void endCommandSequence() override;
 
-		virtual void executeDeferredContext( CommandContextDeferred & pDeferredContext ) override;
+		virtual void cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset ) override;
+		virtual void cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset ) override;
+		virtual void cmdDrawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset ) override;
+		virtual void cmdDrawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset ) override;
 
-		virtual bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPipelineSO ) override;
-		virtual bool setVertexStreamStateObject( const VertexStreamStateObject & pVertexStreamSO ) override;
-		virtual bool setRenderTargetStateObject( const RenderTargetStateObject & pRenderTargetSO ) override;
-
-		virtual void clearRenderTarget( Bitmask<ERenderTargetAttachmentFlags> pAttachmentMask ) override;
-		virtual void setViewport( const ViewportDesc & pViewportDesc ) override;
-		virtual bool setShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData ) override;
-		virtual bool setShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer ) override;
-		virtual bool setShaderTextureImage( shader_input_ref_id_t pParamRefID, Texture & pTexture ) override;
-		virtual bool setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler ) override;
-		virtual void drawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset ) override;
-		virtual void drawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset ) override;
-		virtual void drawDirectNonIndexed( native_uint pVerticesNum, native_uint pVerticesOffset ) override;
-		virtual void drawDirectNonIndexedInstanced( native_uint pVerticesNumPerInstance, native_uint pInstancesNum, native_uint pVerticesOffset ) override;
+		virtual void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext ) override;
 
 	friendapi:
 		ID3D11Query * releaseExecutionSyncQuery();
 
 	private:
-		void updatePipelineState();
+		virtual void executeRenderPassLoadActions( const RenderPassConfiguration & pRenderPassConfiguration ) override;
+
+		virtual void executeRenderPassStoreActions( const RenderPassConfiguration & pRenderPassConfiguration ) override;
 
 		static ComPtr<ID3D11Query> _createExecutionSyncQuery( ComPtr<ID3D11Device1> pD3D11Device );
 
 	private:
+		DX11GraphicsPipelineStateController _graphicsPipelineStateControllerDX11;
 		ComPtr<ID3D11Query> _d3d11ExecutionSyncQuery;
-		DX11GraphicsPipelineStateController _stateController;
 	};
 
 } // namespace ts3::gpuapi

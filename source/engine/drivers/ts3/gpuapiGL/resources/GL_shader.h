@@ -1,9 +1,10 @@
 
 #pragma once
 
-#ifndef __TS3DRIVER_GPUAPI_GLCOMMON_SHADER_INTERFACE_H__
-#define __TS3DRIVER_GPUAPI_GLCOMMON_SHADER_INTERFACE_H__
+#ifndef __TS3DRIVER_GPUAPI_GLCOMMON_SHADER_H__
+#define __TS3DRIVER_GPUAPI_GLCOMMON_SHADER_H__
 
+#include "../GL_prerequisites.h"
 #include "../objects/GL_shaderObject.h"
 #include "../objects/GL_shaderPipelineObject.h"
 #include "../objects/GL_shaderProgramObject.h"
@@ -25,21 +26,10 @@ namespace ts3::gpuapi
 		GLShader( GLGPUDevice & pGPUDevice, EShaderType pShaderType, GLShaderProgramObjectHandle pGLShaderProgramObject );
 		virtual ~GLShader();
 
-		static GLShaderHandle createShaderObjectWithBinary( GLGPUDevice & pGLGPUDevice, EShaderType pShaderType, const ShaderBinary & pShaderBinary );
-		static GLShaderHandle createShaderObjectWithSource( GLGPUDevice & pGLGPUDevice, EShaderType pShaderType, const void * pSource, size_t pSourceLength );
-		static GLShaderHandle createShaderSeparableStageWithBinary( GLGPUDevice & pGLGPUDevice, EShaderType pShaderType, const ShaderBinary & pShaderBinary );
-		static GLShaderHandle createShaderSeparableStageWithSource( GLGPUDevice & pGLGPUDevice, EShaderType pShaderType, const void * pSource, size_t pSourceLength );
+		static GLShaderHandle createInstance( GLGPUDevice & pGPUDevice, const ShaderCreateInfo & pCreateInfo );
+		static GLShaderHandle createInstanceFromSource( GLGPUDevice & pGPUDevice, EShaderType pShaderType, const void * pSource, size_t pSourceLength );
 	};
-
-	namespace rcutil
-	{
-
-		GLShaderHandle createShaderObject( GLGPUDevice & pGLGPUDevice, const ShaderCreateInfo & pCreateInfo );
-
-		GLShaderHandle createShaderSeparableStage( GLGPUDevice & pGLGPUDevice, const ShaderCreateInfo & pCreateInfo );
-
-	}
 
 } // namespace ts3::gpuapi
 
-#endif // __TS3DRIVER_GPUAPI_GLCOMMON_SHADER_INTERFACE_H__
+#endif // __TS3DRIVER_GPUAPI_GLCOMMON_SHADER_H__

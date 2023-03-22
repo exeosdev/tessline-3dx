@@ -1,6 +1,6 @@
 
 #include "GL_inputAssembler.h"
-#include <ts3/gpuapiGL/GL_coreAPIProxy.h>
+#include <ts3/gpuapiGL/GL_apiTranslationLayer.h>
 #include <ts3/gpuapiGL/GL_gpuDevice.h>
 #include <ts3/gpuapiGL/objects/GL_vertexArrayObject.h>
 #include <ts3/gpuapiGL/resources/GL_gpuBuffer.h>
@@ -8,38 +8,66 @@
 namespace ts3::gpuapi
 {
 
-	GLIAInputLayoutImmutableState::GLIAInputLayoutImmutableState(
-			GLGPUDevice & pGPUDevice,
-			const IAInputLayoutStateCommonProperties & pCommonProperties,
-			const GLIAInputLayoutDefinition & pGLInputLayoutDefinition,
-			GLVertexArrayObjectHandle pVertexArrayObject )
-	: IAInputLayoutImmutableState( pGPUDevice, pCommonProperties )
-	, mGLInputLayoutDefinition( pGLInputLayoutDefinition )
-	, mVertexArrayObject( std::move( pVertexArrayObject ) )
-	{}
-
-	GLIAInputLayoutImmutableState::~GLIAInputLayoutImmutableState() = default;
-
-	GpaHandle<GLIAInputLayoutImmutableState> GLIAInputLayoutImmutableState::createInstance(
-			GLGPUDevice & pGPUDevice,
-			const IAInputLayoutDefinition & pInputLayoutDefinition )
+	void GLIAInputLayoutDefinition::reset()
 	{
-		const auto inputLayoutCommonProperties = smutil::getIAInputLayoutStateCommonProperties( pInputLayoutDefinition );
-		const auto glcInputLayoutDefinition = smutil::translateIAInputLayoutDefinition( pInputLayoutDefinition );
+		activeAttributesMask = 0;
+		primitiveTopology = 0;
+		memZero( attributeArray );
+	}
 
-		auto vertexArrayObject = smutil::createGLVertexArrayObjectFromLayoutDefinition( glcInputLayoutDefinition );
-		if( !vertexArrayObject )
+
+	void GLIAVertexBuffersBindings::initializeInterleaved()
+	{
+		bindingType = EGLVertexBufferBindingType::Interleaved;
+		interleavedBindings = {};
+	}
+
+	void GLIAVertexBuffersBindings::initializeSeparate()
+	{
+		bindingType = EGLVertexBufferBindingType::Separate;
+		separateBindings = {};
+	}
+
+	void GLIAVertexBuffersBindings::reset()
+	{
+		if( bindingType == EGLVertexBufferBindingType::Interleaved )
 		{
-			return nullptr;
+			memZero( interleavedBindings );
+		}
+		else if( bindingType == EGLVertexBufferBindingType::Separate )
+		{
+			memZero( separateBindings );
 		}
 
-		auto immutableState = createGPUAPIObject<GLIAInputLayoutImmutableState>(
-				pGPUDevice,
-				inputLayoutCommonProperties,
-				glcInputLayoutDefinition,
-				std::move( vertexArrayObject ) );
+		bindingType = EGLVertexBufferBindingType::Undefined;
+	}
 
-		return immutableState;
+	GLIAVertexBufferBinding GLIAVertexBuffersBindings::getBinding( native_uint pStreamIndex ) const
+	{
+		if( bindingType == EGLVertexBufferBindingType::Interleaved )
+		{
+			return interleavedBindings[pStreamIndex];
+		}
+		else if( bindingType == EGLVertexBufferBindingType::Separate )
+		{
+			return {
+				separateBindings.handleArray[pStreamIndex],
+				separateBindings.offsetArray[pStreamIndex],
+				separateBindings.strideArray[pStreamIndex]
+			};
+		}
+		else
+		{
+			return { 0, 0, 0 };
+		}
+	}
+
+
+	void GLIAVertexStreamDefinition::reset()
+	{
+		activeBindingsMask = 0;
+		indexBufferBinding.reset();
+		vertexBufferBindings.reset();
 	}
 
 
@@ -58,12 +86,82 @@ namespace ts3::gpuapi
 			const IAVertexStreamDefinition & pVertexStreamDefinition )
 	{
 		const auto vertexStreamCommonProperties = smutil::getIAVertexStreamStateCommonProperties( pVertexStreamDefinition );
-		const auto glcVertexStreamDefinition = smutil::translateIAVertexStreamDefinition( pVertexStreamDefinition );
+		const auto glcVertexStreamDefinition = smutil::translateIAVertexStreamDefinitionGL( pVertexStreamDefinition );
 
 		auto immutableState = createGPUAPIObject<GLIAVertexStreamImmutableState>(
-				pGPUDevice,
-				vertexStreamCommonProperties,
-				glcVertexStreamDefinition );
+			pGPUDevice,
+			vertexStreamCommonProperties,
+			glcVertexStreamDefinition );
+
+		return immutableState;
+	}
+
+
+	GLIAInputLayoutImmutableState::GLIAInputLayoutImmutableState(
+			GLGPUDevice & pGPUDevice,
+			const IAInputLayoutStateCommonProperties & pCommonProperties )
+	: IAInputLayoutImmutableState( pGPUDevice, pCommonProperties )
+	{}
+
+	GLIAInputLayoutImmutableState::~GLIAInputLayoutImmutableState() = default;
+
+
+	GLIAInputLayoutImmutableStateCore::GLIAInputLayoutImmutableStateCore(
+			GLGPUDevice & pGPUDevice,
+			const IAInputLayoutStateCommonProperties & pCommonProperties,
+			GLVertexArrayObjectHandle pVertexArrayObject,
+			GLenum pGLPrimitiveTopology )
+	: GLIAInputLayoutImmutableState( pGPUDevice, pCommonProperties )
+	, mVertexArrayObject( std::move( pVertexArrayObject ) )
+	, mGLPrimitiveTopology( pGLPrimitiveTopology )
+	{}
+
+	GLIAInputLayoutImmutableStateCore::~GLIAInputLayoutImmutableStateCore() = default;
+
+	GpaHandle<GLIAInputLayoutImmutableStateCore> GLIAInputLayoutImmutableStateCore::createInstance(
+			GLGPUDevice & pGPUDevice,
+			const IAInputLayoutDefinition & pInputLayoutDefinition )
+	{
+		const auto inputLayoutCommonProperties = smutil::getIAInputLayoutStateCommonProperties( pInputLayoutDefinition );
+		const auto glcInputLayoutDefinition = smutil::translateIAInputLayoutDefinitionGL( pInputLayoutDefinition );
+
+		auto vertexArrayObject = smutil::createGLVertexArrayObjectLayoutOnlyGL( glcInputLayoutDefinition );
+		if( !vertexArrayObject )
+		{
+			return nullptr;
+		}
+
+		auto immutableState = createGPUAPIObject<GLIAInputLayoutImmutableStateCore>(
+			pGPUDevice,
+			inputLayoutCommonProperties,
+			std::move( vertexArrayObject ),
+			glcInputLayoutDefinition.primitiveTopology);
+
+		return immutableState;
+	}
+
+
+	GLIAInputLayoutImmutableStateCompat::GLIAInputLayoutImmutableStateCompat(
+			GLGPUDevice & pGPUDevice,
+			const IAInputLayoutStateCommonProperties & pCommonProperties,
+			const GLIAInputLayoutDefinition & pGLInputLayoutDefinition )
+	: GLIAInputLayoutImmutableState( pGPUDevice, pCommonProperties )
+	, mGLInputLayoutDefinition( pGLInputLayoutDefinition )
+	{}
+
+	GLIAInputLayoutImmutableStateCompat::~GLIAInputLayoutImmutableStateCompat() = default;
+
+	GpaHandle<GLIAInputLayoutImmutableStateCompat> GLIAInputLayoutImmutableStateCompat::createInstance(
+			GLGPUDevice & pGPUDevice,
+			const IAInputLayoutDefinition & pInputLayoutDefinition )
+	{
+		const auto inputLayoutCommonProperties = smutil::getIAInputLayoutStateCommonProperties( pInputLayoutDefinition );
+		const auto glcInputLayoutDefinition = smutil::translateIAInputLayoutDefinitionGL( pInputLayoutDefinition );
+
+		auto immutableState = createGPUAPIObject<GLIAInputLayoutImmutableStateCompat>(
+			pGPUDevice,
+			inputLayoutCommonProperties,
+			glcInputLayoutDefinition );
 
 		return immutableState;
 	}
@@ -72,7 +170,7 @@ namespace ts3::gpuapi
 	namespace smutil
 	{
 
-		GLIAVertexAttributeInfo translateIAVertexAttributeInfo(
+		GLIAVertexAttributeInfo translateIAVertexAttributeInfoGL(
 				const IAVertexAttributeInfo & pAttributeInfo )
 		{
 			GLIAVertexAttributeInfo glcAttributeInfo{};
@@ -83,7 +181,7 @@ namespace ts3::gpuapi
 			glcAttributeInfo.byteSize = cxdefs::getVertexAttribFormatByteSize( pAttributeInfo.format );
 
 			const auto attributeFormatBaseType = cxdefs::getVertexAttribFormatBaseDataType( pAttributeInfo.format );
-			glcAttributeInfo.baseType = GLCoreAPIProxy::translateGLBaseDataType( attributeFormatBaseType );
+			glcAttributeInfo.baseType = atl::translateGLBaseDataType( attributeFormatBaseType );
 
 			const auto attributeFormatLength = cxdefs::getVertexAttribFormatLength( pAttributeInfo.format );
 			glcAttributeInfo.componentsNum = static_cast<uint32>( attributeFormatLength );
@@ -94,7 +192,7 @@ namespace ts3::gpuapi
 			return glcAttributeInfo;
 		}
 
-		GLIAInputLayoutDefinition translateIAInputLayoutDefinition(
+		GLIAInputLayoutDefinition translateIAInputLayoutDefinitionGL(
 				const IAInputLayoutDefinition & pDefinition )
 		{
 			GLIAInputLayoutDefinition glcInputLayoutDefinition{};
@@ -104,7 +202,7 @@ namespace ts3::gpuapi
 			uint32 currentVertexAttributesNum = 0;
 			uint64 currentAttributePackedRelativeOffset = 0;
 
-			for( uint32 attributeIndex = 0; attributeIndex < cxdefs::GPU_SYSTEM_METRIC_IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
+			for( uint32 attributeIndex = 0; attributeIndex < gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
 			{
 				const auto attributeBit = cxdefs::makeIAVertexAttributeFlag( attributeIndex );
 				if( pDefinition.activeAttributesMask.isSet( attributeBit ) )
@@ -113,7 +211,7 @@ namespace ts3::gpuapi
 					auto & glcAttributeInfo = glcInputLayoutDefinition.attributeArray[attributeIndex];
 
 					// Translate the attribute data. This includes the relative offset.
-					glcAttributeInfo = translateIAVertexAttributeInfo( inputAttributeInfo );
+					glcAttributeInfo = translateIAVertexAttributeInfoGL( inputAttributeInfo );
 
 					if( inputAttributeInfo.relativeOffset == cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND )
 					{
@@ -134,37 +232,38 @@ namespace ts3::gpuapi
 			}
 
 			glcInputLayoutDefinition.activeAttributesMask = pDefinition.activeAttributesMask;
-			glcInputLayoutDefinition.primitiveTopology = GLCoreAPIProxy::translateGLPrimitiveTopology( pDefinition.primitiveTopology );
+			glcInputLayoutDefinition.primitiveTopology = atl::translateGLPrimitiveTopology( pDefinition.primitiveTopology );
 
 			return glcInputLayoutDefinition;
 		}
 
-		GLIAVertexStreamDefinition translateIAVertexStreamDefinition(
+		GLIAVertexStreamDefinition translateIAVertexStreamDefinitionGL(
 				const IAVertexStreamDefinition & pDefinition )
 		{
 			GLIAVertexStreamDefinition glcVertexStreamDefinition{};
 
 			if( pDefinition.activeBindingsMask.isSetAnyOf( E_IA_VERTEX_STREAM_BINDING_MASK_VERTEX_BUFFER_ALL_BITS ) )
 			{
-				translateVertexBufferReferences(
-						pDefinition.vertexBufferReferences,
-						pDefinition.activeBindingsMask,
-						glcVertexStreamDefinition.vertexBufferBindings );
+				translateVertexBufferReferencesGL(
+					pDefinition.vertexBufferReferences,
+					pDefinition.activeBindingsMask,
+					glcVertexStreamDefinition.vertexBufferBindings );
 			}
 
 			if( pDefinition.activeBindingsMask.isSet( E_IA_VERTEX_STREAM_BINDING_FLAG_INDEX_BUFFER_BIT ) )
 			{
-				translateIndexBufferReference(
-						pDefinition.indexBufferReference,
-						glcVertexStreamDefinition.indexBufferBinding );
+				translateIndexBufferReferenceGL(
+					pDefinition.indexBufferReference,
+					glcVertexStreamDefinition.indexBufferBinding );
 			}
 
 			glcVertexStreamDefinition.activeBindingsMask = ( pDefinition.activeBindingsMask & E_IA_VERTEX_STREAM_BINDING_MASK_ALL );
+			glcVertexStreamDefinition.vertexBufferBindings.activeRanges = smutil::generateActiveVertexBufferRanges( pDefinition.vertexBufferReferences );
 
 			return glcVertexStreamDefinition;
 		}
 
-		uint32 translateVertexBufferReferences(
+		uint32 translateVertexBufferReferencesGL(
 				const IAVertexBufferReferenceArray & pVBReferences,
 				Bitmask<EIAVertexStreamBindingFlags> pBindingMask,
 				GLIAVertexBuffersBindings & pOutGLBindings)
@@ -172,12 +271,12 @@ namespace ts3::gpuapi
 			uint32 activeBindingsNum = 0;
 
 		#if( TS3GX_GL_PLATFORM_TYPE == TS3GX_GL_PLATFORM_TYPE_ES )
-			pOutGLBindings.interleavedBindings = {};
+			pOutGLBindings.initializeInterleaved();
 		#else
-			pOutGLBindings.separateBindings = {};
+			pOutGLBindings.initializeSeparate();
 		#endif
 
-			for( input_assembler_index_t streamIndex = 0; streamIndex < cxdefs::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )
+			for( native_uint streamIndex = 0; streamIndex < gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM; ++streamIndex )
 			{
 				const auto & inputVertexBufferRef = pVBReferences[streamIndex];
 				const auto vbBindingFlag = cxdefs::makeIAVertexBufferFlag( streamIndex );
@@ -215,7 +314,7 @@ namespace ts3::gpuapi
 			return activeBindingsNum;
 		}
 
-		bool translateIndexBufferReference(
+		bool translateIndexBufferReferenceGL(
 				const IAIndexBufferReference & pIBReference,
 				GLIAIndexBufferBinding & pOutGLBinding )
 		{
@@ -225,7 +324,7 @@ namespace ts3::gpuapi
 
 				pOutGLBinding.handle = glcIndexBuffer->mGLBufferObject->mGLHandle;
 				pOutGLBinding.offset = pIBReference.dataOffset();
-				pOutGLBinding.format = GLCoreAPIProxy::translateGLIndexDataFormat( pIBReference.indexFormat );
+				pOutGLBinding.format = atl::translateGLIndexDataFormat( pIBReference.indexFormat );
 				pOutGLBinding.elementByteSize = cxdefs::getIndexDataFormatByteSize( pIBReference.indexFormat );
 
 				return true;
@@ -241,52 +340,65 @@ namespace ts3::gpuapi
 			}
 		}
 
-		GLIAVertexBuffersBindings translateVertexBufferReferences(
+		GLIAVertexBuffersBindings translateVertexBufferReferencesGL(
 				const IAVertexBufferReferenceArray & pVBReferences,
 				Bitmask<EIAVertexStreamBindingFlags> pBindingMask )
 		{
 			GLIAVertexBuffersBindings glcVertexBufferBindings{};
-			translateVertexBufferReferences( pVBReferences, pBindingMask, glcVertexBufferBindings );
+			translateVertexBufferReferencesGL( pVBReferences, pBindingMask, glcVertexBufferBindings );
 			return glcVertexBufferBindings;
 		}
 
-		GLIAIndexBufferBinding translateIndexBufferReference(
+		GLIAIndexBufferBinding translateIndexBufferReferenceGL(
 				const IAIndexBufferReference & pIBReference )
 		{
 			GLIAIndexBufferBinding glcIndexBufferBinding{};
-			translateIndexBufferReference( pIBReference, glcIndexBufferBinding );
+			translateIndexBufferReferenceGL( pIBReference, glcIndexBufferBinding );
 			return glcIndexBufferBinding;
 		}
 
-		GLVertexArrayObjectHandle createGLVertexArrayObjectFromLayoutDefinition(
-				const GLIAInputLayoutDefinition & pGLLayoutDefinition ) noexcept
+		GLVertexArrayObjectHandle createGLVertexArrayObjectLayoutOnlyGL(
+				const GLIAInputLayoutDefinition & pInputLayoutDefinition ) noexcept
 		{
-			if( !pGLLayoutDefinition.activeAttributesMask.isSetAnyOf( E_IA_VERTEX_ATTRIBUTE_MASK_ALL ) )
+			if( !pInputLayoutDefinition.activeAttributesMask.isSetAnyOf( E_IA_VERTEX_ATTRIBUTE_MASK_ALL ) )
 			{
 				return nullptr;
 			}
 
 			auto vertexArrayObject = GLVertexArrayObject::create();
+			updateGLVertexArrayObjectLayoutOnlyGL( *vertexArrayObject, pInputLayoutDefinition );
 
-			glBindVertexArray( vertexArrayObject->mGLHandle );
+			return vertexArrayObject;
+		}
+
+		bool updateGLVertexArrayObjectLayoutOnlyGL(
+				GLVertexArrayObject & pVertexArrayObject,
+				const GLIAInputLayoutDefinition & pInputLayoutDefinition ) noexcept
+		{
+			if( !pInputLayoutDefinition.activeAttributesMask.isSetAnyOf( E_IA_VERTEX_ATTRIBUTE_MASK_ALL ) )
+			{
+				return false;
+			}
+
+			glBindVertexArray( pVertexArrayObject.mGLHandle );
 			ts3OpenGLHandleLastError();
 
-			for( uint32 attributeIndex = 0; attributeIndex < cxdefs::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
+			for( uint32 attributeIndex = 0; attributeIndex < gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
 			{
 				const auto attributeBit = cxdefs::makeIAVertexAttributeFlag( attributeIndex );
-				if( pGLLayoutDefinition.activeAttributesMask.isSet( attributeBit ) )
+				if( pInputLayoutDefinition.activeAttributesMask.isSet( attributeBit ) )
 				{
-					const auto & glcAttribute = pGLLayoutDefinition.attributeArray[attributeIndex];
+					const auto & glcAttribute = pInputLayoutDefinition.attributeArray[attributeIndex];
 
 					glEnableVertexAttribArray( attributeIndex );
 					ts3OpenGLHandleLastError();
 
 					glVertexAttribFormat(
-							attributeIndex,
-							glcAttribute.componentsNum,
-							glcAttribute.baseType,
-							glcAttribute.normalized,
-							glcAttribute.relativeOffset );
+						attributeIndex,
+						glcAttribute.componentsNum,
+						glcAttribute.baseType,
+						glcAttribute.normalized,
+						glcAttribute.relativeOffset );
 					ts3OpenGLHandleLastError();
 
 					// NOTE: glVertexAttribDivisor modifies the binding between attribute index and its vertex stream slot.
@@ -309,7 +421,81 @@ namespace ts3::gpuapi
 			glBindVertexArray( 0 );
 			ts3OpenGLHandleLastError();
 
+			return true;
+		}
+
+		GLVertexArrayObjectHandle createGLVertexArrayObjectLayoutStreamCombinedGL(
+				const GLIAInputLayoutDefinition & pInputLayoutDefinition,
+				const GLIAVertexStreamDefinition & pVertexStreamDefinition ) noexcept
+		{
+			if( !pInputLayoutDefinition.activeAttributesMask.isSetAnyOf( E_IA_VERTEX_ATTRIBUTE_MASK_ALL ) )
+			{
+				return nullptr;
+			}
+
+			auto vertexArrayObject = GLVertexArrayObject::create();
+			updateGLVertexArrayObjectLayoutStreamCombinedGL( *vertexArrayObject, pInputLayoutDefinition, pVertexStreamDefinition );
+
 			return vertexArrayObject;
+		}
+
+		bool updateGLVertexArrayObjectLayoutStreamCombinedGL(
+				GLVertexArrayObject & pVertexArrayObject,
+				const GLIAInputLayoutDefinition & pInputLayoutDefinition,
+				const GLIAVertexStreamDefinition & pVertexStreamDefinition ) noexcept
+		{
+			if( !pInputLayoutDefinition.activeAttributesMask.isSetAnyOf( E_IA_VERTEX_ATTRIBUTE_MASK_ALL ) )
+			{
+				return false;
+			}
+
+			glBindVertexArray( pVertexArrayObject.mGLHandle );
+			ts3OpenGLHandleLastError();
+
+			GLuint currentVBBinding = 0;
+
+			for( uint32 attributeIndex = 0; attributeIndex < gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
+			{
+				const auto attributeBit = cxdefs::makeIAVertexAttributeFlag( attributeIndex );
+				if( pInputLayoutDefinition.activeAttributesMask.isSet( attributeBit ) )
+				{
+					const auto & glcAttribute = pInputLayoutDefinition.attributeArray[attributeIndex];
+					const auto & glcVertexBufferBinding = pVertexStreamDefinition.vertexBufferBindings.getBinding( glcAttribute.streamIndex );
+
+					ts3DebugAssert( glcVertexBufferBinding );
+
+					if( currentVBBinding != glcVertexBufferBinding.handle )
+					{
+						glBindBuffer( GL_ARRAY_BUFFER, glcVertexBufferBinding.handle );
+						ts3OpenGLHandleLastError();
+
+						currentVBBinding = glcVertexBufferBinding.handle;
+					}
+
+					glEnableVertexAttribArray( attributeIndex );
+					ts3OpenGLHandleLastError();
+
+					glVertexAttribDivisor( attributeIndex, glcAttribute.instanceRate );
+					ts3OpenGLHandleLastError();
+
+					glVertexAttribPointer(
+						attributeIndex,
+						glcAttribute.componentsNum,
+						glcAttribute.baseType,
+						glcAttribute.normalized,
+						glcVertexBufferBinding.stride,
+						reinterpret_cast<const void *>( glcVertexBufferBinding.offset + glcAttribute.relativeOffset ) );
+					ts3OpenGLHandleLastError();
+				}
+			}
+
+			glBindBuffer( GL_ARRAY_BUFFER, 0u );
+			ts3OpenGLHandleLastError();
+
+			glBindVertexArray( 0 );
+			ts3OpenGLHandleLastError();
+
+			return true;
 		}
 
 	}

@@ -1,7 +1,12 @@
 
-set( gpuapi01_SRC_FILES
+set( gpuapi01_SRC_FILES_COMMON
         "gpuapi01-meshDefs.h"
         "gpuapi01-main.cpp"
+        )
+
+set( gpuapi01_SRC_FILES_APPLE
+        "gpuapi01-meshDefs.h"
+        "gpuapi01-main.mm"
         )
 
 set( TS3SAMPLES_LINK_INPUT ${TS3SAMPLES_LINK_INPUT}
@@ -25,13 +30,17 @@ if( TARGET ts3drv-gpuapi-gles3 )
     set( TS3SAMPLES_LINK_INPUT ${TS3SAMPLES_LINK_INPUT} "ts3drv-gpuapi-gles3" )
 endif()
 
-if( "${CM_EBS_SYSCONF_TARGET_PLATFORM}" STREQUAL "Android" )
+if( "${CM_EBS_SYSCONF_TARGET_PLATFORM}" STREQUAL "Apple" )
+    add_executable( ts3sample-gpuapi01
+            ${gpuapi01_SRC_FILES_APPLE}
+            )
+elseif( "${CM_EBS_SYSCONF_TARGET_PLATFORM}" STREQUAL "Android" )
     add_library( ts3sample-gpuapi01 STATIC
-            ${gpuapi01_SRC_FILES}
+            ${gpuapi01_SRC_FILES_COMMON}
             )
 else()
     add_executable( ts3sample-gpuapi01
-            ${gpuapi01_SRC_FILES}
+            ${gpuapi01_SRC_FILES_COMMON}
             )
 endif()
 

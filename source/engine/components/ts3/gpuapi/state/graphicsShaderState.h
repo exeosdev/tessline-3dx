@@ -56,6 +56,8 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD uint32 getActiveShaderStagesNum() const noexcept;
 
+		TS3_ATTR_NO_DISCARD bool empty() const noexcept;
+
 		TS3_ATTR_NO_DISCARD bool validateShaders() const noexcept;
 
 		void addShader( ShaderHandle pShader ) noexcept;

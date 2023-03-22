@@ -8,7 +8,7 @@ namespace ts3::gpuapi
 {
 
 	GL4GPUDevice::GL4GPUDevice( GL4GPUDriver & pDriver )
-	: GLGPUDevice( pDriver )
+	: GL4GPUDeviceBase( pDriver )
 	{}
 
 	GL4GPUDevice::~GL4GPUDevice() = default;

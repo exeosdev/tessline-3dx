@@ -30,13 +30,13 @@ namespace ts3::gpuapi
 
 	enum class ETextureClass : enum_default_value_t
 	{
+		Unknown,
 		T2D,
 		T2DArray,
 		T2DMS,
 		T2DMSArray,
 		T3D,
 		TCubeMap,
-		Unknown
 	};
 
 	enum ETextureCubeMapFace : uint32

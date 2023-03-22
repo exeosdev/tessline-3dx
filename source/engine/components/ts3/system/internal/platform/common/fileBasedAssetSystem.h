@@ -33,15 +33,23 @@ namespace ts3::system
 		struct AssetLoaderCreateInfoNativeParams
 		{
 			FileManagerHandle fileManager = nullptr;
+			std::string absoluteAssetRootDir;
 			std::string relativeAssetRootDir;
 		};
 
-		TS3_SYSTEM_API_NODISCARD AssetLoaderHandle createFileAssetLoader( SysContextHandle pSysContext,
-		                                                                  FileManagerHandle pFileManager,
-		                                                                  const std::string & pRootDirectory );
+		TS3_SYSTEM_API_NODISCARD AssetLoaderHandle createFileAssetLoaderExplicit(
+				SysContextHandle pSysContext,
+				FileManagerHandle pFileManager,
+				const std::string & pAbsoluteAssetDirectory );
 
-		TS3_SYSTEM_API_NODISCARD AssetLoaderHandle createFileAssetLoader( SysContextHandle pSysContext,
-		                                                                  const AssetLoaderCreateInfoNativeParams & pCreateParams );
+		TS3_SYSTEM_API_NODISCARD AssetLoaderHandle createFileAssetLoaderResolve(
+				SysContextHandle pSysContext,
+				FileManagerHandle pFileManager,
+				const std::string & pRelativeAssetDirectory );
+
+		TS3_SYSTEM_API_NODISCARD AssetLoaderHandle createFileAssetLoader(
+				SysContextHandle pSysContext,
+				const AssetLoaderCreateInfoNativeParams & pCreateParams );
 
 	}
 

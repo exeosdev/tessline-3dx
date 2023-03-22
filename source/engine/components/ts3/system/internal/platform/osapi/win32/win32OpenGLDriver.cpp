@@ -347,6 +347,54 @@ namespace ts3::system
 		return EOpenGLAPIClass::OpenGLDesktop;
 	}
 
+	VisualConfig Win32OpenGLDisplaySurface::_nativeQueryVisualConfig() const
+	{
+		int surfacePixelFormat = ::GetPixelFormat( mNativeData.hdc );
+
+		PIXELFORMATDESCRIPTOR pixelFormatDesc;
+		pixelFormatDesc.nSize = sizeof( PIXELFORMATDESCRIPTOR );
+
+		::DescribePixelFormat(
+			mNativeData.hdc,
+			surfacePixelFormat,
+			sizeof( PIXELFORMATDESCRIPTOR ),
+			&pixelFormatDesc );
+
+		VisualConfig visualConfig;
+
+		if( pixelFormatDesc.cColorBits == 32 )
+		{
+			visualConfig.colorFormat = EColorFormat::B8G8R8A8;
+		}
+		else
+		{
+			visualConfig.colorFormat = EColorFormat::Unknown;
+		}
+
+		if( ( pixelFormatDesc.cDepthBits == 24 ) && ( pixelFormatDesc.cStencilBits == 8 ) )
+		{
+			visualConfig.depthStencilFormat = EDepthStencilFormat::D24S8;
+		}
+		else if( ( pixelFormatDesc.cDepthBits == 24 ) && ( pixelFormatDesc.cStencilBits == 0 ) )
+		{
+			visualConfig.depthStencilFormat = EDepthStencilFormat::D24X8;
+		}
+		else if( ( pixelFormatDesc.cDepthBits == 32 ) && ( pixelFormatDesc.cStencilBits == 0 ) )
+		{
+			visualConfig.depthStencilFormat = EDepthStencilFormat::D32F;
+		}
+		else if( ( pixelFormatDesc.cDepthBits == 32 ) && ( pixelFormatDesc.cStencilBits == 8 ) )
+		{
+			visualConfig.depthStencilFormat = EDepthStencilFormat::D32FS8;
+		}
+		else
+		{
+			visualConfig.depthStencilFormat = EDepthStencilFormat::Unknown;
+		}
+
+		return visualConfig;
+	}
+
 	FrameSize Win32OpenGLDisplaySurface::_nativeQueryRenderAreaSize() const
 	{
 		return platform::win32GetFrameSize( mNativeData.hwnd, EFrameSizeMode::ClientArea );

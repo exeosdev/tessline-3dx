@@ -8,15 +8,18 @@
 #include "resources/GL_shader.h"
 #include "resources/GL_texture.h"
 #include "state/GL_pipelineStateObject.h"
+#include "state/GL_pipelineStateController.h"
 
 namespace ts3::gpuapi
 {
 
-	GLGPUDevice::GLGPUDevice( GLGPUDriver & pGPUDriver )
+	GLGPUDevice::GLGPUDevice( GLGPUDriver & pGPUDriver, GLPipelineImmutableStateFactory & pImmutableStateFactory )
 	: GPUDevice( pGPUDriver )
 	, mSysGLDriver( pGPUDriver.mSysGLDriver )
-	, _immutableStateFactory( *this )
-	, _immutableStateCache( _immutableStateFactory )
+	, mSysGLSupportInfo( mSysGLDriver->getVersionSupportInfo() )
+	, mGLRuntimeSupportFlags( coreutil::queryGLRuntimeSupportFlags( mSysGLSupportInfo ) )
+	, _immutableStateFactoryGL( &pImmutableStateFactory )
+	, _immutableStateCache( pImmutableStateFactory )
 	{
 		setImmutableStateCache( _immutableStateCache );
 	}
@@ -26,19 +29,6 @@ namespace ts3::gpuapi
 	GLDebugOutput * GLGPUDevice::getDebugOutputInterface() const
 	{
 		return _glDebugOutput.get();
-	}
-
-	bool GLGPUDevice::initializeGLDebugOutput()
-	{
-		if( !_glDebugOutput )
-		{
-			auto glcDebugOutput = GLDebugOutput::createInterface( GLDebugOutputVersion::ARBExt );
-			if( glcDebugOutput )
-			{
-				_glDebugOutput = std::move( glcDebugOutput );
-			}
-		}
-		return _glDebugOutput ? true : false;
 	}
 
 	void GLGPUDevice::waitForCommandSync( CommandSync & pCommandSync )
@@ -53,6 +43,19 @@ namespace ts3::gpuapi
 			releaseGLCommandSyncData( pCommandSync.syncData );
 			pCommandSync.syncData = nullptr;
 		}
+	}
+
+	bool GLGPUDevice::initializeGLDebugOutput()
+	{
+		if( !_glDebugOutput )
+		{
+			auto glcDebugOutput = GLDebugOutput::createInterface( GLDebugOutputVersion::ARBExt );
+			if( glcDebugOutput )
+			{
+				_glDebugOutput = std::move( glcDebugOutput );
+			}
+		}
+		return _glDebugOutput ? true : false;
 	}
 
 	void GLGPUDevice::initializeCommandSystem()
@@ -77,7 +80,7 @@ namespace ts3::gpuapi
 
 	GPUBufferHandle GLGPUDevice::_drvCreateGPUBuffer( const GPUBufferCreateInfo & pCreateInfo )
 	{
-	    auto glcBuffer = GLGPUBuffer::create( *this, pCreateInfo );
+	    auto glcBuffer = GLGPUBuffer::createInstance( *this, pCreateInfo );
 	    ts3DebugAssert( glcBuffer );
 	    return glcBuffer;
 	}
@@ -91,18 +94,14 @@ namespace ts3::gpuapi
 
 	ShaderHandle GLGPUDevice::_drvCreateShader( const ShaderCreateInfo & pCreateInfo )
 	{
-	#if( TS3GX_GL_TARGET >= TS3GX_GL_TARGET_GL43 )
-		auto glcShader = rcutil::createShaderSeparableStage( *this, pCreateInfo );
-	#else
-	    auto glcShader = rcutil::createShaderObject( *this, pCreateInfo );
-	#endif
-	    ts3DebugAssert( glcShader );
+		ShaderHandle glcShader;
+		glcShader = GLShader::createInstance( *this, pCreateInfo );
 	    return glcShader;
 	}
 
 	TextureHandle GLGPUDevice::_drvCreateTexture( const TextureCreateInfo & pCreateInfo )
 	{
-	    auto glcTexture = GLTexture::create( *this, pCreateInfo );
+	    auto glcTexture = GLTexture::createDefault( *this, pCreateInfo );
 	    ts3DebugAssert( glcTexture );
 	    return glcTexture;
 	}
@@ -110,17 +109,50 @@ namespace ts3::gpuapi
 	RenderTargetTextureHandle GLGPUDevice::_drvCreateRenderTargetTexture(
 			const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
-		auto glcRTTexture = GLTexture::createRTT( *this, pCreateInfo );
-		ts3DebugAssert( glcRTTexture );
-		return glcRTTexture;
+		auto glcRTTextureView = GLTexture::createRenderTargetTextureView( *this, pCreateInfo );
+		ts3DebugAssert( glcRTTextureView );
+		return glcRTTextureView;
 	}
 
 	GraphicsPipelineStateObjectHandle GLGPUDevice::_drvCreateGraphicsPipelineStateObject(
 			const GraphicsPipelineStateObjectCreateInfo & pCreateInfo )
 	{
+		if( !pCreateInfo.shaderLinkageState )
+		{
+			pCreateInfo.shaderLinkageState = _immutableStateFactoryGL->createGraphicsShaderLinkageState( pCreateInfo.shaderSet );
+		}
+
 		auto glcGraphicsPSO = GLGraphicsPipelineStateObject::create( *this, pCreateInfo );
 		ts3DebugAssert( glcGraphicsPSO );
+
 		return glcGraphicsPSO;
 	}
+
+
+	GLGPUDeviceCore::GLGPUDeviceCore( GLGPUDriver & pGPUDriver )
+	: GLGPUDevice( pGPUDriver, _immutableStateFactoryCore )
+	, _immutableStateFactoryCore( *this )
+	{}
+
+	GLGPUDeviceCore::~GLGPUDeviceCore() = default;
+
+	bool GLGPUDeviceCore::isCompatibilityDevice() const noexcept
+	{
+		return false;
+	}
+
+
+	GLGPUDeviceCompat::GLGPUDeviceCompat( GLGPUDriver & pGPUDriver )
+	: GLGPUDevice( pGPUDriver, _immutableStateFactoryCompat )
+	, _immutableStateFactoryCompat( *this )
+	{}
+
+	GLGPUDeviceCompat::~GLGPUDeviceCompat() = default;
+
+	bool GLGPUDeviceCompat::isCompatibilityDevice() const noexcept
+	{
+		return true;
+	}
+
 
 } // namespace ts3::gpuapi

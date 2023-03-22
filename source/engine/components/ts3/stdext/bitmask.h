@@ -236,20 +236,20 @@ namespace ts3
 		ValueType  _value;
 	};
 
-	template <typename TEnum, typename ::std::enable_if<::std::is_enum<TEnum>::value, int>::type = 0>
-	TS3_ATTR_NO_DISCARD inline constexpr Bitmask<typename ::std::underlying_type<TEnum>::type> makeBitmask( TEnum pValue ) noexcept
+	template <typename TEnum, typename std::enable_if<std::is_enum<TEnum>::value, int>::type = 0>
+	TS3_ATTR_NO_DISCARD inline constexpr Bitmask<typename std::underlying_type<TEnum>::type> makeBitmask( TEnum pValue = static_cast<TEnum>( 0 ) ) noexcept
 	{
 		return Bitmask<typename std::underlying_type<TEnum>::type>( pValue );
 	}
 
-	template <typename TIntegral, typename ::std::enable_if<::std::is_integral<TIntegral>::value, int>::type = 0>
+	template <typename TIntegral, typename std::enable_if<std::is_integral<TIntegral>::value, int>::type = 0>
 	TS3_ATTR_NO_DISCARD inline constexpr Bitmask<TIntegral> makeBitmask( TIntegral pValue ) noexcept
 	{
 		return Bitmask<TIntegral>( pValue );
 	}
 
-	template <typename TVal, typename TInput = TVal>
-	TS3_ATTR_NO_DISCARD inline constexpr Bitmask<TVal> makeBitmaskEx( TInput pValue = static_cast<TVal>( 0 ) ) noexcept
+	template <typename TVal, typename TInput>
+	TS3_ATTR_NO_DISCARD inline constexpr Bitmask<TVal> makeBitmaskEx( TInput pValue = static_cast<TInput>( 0 ) ) noexcept
 	{
 		return Bitmask<TVal>( pValue );
 	}

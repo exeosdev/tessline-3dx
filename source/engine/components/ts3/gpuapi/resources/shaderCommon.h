@@ -36,13 +36,13 @@ namespace ts3::gpuapi
 	/// @brief
 	enum class EShaderType : uint32
 	{
-		GSVertex        = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX        ),
-		GSHull          = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_HULL          ),
-		GSDomain        = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_DOMAIN        ),
-		GSGeometry      = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY      ),
-		GSPixel         = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL         ),
-		CSCompute       = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_COMPUTE                ),
-		Unknown = 0,
+		Unknown    = 0,
+		GSVertex   = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_VERTEX        ),
+		GSHull     = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_HULL          ),
+		GSDomain   = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_DOMAIN        ),
+		GSGeometry = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_GEOMETRY      ),
+		GSPixel    = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_GRAPHICS_PIXEL         ),
+		CSCompute  = cxdefs::makeShaderType( E_SHADER_STAGE_INDEX_COMPUTE                ),
 	};
 
 	struct alignas( 32 ) ShaderBinary

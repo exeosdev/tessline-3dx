@@ -22,7 +22,23 @@
 #  endif
 #endif
 
-#define TS3GX_GL4_USE_V1CORE_API 1
+#define TS3GX_GL4_USE_COMPAT_API 0
+
+#if defined( TS3GX_GL4_USE_COMPAT_API )
+#  if( TS3_PCL_TARGET_OS == TS3_PCL_TARGET_OS_MACOS )
+#    undef TS3GX_GL4_USE_COMPAT_API
+#    define TS3GX_GL4_USE_COMPAT_API 1
+#    pragma message( "Core OpenGL API not available on macOS. Overwriting TS3GX_GL4_USE_COMPAT_API with 0." )
+#  endif
+#else
+#  define TS3GX_GL4_USE_COMPAT_API
+#endif
+
+#if( !TS3GX_GL4_USE_COMPAT_API )
+#  pragma message( "OpenGL 4 Driver will use <Core> API." )
+#else
+#  pragma message( "OpenGL 4 Driver will use <Compat> API." )
+#endif
 
 namespace ts3::gpuapi
 {

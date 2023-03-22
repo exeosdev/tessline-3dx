@@ -36,9 +36,7 @@ namespace ts3::system
 
 	AssetLoaderHandle X11SysContext::createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo )
 	{
-		return platform::createFileAssetLoader( getHandle<X11SysContext>(),
-		                                        pCreateInfo.nativeParams->fileManager,
-		                                        pCreateInfo.nativeParams->relativeAssetRootDir );
+		return platform::createFileAssetLoader( getHandle<X11SysContext>(), *pCreateInfo.nativeParams );
 	}
 
 	DisplayManagerHandle X11SysContext::createDisplayManager()
@@ -119,6 +117,14 @@ namespace ts3::system
 		mNativeData.xSessionData.sessionInfo.connectionNumber = -1;
 		mNativeData.xSessionData.sessionInfo.vendorName.clear();
 		mNativeData.xSessionData.sessionInfo.displayString.clear();
+	}
+
+	std::string X11SysContext::queryCurrentProcessWorkingDirectory() const
+	{
+		char workingDirStrBuffer[2048];
+		getcwd( workingDirStrBuffer, 2048 );
+
+		return std::string( workingDirStrBuffer );
 	}
 
 	std::string X11SysContext::queryCurrentProcessExecutableFilePath() const

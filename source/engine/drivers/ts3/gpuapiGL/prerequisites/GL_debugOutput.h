@@ -15,10 +15,10 @@ namespace ts3::gpuapi
 
 	enum class GLDebugOutputVersion : enum_default_value_t
 	{
+		Unknown,
 		AMDExt,
 		ARBExt,
 		KHRCore,
-		Unknown
 	};
 
 	class GLDebugOutput

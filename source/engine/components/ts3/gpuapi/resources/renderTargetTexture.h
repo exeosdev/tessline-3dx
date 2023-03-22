@@ -6,30 +6,21 @@
 
 #include "gpuResource.h"
 #include "textureReference.h"
+#include "../state/renderTargetCommon.h"
 
 namespace ts3::gpuapi
 {
 
 	/// @brief
-	enum class ERenderTargetTextureType : enum_default_value_t
-	{
-		RTColor = 1,
-		RTDepth = 2,
-		RTDepthStencil = 3,
-		Unknown = 0
-	};
-
-	/// @brief
 	struct RenderTargetTextureCreateInfo
 	{
 		TextureReference targetTexture;
-		ERenderTargetTextureType rttType;
-		RenderTargetTextureLayout rttLayout;
+		RenderTargetTextureLayout rtTextureLayout;
 		Bitmask<ETextureBindFlags> bindFlags;
 	};
 
 	/// @brief
-	class RenderTargetTexture : public GPUResourceWrapper
+	class RenderTargetTexture : public GPUResourceView
 	{
 		friend class GPUDevice;
 		friend class Texture;
@@ -37,9 +28,14 @@ namespace ts3::gpuapi
 	public:
 		ERenderTargetTextureType const mRTTextureType;
 
+		Bitmask<ERenderTargetBufferFlags> const mRTBufferMask;
+
 		RenderTargetTextureLayout const mRTTextureLayout;
 
-		Bitmask<resource_flags_value_t> const mInternalResourceFlags;
+		/// Internal texture used by this RTT. Can be null, if this is a write-only depth-stencil
+		/// RTT (created solely for the purpose of an off-screen depth/stencil testing).
+		/// In particular, this is null always when isDepthStencilRenderBuffer() returns true.
+		TextureReference const mTargetTexture;
 
 	public:
 		RenderTargetTexture(
@@ -58,12 +54,6 @@ namespace ts3::gpuapi
 		virtual ~RenderTargetTexture();
 
 		///
-		TS3_ATTR_NO_DISCARD const TextureReference & getTargetTextureRef() const noexcept;
-
-		///
-		TS3_ATTR_NO_DISCARD GPUDeviceChildObject * getInternalRenderBuffer() const noexcept;
-
-		///
 		TS3_ATTR_NO_DISCARD bool empty() const noexcept;
 
 		///
@@ -72,17 +62,14 @@ namespace ts3::gpuapi
 		///
 		TS3_ATTR_NO_DISCARD bool isDepthStencilRenderBuffer() const noexcept;
 
-	protected:
-		void setTargetTexture( const TextureReference & pTargetTextureRef );
-
-		void setInternalRenderBuffer( GpaHandle<GPUDeviceChildObject> pInternalRenderBuffer );
+		///
+		template <typename TRenderBufferType>
+		TS3_ATTR_NO_DISCARD TRenderBufferType * getInternalRenderBuffer() const noexcept
+		{
+			return _internalRenderBuffer ? _internalRenderBuffer->queryInterface<TRenderBufferType>() : nullptr;
+		}
 
 	private:
-		/// Internal texture used by this RTT. Can be null, if this is a write-only depth-stencil
-		/// RTT (created solely for the purpose of an off-screen depth/stencil testing).
-		/// In particular, this is null always when isDepthStencilRenderBuffer() returns true.
-		TextureReference _targetTexture;
-
 		///
 		GpaHandle<GPUDeviceChildObject> _internalRenderBuffer;
 	};

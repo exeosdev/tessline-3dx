@@ -258,6 +258,11 @@ namespace ts3::system
 		return _nativeQuerySupportedAPIClass();
 	}
 
+	VisualConfig OpenGLDisplaySurface::queryVisualConfig() const
+	{
+		return _nativeQueryVisualConfig();
+	}
+
 	FrameSize OpenGLDisplaySurface::queryRenderAreaSize() const
 	{
 		return _nativeQueryRenderAreaSize();

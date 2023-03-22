@@ -1,6 +1,6 @@
 
 #include "../GL_prerequisites.h"
-#include "../GL_coreAPIProxy.h"
+#include "../GL_apiTranslationLayer.h"
 
 namespace ts3::gpuapi
 {
@@ -69,7 +69,7 @@ namespace ts3::gpuapi
 
 	const char * GLDebugOutput::getExtensionName() const
 	{
-		return GLCoreAPIProxy::translateGLDebugOutputExtensionName( _apiVersion );
+		return atl::translateGLDebugOutputExtensionName( _apiVersion );
 	}
 
 	uint64 GLDebugOutput::getEventsCounter() const
@@ -219,8 +219,8 @@ namespace ts3::gpuapi
 					"- Description: %s\n"\
 					"----------------------------------------------------------------------\n",
 		          pEventID,
-		          GLCoreAPIProxy::translateGLDebugEventCategoryStrAMD( pEventCategory ),
-		          GLCoreAPIProxy::translateGLDebugEventSeverityStr( pEventSeverity ),
+		          atl::translateGLDebugEventCategoryStrAMD( pEventCategory ),
+		          atl::translateGLDebugEventSeverityStr( pEventSeverity ),
 		          pMessage );
 
 		processEvent( pEventSeverity, eventInfoBuffer );
@@ -291,9 +291,9 @@ namespace ts3::gpuapi
 					"- Description: %s\n"\
 					"----------------------------------------------------------------------\n",
 		          pEventID,
-		          GLCoreAPIProxy::translateGLDebugEventSourceStr( pEventSource ),
-		          GLCoreAPIProxy::translateGLDebugEventTypeStr( pEventType ),
-		          GLCoreAPIProxy::translateGLDebugEventSeverityStr( pEventSeverity ),
+		          atl::translateGLDebugEventSourceStr( pEventSource ),
+		          atl::translateGLDebugEventTypeStr( pEventType ),
+		          atl::translateGLDebugEventSeverityStr( pEventSeverity ),
 		          pMessage );
 
 		processEvent( pEventSeverity, eventInfoBuffer );
@@ -365,9 +365,9 @@ namespace ts3::gpuapi
 		           "- Description: %s\n"\
 		           "----------------------------------------------------------------------\n",
 		          pEventID,
-		          GLCoreAPIProxy::translateGLDebugEventSourceStr( pEventSource ),
-		          GLCoreAPIProxy::translateGLDebugEventTypeStr( pEventType ),
-		          GLCoreAPIProxy::translateGLDebugEventSeverityStr( pEventSeverity ),
+		          atl::translateGLDebugEventSourceStr( pEventSource ),
+		          atl::translateGLDebugEventTypeStr( pEventType ),
+		          atl::translateGLDebugEventSeverityStr( pEventSeverity ),
 		          pMessage );
 
 		processEvent( pEventSeverity, eventInfoBuffer );
@@ -416,7 +416,7 @@ namespace ts3::gpuapi
 
 	const char * GLDebugOutput::getExtensionName() const
 	{
-		return GLCoreAPIProxy::translateGLDebugOutputExtensionName( GLDebugOutputVersion::Unknown );
+		return atl::translateGLDebugOutputExtensionName( GLDebugOutputVersion::Unknown );
 	}
 
 	uint64 GLDebugOutput::getEventsCounter() const

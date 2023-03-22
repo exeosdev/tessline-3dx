@@ -14,9 +14,35 @@ namespace ts3::gpuapi
 
 	GraphicsPipelineStateController::~GraphicsPipelineStateController() = default;
 
-	bool GraphicsPipelineStateController::applyStateChanges()
+	bool GraphicsPipelineStateController::isIAVertexStreamStateDynamic() const noexcept
 	{
-		return false;
+		return _currentCommonState.iaVertexStreamState && _currentCommonState.iaVertexStreamState->isDynamicOverrideState();
+	}
+
+	bool GraphicsPipelineStateController::isRenderTargetStateDynamic() const noexcept
+	{
+		return _currentCommonState.renderTargetBindingState && _currentCommonState.renderTargetBindingState->isDynamicOverrideState();
+	}
+
+	const GraphicsPipelineDynamicState & GraphicsPipelineStateController::getRenderPassDynamicState() const noexcept
+	{
+		return _currentRenderPassDynamicState;
+	}
+
+	const ShaderInputSignature & GraphicsPipelineStateController::getShaderInputSignature() const noexcept
+	{
+		ts3DebugAssert( _currentCommonState.graphicsPSO );
+		return _currentCommonState.graphicsPSO->mShaderInputSignature;
+	}
+
+	void GraphicsPipelineStateController::setRenderPassDynamicState( const GraphicsPipelineDynamicState & pDynamicState )
+	{
+		_currentRenderPassDynamicState = pDynamicState;
+	}
+
+	void GraphicsPipelineStateController::resetRenderPassDynamicState()
+	{
+		_currentRenderPassDynamicState.activeStateMask.clear();
 	}
 
 	bool GraphicsPipelineStateController::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO )
@@ -88,11 +114,6 @@ namespace ts3::gpuapi
 	{
 		_currentCommonState.renderTargetBindingState = nullptr;
 		_stateUpdateMask.set( E_GRAPHICS_STATE_UPDATE_FLAG_COMMON_RENDER_TARGET_BINDING_BIT );
-		return true;
-	}
-
-	bool GraphicsPipelineStateController::setBlendConstantColor( const math::RGBAColorR32Norm & pColor )
-	{
 		return true;
 	}
 

@@ -10,11 +10,11 @@ namespace ts3::gpuapi
 			ERenderTargetTextureType pRTTextureType,
 			const RenderTargetTextureLayout & pRTTextureLayout,
 			TextureReference pTargetTexture )
-	: GPUResourceWrapper( pGPUDevice, EGPUResourceBaseType::Texture )
+	: GPUResourceView( pGPUDevice, EGPUResourceBaseType::Texture, pTargetTexture->mTextureProperties.resourceFlags )
 	, mRTTextureType( pRTTextureType )
+	, mRTBufferMask( cxdefs::getRTBufferMaskForRenderTargetTextureType( pRTTextureType ) )
 	, mRTTextureLayout( pRTTextureLayout )
-	, mInternalResourceFlags( pTargetTexture->mTextureProperties.resourceFlags )
-	, _targetTexture( pTargetTexture )
+	, mTargetTexture( pTargetTexture )
 	{}
 
 	RenderTargetTexture::RenderTargetTexture(
@@ -23,44 +23,29 @@ namespace ts3::gpuapi
 			const RenderTargetTextureLayout & pRTTextureLayout,
 			GpaHandle<GPUDeviceChildObject> pInternalRenderBuffer,
 			Bitmask<resource_flags_value_t> pRenderBufferFlags )
-	: GPUResourceWrapper( pGPUDevice, EGPUResourceBaseType::Texture )
+	: GPUResourceView( pGPUDevice, EGPUResourceBaseType::Texture, pRenderBufferFlags )
 	, mRTTextureType( pRTTextureType )
+	, mRTBufferMask( cxdefs::getRTBufferMaskForRenderTargetTextureType( pRTTextureType ) )
 	, mRTTextureLayout( pRTTextureLayout )
-	, mInternalResourceFlags( pRenderBufferFlags )
+	, mTargetTexture()
 	, _internalRenderBuffer( pInternalRenderBuffer )
 	{}
 
 	RenderTargetTexture::~RenderTargetTexture() = default;
 
-	const TextureReference & RenderTargetTexture::getTargetTextureRef() const noexcept
+	bool RenderTargetTexture::empty() const noexcept
 	{
-		return _targetTexture;
-	}
-
-	GPUDeviceChildObject * RenderTargetTexture::getInternalRenderBuffer() const noexcept
-	{
-		return _internalRenderBuffer.get();
+		return !mTargetTexture && !_internalRenderBuffer;
 	}
 
 	bool RenderTargetTexture::isDepthStencilTexture() const noexcept
 	{
-		return ( mRTTextureType == ERenderTargetTextureType::RTDepth ) ||
-		       ( mRTTextureType == ERenderTargetTextureType::RTDepthStencil );
+		return mRTBufferMask.isSetAnyOf( E_RENDER_TARGET_BUFFER_MASK_DEPTH_STENCIL );
 	}
 
 	bool RenderTargetTexture::isDepthStencilRenderBuffer() const noexcept
 	{
-		return _targetTexture.empty() && isDepthStencilTexture();
-	}
-
-	void RenderTargetTexture::setTargetTexture( const TextureReference & pTargetTextureRef )
-	{
-		_targetTexture = pTargetTextureRef;
-	}
-
-	void RenderTargetTexture::setInternalRenderBuffer( GpaHandle<GPUDeviceChildObject> pInternalRenderBuffer )
-	{
-		_internalRenderBuffer = pInternalRenderBuffer;
+		return _internalRenderBuffer && isDepthStencilTexture();
 	}
 
 	namespace rcutil
@@ -80,11 +65,14 @@ namespace ts3::gpuapi
 			}
 			else if( pixelFormatFlags.isSet( E_GPU_DATA_FORMAT_FLAG_DEPTH_BIT ) )
 			{
-				return ERenderTargetTextureType::RTDepth;
+				return ERenderTargetTextureType::RTDepthOnly;
+			}
+			else if( pixelFormatFlags.isSet( E_GPU_DATA_FORMAT_FLAG_STENCIL_BIT ) )
+			{
+				return ERenderTargetTextureType::RTStencilOnly;
 			}
 			else /* Not a depth/stencil, not a compressed, should be a color-compatible one. */
 			{
-				ts3DebugAssert( rcutil::checkRenderTargetTextureColorFormat( pFormat ) );
 				return ERenderTargetTextureType::RTColor;
 			}
 		}
@@ -92,9 +80,9 @@ namespace ts3::gpuapi
 		RenderTargetTextureLayout queryRenderTargetTextureLayout( const TextureLayout & pTextureLayout )
 		{
 			RenderTargetTextureLayout rtTextureLayout{};
-			rtTextureLayout.bufferSize.width = pTextureLayout.dimensions.width;
-			rtTextureLayout.bufferSize.height = pTextureLayout.dimensions.height;
-			rtTextureLayout.internalDataFormat = pTextureLayout.pixelFormat;
+			rtTextureLayout.imageRect.width = pTextureLayout.dimensions.width;
+			rtTextureLayout.imageRect.height = pTextureLayout.dimensions.height;
+			rtTextureLayout.internalFormat = pTextureLayout.internalFormat;
 			rtTextureLayout.msaaLevel = pTextureLayout.msaaLevel;
 
 			return rtTextureLayout;
@@ -110,9 +98,9 @@ namespace ts3::gpuapi
 			const auto & targetTextureLayout = pTargetTexture->mTextureLayout;
 
 			const auto layoutMatch =
-				( pRTTextureLayout.bufferSize.width == targetTextureLayout.dimensions.width ) &&
-				( pRTTextureLayout.bufferSize.height == targetTextureLayout.dimensions.height ) &&
-				( pRTTextureLayout.internalDataFormat == targetTextureLayout.pixelFormat ) &&
+				( pRTTextureLayout.imageRect.width == targetTextureLayout.dimensions.width ) &&
+				( pRTTextureLayout.imageRect.height == targetTextureLayout.dimensions.height ) &&
+				( pRTTextureLayout.internalFormat == targetTextureLayout.internalFormat ) &&
 				( pRTTextureLayout.msaaLevel == targetTextureLayout.msaaLevel );
 
 			return layoutMatch;

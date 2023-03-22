@@ -38,9 +38,7 @@ namespace ts3::system
 	
 	AssetLoaderHandle Win32SysContext::createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo )
 	{
-		return platform::createFileAssetLoader( getHandle<Win32SysContext>(),
-		                                        pCreateInfo.nativeParams->fileManager,
-		                                        pCreateInfo.nativeParams->relativeAssetRootDir );
+		return platform::createFileAssetLoader( getHandle<Win32SysContext>(), *pCreateInfo.nativeParams );
 	}
 
 	DisplayManagerHandle Win32SysContext::createDisplayManager()
@@ -76,6 +74,13 @@ namespace ts3::system
 		}
 
 		return createSysObject<Win32WindowManager>( pDisplayManager->getHandle<Win32DisplayManager>() );
+	}
+
+	std::string Win32SysContext::queryCurrentProcessWorkingDirectory() const
+	{
+		char workingDirStrBuffer[2048];
+		_getcwd( workingDirStrBuffer, 2048 );
+		return std::string( workingDirStrBuffer );
 	}
 
 	std::string Win32SysContext::queryCurrentProcessExecutableFilePath() const

@@ -103,6 +103,14 @@ namespace ts3
 		return HFSIdentifier{ hash1, hash2 };
 	}
 
+	template <typename TInput>
+	inline HFSIdentifier generateHFSIdentifier( const TInput & pInput )
+	{
+		const auto hash1 = hashCompute<EHashAlgo::FNV1A32>( pInput );
+		const auto hash2 = hashCompute<EHashAlgo::SDBM>( pInput );
+		return HFSIdentifier{ hash1, hash2 };
+	}
+
 } // namespace ts3
 
 #endif // __TS3_CORE_HFS_IDENTIFIER_H__

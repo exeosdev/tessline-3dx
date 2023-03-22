@@ -31,6 +31,7 @@ namespace ts3::gpuapi
 
 		void bindDepthStencilRenderbuffer(
 				GLRenderbufferObject & pGLRenderbuffer,
+				Bitmask<uint32> pBufferMask,
 				GLenum pActiveBindTarget = 0 );
 
 		void bindColorTexture(
@@ -42,15 +43,16 @@ namespace ts3::gpuapi
 		void bindDepthStencilTexture(
 				GLTextureObject & pGLTexture,
 				const TextureSubResource & pSubResource,
+				Bitmask<uint32> pBufferMask,
 				GLenum pActiveBindTarget = 0 );
 
 		bool checkStatus( GLenum pActiveBindTarget = 0 ) const;
 
 		static GLFramebufferObjectHandle create();
 
-	private:
-		bool initialize();
+		static GLFramebufferObjectHandle createForDefaultFramebuffer();
 
+	private:
 		GLenum checkActiveBindTarget( GLenum pBindTarget ) const;
 	};
 

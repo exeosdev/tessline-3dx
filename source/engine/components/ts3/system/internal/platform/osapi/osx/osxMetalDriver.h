@@ -39,11 +39,13 @@ namespace ts3::system
 	class OSXMetalSystemDriver : public OSXNativeObject<MetalSystemDriver, platform::OSXMetalSystemDriverNativeData>
 	{
 	public:
-		OSXMetalSystemDriver( OSXDisplayManagerHandle pDisplayManager, MetalDeviceHandle pMetalDevice );
+		OSXMetalSystemDriver( OSXDisplayManagerHandle pDisplayManager );
 		virtual ~OSXMetalSystemDriver() noexcept;
 		
 	private:
-		virtual MetalDisplaySurfaceHandle _nativeCreateDisplaySurface( const MetalDisplaySurfaceCreateInfo & pCreateInfo ) override final;
+		virtual MetalDisplaySurfaceHandle _nativeCreateDisplaySurface(
+				MetalDevice & pMetalDevice,
+				const MetalDisplaySurfaceCreateInfo & pCreateInfo ) override final;
 
 		virtual void _nativeDestroyDisplaySurface( MetalDisplaySurface & pDisplaySurface ) override final;
 	};

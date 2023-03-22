@@ -122,6 +122,9 @@ namespace ts3::system
         virtual EOpenGLAPIClass _nativeQuerySupportedAPIClass() const noexcept override final;
 
 		/// @copybrief OpenGLDisplaySurface::_nativeQueryRenderAreaSize
+		virtual VisualConfig _nativeQueryVisualConfig() const override final;
+
+		/// @copybrief OpenGLDisplaySurface::_nativeQueryRenderAreaSize
 		virtual FrameSize _nativeQueryRenderAreaSize() const override final;
 
 		/// @copybrief OpenGLDisplaySurface::_nativeSysValidate

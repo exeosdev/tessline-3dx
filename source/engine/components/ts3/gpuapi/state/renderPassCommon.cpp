@@ -97,24 +97,6 @@ namespace ts3::gpuapi
 					E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_RESOLVE_BIT );
 		}
 
-		void updateRenderPassConfigurationFlags( RenderPassConfiguration & pRenderPassConfig )
-		{
-			foreachRTAttachmentIndex( pRenderPassConfig.activeAttachmentsMask,
-				[&]( native_uint pIndex, ERTAttachmentFlags pAttachmentBit )
-				{
-					const auto attachmentUsage = getRenderPassAttachmentActionMask( pRenderPassConfig.colorAttachments[pIndex] );
-					if( attachmentUsage.isSet( E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_LOAD_CLEAR_BIT ) )
-					{
-						pRenderPassConfig.attachmentsActionClearMask.set( pAttachmentBit );
-					}
-					if( attachmentUsage.isSet( E_RENDER_PASS_ATTACHMENT_ACTION_FLAG_STORE_RESOLVE_BIT ) )
-					{
-						pRenderPassConfig.attachmentsActionResolveMask.set( pAttachmentBit );
-					}
-					return true;
-				} );
-		}
-
 	}
 
 }

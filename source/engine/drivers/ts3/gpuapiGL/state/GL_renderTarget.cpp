@@ -1,6 +1,5 @@
 
 #include "GL_renderTarget.h"
-#include <ts3/gpuapi/resources/texture.h>
 #include <ts3/gpuapiGL/GL_gpuDevice.h>
 #include <ts3/gpuapiGL/objects/GL_framebufferObject.h>
 #include <ts3/gpuapiGL/objects/GL_renderbufferObject.h>
@@ -48,23 +47,19 @@ namespace ts3::gpuapi
 		return immutableState;
 	}
 
-
-	GLRenderPassConfigurationImmutableState::GLRenderPassConfigurationImmutableState(
+	GpaHandle<GLRenderTargetBindingImmutableState> GLRenderTargetBindingImmutableState::createForScreen(
 			GLGPUDevice & pGPUDevice,
-			const RenderPassConfiguration & pRenderPassConfiguration )
-	: RenderPassConfigurationImmutableState( pGPUDevice )
-	, mRenderPassConfiguration( pRenderPassConfiguration )
-	{}
-
-	GLRenderPassConfigurationImmutableState::~GLRenderPassConfigurationImmutableState() = default;
-
-	GpaHandle<GLRenderPassConfigurationImmutableState> GLRenderPassConfigurationImmutableState::createInstance(
-			GLGPUDevice & pGPUDevice,
-			const RenderPassConfiguration & pConfiguration )
+			const RenderTargetLayout & pRenderTargetLayout )
 	{
-		auto immutableState = createGPUAPIObject<GLRenderPassConfigurationImmutableState>(
-				pGPUDevice,
-				pConfiguration );
+		GLRenderTargetBindingDefinition glcRenderTargetBindingDefinition;
+		glcRenderTargetBindingDefinition.fboData.renderFBO = GLFramebufferObject::createForDefaultFramebuffer();
+		glcRenderTargetBindingDefinition.fboData.resolveFBO = nullptr;
+		glcRenderTargetBindingDefinition.rtLayout = pRenderTargetLayout;
+
+		auto immutableState = createGPUAPIObject<GLRenderTargetBindingImmutableState>(
+			pGPUDevice,
+			glcRenderTargetBindingDefinition.rtLayout,
+			std::move( glcRenderTargetBindingDefinition.fboData ) );
 
 		return immutableState;
 	}
@@ -122,7 +117,7 @@ namespace ts3::gpuapi
 				if( pAttachmentMask.isSet( attachmentBit ) )
 				{
 					auto & colorAttachmentBinding = pBindingDefinition.colorAttachments[caIndex];
-					auto & textureReference = colorAttachmentBinding.attachmentTexture->getTargetTextureRef();
+					auto & textureReference = colorAttachmentBinding.attachmentTexture->mTargetTexture;
 					auto * openglTexture = textureReference.getRefTexture()->queryInterface<GLTexture>();
 
 					framebufferObject->bindColorTexture(
@@ -138,20 +133,28 @@ namespace ts3::gpuapi
 
 				if( depthStencilAttachmentBinding.attachmentTexture->isDepthStencilRenderBuffer() )
 				{
-					auto * internalRenderBuffer = depthStencilAttachmentBinding.attachmentTexture->getInternalRenderBuffer();
-					auto * openglRenderBuffer = internalRenderBuffer->queryInterface<GLInternalRenderBuffer>();
+					auto * renderBuffer = depthStencilAttachmentBinding.attachmentTexture->getInternalRenderBuffer<GLInternalRenderBuffer>();
 
-					framebufferObject->bindDepthStencilRenderbuffer( *( openglRenderBuffer->mGLRenderbufferObject ) );
+					framebufferObject->bindDepthStencilRenderbuffer(
+							*renderBuffer->mGLRenderbufferObject,
+							depthStencilAttachmentBinding.attachmentTexture->mRTBufferMask );
 				}
 				else
 				{
-					auto & textureReference = depthStencilAttachmentBinding.attachmentTexture->getTargetTextureRef();
+					auto & textureReference = depthStencilAttachmentBinding.attachmentTexture->mTargetTexture;
 					auto * openglTexture = textureReference.getRefTexture()->queryInterface<GLTexture>();
 
 					framebufferObject->bindDepthStencilTexture(
-							*( openglTexture->mGLTextureObject ),
-							textureReference.getRefSubResource() );
+							*openglTexture->mGLTextureObject,
+							textureReference.getRefSubResource(),
+							depthStencilAttachmentBinding.attachmentTexture->mRTBufferMask );
 				}
+			}
+
+			if( !pAttachmentMask.isSetAnyOf( E_RT_ATTACHMENT_MASK_COLOR_ALL ) )
+			{
+				glDrawBuffer( GL_NONE );
+				ts3OpenGLHandleLastError();
 			}
 
 			if( !framebufferObject->checkStatus() )
@@ -161,6 +164,15 @@ namespace ts3::gpuapi
 			}
 
 			return framebufferObject;
+		}
+
+		RenderTargetLayout translateSystemVisualConfigToRenderTargetLayout( const system::VisualConfig & pSysVisualConfig )
+		{
+			RenderTargetLayout renderTargetLayout;
+			renderTargetLayout.activeAttachmentsMask = E_RT_ATTACHMENT_MASK_DEFAULT_C0_DS;
+			renderTargetLayout.colorAttachments[0].format = ETextureFormat::BGRA8UN;
+			renderTargetLayout.depthStencilAttachment.format = ETextureFormat::D24UNS8U;
+			return renderTargetLayout;
 		}
 
 		void clearRenderPassFramebuffer( const RenderPassConfiguration & pRenderPassConfiguration )
@@ -224,11 +236,13 @@ namespace ts3::gpuapi
 
 				GLint drawFramebufferHandle = -1;
 				glGetIntegerv( GL_DRAW_FRAMEBUFFER_BINDING, &drawFramebufferHandle );
+				ts3OpenGLHandleLastError();
 
 				GLint readFramebufferHandle = -1;
 				glGetIntegerv( GL_READ_FRAMEBUFFER_BINDING, &readFramebufferHandle );
+				ts3OpenGLHandleLastError();
 
-				const auto & fboImageSize = pRTBindingInfo.rtLayout->sharedImageSize;
+				const auto & fboImageSize = pRTBindingInfo.rtLayout->sharedImageRect;
 
 				glBindFramebuffer( GL_READ_FRAMEBUFFER, drawFramebufferHandle );
 				ts3OpenGLHandleLastError();

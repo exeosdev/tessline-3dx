@@ -6,6 +6,7 @@
 
 #include "../prerequisites.h"
 #include <ts3/core/memory/commonMemoryDefs.h>
+#include <ts3/stdext/byteArray.h>
 
 namespace ts3::gpuapi
 {
@@ -130,6 +131,21 @@ namespace ts3::gpuapi
 		WriteInvalidate = E_GPU_MEMORY_MAP_FLAG_WRITE_INVALIDATE_BIT,
 	};
 
+	struct StructuredResourceAlignedMemoryMetrics
+	{
+		memory_align_t elementSize;
+		memory_align_t elementSizeAligned;
+		gpu_memory_size_t elementsNum;
+		gpu_memory_size_t storageSize;
+		gpu_memory_size_t storageSizeAligned;
+	};
+
+	struct StructuredResourceAlignedMemory
+	{
+		DynamicByteArray alignedBuffer;
+		StructuredResourceAlignedMemoryMetrics metrics;
+	};
+
 	struct ResourceMemoryInfo
 	{
         memory_align_t baseAlignment;
@@ -151,15 +167,34 @@ namespace ts3::gpuapi
 		}
 	};
 
-	namespace GpuMem
+	namespace memutil
 	{
 
 		/// @brief Returns true if the requested memory map mode is valid for the memory with given properties (flags).
-		inline bool checkMemoryMapAccess( EGPUMemoryMapMode pRequestedMapMode, Bitmask<EGPUMemoryFlags> pMemoryFlags )
-		{
-			auto mapRequestedAccessFlags = static_cast<uint32>( pRequestedMapMode ) & E_GPU_MEMORY_MAP_FLAG_ACCESS_READ_WRITE_BIT;
-			return pMemoryFlags.isSet( mapRequestedAccessFlags );
-		}
+		TS3_GPUAPI_API_NO_DISCARD bool checkMemoryMapAccess( EGPUMemoryMapMode pRequestedMapMode, Bitmask<EGPUMemoryFlags> pMemoryFlags );
+
+		TS3_GPUAPI_API_NO_DISCARD StructuredResourceAlignedMemory alignStructuredResourceDataAuto(
+				const void * pData,
+				native_uint pElementSize,
+				native_uint pElementsNum );
+
+		TS3_GPUAPI_API_NO_DISCARD DynamicByteArray alignStructuredResourceData(
+				const void * pData,
+				native_uint pElementSize,
+				native_uint pElementsNum,
+				memory_align_t pAlignedStride );
+
+		TS3_GPUAPI_API_NO_DISCARD DynamicByteArray alignStructuredResourceData(
+				const void * pData,
+				const StructuredResourceAlignedMemoryMetrics & pMetrics );
+
+		/// @brief
+		TS3_GPUAPI_API_NO_DISCARD StructuredResourceAlignedMemoryMetrics computeStructuredResourceAlignedMemoryMetrics(
+				gpu_memory_size_t pElementSize,
+				gpu_memory_size_t pElementsNum );
+
+		/// @brief
+		TS3_GPUAPI_API_NO_DISCARD gpu_memory_size_t computeStructuredResourceAlignedStride( gpu_memory_size_t pElementSize );
 
 	}
 

@@ -18,16 +18,16 @@ namespace ts3::gpuapi
 	{
 		std::unique_ptr<CommandContext> commandContext;
 
-		auto contextExecutionMode = ecGetCommandContextExecutionMode( pContextType );
+		const auto contextExecutionMode = cxdefs::getCommandObjectExecutionMode( pContextType );
 		if( auto * commandList = acquireCommandList( contextExecutionMode ) )
 		{
 			if( contextExecutionMode == ECommandExecutionMode::Direct )
 			{
-				commandContext.reset( new CommandContextDirectGraphics( *this, *commandList ) );
+				commandContext.reset( new CommandContextDirectGraphics( *commandList ) );
 			}
 			else
 			{
-				commandContext.reset( new CommandContextDeferredGraphics( *this, *commandList ) );
+				commandContext.reset( new CommandContextDeferredGraphics( *commandList ) );
 			}
 		}
 

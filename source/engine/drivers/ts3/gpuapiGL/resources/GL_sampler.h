@@ -5,7 +5,7 @@
 #define __TS3DRIVER_GPUAPI_GLCOMMON_SAMPLER_H__
 
 #include "../objects/GL_samplerObject.h"
-#include <ts3/gpuapi/resources/sampler.h>
+#include <ts3/gpuapi/state/sampler.h>
 
 namespace ts3::gpuapi
 {
@@ -18,13 +18,13 @@ namespace ts3::gpuapi
 		GLSamplerObjectHandle const mGLSamplerObject;
 
 	public:
-		GLSampler( GLGPUDevice & pGPUDevice, const SamplerDesc & pSamplerDesc, GLSamplerObjectHandle pGLSamplerObject );
+		GLSampler( GLGPUDevice & pGPUDevice, GLSamplerObjectHandle pGLSamplerObject );
 		virtual ~GLSampler();
 
-		static GLSamplerHandle createSampler( GLGPUDevice & pGLGPUDevice, const SamplerCreateInfo & pCreateInfo );
+		static GLSamplerHandle createSampler( GLGPUDevice & pGPUDevice, const SamplerCreateInfo & pCreateInfo );
 
 	private:
-		static bool translateSamplerDesc( const SamplerDesc & pSamplerDesc, GLSamplerState & pOutSamplerState );
+		static bool translateSamplerConfig( const SamplerConfig & pSamplerConfig, GLSamplerState & pOutSamplerState );
 	};
 
 } // namespace ts3::gpuapi

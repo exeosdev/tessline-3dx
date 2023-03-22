@@ -44,9 +44,61 @@ namespace ts3::gpuapi
 		auto programObject = GLShaderProgramObject::create( GLShaderProgramType::Separable );
 		programObject->attachShader( pShader );
 		programObject->link();
-		programObject->validate();
 		programObject->detachShader( pShader );
 		return programObject;
+	}
+
+	GLShaderProgramObjectHandle GLShaderProgramObject::createSeparableModule( GLShaderObject & pShader, const GLShaderDataLayoutMap & pLayoutMap )
+	{
+		auto programObject = GLShaderProgramObject::create( GLShaderProgramType::Separable );
+		programObject->attachShader( pShader );
+		setProgramPreLinkBindings( *programObject, pLayoutMap );
+		programObject->link();
+		setProgramPostLinkBindings( *programObject, pLayoutMap );
+		programObject->detachShader( pShader );
+		return programObject;
+	}
+
+	void GLShaderProgramObject::setProgramPreLinkBindings( GLShaderProgramObject & pProgram, const GLShaderDataLayoutMap & pLayoutMap )
+	{
+		for( const auto & attributeLocation : pLayoutMap.attributeLocations )
+		{
+			glBindAttribLocation( pProgram.mGLHandle, attributeLocation.second, attributeLocation.first.data() );
+			ts3OpenGLHandleLastError();
+		}
+
+		for( const auto & fragDataLocation : pLayoutMap.fragDataLocations )
+		{
+			glBindFragDataLocation( pProgram.mGLHandle, fragDataLocation.second, fragDataLocation.first.data() );
+			ts3OpenGLHandleLastError();
+		}
+	}
+
+	void GLShaderProgramObject::setProgramPostLinkBindings( GLShaderProgramObject & pProgram, const GLShaderDataLayoutMap & pLayoutMap )
+	{
+		for( const auto & samplerBinding : pLayoutMap.samplerBindings )
+		{
+			GLint samplerVariableLocation = glGetUniformLocation( pProgram.mGLHandle, samplerBinding.first.data() );
+			ts3OpenGLHandleLastError();
+
+			if( samplerVariableLocation != -1 )
+			{
+				glProgramUniform1i( pProgram.mGLHandle, samplerVariableLocation, samplerBinding.second );
+				ts3OpenGLHandleLastError();
+			}
+		}
+
+		for( const auto & uniformBlockBinding : pLayoutMap.uniformBlockBindings )
+		{
+			GLint blockIndex = glGetUniformBlockIndex( pProgram.mGLHandle, uniformBlockBinding.first.data() );
+			ts3OpenGLHandleLastError();
+
+			if( blockIndex != -1 )
+			{
+				glUniformBlockBinding( pProgram.mGLHandle, blockIndex, uniformBlockBinding.second );
+				ts3OpenGLHandleLastError();
+			}
+		}
 	}
 
 	bool GLShaderProgramObject::release()
@@ -116,7 +168,7 @@ namespace ts3::gpuapi
 		if( linkStatus == GL_FALSE )
 		{
 			auto infoLog = getInfoLog();
-			// print info log
+			ts3DebugOutput( infoLog.data() );
 			ts3DebugInterrupt();
 			return false;
 		}
@@ -135,7 +187,7 @@ namespace ts3::gpuapi
 		if( validateStatus == GL_FALSE )
 		{
 			auto infoLog = getInfoLog();
-			// print info log
+			ts3DebugOutput( infoLog.data() );
 			ts3DebugInterrupt();
 			return false;
 		}
@@ -271,7 +323,7 @@ namespace ts3::gpuapi
 
 	size_t GLShaderProgramObject::getInfoLogLength() const
 	{
-		auto infoLogLength = queryParameter( GL_ATTACHED_SHADERS );
+		auto infoLogLength = queryParameter( GL_INFO_LOG_LENGTH );
 		return infoLogLength;
 	}
 

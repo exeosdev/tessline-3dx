@@ -1,5 +1,6 @@
 
 #include "texture.h"
+#include "renderTargetTexture.h"
 
 namespace ts3::gpuapi
 {
@@ -19,11 +20,6 @@ namespace ts3::gpuapi
 	const GPUResourceProperties & Texture::getProperties() const
 	{
 		return mTextureProperties;
-	}
-
-	bool Texture::checkTextureTargetSupport( ETextureTarget pTextureTarget ) const
-	{
-		return true;
 	}
 
 	TextureSubResource Texture::getAllSubResourcesRef() const
@@ -128,63 +124,64 @@ namespace ts3::gpuapi
 		}
 	}
 
-	bool Texture::validateTextureCreateInfo( TextureCreateInfo & pCreateInfo )
+	RenderTargetTextureHandle Texture::createDefaultRenderTargetTextureView(
+			GPUDevice & pGPUDevice,
+			const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
-		if( pCreateInfo.initialTarget != ETextureTarget::Unknown )
+		if( pCreateInfo.targetTexture )
 		{
-			// If the user has specified explicit initial target for the buffer, we need to verify
-			// if the buffer description allows for that target in the first place.
-			if( !pCreateInfo.resourceFlags.isSet( pCreateInfo.initialTarget ) )
+			const auto rttType = rcutil::queryRenderTargetTextureType( pCreateInfo.targetTexture->mTextureLayout.internalFormat );
+			const auto rttLayout = rcutil::queryRenderTargetTextureLayout( pCreateInfo.targetTexture->mTextureLayout );
+
+			auto existingTextureRTT = createGPUAPIObject<RenderTargetTexture>( pGPUDevice, rttType, rttLayout, pCreateInfo.targetTexture );
+
+			return existingTextureRTT;
+		}
+
+		return nullptr;
+	}
+
+
+	namespace rcutil
+	{
+
+		TextureDimensions getValidTextureDimensions( ETextureClass pTexClass, const TextureDimensions & pDimensions )
+		{
+			TextureDimensions validTextureDimensions = pDimensions;
+
+			if( pTexClass == ETextureClass::T2D )
 			{
-				pCreateInfo.resourceFlags.set( pCreateInfo.initialTarget );
+				validTextureDimensions.arraySize = 1;
+				validTextureDimensions.depth = 1;
 			}
-		}
-		else
-		{
-			auto initialTarget = rcutil::getTextureTargetFromResourceFlags( pCreateInfo.resourceFlags );
-			if( initialTarget == ETextureTarget::Unknown )
+			else if( pTexClass == ETextureClass::T2DArray )
 			{
-				return false;
+				validTextureDimensions.depth = 1;
 			}
-			pCreateInfo.initialTarget = initialTarget;
+			else if( pTexClass == ETextureClass::T2DMS )
+			{
+				validTextureDimensions.arraySize = 1;
+				validTextureDimensions.depth = 1;
+				validTextureDimensions.mipLevelsNum = 1;
+			}
+			else if( pTexClass == ETextureClass::T2DMSArray )
+			{
+				validTextureDimensions.depth = 1;
+				validTextureDimensions.mipLevelsNum = 1;
+			}
+			else if( pTexClass == ETextureClass::T3D )
+			{
+				validTextureDimensions.arraySize = 1;
+			}
+			else if( pTexClass == ETextureClass::TCubeMap )
+			{
+				validTextureDimensions.depth = 1;
+				validTextureDimensions.arraySize = 1;
+			}
+
+			return validTextureDimensions;
 		}
 
-		if( pCreateInfo.memoryBaseAlignment == 0 )
-		{
-		    pCreateInfo.memoryBaseAlignment = ts3::cxdefs::MEMORY_DEFAULT_ALIGNMENT;
-		}
-
-		if( pCreateInfo.texClass == ETextureClass::T2D )
-		{
-			pCreateInfo.dimensions.arraySize = 1;
-			pCreateInfo.dimensions.depth = 1;
-		}
-		else if( pCreateInfo.texClass == ETextureClass::T2DArray )
-		{
-			pCreateInfo.dimensions.depth = 1;
-		}
-		else if( pCreateInfo.texClass == ETextureClass::T2DMS )
-		{
-			pCreateInfo.dimensions.arraySize = 1;
-			pCreateInfo.dimensions.depth = 1;
-			pCreateInfo.dimensions.mipLevelsNum = 1;
-		}
-		else if( pCreateInfo.texClass == ETextureClass::T2DMSArray )
-		{
-			pCreateInfo.dimensions.depth = 1;
-			pCreateInfo.dimensions.mipLevelsNum = 1;
-		}
-		else if( pCreateInfo.texClass == ETextureClass::T3D )
-		{
-			pCreateInfo.dimensions.arraySize = 1;
-		}
-		else if( pCreateInfo.texClass == ETextureClass::TCubeMap )
-		{
-			pCreateInfo.dimensions.depth = 1;
-			pCreateInfo.dimensions.arraySize = 1;
-		}
-
-		return true;
 	}
 
 } // namespace ts3::gpuapi

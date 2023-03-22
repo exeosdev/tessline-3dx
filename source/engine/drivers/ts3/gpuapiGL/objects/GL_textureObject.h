@@ -15,6 +15,7 @@ namespace ts3::gpuapi
 	struct GLTextureInitDataDesc
 	{
 		TextureSubTextureInitDataDesc * subTextureInitDataPtr = nullptr;
+		Bitmask<ETextureInitFlags> textureInitFlags = 0;
 		GLenum openglPixelDataLayout = 0;
 		GLenum openglPixelDataType = 0;
 
@@ -37,6 +38,11 @@ namespace ts3::gpuapi
 		GLenum internalFormat = 0;
 		GLuint msaaLevel = 0;
 		GLTextureInitDataDesc openglInitDataDesc;
+
+		uint32 getInitMipLevelsNum() const
+		{
+			return openglInitDataDesc.textureInitFlags.isSet( E_TEXTURE_INIT_FLAG_GENERATE_MIPMAPS_BIT ) ? 1u : dimensions.mipLevelsNum;
+		}
 	};
 
 	struct GLTextureSubDataUploadDesc
@@ -57,6 +63,10 @@ namespace ts3::gpuapi
 		GLTextureObject( GLuint pHandle, const GLTextureCreateInfo & pGLCreateInfo );
 		virtual ~GLTextureObject();
 
+		bool isAutoMipGenerationEnabled() const;
+		GLenum queryInternalFormat( GLenum pActiveBindTarget = 0 ) const;
+		memory_size_t querySize( GLenum pActiveBindTarget = 0 ) const;
+
 		virtual bool release();
 		virtual bool validateHandle() const;
 
@@ -70,22 +80,37 @@ namespace ts3::gpuapi
 		void updateUpload3D( const GLTextureSubDataUploadDesc & pGLUploadDesc, GLenum pActiveBindTarget = 0 );
 		void updateUploadCubeMap( const GLTextureSubDataUploadDesc & pGLUploadDesc, GLenum pActiveBindTarget = 0 );
 
-		GLenum queryInternalFormat( GLenum pActiveBindTarget = 0 ) const;
-		memory_size_t querySize( GLenum pActiveBindTarget = 0 ) const;
-
-		static GLTextureObjectHandle create( const GLTextureCreateInfo & pGLCreateInfo );
+		static GLTextureObjectHandle createCore( const GLTextureCreateInfo & pGLCreateInfo );
+		static GLTextureObjectHandle createCompat( const GLTextureCreateInfo & pGLCreateInfo );
 
 	private:
-		bool initialize( const GLTextureCreateInfo & pGLCreateInfo );
-		bool initialize2D( const GLTextureCreateInfo & pGLCreateInfo );
-		bool initialize2DArray( const GLTextureCreateInfo & pGLCreateInfo );
-		bool initialize2DMS( const GLTextureCreateInfo & pGLCreateInfo );
-		bool initialize3D( const GLTextureCreateInfo & pGLCreateInfo );
-		bool initializeCubeMap( const GLTextureCreateInfo & pGLCreateInfo );
+		void setAutoMipGeneration( bool pEnable );
+
+		bool initializeCore( const GLTextureCreateInfo & pGLCreateInfo );
+		bool initializeCore2D( const GLTextureCreateInfo & pGLCreateInfo );
+		bool initializeCore2DArray( const GLTextureCreateInfo & pGLCreateInfo );
+		bool initializeCore2DMS( const GLTextureCreateInfo & pGLCreateInfo );
+		bool initializeCore3D( const GLTextureCreateInfo & pGLCreateInfo );
+		bool initializeCoreCubeMap( const GLTextureCreateInfo & pGLCreateInfo );
+
+		bool initializeCompat( const GLTextureCreateInfo & pGLCreateInfo );
+		bool initializeCompat2D( const GLTextureCreateInfo & pGLCreateInfo );
+		bool initializeCompat2DArray( const GLTextureCreateInfo & pGLCreateInfo );
+		bool initializeCompat2DMS( const GLTextureCreateInfo & pGLCreateInfo );
+		bool initializeCompat3D( const GLTextureCreateInfo & pGLCreateInfo );
+		bool initializeCompatCubeMap( const GLTextureCreateInfo & pGLCreateInfo );
+
+		void initializeData2D( const GLTextureCreateInfo & pGLCreateInfo, bool pAllocateMipMapStorage = false );
+		void initializeData2DArray( const GLTextureCreateInfo & pGLCreateInfo, bool pAllocateMipMapStorage = false );
+		void initializeData3D( const GLTextureCreateInfo & pGLCreateInfo, bool pAllocateMipMapStorage = false );
+		void initializeDataCubeMap( const GLTextureCreateInfo & pGLCreateInfo, bool pAllocateMipMapStorage = false );
 
 		GLenum checkActiveBindTarget( GLenum pBindTarget ) const;
 
 		static GLuint computeInputPixelDataAlignment( GLenum pPixelDataLayout, GLenum pPixelDataType );
+
+	private:
+		bool _autoMipGenerationStatus = false;
 	};
 
 } // namespace ts3::gpuapi

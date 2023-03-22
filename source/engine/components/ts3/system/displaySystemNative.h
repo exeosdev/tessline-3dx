@@ -14,10 +14,6 @@
 #  include "internal/platform/osapi/x11/x11DisplaySystem.h"
 #endif
 
-#if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_DXGI )
-#  include "internal/platform/shared/dxgi/dxgiDisplaySystem.h"
-#endif
-
 #if( TS3_SYSTEM_DSM_DRIVER_TYPE_SUPPORT_SDL )
 #  include "internal/platform/shared/sdl/sdlDisplaySystem.h"
 #endif

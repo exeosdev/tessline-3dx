@@ -6,6 +6,7 @@
 
 #include "../DX11_prerequisites.h"
 #include <ts3/gpuapi/resources/texture.h>
+#include <ts3/gpuapi/state/renderTargetCommon.h>
 
 namespace ts3::gpuapi
 {
@@ -36,46 +37,64 @@ namespace ts3::gpuapi
 
 	struct DX11TextureCreateInfo
 	{
-		ETextureDimensionClass dimensionClass;
+		ETextureClass texClass;
 		TextureDimensions dimensions;
 		DXGI_FORMAT dxgiTextureFormat;
 		UINT msaaLevel;
 		DX11TextureUsageDesc dx11UsageDesc;
 		DX11TextureInitDataDesc dx11InitDataDesc;
+		Bitmask<resource_flags_value_t> resourceFlags;
 	};
 
 	class DX11Texture : public Texture
 	{
-		friend class DX11CommandContext;
 		friend class DX11RenderBuffer;
 
 	public:
-		DXGI_FORMAT const mDXGITextureFormat;
+		DXGI_FORMAT const mDXGIInternalFormat;
 		ComPtr<ID3D11Device1> const mD3D11Device1;
 		ComPtr<ID3D11Texture2D> const mD3D11Texture2D;
 		ComPtr<ID3D11Texture3D> const mD3D11Texture3D;
 		ComPtr<ID3D11ShaderResourceView> const mD3D11DefaultSRV;
 
 	public:
-		DX11Texture( DX11GPUDevice & pDX11GPUDevice,
-		             const ResourceMemoryInfo & pResourceMemory,
-		             const TextureProperties & pTextureProperties,
-		             const TextureLayout & pTextureLayout,
-		             DXGI_FORMAT pDXGITextureFormat,
-		             ComPtr<ID3D11Texture2D> pD3D11Texture2D );
+		DX11Texture(
+				DX11GPUDevice & pDX11GPUDevice,
+				const ResourceMemoryInfo & pResourceMemory,
+				const TextureProperties & pTextureProperties,
+				const TextureLayout & pTextureLayout,
+				DXGI_FORMAT pDXGIInternalFormat,
+				ComPtr<ID3D11Texture2D> pD3D11Texture2D,
+				ComPtr<ID3D11ShaderResourceView> pD3D11DefaultSRV );
 
-		DX11Texture( DX11GPUDevice & pDX11GPUDevice,
-		             const ResourceMemoryInfo & pResourceMemory,
-		             const TextureProperties & pTextureProperties,
-		             const TextureLayout & pTextureLayout,
-		             DXGI_FORMAT pDXGITextureFormat,
-		             ComPtr<ID3D11Texture3D> pD3D11Texture3D );
+		DX11Texture(
+				DX11GPUDevice & pDX11GPUDevice,
+				const ResourceMemoryInfo & pResourceMemory,
+				const TextureProperties & pTextureProperties,
+				const TextureLayout & pTextureLayout,
+				DXGI_FORMAT pDXGIInternalFormat,
+				ComPtr<ID3D11Texture3D> pD3D11Texture3D,
+				ComPtr<ID3D11ShaderResourceView> pD3D11DefaultSRV );
 
 		virtual ~DX11Texture();
 
-		static DX11TextureHandle create( DX11GPUDevice & pDX11GPUDevice, const TextureCreateInfo & pCreateInfo );
+		static DX11TextureHandle createDefault(
+				DX11GPUDevice & pDX11GPUDevice,
+				const TextureCreateInfo & pCreateInfo );
 
-	private:
+		static DX11TextureHandle createForRenderTarget(
+				DX11GPUDevice & pDX11GPUDevice,
+				const RenderTargetTextureCreateInfo & pCreateInfo );
+
+		static RenderTargetTextureHandle createRenderTargetTextureView(
+				DX11GPUDevice & pDX11GPUDevice,
+				const RenderTargetTextureCreateInfo & pCreateInfo );
+	};
+
+
+	namespace rcutil
+	{
+
 		struct DX11TextureData
 		{
 			ComPtr<ID3D11Texture2D> d3d11Texture2D;
@@ -98,20 +117,44 @@ namespace ts3::gpuapi
 			}
 		};
 
-		static ComPtr<ID3D11ShaderResourceView> createDefaultSRV2D( ETextureDimensionClass pDimensionClass,
-		                                                            const ComPtr<ID3D11Texture2D> & pD3D11Texture2D );
+		TS3_ATTR_NO_DISCARD DX11TextureData createTextureResourceDX11(
+				DX11GPUDevice & pDX11GPUDevice,
+				const DX11TextureCreateInfo & pCreateInfo );
 
-		static ComPtr<ID3D11ShaderResourceView> createDefaultSRV3D( const ComPtr<ID3D11Texture3D> & pD3D11Texture3D );
+		TS3_ATTR_NO_DISCARD DX11TextureData create2DTextureResourceDX11(
+				DX11GPUDevice & pDX11GPUDevice,
+				const DX11TextureCreateInfo & pCreateInfo );
 
-		static DX11TextureData create2D( DX11GPUDevice & pDX11GPUDevice, const DX11TextureCreateInfo & pDX11CreateInfo );
-		static DX11TextureData create2DMS( DX11GPUDevice & pDX11GPUDevice, const DX11TextureCreateInfo & pDX11CreateInfo );
-		static DX11TextureData create3D( DX11GPUDevice & pDX11GPUDevice, const DX11TextureCreateInfo & pDX11CreateInfo );
+		TS3_ATTR_NO_DISCARD DX11TextureData create2DMSTextureResourceDX11(
+				DX11GPUDevice & pDX11GPUDevice,
+				const DX11TextureCreateInfo & pCreateInfo );
 
-		static DX11TextureInitDataDesc translateTextureInitDataDesc( const TextureCreateInfo & pCreateInfo );
-		static DX11TextureUsageDesc translateTextureUsageDesc( const TextureCreateInfo & pCreateInfo );
+		TS3_ATTR_NO_DISCARD DX11TextureData create3DTextureResourceDX11(
+				DX11GPUDevice & pDX11GPUDevice,
+				const DX11TextureCreateInfo & pCreateInfo );
 
-		static ID3D11DeviceContext1 * getD3D11DeviceContext( void * pCommandObject );
-	};
+		TS3_ATTR_NO_DISCARD ComPtr<ID3D11ShaderResourceView> create2DTextureDefaultShaderResourceViewDX11(
+				ETextureClass pTexClass,
+				const ComPtr<ID3D11Texture2D> & pD3D11Texture2D );
+
+		TS3_ATTR_NO_DISCARD ComPtr<ID3D11ShaderResourceView> create3DTextureDefaultShaderResourceViewDX11(
+				const ComPtr<ID3D11Texture3D> & pD3D11Texture3D );
+
+		TS3_ATTR_NO_DISCARD bool checkIsDXGIFormatDepthStencilDX11( DXGI_FORMAT pDXGIFormat );
+
+		TS3_ATTR_NO_DISCARD bool checkIsDXGIFormatTypelessDX11( DXGI_FORMAT pDXGIFormat );
+
+		TS3_ATTR_NO_DISCARD DXGI_FORMAT getTypelessFormatForDpethStencilFormatDX11( DXGI_FORMAT pDXGIFormat );
+
+		DXGI_FORMAT getDSVFormatForTypelessFormatDX11( DXGI_FORMAT pDXGIFormat );
+
+		DXGI_FORMAT getSRVFormatForTypelessFormatDX11( DXGI_FORMAT pDXGIFormat, Bitmask<ERenderTargetBufferFlags> pRTBufferMask );
+
+		TS3_ATTR_NO_DISCARD DX11TextureInitDataDesc translateTextureInitDataDescDX11( const TextureCreateInfo & pCreateInfo );
+
+		TS3_ATTR_NO_DISCARD DX11TextureUsageDesc translateTextureUsageDescDX11( const TextureCreateInfo & pCreateInfo );
+
+	}
 
 } // namespace ts3::gpuapi
 

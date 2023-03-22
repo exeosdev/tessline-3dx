@@ -10,6 +10,8 @@
 #include <ts3/system/assetSystemNative.h>
 #include "nsOSXApplicationProxy.h"
 
+#include <unistd.h>
+
 #if( TS3_PCL_TARGET_SYSAPI == TS3_PCL_TARGET_SYSAPI_OSX )
 namespace ts3::system
 {
@@ -38,7 +40,7 @@ namespace ts3::system
     AssetLoaderHandle OSXSysContext::createAssetLoader( const AssetLoaderCreateInfo & pCreateInfo )
     {
 		ts3DebugAssert( pCreateInfo.nativeParams );
-        return platform::createFileAssetLoader( getHandle<SysContext>(), *( pCreateInfo.nativeParams ) );
+        return platform::createFileAssetLoader( getHandle<SysContext>(), *pCreateInfo.nativeParams );
     }
 
     DisplayManagerHandle OSXSysContext::createDisplayManager()
@@ -64,13 +66,7 @@ namespace ts3::system
 			pDisplayManager = createDisplayManager();
 		}
 
-		auto metalDevice = pCreateInfo.metalDevice;
-		if( !metalDevice )
-		{
-			metalDevice = MetalDevice::createDefault( pDisplayManager->mSysContext );
-		}
-
-		return createSysObject<OSXMetalSystemDriver>( pDisplayManager->getHandle<OSXDisplayManager>(), std::move( metalDevice ) );
+		return createSysObject<OSXMetalSystemDriver>( pDisplayManager->getHandle<OSXDisplayManager>() );
 	}
 
     OpenGLSystemDriverHandle OSXSysContext::createOpenGLSystemDriver( DisplayManagerHandle pDisplayManager )
@@ -93,12 +89,19 @@ namespace ts3::system
         return createSysObject<OSXWindowManager>( pDisplayManager->getHandle<OSXDisplayManager>() );
     }
 
+	std::string OSXSysContext::queryCurrentProcessWorkingDirectory() const
+	{
+		char workingDirStrBuffer[2048];
+		getcwd( workingDirStrBuffer, 2048 );
+
+		return std::string( workingDirStrBuffer );
+	}
+
     std::string OSXSysContext::queryCurrentProcessExecutableFilePath() const
     {
         std::string executableFilePath;
 
 		auto * executablePath = [[NSBundle mainBundle] bundlePath];
-
 	    executableFilePath.assign( [executablePath cStringUsingEncoding: NSUTF8StringEncoding],
 	                               [executablePath lengthOfBytesUsingEncoding: NSUTF8StringEncoding] );
 

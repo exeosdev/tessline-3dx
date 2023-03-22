@@ -1,6 +1,7 @@
 
 #include "graphicsPipelineImmutableState.h"
 #include "graphicsShaderLinkageImmutableState.h"
+#include "renderTargetImmutableStates.h"
 
 namespace ts3::gpuapi
 {
@@ -43,12 +44,20 @@ namespace ts3::gpuapi
 
 		const auto stateCommonProperties = smutil::getGraphicsShaderLinkageCommonPropertiesForShaderSet( pShaderSet );
 
-		const auto shaderImmutableState = createGPUAPIObject<GraphicsShaderImmutableStateSeparable>(
+		const auto shaderImmutableState = createGPUAPIObject<GraphicsShaderLinkageImmutableStateSeparable>(
 				mGPUDevice,
-				std::move( pShaderSet ),
-				stateCommonProperties );
+				stateCommonProperties,
+				pShaderSet );
 
 		return shaderImmutableState;
+	}
+
+
+	RenderPassConfigurationImmutableStateHandle PipelineImmutableStateFactory::createRenderPassStateDefault(
+			GPUDevice & pGPUDevice,
+			const RenderPassConfiguration & pConfiguration )
+	{
+		return RenderPassConfigurationImmutableStateDefault::createInstance( pGPUDevice, pConfiguration );
 	}
 
 
@@ -67,7 +76,7 @@ namespace ts3::gpuapi
 		return nullptr;
 	}
 
-	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryNull::createIAInputLayoutState( const IAInputLayoutDefinition & )
+	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryNull::createIAInputLayoutState( const IAInputLayoutDefinition &, Shader * )
 	{
 		return nullptr;
 	}
@@ -114,9 +123,9 @@ namespace ts3::gpuapi
 		return _stateFactory->createGraphicsShaderLinkageState( pShaderSet );
 	}
 
-	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryAdapter::createState( const IAInputLayoutDefinition & pDefinition )
+	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryAdapter::createState( const IAInputLayoutDefinition & pDefinition, Shader * pVertexShaderWithBinary )
 	{
-		return _stateFactory->createIAInputLayoutState( pDefinition );
+		return _stateFactory->createIAInputLayoutState( pDefinition, pVertexShaderWithBinary );
 	}
 
 	IAVertexStreamImmutableStateHandle PipelineImmutableStateFactoryAdapter::createState( const IAVertexStreamDefinition & pDefinition )

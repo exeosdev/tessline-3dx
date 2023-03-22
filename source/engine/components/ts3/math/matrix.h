@@ -359,6 +359,11 @@ namespace ts3::math
 			return { row0[pColumnIndex], row1[pColumnIndex], row2[pColumnIndex], row3[pColumnIndex] };
 		}
 
+		TS3_PCL_ATTR_FUNC_NO_DISCARD Matrix<TVal, 2, tColumns> asMat2() const noexcept
+		{
+
+		}
+
 		TS3_PCL_ATTR_FUNC_NO_DISCARD TVal * data() noexcept
 		{
 			return &( values[0] );
@@ -475,11 +480,28 @@ namespace ts3::math
 	using Mat2u64 = Mat2x2u64;
 	using Mat2f   = Mat2x2f;
 
+	using Mat3i   = Mat3x3i;
+	using Mat3u   = Mat3x3u;
+	using Mat3i64 = Mat3x3i64;
+	using Mat3u64 = Mat3x3u64;
+	using Mat3f   = Mat3x3f;
+
 	using Mat4i   = Mat4x4i;
 	using Mat4u   = Mat4x4u;
 	using Mat4i64 = Mat4x4i64;
 	using Mat4u64 = Mat4x4u64;
 	using Mat4f   = Mat4x4f;
+
+
+	template <typename TVal>
+	inline Matrix3x3<TVal> matrixTrim3( const Matrix4x4<TVal> & pMatrix )
+	{
+		return Matrix3x3<TVal> {
+			pMatrix[0][0], pMatrix[0][1], pMatrix[0][2],
+			pMatrix[1][0], pMatrix[1][1], pMatrix[1][2],
+			pMatrix[2][0], pMatrix[2][1], pMatrix[2][2],
+		};
+	}
 
 }
 

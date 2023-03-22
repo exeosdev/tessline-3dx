@@ -70,7 +70,7 @@ namespace ts3::gpuapi
 
 					_refTextureObject = pTexture;
 					_refTextureObject->addActiveRef();
-					_refTextureFormat = pTexture->mTextureLayout.pixelFormat;
+					_refTextureFormat = pTexture->mTextureLayout.internalFormat;
 				}
 
 				// Update the referenced subresource.

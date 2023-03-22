@@ -6,7 +6,7 @@ namespace ts3::gpuapi
 
 	BlendImmutableState::BlendImmutableState( GPUDevice & pGPUDevice, Bitmask<EBlendConfigFlags> pBlendFlags )
 	: GraphicsPipelineImmutableState( pGPUDevice )
-	, mBlendFlags( pBlendFlags )
+	, mBlendFlags( pBlendFlags & E_BLEND_CONFIG_MASK_ALL )
 	{}
 
 	BlendImmutableState::~BlendImmutableState() = default;
@@ -14,7 +14,7 @@ namespace ts3::gpuapi
 
 	DepthStencilImmutableState::DepthStencilImmutableState( GPUDevice & pGPUDevice, Bitmask<EDepthStencilConfigFlags> pDepthStencilFlags )
 	: GraphicsPipelineImmutableState( pGPUDevice )
-	, mDepthStencilFlags( pDepthStencilFlags )
+	, mDepthStencilFlags( pDepthStencilFlags & E_DEPTH_STENCIL_CONFIG_MASK_ALL )
 	{}
 
 	DepthStencilImmutableState::~DepthStencilImmutableState() = default;
@@ -22,7 +22,7 @@ namespace ts3::gpuapi
 
 	RasterizerImmutableState::RasterizerImmutableState( GPUDevice & pGPUDevice, Bitmask<ERasterizerConfigFlags> pRasterizerFlags )
 	: GraphicsPipelineImmutableState( pGPUDevice )
-	, mRasterizerFlags( pRasterizerFlags )
+	, mRasterizerFlags( pRasterizerFlags & E_RASTERIZER_CONFIG_MASK_ALL )
 	{}
 
 	RasterizerImmutableState::~RasterizerImmutableState() = default;

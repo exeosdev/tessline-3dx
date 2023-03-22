@@ -6,26 +6,22 @@
 
 #include "commonCommandDefs.h"
 #include "resources/gpuBufferCommon.h"
-#include "resources/samplerCommon.h"
+#include "state/samplerCommon.h"
+#include "state/renderPassCommon.h"
 
 namespace ts3::gpuapi
 {
 
 	class GraphicsPipelineStateController;
 
-	enum ECommandListActionFlags : uint32
-	{
-		E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT = 0x01,
-
-		E_COMMAND_LIST_ACTION_FLAGS_DEFAULT =
-			E_COMMAND_LIST_ACTION_FLAG_BRP_APPLY_PIPELINE_STATE_BIT,
-	};
-
 	class TS3_GPUAPI_CLASS CommandList : public GPUDeviceChildObject
 	{
 	public:
-		CommandSystem * const mCommandSystem = nullptr;
-		ECommandListType const mListType = ECommandListType::Undefined;
+		CommandSystem * const mCommandSystem;
+
+		ECommandListType const mListType;
+
+		Bitmask<ECommandObjectPropertyFlags> const mCommandFlags;
 
 		CommandList(
 			CommandSystem & pCommandSystem,
@@ -34,9 +30,9 @@ namespace ts3::gpuapi
 
 		virtual ~CommandList();
 
-		TS3_ATTR_NO_DISCARD bool checkContextSupport( ECommandContextType pContextType ) const noexcept;
+		TS3_ATTR_NO_DISCARD bool checkCommandClassSupport( ECommandQueueClass pQueueClass ) const noexcept;
 
-		TS3_ATTR_NO_DISCARD bool checkFeatureSupport( Bitmask<ECommandListFlags> pListFlags ) const noexcept;
+		TS3_ATTR_NO_DISCARD bool checkFeatureSupport( Bitmask<ECommandObjectPropertyFlags> pCommandListFlags ) const noexcept;
 
 		TS3_ATTR_NO_DISCARD bool isRenderPassActive() const noexcept;
 
@@ -64,13 +60,15 @@ namespace ts3::gpuapi
 
 		virtual bool beginRenderPass(
 				const RenderPassConfigurationImmutableState & pRenderPassState,
-				Bitmask<ECommandListActionFlags> pFlags = E_COMMAND_LIST_ACTION_FLAGS_DEFAULT );
+				Bitmask<ECommandListActionFlags> pFlags );
 
 		virtual bool beginRenderPass(
 				const RenderPassConfigurationDynamicState & pRenderPassState,
-				Bitmask<ECommandListActionFlags> pFlags = E_COMMAND_LIST_ACTION_FLAGS_DEFAULT );
+				Bitmask<ECommandListActionFlags> pFlags );
 
 		virtual void endRenderPass();
+
+		void setRenderPassDynamicState( const GraphicsPipelineDynamicState & pDynamicState );
 
 		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO );
 		bool setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState );
@@ -78,7 +76,6 @@ namespace ts3::gpuapi
 		bool setRenderTargetBindingState( const RenderTargetBindingImmutableState & pRenderTargetBindingState );
 		bool setRenderTargetBindingState( const RenderTargetBindingDynamicState & pRenderTargetBindingState );
 
-		bool cmdSetBlendConstantColor( const math::RGBAColorR32Norm & pColor );
 		bool cmdSetViewport( const ViewportDesc & pViewportDesc );
 		bool cmdSetShaderConstant( shader_input_ref_id_t pParamRefID, const void * pData );
 		bool cmdSetShaderConstantBuffer( shader_input_ref_id_t pParamRefID, GPUBuffer & pConstantBuffer );
@@ -96,11 +93,46 @@ namespace ts3::gpuapi
 		virtual void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext ) = 0;
 
 	private:
+		bool onBeginRenderPass( Bitmask<ECommandListActionFlags> pFlags );
+		void onEndRenderPass();
+
+	protected:
 		std::atomic<bool> _listLockStatus = ATOMIC_VAR_INIT( false );
 
 		Bitmask<uint32> _internalStateMask;
 
 		GraphicsPipelineStateController * _graphicsPipelineStateController = nullptr;
+	};
+
+	class TS3_GPUAPI_CLASS CommandListRenderPassDefault : public CommandList
+	{
+	public:
+		CommandListRenderPassDefault(
+				CommandSystem & pCommandSystem,
+		ECommandListType pListType,
+				GraphicsPipelineStateController & pPipelineStateController );
+
+		virtual ~CommandListRenderPassDefault();
+
+		TS3_ATTR_NO_DISCARD const RenderPassConfiguration & getRenderPassConfiguration() const noexcept;
+
+		virtual bool beginRenderPass(
+				const RenderPassConfigurationImmutableState & pRenderPassState,
+				Bitmask<ECommandListActionFlags> pFlags ) override;
+
+		virtual bool beginRenderPass(
+				const RenderPassConfigurationDynamicState & pRenderPassState,
+				Bitmask<ECommandListActionFlags> pFlags ) override;
+
+		virtual void endRenderPass() override;
+
+	protected:
+		virtual void executeRenderPassLoadActions( const RenderPassConfiguration & pRenderPassConfiguration ) = 0;
+
+		virtual void executeRenderPassStoreActions( const RenderPassConfiguration & pRenderPassConfiguration ) = 0;
+
+	private:
+		RenderPassConfiguration _currentRenderPassConfiguration;
 	};
 
 } // namespace ts3::gpuapi

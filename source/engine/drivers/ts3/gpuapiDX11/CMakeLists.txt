@@ -9,8 +9,8 @@ set( TS3_DRIVER_GPUAPI_DX11_SRC_FILES
         "DX11_commandList.cpp"
         "DX11_commandSystem.h"
         "DX11_commandSystem.cpp"
-        "DX11_coreAPIProxy.h"
-        "DX11_coreAPIProxy.cpp"
+        "DX11_apiTranslationLayer.h"
+        "DX11_apiTranslationLayer.cpp"
         "DX11_gpuDevice.h"
         "DX11_gpuDevice.cpp"
         "DX11_gpuDriver.h"
@@ -23,8 +23,6 @@ set( TS3_DRIVER_GPUAPI_DX11_SRC_FILES
 
         "resources/DX11_gpuBuffer.h"
         "resources/DX11_gpuBuffer.cpp"
-        "resources/DX11_renderBuffer.h"
-        "resources/DX11_renderBuffer.cpp"
         "resources/DX11_sampler.h"
         "resources/DX11_sampler.cpp"
         "resources/DX11_shader.h"
@@ -36,14 +34,19 @@ set( TS3_DRIVER_GPUAPI_DX11_SRC_FILES
         "state/DX11_pipelineStateController.cpp"
         "state/DX11_pipelineStateObject.h"
         "state/DX11_pipelineStateObject.cpp"
-        "state/DX11_pipelineStateDesc.h"
-        "state/DX11_pipelineStateDesc.cpp"
-        "state/DX11_renderTargetStateObject.h"
-        "state/DX11_renderTargetStateObject.cpp"
-        "state/DX11_vertexStreamStateObject.h"
-        "state/DX11_vertexStreamStateObject.cpp"
 
-        )
+        "state/DX11_commonGraphicsConfig.cpp"
+        "state/DX11_commonGraphicsConfig.h"
+        "state/DX11_graphicsShaderState.h"
+
+        "state/DX11_inputAssembler.cpp"
+		"state/DX11_inputAssembler.h"
+		"state/DX11_pipelineImmutableStateFactory.cpp"
+		"state/DX11_pipelineImmutableStateFactory.h"
+		"state/DX11_renderTarget.cpp"
+		"state/DX11_renderTarget.h"
+		
+		)
 
 
 if( ${CM_EBS_SYSCONF_TARGET_FLAG_OSINFO_MSE} )
