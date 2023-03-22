@@ -29,6 +29,12 @@ namespace ts3::gpuapi
 		return _currentRenderPassDynamicState;
 	}
 
+	const ShaderInputSignature & GraphicsPipelineStateController::getShaderInputSignature() const noexcept
+	{
+		ts3DebugAssert( _currentCommonState.graphicsPSO );
+		return _currentCommonState.graphicsPSO->mShaderInputSignature;
+	}
+
 	void GraphicsPipelineStateController::setRenderPassDynamicState( const GraphicsPipelineDynamicState & pDynamicState )
 	{
 		_currentRenderPassDynamicState = pDynamicState;

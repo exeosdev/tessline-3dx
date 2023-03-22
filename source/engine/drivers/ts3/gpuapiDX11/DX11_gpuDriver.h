@@ -20,13 +20,14 @@ namespace ts3::gpuapi
 		explicit DX11GPUDriver( system::SysContextHandle pSysContext ) noexcept;
 		virtual ~DX11GPUDriver() noexcept;
 
-		virtual DisplayManagerHandle createDefaultDisplayManager() override;
-
-		virtual GPUDeviceHandle createDevice( const GPUDeviceCreateInfo & pCreateInfo ) override;
-
-		virtual EGPUDriverID queryGPUDriverID() const override;
+		virtual EGPUDriverID queryGPUDriverID() const noexcept override final;
 
 		static DX11GPUDriverHandle create( const DX11GPUDriverCreateInfo & pCreateInfo );
+
+	private:
+		virtual DisplayManagerHandle _drvCreateDefaultDisplayManager() override;
+
+		virtual GPUDeviceHandle _drvCreateDevice( const GPUDeviceCreateInfo & pCreateInfo ) override;
 	};
 
 } // namespace ts3::gpuapi

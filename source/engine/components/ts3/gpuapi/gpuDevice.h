@@ -89,7 +89,11 @@ namespace ts3::gpuapi
 		BlendImmutableStateHandle createBlendImmutableState( const BlendConfig & pConfig );
 		DepthStencilImmutableStateHandle createDepthStencilImmutableState( const DepthStencilConfig & pConfig );
 		GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageImmutableState( const GraphicsShaderSet & pShaderSet );
-		IAInputLayoutImmutableStateHandle createIAInputLayoutImmutableState( const IAInputLayoutDefinition & pDefinition );
+
+		IAInputLayoutImmutableStateHandle createIAInputLayoutImmutableState(
+				const IAInputLayoutDefinition & pDefinition,
+				Shader * pVertexShaderWithBinary );
+
 		IAVertexStreamImmutableStateHandle createIAVertexStreamImmutableState( const IAVertexStreamDefinition & pDefinition );
 		RasterizerImmutableStateHandle createRasterizerImmutableState( const RasterizerConfig & pConfig );
 		RenderTargetBindingImmutableStateHandle createRenderTargetBindingImmutableState( const RenderTargetBindingDefinition & pDefinition );
@@ -109,7 +113,8 @@ namespace ts3::gpuapi
 
 		IAInputLayoutImmutableStateHandle createIAInputLayoutImmutableStateCached(
 				const UniqueGPUObjectName & pUniqueName,
-				const IAInputLayoutDefinition & pDefinition );
+				const IAInputLayoutDefinition & pDefinition,
+				Shader * pVertexShaderWithBinary );
 
 		IAVertexStreamImmutableStateHandle createIAVertexStreamImmutableStateCached(
 				const UniqueGPUObjectName & pUniqueName,

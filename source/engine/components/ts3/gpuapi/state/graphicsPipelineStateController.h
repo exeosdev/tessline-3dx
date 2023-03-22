@@ -39,6 +39,8 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD const GraphicsPipelineDynamicState & getRenderPassDynamicState() const noexcept;
 
+		TS3_ATTR_NO_DISCARD const ShaderInputSignature & getShaderInputSignature() const noexcept;
+
 		void setRenderPassDynamicState( const GraphicsPipelineDynamicState & pDynamicState );
 
 		void resetRenderPassDynamicState();

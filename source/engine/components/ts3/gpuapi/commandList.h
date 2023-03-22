@@ -7,20 +7,12 @@
 #include "commonCommandDefs.h"
 #include "resources/gpuBufferCommon.h"
 #include "state/samplerCommon.h"
+#include "state/renderPassCommon.h"
 
 namespace ts3::gpuapi
 {
 
 	class GraphicsPipelineStateController;
-
-	enum ECommandListActionFlags : uint32
-	{
-		E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_APPLY_PIPELINE_STATE_BIT = 0x01,
-		E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_PRESERVE_DYNAMIC_STATE_BIT = 0x02,
-
-		E_COMMAND_LIST_ACTION_FLAGS_DEFAULT =
-			E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_APPLY_PIPELINE_STATE_BIT,
-	};
 
 	class TS3_GPUAPI_CLASS CommandList : public GPUDeviceChildObject
 	{
@@ -68,11 +60,11 @@ namespace ts3::gpuapi
 
 		virtual bool beginRenderPass(
 				const RenderPassConfigurationImmutableState & pRenderPassState,
-				Bitmask<ECommandListActionFlags> pFlags = E_COMMAND_LIST_ACTION_FLAGS_DEFAULT );
+				Bitmask<ECommandListActionFlags> pFlags );
 
 		virtual bool beginRenderPass(
 				const RenderPassConfigurationDynamicState & pRenderPassState,
-				Bitmask<ECommandListActionFlags> pFlags = E_COMMAND_LIST_ACTION_FLAGS_DEFAULT );
+				Bitmask<ECommandListActionFlags> pFlags );
 
 		virtual void endRenderPass();
 
@@ -110,6 +102,37 @@ namespace ts3::gpuapi
 		Bitmask<uint32> _internalStateMask;
 
 		GraphicsPipelineStateController * _graphicsPipelineStateController = nullptr;
+	};
+
+	class TS3_GPUAPI_CLASS CommandListRenderPassDefault : public CommandList
+	{
+	public:
+		CommandListRenderPassDefault(
+				CommandSystem & pCommandSystem,
+		ECommandListType pListType,
+				GraphicsPipelineStateController & pPipelineStateController );
+
+		virtual ~CommandListRenderPassDefault();
+
+		TS3_ATTR_NO_DISCARD const RenderPassConfiguration & getRenderPassConfiguration() const noexcept;
+
+		virtual bool beginRenderPass(
+				const RenderPassConfigurationImmutableState & pRenderPassState,
+				Bitmask<ECommandListActionFlags> pFlags ) override;
+
+		virtual bool beginRenderPass(
+				const RenderPassConfigurationDynamicState & pRenderPassState,
+				Bitmask<ECommandListActionFlags> pFlags ) override;
+
+		virtual void endRenderPass() override;
+
+	protected:
+		virtual void executeRenderPassLoadActions( const RenderPassConfiguration & pRenderPassConfiguration ) = 0;
+
+		virtual void executeRenderPassStoreActions( const RenderPassConfiguration & pRenderPassConfiguration ) = 0;
+
+	private:
+		RenderPassConfiguration _currentRenderPassConfiguration;
 	};
 
 } // namespace ts3::gpuapi

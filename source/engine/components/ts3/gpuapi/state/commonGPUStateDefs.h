@@ -19,6 +19,7 @@ namespace ts3::gpuapi
 	struct RasterizerConfig;
 	struct RenderTargetBindingDefinition;
 	struct RenderPassConfiguration;
+	struct ShaderInputSignature;
 
 	struct ComputePipelineStateObjectCreateInfo;
 	struct GraphicsPipelineStateObjectCreateInfo;

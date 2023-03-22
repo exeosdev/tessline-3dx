@@ -17,7 +17,7 @@ namespace ts3::gpuapi
 	public:
 		ComPtr<ID3D11SamplerState> const mD3D11SamplerState;
 
-		DX11Sampler( DX11GPUDevice & pGPUDevice, const SamplerConfig & pSamplerConfig, ComPtr<ID3D11SamplerState> pD3D11SamplerState );
+		DX11Sampler( DX11GPUDevice & pGPUDevice, ComPtr<ID3D11SamplerState> pD3D11SamplerState );
 		virtual ~DX11Sampler();
 
 		static DX11SamplerHandle create( DX11GPUDevice & pDX11GPUDevice, const SamplerCreateInfo & pCreateInfo );

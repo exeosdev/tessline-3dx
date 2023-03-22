@@ -57,14 +57,8 @@ namespace ts3::gpuapi
 		virtual bool setShaderTextureSampler( shader_input_ref_id_t pParamRefID, Sampler & pSampler ) override;
 
 	private:
-		void resetDynamicIAVertexStreamState();
-
-		void resetDynamicRenderTargetBindingState();
-
 		Bitmask<uint32> applyCommonGraphicsConfigState( const GLGraphicsPipelineStateObject & pGraphicsPSO );
-
 		static void applyGraphicsPipelineDynamicState( const GraphicsPipelineDynamicState & pDynamicState );
-
 		static void applyGLRenderTargetBinding( const GLRenderTargetBindingInfo & pGLRenderTargetBinding );
 
 	private:

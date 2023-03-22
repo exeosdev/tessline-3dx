@@ -238,6 +238,39 @@ namespace ts3::gpuapi
 		return true;
 	}
 
+	template <typename TFunction>
+	inline bool foreachRTColorAttachmentIndex( Bitmask<ERTAttachmentFlags> pActiveAttachmentsMask, TFunction pFunction )
+	{
+		// A local copy of the active attachments mask. Bits of already processed attachments
+		// are removed, so when the value reaches 0, we can immediately stop further processing.
+		auto activeAttachmentsMask = pActiveAttachmentsMask;
+
+		for( // Iterate using RTA (Render Target Attachment) index value.
+			native_uint attachmentIndex = 0;
+			// Stop after reaching the limit or when there are no active attachments to process.
+			cxdefs::isRTColorAttachmentIndexValid( attachmentIndex ) && !activeAttachmentsMask.empty();
+			// This is rather self-descriptive, but it looked bad without this third comment here :)
+			++attachmentIndex )
+		{
+			const auto attachmentBit = cxdefs::makeRTAttachmentFlag( attachmentIndex );
+			// Check if the attachments mask has this bit set.
+			if( activeAttachmentsMask.isSet( attachmentBit ) )
+			{
+				// The function returns false if there was some internal error condition
+				// and the processing should be aborted.
+				if( !pFunction( attachmentIndex, makeBitmaskEx<ERTAttachmentFlags>( attachmentBit ) ) )
+				{
+					return false;
+				}
+
+				// Update the control mask.
+				activeAttachmentsMask.unset( attachmentBit );
+			}
+		}
+
+		return true;
+	}
+
 } // namespace ts3::gpuapi
 
 #endif // __TS3_GPUAPI_RENDER_TARGET_COMMON_H__

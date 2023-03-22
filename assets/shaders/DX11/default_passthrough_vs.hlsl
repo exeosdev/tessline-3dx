@@ -1,7 +1,6 @@
 
 cbuffer CB0 : register( b0 )
 {
-	float4 scolor;
 	float4x4 cb0ModelMatrix;
 	float4x4 cb0ViewMatrix;
 	float4x4 cb0ProjectionMatrix;
@@ -9,7 +8,9 @@ cbuffer CB0 : register( b0 )
 
 struct VSInputData
 {
-	float4 vPosition : POSITION;
+	float3 vPosition : POSITION;
+	float4 vColor : COLOR;
+	float3 vNormal : NORMAL;
 	float2 vTexCoord0 : TEXCOORD0;
 };
 
@@ -21,7 +22,7 @@ struct VSOutputData
 
 VSOutputData main( VSInputData pVSInput )
 {
-	float4 vertexPos = float4( pVSInput.vPosition );
+	float4 vertexPos = float4( pVSInput.vPosition, 1.0f );
 	vertexPos = mul( vertexPos, cb0ModelMatrix );
 	vertexPos = mul( vertexPos, cb0ViewMatrix );
 	vertexPos = mul( vertexPos, cb0ProjectionMatrix );

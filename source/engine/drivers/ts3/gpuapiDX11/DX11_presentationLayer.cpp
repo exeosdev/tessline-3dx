@@ -3,16 +3,20 @@
 #include "DX11_commandList.h"
 #include "DX11_apiTranslationLayer.h"
 #include "DX11_gpuDevice.h"
+#include "state/DX11_renderTarget.h"
 #include <ts3/gpuapi/commandContext.h>
 
 namespace ts3::gpuapi
 {
 
-	DX11ScreenPresentationLayer::DX11ScreenPresentationLayer( DX11GPUDevice & pDevice,
-                                                              system::WindowHandle pSysWindow,
-                                                              ComPtr<IDXGISwapChain1> pDXGISwapChain1 )
+	DX11ScreenPresentationLayer::DX11ScreenPresentationLayer(
+			DX11GPUDevice & pDevice,
+			system::WindowHandle pSysWindow,
+			ComPtr<IDXGISwapChain1> pDXGISwapChain1,
+			RenderTargetBindingImmutableStateHandle pScreenRenderTargetBindingState )
 	: DXScreenPresentationLayer( pDevice, pSysWindow, std::move( pDXGISwapChain1 ) )
 	, mD3D11Device1( pDevice.mD3D11Device1 )
+	, mScreenRenderTargetBindingState( pScreenRenderTargetBindingState )
 	{}
 
 	DX11ScreenPresentationLayer::~DX11ScreenPresentationLayer() = default;
@@ -25,17 +29,45 @@ namespace ts3::gpuapi
 		auto dxgiSwapChain = atl::createD3D11SwapChainForSystemWindow( pDevice, sysWindow.get() );
 		ts3DebugAssert( dxgiSwapChain );
 
-		auto presentationLayer = createGPUAPIObject<DX11ScreenPresentationLayer>( pDevice, sysWindow, std::move( dxgiSwapChain ) );
+		ComPtr<ID3D11Texture2D> backBufferRTTexture;
+		auto hResult = dxgiSwapChain->GetBuffer( 0, IID_PPV_ARGS( &backBufferRTTexture ) );
+		if( FAILED( hResult ) )
+		{
+			ts3DebugInterrupt();
+			return nullptr;
+		}
+
+		D3D11_TEXTURE2D_DESC backBufferDSTextureDesc;
+		backBufferRTTexture->GetDesc( &backBufferDSTextureDesc );
+		backBufferDSTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		backBufferDSTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		backBufferDSTextureDesc.CPUAccessFlags = 0;
+
+		ComPtr<ID3D11Texture2D> backBufferDSTexture;
+		hResult = pDevice.mD3D11Device1->CreateTexture2D( &backBufferDSTextureDesc, nullptr, backBufferDSTexture.GetAddressOf() );
+		if( FAILED( hResult ) )
+		{
+			ts3DebugInterrupt();
+			return false;
+		}
+
+		auto renderTargetState = DX11RenderTargetBindingImmutableState::createForScreen( pDevice, backBufferRTTexture, backBufferDSTexture );
+		ts3DebugAssert( renderTargetState );
+
+		auto presentationLayer = createGPUAPIObject<DX11ScreenPresentationLayer>( pDevice, sysWindow, std::move( dxgiSwapChain ), renderTargetState );
 
 		return presentationLayer;
 	}
 
 	void DX11ScreenPresentationLayer::bindRenderTarget( CommandContext * pCmdContext )
 	{
-		auto * dx11CommandList = pCmdContext->mCommandList->queryInterface<DX11CommandList>();
-		auto * backBufferRTView = getBackBufferRTView();
-		auto * backBufferDSView = getBackBufferDSView();
-		dx11CommandList->mD3D11DeviceContext1->OMSetRenderTargets( 1, &backBufferRTView, backBufferDSView );
+		auto * directGraphicsContext = pCmdContext->queryInterface<CommandContextDirectGraphics>();
+		directGraphicsContext->setRenderTargetBindingState( *mScreenRenderTargetBindingState );
+
+		// auto * dx11CommandList = pCmdContext->mCommandList->queryInterface<DX11CommandList>();
+		// auto * backBufferRTView = getBackBufferRTView();
+		// auto * backBufferDSView = getBackBufferDSView();
+		// dx11CommandList->mD3D11DeviceContext1->OMSetRenderTargets( 1, &backBufferRTView, backBufferDSView );
 	}
 
 	void DX11ScreenPresentationLayer::invalidateRenderTarget( CommandContext * pCmdContext )

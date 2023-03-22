@@ -74,24 +74,14 @@ namespace ts3::gpuapi
 
 		auto & renderTargetLayout = pCreateInfo.renderTargetLayout;
 		auto & shaderInputSignature = pCreateInfo.shaderInputSignature;
-
-		const GraphicsShaderSet * graphicsShaderSet = nullptr;
-		if( !pCreateInfo.shaderSet.empty() )
-		{
-			graphicsShaderSet = &pCreateInfo.shaderSet;
-		}
-		else
-		{
-			auto * separableShaderState = pCreateInfo.shaderLinkageState->queryInterface<GraphicsShaderLinkageImmutableStateSeparable>();
-			graphicsShaderSet = &separableShaderState->mShaderSet;
-		}
+		auto * separableShaderState = pCreateInfo.shaderLinkageState->queryInterface<GraphicsShaderLinkageImmutableStateSeparable>();
 
 		auto pipelineStateObject = createDynamicInterfaceObject<DX11GraphicsPipelineStateObject>(
 				pGPUDevice,
 				std::move( renderTargetLayout ),
 				std::move( shaderInputSignature ),
 				separableStates,
-				*graphicsShaderSet );
+			separableShaderState->mShaderSet );
 
 		return pipelineStateObject;
 	}

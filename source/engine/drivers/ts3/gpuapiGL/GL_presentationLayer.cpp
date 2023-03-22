@@ -70,8 +70,12 @@ namespace ts3::gpuapi
 	}
 
 
-	GLScreenPresentationLayer::GLScreenPresentationLayer( GLGPUDevice & pGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface )
+	GLScreenPresentationLayer::GLScreenPresentationLayer(
+		GLGPUDevice & pGPUDevice,
+		system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface,
+		RenderTargetBindingImmutableStateHandle pScreenRenderTargetBindingState )
 	: GLPresentationLayer( pGPUDevice, pSysGLDisplaySurface )
+	, mScreenRenderTargetBindingState( pScreenRenderTargetBindingState )
 	{ }
 
 	GLScreenPresentationLayer::~GLScreenPresentationLayer() = default;
@@ -87,20 +91,18 @@ namespace ts3::gpuapi
 		auto screenRTLayout = smutil::translateSystemVisualConfigToRenderTargetLayout( surfaceVisualConfig );
 		screenRTLayout.sharedImageSize = { surfaceSize.x, surfaceSize.y };
 
-		auto presentationLayer = createGPUAPIObject<GLScreenPresentationLayer>( pDevice, sysGLSurface );
-		auto renderTargetState = pDevice.createScreenRenderTargetBindingState( screenRTLayout );
-
-		presentationLayer->setScreenRenderTargetBindingState( renderTargetState );
+		auto renderTargetState = GLRenderTargetBindingImmutableState::createForScreen( pDevice, screenRTLayout );
+		ts3DebugAssert( renderTargetState );
+		
+		auto presentationLayer = createGPUAPIObject<GLScreenPresentationLayer>( pDevice, sysGLSurface, renderTargetState );
 
 		return presentationLayer;
 	}
 
 	void GLScreenPresentationLayer::bindRenderTarget( CommandContext * pCmdContext )
 	{
-		ts3DebugAssert( _screenRenderTargetBindingState );
-
 		auto * directGraphicsContext = pCmdContext->queryInterface<CommandContextDirectGraphics>();
-		directGraphicsContext->setRenderTargetBindingState( *_screenRenderTargetBindingState );
+		directGraphicsContext->setRenderTargetBindingState( *mScreenRenderTargetBindingState );
 
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 		ts3OpenGLHandleLastError();
@@ -130,11 +132,6 @@ namespace ts3::gpuapi
 	ts3::math::Vec2u32 GLScreenPresentationLayer::queryRenderTargetSize() const
 	{
 		return mSysGLDisplaySurface->queryRenderAreaSize();
-	}
-
-	void GLScreenPresentationLayer::setScreenRenderTargetBindingState( RenderTargetBindingImmutableStateHandle pRenderTargetState )
-	{
-		_screenRenderTargetBindingState = pRenderTargetState;
 	}
 
 } // namespace ts3::gpuapi

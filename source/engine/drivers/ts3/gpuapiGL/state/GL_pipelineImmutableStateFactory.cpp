@@ -71,7 +71,8 @@ namespace ts3::gpuapi
 	}
 
 	IAInputLayoutImmutableStateHandle GLPipelineImmutableStateFactoryCore::createIAInputLayoutState(
-			const IAInputLayoutDefinition & pDefinition )
+			const IAInputLayoutDefinition & pDefinition,
+			Shader * pVertexShaderWithBinary )
 	{
 		return GLIAInputLayoutImmutableStateCore::createInstance( mGLGPUDevice, pDefinition );
 	}
@@ -89,7 +90,8 @@ namespace ts3::gpuapi
 	}
 
 	IAInputLayoutImmutableStateHandle GLPipelineImmutableStateFactoryCompat::createIAInputLayoutState(
-			const IAInputLayoutDefinition & pDefinition )
+			const IAInputLayoutDefinition & pDefinition,
+			Shader * pVertexShaderWithBinary )
 	{
 		return GLIAInputLayoutImmutableStateCompat::createInstance( mGLGPUDevice, pDefinition );
 	}

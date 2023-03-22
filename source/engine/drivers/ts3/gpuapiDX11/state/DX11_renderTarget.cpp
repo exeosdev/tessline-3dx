@@ -310,6 +310,7 @@ namespace ts3::gpuapi
 			const auto & textureSubResource = pAttachmentTextureRef.getRefSubResource();
 
 			ID3D11Resource * d3d11AttachmentResource = nullptr;
+			DXGI_FORMAT targetDXGIFormat = DXGI_FORMAT_UNKNOWN;
 			UINT d3d11AttachmentSubResourceIndex = 0;
 
 			if( dx11Texture->mTextureLayout.texClass == ETextureClass::T3D )
@@ -317,7 +318,11 @@ namespace ts3::gpuapi
 				auto * d3d11Texture3D = dx11Texture->mD3D11Texture3D.Get();
 				ts3DebugAssert( d3d11Texture3D );
 
+				D3D11_TEXTURE3D_DESC texture3DDesc;
+				d3d11Texture3D->GetDesc( &texture3DDesc );
+
 				d3d11AttachmentResource = d3d11Texture3D;
+				targetDXGIFormat = texture3DDesc.Format;
 				d3d11AttachmentSubResourceIndex = D3D11CalcSubresource(
 						textureSubResource.uSubRes3D.mipLevel,
 						0,
@@ -328,7 +333,11 @@ namespace ts3::gpuapi
 				auto * d3d11Texture2D = dx11Texture->mD3D11Texture2D.Get();
 				ts3DebugAssert( d3d11Texture2D );
 
+				D3D11_TEXTURE2D_DESC texture2DDesc;
+				d3d11Texture2D->GetDesc( &texture2DDesc );
+
 				d3d11AttachmentResource = d3d11Texture2D;
+				targetDXGIFormat = texture2DDesc.Format;
 
 				if( dx11Texture->mTextureLayout.texClass == ETextureClass::T2D )
 				{
@@ -437,7 +446,78 @@ namespace ts3::gpuapi
 			return dx11RenderTargetBindingData;
 		}
 
+		void renderPassClearRenderTargetDX11(
+				ID3D11DeviceContext1 * pD3D1DeviceContext,
+				const DX11RenderTargetBindingData & pRenderTargetBinding,
+				const RenderPassConfiguration & pRenderPassConfiguration )
+		{
+			foreachRTColorAttachmentIndex(
+					pRenderTargetBinding.activeAttachmentsMask,
+					[&]( native_uint pIndex, ERTAttachmentFlags pAttachmentBit )
+					{
+						if( pRenderPassConfiguration.attachmentsActionClearMask.isSet( pAttachmentBit ) )
+						{
+							auto * d3d11AttachmentRTView = pRenderTargetBinding.d3d11ColorAttachmentRTViewArray[pIndex];
+							const auto & clearConfig = pRenderPassConfiguration.colorAttachments[pIndex].clearConfig;
 
+							pD3D1DeviceContext->ClearRenderTargetView(
+									d3d11AttachmentRTView,
+									clearConfig.colorValue.rgbaArray );
+						}
+						return true;
+					} );
+
+			if( pRenderPassConfiguration.attachmentsActionClearMask.isSet( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT ) )
+			{
+				auto * d3d11AttachmentDSView = pRenderTargetBinding.d3d11DepthStencilAttachmentDSView;
+				const auto & clearConfig = pRenderPassConfiguration.depthStencilAttachment.clearConfig;
+				const auto d3d11ClearMask = atl::translateDX11RTClearDepthStencilFlags( pRenderPassConfiguration.depthStencilAttachment.clearMask );
+
+				pD3D1DeviceContext->ClearDepthStencilView(
+						d3d11AttachmentDSView,
+						d3d11ClearMask,
+						static_cast<FLOAT>( clearConfig.depthValue ),
+						static_cast<UINT8>( clearConfig.stencilValue ) );
+			}
+		}
+
+		void renderPassResolveRenderTargetDX11(
+				ID3D11DeviceContext1 * pD3D1DeviceContext,
+				const DX11RenderTargetBindingData & pRenderTargetBinding,
+				const RenderPassConfiguration & pRenderPassConfiguration )
+		{
+			foreachRTAttachmentIndex(
+					pRenderTargetBinding.activeAttachmentsMask,
+					[&]( native_uint pIndex, ERTAttachmentFlags pAttachmentBit )
+					{
+						if( pRenderPassConfiguration.attachmentsActionResolveMask.isSet( pAttachmentBit ) )
+						{
+							const auto & sourceAttachment = pRenderTargetBinding.colorAttachments[pIndex];
+							const auto & destAttachment = pRenderTargetBinding.resolveAttachments[pIndex];
+
+							pD3D1DeviceContext->ResolveSubresource(
+									destAttachment.d3d11Resource,
+									destAttachment.d3d11SubResourceIndex,
+									sourceAttachment.d3d11Resource,
+									sourceAttachment.d3d11SubResourceIndex,
+									destAttachment.targetDXGIFormat );
+						}
+						return true;
+					} );
+
+			if( pRenderPassConfiguration.attachmentsActionResolveMask.isSet( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT ) )
+			{
+				auto * d3d11AttachmentDSView = pRenderTargetBinding.d3d11DepthStencilAttachmentDSView;
+				const auto & clearConfig = pRenderPassConfiguration.depthStencilAttachment.clearConfig;
+				const auto d3d11ClearMask = atl::translateDX11RTClearDepthStencilFlags( pRenderPassConfiguration.depthStencilAttachment.clearMask );
+
+				pD3D1DeviceContext->ClearDepthStencilView(
+						d3d11AttachmentDSView,
+						d3d11ClearMask,
+						static_cast<FLOAT>( clearConfig.depthValue ),
+						static_cast<UINT8>( clearConfig.stencilValue ) );
+			}
+		}
 
 	}
 	

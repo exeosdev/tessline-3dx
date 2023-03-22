@@ -30,7 +30,7 @@ namespace ts3::gpuapi
 
 		static MetalTextureHandle create( MetalGPUDevice & pGPUDevice, const TextureCreateInfo & pCreateInfo );
 
-		static RenderTargetTextureHandle createRTT( MetalGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo );
+		static RenderTargetTextureHandle createForRenderTarget( MetalGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo );
 	};
 
 } // namespace ts3::gpuapi

@@ -4,6 +4,8 @@
 #include "gpuDevice.h"
 #include "resources/gpuBuffer.h"
 #include "state/graphicsPipelineStateController.h"
+#include "state/renderTargetDynamicStates.h"
+#include "state/renderTargetImmutableStates.h"
 
 namespace ts3::gpuapi
 {
@@ -334,12 +336,72 @@ namespace ts3::gpuapi
 
 	void CommandList::onEndRenderPass()
 	{
+		ts3DebugAssert( isRenderPassActive() );
+
 		if( _internalStateMask.isSet( E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_PRESERVE_DYNAMIC_STATE_BIT ) )
 		{
 			_graphicsPipelineStateController->resetRenderPassDynamicState();
 		}
 
 		_internalStateMask.unset( E_COMMAND_LIST_INTERNAL_STATE_FLAG_ACTIVE_RENDER_PASS_BIT );
+	}
+
+
+	CommandListRenderPassDefault::CommandListRenderPassDefault(
+			CommandSystem & pCommandSystem,
+			ECommandListType pListType,
+			GraphicsPipelineStateController & pPipelineStateController )
+	: CommandList( pCommandSystem, pListType, pPipelineStateController )
+	{}
+
+	CommandListRenderPassDefault::~CommandListRenderPassDefault() = default;
+
+	const RenderPassConfiguration & CommandListRenderPassDefault::getRenderPassConfiguration() const noexcept
+	{
+		return _currentRenderPassConfiguration;
+	}
+
+	bool CommandListRenderPassDefault::beginRenderPass(
+			const RenderPassConfigurationImmutableState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags )
+	{
+		if( CommandList::beginRenderPass( pRenderPassState, pFlags ) )
+		{
+			const auto * defaultRenderPassState = pRenderPassState.queryInterface<RenderPassConfigurationImmutableStateDefault>();
+			_currentRenderPassConfiguration = defaultRenderPassState->mRenderPassConfiguration;
+
+			executeRenderPassLoadActions( _currentRenderPassConfiguration );
+
+			return true;
+		}
+
+		return false;
+	}
+
+	bool CommandListRenderPassDefault::beginRenderPass(
+			const RenderPassConfigurationDynamicState & pRenderPassState,
+			Bitmask<ECommandListActionFlags> pFlags )
+	{
+		if( CommandList::beginRenderPass( pRenderPassState, pFlags ) )
+		{
+			_currentRenderPassConfiguration = pRenderPassState.getRenderPassConfiguration();
+
+			executeRenderPassLoadActions( _currentRenderPassConfiguration );
+
+			return true;
+		}
+
+		return false;
+	}
+
+	void CommandListRenderPassDefault::endRenderPass()
+	{
+		if( isRenderPassActive() )
+		{
+			executeRenderPassStoreActions( _currentRenderPassConfiguration );
+
+			CommandList::endRenderPass();
+		}
 	}
 
 

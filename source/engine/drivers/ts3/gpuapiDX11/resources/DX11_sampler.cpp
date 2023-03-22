@@ -6,8 +6,8 @@
 namespace ts3::gpuapi
 {
 
-	DX11Sampler::DX11Sampler( DX11GPUDevice & pGPUDevice, const SamplerConfig & pSamplerConfig, ComPtr<ID3D11SamplerState> pD3D11SamplerState )
-	: Sampler( pGPUDevice, pSamplerConfig )
+	DX11Sampler::DX11Sampler( DX11GPUDevice & pGPUDevice, ComPtr<ID3D11SamplerState> pD3D11SamplerState )
+	: Sampler( pGPUDevice )
 	, mD3D11SamplerState( std::move( pD3D11SamplerState ) )
 	{ }
 
@@ -29,7 +29,7 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
-		auto sampler = createGPUAPIObject<DX11Sampler>( pDX11GPUDevice, pCreateInfo.samplerConfig, d3d11SamplerState );
+		auto sampler = createGPUAPIObject<DX11Sampler>( pDX11GPUDevice, d3d11SamplerState );
 
 		return sampler;
 	}
@@ -51,10 +51,11 @@ namespace ts3::gpuapi
 		pOutD3D11SamplerConfig.BorderColor[2] = pSamplerConfig.borderColor.rgbaArray[2];
 		pOutD3D11SamplerConfig.BorderColor[3] = pSamplerConfig.borderColor.rgbaArray[3];
 
-		pOutD3D11SamplerConfig.Filter = atl::translateDX11ETextureFilter( pSamplerConfig.filterConfig.magFilter,
-		                                                                         pSamplerConfig.filterConfig.minFilter,
-		                                                                         pSamplerConfig.filterConfig.mipMode,
-		                                                                         pSamplerConfig.filterConfig.anisotropyLevel );
+		pOutD3D11SamplerConfig.Filter = atl::translateDX11ETextureFilter(
+				pSamplerConfig.filterConfig.magFilter,
+				pSamplerConfig.filterConfig.minFilter,
+				pSamplerConfig.filterConfig.mipMode,
+				pSamplerConfig.filterConfig.anisotropyLevel );
 
 		return true;
 	}

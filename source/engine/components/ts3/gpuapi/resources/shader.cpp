@@ -19,7 +19,10 @@ namespace ts3::gpuapi
 	, mShaderBinary( std::move( pShaderBinary ) )
 	{}
 
-	Shader::~Shader() = default;
+	Shader::~Shader()
+	{
+		const_cast< std::unique_ptr<ShaderBinary> * >( &mShaderBinary )->release();
+	}
 
 
 	std::unique_ptr<ShaderBinary> ShaderBinary::create( size_t pBinarySize )

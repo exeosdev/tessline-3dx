@@ -3,13 +3,15 @@
 #include "DX11_commonGraphicsConfig.h"
 #include "DX11_graphicsShaderState.h"
 #include "DX11_inputAssembler.h"
+#include "DX11_renderTarget.h"
 #include "../DX11_gpuDevice.h"
+#include "../resources/DX11_shader.h"
 
 namespace ts3::gpuapi
 {
 	
 	DX11PipelineImmutableStateFactory::DX11PipelineImmutableStateFactory( DX11GPUDevice & pGPUDevice )
-	: PipelineImmutableStateFactory()
+	: PipelineImmutableStateFactorySeparableShader( pGPUDevice  )
 	, mDX11GPUDevice( pGPUDevice )
 	{}
 
@@ -27,6 +29,13 @@ namespace ts3::gpuapi
 		return DX11DepthStencilImmutableState::createInstance( mDX11GPUDevice, pConfig );
 	}
 
+	IAInputLayoutImmutableStateHandle DX11PipelineImmutableStateFactory::createIAInputLayoutState(
+			const IAInputLayoutDefinition & pDefinition,
+			Shader * pVertexShaderWithBinary )
+	{
+		return DX11IAInputLayoutImmutableState::createInstance( mDX11GPUDevice, pDefinition, *pVertexShaderWithBinary->mShaderBinary );
+	}
+
 	IAVertexStreamImmutableStateHandle DX11PipelineImmutableStateFactory::createIAVertexStreamState(
 			const IAVertexStreamDefinition & pDefinition )
 	{
@@ -42,19 +51,19 @@ namespace ts3::gpuapi
 	RenderTargetBindingImmutableStateHandle DX11PipelineImmutableStateFactory::createRenderTargetBindingState(
 			const RenderTargetBindingDefinition & pDefinition )
 	{
-		return nullptr;//DX11RenderTargetBindingImmutableState::createInstance( mDX11GPUDevice, pDefinition );
+		return DX11RenderTargetBindingImmutableState::createInstance( mDX11GPUDevice, pDefinition );
 	}
 
 	RenderPassConfigurationImmutableStateHandle DX11PipelineImmutableStateFactory::createRenderPassState(
 			const RenderPassConfiguration & pConfiguration )
 	{
-		return nullptr;//DX11RenderPassConfigurationImmutableState::createInstance( mDX11GPUDevice, pConfiguration );
+		return DX11RenderPassConfigurationImmutableState::createInstance( mDX11GPUDevice, pConfiguration );
 	}
 
 	RenderTargetBindingImmutableStateHandle DX11PipelineImmutableStateFactory::createScreenRenderTargetBindingState(
 			ComPtr<IDXGISwapChain1> pDXGISwapChain )
 	{
-		return nullptr;//DX11RenderTargetBindingImmutableState::createForScreen( mDX11GPUDevice, pRenderTargetLayout );
+		return nullptr;// DX11RenderTargetBindingImmutableState::createForScreen( mDX11GPUDevice, pRenderTargetLayout );
 	}
 	
 }

@@ -13,6 +13,16 @@ namespace ts3::gpuapi
 
 	GraphicsShaderLinkageImmutableState::~GraphicsShaderLinkageImmutableState() = default;
 
+	Shader * GraphicsShaderLinkageImmutableState::getShader( size_t pIndex ) const noexcept
+	{
+		return nullptr;
+	}
+
+	Shader * GraphicsShaderLinkageImmutableState::getShader( EShaderType pShaderType ) const noexcept
+	{
+		return nullptr;
+	}
+
 
 	GraphicsShaderLinkageImmutableStateSeparable::GraphicsShaderLinkageImmutableStateSeparable(
 			GPUDevice & pGPUDevice,
@@ -23,6 +33,16 @@ namespace ts3::gpuapi
 	{}
 
 	GraphicsShaderLinkageImmutableStateSeparable::~GraphicsShaderLinkageImmutableStateSeparable() = default;
+
+	Shader * GraphicsShaderLinkageImmutableStateSeparable::getShader( size_t pIndex ) const noexcept
+	{
+		return mShaderSet[pIndex];
+	}
+
+	Shader * GraphicsShaderLinkageImmutableStateSeparable::getShader( EShaderType pShaderType ) const noexcept
+	{
+		return mShaderSet[pShaderType];
+	}
 
 
 	namespace smutil

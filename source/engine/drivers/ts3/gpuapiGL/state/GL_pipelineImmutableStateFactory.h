@@ -36,7 +36,7 @@ namespace ts3::gpuapi
 		virtual ~GLPipelineImmutableStateFactoryCore();
 
 		virtual GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageState( const GraphicsShaderSet & pShaderSet ) override final;
-		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & pDefinition ) override final;
+		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & pDefinition, Shader * pVertexShaderWithBinary ) override final;
 	};
 
 	class GLPipelineImmutableStateFactoryCompat : public GLPipelineImmutableStateFactory
@@ -46,7 +46,7 @@ namespace ts3::gpuapi
 		virtual ~GLPipelineImmutableStateFactoryCompat();
 
 		virtual GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageState( const GraphicsShaderSet & pShaderSet ) override final;
-		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & pDefinition ) override final;
+		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & pDefinition, Shader * pVertexShaderWithBinary ) override final;
 	};
 
 }

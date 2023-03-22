@@ -26,24 +26,6 @@ namespace ts3::gpuapi
 
 	GLGPUDevice::~GLGPUDevice() = default;
 
-	bool GLGPUDevice::checkBufferImmutableStorageSupport() const noexcept
-	{
-		return mGLRuntimeSupportFlags.isSet( E_GL_RUNTIME_SUPPORT_FLAG_BUFFER_IMMUTABLE_STORAGE_BIT ) && glBufferStorage;
-	}
-
-	bool GLGPUDevice::checkShaderExplicitLayoutSupport() const noexcept
-	{
-		return mGLRuntimeSupportFlags.isSet(
-			E_GL_RUNTIME_SUPPORT_FLAG_EXPLICIT_SHADER_ATTRIBUTE_LOCATION_BIT |
-			E_GL_RUNTIME_SUPPORT_FLAG_EXPLICIT_SHADER_FRAG_DATA_LOCATION_BIT |
-			E_GL_RUNTIME_SUPPORT_FLAG_EXPLICIT_SHADER_UNIFORM_BINDING_BIT );
-	}
-
-	bool GLGPUDevice::checkShaderSeparateStagesSupport() const noexcept
-	{
-		return mGLRuntimeSupportFlags.isSet( E_GL_RUNTIME_SUPPORT_FLAG_SEPARATE_SHADER_STAGES_BIT ) && glProgramParameteri;
-	}
-
 	GLDebugOutput * GLGPUDevice::getDebugOutputInterface() const
 	{
 		return _glDebugOutput.get();
@@ -125,7 +107,7 @@ namespace ts3::gpuapi
 
 	TextureHandle GLGPUDevice::_drvCreateTexture( const TextureCreateInfo & pCreateInfo )
 	{
-	    auto glcTexture = GLTexture::createInstance( *this, pCreateInfo );
+	    auto glcTexture = GLTexture::createDefault( *this, pCreateInfo );
 	    ts3DebugAssert( glcTexture );
 	    return glcTexture;
 	}
@@ -133,7 +115,7 @@ namespace ts3::gpuapi
 	RenderTargetTextureHandle GLGPUDevice::_drvCreateRenderTargetTexture(
 			const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
-		auto glcRTTexture = GLTexture::createRTT( *this, pCreateInfo );
+		auto glcRTTexture = GLTexture::createForRenderTarget( *this, pCreateInfo );
 		ts3DebugAssert( glcRTTexture );
 		return glcRTTexture;
 	}
@@ -165,11 +147,6 @@ namespace ts3::gpuapi
 		return false;
 	}
 
-	std::unique_ptr<GLGraphicsPipelineStateController> GLGPUDeviceCore::createPipelineStateController() const noexcept
-	{
-		return std::make_unique<GLGraphicsPipelineStateControllerCore>();
-	}
-
 
 	GLGPUDeviceCompat::GLGPUDeviceCompat( GLGPUDriver & pGPUDriver )
 	: GLGPUDevice( pGPUDriver, _immutableStateFactoryCompat )
@@ -181,11 +158,6 @@ namespace ts3::gpuapi
 	bool GLGPUDeviceCompat::isCompatibilityDevice() const noexcept
 	{
 		return true;
-	}
-
-	std::unique_ptr<GLGraphicsPipelineStateController> GLGPUDeviceCompat::createPipelineStateController() const noexcept
-	{
-		return std::make_unique<GLGraphicsPipelineStateControllerCompat>();
 	}
 
 

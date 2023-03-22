@@ -86,7 +86,7 @@ namespace ts3::gpuapi
 		{
 			D3D11_INPUT_ELEMENT_DESC d3D11InputElementDesc;
 
-			d3D11InputElementDesc.AlignedByteOffset = numeric_cast<UINT>( pAttributeInfo.relativeOffset );
+			d3D11InputElementDesc.AlignedByteOffset = static_cast<UINT>( pAttributeInfo.relativeOffset );
 			d3D11InputElementDesc.SemanticName = pAttributeInfo.semanticName;
 			d3D11InputElementDesc.SemanticIndex = pAttributeInfo.semanticIndex;
 			d3D11InputElementDesc.Format = atl::translateVertexAttribFormatDX( pAttributeInfo.format );

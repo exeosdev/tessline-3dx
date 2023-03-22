@@ -150,7 +150,7 @@ namespace ts3::gpuapi
 
 	bool DX11GPUBuffer::mapRegion( void * pCommandObject, const GPUMemoryRegion & pRegion, EGPUMemoryMapMode pMapMode )
 	{
-		auto * d3d11DeviceContext1 = getD3D11DeviceContext( pCommandObject );
+		auto * d3d11DeviceContext1 = smutil::getD3D11DeviceContextFromCommandList( pCommandObject );
 
 		auto d3d11MapMode = atl::translateDX11BufferMapFlags( pMapMode, mResourceMemory.memoryFlags );
 		ts3DebugAssert( d3d11MapMode != 0 );
@@ -177,7 +177,7 @@ namespace ts3::gpuapi
 
 	void DX11GPUBuffer::unmap( void * pCommandObject )
 	{
-		auto * d3d11DeviceContext1 = getD3D11DeviceContext( pCommandObject );
+		auto * d3d11DeviceContext1 = smutil::getD3D11DeviceContextFromCommandList( pCommandObject );
 
 		d3d11DeviceContext1->Unmap( mD3D11Buffer.Get(), 0 );
 
@@ -186,7 +186,7 @@ namespace ts3::gpuapi
 
 	void DX11GPUBuffer::flushMappedRegion( void * pCommandObject, const GPUMemoryRegion & pRegion )
 	{
-		auto * d3d11DeviceContext1 = getD3D11DeviceContext( pCommandObject );
+		auto * d3d11DeviceContext1 = smutil::getD3D11DeviceContextFromCommandList( pCommandObject );
 
 		d3d11DeviceContext1->Unmap( mD3D11Buffer.Get(), 0 );
 
@@ -201,7 +201,7 @@ namespace ts3::gpuapi
 	{
 		if( pRegion.size == mBufferProperties.byteSize )
 		{
-			auto * d3d11DeviceContext1 = getD3D11DeviceContext( pCommandObject );
+			auto * d3d11DeviceContext1 = smutil::getD3D11DeviceContextFromCommandList( pCommandObject );
 			d3d11DeviceContext1->DiscardResource( mD3D11Buffer.Get() );
 		}
 	}

@@ -19,57 +19,12 @@ namespace ts3::gpuapi
 			ECommandListType pListType,
 			system::OpenGLRenderContextHandle pSysGLRenderContext,
 			GLGraphicsPipelineStateController & pStateController )
-	: CommandList( pGLCommandSystem, pListType, pStateController )
+	: CommandListRenderPassDefault( pGLCommandSystem, pListType, pStateController )
 	, mSysGLRenderContext( pSysGLRenderContext )
 	, _graphicsPipelineStateControllerGL( &pStateController )
 	{}
 
 	GLCommandList::~GLCommandList() = default;
-
-	bool GLCommandList::beginRenderPass(
-			const RenderPassConfigurationImmutableState & pRenderPassState,
-			Bitmask<ECommandListActionFlags> pFlags )
-	{
-		bool beginRenderPassStatus = CommandList::beginRenderPass( pRenderPassState, pFlags );
-
-		if( beginRenderPassStatus )
-		{
-			const auto * glcRenderPassState = pRenderPassState.queryInterface<GLRenderPassConfigurationImmutableState>();
-			_currentRenderPassConfiguration = glcRenderPassState->mRenderPassConfiguration;
-
-			executeRenderPassLoadActions();
-		}
-
-		return true;
-	}
-
-	bool GLCommandList::beginRenderPass(
-			const RenderPassConfigurationDynamicState & pRenderPassState,
-			Bitmask<ECommandListActionFlags> pFlags )
-	{
-		bool beginRenderPassStatus = CommandList::beginRenderPass( pRenderPassState, pFlags );
-
-		if( beginRenderPassStatus )
-		{
-			_currentRenderPassConfiguration = pRenderPassState.getRenderPassConfiguration();
-
-			executeRenderPassLoadActions();
-		}
-
-		return true;
-	}
-
-	void GLCommandList::endRenderPass()
-	{
-		if( !isRenderPassActive() )
-		{
-			return;
-		}
-
-		executeRenderPassStoreActions();
-
-		CommandList::endRenderPass();
-	}
 
 	void GLCommandList::beginCommandSequence()
 	{
@@ -123,21 +78,21 @@ namespace ts3::gpuapi
 		ts3DebugInterrupt();
 	}
 
-	void GLCommandList::executeRenderPassLoadActions()
+	void GLCommandList::executeRenderPassLoadActions( const RenderPassConfiguration & pRenderPassConfiguration )
 	{
-		if( _currentRenderPassConfiguration.attachmentsActionClearMask != 0 )
+		if( pRenderPassConfiguration.attachmentsActionClearMask != 0 )
 		{
-			smutil::clearRenderPassFramebuffer( _currentRenderPassConfiguration );
+			smutil::clearRenderPassFramebuffer( pRenderPassConfiguration );
 		}
 	}
 
-	void GLCommandList::executeRenderPassStoreActions()
+	void GLCommandList::executeRenderPassStoreActions( const RenderPassConfiguration & pRenderPassConfiguration )
 	{
-		if( _currentRenderPassConfiguration.attachmentsActionResolveMask != 0 )
+		if( pRenderPassConfiguration.attachmentsActionResolveMask != 0 )
 		{
 			smutil::resolveRenderPassFramebuffer(
 				_graphicsPipelineStateControllerGL->getCurrentRenderTargetBindingInfo(),
-				_currentRenderPassConfiguration );
+				pRenderPassConfiguration );
 		}
 	}
 

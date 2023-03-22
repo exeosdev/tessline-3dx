@@ -11,6 +11,12 @@
 namespace ts3::gpuapi
 {
 
+	template <typename TEnum>
+	inline const TEnum D3D11_INVALID = static_cast< TEnum >( 0xFFFFFFFF );
+	
+	template <typename TEnum>
+	inline const TEnum D3D11_UNDEFINED = static_cast< TEnum >( 0 );
+
 	ComPtr<ID3D11Device1> atl::createD3D11Device( D3D_DRIVER_TYPE pDeviceType, Bitmask<UINT> pCreateFlags )
 	{
 		Bitmask<UINT> createDeviceFlags = 0;
@@ -198,56 +204,58 @@ namespace ts3::gpuapi
 
 	D3D11_BLEND atl::translateDX11BlendFactor( EBlendFactor pBlendFactor )
 	{
-		static const D3D11_BLEND blendFactorArray[] =
+		switch( pBlendFactor )
 		{
-			D3D11_BLEND_ZERO,
-			D3D11_BLEND_ONE,
-			D3D11_BLEND_BLEND_FACTOR,
-			D3D11_BLEND_INV_BLEND_FACTOR,
-			D3D11_BLEND_SRC_COLOR,
-			D3D11_BLEND_SRC_ALPHA,
-			D3D11_BLEND_DEST_COLOR,
-			D3D11_BLEND_DEST_ALPHA,
-			D3D11_BLEND_INV_SRC_COLOR,
-			D3D11_BLEND_INV_SRC_ALPHA,
-			D3D11_BLEND_INV_DEST_COLOR,
-			D3D11_BLEND_INV_DEST_ALPHA,
+			ts3CaseReturn( EBlendFactor::Undefined   , D3D11_UNDEFINED<D3D11_BLEND> );
+			ts3CaseReturn( EBlendFactor::Zero        , D3D11_BLEND_ZERO );
+			ts3CaseReturn( EBlendFactor::One         , D3D11_BLEND_ONE );
+			ts3CaseReturn( EBlendFactor::Const       , D3D11_BLEND_BLEND_FACTOR );
+			ts3CaseReturn( EBlendFactor::ConstInv    , D3D11_BLEND_INV_BLEND_FACTOR );
+			ts3CaseReturn( EBlendFactor::SrcColor    , D3D11_BLEND_SRC_COLOR );
+			ts3CaseReturn( EBlendFactor::SrcAlpha    , D3D11_BLEND_SRC_ALPHA );
+			ts3CaseReturn( EBlendFactor::DstColor    , D3D11_BLEND_DEST_COLOR );
+			ts3CaseReturn( EBlendFactor::DstAlpha    , D3D11_BLEND_DEST_ALPHA );
+			ts3CaseReturn( EBlendFactor::SrcColorInv , D3D11_BLEND_INV_SRC_COLOR );
+			ts3CaseReturn( EBlendFactor::SrcAlphaInv , D3D11_BLEND_INV_SRC_ALPHA );
+			ts3CaseReturn( EBlendFactor::DstColorInv , D3D11_BLEND_INV_DEST_COLOR );
+			ts3CaseReturn( EBlendFactor::DstAlphaInv , D3D11_BLEND_INV_DEST_ALPHA );
 		};
-		return staticArrayElement( blendFactorArray, pBlendFactor );
+		return D3D11_INVALID<D3D11_BLEND>;
 	}
 
 	D3D11_BLEND_OP atl::translateDX11BlendOp( EBlendOp pBlendOp )
 	{
-		static const D3D11_BLEND_OP blendOpArray[] =
+		switch( pBlendOp )
 		{
-			D3D11_BLEND_OP_ADD,
-			D3D11_BLEND_OP_MIN,
-			D3D11_BLEND_OP_MAX,
-			D3D11_BLEND_OP_SUBTRACT,
-			D3D11_BLEND_OP_REV_SUBTRACT
+			ts3CaseReturn( EBlendOp::Undefined   , D3D11_UNDEFINED<D3D11_BLEND_OP> );
+			ts3CaseReturn( EBlendOp::Add         , D3D11_BLEND_OP_ADD );
+			ts3CaseReturn( EBlendOp::Min         , D3D11_BLEND_OP_MIN );
+			ts3CaseReturn( EBlendOp::Max         , D3D11_BLEND_OP_MAX );
+			ts3CaseReturn( EBlendOp::Subtract    , D3D11_BLEND_OP_SUBTRACT );
+			ts3CaseReturn( EBlendOp::SubtractRev , D3D11_BLEND_OP_REV_SUBTRACT );
 		};
-		return staticArrayElement( blendOpArray, pBlendOp );
+		return D3D11_INVALID<D3D11_BLEND_OP>;
 	}
 
 	UINT8 atl::translateDX11BlendRenderTargetWriteMask( Bitmask<EBlendWriteMaskFlags> pWriteMask )
 	{
-		auto d3d11WriteMask = makeBitmask<D3D11_COLOR_WRITE_ENABLE>();
+		auto d3d11WriteMask = makeBitmask<UINT8>( 0 );
 
 		if( pWriteMask.isSet( E_BLEND_WRITE_MASK_CHANNEL_RED ) )
 		{
-			return d3d11WriteMask.set( D3D11_COLOR_WRITE_ENABLE_RED );
+			d3d11WriteMask.set( D3D11_COLOR_WRITE_ENABLE_RED );
 		}
 		if( pWriteMask.isSet( E_BLEND_WRITE_MASK_CHANNEL_GREEN ) )
 		{
-			return d3d11WriteMask.set( D3D11_COLOR_WRITE_ENABLE_GREEN );
+			d3d11WriteMask.set( D3D11_COLOR_WRITE_ENABLE_GREEN );
 		}
 		if( pWriteMask.isSet( E_BLEND_WRITE_MASK_CHANNEL_BLUE ) )
 		{
-			return d3d11WriteMask.set( D3D11_COLOR_WRITE_ENABLE_BLUE );
+			d3d11WriteMask.set( D3D11_COLOR_WRITE_ENABLE_BLUE );
 		}
 		if( pWriteMask.isSet( E_BLEND_WRITE_MASK_CHANNEL_ALPHA ) )
 		{
-			return d3d11WriteMask.set( D3D11_COLOR_WRITE_ENABLE_ALPHA );
+			d3d11WriteMask.set( D3D11_COLOR_WRITE_ENABLE_ALPHA );
 		}
 
 		return d3d11WriteMask;
@@ -299,42 +307,44 @@ namespace ts3::gpuapi
 
 	D3D11_MAP atl::translateDX11BufferMapFlags( EGPUMemoryMapMode pMapMode, Bitmask<EGPUMemoryFlags> /* pMemoryFlags */ )
 	{
-		static const std::unordered_map<EGPUMemoryMapMode, D3D11_MAP> mapModeMap =
+		switch( pMapMode )
 		{
-			{ EGPUMemoryMapMode::ReadOnly        , D3D11_MAP_READ               },
-			{ EGPUMemoryMapMode::ReadWrite       , D3D11_MAP_READ_WRITE         },
-			{ EGPUMemoryMapMode::WriteDefault    , D3D11_MAP_WRITE              },
-			{ EGPUMemoryMapMode::WriteInvalidate , D3D11_MAP_WRITE_DISCARD      },
-			{ EGPUMemoryMapMode::WriteAppend     , D3D11_MAP_WRITE_NO_OVERWRITE },
+			ts3CaseReturn( EGPUMemoryMapMode::ReadOnly        , D3D11_MAP_READ               );
+			ts3CaseReturn( EGPUMemoryMapMode::ReadWrite       , D3D11_MAP_READ_WRITE         );
+			ts3CaseReturn( EGPUMemoryMapMode::WriteDefault    , D3D11_MAP_WRITE              );
+			ts3CaseReturn( EGPUMemoryMapMode::WriteInvalidate , D3D11_MAP_WRITE_DISCARD      );
+			ts3CaseReturn( EGPUMemoryMapMode::WriteAppend     , D3D11_MAP_WRITE_NO_OVERWRITE );
 		};
-		return stdx::getMapValueRefOrDefault( mapModeMap, pMapMode, static_cast<D3D11_MAP>( 0 ) );
+		return static_cast<D3D11_MAP>( 0 );
 	}
 
 	D3D11_COMPARISON_FUNC atl::translateDX11CompFunc( ECompFunc pCompFunc )
 	{
-		static const D3D11_COMPARISON_FUNC compFuncArray[] =
+		switch( pCompFunc )
 		{
-			D3D11_COMPARISON_NEVER,
-			D3D11_COMPARISON_ALWAYS,
-			D3D11_COMPARISON_EQUAL,
-			D3D11_COMPARISON_NOT_EQUAL,
-			D3D11_COMPARISON_GREATER,
-			D3D11_COMPARISON_GREATER_EQUAL,
-			D3D11_COMPARISON_LESS,
-			D3D11_COMPARISON_LESS_EQUAL,
+			ts3CaseReturn( ECompFunc::Undefined    , D3D11_UNDEFINED<D3D11_COMPARISON_FUNC> );
+			ts3CaseReturn( ECompFunc::Never        , D3D11_COMPARISON_NEVER );
+			ts3CaseReturn( ECompFunc::Always       , D3D11_COMPARISON_ALWAYS );
+			ts3CaseReturn( ECompFunc::Equal        , D3D11_COMPARISON_EQUAL );
+			ts3CaseReturn( ECompFunc::NotEqual     , D3D11_COMPARISON_NOT_EQUAL );
+			ts3CaseReturn( ECompFunc::Greater      , D3D11_COMPARISON_GREATER );
+			ts3CaseReturn( ECompFunc::GreaterEqual , D3D11_COMPARISON_GREATER_EQUAL );
+			ts3CaseReturn( ECompFunc::Less         , D3D11_COMPARISON_LESS );
+			ts3CaseReturn( ECompFunc::LessEqual    , D3D11_COMPARISON_LESS_EQUAL );
 		};
-		return staticArrayElement( compFuncArray, pCompFunc );
+		return D3D11_INVALID<D3D11_COMPARISON_FUNC>;
 	}
 
 	D3D11_CULL_MODE atl::translateDX11CullMode( ECullMode pCullMode )
 	{
-		static const D3D11_CULL_MODE cullModeArray[] =
+		switch( pCullMode )
 		{
-			D3D11_CULL_NONE,
-			D3D11_CULL_BACK,
-			D3D11_CULL_FRONT,
+			ts3CaseReturn( ECullMode::Undefined  , D3D11_UNDEFINED<D3D11_CULL_MODE> );
+			ts3CaseReturn( ECullMode::None       , D3D11_CULL_NONE );
+			ts3CaseReturn( ECullMode::Back       , D3D11_CULL_BACK );
+			ts3CaseReturn( ECullMode::Front      , D3D11_CULL_FRONT );
 		};
-		return staticArrayElement( cullModeArray, pCullMode );
+		return D3D11_INVALID<D3D11_CULL_MODE>;
 	}
 
 	D3D11_DEPTH_WRITE_MASK atl::translateDX11DepthWriteMask( EDepthWriteMask pDepthWriteMask )
@@ -351,74 +361,78 @@ namespace ts3::gpuapi
 
 	D3D11_FILL_MODE atl::translateDX11PrimitiveFillMode( EPrimitiveFillMode pFillMode )
 	{
-		static const D3D11_FILL_MODE fillModeArray[] =
+		switch( pFillMode )
 		{
-			D3D11_FILL_SOLID,
-			D3D11_FILL_WIREFRAME,
+			ts3CaseReturn( EPrimitiveFillMode::Undefined , D3D11_UNDEFINED<D3D11_FILL_MODE> );
+			ts3CaseReturn( EPrimitiveFillMode::Solid     , D3D11_FILL_SOLID );
+			ts3CaseReturn( EPrimitiveFillMode::Wireframe , D3D11_FILL_WIREFRAME );
 		};
-		return staticArrayElement( fillModeArray, pFillMode );
+		return D3D11_INVALID<D3D11_FILL_MODE>;
 	}
 
 	D3D11_PRIMITIVE_TOPOLOGY atl::translateDX11PrimitiveTopology( EPrimitiveTopology pTopology )
 	{
-		static const D3D11_PRIMITIVE_TOPOLOGY primitiveTopologyArray[] =
+		switch( pTopology )
 		{
-			D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED,
-			D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,
-			D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
-			D3D11_PRIMITIVE_TOPOLOGY_LINELIST_ADJ,
-			D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP,
-			D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ,
-			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
-			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ,
-			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
-			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ,
-			D3D11_PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST
+			ts3CaseReturn( EPrimitiveTopology::Undefined        , D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED );
+			ts3CaseReturn( EPrimitiveTopology::PointList        , D3D11_PRIMITIVE_TOPOLOGY_POINTLIST );
+			ts3CaseReturn( EPrimitiveTopology::LineList         , D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
+			ts3CaseReturn( EPrimitiveTopology::LineListAdj      , D3D11_PRIMITIVE_TOPOLOGY_LINELIST_ADJ );
+			ts3CaseReturn( EPrimitiveTopology::LineStrip        , D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP );
+			ts3CaseReturn( EPrimitiveTopology::LineStripAdj     , D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ );
+			ts3CaseReturn( EPrimitiveTopology::TriangleList     , D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+			ts3CaseReturn( EPrimitiveTopology::TriangleListAdj  , D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ );
+			ts3CaseReturn( EPrimitiveTopology::TriangleStrip    , D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP );
+			ts3CaseReturn( EPrimitiveTopology::TriangleStripAdj , D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ );
+			ts3CaseReturn( EPrimitiveTopology::TesselationPatch , D3D11_PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST );
 		};
-		return staticArrayElement( primitiveTopologyArray, pTopology );
+		return D3D11_INVALID<D3D11_PRIMITIVE_TOPOLOGY>;
 	}
 
 	D3D11_SHADER_TYPE atl::translateDX11EShaderType( EShaderType pShaderType )
 	{
-		static const D3D11_SHADER_TYPE shaderTypeArray[] =
+		switch( pShaderType )
 		{
-			D3D11_VERTEX_SHADER,
-			D3D11_HULL_SHADER,
-			D3D11_DOMAIN_SHADER,
-			D3D11_GEOMETRY_SHADER,
-			D3D11_PIXEL_SHADER,
-			D3D11_COMPUTE_SHADER,
-		};
-		return staticArrayElement( shaderTypeArray, pShaderType );
+			ts3CaseReturn( EShaderType::Unknown    , D3D11_UNDEFINED<D3D11_SHADER_TYPE> );
+			ts3CaseReturn( EShaderType::GSVertex   , D3D11_VERTEX_SHADER );
+			ts3CaseReturn( EShaderType::GSHull     , D3D11_HULL_SHADER );
+			ts3CaseReturn( EShaderType::GSDomain   , D3D11_DOMAIN_SHADER );
+			ts3CaseReturn( EShaderType::GSGeometry , D3D11_GEOMETRY_SHADER );
+			ts3CaseReturn( EShaderType::GSPixel    , D3D11_PIXEL_SHADER );
+			ts3CaseReturn( EShaderType::CSCompute  , D3D11_COMPUTE_SHADER );
+		}
+		return D3D11_INVALID<D3D11_SHADER_TYPE>;
 	}
 
 	D3D11_STENCIL_OP atl::translateDX11StencilOp( EStencilOp pStencilOp )
 	{
-		static const D3D11_STENCIL_OP stencilOpArray[] =
+		switch( pStencilOp )
 		{
-			D3D11_STENCIL_OP_ZERO,
-			D3D11_STENCIL_OP_KEEP,
-			D3D11_STENCIL_OP_REPLACE,
-			D3D11_STENCIL_OP_INCR,
-			D3D11_STENCIL_OP_INCR_SAT,
-			D3D11_STENCIL_OP_DECR,
-			D3D11_STENCIL_OP_DECR_SAT,
-			D3D11_STENCIL_OP_INVERT,
+			ts3CaseReturn( EStencilOp::Undefined , D3D11_UNDEFINED<D3D11_STENCIL_OP> );
+			ts3CaseReturn( EStencilOp::Zero      , D3D11_STENCIL_OP_ZERO );
+			ts3CaseReturn( EStencilOp::Keep      , D3D11_STENCIL_OP_KEEP );
+			ts3CaseReturn( EStencilOp::Replace   , D3D11_STENCIL_OP_REPLACE );
+			ts3CaseReturn( EStencilOp::IncrClamp , D3D11_STENCIL_OP_INCR );
+			ts3CaseReturn( EStencilOp::IncrWrap  , D3D11_STENCIL_OP_INCR_SAT );
+			ts3CaseReturn( EStencilOp::DecrClamp , D3D11_STENCIL_OP_DECR );
+			ts3CaseReturn( EStencilOp::DecrWrap  , D3D11_STENCIL_OP_DECR_SAT );
+			ts3CaseReturn( EStencilOp::Invert    , D3D11_STENCIL_OP_INVERT );
 		};
-		return staticArrayElement( stencilOpArray, pStencilOp );
+		return D3D11_INVALID<D3D11_STENCIL_OP>;
 	}
 
 	D3D11_TEXTURE_ADDRESS_MODE atl::translateDX11ETextureAddressMode( ETextureAddressMode pAddressMode )
 	{
-		static const D3D11_TEXTURE_ADDRESS_MODE textureAddressModeArray[] =
+		switch( pAddressMode )
 		{
-			D3D11_TEXTURE_ADDRESS_BORDER,
-			D3D11_TEXTURE_ADDRESS_CLAMP,
-			D3D11_TEXTURE_ADDRESS_MIRROR,
-			D3D11_TEXTURE_ADDRESS_MIRROR_ONCE,
-			D3D11_TEXTURE_ADDRESS_WRAP,
+			ts3CaseReturn( ETextureAddressMode::Undefined         , D3D11_UNDEFINED<D3D11_TEXTURE_ADDRESS_MODE> );
+			ts3CaseReturn( ETextureAddressMode::ClampToEdge       , D3D11_TEXTURE_ADDRESS_CLAMP );
+			ts3CaseReturn( ETextureAddressMode::MirrorRepeat      , D3D11_TEXTURE_ADDRESS_MIRROR );
+			ts3CaseReturn( ETextureAddressMode::Repeat            , D3D11_TEXTURE_ADDRESS_WRAP );
+			ts3CaseReturn( ETextureAddressMode::ClampToColor      , D3D11_TEXTURE_ADDRESS_BORDER );
+			ts3CaseReturn( ETextureAddressMode::MirrorClampToEdge , D3D11_TEXTURE_ADDRESS_MIRROR_ONCE );
 		};
-		return staticArrayElement( textureAddressModeArray, pAddressMode );
+		return D3D11_UNDEFINED<D3D11_TEXTURE_ADDRESS_MODE>;
 	}
 
 	UINT atl::translateDX11ETextureBindFlags( Bitmask<resource_flags_value_t> pTextureFlags )

@@ -47,7 +47,7 @@ namespace ts3::gpuapi
 		const auto shaderImmutableState = createGPUAPIObject<GraphicsShaderLinkageImmutableStateSeparable>(
 				mGPUDevice,
 				stateCommonProperties,
-				std::move( pShaderSet ) );
+				pShaderSet );
 
 		return shaderImmutableState;
 	}
@@ -76,7 +76,7 @@ namespace ts3::gpuapi
 		return nullptr;
 	}
 
-	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryNull::createIAInputLayoutState( const IAInputLayoutDefinition & )
+	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryNull::createIAInputLayoutState( const IAInputLayoutDefinition &, Shader * )
 	{
 		return nullptr;
 	}
@@ -123,9 +123,9 @@ namespace ts3::gpuapi
 		return _stateFactory->createGraphicsShaderLinkageState( pShaderSet );
 	}
 
-	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryAdapter::createState( const IAInputLayoutDefinition & pDefinition )
+	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryAdapter::createState( const IAInputLayoutDefinition & pDefinition, Shader * pVertexShaderWithBinary )
 	{
-		return _stateFactory->createIAInputLayoutState( pDefinition );
+		return _stateFactory->createIAInputLayoutState( pDefinition, pVertexShaderWithBinary );
 	}
 
 	IAVertexStreamImmutableStateHandle PipelineImmutableStateFactoryAdapter::createState( const IAVertexStreamDefinition & pDefinition )

@@ -51,6 +51,14 @@ namespace ts3::gpuapi
 	ts3GpaDeclareTypedefHandle( DX11GraphicsShaderLinkageImmutableState, GraphicsShaderLinkageImmutableStateSeparable );
 	ts3GpaDeclareTypedefHandle( DX11RenderPassConfigurationImmutableState, RenderPassConfigurationImmutableStateDefault );
 
+
+	namespace smutil
+	{
+
+		TS3_ATTR_NO_DISCARD ID3D11DeviceContext1 * getD3D11DeviceContextFromCommandList( void * pDX11CommandList );
+
+	}
+
 } // namespace ts3::gpuapi
 
 #endif // __TS3DRIVER_GPUAPI_DX11_PREREQUISITES_H__

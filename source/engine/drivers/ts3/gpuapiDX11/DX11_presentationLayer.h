@@ -5,6 +5,7 @@
 #define __TS3DRIVER_GPUAPI_DX11_PRESENTATION_LAYER_H__
 
 #include "DX11_prerequisites.h"
+#include <ts3/gpuapi/state/commonGPUStateDefs.h>
 #include <ts3/gpuapiDX/DX_presentationLayer.h>
 
 namespace ts3::gpuapi
@@ -20,11 +21,17 @@ namespace ts3::gpuapi
 	class TS3GX_DX11_CLASS DX11ScreenPresentationLayer final : public DXScreenPresentationLayer
 	{
 	public:
-		ComPtr<ID3D11Device1> const mD3D11Device1 = nullptr;
+		ComPtr<ID3D11Device1> const mD3D11Device1;
 
-		DX11ScreenPresentationLayer( DX11GPUDevice & pDevice,
-                                     system::WindowHandle pSysWindow,
-                                     ComPtr<IDXGISwapChain1> pDXGISwapChain );
+		RenderTargetBindingImmutableStateHandle const mScreenRenderTargetBindingState;
+
+	public:
+		DX11ScreenPresentationLayer(
+				DX11GPUDevice & pDevice,
+				system::WindowHandle pSysWindow,
+				ComPtr<IDXGISwapChain1> pDXGISwapChain,
+				RenderTargetBindingImmutableStateHandle pScreenRenderTargetBindingState );
+
 		virtual ~DX11ScreenPresentationLayer();
 
 		virtual void bindRenderTarget( CommandContext * pCmdContext ) override;

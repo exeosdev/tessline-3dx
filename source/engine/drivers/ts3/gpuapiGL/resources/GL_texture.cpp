@@ -20,7 +20,7 @@ namespace ts3::gpuapi
 
 	GLTexture::~GLTexture() = default;
 
-	GLTextureHandle GLTexture::createInstance( GLGPUDevice & pGPUDevice, const TextureCreateInfo & pCreateInfo )
+	GLTextureHandle GLTexture::createDefault( GLGPUDevice & pGPUDevice, const TextureCreateInfo & pCreateInfo )
 	{
 		auto createInfo = pCreateInfo;
 		if( !validateTextureCreateInfo( createInfo ) )
@@ -81,7 +81,7 @@ namespace ts3::gpuapi
 		return openglTexture;
 	}
 
-	RenderTargetTextureHandle GLTexture::createRTT( GLGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo )
+	RenderTargetTextureHandle GLTexture::createForRenderTarget( GLGPUDevice & pGPUDevice, const RenderTargetTextureCreateInfo & pCreateInfo )
 	{
 		const auto renderBufferIncompatibleBindFlags =
 				E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT |
@@ -100,8 +100,11 @@ namespace ts3::gpuapi
 			textureCreateInfo.resourceFlags = ( pCreateInfo.bindFlags & E_GPU_RESOURCE_USAGE_MASK_ALL );
 			textureCreateInfo.pixelFormat = pCreateInfo.rttLayout.internalDataFormat;
 			textureCreateInfo.initialTarget = rcutil::getTextureTargetFromResourceFlags( pCreateInfo.bindFlags );
+			textureCreateInfo.dimensions.arraySize = 1;
+			textureCreateInfo.dimensions.depth = 1;
+			textureCreateInfo.dimensions.mipLevelsNum = 1;
 
-			auto glcTexture = GLTexture::createInstance( pGPUDevice, textureCreateInfo );
+			auto glcTexture = GLTexture::createDefault( pGPUDevice, textureCreateInfo );
 			if( !glcTexture )
 			{
 				return nullptr;

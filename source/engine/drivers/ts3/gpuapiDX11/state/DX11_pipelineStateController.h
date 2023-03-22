@@ -4,7 +4,8 @@
 #ifndef __TS3DRIVER_GPUAPI_DXCOMMON_PIPELINE_STATE_CONTROLLER_H__
 #define __TS3DRIVER_GPUAPI_DXCOMMON_PIPELINE_STATE_CONTROLLER_H__
 
-#include "../DX11_prerequisites.h"
+#include "DX11_inputAssembler.h"
+#include "DX11_renderTarget.h"
 #include <ts3/gpuapi/state/separablePipelineState.h>
 
 namespace ts3::gpuapi
@@ -18,11 +19,17 @@ namespace ts3::gpuapi
 		friend class DX11CommandList;
 
 	public:
+		GPUDevice & mGPUDevice;
 		DX11CommandList * const mDX11CommandList = nullptr;
+		ID3D11DeviceContext1 * const mD3D11DeviceContext1 = nullptr;
 
 	public:
 		DX11GraphicsPipelineStateController( DX11CommandList & pDX11CommandList );
 		~DX11GraphicsPipelineStateController();
+
+		TS3_ATTR_NO_DISCARD const DX11IAVertexStreamDefinition & getCurrentIAVertexStreamDefinition() const noexcept;
+
+		TS3_ATTR_NO_DISCARD DX11RenderTargetBindingData getCurrentRenderTargetBinding() const noexcept;
 
 		virtual bool applyStateChanges() override;
 
@@ -46,7 +53,12 @@ namespace ts3::gpuapi
 	private:
 		Bitmask<uint32> applyCommonGraphicsConfigState( const DX11GraphicsPipelineStateObject & pGraphicsPSO );
 		Bitmask<uint32> applyGraphicsShaderState( const SeparableShaderCache & pSeparableShaders );
-		void applyIAVertexStreamState( const DX11IAVertexStreamImmutableState & pVertexStreamState );
+		void applyIAVertexStreamState( const DX11IAVertexStreamDefinition & pVertexStreamDefinition );
+		void applyRenderTargetBinding( const DX11RenderTargetBindingData & pRenderTargetBindingData );
+
+	private:
+		DX11IAVertexStreamDefinition _dynamicIAVertexStreamDefinitionDX11;
+		DX11RenderTargetBindingData _dynamicRenderTargetBindingDataDX11;
 	};
 
 } // namespace ts3::gpuapi

@@ -37,14 +37,6 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD virtual bool isCompatibilityDevice() const noexcept = 0;
 
-		TS3_ATTR_NO_DISCARD virtual std::unique_ptr<GLGraphicsPipelineStateController> createPipelineStateController() const noexcept = 0;
-
-		TS3_ATTR_NO_DISCARD bool checkBufferImmutableStorageSupport() const noexcept;
-
-		TS3_ATTR_NO_DISCARD bool checkShaderExplicitLayoutSupport() const noexcept;
-
-		TS3_ATTR_NO_DISCARD bool checkShaderSeparateStagesSupport() const noexcept;
-
 		GLDebugOutput * getDebugOutputInterface() const;
 
 		RenderTargetBindingImmutableStateHandle createScreenRenderTargetBindingState( const RenderTargetLayout & pRenderTargetLayout );
@@ -84,8 +76,6 @@ namespace ts3::gpuapi
 
 		virtual bool isCompatibilityDevice() const noexcept override final;
 
-		virtual std::unique_ptr<GLGraphicsPipelineStateController> createPipelineStateController() const noexcept override final;
-
 	private:
 		GLPipelineImmutableStateFactoryCore _immutableStateFactoryCore;
 	};
@@ -97,8 +87,6 @@ namespace ts3::gpuapi
 		virtual ~GLGPUDeviceCompat();
 
 		virtual bool isCompatibilityDevice() const noexcept override final;
-
-		virtual std::unique_ptr<GLGraphicsPipelineStateController> createPipelineStateController() const noexcept override final;
 
 	private:
 		GLPipelineImmutableStateFactoryCompat _immutableStateFactoryCompat;

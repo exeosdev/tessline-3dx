@@ -12,7 +12,7 @@ namespace ts3::gpuapi
 
 	struct RenderTargetLayout;
 
-	class DX11PipelineImmutableStateFactory : public PipelineImmutableStateFactory
+	class DX11PipelineImmutableStateFactory : public PipelineImmutableStateFactorySeparableShader
 	{
 	public:
 		DX11GPUDevice & mDX11GPUDevice;
@@ -23,6 +23,7 @@ namespace ts3::gpuapi
 
 		virtual BlendImmutableStateHandle createBlendState( const BlendConfig & pConfig ) override final;
 		virtual DepthStencilImmutableStateHandle createDepthStencilState( const DepthStencilConfig & pConfig ) override final;
+		virtual IAInputLayoutImmutableStateHandle createIAInputLayoutState( const IAInputLayoutDefinition & pDefinition, Shader * pVertexShaderWithBinary ) override final;
 		virtual IAVertexStreamImmutableStateHandle createIAVertexStreamState( const IAVertexStreamDefinition & pDefinition ) override final;
 		virtual RasterizerImmutableStateHandle createRasterizerState( const RasterizerConfig & pConfig ) override final;
 		virtual RenderTargetBindingImmutableStateHandle createRenderTargetBindingState( const RenderTargetBindingDefinition & pDefinition ) override final;

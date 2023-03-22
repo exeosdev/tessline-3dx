@@ -185,8 +185,6 @@ namespace ts3::gpuapi
 			dx11RasterizerDescriptor.FillMode = atl::translateDX11PrimitiveFillMode( pConfig.primitiveFillMode );
 			dx11RasterizerDescriptor.DepthClipEnable = TRUE;
 			dx11RasterizerDescriptor.MultisampleEnable = FALSE;
-			dx11RasterizerDescriptor.FrontCounterClockwise = FALSE;
-			dx11RasterizerDescriptor.ScissorEnable = FALSE;
 			dx11RasterizerDescriptor.DepthBias = 0;
 			dx11RasterizerDescriptor.DepthBiasClamp = 0.0f;
 			dx11RasterizerDescriptor.SlopeScaledDepthBias = 0.0f;

@@ -49,7 +49,7 @@ namespace ts3::gpuapi
 		GLRenderTargetBindingInfo glcRTBindingInfo{};
 		if( _currentCommonState.renderTargetBindingState )
 		{
-			if( _currentCommonState.renderTargetBindingState->isDynamicOverrideState() )
+			if( isRenderTargetStateDynamic()  )
 			{
 				return smutil::getGLRenderTargetBindingInfo( _dynamicRenderTargetBindingDefinition );
 			}
@@ -280,15 +280,6 @@ namespace ts3::gpuapi
 		}
 
 		return baseResult;
-	}
-
-	void GLGraphicsPipelineStateController::resetDynamicIAVertexStreamState()
-	{}
-
-	void GLGraphicsPipelineStateController::resetDynamicRenderTargetBindingState()
-	{
-		_dynamicRenderTargetBindingDefinition.fboData.renderFBO.reset();
-		_dynamicRenderTargetBindingDefinition.fboData.resolveFBO.reset();
 	}
 
 	Bitmask<uint32> GLGraphicsPipelineStateController::applyCommonGraphicsConfigState( const GLGraphicsPipelineStateObject & pGraphicsPSO )

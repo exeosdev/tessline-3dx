@@ -12,7 +12,7 @@ namespace ts3::gpuapi
 {
 
 	/// @brief
-	class TS3_GPUAPI_CLASS DX11CommandList : public CommandList
+	class TS3_GPUAPI_CLASS DX11CommandList : public CommandListRenderPassDefault
 	{
 		friend class DX11CommandSystem;
 
@@ -22,16 +22,6 @@ namespace ts3::gpuapi
 
 		DX11CommandList( DX11CommandSystem & pDX11CommandSystem, ECommandListType pListType, ComPtr<ID3D11DeviceContext1> pD3D11DeviceContext1 );
 		virtual ~DX11CommandList();
-
-		virtual bool beginRenderPass(
-			const RenderPassConfigurationImmutableState & pRenderPassState,
-			Bitmask<ECommandListActionFlags> pFlags ) override;
-
-		virtual bool beginRenderPass(
-			const RenderPassConfigurationDynamicState & pRenderPassState,
-			Bitmask<ECommandListActionFlags> pFlags ) override;
-
-		virtual void endRenderPass() override;
 
 		virtual void beginCommandSequence() override;
 		virtual void endCommandSequence() override;
@@ -47,13 +37,15 @@ namespace ts3::gpuapi
 		ID3D11Query * releaseExecutionSyncQuery();
 
 	private:
-		void updatePipelineState();
+		virtual void executeRenderPassLoadActions( const RenderPassConfiguration & pRenderPassConfiguration ) override;
+
+		virtual void executeRenderPassStoreActions( const RenderPassConfiguration & pRenderPassConfiguration ) override;
 
 		static ComPtr<ID3D11Query> _createExecutionSyncQuery( ComPtr<ID3D11Device1> pD3D11Device );
 
 	private:
+		DX11GraphicsPipelineStateController _graphicsPipelineStateControllerDX11;
 		ComPtr<ID3D11Query> _d3d11ExecutionSyncQuery;
-		DX11GraphicsPipelineStateController _stateController;
 	};
 
 } // namespace ts3::gpuapi

@@ -1,12 +1,13 @@
 
-#include <ts3/gpuapi/commandSystem.h>
-#include <ts3/gpuapi/gpuDeviceNull.h>
-#include <ts3/gpuapi/gpuDriver.h>
-#include <ts3/gpuapi/presentationLayer.h>
-#include <ts3/gpuapi/resources/texture.h>
-#include <ts3/gpuapi/resources/renderTargetTexture.h>
-#include <ts3/gpuapi/state/pipelineStateObject.h>
-#include <ts3/gpuapi/state/pipelineImmutableStateCache.h>
+#include "commandSystem.h"
+#include "gpuDeviceNull.h"
+#include "gpuDriver.h"
+#include "presentationLayer.h"
+#include "resources/texture.h"
+#include "resources/renderTargetTexture.h"
+#include "state/graphicsShaderLinkageImmutableState.h"
+#include "state/pipelineStateObject.h"
+#include "state/pipelineImmutableStateCache.h"
 
 namespace ts3::gpuapi
 {
@@ -176,14 +177,15 @@ namespace ts3::gpuapi
 			pCreateInfo.rasterizerState = _immutableStateFactoryBase->createRasterizerState( pCreateInfo.rasterizerConfig );
 		}
 
-		// if( !pCreateInfo.shaderLinkageState )
-		// {
-		// 	pCreateInfo.shaderLinkageState = _immutableStateFactoryBase->createGraphicsShaderLinkageState( pCreateInfo.shaderSet );
-		// }
+		if( !pCreateInfo.shaderLinkageState )
+		{
+			pCreateInfo.shaderLinkageState = _immutableStateFactoryBase->createGraphicsShaderLinkageState( pCreateInfo.shaderSet );
+		}
 
 		if( !pCreateInfo.inputLayoutState )
 		{
-			pCreateInfo.inputLayoutState = _immutableStateFactoryBase->createIAInputLayoutState( pCreateInfo.inputLayoutDefinition );
+			auto * vertexShader = pCreateInfo.shaderLinkageState->getShader( EShaderType::GSVertex );
+			pCreateInfo.inputLayoutState = _immutableStateFactoryBase->createIAInputLayoutState( pCreateInfo.inputLayoutDefinition, vertexShader );
 		}
 
 		return _drvCreateGraphicsPipelineStateObject( pCreateInfo );
@@ -207,10 +209,10 @@ namespace ts3::gpuapi
 		return _immutableStateFactoryBase->createGraphicsShaderLinkageState( pShaderSet );
 	}
 
-	IAInputLayoutImmutableStateHandle GPUDevice::createIAInputLayoutImmutableState( const IAInputLayoutDefinition & pDefinition )
+	IAInputLayoutImmutableStateHandle GPUDevice::createIAInputLayoutImmutableState( const IAInputLayoutDefinition & pDefinition, Shader * pVertexShaderWithBinary )
 	{
 		ts3DebugAssert( _immutableStateFactoryBase );
-		return _immutableStateFactoryBase->createIAInputLayoutState( pDefinition );
+		return _immutableStateFactoryBase->createIAInputLayoutState( pDefinition, pVertexShaderWithBinary );
 	}
 
 	IAVertexStreamImmutableStateHandle GPUDevice::createIAVertexStreamImmutableState( const IAVertexStreamDefinition & pDefinition )
@@ -263,10 +265,11 @@ namespace ts3::gpuapi
 
 	IAInputLayoutImmutableStateHandle GPUDevice::createIAInputLayoutImmutableStateCached(
 			const UniqueGPUObjectName & pUniqueName,
-			const IAInputLayoutDefinition & pDefinition )
+			const IAInputLayoutDefinition & pDefinition,
+			Shader * pVertexShaderWithBinary )
 	{
 		ts3DebugAssert( _immutableStateCachePtr );
-		return _immutableStateCachePtr->createState<IAInputLayoutImmutableState>( pUniqueName, pDefinition );
+		return _immutableStateCachePtr->createState<IAInputLayoutImmutableState>( pUniqueName, pDefinition, pVertexShaderWithBinary );
 	}
 
 	IAVertexStreamImmutableStateHandle GPUDevice::createIAVertexStreamImmutableStateCached(

@@ -14,7 +14,7 @@ namespace ts3::gpuapi
 	class GLShaderProgramObject;
 
 	/// @brief
-	class GLCommandList : public CommandList
+	class GLCommandList : public CommandListRenderPassDefault
 	{
 	public:
 		system::OpenGLRenderContextHandle const mSysGLRenderContext;
@@ -28,16 +28,6 @@ namespace ts3::gpuapi
 
 		virtual ~GLCommandList();
 
-		virtual bool beginRenderPass(
-				const RenderPassConfigurationImmutableState & pRenderPassState,
-				Bitmask<ECommandListActionFlags> pFlags ) override;
-
-		virtual bool beginRenderPass(
-				const RenderPassConfigurationDynamicState & pRenderPassState,
-				Bitmask<ECommandListActionFlags> pFlags ) override;
-
-		virtual void endRenderPass() override;
-
 		virtual void beginCommandSequence() override;
 		virtual void endCommandSequence() override;
 
@@ -48,13 +38,13 @@ namespace ts3::gpuapi
 
 		virtual void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext ) override;
 
-	protected:
-		void executeRenderPassLoadActions();
-		void executeRenderPassStoreActions();
+	private:
+		virtual void executeRenderPassLoadActions( const RenderPassConfiguration & pRenderPassConfiguration ) override;
+
+		virtual void executeRenderPassStoreActions( const RenderPassConfiguration & pRenderPassConfiguration ) override;
 
 	private:
 		GLGraphicsPipelineStateController * _graphicsPipelineStateControllerGL;
-		RenderPassConfiguration _currentRenderPassConfiguration;
 	};
 
 	class GLCommandListCore : public GLCommandList

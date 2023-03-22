@@ -41,6 +41,7 @@ namespace ts3::gpuapi
 	{
 		ID3D11Resource * d3d11Resource = nullptr;
 		UINT d3d11SubResourceIndex;
+		DXGI_FORMAT targetDXGIFormat;
 
 		explicit operator bool() const noexcept
 		{
@@ -105,6 +106,16 @@ namespace ts3::gpuapi
 		TS3_ATTR_NO_DISCARD DX11RenderTargetBindingData createRenderTargetBindingDataDX11(
 				DX11GPUDevice & pGPUDevice,
 				const RenderTargetBindingDefinition & pBindingDefinition );
+
+		void renderPassClearRenderTargetDX11(
+				ID3D11DeviceContext1 * pD3D1DeviceContext,
+				const DX11RenderTargetBindingData & pRenderTargetBinding,
+				const RenderPassConfiguration & pRenderPassConfiguration );
+
+		void renderPassResolveRenderTargetDX11(
+				ID3D11DeviceContext1 * pD3D1DeviceContext,
+				const DX11RenderTargetBindingData & pRenderTargetBinding,
+				const RenderPassConfiguration & pRenderPassConfiguration );
 
 	}
 	

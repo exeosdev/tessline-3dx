@@ -36,7 +36,14 @@ namespace ts3::gpuapi
 		friend GLGPUDevice;
 
 	public:
-	    GLScreenPresentationLayer( GLGPUDevice & pGPUDevice, system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface );
+		RenderTargetBindingImmutableStateHandle const mScreenRenderTargetBindingState;
+
+	public:
+	    GLScreenPresentationLayer(
+			GLGPUDevice & pGPUDevice,
+			system::OpenGLDisplaySurfaceHandle pSysGLDisplaySurface,
+			RenderTargetBindingImmutableStateHandle pScreenRenderTargetBindingState );
+
 		virtual ~GLScreenPresentationLayer();
 
 		virtual void bindRenderTarget( CommandContext * pCmdContext ) override;
@@ -53,12 +60,6 @@ namespace ts3::gpuapi
 
 		/// @brief Creates new swap chain using provided create params.
 		static GLScreenPresentationLayerHandle create( GLGPUDevice & pDevice, const GLPresentationLayerCreateInfo & pCreateInfo );
-
-	private:
-		void setScreenRenderTargetBindingState( RenderTargetBindingImmutableStateHandle pRenderTargetState );
-
-	private:
-		RenderTargetBindingImmutableStateHandle _screenRenderTargetBindingState;
 	};
 
 } // namespace ts3::gpuapi

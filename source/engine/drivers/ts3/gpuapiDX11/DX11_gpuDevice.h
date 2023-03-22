@@ -5,7 +5,9 @@
 #define __TS3DRIVER_GPUAPI_DX11_GPU_DEVICE_H__
 
 #include "DX11_prerequisites.h"
+#include "state/DX11_pipelineImmutableStateFactory.h"
 #include <ts3/gpuapiDX/DX_gpuDevice.h>
+#include <ts3/gpuapi/state/pipelineImmutableStateCache.h>
 
 namespace ts3::gpuapi
 {
@@ -17,7 +19,6 @@ namespace ts3::gpuapi
 	/// @brief
 	class TS3GX_DX11_CLASS DX11GPUDevice : public DXGPUDevice
 	{
-		friend class DX11CommandContext;
 		friend class DX11CommandList;
 		friend class DX11GraphicsPipelineStateObject;
 
@@ -32,6 +33,8 @@ namespace ts3::gpuapi
 
 		virtual ~DX11GPUDevice();
 
+		void waitForCommandSync( CommandSync & pCommandSync ) override final;
+
 		static DX11GPUDeviceHandle create( DX11GPUDriver & pDX11Driver, const DX11GPUDeviceCreateInfo & pCreateInfo );
 
 	private:
@@ -42,8 +45,15 @@ namespace ts3::gpuapi
 		virtual ShaderHandle _drvCreateShader( const ShaderCreateInfo & pCreateInfo ) override final;
 		virtual TextureHandle _drvCreateTexture( const TextureCreateInfo & pCreateInfo ) override final;
 
+		virtual RenderTargetTextureHandle _drvCreateRenderTargetTexture(
+				const RenderTargetTextureCreateInfo & pCreateInfo ) override final;
+
+		virtual GraphicsPipelineStateObjectHandle _drvCreateGraphicsPipelineStateObject(
+				const GraphicsPipelineStateObjectCreateInfo & pCreateInfo ) override final;
+
 	private:
-		//DX11GraphicsPipelineStateDescriptorCache _descriptorCache;
+		DX11PipelineImmutableStateFactory _immutableStateFactoryDX11;
+		PipelineImmutableStateCache _immutableStateCache;
 	};
 
 } // namespace ts3::gpuapi

@@ -12,8 +12,6 @@ namespace ts3::gpuapi
 
 	struct GraphicsShaderLinkageCommonProperties
 	{
-		struct ActiveStageInfo
-		{};
 		Bitmask<EShaderStageFlags> activeStagesMask;
 		uint32 activeStagesNum;
 
@@ -49,6 +47,10 @@ namespace ts3::gpuapi
 		{
 			return mCommonProperties.activeStagesNum;
 		}
+
+		TS3_ATTR_NO_DISCARD virtual Shader * getShader( size_t pIndex ) const noexcept;
+
+		TS3_ATTR_NO_DISCARD virtual Shader * getShader( EShaderType pShaderType ) const noexcept;
 	};
 
 	/// @brief
@@ -67,6 +69,10 @@ namespace ts3::gpuapi
 				const GraphicsShaderSet & pShaderSet );
 
 		virtual ~GraphicsShaderLinkageImmutableStateSeparable();
+
+		TS3_ATTR_NO_DISCARD virtual Shader * getShader( size_t pIndex ) const noexcept override final;
+
+		TS3_ATTR_NO_DISCARD virtual Shader * getShader( EShaderType pShaderType ) const noexcept override final;
 	};
 
 	namespace smutil

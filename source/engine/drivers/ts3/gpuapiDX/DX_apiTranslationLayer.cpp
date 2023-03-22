@@ -250,6 +250,7 @@ namespace ts3::gpuapi
 	{
 		static const DXGI_FORMAT baseDataTypeArray[] =
 		{
+			DXGI_FORMAT_UNKNOWN,
 			DXGI_FORMAT_R8_SINT,
 			DXGI_FORMAT_R8_UINT,
 			DXGI_FORMAT_R16_SINT,

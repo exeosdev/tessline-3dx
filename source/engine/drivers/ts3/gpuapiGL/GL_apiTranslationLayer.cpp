@@ -281,11 +281,6 @@ namespace ts3::gpuapi
 			ts3CaseReturn( EBlendFactor::SrcAlphaInv , GL_ONE_MINUS_SRC_ALPHA      );
 			ts3CaseReturn( EBlendFactor::DstColorInv , GL_ONE_MINUS_DST_COLOR      );
 			ts3CaseReturn( EBlendFactor::DstAlphaInv , GL_ONE_MINUS_DST_ALPHA      );
-
-			default:
-			{
-				break;
-			}
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -300,11 +295,6 @@ namespace ts3::gpuapi
 			ts3CaseReturn( EBlendOp::Max         , GL_MAX                   );
 			ts3CaseReturn( EBlendOp::Subtract    , GL_FUNC_SUBTRACT         );
 			ts3CaseReturn( EBlendOp::SubtractRev , GL_FUNC_REVERSE_SUBTRACT );
-
-			default:
-			{
-				break;
-			}
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -324,11 +314,6 @@ namespace ts3::gpuapi
 			ts3CaseReturn( EGPUBufferTarget::IndirectDrawBuffer     , GL_DRAW_INDIRECT_BUFFER      );
 			ts3CaseReturn( EGPUBufferTarget::TransferSourceBuffer   , GL_COPY_READ_BUFFER          );
 			ts3CaseReturn( EGPUBufferTarget::TransferTargetBuffer   , GL_COPY_WRITE_BUFFER         );
-
-			default:
-			{
-				break;
-			}
 		};
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
@@ -405,11 +390,6 @@ namespace ts3::gpuapi
 			ts3CaseReturn( EIndexDataFormat::Undefined , GL_INVALID_ENUM   );
 			ts3CaseReturn( EIndexDataFormat::Uint16    , GL_UNSIGNED_SHORT );
 			ts3CaseReturn( EIndexDataFormat::Uint32    , GL_UNSIGNED_INT   );
-
-			default:
-			{
-				break;
-			}
 		}
 		return GL_TS3_ERR_INVALID_PARAM;
 	}
