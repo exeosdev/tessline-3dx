@@ -1,6 +1,6 @@
 
-#ifndef __TS3EXT_RCSUPPORT_BITMAP_COMMON_H__
-#define __TS3EXT_RCSUPPORT_BITMAP_COMMON_H__
+#ifndef __TS3_ENGINE_BITMAP_COMMON_H__
+#define __TS3_ENGINE_BITMAP_COMMON_H__
 
 #include <ts3/engine/res/imageCommon.h>
 
@@ -122,4 +122,4 @@ namespace ts3
 
 } // namespace ts3
 
-#endif // __TS3EXT_RCSUPPORT_BITMAP_COMMON_H__
+#endif // __TS3_ENGINE_BITMAP_COMMON_H__

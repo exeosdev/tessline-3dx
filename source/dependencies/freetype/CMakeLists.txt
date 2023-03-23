@@ -41,17 +41,17 @@ set( TS3_CDEP_FREETYPE_SCR_FILES
 		"src/type42/type42.c"
 		"src/winfonts/winfnt.c" )
 
-add_library( dplib-freetype STATIC
+add_library( src-dep-freetype STATIC
         ${TS3_CDEP_FREETYPE_SCR_FILES} )
 
-set_target_properties( dplib-freetype PROPERTIES
+set_target_properties( src-dep-freetype PROPERTIES
         OUTPUT_NAME "freetype" )
 
-target_include_directories( dplib-freetype PUBLIC
+target_include_directories( src-dep-freetype PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/include )
 
-target_compile_definitions( dplib-freetype PUBLIC
+target_compile_definitions( src-dep-freetype PUBLIC
 		_CRT_SECURE_NO_DEPRECATE=1
 		_CRT_SECURE_NO_WARNINGS=1
 		_LIB=1

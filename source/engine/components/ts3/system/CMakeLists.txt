@@ -246,7 +246,7 @@ target_link_libraries( ts3-system PUBLIC
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "WinDesktop" )
     target_link_libraries( ts3-system PUBLIC
-            dplib-glew
+            src-dep-glew
             opengl32.lib
             DXGI.lib
             )
@@ -263,7 +263,7 @@ endif()
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "Linux" )
     target_link_libraries( ts3-system PUBLIC
-            dplib-glew
+            src-dep-glew
             X11
             Xrandr
             GL
@@ -280,7 +280,7 @@ find_library(FrmLib_QuartzCore QuartzCore)
 
 if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
     target_link_libraries( ts3-system PUBLIC
-            dplib-glew
+            src-dep-glew
             ${FrmLib_AppKit}
             ${FrmLib_CoreFoundation}
             ${FrmLib_Foundation}

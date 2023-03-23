@@ -47,7 +47,7 @@ namespace ts3
 
 	void ShadowRenderer::setCSProjectionMatrixLightPerspectiveDefault()
 	{
-		_currentState.mLightProjection = math::perspectiveAspectLH( math::constants::cxFloatRad60Degree, 1.0f, 1.0f, 24.0f );
+		_currentState.mLightProjection = math::perspectiveAspectLH( math::constants::cxFloatRad90Degree, 1.0f, 1.0f, 24.0f );
 	}
 
 	void ShadowRenderer::updateMatricesForLightPass( gpuapi::CommandContext & pCommandContext )

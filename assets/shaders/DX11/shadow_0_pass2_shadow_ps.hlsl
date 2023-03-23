@@ -1,8 +1,8 @@
 
 Texture2D txTexture0 : register( t0 );
-Texture2D txTextureShadow : register( t7 );
-
 SamplerState smSampler0 : register( s0 );
+
+Texture2D txTextureShadow : register( t7 );
 SamplerState smSamplerShadow : register( s7 );
 
 cbuffer CB0 : register( b0 )
@@ -51,18 +51,18 @@ float calculateShadowfactor( float4 pLightSpacePos )
 
 float4 main( VSOutputData pPSInput ) : SV_TARGET
 {
-	float3 textureColor0;
+	float4 textureColor0;
 	if( pPSInput.fragColor.a > 0.0f )
 	{
-		textureColor0 = pPSInput.fragColor.rgb;
+		textureColor0 = pPSInput.fragColor;
 	}
 	else
 	{
-		textureColor0 = txTexture0.Sample( smSampler0, pPSInput.texCoord ).rgb;
+		textureColor0 = txTexture0.Sample( smSampler0, pPSInput.texCoord );
 	}
 
-	float3 fixedLightColor = float3( 1.0f, 1.0f, 1.0f );
+	float4 fixedLightColor = float4( 1.0f, 1.0f, 1.0f, 1.0f );
 	float shadowFactor = calculateShadowfactor( pPSInput.lightSpacePosition );
 
-	return float4( shadowFactor * textureColor0 * fixedLightColor, 1.0 );
+	return float4( shadowFactor * textureColor0 * fixedLightColor );
 }

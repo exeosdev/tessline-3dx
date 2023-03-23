@@ -22,7 +22,7 @@ set( TS3_ENGINE_SRC_FILES
 		# "gpuapi/hwGeometryBuffer.cpp"
 		# "gpuapi/vertexFormatDefs.h"
         # "gpuapi/vertexFormatDefs.cpp"
-		#"gpuapi/shaderResourceDefs.h"
+		# "gpuapi/shaderResourceDefs.h"
 
 		"renderer/commonRendererDefs.h"
 		"renderer/renderer.h"
@@ -58,20 +58,20 @@ set( TS3_ENGINE_SRC_FILES
 
         "typeinfo/tpiEngineEnum.cpp"
 
-		"utility/scfCommon.h"
-        "utility/scfEntry.h"
-        "utility/scfEntry.cpp"
-		"utility/scfIndex.h"
-		"utility/scfIndex.cpp"
-		"utility/scfIndexBuilder.h"
-		"utility/scfIndexBuilder.cpp"
-		"utility/scfIOSupport.h"
-		"utility/scfIOSupport.cpp"
-		"utility/scfXMLCommon.h"
-		"utility/scfXMLCommon.cpp"
-		"utility/scfXMLReader.h"
-		"utility/scfXMLReader.cpp"
-		)
+		# "utility/scfCommon.h"
+        # "utility/scfEntry.h"
+        # "utility/scfEntry.cpp"
+		# "utility/scfIndex.h"
+		# "utility/scfIndex.cpp"
+		# "utility/scfIndexBuilder.h"
+		# "utility/scfIndexBuilder.cpp"
+		# "utility/scfIOSupport.h"
+		# "utility/scfIOSupport.cpp"
+		# "utility/scfXMLCommon.h"
+		# "utility/scfXMLCommon.cpp"
+		# "utility/scfXMLReader.h"
+		# "utility/scfXMLReader.cpp"
+		utility/gridGenerator.cpp utility/gridGenerator.h geometry/meshCommon.h geometry/meshCommon.cpp res/image/pngCommon.cpp res/image/pngCommon.h)
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
     add_library( ts3-engine STATIC ${TS3_ENGINE_SRC_FILES} )
@@ -93,7 +93,9 @@ target_include_directories( ts3-engine PUBLIC
 		)
 
 target_link_libraries( ts3-engine PUBLIC
-		dplib-freetype
+		assimp
+		src-dep-freetype
+		src-dep-png
 		ts3-core
 		ts3-gpuapi
 		)

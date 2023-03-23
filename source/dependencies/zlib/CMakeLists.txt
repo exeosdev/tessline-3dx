@@ -27,22 +27,22 @@ set( TS3_CDEP_ZLIB_SCR_FILES
         zutil.c
         )
 
-add_library( dplib-zlib STATIC
+add_library( src-dep-zlib STATIC
         ${TS3_CDEP_ZLIB_SCR_FILES} )
 
-set_target_properties( dplib-zlib PROPERTIES
+set_target_properties( src-dep-zlib PROPERTIES
         OUTPUT_NAME "zlib" )
 
-target_include_directories( dplib-zlib PUBLIC
+target_include_directories( src-dep-zlib PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR} )
 
-target_compile_definitions( dplib-zlib PRIVATE
+target_compile_definitions( src-dep-zlib PRIVATE
         _CRT_SECURE_NO_WARNINGS=1
         _CRT_SECURE_NO_DEPRECATED=1
 )
 
 if( "${CM_EBS_SYSCONF_HOST_COMPILER}" MATCHES "Clang|GCC" )
-    target_compile_options( dplib-zlib PRIVATE
+    target_compile_options( src-dep-zlib PRIVATE
             -Wno-implicit-function-declaration
     )
 endif()

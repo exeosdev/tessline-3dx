@@ -39,7 +39,7 @@ target_include_directories( ts3-stdext PUBLIC
         )
 
 target_link_libraries( ts3-stdext PUBLIC
-        dplib-zlib
+        src-dep-zlib
         ts3-platform
         )
         

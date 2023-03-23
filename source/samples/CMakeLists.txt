@@ -1,5 +1,6 @@
 
 set( TS3SAMPLES_LINK_INPUT
+        assimp
         ts3-system
         ts3-gpuapi
         )

@@ -4,7 +4,7 @@ set( TS3_EXTENSIONS_INCLUDE_DIR_INTERNAL
         "${TS3_BASE_DIR}/source/engine/extensions" )
 
 set( _EBS_ENGINE_EXTENSIONS_TARGET_LIST
-        #"rcsupport"
+        "rcsupport"
         )
 
 foreach( target ${_EBS_ENGINE_EXTENSIONS_TARGET_LIST} )

@@ -66,10 +66,10 @@ inline const VertexPNT0 cvMeshTexUnitCubeVertexData[] =
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Plane rectangle
-	VertexPNT0 { ts3::math::Vec3f{ -6.0f, -0.5f,  0.0f }, VCOL(), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  6.0f, -0.5f,  0.0f }, VCOL(), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
-	VertexPNT0 { ts3::math::Vec3f{  6.0f, -0.5f,  16.0f }, VCOL(), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
-	VertexPNT0 { ts3::math::Vec3f{ -6.0f, -0.5f,  16.0f }, VCOL(), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -6.0f, 0.5f,  0.0f }, VCOL(), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  6.0f, 0.5f,  0.0f }, VCOL(), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{  6.0f, 0.5f,  16.0f }, VCOL(), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
+	VertexPNT0 { ts3::math::Vec3f{ -6.0f, 0.5f,  16.0f }, VCOL(), V3(0.0f), ts3::math::Vec2f{ 0.0f, 0.0f } },
 };
 
 inline const ts3::math::Vec3f cvMeshTexUnitCubeNormals[] =

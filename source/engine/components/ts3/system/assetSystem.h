@@ -104,10 +104,10 @@ namespace ts3::system
 			return readData( pVector.data(), pVector.size() * sizeof( TValue ), pReadSize );
 		}
 
-		file_size_t readAll( DynamicMemoryBuffer & pBuffer, size_t pExtraALlocSize = 0 )
+		file_size_t readAll( DynamicMemoryBuffer & pBuffer, size_t pExtraAllocSize = 0 )
 		{
 			const auto assetSize = _nativeGetSize();
-			pBuffer.resize( assetSize + pExtraALlocSize );
+			pBuffer.resize( assetSize + pExtraAllocSize );
 			return readData( pBuffer.data(), assetSize, assetSize );
 		}
 

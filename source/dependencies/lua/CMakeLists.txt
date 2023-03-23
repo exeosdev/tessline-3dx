@@ -59,11 +59,11 @@ set( TS3_CDEP_LUA_SCR_FILES
 	lzio.c
 	lzio.h )
 
-add_library( dplib-lua STATIC
+add_library( src-dep-lua STATIC
         ${TS3_CDEP_LUA_SCR_FILES} )
 
-set_target_properties( dplib-lua PROPERTIES
+set_target_properties( src-dep-lua PROPERTIES
         OUTPUT_NAME "lua" )
 
-target_include_directories( dplib-lua PUBLIC
+target_include_directories( src-dep-lua PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR} )

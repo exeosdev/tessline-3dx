@@ -4,6 +4,8 @@
 #ifndef __TS3_GPUAPI_GPU_DATA_FORMATS_H__
 #define __TS3_GPUAPI_GPU_DATA_FORMATS_H__
 
+#include <ts3/core/graphicsTypes.h>
+
 namespace ts3::gpuapi
 {
 
@@ -253,6 +255,30 @@ namespace ts3::gpuapi
 		TS3_ATTR_NO_DISCARD inline constexpr uint32 getVertexAttribFormatByteSize( EVertexAttribFormat pFormat ) noexcept
 		{
 			return getBaseDataTypeByteSize( getVertexAttribFormatBaseDataType( pFormat ) ) * getVertexAttribFormatLength( pFormat );
+		}
+
+	}
+
+	namespace smutil
+	{
+
+		inline ETextureFormat getTextureFormatForGraphicsPixelLayout( EPixelDataLayout pPixelLayout )
+		{
+			switch( pPixelLayout )
+			{
+				ts3CaseReturn( EPixelDataLayout::Alpha , ETextureFormat::R8UN );
+				ts3CaseReturn( EPixelDataLayout::Depth , ETextureFormat::R8UN );
+				ts3CaseReturn( EPixelDataLayout::DS    , ETextureFormat::RG8UN );
+				ts3CaseReturn( EPixelDataLayout::BGR   , ETextureFormat::BGRX8UN );
+				ts3CaseReturn( EPixelDataLayout::BGRA  , ETextureFormat::BGRA8UN );
+				ts3CaseReturn( EPixelDataLayout::Red   , ETextureFormat::R8UN );
+				ts3CaseReturn( EPixelDataLayout::RG    , ETextureFormat::RG8UN );
+				ts3CaseReturn( EPixelDataLayout::RGB   , ETextureFormat::BGRX8UN );
+				ts3CaseReturn( EPixelDataLayout::RGBA  , ETextureFormat::RGBA8UN );
+				ts3CaseReturn( EPixelDataLayout::S3TC  , ETextureFormat::BC3 );
+			}
+
+			return ETextureFormat::UNKNOWN;
 		}
 
 	}
