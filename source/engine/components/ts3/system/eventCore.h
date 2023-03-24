@@ -244,7 +244,9 @@ namespace ts3::system
 		const EventSystemConfig & getEventSystemConfig() const;
 
 	private:
-		void _preProcessEvent( EventObject & pEvent );
+		bool _preProcessEvent( EventObject & pEvent );
+		bool _preProcessEventKeyboard( EvtInputKeyboard & pKeyboardEvent, EventSystemSharedState & pSharedState );
+		bool _preProcessEventMouse( EvtInputMouse & pMouseEvent, EventSystemSharedState & pSharedState );
 
 	protected:
 		struct EventDispatcherPrivateData;

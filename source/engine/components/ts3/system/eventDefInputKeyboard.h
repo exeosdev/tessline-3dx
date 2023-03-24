@@ -117,7 +117,14 @@ namespace ts3::system
 
 	struct KeyStateMap
 	{
+	public:
 		bool stateArray[CX_ENUM_KEY_CODE_COUNT];
+
+	public:
+		KeyStateMap()
+		{
+			reset();
+		}
 
 		bool & operator[]( size_t pIndex )
 		{
@@ -137,6 +144,14 @@ namespace ts3::system
 		bool operator[]( EKeyCode pKeyCode ) const
 		{
 			return staticArrayElement( stateArray, pKeyCode );
+		}
+
+		void reset()
+		{
+			for( auto & state : stateArray )
+			{
+				state = false;
+			}
 		}
 	};
 

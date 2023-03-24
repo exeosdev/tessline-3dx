@@ -94,6 +94,11 @@ namespace ts3::system
 			id nsEventListener = nil;
 		};
 
+		struct OSXEventControllerNativeData : public OSXNativeDataCommon
+		{
+			CGPoint lastCursorPosReal;
+		};
+
 		struct NativeEventType
 		{
 			OSXEventID nsAppEventID = OSXEventIDNull;
@@ -110,6 +115,12 @@ namespace ts3::system
 			, nsSourceWindow( [pNSEvent window] )
 			{}
 
+			explicit NativeEventType( NSEvent * pNSEvent, NSEventType pOverrideEventID )
+			: nsAppEventID( static_cast<OSXEventID>( pOverrideEventID ) )
+			, nsEvent( pNSEvent )
+			, nsSourceWindow( [pNSEvent window] )
+			{}
+
 			NativeEventType( OSXEventID pAppEventID, NSNotification * pNSNotification )
 			: nsAppEventID( pAppEventID )
 			, nsNotification( pNSNotification )
@@ -121,7 +132,7 @@ namespace ts3::system
 
 		void osxCreateEventListener( OSXEventSourceNativeData & pEventSourceNativeData );
 
-		bool osxTranslateEvent( const NativeEventType & pNativeEvent, EventSource & pEventSource, EventObject & pOutEvent );
+		bool osxTranslateEvent( EventController & pEventController, EventSource & pEventSource, const NativeEventType & pNativeEvent, EventObject & pOutEvent );
 
 		TS3_SYSTEM_API_NODISCARD bool osxIsEventTypeInputKeyboard( OSXEventID pEventID );
 
@@ -139,7 +150,7 @@ namespace ts3::system
 
 	}
 
-	class OSXEventController : public OSXNativeObject<EventController, platform::OSXNativeDataCommon>
+	class OSXEventController : public OSXNativeObject<EventController, platform::OSXEventControllerNativeData>
 	{
 	public:
 		OSXEventController( SysContextHandle pSysContext );

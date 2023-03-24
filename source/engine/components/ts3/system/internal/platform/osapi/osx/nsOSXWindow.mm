@@ -58,7 +58,7 @@
 
 	// Bind the view as the responder. All defined event handlers inside this view
 	// will get called first before (optionally) being forwarded to the window itself.
-	[pWindow makeFirstResponder:self];;
+	[pWindow makeFirstResponder:self];
 
 	// Next responder for this view is the window.
 	// E.g. calling [super keyDown:pEvent] in the view will forward the even to the window handler.

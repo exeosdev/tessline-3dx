@@ -589,44 +589,43 @@ namespace ts3::system
 
 	bool EventDispatcher::postEvent( EventObject pEvent )
 	{
-		if( !cxdefs::validateEventCode( pEvent.code ) )
+		if( cxdefs::validateEventCode( pEvent.code ) )
 		{
-			return false;
-		}
+			if( _preProcessEvent( pEvent ) )
+			{
+				pEvent.commonData.timeStamp = PerfCounter::queryCurrentStamp();
 
-		// _preProcessEvent( pEvent );
-
-		pEvent.commonData.timeStamp = PerfCounter::queryCurrentStamp();
-
-		{
-			auto codeIndexValue = static_cast<size_t>( cxdefs::getEventCodeCodeIndex( pEvent.code ) );
-			auto & eventHandler = _privateData->handlerMapByCodeIndex[codeIndexValue];
-			if( eventHandler && eventHandler( pEvent ) )
-			{
-				return true;
-			}
-		}
-		{
-			auto categoryValue = static_cast<size_t>( cxdefs::getEventCodeCategory( pEvent.code ) );
-			auto & eventHandler = _privateData->handlerMapByCategory[categoryValue];
-			if( eventHandler && eventHandler( pEvent ) )
-			{
-				return true;
-			}
-		}
-		{
-			auto baseTypeValue = static_cast<size_t>( cxdefs::getEventCodeBaseType( pEvent.code ) );
-			auto & eventHandler = _privateData->handlerMapByBaseType[baseTypeValue];
-			if( eventHandler && eventHandler( pEvent ) )
-			{
-				return true;
-			}
-		}
-		{
-			auto & defaultHandler = _privateData->defaultHandler;
-			if( defaultHandler && defaultHandler( pEvent ) )
-			{
-				return true;
+				{
+					auto codeIndexValue = static_cast<size_t>( cxdefs::getEventCodeCodeIndex( pEvent.code ) );
+					auto & eventHandler = _privateData->handlerMapByCodeIndex[codeIndexValue];
+					if( eventHandler && eventHandler( pEvent ) )
+					{
+						return true;
+					}
+				}
+				{
+					auto categoryValue = static_cast<size_t>( cxdefs::getEventCodeCategory( pEvent.code ) );
+					auto & eventHandler = _privateData->handlerMapByCategory[categoryValue];
+					if( eventHandler && eventHandler( pEvent ) )
+					{
+						return true;
+					}
+				}
+				{
+					auto baseTypeValue = static_cast<size_t>( cxdefs::getEventCodeBaseType( pEvent.code ) );
+					auto & eventHandler = _privateData->handlerMapByBaseType[baseTypeValue];
+					if( eventHandler && eventHandler( pEvent ) )
+					{
+						return true;
+					}
+				}
+				{
+					auto & defaultHandler = _privateData->defaultHandler;
+					if( defaultHandler && defaultHandler( pEvent ) )
+					{
+						return true;
+					}
+				}
 			}
 		}
 
@@ -665,26 +664,50 @@ namespace ts3::system
 		return _privateData->currentEventSystemConfig;
 	}
 
-	void EventDispatcher::_preProcessEvent( EventObject & pEvent )
+	bool EventDispatcher::_preProcessEvent( EventObject & pEvent )
 	{
-		switch( pEvent.category() )
+		const auto eventCategory = pEvent.category();
+
+		auto & eventSystemSharedState = _eventControllerActiveRef->getEventSystemSharedState();
+
+		if( eventCategory == EEventCategory::InputKeyboard )
 		{
-			case EEventCategory::InputMouse:
-			{
-				//_preProcessInputMouseEvent( pEvent.eInputMouse );
-				break;
-			}
-			case EEventCategory::InputKeyboard:
-			{
-				//_preProcessInputKeyboardEvent( pEvent.eInputKeyboard );
-				break;
-			}
-			default:
-			{
-				break;
-			}
+			return _preProcessEventKeyboard( pEvent.eInputKeyboard, eventSystemSharedState );
 		}
+
+		if( eventCategory == EEventCategory::InputMouse )
+		{
+			return _preProcessEventMouse( pEvent.eInputMouse, eventSystemSharedState );
+		}
+
+		return true;
 	}
+
+	bool EventDispatcher::_preProcessEventKeyboard( EvtInputKeyboard & pKeyboardEvent, EventSystemSharedState & pSharedState )
+	{
+		if( pKeyboardEvent.keyCode == EKeyCode::Unknown )
+		{
+			// Discard unknown key events
+			return false;
+		}
+
+		if( pKeyboardEvent.keyAction == EKeyActionType::Press )
+		{
+			pSharedState.inputKeyboardState.keyStateMap[pKeyboardEvent.keyCode] = true;
+		}
+		else
+		{
+			pSharedState.inputKeyboardState.keyStateMap[pKeyboardEvent.keyCode] = false;
+		}
+
+		return true;
+	}
+
+	bool EventDispatcher::_preProcessEventMouse( EvtInputMouse & pMouseEvent, EventSystemSharedState & pSharedState )
+	{
+		return true;
+	}
+
 
 	void evtUpdateEventInputMouse( EvtInputMouse & pMouseEvent, EventSystemSharedState & pEventSystemSharedState )
 	{

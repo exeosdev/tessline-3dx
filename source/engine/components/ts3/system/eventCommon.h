@@ -3,7 +3,7 @@
 #define __TS3_SYSTEM_EVENT_COMMON_H__
 
 #include "perfCounter.h"
-#include <ts3/math/vector.h>
+#include <ts3/math/vectorOps.h>
 #include <functional>
 
 namespace ts3::system

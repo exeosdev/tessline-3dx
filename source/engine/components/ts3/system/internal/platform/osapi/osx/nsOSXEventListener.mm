@@ -143,58 +143,71 @@
 	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
+#define ts3EvtOutput(...) ts3DebugOutput(__VA_ARGS__)
+
 -( void ) mouseMoved:( NSEvent * ) pEvent
 {
+	ts3EvtOutput("mouseMoved");
 	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) mouseDown:( NSEvent * ) pEvent
 {
+	ts3EvtOutput("mouseDown");
 	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) mouseUp:( NSEvent * ) pEvent
 {
+	ts3EvtOutput("mouseUp");
 	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) mouseDragged:( NSEvent * ) pEvent
 {
+	ts3EvtOutput("mouseDragged");
 	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) rightMouseDown:( NSEvent * ) pEvent
 {
+	ts3EvtOutput("rightMouseDown");
 	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) rightMouseUp:( NSEvent * ) pEvent
 {
+	ts3EvtOutput("rightMouseUp");
 	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) rightMouseDragged:( NSEvent * ) pEvent
 {
+	ts3EvtOutput("rightMouseDragged");
 	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) otherMouseDown:( NSEvent * ) pEvent
 {
+	ts3EvtOutput("otherMouseDown");
 	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) otherMouseUp:( NSEvent * ) pEvent
 {
+	ts3EvtOutput("otherMouseUp");
 	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) otherMouseDragged:( NSEvent * ) pEvent
 {
+	ts3EvtOutput("otherMouseDragged");
 	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 
 -( void ) scrollWheel:( NSEvent * ) pEvent
 {
+	ts3EvtOutput("scrollWheel");
 	nativeEventDispatch( *mEventController, platform::NativeEventType( pEvent ) );
 }
 

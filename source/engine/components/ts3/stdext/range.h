@@ -8,7 +8,7 @@
 namespace ts3
 {
 
-	enum class RangeType
+	enum class ERangeType
 	{
 		Exclusive,
 		Inclusive,
@@ -16,7 +16,7 @@ namespace ts3
 		InclusiveRight
 	};
 
-	template <typename TVal, RangeType tRangeType = RangeType::Inclusive>
+	template <typename TVal, ERangeType tERangeType = ERangeType::Inclusive>
 	struct Range
 	{
 		TVal begin;
@@ -24,37 +24,43 @@ namespace ts3
 	};
 
 	template <typename TVal>
-	using ExclusiveRange = Range<TVal, RangeType::Exclusive>;
+	using ExclusiveRange = Range<TVal, ERangeType::Exclusive>;
 
 	template <typename TVal>
-	using InclusiveRange = Range<TVal, RangeType::Inclusive>;
+	using InclusiveRange = Range<TVal, ERangeType::Inclusive>;
 
-	template <typename TVal, RangeType>
+	template <typename TVal, ERangeType>
 	struct LeftRangeBound;
 
-	template <typename TVal, RangeType>
+	template <typename TVal, ERangeType>
 	struct RightRangeBound;
 
-	template <typename TVal, RangeType tRangeType>
-	inline bool checkRangeLeftBound( const Range<TVal, tRangeType> & pRange, TVal pValue )
+	template <ERangeType tERangeType, typename TVal>
+	inline bool checkRangeLeftBound( const Range<TVal, tERangeType> & pRange, TVal pValue )
 	{
-		return LeftRangeBound<TVal, tRangeType>::inside( pRange, pValue );
+		return LeftRangeBound<TVal, tERangeType>::inside( pRange, pValue );
 	}
 
-	template <typename TVal, RangeType tRangeType>
-	inline bool checkRangeRightBound( const Range<TVal, tRangeType> & pRange, TVal pValue )
+	template <ERangeType tERangeType, typename TVal>
+	inline bool checkRangeRightBound( const Range<TVal, tERangeType> & pRange, TVal pValue )
 	{
-		return RightRangeBound<TVal, tRangeType>::inside( pRange, pValue );
+		return RightRangeBound<TVal, tERangeType>::inside( pRange, pValue );
 	}
 
-	template <typename TVal, RangeType tRangeType>
-	inline bool checkValueInsideRange( const Range<TVal, tRangeType> & pRange, TVal pValue )
+	template <ERangeType tERangeType, typename TVal>
+	inline bool checkValueInsideRange( const Range<TVal, tERangeType> & pRange, TVal pValue )
 	{
 		return checkRangeLeftBound( pRange, pValue ) && checkRangeRightBound( pRange, pValue );
 	}
 
-	template <typename TVal, RangeType tRangeType>
-	inline bool checkValueOutsideRange( const Range<TVal, tRangeType> & pRange, TVal pValue )
+	template <typename TVal>
+	inline bool checkValueInsideInclusiveRange( const Range<TVal, ERangeType::Inclusive> & pRange, TVal pValue )
+	{
+		return checkRangeLeftBound( pRange, pValue ) && checkRangeRightBound( pRange, pValue );
+	}
+
+	template <ERangeType tERangeType, typename TVal>
+	inline bool checkValueOutsideRange( const Range<TVal, tERangeType> & pRange, TVal pValue )
 	{
 		return !checkRangeLeftBound( pRange, pValue ) || !checkRangeRightBound( pRange, pValue );
 	}
@@ -71,55 +77,55 @@ namespace ts3
 		return checkRangeLeftBound( pRange, pSubRange.begin ) && checkRangeRightBound( pRange, pSubRange.end );
 	}
 
-	template <typename TVal, RangeType tRangeType>
+	template <typename TVal, ERangeType tERangeType>
 	struct LeftRangeBound
 	{
-		static bool inside( const Range<TVal, tRangeType> & pRange, TVal pValue )
+		static bool inside( const Range<TVal, tERangeType> & pRange, TVal pValue )
 		{
 			return pValue > pRange.begin;
 		}
 	};
 
 	template <typename TVal>
-	struct LeftRangeBound<TVal, RangeType::Inclusive>
+	struct LeftRangeBound<TVal, ERangeType::Inclusive>
 	{
-		static bool inside( const Range<TVal, RangeType::Inclusive> & pRange, TVal pValue )
+		static bool inside( const Range<TVal, ERangeType::Inclusive> & pRange, TVal pValue )
 		{
 			return pValue >= pRange.begin;
 		}
 	};
 
 	template <typename TVal>
-	struct LeftRangeBound<TVal, RangeType::InclusiveLeft>
+	struct LeftRangeBound<TVal, ERangeType::InclusiveLeft>
 	{
-		static bool inside( const Range<TVal, RangeType::InclusiveLeft> & pRange, TVal pValue )
+		static bool inside( const Range<TVal, ERangeType::InclusiveLeft> & pRange, TVal pValue )
 		{
 			return pValue >= pRange.begin;
 		}
 	};
 
-	template <typename TVal, RangeType tRangeType>
+	template <typename TVal, ERangeType tERangeType>
 	struct RightRangeBound
 	{
-		static bool inside( const Range<TVal, tRangeType> & pRange, TVal pValue )
+		static bool inside( const Range<TVal, tERangeType> & pRange, TVal pValue )
 		{
 			return pValue < pRange.end;
 		}
 	};
 
 	template <typename TVal>
-	struct RightRangeBound<TVal, RangeType::Inclusive>
+	struct RightRangeBound<TVal, ERangeType::Inclusive>
 	{
-		static bool inside( const Range<TVal, RangeType::Inclusive> & pRange, TVal pValue )
+		static bool inside( const Range<TVal, ERangeType::Inclusive> & pRange, TVal pValue )
 		{
 			return pValue <= pRange.end;
 		}
 	};
 
 	template <typename TVal>
-	struct RightRangeBound<TVal, RangeType::InclusiveRight>
+	struct RightRangeBound<TVal, ERangeType::InclusiveRight>
 	{
-		static bool inside( const Range<TVal, RangeType::InclusiveRight> & pRange, TVal pValue )
+		static bool inside( const Range<TVal, ERangeType::InclusiveRight> & pRange, TVal pValue )
 		{
 			return pValue <= pRange.end;
 		}

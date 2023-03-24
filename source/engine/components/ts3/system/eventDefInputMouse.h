@@ -69,6 +69,8 @@ namespace ts3::system
 
 		math::Vec2i32 cursorPos;
 
+		math::Vec2i32 cursorPosWindowRelative;
+
 		const EvtSharedInputMouseState * inputMouseState;
 	};
 

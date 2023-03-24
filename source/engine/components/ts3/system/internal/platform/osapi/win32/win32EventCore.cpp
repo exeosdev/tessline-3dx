@@ -132,7 +132,7 @@ namespace ts3::system
 			return eventSource;
 		}
 
-		bool win32TranslateEvent( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
+		bool win32TranslateEvent( const NativeEventType & pNativeEventconst MSG & pMSG, EventObject & pOutEvent )
 		{
 			auto * eventSource = win32FindEventSourceByHWND( pEventController, pMSG.hwnd );
 
@@ -647,13 +647,13 @@ namespace ts3::system
 		{
 			if( ( pWparam >= 0x0008 ) && ( pWparam <= 0x007B ) )
 			{
-				auto baseIndex = pWparam - 0x0008;
+				const auto baseIndex = pWparam - 0x0008;
 				return sASCIIKeyCodeMap_08_7B[baseIndex];
 			}
 
 			if( ( pWparam >= 0x00A0 ) && ( pWparam <= 0x00A5 ) )
 			{
-				auto baseIndex = pWparam - 0x00A0;
+				const auto baseIndex = pWparam - 0x00A0;
 				return sASCIIKeyCodeMap_A0_A5[baseIndex];
 			}
 
