@@ -22,6 +22,7 @@
 
 -( void ) keyDown:( NSEvent * ) pEvent;
 -( void ) keyUp:( NSEvent * ) pEvent;
+-( void ) flagsChanged:( NSEvent * ) pEvent;
 
 -( void ) mouseEntered:( NSEvent * ) pEvent;
 -( void ) mouseExited:( NSEvent * ) pEvent;

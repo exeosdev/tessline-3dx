@@ -2,6 +2,7 @@
 #include "osxEventCore.h"
 #include "nsOSXEventListener.h"
 #include "nsOSXWindow.h"
+#include "nsOSXKeyboardSupport.h"
 #include <ts3/system/internal/eventCorePrivate.h>
 
 namespace ts3::system
@@ -314,6 +315,7 @@ namespace ts3::system
 				{
 					auto & eInputKeyboard = pOutEvent.eInputKeyboard;
 					eInputKeyboard.eventCode = E_EVENT_CODE_INPUT_KEYBOARD;
+					inputKeyboardState.activeModifiersMask = osxTranslateModifierKeyFlags( [pNativeEvent.nsEvent modifierFlags] );
 					eInputKeyboard.inputKeyboardState = &inputKeyboardState;
 					eInputKeyboard.keyAction = EKeyActionType::Press;
 					eInputKeyboard.keyCode = _osxGetSysKeyCodeV1( [pNativeEvent.nsEvent keyCode] );
@@ -323,13 +325,36 @@ namespace ts3::system
 				{
 					auto & eInputKeyboard = pOutEvent.eInputKeyboard;
 					eInputKeyboard.eventCode = E_EVENT_CODE_INPUT_KEYBOARD;
+					inputKeyboardState.activeModifiersMask = osxTranslateModifierKeyFlags( [pNativeEvent.nsEvent modifierFlags] );
 					eInputKeyboard.inputKeyboardState = &inputKeyboardState;
 					eInputKeyboard.keyAction = EKeyActionType::Release;
 					eInputKeyboard.keyCode = _osxGetSysKeyCodeV1( [pNativeEvent.nsEvent keyCode] );
 					break;
 				}
 				case OSXEventIDGenericFlagsChanged:
+				{
+					const auto currentModifierFlags = osxTranslateModifierKeyFlags( [pNativeEvent.nsEvent modifierFlags] );
+					const auto previousModifierFlags = inputKeyboardState.activeModifiersMask;
+					const auto modifierDiff = currentModifierFlags ^ previousModifierFlags;
+					const auto modifierKeyCode = evt::getModifierKeyCodeFromModifierFlags( modifierDiff );
+
+					auto & eInputKeyboard = pOutEvent.eInputKeyboard;
+					eInputKeyboard.eventCode = E_EVENT_CODE_INPUT_KEYBOARD;
+					inputKeyboardState.activeModifiersMask = currentModifierFlags;
+					eInputKeyboard.inputKeyboardState = &inputKeyboardState;
+					eInputKeyboard.keyCode = evt::getModifierKeyCodeFromModifierFlags( modifierDiff );
+
+					if( !previousModifierFlags.isSet( modifierDiff ) )
+					{
+						eInputKeyboard.keyAction = EKeyActionType::Press;
+					}
+					else
+					{
+						eInputKeyboard.keyAction = EKeyActionType::Release;
+					}
+
 					break;
+				}
 				default:
 				{
 					ts3DebugInterrupt();
@@ -401,8 +426,6 @@ namespace ts3::system
 
 			controllerNativeData.lastCursorPosReal = pCursorState.positionScreenSpace;
 			inputMouseState.lastCursorPos = pCursorState.positionScreenSpaceI32();
-
-			ts3DebugOutputFmt( "Delta: %d, %d", eInputMouseMove.movementDelta.x, eInputMouseMove.movementDelta.y );
 
 			return eInputMouseMove;
 		}
@@ -790,7 +813,7 @@ namespace ts3::system
 			/* 0x36 */ /* , and "<"      */ EKeyCode::Unknown,
 			/* 0x37 */ /* . and ">"      */ EKeyCode::Unknown,
 			/* 0x38 */ /* / and ?        */ EKeyCode::Unknown,
-			/* 0x39 */ /* Caps Lock      */ EKeyCode::Unknown,
+			/* 0x39 */ EKeyCode::CapsLock,
 			/* 0x3A */ EKeyCode::F1,
 			/* 0x3B */ EKeyCode::F2,
 			/* 0x3C */ EKeyCode::F3,
@@ -821,7 +844,7 @@ namespace ts3::system
 			/* 0x55 */ EKeyCode::NumPadMul,
 			/* 0x56 */ EKeyCode::NumPadSub,
 			/* 0x57 */ EKeyCode::NumPadAdd,
-			/* 0x58 */ /* Keypad Enter */ EKeyCode::Unknown,
+			/* 0x58 */ EKeyCode::Enter,
 			/* 0x59 */ EKeyCode::NumPad0,
 			/* 0x5A */ EKeyCode::NumPad1,
 			/* 0x5B */ EKeyCode::NumPad2,

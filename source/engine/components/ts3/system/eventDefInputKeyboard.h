@@ -10,6 +10,25 @@ namespace ts3::system
 	enum class EKeyActionType : enum_default_value_t;
 	enum class EKeyCode : uint32;
 
+	enum EKeyModifierFlags : uint32
+	{
+		E_KEY_MODIFIER_FLAG_CONTROL_LEFT_BIT = 0x01,
+		E_KEY_MODIFIER_FLAG_CONTROL_RIGHT_BIT = 0x02,
+		E_KEY_MODIFIER_FLAG_ALT_LEFT_BIT = 0x04,
+		E_KEY_MODIFIER_FLAG_ALT_RIGHT_BIT = 0x08,
+		E_KEY_MODIFIER_FLAG_SHIFT_LEFT_BIT = 0x10,
+		E_KEY_MODIFIER_FLAG_SHIFT_RIGHT_BIT = 0x20,
+		E_KEY_MODIFIER_FLAG_GUI_LEFT_BIT = 0x40,
+		E_KEY_MODIFIER_FLAG_GUI_RIGHT_BIT = 0x80,
+
+		E_KEY_MODIFIER_MASK_CONTROL_ANY = E_KEY_MODIFIER_FLAG_CONTROL_LEFT_BIT | E_KEY_MODIFIER_FLAG_CONTROL_RIGHT_BIT,
+		E_KEY_MODIFIER_MASK_ALT_ANY = E_KEY_MODIFIER_FLAG_ALT_LEFT_BIT | E_KEY_MODIFIER_FLAG_ALT_RIGHT_BIT,
+		E_KEY_MODIFIER_MASK_SHIFT_ANY = E_KEY_MODIFIER_FLAG_SHIFT_LEFT_BIT | E_KEY_MODIFIER_FLAG_SHIFT_RIGHT_BIT,
+		E_KEY_MODIFIER_MASK_GUI_ANY = E_KEY_MODIFIER_FLAG_GUI_LEFT_BIT | E_KEY_MODIFIER_FLAG_GUI_RIGHT_BIT,
+
+		E_KEY_MODIFIER_MASK_ALL = 0xFF
+	};
+
 	enum class EKeyActionType : enum_default_value_t
 	{
 		Press,
@@ -110,6 +129,9 @@ namespace ts3::system
 		CharY = 89, // 0x59
 		CharZ = 90, // 0x5A
 
+		GuiLeft  = 91, // 0x5B
+		GuiRight = 92, // 0x5C
+
 		_ReservedMax,
 	};
 
@@ -158,6 +180,8 @@ namespace ts3::system
 	struct EvtSharedInputKeyboardState
 	{
 		KeyStateMap keyStateMap;
+
+		Bitmask<EKeyModifierFlags> activeModifiersMask = 0;
 	};
 
 	struct EvtInputKeyboard : public EvtInput
@@ -169,6 +193,33 @@ namespace ts3::system
 		//
 		const EvtSharedInputKeyboardState * inputKeyboardState;
 	};
+
+	namespace evt
+	{
+
+		inline EKeyCode getModifierKeyCodeFromModifierFlags( Bitmask<EKeyModifierFlags> pModifierFlags )
+		{
+			const auto maskValue = static_cast<uint32>( pModifierFlags & E_KEY_MODIFIER_MASK_ALL );
+			const auto setBitsNum = popCount( maskValue );
+
+			ts3DebugAssert( setBitsNum <= 1 );
+
+			switch( maskValue )
+			{
+				ts3CaseReturn( E_KEY_MODIFIER_FLAG_CONTROL_LEFT_BIT, EKeyCode::CtrlLeft );
+				ts3CaseReturn( E_KEY_MODIFIER_FLAG_CONTROL_RIGHT_BIT, EKeyCode::CtrlRight );
+				ts3CaseReturn( E_KEY_MODIFIER_FLAG_ALT_LEFT_BIT, EKeyCode::AltLeft );
+				ts3CaseReturn( E_KEY_MODIFIER_FLAG_ALT_RIGHT_BIT, EKeyCode::AltRight );
+				ts3CaseReturn( E_KEY_MODIFIER_FLAG_SHIFT_LEFT_BIT, EKeyCode::ShiftLeft );
+				ts3CaseReturn( E_KEY_MODIFIER_FLAG_SHIFT_RIGHT_BIT, EKeyCode::ShiftRight );
+				ts3CaseReturn( E_KEY_MODIFIER_FLAG_GUI_LEFT_BIT, EKeyCode::GuiLeft );
+				ts3CaseReturn( E_KEY_MODIFIER_FLAG_GUI_RIGHT_BIT, EKeyCode::GuiRight );
+			}
+
+			return EKeyCode::Unknown;
+		}
+
+	}
 
 } // namespace ts3::system
 

@@ -177,6 +177,8 @@ if( "${CM_EBS_SYSCONF_TARGET_SYSTEM}" STREQUAL "macOS" )
             ${TS3_SYSTEM_SRC_FILES}
             "internal/platform/osapi/osx/nsOSXApplicationProxy.h"
             "internal/platform/osapi/osx/nsOSXApplicationProxy.mm"
+            "internal/platform/osapi/osx/nsOSXKeyboardSupport.h"
+            "internal/platform/osapi/osx/nsOSXKeyboardSupport.mm"
             "internal/platform/osapi/osx/nsOSXEventListener.h"
             "internal/platform/osapi/osx/nsOSXEventListener.mm"
             "internal/platform/osapi/osx/nsOSXMetalSupport.h"
