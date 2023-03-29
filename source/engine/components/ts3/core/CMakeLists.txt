@@ -9,9 +9,7 @@ set( TS3_CORE_SRC_FILES
         "prerequisites.h"
         "prerequisites.cpp"
 
-		"coreEngineState.h"
-		"coreEngineState.cpp"
-		"exception.h"
+        "exception.h"
 		"exception.cpp"
 		"exceptionCommon.h"
 		"exceptionResult.h"

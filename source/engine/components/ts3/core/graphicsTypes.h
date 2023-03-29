@@ -21,6 +21,7 @@ namespace ts3
 
 	enum class EPixelDataLayout : uint32
 	{
+		Undefined = 0,
 		Alpha     = cxdefs::declarePixelDataLayout( 0x1, 1 ),
 		Depth     = cxdefs::declarePixelDataLayout( 0x2, 1 ),
 		DS        = cxdefs::declarePixelDataLayout( 0x3, 2 ),
@@ -31,7 +32,6 @@ namespace ts3
 		RGB       = cxdefs::declarePixelDataLayout( 0x8, 3 ),
 		RGBA      = cxdefs::declarePixelDataLayout( 0x9, 4 ),
 		S3TC      = cxdefs::declarePixelDataLayout( 0xA, 1 ),
-		Undefined = 0,
 	};
 
 	namespace cxdefs

@@ -51,7 +51,7 @@ namespace ts3
 
 		constexpr bool empty() const noexcept
 		{
-			return idValue != 0;
+			return idValue == 0;
 		}
 
 		constexpr ValueType asValue() const noexcept
@@ -112,5 +112,14 @@ namespace ts3
 	}
 
 } // namespace ts3
+
+template<>
+struct std::hash<ts3::HFSIdentifier>
+{
+	std::size_t operator()( const ts3::HFSIdentifier & pHFSIdentifier ) const noexcept
+	{
+		return pHFSIdentifier.asValue();
+	}
+};
 
 #endif // __TS3_CORE_HFS_IDENTIFIER_H__
