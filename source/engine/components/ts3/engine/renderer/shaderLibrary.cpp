@@ -1,57 +1,67 @@
 
 #include "shaderLibrary.h"
-
+#include <ts3/gpuapi/gpuDevice.h>
 #include <ts3/gpuapi/gpuUtils.h>
 
 namespace ts3
 {
 
-	ShaderLibrary::ShaderLibrary( gpuapi::GPUDeviceHandle pGPUDevice )
-	: _gpuDevice( std::move( pGPUDevice ) )
+	ShaderLibrary::ShaderLibrary( const CoreEngineState & pCES )
+	: CoreEngineObject( pCES )
 	{}
 
 	ShaderLibrary::~ShaderLibrary() = default;
 
-	gpuapi::GPUDevice & ShaderLibrary::gpuDevice() const noexcept
+	gpuapi::ShaderHandle ShaderLibrary::getShader( GpaUniqueObjectID pShaderID ) const noexcept
 	{
-		return *_gpuDevice;
+		const auto shaderIter = _shaderMap.find( pShaderID );
+		return ( shaderIter != _shaderMap.end() ) ? shaderIter->second : nullptr;
 	}
 
-	gpuapi::ShaderHandle ShaderLibrary::getShader( const ShaderID & pShaderID ) const noexcept
+	gpuapi::ShaderHandle ShaderLibrary::getShader( const GpaUniqueObjectName & pShaderName ) const noexcept
 	{
-		const auto shaderRef = _shaderMap.find( pShaderID );
-		return ( shaderRef != _shaderMap.end() ) ? shaderRef->second : nullptr;
+		const auto uniqueShaderID = gpuapi::generateUniqueGPUObjectID( pShaderName );
+		return getShader( uniqueShaderID );
 	}
 
-	void ShaderLibrary::loadShaders( std::initializer_list<ShaderSourceDefinition> pShaderDefinitions )
+	uint32 ShaderLibrary::append( const ShaderLibrary & pOtherLibrary )
 	{
-		if( pShaderDefinitions.size() == 0 )
-		{
-			return;
-		}
+		uint32 addedShadersNum = 0;
 
-		for( auto & shaderDefinition : pShaderDefinitions )
+		for( const auto & shaderDef : pOtherLibrary._shaderMap )
 		{
-			auto shaderSource = shaderDefinition.sourceLoadCallback();
-			if( !shaderSource.empty() )
+			if( registerShader( shaderDef.first, shaderDef.second ) )
 			{
-				auto shaderObject = gpuapi::utils::createShaderFromSource(
-						*_gpuDevice,
-						shaderDefinition.shaderType,
-						shaderSource.data(),
-						shaderSource.size() );
-
-				if( shaderObject )
-				{
-					registerShader( shaderDefinition.shaderID, shaderObject );
-				}
+				++addedShadersNum;
 			}
 		}
+
+		return addedShadersNum;
 	}
 
-	void ShaderLibrary::registerShader( ShaderID pShaderID, gpuapi::ShaderHandle pShader )
+	bool ShaderLibrary::registerShader( GpaUniqueObjectID pShaderID, gpuapi::ShaderHandle pShaderObject )
 	{
-		_shaderMap[pShaderID] = std::move( pShader );
+		if( !pShaderID || !pShaderObject )
+		{
+			ts3DebugOutput( "Cannot register shader: empty name or shader handle" );
+			return false;
+		}
+
+		auto existingShaderIter = _shaderMap.find( pShaderID );
+		if( existingShaderIter != _shaderMap.end() )
+		{
+			return false;
+		}
+
+		_shaderMap.insert( { pShaderID, pShaderObject } );
+
+		return true;
+	}
+
+	bool ShaderLibrary::registerShader( const GpaUniqueObjectName & pShaderName, gpuapi::ShaderHandle pShaderObject )
+	{
+		const auto uniqueShaderID = gpuapi::generateUniqueGPUObjectID( pShaderName );
+		return registerShader( uniqueShaderID, pShaderObject );
 	}
 
 }

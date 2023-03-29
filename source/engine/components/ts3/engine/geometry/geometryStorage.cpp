@@ -1,6 +1,5 @@
 
 #include "geometryStorage.h"
-#include "../coreEngineState.h"
 #include <ts3/gpuapi/gpuDevice.h>
 #include <ts3/gpuapi/resources//gpuBuffer.h>
 

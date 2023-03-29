@@ -4,44 +4,39 @@
 #ifndef __TS3_ENGINE_SHADER_LIBRARY_H__
 #define __TS3_ENGINE_SHADER_LIBRARY_H__
 
-#include "../prerequisites.h"
+#include "commonRendererDefs.h"
 #include <ts3/gpuapi/resources/shaderCommon.h>
-
 #include <unordered_map>
 
 namespace ts3
 {
 
-	using ShaderID = std::string;
-
-	using ShaderSourceLoadCallback = std::function<DynamicMemoryBuffer()>;
-
-	struct ShaderSourceDefinition
-	{
-		ShaderID shaderID;
-		gpuapi::EShaderType shaderType;
-		ShaderSourceLoadCallback sourceLoadCallback;
-	};
-
-	class ShaderLibrary
+	class ShaderLibrary : public CoreEngineObject
 	{
 	public:
-		explicit ShaderLibrary( gpuapi::GPUDeviceHandle pGPUDevice );
+		explicit ShaderLibrary( const CoreEngineState & pCES );
 		~ShaderLibrary();
 
-		TS3_ATTR_NO_DISCARD gpuapi::GPUDevice & gpuDevice() const noexcept;
+		TS3_ATTR_NO_DISCARD bool empty() const noexcept;
 
-		TS3_ATTR_NO_DISCARD gpuapi::ShaderHandle getShader( const ShaderID & pShaderID ) const noexcept;
+		TS3_ATTR_NO_DISCARD gpuapi::ShaderHandle getShader( GpaUniqueObjectID pShaderID ) const noexcept;
 
-		void loadShaders( std::initializer_list<ShaderSourceDefinition> pShaderDefinitions );
+		TS3_ATTR_NO_DISCARD gpuapi::ShaderHandle getShader( const GpaUniqueObjectName & pShaderName ) const noexcept;
 
-		void registerShader( ShaderID pShaderID, gpuapi::ShaderHandle pShader );
+		uint32 append( const ShaderLibrary & pOtherLibrary );
+
+		bool registerShader( GpaUniqueObjectID pShaderID, gpuapi::ShaderHandle pShaderObject );
+
+		bool registerShader( const GpaUniqueObjectName & pShaderName, gpuapi::ShaderHandle pShaderObject );
 
 	private:
-		using ShaderMap = std::unordered_map<ShaderID, gpuapi::ShaderHandle>;
-		gpuapi::GPUDeviceHandle _gpuDevice;
-		ShaderMap _shaderMap;
+		std::unordered_map<GpaUniqueObjectID, gpuapi::ShaderHandle> _shaderMap;
 	};
+
+	inline bool ShaderLibrary::empty() const noexcept
+	{
+		return _shaderMap.empty();
+	}
 
 } // namespace ts3
 

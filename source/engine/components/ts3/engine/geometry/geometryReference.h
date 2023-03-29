@@ -4,7 +4,7 @@
 #ifndef __TS3_ENGINE_GEOMETRY_REFERENCE_H__
 #define __TS3_ENGINE_GEOMETRY_REFERENCE_H__
 
-#include "../gpuapi/commonGpaDefs.h"
+#include "geometryCommonDefs.h"
 #include <ts3/gpuapi/resources/gpuBufferReference.h>
 #include <list>
 
@@ -18,22 +18,6 @@ namespace ts3
 
 	using GeometryReferenceList = std::list<GeometryReference>;
 	using GeometryReferenceSelfIter = GeometryReferenceList::iterator;
-
-	struct GeometryDataFormatInfo
-	{
-		gpuapi::EIndexDataFormat indexDataFormat = gpuapi::EIndexDataFormat::Undefined;
-
-		uint16 vertexElementByteSize;
-
-		uint16 activeVertexComponentsNum;
-
-		GeometryVertexComponentDataArray<uint16> vertexComponentSizeArray{};
-
-		TS3_ATTR_NO_DISCARD uint16 indexElementByteSize() const noexcept
-		{
-			return cxdefs::getIndexDataFormatByteSize( indexDataFormat );
-		}
-	};
 
 	struct GeometryReference
 	{

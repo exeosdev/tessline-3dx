@@ -7,11 +7,11 @@
 namespace ts3
 {
 
-	enum class EGeometryDataType : enum_default_value_t
-	{
-		VertexData = static_cast<enum_default_value_t>( gpuapi::EGPUBufferTarget::VertexBuffer ),
-		IndexData = static_cast<enum_default_value_t>( gpuapi::EGPUBufferTarget::IndexBuffer ),
-	};
+//	enum class EGeometryDataType : enum_default_value_t
+//	{
+//		VertexData = static_cast<enum_default_value_t>( gpuapi::EGPUBufferTarget::VertexBuffer ),
+//		IndexData = static_cast<enum_default_value_t>( gpuapi::EGPUBufferTarget::IndexBuffer ),
+//	};
 
 } // namespace ts3
 

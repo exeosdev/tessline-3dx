@@ -4,7 +4,6 @@
 #ifndef __TS3_ENGINE_CORE_ENGINE_STATE_H__
 #define __TS3_ENGINE_CORE_ENGINE_STATE_H__
 
-#include "prerequisites.h"
 #include <ts3/system/sysContext.h>
 
 namespace ts3

@@ -32,5 +32,38 @@
 
 #include "prerequisites/gpuapiCommon.h"
 #include "prerequisites/geometryCommon.h"
+#include "prerequisites/coreEngineState.h"
+
+namespace ts3
+{
+
+	class CoreEngineState;
+
+	namespace gpa
+	{
+
+		constexpr uint32 MAX_GEOMETRY_SEPARATE_VERTEX_COMPONENTS_NUM = 8;
+
+		constexpr uint32 MAX_GEOMETRY_VERTEX_ATTRIBUTES_NUM = gpuapi::gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM;
+
+	}
+
+	template <typename TData>
+	using GeometryVertexComponentDataArray = std::array<TData, gpa::MAX_GEOMETRY_SEPARATE_VERTEX_COMPONENTS_NUM>;
+
+	class CoreEngineObject : public DynamicInterface
+	{
+	public:
+		const CoreEngineState & mCES;
+
+	public:
+		explicit CoreEngineObject( const CoreEngineState & pCES )
+		: mCES( pCES )
+		{}
+
+		virtual ~CoreEngineObject() = default;
+	};
+
+}
 
 #endif // __TS3_ENGINE_PREREQUISITES_H__
