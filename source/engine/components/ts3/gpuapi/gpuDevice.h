@@ -9,20 +9,13 @@
 #include "resources/textureCommon.h"
 #include "state/graphicsShaderState.h"
 #include "state/renderPassCommon.h"
+#include "state/pipelineImmutableStateCache.h"
 
 namespace ts3::gpuapi
 {
 
-	class IAIndexBufferDescriptor;
-	class IAVertexBufferDescriptor;
-
-	class PipelineImmutableStateCache;
-	class PipelineImmutableStateFactory;
-
 	struct PresentationLayerCreateInfo;
 	struct RenderTargetTextureCreateInfo;
-
-	struct IAVertexBufferDescriptorBindingDesc;
 
 	enum EGPUDeviceCreateFlags : uint32
 	{
@@ -72,65 +65,40 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD const RenderTargetAttachmentClearConfig & getDefaultClearConfig() const noexcept;
 
-		GPUBufferHandle createGPUBuffer( const GPUBufferCreateInfo & pCreateInfo );
-		SamplerHandle createSampler( const SamplerCreateInfo & pCreateInfo );
-		ShaderHandle createShader( const ShaderCreateInfo & pCreateInfo );
-		TextureHandle createTexture( const TextureCreateInfo & pCreateInfo );
+		template <typename TState>
+		TS3_ATTR_NO_DISCARD GpaHandle<TState> getCachedImmutableState( UniqueGPUObjectID pUniqueID ) const noexcept;
+
+		template <typename TState>
+		TS3_ATTR_NO_DISCARD GpaHandle<TState> getCachedImmutableState( const UniqueGPUObjectName & pStateObjectName ) const noexcept;
+
+		TS3_ATTR_NO_DISCARD GPUBufferHandle createGPUBuffer( const GPUBufferCreateInfo & pCreateInfo );
+		TS3_ATTR_NO_DISCARD SamplerHandle createSampler( const SamplerCreateInfo & pCreateInfo );
+		TS3_ATTR_NO_DISCARD ShaderHandle createShader( const ShaderCreateInfo & pCreateInfo );
+		TS3_ATTR_NO_DISCARD TextureHandle createTexture( const TextureCreateInfo & pCreateInfo );
 
 		/// @brief Creates an RTT using the provided CIS.
 		/// This function will automatically create a required resource, depending on the specified layout and usage.
 		/// It can either be an explicit texture object which can be retrieved later or an implicit render buffer
 		/// (e.g. if the RTT is supposed to be only a depth/stencil attachment used for depth and/or stencil testing).
-		RenderTargetTextureHandle createRenderTargetTexture( const RenderTargetTextureCreateInfo & pCreateInfo );
+		TS3_ATTR_NO_DISCARD RenderTargetTextureHandle createRenderTargetTexture( const RenderTargetTextureCreateInfo & pCreateInfo );
 
 		/// @brief
-		GraphicsPipelineStateObjectHandle createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo );
+		TS3_ATTR_NO_DISCARD GraphicsPipelineStateObjectHandle createGraphicsPipelineStateObject( const GraphicsPipelineStateObjectCreateInfo & pCreateInfo );
 
-		BlendImmutableStateHandle createBlendImmutableState( const BlendConfig & pConfig );
-		DepthStencilImmutableStateHandle createDepthStencilImmutableState( const DepthStencilConfig & pConfig );
-		GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageImmutableState( const GraphicsShaderSet & pShaderSet );
+		TS3_ATTR_NO_DISCARD BlendImmutableStateHandle createBlendImmutableState( const BlendConfig & pConfig );
+		TS3_ATTR_NO_DISCARD DepthStencilImmutableStateHandle createDepthStencilImmutableState( const DepthStencilConfig & pConfig );
+		TS3_ATTR_NO_DISCARD GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageImmutableState( const GraphicsShaderSet & pShaderSet );
+		TS3_ATTR_NO_DISCARD IAInputLayoutImmutableStateHandle createIAInputLayoutImmutableState( const IAInputLayoutDefinition & pDefinition, Shader & pVertexShaderWithBinary );
+		TS3_ATTR_NO_DISCARD IAVertexStreamImmutableStateHandle createIAVertexStreamImmutableState( const IAVertexStreamDefinition & pDefinition );
+		TS3_ATTR_NO_DISCARD RasterizerImmutableStateHandle createRasterizerImmutableState( const RasterizerConfig & pConfig );
+		TS3_ATTR_NO_DISCARD RenderTargetBindingImmutableStateHandle createRenderTargetBindingImmutableState( const RenderTargetBindingDefinition & pDefinition );
+		TS3_ATTR_NO_DISCARD RenderPassConfigurationImmutableStateHandle createRenderPassConfigurationImmutableState( const RenderPassConfiguration & pConfiguration );
 
-		IAInputLayoutImmutableStateHandle createIAInputLayoutImmutableState(
-				const IAInputLayoutDefinition & pDefinition,
-				Shader * pVertexShaderWithBinary );
+		template <typename TState, typename TInputDesc, typename... TArgs>
+		GpaHandle<TState> createCachedImmutableState( UniqueGPUObjectID pUniqueID, const TInputDesc & pInputDesc, TArgs && ...pArgs );
 
-		IAVertexStreamImmutableStateHandle createIAVertexStreamImmutableState( const IAVertexStreamDefinition & pDefinition );
-		RasterizerImmutableStateHandle createRasterizerImmutableState( const RasterizerConfig & pConfig );
-		RenderTargetBindingImmutableStateHandle createRenderTargetBindingImmutableState( const RenderTargetBindingDefinition & pDefinition );
-		RenderPassConfigurationImmutableStateHandle createRenderPassConfigurationImmutableState( const RenderPassConfiguration & pConfiguration );
-
-		BlendImmutableStateHandle createBlendImmutableStateCached(
-				const UniqueGPUObjectName & pUniqueName,
-				const BlendConfig & pConfig );
-
-		DepthStencilImmutableStateHandle createDepthStencilImmutableStateCached(
-				const UniqueGPUObjectName & pUniqueName,
-				const DepthStencilConfig & pConfig );
-
-		GraphicsShaderLinkageImmutableStateHandle createGraphicsShaderLinkageImmutableStateCached(
-				const UniqueGPUObjectName & pUniqueName,
-				const GraphicsShaderSet & pShaderSet );
-
-		IAInputLayoutImmutableStateHandle createIAInputLayoutImmutableStateCached(
-				const UniqueGPUObjectName & pUniqueName,
-				const IAInputLayoutDefinition & pDefinition,
-				Shader * pVertexShaderWithBinary );
-
-		IAVertexStreamImmutableStateHandle createIAVertexStreamImmutableStateCached(
-				const UniqueGPUObjectName & pUniqueName,
-				const IAVertexStreamDefinition & pDefinition );
-
-		RasterizerImmutableStateHandle createRasterizerImmutableStateCached(
-				const UniqueGPUObjectName & pUniqueName,
-				const RasterizerConfig & pConfig );
-
-		RenderTargetBindingImmutableStateHandle createRenderTargetBindingImmutableStateCached(
-				const UniqueGPUObjectName & pUniqueName,
-				const RenderTargetBindingDefinition & pDefinition );
-
-		RenderPassConfigurationImmutableStateHandle createRenderPassConfigurationImmutableStateCached(
-				const UniqueGPUObjectName & pUniqueName,
-				const RenderPassConfiguration & pConfiguration );
+		template <typename TState, typename TInputDesc, typename... TArgs>
+		GpaHandle<TState> createCachedImmutableState( const UniqueGPUObjectName & pUniqueName, const TInputDesc & pInputDesc, TArgs && ...pArgs );
 
 		void resetImmutableStateCache( Bitmask<EPipelineImmutableStateTypeFlags> pResetMask = E_PIPELINE_IMMUTABLE_STATE_TYPE_MASK_ALL );
 
@@ -175,6 +143,30 @@ namespace ts3::gpuapi
 
 		Bitmask<uint32> _internalStateFlags;
 	};
+
+	template <typename TState>
+	inline GpaHandle<TState> GPUDevice::getCachedImmutableState( UniqueGPUObjectID pUniqueID ) const noexcept
+	{
+		return _immutableStateCachePtr->template getState<TState>( pUniqueID );
+	}
+
+	template <typename TState>
+	inline GpaHandle<TState> GPUDevice::getCachedImmutableState( const UniqueGPUObjectName & pUniqueName ) const noexcept
+	{
+		return _immutableStateCachePtr->template getState<TState>( pUniqueName );
+	}
+
+	template <typename TState, typename TInputDesc, typename... TArgs>
+	inline GpaHandle<TState> GPUDevice::createCachedImmutableState( UniqueGPUObjectID pUniqueID, const TInputDesc & pInputDesc, TArgs && ...pArgs )
+	{
+		return _immutableStateCachePtr->template createState<TState>( pUniqueID, pInputDesc, std::forward<TArgs>( pArgs )... );
+	}
+
+	template <typename TState, typename TInputDesc, typename... TArgs>
+	inline GpaHandle<TState> GPUDevice::createCachedImmutableState( const UniqueGPUObjectName & pUniqueName, const TInputDesc & pInputDesc, TArgs && ...pArgs )
+	{
+		return _immutableStateCachePtr->template createState<TState>( pUniqueName, pInputDesc, std::forward<TArgs>( pArgs )... );
+	}
 
 } // namespace ts3::gpuapi
 

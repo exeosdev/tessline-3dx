@@ -76,7 +76,7 @@ namespace ts3::gpuapi
 		return nullptr;
 	}
 
-	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryNull::createIAInputLayoutState( const IAInputLayoutDefinition &, Shader * )
+	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryNull::createIAInputLayoutState( const IAInputLayoutDefinition &, Shader & )
 	{
 		return nullptr;
 	}
@@ -123,7 +123,7 @@ namespace ts3::gpuapi
 		return _stateFactory->createGraphicsShaderLinkageState( pShaderSet );
 	}
 
-	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryAdapter::createState( const IAInputLayoutDefinition & pDefinition, Shader * pVertexShaderWithBinary )
+	IAInputLayoutImmutableStateHandle PipelineImmutableStateFactoryAdapter::createState( const IAInputLayoutDefinition & pDefinition, Shader & pVertexShaderWithBinary )
 	{
 		return _stateFactory->createIAInputLayoutState( pDefinition, pVertexShaderWithBinary );
 	}

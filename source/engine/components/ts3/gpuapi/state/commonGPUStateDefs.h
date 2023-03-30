@@ -59,6 +59,9 @@ namespace ts3::gpuapi
 		constexpr auto VERTEX_ATTRIBUTE_OFFSET_APPEND = Limits<gpu_memory_size_t>::maxValue;
 
 		///
+		constexpr auto VERTEX_ATTRIBUTE_OFFSET_APPEND16 = Limits<gpu_memory_size_t>::maxValue - 1;
+
+		///
 		constexpr auto RT_ATTACHMENT_MSAA_LEVEL_INVALID = Limits<uint32>::maxValue;
 
 		///
@@ -137,7 +140,8 @@ namespace ts3::gpuapi
 	enum EGraphicsPipelineDynamicStateFlags : uint32
 	{
 		E_GRAPHICS_PIPELINE_DYNAMIC_STATE_FLAG_BLEND_CONSTANT_COLOR_BIT = 0x01,
-		E_GRAPHICS_PIPELINE_DYNAMIC_STATE_FLAG_STENCIL_REF_VALUE_BIT = 0x02,
+		E_GRAPHICS_PIPELINE_DYNAMIC_STATE_FLAG_COMMON_CLEAR_CONFIG_BIT = 0x02,
+		E_GRAPHICS_PIPELINE_DYNAMIC_STATE_FLAG_STENCIL_REF_VALUE_BIT = 0x04,
 	};
 
 	enum class EPrimitiveFillMode : uint16
@@ -177,9 +181,18 @@ namespace ts3::gpuapi
 
 	struct GraphicsPipelineDynamicState
 	{
+		// Bitmask which describes what part of the state is active and should be used when the rendering is executed.
 		Bitmask<EGraphicsPipelineDynamicStateFlags> activeStateMask = 0;
+
+		// Constant color used for blending. Overrides color specified as a part of the BlendState within a PSO.
 		math::RGBAColorR32Norm blendConstantColor;
-		UINT8 stencilTestRefValue;
+
+		// Global clear values used to clear attachments when a render pass starts. It overrides clear settings
+		// for *ALL* attachments for which "Clear" was defined as the "Load" action in a given render pass.
+		RenderTargetAttachmentClearConfig commonClearConfig;
+
+		// Ref value used for stencil testing. If this is not set and stencil testing is enabled, 0 is used by default.
+		uint8 stencilTestRefValue;
 	};
 
 } // namespace ts3::gpuapi

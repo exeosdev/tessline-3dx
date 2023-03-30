@@ -71,7 +71,7 @@ namespace ts3::gpuapi
 			0u,
 			ECullMode::Back,
 			EPrimitiveFillMode::Solid,
-			ETriangleVerticesOrder::Clockwise,
+			ETriangleVerticesOrder::CounterClockwise,
 		};
 
 	}

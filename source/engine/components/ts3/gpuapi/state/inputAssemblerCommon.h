@@ -108,7 +108,7 @@ namespace ts3::gpuapi
 
 		const char * semanticName = ts3::cxdefs::STR_CHAR_EMPTY;
 
-		input_assembler_index_t semanticIndex = 0;
+		input_assembler_index_t semanticIndex{ 0 };
 
 		EVertexAttribFormat format{ EVertexAttribFormat::Undefined };
 

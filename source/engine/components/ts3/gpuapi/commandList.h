@@ -69,6 +69,7 @@ namespace ts3::gpuapi
 		virtual void endRenderPass();
 
 		void setRenderPassDynamicState( const GraphicsPipelineDynamicState & pDynamicState );
+		void resetRenderPassDynamicState();
 
 		bool setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO );
 		bool setIAVertexStreamState( const IAVertexStreamImmutableState & pIAVertexStreamState );
@@ -127,9 +128,13 @@ namespace ts3::gpuapi
 		virtual void endRenderPass() override;
 
 	protected:
-		virtual void executeRenderPassLoadActions( const RenderPassConfiguration & pRenderPassConfiguration ) = 0;
+		virtual void executeRenderPassLoadActions(
+				const RenderPassConfiguration & pRenderPassConfiguration,
+				const GraphicsPipelineDynamicState & pDynamicState ) = 0;
 
-		virtual void executeRenderPassStoreActions( const RenderPassConfiguration & pRenderPassConfiguration ) = 0;
+		virtual void executeRenderPassStoreActions(
+				const RenderPassConfiguration & pRenderPassConfiguration,
+				const GraphicsPipelineDynamicState & pDynamicState ) = 0;
 
 	private:
 		RenderPassConfiguration _currentRenderPassConfiguration;

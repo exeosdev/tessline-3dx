@@ -266,16 +266,17 @@ namespace ts3::gpuapi
 		{
 			switch( pPixelLayout )
 			{
-				ts3CaseReturn( EPixelDataLayout::Alpha , ETextureFormat::R8UN );
-				ts3CaseReturn( EPixelDataLayout::Depth , ETextureFormat::R8UN );
-				ts3CaseReturn( EPixelDataLayout::DS    , ETextureFormat::RG8UN );
-				ts3CaseReturn( EPixelDataLayout::BGR   , ETextureFormat::BGRX8UN );
-				ts3CaseReturn( EPixelDataLayout::BGRA  , ETextureFormat::BGRA8UN );
-				ts3CaseReturn( EPixelDataLayout::Red   , ETextureFormat::R8UN );
-				ts3CaseReturn( EPixelDataLayout::RG    , ETextureFormat::RG8UN );
-				ts3CaseReturn( EPixelDataLayout::RGB   , ETextureFormat::BGRX8UN );
-				ts3CaseReturn( EPixelDataLayout::RGBA  , ETextureFormat::RGBA8UN );
-				ts3CaseReturn( EPixelDataLayout::S3TC  , ETextureFormat::BC3 );
+				ts3CaseReturn( EPixelDataLayout::Undefined , ETextureFormat::UNKNOWN );
+				ts3CaseReturn( EPixelDataLayout::Alpha     , ETextureFormat::R8UN );
+				ts3CaseReturn( EPixelDataLayout::Depth     , ETextureFormat::R8UN );
+				ts3CaseReturn( EPixelDataLayout::DS        , ETextureFormat::RG8UN );
+				ts3CaseReturn( EPixelDataLayout::BGR       , ETextureFormat::BGRX8UN );
+				ts3CaseReturn( EPixelDataLayout::BGRA      , ETextureFormat::BGRA8UN );
+				ts3CaseReturn( EPixelDataLayout::Red       , ETextureFormat::R8UN );
+				ts3CaseReturn( EPixelDataLayout::RG        , ETextureFormat::RG8UN );
+				ts3CaseReturn( EPixelDataLayout::RGB       , ETextureFormat::BGRX8UN );
+				ts3CaseReturn( EPixelDataLayout::RGBA      , ETextureFormat::RGBA8UN );
+				ts3CaseReturn( EPixelDataLayout::S3TC      , ETextureFormat::BC3 );
 			}
 
 			return ETextureFormat::UNKNOWN;

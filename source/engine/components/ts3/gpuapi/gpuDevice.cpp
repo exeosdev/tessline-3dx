@@ -191,7 +191,7 @@ namespace ts3::gpuapi
 		if( !pCreateInfo.inputLayoutState )
 		{
 			auto * vertexShader = pCreateInfo.shaderLinkageState->getShader( EShaderType::GSVertex );
-			pCreateInfo.inputLayoutState = _immutableStateFactoryBase->createIAInputLayoutState( pCreateInfo.inputLayoutDefinition, vertexShader );
+			pCreateInfo.inputLayoutState = _immutableStateFactoryBase->createIAInputLayoutState( pCreateInfo.inputLayoutDefinition, *vertexShader );
 		}
 
 		return _drvCreateGraphicsPipelineStateObject( pCreateInfo );
@@ -215,7 +215,7 @@ namespace ts3::gpuapi
 		return _immutableStateFactoryBase->createGraphicsShaderLinkageState( pShaderSet );
 	}
 
-	IAInputLayoutImmutableStateHandle GPUDevice::createIAInputLayoutImmutableState( const IAInputLayoutDefinition & pDefinition, Shader * pVertexShaderWithBinary )
+	IAInputLayoutImmutableStateHandle GPUDevice::createIAInputLayoutImmutableState( const IAInputLayoutDefinition & pDefinition, Shader & pVertexShaderWithBinary )
 	{
 		ts3DebugAssert( _immutableStateFactoryBase );
 		return _immutableStateFactoryBase->createIAInputLayoutState( pDefinition, pVertexShaderWithBinary );
@@ -243,71 +243,6 @@ namespace ts3::gpuapi
 	{
 		ts3DebugAssert( _immutableStateFactoryBase );
 		return _immutableStateFactoryBase->createRenderPassState( pConfiguration.getValidated() );
-	}
-
-	BlendImmutableStateHandle GPUDevice::createBlendImmutableStateCached(
-			const UniqueGPUObjectName & pUniqueName,
-			const BlendConfig & pConfig )
-	{
-		ts3DebugAssert( _immutableStateCachePtr );
-		return _immutableStateCachePtr->createState<BlendImmutableState>( pUniqueName, pConfig );
-	}
-
-	DepthStencilImmutableStateHandle GPUDevice::createDepthStencilImmutableStateCached(
-			const UniqueGPUObjectName & pUniqueName,
-			const DepthStencilConfig & pConfig )
-	{
-		ts3DebugAssert( _immutableStateCachePtr );
-		return _immutableStateCachePtr->createState<DepthStencilImmutableState>( pUniqueName, pConfig );
-	}
-
-	GraphicsShaderLinkageImmutableStateHandle GPUDevice::createGraphicsShaderLinkageImmutableStateCached(
-			const UniqueGPUObjectName & pUniqueName,
-			const GraphicsShaderSet & pShaderSet )
-	{
-		ts3DebugAssert( _immutableStateCachePtr );
-		return _immutableStateCachePtr->createState<GraphicsShaderLinkageImmutableState>( pUniqueName, pShaderSet );
-	}
-
-	IAInputLayoutImmutableStateHandle GPUDevice::createIAInputLayoutImmutableStateCached(
-			const UniqueGPUObjectName & pUniqueName,
-			const IAInputLayoutDefinition & pDefinition,
-			Shader * pVertexShaderWithBinary )
-	{
-		ts3DebugAssert( _immutableStateCachePtr );
-		return _immutableStateCachePtr->createState<IAInputLayoutImmutableState>( pUniqueName, pDefinition, pVertexShaderWithBinary );
-	}
-
-	IAVertexStreamImmutableStateHandle GPUDevice::createIAVertexStreamImmutableStateCached(
-			const UniqueGPUObjectName & pUniqueName,
-			const IAVertexStreamDefinition & pDefinition )
-	{
-		ts3DebugAssert( _immutableStateCachePtr );
-		return _immutableStateCachePtr->createState<IAVertexStreamImmutableState>( pUniqueName, pDefinition );
-	}
-
-	RasterizerImmutableStateHandle GPUDevice::createRasterizerImmutableStateCached(
-			const UniqueGPUObjectName & pUniqueName,
-			const RasterizerConfig & pConfig )
-	{
-		ts3DebugAssert( _immutableStateCachePtr );
-		return _immutableStateCachePtr->createState<RasterizerImmutableState>( pUniqueName, pConfig );
-	}
-
-	RenderTargetBindingImmutableStateHandle GPUDevice::createRenderTargetBindingImmutableStateCached(
-			const UniqueGPUObjectName & pUniqueName,
-			const RenderTargetBindingDefinition & pDefinition )
-	{
-		ts3DebugAssert( _immutableStateCachePtr );
-		return _immutableStateCachePtr->createState<RenderTargetBindingImmutableState>( pUniqueName, pDefinition );
-	}
-
-	RenderPassConfigurationImmutableStateHandle GPUDevice::createRenderPassConfigurationImmutableStateCached(
-			const UniqueGPUObjectName & pUniqueName,
-			const RenderPassConfiguration & pConfiguration )
-	{
-		ts3DebugAssert( _immutableStateCachePtr );
-		return _immutableStateCachePtr->createState<RenderPassConfigurationImmutableState>( pUniqueName, pConfiguration );
 	}
 
 	void GPUDevice::resetImmutableStateCache( Bitmask<EPipelineImmutableStateTypeFlags> pResetMask )

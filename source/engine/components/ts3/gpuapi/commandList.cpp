@@ -233,6 +233,11 @@ namespace ts3::gpuapi
 		_graphicsPipelineStateController->setRenderPassDynamicState( pDynamicState );
 	}
 
+	void CommandList::resetRenderPassDynamicState()
+	{
+		_graphicsPipelineStateController->resetRenderPassDynamicState();
+	}
+
 	bool CommandList::setGraphicsPipelineStateObject( const GraphicsPipelineStateObject & pGraphicsPSO )
 	{
 		return _graphicsPipelineStateController->setGraphicsPipelineStateObject( pGraphicsPSO );
@@ -338,7 +343,7 @@ namespace ts3::gpuapi
 	{
 		ts3DebugAssert( isRenderPassActive() );
 
-		if( _internalStateMask.isSet( E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_PRESERVE_DYNAMIC_STATE_BIT ) )
+		if( !_internalStateMask.isSet( E_COMMAND_LIST_ACTION_FLAG_RENDER_PASS_PRESERVE_DYNAMIC_STATE_BIT ) )
 		{
 			_graphicsPipelineStateController->resetRenderPassDynamicState();
 		}
@@ -370,7 +375,9 @@ namespace ts3::gpuapi
 			const auto * defaultRenderPassState = pRenderPassState.queryInterface<RenderPassConfigurationImmutableStateDefault>();
 			_currentRenderPassConfiguration = defaultRenderPassState->mRenderPassConfiguration;
 
-			executeRenderPassLoadActions( _currentRenderPassConfiguration );
+			executeRenderPassLoadActions(
+					_currentRenderPassConfiguration,
+					_graphicsPipelineStateController->getRenderPassDynamicState() );
 
 			return true;
 		}
@@ -386,7 +393,9 @@ namespace ts3::gpuapi
 		{
 			_currentRenderPassConfiguration = pRenderPassState.getRenderPassConfiguration();
 
-			executeRenderPassLoadActions( _currentRenderPassConfiguration );
+			executeRenderPassLoadActions(
+					_currentRenderPassConfiguration,
+					_graphicsPipelineStateController->getRenderPassDynamicState() );
 
 			return true;
 		}
@@ -398,7 +407,9 @@ namespace ts3::gpuapi
 	{
 		if( isRenderPassActive() )
 		{
-			executeRenderPassStoreActions( _currentRenderPassConfiguration );
+			executeRenderPassStoreActions(
+					_currentRenderPassConfiguration,
+					_graphicsPipelineStateController->getRenderPassDynamicState() );
 
 			CommandList::endRenderPass();
 		}

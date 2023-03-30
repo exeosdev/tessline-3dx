@@ -50,7 +50,7 @@ namespace ts3::gpuapi
 
 		~PipelineImmutableStateSubCache() = default;
 
-		TS3_ATTR_NO_DISCARD GpaHandle<TState> getState( const UniqueGPUObjectID & pStateObjectID ) const
+		TS3_ATTR_NO_DISCARD GpaHandle<TState> getState( UniqueGPUObjectID pStateObjectID ) const noexcept
 		{
 			const auto existingStateRef = _cachedStates.find( pStateObjectID.asValue() );
 
@@ -63,7 +63,7 @@ namespace ts3::gpuapi
 			return nullptr;
 		}
 
-		TS3_ATTR_NO_DISCARD GpaHandle<TState> getState( const UniqueGPUObjectName & pStateObjectName ) const
+		TS3_ATTR_NO_DISCARD GpaHandle<TState> getState( const UniqueGPUObjectName & pStateObjectName ) const noexcept
 		{
 			const auto uniqueID = generateUniqueGPUObjectID( pStateObjectName );
 			return getState( uniqueID );
@@ -165,14 +165,14 @@ namespace ts3::gpuapi
 		{}
 
 		template <typename TState>
-		TS3_ATTR_NO_DISCARD GpaHandle<TState> getState( const UniqueGPUObjectID & pStateObjectID ) const
+		TS3_ATTR_NO_DISCARD GpaHandle<TState> getState( UniqueGPUObjectID pStateObjectID ) const noexcept
 		{
 			auto & subCache = _subCacheProxy<TState>();
 			return subCache.getState( pStateObjectID );
 		}
 
 		template <typename TState>
-		TS3_ATTR_NO_DISCARD GpaHandle<TState> getState( const UniqueGPUObjectName & pStateObjectName ) const
+		TS3_ATTR_NO_DISCARD GpaHandle<TState> getState( const UniqueGPUObjectName & pStateObjectName ) const noexcept
 		{
 			auto & subCache = _subCacheProxy<TState>();
 			return subCache.getState( pStateObjectName );

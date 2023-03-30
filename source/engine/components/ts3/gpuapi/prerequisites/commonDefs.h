@@ -43,7 +43,8 @@ namespace ts3::gpuapi
 		constexpr uint32 SHADER_COMBINED_STAGES_NUM = 6;
 		constexpr uint32 SHADER_GRAPHICS_STAGES_NUM = 5;
 
-		constexpr uint32 RES_MAX_TEXTURE_UNITS_NUM = 32;
+		constexpr uint32 RES_MAX_CONSTANT_BUFFERS_NUM = 16;
+		constexpr uint32 RES_MAX_TEXTURE_UNITS_NUM = 16;
 
 		constexpr uint32 TEXTURE_MAX_MIP_LEVELS_NUM = 16;
 
