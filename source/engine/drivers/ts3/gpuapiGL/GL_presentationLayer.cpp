@@ -14,7 +14,7 @@ namespace ts3::gpuapi
 		try
 		{
 		    system::OpenGLDisplaySurfaceCreateInfo surfaceCreateInfo;
-			surfaceCreateInfo.frameGeometry.position = pPLCreateInfo.screenRect.offset;
+			surfaceCreateInfo.frameGeometry.position = system::CX_FRAME_POS_AUTO;
 			surfaceCreateInfo.frameGeometry.size = pPLCreateInfo.screenRect.size;
 			surfaceCreateInfo.frameGeometry.style = system::EFrameStyle::Default;
 			surfaceCreateInfo.visualConfig = pPLCreateInfo.visualConfig;

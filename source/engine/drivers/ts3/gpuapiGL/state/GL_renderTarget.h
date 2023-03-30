@@ -72,7 +72,9 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD RenderTargetLayout translateSystemVisualConfigToRenderTargetLayout( const system::VisualConfig & pSysVisualConfig );
 
-		void clearRenderPassFramebuffer( const RenderPassConfiguration & pRenderPassConfiguration );
+		void clearRenderPassFramebuffer(
+				const RenderPassConfiguration & pRenderPassConfiguration,
+				const GraphicsPipelineDynamicState & pDynamicState );
 
 		void resolveRenderPassFramebuffer(
 				const GLRenderTargetBindingInfo & pRTBindingInfo,

@@ -121,7 +121,12 @@ namespace ts3::gpuapi
 					if( inputAttributeInfo.relativeOffset == cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND )
 					{
 						// If the offset is APPEND, update it with the current packed offset calculated.
-						dx11AttributeInfo.AlignedByteOffset = numeric_cast<uint32>( currentAttributePackedRelativeOffset );
+						dx11AttributeInfo.AlignedByteOffset = numeric_cast<uint32>( memGetAlignedValue( currentAttributePackedRelativeOffset, 4 ) );
+					}
+					else if( inputAttributeInfo.relativeOffset == cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND16 )
+					{
+						// If the offset is APPEND, update it with the current packed offset calculated.
+						dx11AttributeInfo.AlignedByteOffset = numeric_cast<uint32>( memGetAlignedValue( currentAttributePackedRelativeOffset, 16 ) );
 					}
 
 					// Update the current packed offset.

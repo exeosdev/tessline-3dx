@@ -218,6 +218,11 @@ namespace ts3::gpuapi
 						// If the offset is APPEND, update it with the current packed offset calculated.
 						glcAttributeInfo.relativeOffset = numeric_cast<uint32>( currentAttributePackedRelativeOffset );
 					}
+					else if( inputAttributeInfo.relativeOffset == cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND16 )
+					{
+						// If the offset is APPEND, update it with the current packed offset calculated.
+						glcAttributeInfo.relativeOffset = numeric_cast<uint32>( memGetAlignedValue( currentAttributePackedRelativeOffset, 16 ) );
+					}
 
 					// Update the current packed offset.
 					currentAttributePackedRelativeOffset = glcAttributeInfo.relativeOffset + glcAttributeInfo.byteSize;

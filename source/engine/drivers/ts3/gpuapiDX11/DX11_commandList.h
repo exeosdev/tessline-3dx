@@ -37,9 +37,13 @@ namespace ts3::gpuapi
 		ID3D11Query * releaseExecutionSyncQuery();
 
 	private:
-		virtual void executeRenderPassLoadActions( const RenderPassConfiguration & pRenderPassConfiguration ) override;
+		virtual void executeRenderPassLoadActions(
+				const RenderPassConfiguration & pRenderPassConfiguration,
+				const GraphicsPipelineDynamicState & pDynamicState ) override;
 
-		virtual void executeRenderPassStoreActions( const RenderPassConfiguration & pRenderPassConfiguration ) override;
+		virtual void executeRenderPassStoreActions(
+				const RenderPassConfiguration & pRenderPassConfiguration,
+				const GraphicsPipelineDynamicState & pDynamicState ) override;
 
 		static ComPtr<ID3D11Query> _createExecutionSyncQuery( ComPtr<ID3D11Device1> pD3D11Device );
 

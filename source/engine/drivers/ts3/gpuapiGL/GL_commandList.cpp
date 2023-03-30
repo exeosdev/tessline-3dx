@@ -78,15 +78,19 @@ namespace ts3::gpuapi
 		ts3DebugInterrupt();
 	}
 
-	void GLCommandList::executeRenderPassLoadActions( const RenderPassConfiguration & pRenderPassConfiguration )
+	void GLCommandList::executeRenderPassLoadActions(
+			const RenderPassConfiguration & pRenderPassConfiguration,
+			const GraphicsPipelineDynamicState & pDynamicState )
 	{
 		if( pRenderPassConfiguration.attachmentsActionClearMask != 0 )
 		{
-			smutil::clearRenderPassFramebuffer( pRenderPassConfiguration );
+			smutil::clearRenderPassFramebuffer( pRenderPassConfiguration, pDynamicState );
 		}
 	}
 
-	void GLCommandList::executeRenderPassStoreActions( const RenderPassConfiguration & pRenderPassConfiguration )
+	void GLCommandList::executeRenderPassStoreActions(
+			const RenderPassConfiguration & pRenderPassConfiguration,
+			const GraphicsPipelineDynamicState & pDynamicState )
 	{
 		if( pRenderPassConfiguration.attachmentsActionResolveMask != 0 )
 		{

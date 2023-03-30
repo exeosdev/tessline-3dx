@@ -555,6 +555,7 @@ namespace ts3::gpuapi
 			ts3CaseReturn( ETextureFormat::D16UN      , GL_DEPTH_COMPONENT16  );
 			ts3CaseReturn( ETextureFormat::D24UNS8U   , GL_DEPTH24_STENCIL8   );
 			ts3CaseReturn( ETextureFormat::D24UNX8    , GL_DEPTH_COMPONENT24  );
+			ts3CaseReturn( ETextureFormat::X24S8U     , GL_DEPTH24_STENCIL8   );
 			ts3CaseReturn( ETextureFormat::D32F       , GL_DEPTH_COMPONENT32F );
 		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_COMPRESSED_BCX )
 			ts3CaseReturn( ETextureFormat::BC1        , GL_TEX_FORMAT_COMPRESSED_BC1         );
@@ -628,9 +629,10 @@ namespace ts3::gpuapi
 			ts3CaseReturn( ETextureFormat::RGB10A2UN  , GL_RGB10_A2           );
 			ts3CaseReturn( ETextureFormat::R11G11B10F , GL_R11F_G11F_B10F     );
 			ts3CaseReturn( ETextureFormat::D16UN      , GL_DEPTH_COMPONENT16  );
-			ts3CaseReturn( ETextureFormat::D24UNS8U   , GL_DEPTH_STENCIL   );
-			ts3CaseReturn( ETextureFormat::D24UNX8    , GL_DEPTH_STENCIL  );
-			ts3CaseReturn( ETextureFormat::D32F       , GL_DEPTH_COMPONENT );
+			ts3CaseReturn( ETextureFormat::D24UNS8U   , GL_DEPTH_STENCIL      );
+			ts3CaseReturn( ETextureFormat::D24UNX8    , GL_DEPTH_STENCIL      );
+			ts3CaseReturn( ETextureFormat::X24S8U     , GL_DEPTH_STENCIL      );
+			ts3CaseReturn( ETextureFormat::D32F       , GL_DEPTH_COMPONENT    );
 		#if( TS3GX_GL_FEATURE_SUPPORT_TEXTURE_FORMAT_COMPRESSED_BCX )
 			ts3CaseReturn( ETextureFormat::BC1        , GL_TEX_FORMAT_COMPRESSED_BC1         );
 			ts3CaseReturn( ETextureFormat::BC1SRGB    , GL_TEX_FORMAT_COMPRESSED_BC1_SRGBA   );

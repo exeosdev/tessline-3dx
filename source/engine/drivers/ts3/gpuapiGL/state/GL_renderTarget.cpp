@@ -175,8 +175,12 @@ namespace ts3::gpuapi
 			return renderTargetLayout;
 		}
 
-		void clearRenderPassFramebuffer( const RenderPassConfiguration & pRenderPassConfiguration )
+		void clearRenderPassFramebuffer(
+				const RenderPassConfiguration & pRenderPassConfiguration,
+				const GraphicsPipelineDynamicState & pDynamicState )
 		{
+			const bool clearConfigOverride = pDynamicState.activeStateMask.isSet( E_GRAPHICS_PIPELINE_DYNAMIC_STATE_FLAG_COMMON_CLEAR_CONFIG_BIT );
+
 			if( pRenderPassConfiguration.attachmentsActionClearMask != 0 )
 			{
 				auto colorAttachmentsClearMask = pRenderPassConfiguration.attachmentsActionClearMask & E_RT_ATTACHMENT_MASK_COLOR_ALL;
@@ -186,15 +190,20 @@ namespace ts3::gpuapi
 					if( colorAttachmentsClearMask.isSet( attachmentBit ) )
 					{
 						const auto & attachmentConfig = pRenderPassConfiguration.colorAttachments[caIndex];
-						const auto & clearColor = attachmentConfig.clearConfig.colorValue;
-
 						if( attachmentConfig.clearMask.isSet( E_RENDER_TARGET_BUFFER_FLAG_COLOR_BIT ) )
 						{
-							GLfloat clearArray[4] = { clearColor.fpRed, clearColor.fpGreen, clearColor.fpBlue, clearColor.fpAlpha };
+							const auto * clearConfig = clearConfigOverride ? &pDynamicState.commonClearConfig : &attachmentConfig.clearConfig;
+
+							GLfloat clearArray[4] = {
+								clearConfig->colorValue.fpRed,
+								clearConfig->colorValue.fpGreen,
+								clearConfig->colorValue.fpBlue,
+								clearConfig->colorValue.fpAlpha
+							};
+
 							glClearBufferfv( GL_COLOR, caIndex, clearArray );
 							ts3OpenGLHandleLastError();
 						}
-
 						colorAttachmentsClearMask.unset( attachmentBit );
 					}
 
@@ -207,18 +216,18 @@ namespace ts3::gpuapi
 				if( pRenderPassConfiguration.attachmentsActionClearMask.isSet( E_RT_ATTACHMENT_FLAG_DEPTH_STENCIL_BIT ) )
 				{
 					const auto & attachmentConfig = pRenderPassConfiguration.depthStencilAttachment;
-					const auto & clearData = attachmentConfig.clearConfig;
+					const auto * clearConfig = clearConfigOverride ? &pDynamicState.commonClearConfig : &attachmentConfig.clearConfig;
 
 					if( attachmentConfig.clearMask.isSet( E_RENDER_TARGET_BUFFER_FLAG_DEPTH_BIT ) )
 					{
-						const GLfloat depthValue = clearData.depthValue;
+						const GLfloat depthValue = clearConfig->depthValue;
 						glClearBufferfv( GL_DEPTH, 0, &depthValue );
 						ts3OpenGLHandleLastError();
 					}
 
 					if( attachmentConfig.clearMask.isSet( E_RENDER_TARGET_BUFFER_FLAG_STENCIL_BIT ) )
 					{
-						const GLint stencilValue = clearData.stencilValue;
+						const GLint stencilValue = clearConfig->stencilValue;
 						glClearBufferiv( GL_STENCIL, 0, &stencilValue );
 						ts3OpenGLHandleLastError();
 					}

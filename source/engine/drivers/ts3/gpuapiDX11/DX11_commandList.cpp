@@ -85,25 +85,31 @@ namespace ts3::gpuapi
 	}
 
 
-	void DX11CommandList::executeRenderPassLoadActions( const RenderPassConfiguration & pRenderPassConfiguration )
+	void DX11CommandList::executeRenderPassLoadActions(
+			const RenderPassConfiguration & pRenderPassConfiguration,
+			const GraphicsPipelineDynamicState & pDynamicState )
 	{
 		if( pRenderPassConfiguration.attachmentsActionClearMask != 0 )
 		{
 			smutil::renderPassClearRenderTargetDX11(
 					mD3D11DeviceContext1.Get(),
 					_graphicsPipelineStateControllerDX11.getCurrentRenderTargetBinding(),
-					getRenderPassConfiguration() );
+					pRenderPassConfiguration,
+					pDynamicState );
 		}
 	}
 
-	void DX11CommandList::executeRenderPassStoreActions( const RenderPassConfiguration & pRenderPassConfiguration )
+	void DX11CommandList::executeRenderPassStoreActions(
+			const RenderPassConfiguration & pRenderPassConfiguration,
+			const GraphicsPipelineDynamicState & pDynamicState )
 	{
 		if( pRenderPassConfiguration.attachmentsActionResolveMask != 0 )
 		{
 			smutil::renderPassResolveRenderTargetDX11(
 					mD3D11DeviceContext1.Get(),
 					_graphicsPipelineStateControllerDX11.getCurrentRenderTargetBinding(),
-					getRenderPassConfiguration() );
+					pRenderPassConfiguration,
+					pDynamicState );
 		}
 	}
 

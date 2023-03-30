@@ -39,9 +39,13 @@ namespace ts3::gpuapi
 		virtual void cmdExecuteDeferredContext( CommandContextDeferred & pDeferredContext ) override;
 
 	private:
-		virtual void executeRenderPassLoadActions( const RenderPassConfiguration & pRenderPassConfiguration ) override;
+		virtual void executeRenderPassLoadActions(
+				const RenderPassConfiguration & pRenderPassConfiguration,
+				const GraphicsPipelineDynamicState & pDynamicState ) override;
 
-		virtual void executeRenderPassStoreActions( const RenderPassConfiguration & pRenderPassConfiguration ) override;
+		virtual void executeRenderPassStoreActions(
+				const RenderPassConfiguration & pRenderPassConfiguration,
+				const GraphicsPipelineDynamicState & pDynamicState ) override;
 
 	private:
 		GLGraphicsPipelineStateController * _graphicsPipelineStateControllerGL;

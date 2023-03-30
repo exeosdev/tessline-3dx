@@ -31,7 +31,7 @@ namespace ts3::gpuapi
 
 	IAInputLayoutImmutableStateHandle DX11PipelineImmutableStateFactory::createIAInputLayoutState(
 			const IAInputLayoutDefinition & pDefinition,
-			Shader * pVertexShaderWithBinary )
+			Shader & pVertexShaderWithBinary )
 	{
 		return DX11IAInputLayoutImmutableState::createInstance( mDX11GPUDevice, pDefinition, *pVertexShaderWithBinary->mShaderBinary );
 	}
