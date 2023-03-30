@@ -2,7 +2,7 @@
 #ifndef __TS3_ENGINE_VERTEX_FORMAT_DEFS_H__
 #define __TS3_ENGINE_VERTEX_FORMAT_DEFS_H__
 
-#include "commonGPUDefs.h"
+#include "commonGpaDefs.h"
 #include <ts3/gpuapi/state/pipelineStateDesc.h>
 
 namespace ts3

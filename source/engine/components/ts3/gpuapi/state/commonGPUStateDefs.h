@@ -56,12 +56,6 @@ namespace ts3::gpuapi
 		constexpr auto PIPELINE_INTERNAL_STATE_ID_INVALID = 0u;
 
 		///
-		constexpr auto VERTEX_ATTRIBUTE_OFFSET_APPEND = Limits<gpu_memory_size_t>::maxValue;
-
-		///
-		constexpr auto VERTEX_ATTRIBUTE_OFFSET_APPEND16 = Limits<gpu_memory_size_t>::maxValue - 1;
-
-		///
 		constexpr auto RT_ATTACHMENT_MSAA_LEVEL_INVALID = Limits<uint32>::maxValue;
 
 		///

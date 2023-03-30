@@ -16,11 +16,20 @@ namespace ts3::gpuapi
 	/// @brief
 	using input_assembler_index_t = uint16;
 
+	/// @brief
+	using vertex_attribute_offset_t = uint16;
+
 	namespace cxdefs
 	{
 
 		///
 		constexpr auto IA_VERTEX_ATTRIBUTE_INDEX_UNDEFINED = Limits<input_assembler_index_t>::maxValue;
+
+		///
+		constexpr auto IA_VERTEX_ATTRIBUTE_OFFSET_APPEND = Limits<vertex_attribute_offset_t>::maxValue;
+
+		///
+		constexpr auto IA_VERTEX_ATTRIBUTE_OFFSET_APPEND16 = Limits<vertex_attribute_offset_t>::maxValue - 1;
 
 		///
 		constexpr auto IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED = Limits<input_assembler_index_t>::maxValue;
@@ -104,30 +113,24 @@ namespace ts3::gpuapi
 	/// @brief Definition of a vertex input attribute.
 	struct IAVertexAttributeInfo
 	{
+		std::string semanticName;
+
+		input_assembler_index_t semanticIndex;
+
 		input_assembler_index_t streamIndex{ cxdefs::IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED };
-
-		const char * semanticName = ts3::cxdefs::STR_CHAR_EMPTY;
-
-		input_assembler_index_t semanticIndex{ 0 };
 
 		EVertexAttribFormat format{ EVertexAttribFormat::Undefined };
 
 		/// An offset of the attribute from the start of the vertex data.
 		/// VERTEX_ATTRIBUTE_OFFSET_APPEND can be specified if the attribute is placed directly after previous one.
-		gpu_memory_size_t relativeOffset{ cxdefs::GPU_MEMORY_OFFSET_INVALID };
+		uint16 relativeOffset;
 
-		uint16 instanceRate{ 0 };
+		uint16 instanceRate;
 
 		/// @brief Returns true if this instance represents a valid vertex attribute.
 		TS3_ATTR_NO_DISCARD constexpr bool active() const noexcept
 		{
-			return cxdefs::isIAVertexBufferIndexValid( streamIndex ) && ( format != EVertexAttribFormat::Undefined );
-		}
-
-		/// @brief Returns true if this instance represents a valid vertex attribute.
-		TS3_ATTR_NO_DISCARD constexpr bool valid() const noexcept
-		{
-			return active() && ( relativeOffset != cxdefs::GPU_MEMORY_OFFSET_INVALID );
+			return !semanticName.empty() && cxdefs::isIAVertexBufferIndexValid( streamIndex ) && ( format != EVertexAttribFormat::Undefined );
 		}
 	};
 

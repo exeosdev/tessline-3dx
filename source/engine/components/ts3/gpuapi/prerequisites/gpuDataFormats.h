@@ -30,9 +30,9 @@ namespace ts3::gpuapi
 		}
 
 		TS3_ATTR_NO_DISCARD inline constexpr vertex_attrib_format_value_t declareVertexAttribFormat(
-				uint8 pIndex, EBaseDataType pBaseType, uint8 pLength, uint8 pFlags ) noexcept
+				EBaseDataType pBaseType, uint8 pCompNum, uint8 pFlags ) noexcept
 		{
-			return ( ( ( uint32 )pBaseType ) << 24 ) | ( ( ( uint32 )pLength ) << 16 ) | ( ( ( uint32 )pFlags ) << 8 ) | ( uint32 )pIndex;
+			return ( ( ( uint32 )pBaseType ) << 24 ) | ( ( ( uint32 )pCompNum ) << 16 ) | ( ( ( uint32 )pFlags ) << 8 );
 		}
 
 	}
@@ -143,45 +143,45 @@ namespace ts3::gpuapi
 
 	enum class EVertexAttribFormat : vertex_attrib_format_value_t
 	{
-		F16       = cxdefs::declareVertexAttribFormat( 0,  EBaseDataType::Float16, 1, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		F32       = cxdefs::declareVertexAttribFormat( 1,  EBaseDataType::Float32, 1, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		I8        = cxdefs::declareVertexAttribFormat( 2,  EBaseDataType::Byte,    1, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		I16       = cxdefs::declareVertexAttribFormat( 3,  EBaseDataType::Int16,   1, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		I32       = cxdefs::declareVertexAttribFormat( 4,  EBaseDataType::Int32,   1, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		U8        = cxdefs::declareVertexAttribFormat( 5,  EBaseDataType::Ubyte,   1, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
-		U16       = cxdefs::declareVertexAttribFormat( 6,  EBaseDataType::Uint16,  1, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
-		U32       = cxdefs::declareVertexAttribFormat( 7,  EBaseDataType::Uint32,  1, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
-		I8N       = cxdefs::declareVertexAttribFormat( 8,  EBaseDataType::Byte,    1, E_GPU_DATA_FORMAT_FLAG_SNORM ),
-		I16N      = cxdefs::declareVertexAttribFormat( 9,  EBaseDataType::Int16,   1, E_GPU_DATA_FORMAT_FLAG_SNORM ),
-		U8N       = cxdefs::declareVertexAttribFormat( 10, EBaseDataType::Ubyte,   1, E_GPU_DATA_FORMAT_FLAG_UNORM ),
-		U16N      = cxdefs::declareVertexAttribFormat( 11, EBaseDataType::Uint16,  1, E_GPU_DATA_FORMAT_FLAG_UNORM ),
-		Vec2F16   = cxdefs::declareVertexAttribFormat( 12, EBaseDataType::Float16, 2, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		Vec2F32   = cxdefs::declareVertexAttribFormat( 13, EBaseDataType::Float32, 2, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		Vec2I8    = cxdefs::declareVertexAttribFormat( 14, EBaseDataType::Byte,    2, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		Vec2I16   = cxdefs::declareVertexAttribFormat( 15, EBaseDataType::Int16,   2, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		Vec2I32   = cxdefs::declareVertexAttribFormat( 16, EBaseDataType::Int32,   2, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		Vec2U8    = cxdefs::declareVertexAttribFormat( 17, EBaseDataType::Ubyte,   2, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
-		Vec2U16   = cxdefs::declareVertexAttribFormat( 18, EBaseDataType::Uint16,  2, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
-		Vec2U32   = cxdefs::declareVertexAttribFormat( 19, EBaseDataType::Uint32,  2, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
-		Vec2I8N   = cxdefs::declareVertexAttribFormat( 20, EBaseDataType::Byte,    2, E_GPU_DATA_FORMAT_FLAG_SNORM ),
-		Vec2I16N  = cxdefs::declareVertexAttribFormat( 21, EBaseDataType::Int16,   2, E_GPU_DATA_FORMAT_FLAG_SNORM ),
-		Vec2U8N   = cxdefs::declareVertexAttribFormat( 22, EBaseDataType::Ubyte,   2, E_GPU_DATA_FORMAT_FLAG_UNORM ),
-		Vec2U16N  = cxdefs::declareVertexAttribFormat( 23, EBaseDataType::Uint16,  2, E_GPU_DATA_FORMAT_FLAG_UNORM ),
-		Vec3F32   = cxdefs::declareVertexAttribFormat( 24, EBaseDataType::Float32, 3, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		Vec3I32   = cxdefs::declareVertexAttribFormat( 25, EBaseDataType::Int32,   3, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		Vec3U32   = cxdefs::declareVertexAttribFormat( 26, EBaseDataType::Uint32,  3, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
-		Vec4F16   = cxdefs::declareVertexAttribFormat( 27, EBaseDataType::Float16, 4, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		Vec4F32   = cxdefs::declareVertexAttribFormat( 28, EBaseDataType::Float32, 4, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		Vec4I8    = cxdefs::declareVertexAttribFormat( 29, EBaseDataType::Byte,    4, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		Vec4I16   = cxdefs::declareVertexAttribFormat( 30, EBaseDataType::Int16,   4, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		Vec4I32   = cxdefs::declareVertexAttribFormat( 31, EBaseDataType::Int32,   4, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
-		Vec4U8    = cxdefs::declareVertexAttribFormat( 32, EBaseDataType::Ubyte,   4, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
-		Vec4U16   = cxdefs::declareVertexAttribFormat( 33, EBaseDataType::Uint16,  4, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
-		Vec4U32   = cxdefs::declareVertexAttribFormat( 34, EBaseDataType::Uint32,  4, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
-		Vec4I8N   = cxdefs::declareVertexAttribFormat( 35, EBaseDataType::Byte,    4, E_GPU_DATA_FORMAT_FLAG_SNORM ),
-		Vec4I16N  = cxdefs::declareVertexAttribFormat( 36, EBaseDataType::Int16,   4, E_GPU_DATA_FORMAT_FLAG_SNORM ),
-		Vec4U8N   = cxdefs::declareVertexAttribFormat( 37, EBaseDataType::Ubyte,   4, E_GPU_DATA_FORMAT_FLAG_UNORM ),
-		Vec4U16N  = cxdefs::declareVertexAttribFormat( 38, EBaseDataType::Uint16,  4, E_GPU_DATA_FORMAT_FLAG_UNORM ),
+		F16       = cxdefs::declareVertexAttribFormat( EBaseDataType::Float16, 1, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		F32       = cxdefs::declareVertexAttribFormat( EBaseDataType::Float32, 1, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		I8        = cxdefs::declareVertexAttribFormat( EBaseDataType::Byte,    1, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		I16       = cxdefs::declareVertexAttribFormat( EBaseDataType::Int16,   1, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		I32       = cxdefs::declareVertexAttribFormat( EBaseDataType::Int32,   1, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		U8        = cxdefs::declareVertexAttribFormat( EBaseDataType::Ubyte,   1, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
+		U16       = cxdefs::declareVertexAttribFormat( EBaseDataType::Uint16,  1, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
+		U32       = cxdefs::declareVertexAttribFormat( EBaseDataType::Uint32,  1, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
+		I8N       = cxdefs::declareVertexAttribFormat( EBaseDataType::Byte,    1, E_GPU_DATA_FORMAT_FLAG_SNORM ),
+		I16N      = cxdefs::declareVertexAttribFormat( EBaseDataType::Int16,   1, E_GPU_DATA_FORMAT_FLAG_SNORM ),
+		U8N       = cxdefs::declareVertexAttribFormat( EBaseDataType::Ubyte,   1, E_GPU_DATA_FORMAT_FLAG_UNORM ),
+		U16N      = cxdefs::declareVertexAttribFormat( EBaseDataType::Uint16,  1, E_GPU_DATA_FORMAT_FLAG_UNORM ),
+		Vec2F16   = cxdefs::declareVertexAttribFormat( EBaseDataType::Float16, 2, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		Vec2F32   = cxdefs::declareVertexAttribFormat( EBaseDataType::Float32, 2, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		Vec2I8    = cxdefs::declareVertexAttribFormat( EBaseDataType::Byte,    2, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		Vec2I16   = cxdefs::declareVertexAttribFormat( EBaseDataType::Int16,   2, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		Vec2I32   = cxdefs::declareVertexAttribFormat( EBaseDataType::Int32,   2, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		Vec2U8    = cxdefs::declareVertexAttribFormat( EBaseDataType::Ubyte,   2, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
+		Vec2U16   = cxdefs::declareVertexAttribFormat( EBaseDataType::Uint16,  2, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
+		Vec2U32   = cxdefs::declareVertexAttribFormat( EBaseDataType::Uint32,  2, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
+		Vec2I8N   = cxdefs::declareVertexAttribFormat( EBaseDataType::Byte,    2, E_GPU_DATA_FORMAT_FLAG_SNORM ),
+		Vec2I16N  = cxdefs::declareVertexAttribFormat( EBaseDataType::Int16,   2, E_GPU_DATA_FORMAT_FLAG_SNORM ),
+		Vec2U8N   = cxdefs::declareVertexAttribFormat( EBaseDataType::Ubyte,   2, E_GPU_DATA_FORMAT_FLAG_UNORM ),
+		Vec2U16N  = cxdefs::declareVertexAttribFormat( EBaseDataType::Uint16,  2, E_GPU_DATA_FORMAT_FLAG_UNORM ),
+		Vec3F32   = cxdefs::declareVertexAttribFormat( EBaseDataType::Float32, 3, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		Vec3I32   = cxdefs::declareVertexAttribFormat( EBaseDataType::Int32,   3, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		Vec3U32   = cxdefs::declareVertexAttribFormat( EBaseDataType::Uint32,  3, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
+		Vec4F16   = cxdefs::declareVertexAttribFormat( EBaseDataType::Float16, 4, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		Vec4F32   = cxdefs::declareVertexAttribFormat( EBaseDataType::Float32, 4, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		Vec4I8    = cxdefs::declareVertexAttribFormat( EBaseDataType::Byte,    4, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		Vec4I16   = cxdefs::declareVertexAttribFormat( EBaseDataType::Int16,   4, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		Vec4I32   = cxdefs::declareVertexAttribFormat( EBaseDataType::Int32,   4, E_GPU_DATA_FORMAT_FLAG_TYPE_SIGNED_BIT ),
+		Vec4U8    = cxdefs::declareVertexAttribFormat( EBaseDataType::Ubyte,   4, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
+		Vec4U16   = cxdefs::declareVertexAttribFormat( EBaseDataType::Uint16,  4, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
+		Vec4U32   = cxdefs::declareVertexAttribFormat( EBaseDataType::Uint32,  4, E_GPU_DATA_FORMAT_FLAG_TYPE_UNSIGNED_BIT ),
+		Vec4I8N   = cxdefs::declareVertexAttribFormat( EBaseDataType::Byte,    4, E_GPU_DATA_FORMAT_FLAG_SNORM ),
+		Vec4I16N  = cxdefs::declareVertexAttribFormat( EBaseDataType::Int16,   4, E_GPU_DATA_FORMAT_FLAG_SNORM ),
+		Vec4U8N   = cxdefs::declareVertexAttribFormat( EBaseDataType::Ubyte,   4, E_GPU_DATA_FORMAT_FLAG_UNORM ),
+		Vec4U16N  = cxdefs::declareVertexAttribFormat( EBaseDataType::Uint16,  4, E_GPU_DATA_FORMAT_FLAG_UNORM ),
 		Undefined = 0
 	};
 
@@ -189,11 +189,6 @@ namespace ts3::gpuapi
 
 	namespace cxdefs
 	{
-
-		TS3_ATTR_NO_DISCARD inline constexpr uint8 getBaseDataTypeIndex( EBaseDataType pBaseType ) noexcept
-		{
-			return ( uint8 )( ( base_data_type_value_t )pBaseType & 0xF );
-		}
 
 		TS3_ATTR_NO_DISCARD inline constexpr uint16 getBaseDataTypeByteSize( EBaseDataType pBaseType ) noexcept
 		{
@@ -230,7 +225,7 @@ namespace ts3::gpuapi
 			return ( EBaseDataType )( ( ( vertex_attrib_format_value_t )pFormat >> 24 ) & 0xFF );
 		}
 
-		TS3_ATTR_NO_DISCARD inline constexpr uint8 getVertexAttribFormatLength( EVertexAttribFormat pFormat ) noexcept
+		TS3_ATTR_NO_DISCARD inline constexpr uint8 getVertexAttribFormatComponentsNum( EVertexAttribFormat pFormat ) noexcept
 		{
 			return ( uint8 )( ( ( vertex_attrib_format_value_t )pFormat >> 16 ) & 0xFF );
 		}
@@ -254,7 +249,7 @@ namespace ts3::gpuapi
 
 		TS3_ATTR_NO_DISCARD inline constexpr uint32 getVertexAttribFormatByteSize( EVertexAttribFormat pFormat ) noexcept
 		{
-			return getBaseDataTypeByteSize( getVertexAttribFormatBaseDataType( pFormat ) ) * getVertexAttribFormatLength( pFormat );
+			return getBaseDataTypeByteSize( getVertexAttribFormatBaseDataType( pFormat ) ) * getVertexAttribFormatComponentsNum( pFormat );
 		}
 
 	}

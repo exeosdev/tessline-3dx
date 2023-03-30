@@ -434,6 +434,7 @@ namespace ts3::math
 	using Vec4u32 = Vector4<uint32>;
 	using Vec4i64 = Vector4<int64>;
 	using Vec4u64 = Vector4<uint64>;
+	using Vec4u8n = Vector4<uint8>;
 	using Vec4f   = Vector4<float>;
 	using Vec4d   = Vector4<double>;
 
