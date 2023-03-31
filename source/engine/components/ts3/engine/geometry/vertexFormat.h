@@ -16,38 +16,41 @@ namespace ts3
 		PerVertex
 	};
 
-	struct VertexFormat2DDefault
+	struct VertexAttributeSemantics
 	{
-		math::Vec2f position;
-		math::RGBAColorR32Norm color;
-		math::Vec2f texCoords[2];
-	};
+		EVertexAttributeSemanticsID semID;
+		std::string semName;
 
-	struct VertexFormat3DDefaultTex2D0
-	{
-		math::Vec3f position;
-		math::Vec3f normal;
-		math::Vec3f tangent;
-		math::Vec3f biTangent;
-		math::RGBAColorR32Norm color;
-		math::Vec2f texCoord0;
-	};
+		VertexAttributeSemantics()
+		: semID( EVertexAttributeSemanticsID::Undefined )
+		{}
 
-	struct VertexFormat3DDefaultTex2DMulti4
-	{
-		math::Vec3f position;
-		math::Vec3f normal;
-		math::Vec3f tangent;
-		math::Vec3f biTangent;
-		math::RGBAColorR32Norm color;
-		math::Vec2f texCoord[4];
+		VertexAttributeSemantics( EVertexAttributeSemanticsID pSemanticsID )
+		: semID( pSemanticsID )
+		{}
+
+		VertexAttributeSemantics( std::string pSemanticsName )
+		: semID( EVertexAttributeSemanticsID::Custom )
+		, semName( std::move( pSemanticsName ) )
+		{}
 	};
 
 	struct VertexAttributeDesc
 	{
-		VertexAttributeDesc * nextComponent = nullptr;
+		uint32 attributeBaseIndex;
+		VertexAttributeSemantics semantics;
+		gpuapi::EVertexAttribFormat baseFormat;
+		uint32 componentsNum;
+		uint32 streamIndex;
+		uint16 streamElementRelativeOffset = gpuapi::cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND;
+		EVertexDataRate dataRate = EVertexDataRate::PerVertex;
+	};
+
+	struct VertexAttributeFormat
+	{
+		VertexAttributeFormat * nextComponent = nullptr;
 		gpuapi::EVertexAttribFormat componentFormat = gpuapi::EVertexAttribFormat::Undefined;
-		std::string semanticName;
+		VertexAttributeSemantics semantics;
 		uint16 componentsNum;
 		uint16 componentSizeInBytes;
 		uint16 attributeTotalSizeInBytes;
@@ -62,7 +65,7 @@ namespace ts3
 
 		bool isBaseAttribute() const noexcept
 		{
-			return !semanticName.empty();
+			return !semantics.semName.empty();
 		}
 
 		EVertexDataRate getAttributeDataRate() const noexcept
@@ -71,7 +74,7 @@ namespace ts3
 		}
 	};
 
-	struct VertexStreamDesc
+	struct VertexStreamFormat
 	{
 		EVertexDataRate streamDataRate = EVertexDataRate::Undefined;
 		Bitmask<gpuapi::EIAVertexAttributeFlags> activeAttributesMask;
@@ -84,20 +87,8 @@ namespace ts3
 		}
 	};
 
-	using VertexAttributeDescArray = std::array<VertexAttributeDesc, gpa::MAX_GEOMETRY_VERTEX_ATTRIBUTES_NUM>;
-	using VertexStreamDescArray = std::array<VertexStreamDesc, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
-
-	struct GeometryVertexStreamLayout
-	{
-		Bitmask<gpuapi::EIAVertexStreamBindingFlags> activeVertexStreamsMask;
-		uint16 activeVertexStreamsNum;
-		VertexStreamDescArray vertexStreams;
-
-		bool empty() const noexcept
-		{
-			return activeVertexStreamsNum == 0;
-		}
-	};
+	using VertexAttributeFormatArray = std::array<VertexAttributeFormat, gpa::MAX_GEOMETRY_VERTEX_ATTRIBUTES_NUM>;
+	using VertexStreamFormatArray = std::array<VertexStreamFormat, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
 
 	class GeometryDataFormat
 	{
@@ -107,30 +98,40 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD std::string getFormatStringID() const noexcept;
 
-		TS3_ATTR_NO_DISCARD const VertexAttributeDesc & getAttribute( uint32 pAttributeIndex ) const noexcept;
+		TS3_ATTR_NO_DISCARD const VertexAttributeFormat & attribute( uint32 pAttributeIndex ) const;
 
-		TS3_ATTR_NO_DISCARD bool isAttributeSlotUsed( uint32 pAttributeIndex ) const noexcept;
+		TS3_ATTR_NO_DISCARD const VertexStreamFormat & vertexStream( uint32 pVertexStreamIndex ) const;
 
-		TS3_ATTR_NO_DISCARD bool isAttributeActive( uint32 pAttributeIndex ) const noexcept;
+		TS3_ATTR_NO_DISCARD gpuapi::EIndexDataFormat indexDataFormat() const noexcept;
+
+		TS3_ATTR_NO_DISCARD uint32 indexElementSizeInBytes() const noexcept;
 
 		TS3_ATTR_NO_DISCARD bool isFixedAttributeActive( EFixedVertexAttributeID pFixedAttribute ) const noexcept;
 
+		TS3_ATTR_NO_DISCARD bool isAttributeSlotUsed( uint32 pAttributeIndex ) const;
+
+		TS3_ATTR_NO_DISCARD bool isAttributeActive( uint32 pAttributeIndex ) const;
+
+		TS3_ATTR_NO_DISCARD bool isVertexStreamActive( uint32 pVertexStreamIndex ) const;
+
 		TS3_ATTR_NO_DISCARD bool empty() const noexcept;
 
+		TS3_ATTR_NO_DISCARD gpuapi::IAInputLayoutDefinition generateGpaInputLayoutDefinition() const noexcept;
+
 		bool configureFixedAttribute(
-				EFixedVertexAttributeID pAttribute,
+				EFixedVertexAttributeID pFixedAttributeID,
 				uint32 pStreamIndex,
 				uint16 pStreamElementRelativeOffset = gpuapi::cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND );
 
 		template <typename TVertex, typename TAttribute>
 		bool configureFixedAttribute(
-				EFixedVertexAttributeID pAttribute,
+				EFixedVertexAttributeID pFixedAttributeID,
 				uint32 pStreamIndex,
 				TAttribute TVertex::* pAttributePtr );
 
 		bool configureCustomAttribute(
 				uint32 pAttributeBaseIndex,
-				std::string pSemanticName,
+				VertexAttributeSemantics pSemantics,
 				gpuapi::EVertexAttribFormat pAttributeBaseFormat,
 				uint32 pAttributeComponentsNum,
 				uint32 pStreamIndex,
@@ -140,7 +141,7 @@ namespace ts3
 		template <typename TVertex, typename TAttribute>
 		bool configureCustomAttribute(
 				uint32 pAttributeBaseIndex,
-				std::string pSemanticName,
+				VertexAttributeSemantics pSemantics,
 				gpuapi::EVertexAttribFormat pAttributeBaseFormat,
 				uint32 pAttributeComponentsNum,
 				uint32 pStreamIndex,
@@ -150,47 +151,59 @@ namespace ts3
 		template <typename TVertex, typename TAttribute>
 		bool configureCustomAttributeAuto(
 				uint32 pAttributeBaseIndex,
-				std::string pSemanticName,
+				VertexAttributeSemantics pSemantics,
 				uint32 pStreamIndex,
 				TAttribute TVertex::* pAttributePtr,
 				EVertexDataRate pAttributeDataRate = EVertexDataRate::PerVertex );
 
 		void setIndexDataFormat( gpuapi::EIndexDataFormat pIndexDataFormat );
+
 		void setPrimitiveTopology( gpuapi::EPrimitiveTopology pTopology );
 
 	private:
-		bool checkAttributeSlotRangeFree( uint32 pAttributeBaseIndex, uint32 pAttributeComponentsNum ) const;
-		bool setAttributeActive( uint32 pAttributeIndex );
-		void setAttributeFormat( uint32 pAttributeIndex, gpuapi::EVertexAttribFormat pAttributeBaseFormat, uint32 pAttributeComponentsNum );
-		void setAttributeStreamLocation( uint32 pAttributeIndex, uint32 pStreamIndex, uint64 pStreamRelativeOffset );
-
 		template <typename TAttribute>
-		bool checkAttributeAutoDataFormat( gpuapi::EVertexAttribFormat pAttributeComponentFormat, uint16 pAttributeComponentsNum );
+		TS3_ATTR_NO_DISCARD bool checkAttributeAutoDataFormat(
+				gpuapi::EVertexAttribFormat pAttributeComponentFormat,
+				uint16 pAttributeComponentsNum ) const noexcept;
+
+		TS3_ATTR_NO_DISCARD bool checkAttributeSlotRangeFree(
+				uint32 pAttributeBaseIndex,
+				uint32 pAttributeComponentsNum ) const noexcept;
+
+		TS3_ATTR_NO_DISCARD bool checkAttributeVertexStreamCompatibility(
+				uint32 pVertexStreamIndex,
+				EVertexDataRate pAttributeDataRate ) const noexcept;
+
+		void updateStateWithNewAttribute( uint32 pNewAttributeIndex );
 
 	private:
-		uint32 _activeAttributesNum;
-		uint32 _activeAttributeSlotsNum;
-		VertexAttributeDescArray _attributeDescArray;
+		VertexAttributeFormatArray _attributes;
+		VertexStreamFormatArray _vertexStreams;
+		uint32 _activeAttributesNum = 0;
+		uint32 _activeAttributeSlotsNum = 0;
+		uint32 _activeVertexStreamsNum = 0;
+		Bitmask<gpuapi::EIAVertexAttributeFlags> _activeAttributesMask;
+		Bitmask<EVertexAttributeSemanticFlags> _activeFixedAttributesMask;
+		Bitmask<gpuapi::EIAVertexStreamBindingFlags> _activeVertexStreamsMask;
 		gpuapi::EIndexDataFormat _indexDataFormat;
-		Bitmask<gpuapi::EIAVertexAttributeFlags> _gpaActiveAttributesMask;
-		Bitmask<EFixedVertexAttributeFlags> _activeFixedAttributesMask;
+		gpuapi::EPrimitiveTopology _primitiveTopology;
 	};
 
 	template <typename TVertex, typename TAttribute>
 	inline bool GeometryDataFormat::configureFixedAttribute(
-			EFixedVertexAttributeID pAttribute,
+			EFixedVertexAttributeID pFixedAttributeID,
 			uint32 pStreamIndex,
 			TAttribute TVertex::* pAttributePtr )
 	{
-		const auto fixedAttributeFormat = cxdefs::getFixedVertexAttributeBaseFormat( pAttribute );
-		const auto fixedAttributeComponentsNum = cxdefs::getFixedVertexAttributeComponentsNum( pAttribute );
+		const auto fixedAttributeFormat = cxdefs::getFixedVertexAttributeBaseFormat( pFixedAttributeID );
+		const auto fixedAttributeComponentsNum = cxdefs::getFixedVertexAttributeComponentsNum( pFixedAttributeID );
 		if( !checkAttributeAutoDataFormat<TAttribute>( fixedAttributeFormat, fixedAttributeComponentsNum ) )
 		{
 			return false;
 		}
 
 		return configureFixedAttribute(
-				pAttribute,
+				pFixedAttributeID,
 				pStreamIndex,
 				memberOffset( pAttributePtr ) );
 	}
@@ -198,7 +211,7 @@ namespace ts3
 	template <typename TVertex, typename TAttribute>
 	inline bool GeometryDataFormat::configureCustomAttribute(
 			uint32 pAttributeBaseIndex,
-			std::string pSemanticName,
+			VertexAttributeSemantics pSemantics,
 			gpuapi::EVertexAttribFormat pAttributeBaseFormat,
 			uint32 pAttributeComponentsNum,
 			uint32 pStreamIndex,
@@ -212,7 +225,7 @@ namespace ts3
 
 		return configureCustomAttribute(
 				pAttributeBaseIndex,
-				std::move( pSemanticName ),
+				std::move( pSemantics ),
 				pAttributeBaseFormat,
 				pAttributeComponentsNum,
 				pStreamIndex,
@@ -223,7 +236,7 @@ namespace ts3
 	template <typename TVertex, typename TAttribute>
 	inline bool GeometryDataFormat::configureCustomAttributeAuto(
 			uint32 pAttributeBaseIndex,
-			std::string pSemanticName,
+			VertexAttributeSemantics pSemantics,
 			uint32 pStreamIndex,
 			TAttribute TVertex::* pAttributePtr,
 			EVertexDataRate pAttributeDataRate )
@@ -236,7 +249,7 @@ namespace ts3
 
 		return configureCustomAttribute(
 				pAttributeBaseIndex,
-				std::move( pSemanticName ),
+				std::move( pSemantics ),
 				AttributeTraits::sVertexAttribFormat,
 				AttributeTraits::sVertexAttribComponentsNum,
 				pStreamIndex,
@@ -247,7 +260,7 @@ namespace ts3
 	template <typename TAttribute>
 	inline bool GeometryDataFormat::checkAttributeAutoDataFormat(
 			gpuapi::EVertexAttribFormat pAttributeComponentFormat,
-			uint16 pAttributeComponentsNum )
+			uint16 pAttributeComponentsNum ) const noexcept
 	{
 		const auto componentByteSize = gpuapi::cxdefs::getVertexAttribFormatByteSize( pAttributeComponentFormat );
 		const auto attributeByteSize = componentByteSize * pAttributeComponentsNum;
@@ -258,13 +271,9 @@ namespace ts3
 	namespace gpa
 	{
 
-		TS3_ATTR_NO_DISCARD GeometryVertexStreamLayout generateGeometryVertexStreamLayout( const VertexAttributeDescArray & pAttributeArray );
+		TS3_ATTR_NO_DISCARD const char * getStandardVertexAttributeSemanticsName( EVertexAttributeSemanticsID pSemanticsID );
 
-		TS3_ATTR_NO_DISCARD std::string generateVertexFormatStringID( const VertexAttributeDescArray & pAttributeArray );
-
-		TS3_ATTR_NO_DISCARD const char * getFixedAttributeDefaultSemanticName( EFixedVertexAttributeID pFixedAttribute );
-
-		TS3_ATTR_NO_DISCARD const char * getAttributeFormatStringIdentifier( gpuapi::EVertexAttribFormat pAttributeFormat );
+		TS3_ATTR_NO_DISCARD std::string generateVertexFormatStringID( const VertexAttributeFormatArray & pAttributeArray );
 
 	}
 

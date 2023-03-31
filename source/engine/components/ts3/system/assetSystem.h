@@ -10,10 +10,6 @@
 namespace ts3::system
 {
 
-	ts3SysDeclareHandle( Asset );
-	ts3SysDeclareHandle( AssetDirectory );
-	ts3SysDeclareHandle( AssetLoader );
-
 	using AssetNameList = std::vector<std::string>;
 
 	enum EAssetOpenFlags : uint32

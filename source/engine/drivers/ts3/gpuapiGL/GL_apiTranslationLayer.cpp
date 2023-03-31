@@ -247,19 +247,18 @@ namespace ts3::gpuapi
 
 	GLenum atl::translateGLBaseDataType( EBaseDataType pBaseDataType )
 	{
-		auto baseDataTypeIndex = cxdefs::getBaseDataTypeIndex( pBaseDataType );
-		switch( baseDataTypeIndex )
+		switch( pBaseDataType )
 		{
-			ts3CaseReturn( 0u, GL_INVALID_ENUM      );
-			ts3CaseReturn( 1u, GL_BYTE              );
-			ts3CaseReturn( 2u, GL_UNSIGNED_BYTE     );
-			ts3CaseReturn( 3u, GL_SHORT             );
-			ts3CaseReturn( 4u, GL_UNSIGNED_SHORT    );
-			ts3CaseReturn( 5u, GL_INT               );
-			ts3CaseReturn( 6u, GL_UNSIGNED_INT      );
-			ts3CaseReturn( 7u, GL_HALF_FLOAT        );
-			ts3CaseReturn( 8u, GL_FLOAT             );
-			ts3CaseReturn( 9u, GL_UNSIGNED_INT_24_8 );
+			ts3CaseReturn( EBaseDataType::Undefined, GL_INVALID_ENUM      );
+			ts3CaseReturn( EBaseDataType::Byte     , GL_BYTE              );
+			ts3CaseReturn( EBaseDataType::Ubyte    , GL_UNSIGNED_BYTE     );
+			ts3CaseReturn( EBaseDataType::Int16    , GL_SHORT             );
+			ts3CaseReturn( EBaseDataType::Uint16   , GL_UNSIGNED_SHORT    );
+			ts3CaseReturn( EBaseDataType::Int32    , GL_INT               );
+			ts3CaseReturn( EBaseDataType::Uint32   , GL_UNSIGNED_INT      );
+			ts3CaseReturn( EBaseDataType::Float16  , GL_HALF_FLOAT        );
+			ts3CaseReturn( EBaseDataType::Float32  , GL_FLOAT             );
+			ts3CaseReturn( EBaseDataType::Uint24S8 , GL_UNSIGNED_INT_24_8 );
 		}
 		return GL_TS3_ERR_INVALID_PARAM;
 	}

@@ -37,6 +37,7 @@
 #include "prerequisites/commonTypes.h"
 #include "prerequisites/coreInterfaceDefs.h"
 #include "prerequisites/gpuDataFormats.h"
+#include "prerequisites/vertexAttribFormatUtils.h"
 
 namespace ts3::gpuapi
 {

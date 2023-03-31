@@ -6,6 +6,7 @@
 
 #include "prerequisites.h"
 
+#include <ts3/math/color.h>
 #include <ts3/math/vector.h>
 #include <ts3/math/vectorOps.h>
 #include <ts3/math/rect.h>

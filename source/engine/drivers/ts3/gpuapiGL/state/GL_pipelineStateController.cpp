@@ -390,7 +390,7 @@ namespace ts3::gpuapi
 		auto * shaderStateCore = pShaderState.queryInterface<GLGraphicsShaderLinkageImmutableStateCore>();
 
 		auto constantBaseType = cxdefs::getVertexAttribFormatBaseDataType( pConstantInfo.iFormat );
-		auto constantLength = cxdefs::getVertexAttribFormatLength( pConstantInfo.iFormat );
+		auto constantLength = cxdefs::getVertexAttribFormatComponentsNum( pConstantInfo.iFormat );
 
 		smutil::updateUniformDataCurrentGL(
 				*shaderStateCore->mGLShaderPipelineObject,
@@ -506,7 +506,7 @@ namespace ts3::gpuapi
 		auto * shaderStateCompat = pShaderState.queryInterface<GLGraphicsShaderLinkageImmutableStateCompat>();
 
 		auto constantBaseType = cxdefs::getVertexAttribFormatBaseDataType( pConstantInfo.iFormat );
-		auto constantLength = cxdefs::getVertexAttribFormatLength( pConstantInfo.iFormat );
+		auto constantLength = cxdefs::getVertexAttribFormatComponentsNum( pConstantInfo.iFormat );
 
 		smutil::updateUniformDataExplicitGL(
 				*shaderStateCompat->mGLShaderProgramObject,

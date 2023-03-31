@@ -102,6 +102,8 @@ namespace ts3::system
 
 	OpenGLDisplaySurfaceHandle OSXOpenGLSystemDriver::_nativeCreateDisplaySurface( const OpenGLDisplaySurfaceCreateInfo & pCreateInfo )
 	{
+	@autoreleasepool
+	{
 		NSOpenGLPixelFormatAttribute nsOpenGLPixelFormatAttribArray[platform::CX_OSX_MAX_NSGL_FBCONFIG_ATTRIBUTES_NUM + 2];
 		nsOpenGLPixelFormatAttribArray[0] = NSOpenGLPFAOpenGLProfile;
 		nsOpenGLPixelFormatAttribArray[1] = platform::_osxGetAPIProfileForSurface( pCreateInfo, _nsSupportedOpenGLVersion );
@@ -124,6 +126,7 @@ namespace ts3::system
 
 		return displaySurface;
 	}
+	}
 
 	OpenGLDisplaySurfaceHandle OSXOpenGLSystemDriver::_nativeCreateDisplaySurfaceForCurrentThread()
 	{
@@ -137,6 +140,8 @@ namespace ts3::system
 	OpenGLRenderContextHandle OSXOpenGLSystemDriver::_nativeCreateRenderContext( OpenGLDisplaySurface & pDisplaySurface,
 	                                                                             const OpenGLRenderContextCreateInfo & pCreateInfo )
 	{
+	@autoreleasepool
+	{
 		auto * osxDisplaySurface = pDisplaySurface.queryInterface<OSXOpenGLDisplaySurface>();
 		auto * nsPixelFormat = osxDisplaySurface->mNativeData.nsPixelFormat;
 
@@ -146,6 +151,7 @@ namespace ts3::system
 		renderContext->mNativeData.nsContextHandle = nsContextHandle;
 
 		return renderContext;
+	}
 	}
 
 	OpenGLRenderContextHandle OSXOpenGLSystemDriver::_nativeCreateRenderContextForCurrentThread()
@@ -201,11 +207,14 @@ namespace ts3::system
 
 	void OSXOpenGLDisplaySurface::_nativeSwapBuffers()
 	{
+	@autoreleasepool
+	{
 		auto * nsThreadLocalStorage = [NSThread currentThread].threadDictionary;
 		auto * nsContextHandle = ( NSOSXOpenGLContext * )nsThreadLocalStorage[@"ts3OpenGLContext"];
 
 		[nsContextHandle flushBuffer];
 		[nsContextHandle updateConditional];
+	}
 	}
 
 	EOpenGLAPIClass OSXOpenGLDisplaySurface::_nativeQuerySupportedAPIClass() const noexcept
@@ -220,12 +229,18 @@ namespace ts3::system
 
 	FrameSize OSXOpenGLDisplaySurface::_nativeQueryRenderAreaSize() const
 	{
-		const auto windowFrame = [mNativeData.nsWindow frame];
-		const auto windowStyle = [mNativeData.nsWindow styleMask];
-		const auto surfaceSize = [NSWindow contentRectForFrameRect:windowFrame
-		                                                 styleMask:windowStyle];
+	@autoreleasepool
+	{
+		// const auto windowFrame = [mNativeData.nsWindow frame];
+		// const auto windowStyle = [mNativeData.nsWindow styleMask];
+		// const auto surfaceSize = [NSWindow contentRectForFrameRect:windowFrame
+		//                                                  styleMask:windowStyle];
 
-		return { surfaceSize.size.width, surfaceSize.size.height };
+		const NSRect contentRect = [mNativeData.nsWindow frame];
+		const NSRect framebufferRect = [mNativeData.nsWindow convertRectToBacking:contentRect];
+
+		return { framebufferRect.size.width, framebufferRect.size.height };
+	}
 	}
 
 	bool OSXOpenGLDisplaySurface::_nativeSysValidate() const
@@ -253,8 +268,11 @@ namespace ts3::system
 
 	FrameSize OSXOpenGLDisplaySurface::_nativeGetSize( EFrameSizeMode pSizeMode ) const
 	{
+	@autoreleasepool
+	{
 		const auto windowFrame = [mNativeData.nsWindow frame];
 		return { windowFrame.size.width, windowFrame.size.height };
+	}
 	}
 
 	bool OSXOpenGLDisplaySurface::_nativeIsFullscreen() const
@@ -273,6 +291,8 @@ namespace ts3::system
 
 	void OSXOpenGLRenderContext::_nativeBindForCurrentThread( const OpenGLDisplaySurface & pTargetSurface )
 	{
+	@autoreleasepool
+	{
 		auto * osxDisplaySurface = pTargetSurface.queryInterface<OSXOpenGLDisplaySurface>();
 		auto * nsTargetView = static_cast<NSView *>( osxDisplaySurface->mNativeData.nsView );
 
@@ -281,6 +301,7 @@ namespace ts3::system
 
 		[mNativeData.nsContextHandle setView:nsTargetView];
 		[mNativeData.nsContextHandle makeCurrentContext];
+	}
 	}
 
 	bool OSXOpenGLRenderContext::_nativeSysCheckIsCurrent() const

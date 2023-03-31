@@ -35,7 +35,7 @@ namespace ts3
 
 		DataRegion indexDataRegion;
 
-		GeometryVertexComponentDataArray<DataRegion> vertexComponentDataRegionArray{};
+		GeometryVertexStreamGenericArray<DataRegion> vertexStreamDataRegionArray{};
 	};
 
 } // namespace ts3

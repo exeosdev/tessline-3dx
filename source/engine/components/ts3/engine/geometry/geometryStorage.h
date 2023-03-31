@@ -41,7 +41,7 @@ namespace ts3
 
 		GeometryBufferDesc indexBufferDesc;
 
-		GeometryVertexComponentDataArray<GeometryBufferDesc> vertexBufferDescArray{};
+		GeometryVertexStreamGenericArray<GeometryBufferDesc> vertexBufferDescArray{};
 	};
 
 	class GeometryStorage : public CoreEngineObject
@@ -67,9 +67,9 @@ namespace ts3
 
 		gpuapi::GPUBufferHandle getVertexBuffer( uint32 pIndex ) const noexcept;
 
-		GeometryReference * addIndexedGeometry( uint32 pIndicesNum, uint32 pVerticesNum );
+		GeometryReference * addIndexedGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
 
-		GeometryReference * addNonIndexedGeometry( uint32 pVerticesNum );
+		GeometryReference * addNonIndexedGeometry( uint32 pVertexElementsNum );
 
 		std::unique_ptr<GeometryStorage> createStorage(
 				const CoreEngineState & pCES,
@@ -87,7 +87,7 @@ namespace ts3
 
 		void initializeVertexStreamState();
 
-		GeometryReference * addGeometry( uint32 pIndicesNum, uint32 pVerticesNum );
+		GeometryReference * addGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
 
 		TS3_ATTR_NO_DISCARD static gpuapi::GPUBufferHandle createIndexBuffer(
 				const CoreEngineState & pCES,
@@ -127,7 +127,7 @@ namespace ts3
 		CurrentAllocationState _currentAllocationState;
 		GeometryReferenceList _geometryRefList;
 		GeometryBufferState _indexBufferState;
-		GeometryVertexComponentDataArray<GeometryBufferState> _vertexBufferStateArray;
+		GeometryVertexStreamGenericArray<GeometryBufferState> _vertexBufferStateArray;
 		Bitmask<gpuapi::EIAVertexStreamBindingFlags> _vertexStreamBindingMask;
 		gpuapi::IAVertexStreamImmutableStateHandle _gpaVertexStreamState;
 	};

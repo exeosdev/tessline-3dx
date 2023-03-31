@@ -17,11 +17,11 @@
 #define ts3CaseReturnStr( pCaseValue ) \
 	case pCaseValue: return #pCaseValue
 
-#define for_index( pIndexName, pInitVal, pLessThan ) \
-	for( size_t pIndexName = pInitVal; pIndexName < pLessThan; ++pIndexName )
+#define ts3CaseDefaultBreak(  pReturnValue ) \
+	default: break
 
-#define for_index_type( pIndexType, pIndexName, pInitVal, pLessThan ) \
-	for( pIndexType pIndexName = pInitVal; pIndexName < pLessThan; ++pIndexName )
+#define ts3CaseDefaultReturn(  pReturnValue ) \
+	default: return pReturnValue
 
 namespace ts3
 {

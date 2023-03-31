@@ -116,7 +116,7 @@ set( TS3_GPUAPI_SRC_FILES
         "state/samplerCommon.cpp"
         "resources/shaderInputTexture.cpp"
         "resources/shaderInputTexture.h"
-        )
+        prerequisites/vertexAttribFormatUtils.h)
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
     add_library( ts3-gpuapi STATIC ${TS3_GPUAPI_SRC_FILES} )

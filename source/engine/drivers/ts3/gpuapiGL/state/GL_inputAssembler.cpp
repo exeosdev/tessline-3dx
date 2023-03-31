@@ -180,11 +180,11 @@ namespace ts3::gpuapi
 			glcAttributeInfo.relativeOffset = static_cast<uint32>( pAttributeInfo.relativeOffset );
 			glcAttributeInfo.byteSize = cxdefs::getVertexAttribFormatByteSize( pAttributeInfo.format );
 
-			const auto attributeFormatBaseType = cxdefs::getVertexAttribFormatBaseDataType( pAttributeInfo.format );
-			glcAttributeInfo.baseType = atl::translateGLBaseDataType( attributeFormatBaseType );
+			const auto attributeBaseType = cxdefs::getVertexAttribFormatBaseDataType( pAttributeInfo.format );
+			glcAttributeInfo.baseType = atl::translateGLBaseDataType( attributeBaseType );
 
-			const auto attributeFormatLength = cxdefs::getVertexAttribFormatLength( pAttributeInfo.format );
-			glcAttributeInfo.componentsNum = static_cast<uint32>( attributeFormatLength );
+			const auto attributeComponentsNum = cxdefs::getVertexAttribFormatComponentsNum( pAttributeInfo.format );
+			glcAttributeInfo.componentsNum = static_cast<uint32>( attributeComponentsNum );
 
 			const auto attributeFormatFlags = cxdefs::getVertexAttribFormatFlags( pAttributeInfo.format );
 			glcAttributeInfo.normalized = attributeFormatFlags.isSet( E_GPU_DATA_FORMAT_FLAG_NORMALIZED_BIT ) ? GL_TRUE : GL_FALSE;
@@ -213,12 +213,12 @@ namespace ts3::gpuapi
 					// Translate the attribute data. This includes the relative offset.
 					glcAttributeInfo = translateIAVertexAttributeInfoGL( inputAttributeInfo );
 
-					if( inputAttributeInfo.relativeOffset == cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND )
+					if( inputAttributeInfo.relativeOffset == cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND )
 					{
 						// If the offset is APPEND, update it with the current packed offset calculated.
 						glcAttributeInfo.relativeOffset = numeric_cast<uint32>( currentAttributePackedRelativeOffset );
 					}
-					else if( inputAttributeInfo.relativeOffset == cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND16 )
+					else if( inputAttributeInfo.relativeOffset == cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND16 )
 					{
 						// If the offset is APPEND, update it with the current packed offset calculated.
 						glcAttributeInfo.relativeOffset = numeric_cast<uint32>( memGetAlignedValue( currentAttributePackedRelativeOffset, 16 ) );

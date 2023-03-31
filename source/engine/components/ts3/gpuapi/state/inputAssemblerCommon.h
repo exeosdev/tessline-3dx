@@ -113,11 +113,11 @@ namespace ts3::gpuapi
 	/// @brief Definition of a vertex input attribute.
 	struct IAVertexAttributeInfo
 	{
+		input_assembler_index_t streamIndex{ cxdefs::IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED };
+
 		std::string semanticName;
 
 		input_assembler_index_t semanticIndex;
-
-		input_assembler_index_t streamIndex{ cxdefs::IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED };
 
 		EVertexAttribFormat format{ EVertexAttribFormat::Undefined };
 

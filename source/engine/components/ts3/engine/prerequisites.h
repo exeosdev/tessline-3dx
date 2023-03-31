@@ -37,19 +37,17 @@
 namespace ts3
 {
 
-	class CoreEngineState;
-
 	namespace gpa
 	{
 
-		constexpr uint32 MAX_GEOMETRY_SEPARATE_VERTEX_COMPONENTS_NUM = 8;
-
 		constexpr uint32 MAX_GEOMETRY_VERTEX_ATTRIBUTES_NUM = gpuapi::gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM;
+
+		constexpr uint32 MAX_GEOMETRY_VERTEX_STREAMS_NUM = gpuapi::gpm::IA_MAX_VERTEX_BUFFER_BINDINGS_NUM;
 
 	}
 
 	template <typename TData>
-	using GeometryVertexComponentDataArray = std::array<TData, gpa::MAX_GEOMETRY_SEPARATE_VERTEX_COMPONENTS_NUM>;
+	using GeometryVertexStreamGenericArray = std::array<TData, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
 
 	class CoreEngineObject : public DynamicInterface
 	{

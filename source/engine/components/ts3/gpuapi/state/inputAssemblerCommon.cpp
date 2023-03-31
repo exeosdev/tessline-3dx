@@ -13,7 +13,7 @@ namespace ts3::gpuapi
 			Bitmask<EIAVertexAttributeFlags> activeAttributesMask = 0;
 			for( uint32 attributeIndex = 0; attributeIndex < gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++attributeIndex )
 			{
-				if( pVertexAttributes[attributeIndex].valid() )
+				if( pVertexAttributes[attributeIndex].active() )
 				{
 					activeAttributesMask.set( cxdefs::makeIAVertexAttributeFlag( attributeIndex ) );
 				}
