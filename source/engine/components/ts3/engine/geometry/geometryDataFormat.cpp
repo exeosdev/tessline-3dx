@@ -1,10 +1,11 @@
 
-#include "vertexFormat.h"
+#include "geometryDataFormat.h"
 
 namespace ts3
 {
 
 	GeometryDataFormat::GeometryDataFormat()
+	: mProperties( _properties )
 	{}
 
 	GeometryDataFormat::~GeometryDataFormat() = default;
@@ -24,6 +25,12 @@ namespace ts3
 		return _vertexStreams.at( pVertexStreamIndex );
 	}
 
+	uint32 GeometryDataFormat::vertexStreamElementSizeInBytes( uint32 pVertexStreamIndex ) const
+	{
+		const auto & vertexStreamFormat = _vertexStreams.at( pVertexStreamIndex );
+		return vertexStreamFormat.elementSizeInBytes;
+	}
+
 	gpuapi::EIndexDataFormat GeometryDataFormat::indexDataFormat() const noexcept
 	{
 		return _indexDataFormat;
@@ -37,19 +44,19 @@ namespace ts3
 	bool GeometryDataFormat::isFixedAttributeActive( EFixedVertexAttributeID pFixedAttribute ) const noexcept
 	{
 		const auto fixedAttributeBit = cxdefs::getFixedVertexAttributeSemanticFlags( pFixedAttribute );
-		return _activeFixedAttributesMask.isSet( fixedAttributeBit );
+		return _properties.activeFixedAttributesMask.isSet( fixedAttributeBit );
 	}
 
 	bool GeometryDataFormat::isAttributeSlotUsed( uint32 pAttributeIndex ) const
 	{
-		const auto & attributeDesc = _attributes.at( pAttributeIndex );
-		return attributeDesc.componentFormat != gpuapi::EVertexAttribFormat::Undefined;
+		const auto & attributeFormat = _attributes.at( pAttributeIndex );
+		return attributeFormat.componentFormat != gpuapi::EVertexAttribFormat::Undefined;
 	}
 
 	bool GeometryDataFormat::isAttributeActive( uint32 pAttributeIndex ) const
 	{
-		const auto & attributeDesc = _attributes.at( pAttributeIndex );
-		return attributeDesc.active();
+		const auto & attributeFormat = _attributes.at( pAttributeIndex );
+		return attributeFormat.active();
 	}
 
 	bool GeometryDataFormat::isVertexStreamActive( uint32 pVertexStreamIndex ) const
@@ -60,14 +67,14 @@ namespace ts3
 
 	bool GeometryDataFormat::empty() const noexcept
 	{
-		return _activeAttributesNum == 0;
+		return _properties.activeAttributesNum == 0;
 	}
 
 	gpuapi::IAInputLayoutDefinition GeometryDataFormat::generateGpaInputLayoutDefinition() const noexcept
 	{
 		gpuapi::IAInputLayoutDefinition gpaInputLayoutDefinition;
 		gpaInputLayoutDefinition.primitiveTopology = _primitiveTopology;
-		gpaInputLayoutDefinition.activeAttributesMask = _activeAttributesMask;
+		gpaInputLayoutDefinition.activeAttributesMask = _properties.activeAttributesMask;
 
 		for( uint32 iAttribute = 0; iAttribute < gpa::MAX_GEOMETRY_VERTEX_ATTRIBUTES_NUM; ++iAttribute )
 		{
@@ -131,7 +138,7 @@ namespace ts3
 
 		if( configureResult )
 		{
-			_activeFixedAttributesMask.set( fixedAttributeFlags );
+			_properties.activeFixedAttributesMask.set( fixedAttributeFlags );
 		}
 
 		return configureResult;
@@ -181,9 +188,9 @@ namespace ts3
 		baseAttributeDefinition.streamElementRelativeOffset = pStreamElementRelativeOffset;
 		baseAttributeDefinition.instanceRate = ( pAttributeDataRate == EVertexDataRate::PerInstance ) ? 1 : 0;
 
-		_activeAttributesNum += 1;
-		_activeAttributeSlotsNum += 1;
-		_activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( pAttributeBaseIndex ) );
+		_properties.activeAttributesNum += 1;
+		_properties.activeAttributeSlotsNum += 1;
+		_properties.activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( pAttributeBaseIndex ) );
 
 		if( pAttributeComponentsNum > 1 )
 		{
@@ -195,8 +202,8 @@ namespace ts3
 				subAttribute.componentFormat = pAttributeBaseFormat;
 				attributePtr->nextComponent = &subAttribute;
 
-				_activeAttributeSlotsNum += 1;
-				_activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( pAttributeBaseIndex + iComponent ) );
+				_properties.activeAttributeSlotsNum += 1;
+				_properties.activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( pAttributeBaseIndex + iComponent ) );
 
 				attributePtr = attributePtr->nextComponent;
 			}
@@ -223,8 +230,8 @@ namespace ts3
 	{
 		for( uint32 nAttribute = 0; nAttribute < pAttributeComponentsNum; ++nAttribute )
 		{
-			const auto & attributeDesc = _attributes[pAttributeBaseIndex + nAttribute];
-			if( attributeDesc.active() )
+			const auto & attributeFormat = _attributes[pAttributeBaseIndex + nAttribute];
+			if( attributeFormat.active() )
 			{
 				return false;
 			}
@@ -251,8 +258,8 @@ namespace ts3
 		if( vertexStreamFormat.streamDataRate == EVertexDataRate::Undefined )
 		{
 			vertexStreamFormat.streamDataRate = attributeFormat.getAttributeDataRate();
-			_activeVertexStreamsMask.set( gpuapi::cxdefs::makeIAVertexBufferFlag( attributeFormat.streamIndex ) );
-			_activeVertexStreamsNum += 1;
+			_properties.activeVertexStreamsMask.set( gpuapi::cxdefs::makeIAVertexBufferFlag( attributeFormat.streamIndex ) );
+			_properties.activeVertexStreamsNum += 1;
 		}
 
 		if( attributeFormat.streamElementRelativeOffset == gpuapi::cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND )
@@ -303,15 +310,15 @@ namespace ts3
 
 			for( uint32 iAttribute = 0; iAttribute < gpuapi::gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM; ++iAttribute )
 			{
-				const auto & attributeDesc = pAttributeArray[iAttribute];
-				if( attributeDesc.isBaseAttribute() )
+				const auto & attributeFormat = pAttributeArray[iAttribute];
+				if( attributeFormat.isBaseAttribute() )
 				{
-					const auto attributeFormatStr = getAttributeFormatString( iAttribute, attributeDesc );
-					if( !vertexStreamStrings[attributeDesc.streamIndex].empty() )
+					const auto attributeFormatStr = getAttributeFormatString( iAttribute, attributeFormat );
+					if( !vertexStreamStrings[attributeFormat.streamIndex].empty() )
 					{
-						vertexStreamStrings[attributeDesc.streamIndex].append( 1, '|' );
+						vertexStreamStrings[attributeFormat.streamIndex].append( 1, '|' );
 					}
-					vertexStreamStrings[attributeDesc.streamIndex].append( attributeFormatStr );
+					vertexStreamStrings[attributeFormat.streamIndex].append( attributeFormatStr );
 				}
 			}
 

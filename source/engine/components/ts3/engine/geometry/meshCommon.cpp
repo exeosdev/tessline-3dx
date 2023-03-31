@@ -1,7 +1,7 @@
 
 #include "meshCommon.h"
 #include "dataTypesConv.h"
-#include "vertexFormat.h"
+#include "geometryVertexFormat.h"
 #include <ts3/engine/res/image/pngCommon.h>
 
 #include <assimp/Importer.hpp>
@@ -22,22 +22,22 @@ namespace ts3
 		return _vertexDataSizeInBytes;
 	}
 
-	void MeshData::initializeStorage( uint32 pIndicesNum, uint32 pVerticesNum )
+	void MeshData::initializeStorage( uint32 pVertexElementsNum, uint32 pIndexElementsNum )
 	{
-		if( pIndicesNum > 0 )
-		{
-			const auto indexDataBufferSize = mGeometryDataFormat.indexElementSizeInBytes() * pIndicesNum;
-			_indexDataBuffer.resize( indexDataBufferSize );
-		}
-
 		for( uint32 iVertexStream = 0; iVertexStream < gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM; ++iVertexStream )
 		{
 			if( mGeometryDataFormat.isVertexStreamActive( iVertexStream ) )
 			{
 				const auto vertexStreamElementSize = mGeometryDataFormat.vertexStream( iVertexStream ).elementSizeInBytes;
-				const auto vertexStreamDataBufferSize = vertexStreamElementSize * pVerticesNum;
+				const auto vertexStreamDataBufferSize = vertexStreamElementSize * pVertexElementsNum;
 				_vertexDataBuffers[iVertexStream].resize( vertexStreamDataBufferSize );
 			}
+		}
+
+		if( pIndexElementsNum > 0 )
+		{
+			const auto indexDataBufferSize = mGeometryDataFormat.indexElementSizeInBytes() * pIndexElementsNum;
+			_indexDataBuffer.resize( indexDataBufferSize );
 		}
 	}
 
@@ -47,15 +47,15 @@ namespace ts3
 		subMeshReference.subMeshIndex = 0;
 		subMeshReference.indexDataOffsetInElementsNum = 0;
 		subMeshReference.vertexDataOffsetInElementsNum = 0;
-		subMeshReference.indexDataElementsNum = pIndicesNum;
-		subMeshReference.vertexDataElementsNum = pVerticesNum;
+		subMeshReference.indexElementsNum = pIndicesNum;
+		subMeshReference.vertexElementsNum = pVerticesNum;
 
 		if( !_subMeshes.empty() )
 		{
 			const auto & lastSubMesh = _subMeshes.back();
 			subMeshReference.subMeshIndex = numeric_cast<uint32>( _subMeshes.size() );
-			subMeshReference.indexDataOffsetInElementsNum = lastSubMesh.indexDataOffsetInElementsNum + lastSubMesh.indexDataElementsNum;
-			subMeshReference.vertexDataOffsetInElementsNum = lastSubMesh.vertexDataOffsetInElementsNum + lastSubMesh.vertexDataElementsNum;
+			subMeshReference.indexDataOffsetInElementsNum = lastSubMesh.indexDataOffsetInElementsNum + lastSubMesh.indexElementsNum;
+			subMeshReference.vertexDataOffsetInElementsNum = lastSubMesh.vertexDataOffsetInElementsNum + lastSubMesh.vertexElementsNum;
 		}
 
 		_subMeshes.push_back( subMeshReference );
@@ -90,14 +90,14 @@ namespace ts3
 	{
 		MeshSizeMetrics metrics;
 		metrics.meshPartsNum = pAiScene->mNumMeshes;
-		metrics.indexDataElementsNum = 0;
-		metrics.vertexDataElementsNum = 0;
+		metrics.indexElementsNum = 0;
+		metrics.vertexElementsNum = 0;
 
 		for( native_uint iMesh = 0; iMesh < pAiScene->mNumMeshes; ++iMesh )
 		{
 			const auto * aiMesh = pAiScene->mMeshes[iMesh];
-			metrics.indexDataElementsNum += aiMesh->mNumFaces * 3;
-			metrics.vertexDataElementsNum += aiMesh->mNumVertices;
+			metrics.indexElementsNum += aiMesh->mNumFaces * 3;
+			metrics.vertexElementsNum += aiMesh->mNumVertices;
 		}
 
 		return metrics;
@@ -207,7 +207,7 @@ namespace ts3
 		const auto meshSizeMetrics = getAssimpMeshSizeMetrics( pAiScene );
 
 		auto meshData = std::make_unique<MeshData>( pGeometryDataFormat );
-		meshData->initializeStorage( meshSizeMetrics.indexDataElementsNum, meshSizeMetrics.vertexDataElementsNum );
+		meshData->initializeStorage( meshSizeMetrics.indexElementsNum, meshSizeMetrics.vertexElementsNum );
 
 		for( native_uint iMesh = 0; iMesh < pAiScene->mNumMeshes; ++iMesh )
 		{

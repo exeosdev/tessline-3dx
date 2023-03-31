@@ -82,8 +82,8 @@ namespace ts3
 	struct MeshSizeMetrics
 	{
 		uint32 meshPartsNum;
-		uint32 indexDataElementsNum;
-		uint32 vertexDataElementsNum;
+		uint32 indexElementsNum;
+		uint32 vertexElementsNum;
 	};
 
 	struct MeshDataStorage
@@ -106,9 +106,9 @@ namespace ts3
 	{
 		uint32 subMeshIndex;
 		uint32 indexDataOffsetInElementsNum;
-		uint32 indexDataElementsNum;
+		uint32 indexElementsNum;
 		uint32 vertexDataOffsetInElementsNum;
-		uint32 vertexDataElementsNum;
+		uint32 vertexElementsNum;
 	};
 
 	class MeshData
@@ -127,7 +127,7 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD uint32 vertexDataSizeInBytes() const noexcept;
 
-		void initializeStorage( uint32 pIndicesNum, uint32 pVerticesNum );
+		void initializeStorage( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
 
 		MeshPartReference & addMeshPart( uint32 pIndicesNum, uint32 pVerticesNum );
 
@@ -144,8 +144,8 @@ namespace ts3
 
 	private:
 		using VertexDataBufferArray = std::array<DynamicMemoryBuffer, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
-		uint32 _indexDataSizeInBytes = 0;
-		uint32 _vertexDataSizeInBytes = 0;
+		uint32 _indexElementsNum = 0;
+		uint32 _vertexElementsNum = 0;
 		DynamicMemoryBuffer _indexDataBuffer;
 		VertexDataBufferArray _vertexDataBuffers;
 		std::vector<MeshPartReference> _subMeshes;

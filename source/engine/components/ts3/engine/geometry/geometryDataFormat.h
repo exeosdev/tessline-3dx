@@ -1,97 +1,30 @@
 
 #pragma once
 
-#ifndef __TS3_ENGINE_VERTEX_FORMAT_H__
-#define __TS3_ENGINE_VERTEX_FORMAT_H__
+#ifndef __TS3_ENGINE_GEOMETRY_DATA_FORMAT_H__
+#define __TS3_ENGINE_GEOMETRY_DATA_FORMAT_H__
 
 #include "geometryCommonDefs.h"
+#include "geometryVertexFormat.h"
 
 namespace ts3
 {
-
-	enum class EVertexDataRate : enum_default_value_t
+	
+	struct GeometryDataFormatProperties
 	{
-		Undefined,
-		PerInstance,
-		PerVertex
-	};
-
-	struct VertexAttributeSemantics
-	{
-		EVertexAttributeSemanticsID semID;
-		std::string semName;
-
-		VertexAttributeSemantics()
-		: semID( EVertexAttributeSemanticsID::Undefined )
-		{}
-
-		VertexAttributeSemantics( EVertexAttributeSemanticsID pSemanticsID )
-		: semID( pSemanticsID )
-		{}
-
-		VertexAttributeSemantics( std::string pSemanticsName )
-		: semID( EVertexAttributeSemanticsID::Custom )
-		, semName( std::move( pSemanticsName ) )
-		{}
-	};
-
-	struct VertexAttributeDesc
-	{
-		uint32 attributeBaseIndex;
-		VertexAttributeSemantics semantics;
-		gpuapi::EVertexAttribFormat baseFormat;
-		uint32 componentsNum;
-		uint32 streamIndex;
-		uint16 streamElementRelativeOffset = gpuapi::cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND;
-		EVertexDataRate dataRate = EVertexDataRate::PerVertex;
-	};
-
-	struct VertexAttributeFormat
-	{
-		VertexAttributeFormat * nextComponent = nullptr;
-		gpuapi::EVertexAttribFormat componentFormat = gpuapi::EVertexAttribFormat::Undefined;
-		VertexAttributeSemantics semantics;
-		uint16 componentsNum;
-		uint16 componentSizeInBytes;
-		uint16 attributeTotalSizeInBytes;
-		uint16 streamIndex;
-		uint16 streamElementRelativeOffset;
-		uint16 instanceRate;
-
-		bool active() const noexcept
-		{
-			return componentFormat != gpuapi::EVertexAttribFormat::Undefined;
-		}
-
-		bool isBaseAttribute() const noexcept
-		{
-			return !semantics.semName.empty();
-		}
-
-		EVertexDataRate getAttributeDataRate() const noexcept
-		{
-			return ( instanceRate != 0 ) ? EVertexDataRate::PerInstance : EVertexDataRate::PerVertex;
-		}
-	};
-
-	struct VertexStreamFormat
-	{
-		EVertexDataRate streamDataRate = EVertexDataRate::Undefined;
+		uint32 activeAttributesNum = 0;
+		uint32 activeAttributeSlotsNum = 0;
+		uint32 activeVertexStreamsNum = 0;
 		Bitmask<gpuapi::EIAVertexAttributeFlags> activeAttributesMask;
-		uint16 activeAttributesNum = 0;
-		uint16 elementSizeInBytes = 0;
-
-		bool active() const noexcept
-		{
-			return elementSizeInBytes > 0;
-		}
+		Bitmask<EVertexAttributeSemanticFlags> activeFixedAttributesMask;
+		Bitmask<gpuapi::EIAVertexStreamBindingFlags> activeVertexStreamsMask;
 	};
-
-	using VertexAttributeFormatArray = std::array<VertexAttributeFormat, gpa::MAX_GEOMETRY_VERTEX_ATTRIBUTES_NUM>;
-	using VertexStreamFormatArray = std::array<VertexStreamFormat, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
 
 	class GeometryDataFormat
 	{
+	public:
+		const GeometryDataFormatProperties & mProperties;
+
 	public:
 		GeometryDataFormat();
 		~GeometryDataFormat();
@@ -101,6 +34,8 @@ namespace ts3
 		TS3_ATTR_NO_DISCARD const VertexAttributeFormat & attribute( uint32 pAttributeIndex ) const;
 
 		TS3_ATTR_NO_DISCARD const VertexStreamFormat & vertexStream( uint32 pVertexStreamIndex ) const;
+
+		TS3_ATTR_NO_DISCARD uint32 vertexStreamElementSizeInBytes( uint32 pVertexStreamIndex ) const;
 
 		TS3_ATTR_NO_DISCARD gpuapi::EIndexDataFormat indexDataFormat() const noexcept;
 
@@ -177,17 +112,13 @@ namespace ts3
 		void updateStateWithNewAttribute( uint32 pNewAttributeIndex );
 
 	private:
+		GeometryDataFormatProperties _properties;
 		VertexAttributeFormatArray _attributes;
 		VertexStreamFormatArray _vertexStreams;
-		uint32 _activeAttributesNum = 0;
-		uint32 _activeAttributeSlotsNum = 0;
-		uint32 _activeVertexStreamsNum = 0;
-		Bitmask<gpuapi::EIAVertexAttributeFlags> _activeAttributesMask;
-		Bitmask<EVertexAttributeSemanticFlags> _activeFixedAttributesMask;
-		Bitmask<gpuapi::EIAVertexStreamBindingFlags> _activeVertexStreamsMask;
 		gpuapi::EIndexDataFormat _indexDataFormat;
 		gpuapi::EPrimitiveTopology _primitiveTopology;
 	};
+
 
 	template <typename TVertex, typename TAttribute>
 	inline bool GeometryDataFormat::configureFixedAttribute(
@@ -280,4 +211,4 @@ namespace ts3
 
 } // namespace ts3
 
-#endif // __TS3_ENGINE_VERTEX_FORMAT_H__
+#endif // __TS3_ENGINE_GEOMETRY_DATA_FORMAT_H__
