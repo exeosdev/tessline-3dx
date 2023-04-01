@@ -11,31 +11,15 @@
 namespace ts3
 {
 
-	struct GeometryDataFormatInfo;
-	struct GeometryReference;
-
-	class GeometryStorage;
-
-	using GeometryReferenceList = std::list<GeometryReference>;
-	using GeometryReferenceSelfIter = GeometryReferenceList::iterator;
-
 	struct GeometryReference
 	{
-		struct DataRegion
-		{
-			uint32 offsetInElementsNum;
-			uint32 sizeInElementsNum;
-		};
-
-		GeometryStorage * geometryStorage;
-
-		const GeometryDataFormatInfo * formatInfo;
+		GeometryStorage * storage;
 
 		uint32 geometryIndex;
 
-		DataRegion indexDataRegion;
+		const GeometryDataFormat * dataFormat;
 
-		GeometryVertexStreamGenericArray<DataRegion> vertexStreamDataRegionArray{};
+		GeometryDataReference dataReference;
 	};
 
 } // namespace ts3

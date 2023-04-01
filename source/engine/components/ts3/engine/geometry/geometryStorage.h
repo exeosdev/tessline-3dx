@@ -4,6 +4,7 @@
 #ifndef __TS3_ENGINE_GEOMETRY_STORAGE_H__
 #define __TS3_ENGINE_GEOMETRY_STORAGE_H__
 
+#include "geometryDataFormat.h"
 #include "geometryReference.h"
 #include <ts3/gpuapi/state/inputAssemblerImmutableStates.h>
 #include <deque>
@@ -33,9 +34,9 @@ namespace ts3
 			EGPUBufferUsagePolicy bufferUsagePolicy = EGPUBufferUsagePolicy::Undefined;
 		};
 
-		EGPUBufferUsagePolicy commonBufferUsagePolicy;
+		EGPUBufferUsagePolicy commonBufferUsagePolicy = EGPUBufferUsagePolicy::Undefined;
 
-		GeometryDataFormatInfo geometryFormat;
+		const GeometryDataFormat * dataFormat;
 
 		GeometryStorageMetrics metrics;
 
@@ -49,14 +50,14 @@ namespace ts3
 	public:
 		using GeometryReferenceList = std::deque<GeometryReference>;
 
-		GeometryDataFormatInfo const mGeometryFormatInfo;
+		GeometryDataFormat const mDataFormat;
 
 		GeometryStorageMetrics const mStorageMetrics;
 
 	public:
 		GeometryStorage(
 			const CoreEngineState & pCES,
-			const GeometryDataFormatInfo & pGeometryFormatInfo,
+			const GeometryDataFormat & pDataFormat,
 			const GeometryStorageMetrics & pStorageMetrics );
 
 		virtual ~GeometryStorage();
@@ -67,18 +68,16 @@ namespace ts3
 
 		gpuapi::GPUBufferHandle getVertexBuffer( uint32 pIndex ) const noexcept;
 
+		const GeometryReference & getAllGeometryReference() const noexcept;
+
 		GeometryReference * addIndexedGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
 
 		GeometryReference * addNonIndexedGeometry( uint32 pVertexElementsNum );
 
-		std::unique_ptr<GeometryStorage> createStorage(
-				const CoreEngineState & pCES,
-				const GeometryStorageCreateInfo & pCreateInfo );
-
-		std::unique_ptr<GeometryStorage> createStorage(
+		static std::unique_ptr<GeometryStorage> createStorage(
 				const CoreEngineState & pCES,
 				const GeometryStorageCreateInfo & pCreateInfo,
-				const GeometryStorage & pSharedStorage );
+				const GeometryStorage * pSharedStorage = nullptr );
 
 	private:
 		void createStorageGPUBuffers( const GeometryStorageCreateInfo & pCreateInfo );
@@ -108,11 +107,6 @@ namespace ts3
 				EGPUBufferUsagePolicy pCommonUsagePolicy );
 
 	private:
-		GeometryReference::DataRegion allocateIndexBufferRegion( uint32 pIndicesNum );
-
-		GeometryReference::DataRegion allocateVertexBufferRegion( uint32 pStreamIndex, uint32 pVerticesNum );
-
-	private:
 		struct CurrentAllocationState
 		{
 			uint32 indicesOffsetInElementsNum = 0;
@@ -125,6 +119,7 @@ namespace ts3
 		};
 
 		CurrentAllocationState _currentAllocationState;
+		GeometryReference _allGeometryReference;
 		GeometryReferenceList _geometryRefList;
 		GeometryBufferState _indexBufferState;
 		GeometryVertexStreamGenericArray<GeometryBufferState> _vertexBufferStateArray;

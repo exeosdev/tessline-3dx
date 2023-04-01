@@ -25,6 +25,11 @@ namespace ts3
 		return _vertexStreams.at( pVertexStreamIndex );
 	}
 
+	uint32 GeometryDataFormat::vertexElementSizeInBytes() const
+	{
+		return _properties.vertexElementSizeInBytes;
+	}
+
 	uint32 GeometryDataFormat::vertexStreamElementSizeInBytes( uint32 pVertexStreamIndex ) const
 	{
 		const auto & vertexStreamFormat = _vertexStreams.at( pVertexStreamIndex );
@@ -41,10 +46,21 @@ namespace ts3
 		return gpuapi::cxdefs::getIndexDataFormatByteSize( _indexDataFormat );
 	}
 
+	bool GeometryDataFormat::isAttributeSemanticsActive( EVertexAttributeSemanticsID pAttributeSemantics ) const noexcept
+	{
+		const auto attributeSemanticsBit = static_cast<uint32>( pAttributeSemantics );
+		return _properties.activeAttributeSemanticsMask.isSet( attributeSemanticsBit );
+	}
+
 	bool GeometryDataFormat::isFixedAttributeActive( EFixedVertexAttributeID pFixedAttribute ) const noexcept
 	{
-		const auto fixedAttributeBit = cxdefs::getFixedVertexAttributeSemanticFlags( pFixedAttribute );
-		return _properties.activeFixedAttributesMask.isSet( fixedAttributeBit );
+		const auto fixedAttributeSemanticsBit = cxdefs::getFixedVertexAttributeSemanticsFlags( pFixedAttribute );
+		return _properties.activeAttributeSemanticsMask.isSet( fixedAttributeSemanticsBit );
+	}
+
+	bool GeometryDataFormat::isIndexedGeometry() const noexcept
+	{
+		return _indexDataFormat != gpuapi::EIndexDataFormat::Undefined;
 	}
 
 	bool GeometryDataFormat::isAttributeSlotUsed( uint32 pAttributeIndex ) const
@@ -68,6 +84,123 @@ namespace ts3
 	bool GeometryDataFormat::empty() const noexcept
 	{
 		return _properties.activeAttributesNum == 0;
+	}
+
+	void GeometryDataFormat::setIndexDataFormat( gpuapi::EIndexDataFormat pIndexDataFormat )
+	{
+		_indexDataFormat = pIndexDataFormat;
+	}
+
+	void GeometryDataFormat::setPrimitiveTopology( gpuapi::EPrimitiveTopology pTopology )
+	{
+		_primitiveTopology = pTopology;
+	}
+
+	bool GeometryDataFormat::configureFixedAttribute(
+			EFixedVertexAttributeID pFixedAttributeID,
+			uint32 pStreamIndex,
+			uint16 pStreamElementRelativeOffset )
+	{
+		const auto attributeBaseIndex = cxdefs::getFixedVertexAttributeBaseIndex( pFixedAttributeID );
+		const auto attributeBaseFormat = cxdefs::getFixedVertexAttributeBaseFormat( pFixedAttributeID );
+		const auto attributeSemanticsID = cxdefs::getFixedVertexAttributeSemanticsID( pFixedAttributeID );
+		const auto attributeComponentsNum = cxdefs::getFixedVertexAttributeComponentsNum( pFixedAttributeID );
+		const auto fixedAttributeFlags = cxdefs::getFixedVertexAttributeSemanticsFlags( pFixedAttributeID );
+		const auto attributeDataRate =
+				fixedAttributeFlags.isSetAnyOf( E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_INSTANCE_ALL ) ? EVertexDataRate::PerInstance : EVertexDataRate::PerVertex;
+
+		const auto configureResult = configureCustomAttribute(
+				attributeBaseIndex,
+				attributeSemanticsID,
+				attributeBaseFormat,
+				attributeComponentsNum,
+				pStreamIndex,
+				pStreamElementRelativeOffset,
+				attributeDataRate );
+
+		return configureResult;
+	}
+
+	bool GeometryDataFormat::configureCustomAttribute(
+			uint32 pAttributeBaseIndex,
+			VertexAttributeSemantics pSemantics,
+			gpuapi::EVertexAttribFormat pAttributeBaseFormat,
+			uint32 pAttributeComponentsNum,
+			uint32 pStreamIndex,
+			uint16 pStreamElementRelativeOffset,
+			EVertexDataRate pAttributeDataRate )
+	{
+		if( !gpuapi::cxdefs::isIAVertexAttributeIndexValid( pAttributeBaseIndex + pAttributeComponentsNum ) )
+		{
+			return false;
+		}
+
+		if( !checkAttributeSlotRangeFree( pAttributeBaseIndex, pAttributeComponentsNum ) )
+		{
+			return false;
+		}
+
+		if( !checkAttributeVertexStreamCompatibility( pStreamIndex, pAttributeDataRate ) )
+		{
+			return false;
+		}
+
+		if( cxdefs::isVertexAttributeSemanticsValid( pSemantics.semID ) && isAttributeSemanticsActive( pSemantics.semID ) )
+		{
+			return false;
+		}
+
+		if( pSemantics.semName.empty() && cxdefs::isVertexAttributeSemanticsValid( pSemantics.semID ) )
+		{
+			pSemantics.semName = gpa::getStandardVertexAttributeSemanticsName( pSemantics.semID );
+		}
+
+		if( pSemantics.semName.empty() || ( pAttributeDataRate == EVertexDataRate::Undefined ) )
+		{
+			return false;
+		}
+
+		auto & baseAttributeDefinition = _attributes[pAttributeBaseIndex];
+		baseAttributeDefinition.semantics = std::move( pSemantics );
+		baseAttributeDefinition.componentFormat = pAttributeBaseFormat;
+		baseAttributeDefinition.componentsNum = pAttributeComponentsNum;
+		baseAttributeDefinition.componentSizeInBytes = gpuapi::cxdefs::getVertexAttribFormatByteSize( pAttributeBaseFormat );
+		baseAttributeDefinition.attributeTotalSizeInBytes = baseAttributeDefinition.componentSizeInBytes * pAttributeComponentsNum;
+		baseAttributeDefinition.streamIndex = pStreamIndex;
+		baseAttributeDefinition.streamElementRelativeOffset = pStreamElementRelativeOffset;
+		baseAttributeDefinition.instanceRate = ( pAttributeDataRate == EVertexDataRate::PerInstance ) ? 1 : 0;
+
+		_properties.activeAttributesNum += 1;
+		_properties.activeAttributeSlotsNum += 1;
+		_properties.vertexElementSizeInBytes += baseAttributeDefinition.attributeTotalSizeInBytes;
+		_properties.activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( pAttributeBaseIndex ) );
+
+		if( cxdefs::isVertexAttributeSemanticsValid( pSemantics.semID ) )
+		{
+			_properties.activeAttributeSemanticsMask.set( static_cast<uint32>( pSemantics.semID ) );
+			_attributeSemanticsMap[pSemantics.semID] = pAttributeBaseIndex;
+		}
+
+		if( pAttributeComponentsNum > 1 )
+		{
+			auto * attributePtr = &baseAttributeDefinition;
+
+			for( uint32 iComponent = 1; iComponent < pAttributeComponentsNum; ++iComponent )
+			{
+				auto & subAttribute = _attributes[iComponent];
+				subAttribute.componentFormat = pAttributeBaseFormat;
+				attributePtr->nextComponent = &subAttribute;
+
+				_properties.activeAttributeSlotsNum += 1;
+				_properties.activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( pAttributeBaseIndex + iComponent ) );
+
+				attributePtr = attributePtr->nextComponent;
+			}
+		}
+
+		updateStateWithNewAttribute( pAttributeBaseIndex );
+
+		return true;
 	}
 
 	gpuapi::IAInputLayoutDefinition GeometryDataFormat::generateGpaInputLayoutDefinition() const noexcept
@@ -102,8 +235,9 @@ namespace ts3
 						gpaAttributeInfo.semanticName = attributeFormat.semantics.semName;
 						gpaAttributeInfo.semanticIndex = attributeSubComponentIndex;
 						gpaAttributeInfo.format = attributeFormat.componentFormat;
-						gpaAttributeInfo.relativeOffset = attributeFormat.streamElementRelativeOffset + attributeSubComponentIndex * attributeFormat.componentSizeInBytes;
 						gpaAttributeInfo.instanceRate = attributeFormat.instanceRate;
+						gpaAttributeInfo.relativeOffset =
+								attributeFormat.streamElementRelativeOffset + attributeSubComponentIndex * attributeFormat.componentSizeInBytes;
 
 						++attributeSubComponentIndex;
 					}
@@ -112,116 +246,6 @@ namespace ts3
 		}
 
 		return gpaInputLayoutDefinition;
-	}
-
-	bool GeometryDataFormat::configureFixedAttribute(
-			EFixedVertexAttributeID pFixedAttributeID,
-			uint32 pStreamIndex,
-			uint16 pStreamElementRelativeOffset )
-	{
-		const auto attributeBaseIndex = cxdefs::getFixedVertexAttributeBaseIndex( pFixedAttributeID );
-		const auto attributeBaseFormat = cxdefs::getFixedVertexAttributeBaseFormat( pFixedAttributeID );
-		const auto attributeSemanticsID = cxdefs::getFixedVertexAttributeSemanticsID( pFixedAttributeID );
-		const auto attributeComponentsNum = cxdefs::getFixedVertexAttributeComponentsNum( pFixedAttributeID );
-		const auto fixedAttributeFlags = cxdefs::getFixedVertexAttributeSemanticFlags( pFixedAttributeID );
-		const auto attributeDataRate =
-				fixedAttributeFlags.isSetAnyOf( E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_INSTANCE_ALL ) ? EVertexDataRate::PerInstance : EVertexDataRate::PerVertex;
-
-		const auto configureResult = configureCustomAttribute(
-				attributeBaseIndex,
-				attributeSemanticsID,
-				attributeBaseFormat,
-				attributeComponentsNum,
-				pStreamIndex,
-				pStreamElementRelativeOffset,
-				attributeDataRate );
-
-		if( configureResult )
-		{
-			_properties.activeFixedAttributesMask.set( fixedAttributeFlags );
-		}
-
-		return configureResult;
-	}
-
-	bool GeometryDataFormat::configureCustomAttribute(
-			uint32 pAttributeBaseIndex,
-			VertexAttributeSemantics pSemantics,
-			gpuapi::EVertexAttribFormat pAttributeBaseFormat,
-			uint32 pAttributeComponentsNum,
-			uint32 pStreamIndex,
-			uint16 pStreamElementRelativeOffset,
-			EVertexDataRate pAttributeDataRate )
-	{
-		if( pSemantics.semName.empty() && cxdefs::isVertexAttributeSemanticsValid( pSemantics.semID ) )
-		{
-			pSemantics.semName = gpa::getStandardVertexAttributeSemanticsName( pSemantics.semID );
-		}
-
-		if( pSemantics.semName.empty() || ( pAttributeDataRate == EVertexDataRate::Undefined ) )
-		{
-			return false;
-		}
-
-		if( !gpuapi::cxdefs::isIAVertexAttributeIndexValid( pAttributeBaseIndex + pAttributeComponentsNum ) )
-		{
-			return false;
-		}
-
-		if( !checkAttributeSlotRangeFree( pAttributeBaseIndex, pAttributeComponentsNum ) )
-		{
-			return false;
-		}
-
-		if( !checkAttributeVertexStreamCompatibility( pStreamIndex, pAttributeDataRate ) )
-		{
-			return false;
-		}
-
-		auto & baseAttributeDefinition = _attributes[pAttributeBaseIndex];
-		baseAttributeDefinition.semantics = std::move( pSemantics );
-		baseAttributeDefinition.componentFormat = pAttributeBaseFormat;
-		baseAttributeDefinition.componentsNum = pAttributeComponentsNum;
-		baseAttributeDefinition.componentSizeInBytes = gpuapi::cxdefs::getVertexAttribFormatByteSize( pAttributeBaseFormat );
-		baseAttributeDefinition.attributeTotalSizeInBytes = baseAttributeDefinition.componentSizeInBytes * pAttributeComponentsNum;
-		baseAttributeDefinition.streamIndex = pStreamIndex;
-		baseAttributeDefinition.streamElementRelativeOffset = pStreamElementRelativeOffset;
-		baseAttributeDefinition.instanceRate = ( pAttributeDataRate == EVertexDataRate::PerInstance ) ? 1 : 0;
-
-		_properties.activeAttributesNum += 1;
-		_properties.activeAttributeSlotsNum += 1;
-		_properties.activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( pAttributeBaseIndex ) );
-
-		if( pAttributeComponentsNum > 1 )
-		{
-			auto * attributePtr = &baseAttributeDefinition;
-
-			for( uint32 iComponent = 1; iComponent < pAttributeComponentsNum; ++iComponent )
-			{
-				auto & subAttribute = _attributes[iComponent];
-				subAttribute.componentFormat = pAttributeBaseFormat;
-				attributePtr->nextComponent = &subAttribute;
-
-				_properties.activeAttributeSlotsNum += 1;
-				_properties.activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( pAttributeBaseIndex + iComponent ) );
-
-				attributePtr = attributePtr->nextComponent;
-			}
-		}
-
-		updateStateWithNewAttribute( pAttributeBaseIndex );
-
-		return true;
-	}
-
-	void GeometryDataFormat::setIndexDataFormat( gpuapi::EIndexDataFormat pIndexDataFormat )
-	{
-		_indexDataFormat = pIndexDataFormat;
-	}
-
-	void GeometryDataFormat::setPrimitiveTopology( gpuapi::EPrimitiveTopology pTopology )
-	{
-		_primitiveTopology = pTopology;
 	}
 
 	bool GeometryDataFormat::checkAttributeSlotRangeFree(

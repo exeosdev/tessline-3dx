@@ -12,13 +12,17 @@
 namespace ts3
 {
 
-	struct GeometryDataFormatInfo;
 	struct GeometryReference;
 	struct GeometryStorageCreateInfo;
 
+	class GeometryDataFormat;
+	class GeometryDataGpuTransfer;
+	class GeometryManager;
 	class GeometryStorage;
 
-	enum EVertexAttributeSemanticFlags : uint32
+	using GeometryRefHandle = const GeometryReference *;
+
+	enum EVertexAttributeSemanticsFlags : uint32
 	{
 		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_POSITION_BIT    =     0x01,
 		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_NORMAL_BIT      =     0x02,
@@ -59,22 +63,22 @@ namespace ts3
 	namespace cxdefs
 	{
 
-		inline constexpr uint32 declareVertexAttributeSemanticsID( EVertexAttributeSemanticFlags pSemanticFlags )
+		inline constexpr uint32 declareVertexAttributeSemanticsID( EVertexAttributeSemanticsFlags pSemanticsFlags )
 		{
-			return static_cast<uint32>( pSemanticFlags );
+			return static_cast<uint32>( pSemanticsFlags );
 		}
 
 		inline constexpr uint64 declareFixedVertexAttributeID(
 				uint16 pBaseIndex,
 				uint16 pComponentsNum,
 				gpuapi::EVertexAttribFormat pBaseFormat,
-				Bitmask<EVertexAttributeSemanticFlags> pSemanticFlags )
+				Bitmask<EVertexAttributeSemanticsFlags> pSemanticsFlags )
 		{
 			return static_cast<uint64>(
 					( ( ( uint64 )pBaseIndex & 0xF ) << 60 ) |
 					( ( ( uint64 )pComponentsNum & 0xF ) << 56 ) |
 					( ( ( uint64 )pBaseFormat & Limits<uint32>::maxValue ) << 24 ) |
-					( ( uint64 )pSemanticFlags & E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_ALL ) );
+					( ( uint64 )pSemanticsFlags & E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_ALL ) );
 		}
 
 	}
@@ -151,14 +155,14 @@ namespace ts3
 			return getFixedVertexAttributeComponentsNum( pFixedAttributeID ) * getFixedVertexAttributeComponentByteSize( pFixedAttributeID );
 		}
 
-		inline Bitmask<EVertexAttributeSemanticFlags> getFixedVertexAttributeSemanticFlags( EFixedVertexAttributeID pFixedAttributeID )
+		inline Bitmask<EVertexAttributeSemanticsFlags> getFixedVertexAttributeSemanticsFlags( EFixedVertexAttributeID pFixedAttributeID )
 		{
 			return static_cast<uint32>( ( uint64 )pFixedAttributeID & 0xFFFFFF );
 		}
 
 		inline EVertexAttributeSemanticsID getFixedVertexAttributeSemanticsID( EFixedVertexAttributeID pFixedAttributeID )
 		{
-			return static_cast<EVertexAttributeSemanticsID>( declareVertexAttributeSemanticsID( getFixedVertexAttributeSemanticFlags( pFixedAttributeID ) ) );
+			return static_cast<EVertexAttributeSemanticsID>( declareVertexAttributeSemanticsID( getFixedVertexAttributeSemanticsFlags( pFixedAttributeID ) ) );
 		}
 
 		inline bool isVertexAttributeSemanticsValid( EVertexAttributeSemanticsID pSemanticsID )
@@ -172,6 +176,61 @@ namespace ts3
 		}
 
 	}
+
+	template <typename TRegion>
+	struct VertexIndexDataReference
+	{
+		TRegion indexDataRegion;
+
+		GeometryVertexStreamGenericArray<TRegion> vertexStreamDataRegions;
+	};
+
+	struct GeometryDataRegion
+	{
+		const byte * dataPtr = nullptr;
+		uint32 elementSize = 0;
+		uint32 offsetInElementsNum = 0;
+		uint32 sizeInElementsNum = 0;
+	};
+
+	using GeometryDataReference = VertexIndexDataReference<GeometryDataRegion>;
+
+	namespace gmutil
+	{
+
+		TS3_ATTR_NO_DISCARD GeometryDataReference getGeometryDataReferenceSubRegion(
+				const GeometryDataReference & pGeometryDataRef,
+				uint32 pVertexDataOffsetInElementsNum,
+				uint32 pVertexElementsNum,
+				uint32 pIndexDataOffsetInElementsNum,
+				uint32 pIndexElementsNum );
+
+		TS3_ATTR_NO_DISCARD GeometryDataReference advanceGeometryDataReference(
+				const GeometryDataReference & pGeometryDataRef,
+				uint32 pVertexElementsNum,
+				uint32 pIndexElementsNum );
+
+	}
+
+//	struct GeometryDataOffset
+//	{
+//		uint32 indexDataOffsetInBytes = 0;
+//		uint32 vertexDataOffsetInBytes = 0;
+//	};
+//
+	struct GeometryDataSize
+	{
+		uint32 indexDataSizeInBytes = 0;
+		uint32 indexElementsNum = 0;
+		uint32 vertexDataSizeInBytes = 0;
+		uint32 vertexElementsNum = 0;
+	};
+//
+//	struct GeometryDataRegion
+//	{
+//		GeometryDataOffset offset;
+//		GeometryDataSize size;
+//	};
 
 	struct GeometryDataFormatInfo
 	{

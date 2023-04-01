@@ -42,8 +42,8 @@ namespace ts3
 		gpuapi::EVertexAttribFormat baseFormat;
 		uint32 componentsNum;
 		uint32 streamIndex;
-		uint16 streamElementRelativeOffset = gpuapi::cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND;
-		EVertexDataRate dataRate = EVertexDataRate::PerVertex;
+		uint16 streamElementRelativeOffset;
+		EVertexDataRate dataRate;
 	};
 
 	struct VertexAttributeFormat

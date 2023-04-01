@@ -8,10 +8,10 @@ namespace ts3
 
 	GeometryStorage::GeometryStorage(
 			const CoreEngineState & pCES,
-			const GeometryDataFormatInfo & pGeometryFormatInfo,
+			const GeometryDataFormat & pDataFormat,
 			const GeometryStorageMetrics & pStorageMetrics )
 	: CoreEngineObject( pCES )
-	, mGeometryFormatInfo( pGeometryFormatInfo )
+	, mDataFormat( pDataFormat )
 	, mStorageMetrics( pStorageMetrics )
 	{}
 
@@ -30,6 +30,11 @@ namespace ts3
 	gpuapi::GPUBufferHandle GeometryStorage::getVertexBuffer( uint32 pIndex ) const noexcept
 	{
 		return ( pIndex < gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM ) ? _vertexBufferStateArray[pIndex].gpuBuffer : nullptr;
+	}
+
+	const GeometryReference & GeometryStorage::getAllGeometryReference() const noexcept
+	{
+		return _allGeometryReference;
 	}
 
 	GeometryReference * GeometryStorage::addIndexedGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum )
@@ -54,77 +59,87 @@ namespace ts3
 
 	std::unique_ptr<GeometryStorage> GeometryStorage::createStorage(
 			const CoreEngineState & pCES,
-			const GeometryStorageCreateInfo & pCreateInfo )
-	{
-		auto geometryStorage = std::make_unique<GeometryStorage>(
-				pCES,
-				pCreateInfo.geometryFormat,
-				pCreateInfo.metrics );
-
-		geometryStorage->createStorageGPUBuffers( pCreateInfo );
-
-		return geometryStorage;
-	}
-
-	std::unique_ptr<GeometryStorage> GeometryStorage::createStorage(
-			const CoreEngineState & pCES,
 			const GeometryStorageCreateInfo & pCreateInfo,
-			const GeometryStorage & pSharedStorage )
+			const GeometryStorage * pSharedStorage )
 	{
-		if( !validateSharedBuffersConfiguration( pCreateInfo, pSharedStorage ) )
+		if( pSharedStorage && !validateSharedBuffersConfiguration( pCreateInfo, *pSharedStorage ) )
 		{
 			return nullptr;
 		}
 
 		auto geometryStorage = std::make_unique<GeometryStorage>(
 				pCES,
-				pCreateInfo.geometryFormat,
+				*pCreateInfo.dataFormat,
 				pCreateInfo.metrics );
 
 		geometryStorage->createStorageGPUBuffers( pCreateInfo );
-		geometryStorage->bindSharedGPUBuffers( pCreateInfo, pSharedStorage );
+
+		if( pSharedStorage )
+		{
+			geometryStorage->bindSharedGPUBuffers( pCreateInfo, *pSharedStorage );
+		}
 
 		return geometryStorage;
 	}
 
 	void GeometryStorage::createStorageGPUBuffers( const GeometryStorageCreateInfo & pCreateInfo )
 	{
+		_allGeometryReference.storage = this;
+		_allGeometryReference.dataFormat = &mDataFormat;
+		_allGeometryReference.geometryIndex = CX_UINT32_MAX;
+
 		for( uint32 iVertexStream = 0; iVertexStream < gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM; ++iVertexStream )
 		{
-			const auto vertexStreamElementSize = pCreateInfo.geometryFormat.vertexStreamElementSizeArray[iVertexStream];
-			if( vertexStreamElementSize > 0 )
+			if( pCreateInfo.dataFormat->isVertexStreamActive( iVertexStream ) )
 			{
 				if( pCreateInfo.vertexBufferDescArray[iVertexStream].allocationMode == EGeometryBufferAllocationMode::AllocLocal )
 				{
+					const auto & vertexStreamFormat = pCreateInfo.dataFormat->vertexStream( iVertexStream );
+
+					const auto bufferSizeInBytes =
+							vertexStreamFormat.elementSizeInBytes * pCreateInfo.metrics.vertexDataCapacityInElementsNum;
+
 					const auto bufferUsagePolicy = resolveGeometryBufferUsagePolicy(
 							pCreateInfo.vertexBufferDescArray[iVertexStream].bufferUsagePolicy,
 							pCreateInfo.commonBufferUsagePolicy );
 
 					_vertexBufferStateArray[iVertexStream].gpuBuffer = createVertexBuffer(
 							mCES,
-							vertexStreamElementSize * pCreateInfo.metrics.vertexDataCapacityInElementsNum,
+							bufferSizeInBytes,
 							bufferUsagePolicy );
 
 					_vertexStreamBindingMask.set( gpuapi::cxdefs::makeIAVertexBufferFlag( iVertexStream ) );
+
+					auto & allGeometryVertexStreamDataRegion = _allGeometryReference.dataReference.vertexStreamDataRegions[iVertexStream];
+					allGeometryVertexStreamDataRegion.elementSize = vertexStreamFormat.elementSizeInBytes;
+					allGeometryVertexStreamDataRegion.offsetInElementsNum = 0;
+					allGeometryVertexStreamDataRegion.sizeInElementsNum = pCreateInfo.metrics.vertexDataCapacityInElementsNum;
 				}
 			}
 		}
 
 		if( pCreateInfo.indexBufferDesc.allocationMode == EGeometryBufferAllocationMode::AllocLocal )
 		{
-			const auto indexComponentSize = pCreateInfo.geometryFormat.indexElementByteSize();
-			if( indexComponentSize > 0 )
+			if( pCreateInfo.dataFormat->isIndexedGeometry() )
 			{
+				const auto bufferSizeInBytes =
+						pCreateInfo.dataFormat->indexElementSizeInBytes() * pCreateInfo.metrics.vertexDataCapacityInElementsNum;
+
 				const auto bufferUsagePolicy = resolveGeometryBufferUsagePolicy(
 						pCreateInfo.indexBufferDesc.bufferUsagePolicy,
 						pCreateInfo.commonBufferUsagePolicy );
 
 				_indexBufferState.gpuBuffer = createIndexBuffer(
 						mCES,
-						indexComponentSize * pCreateInfo.metrics.indexDataCapacityInElementsNum,
+						bufferSizeInBytes,
 						bufferUsagePolicy );
 
 				_vertexStreamBindingMask.set( gpuapi::E_IA_VERTEX_STREAM_BINDING_FLAG_INDEX_BUFFER_BIT );
+
+				auto & allGeometryIndexDataRegion = _allGeometryReference.dataReference.indexDataRegion;
+				allGeometryIndexDataRegion.elementSize = pCreateInfo.dataFormat->indexElementSizeInBytes();
+				allGeometryIndexDataRegion.offsetInElementsNum = 0;
+				allGeometryIndexDataRegion.sizeInElementsNum = pCreateInfo.metrics.indexDataCapacityInElementsNum;
 			}
 		}
 	}
@@ -159,16 +174,16 @@ namespace ts3
 				auto & vertexBufferReference = vertexStreamDefinition.vertexBufferReferences[iVertexStream];
 				vertexBufferReference.sourceBuffer = vertexBuffer;
 				vertexBufferReference.relativeOffset = 0;
-				vertexBufferReference.vertexStride = mGeometryFormatInfo.vertexStreamElementSizeArray[iVertexStream];
+				vertexBufferReference.vertexStride = mDataFormat.vertexStreamElementSizeInBytes( iVertexStream );
 			}
 		}
 
 		if( const auto & indexBuffer = _indexBufferState.gpuBuffer )
 		{
-			auto & vertexBufferReference = vertexStreamDefinition.indexBufferReference;
-			vertexBufferReference.sourceBuffer = indexBuffer;
-			vertexBufferReference.relativeOffset = 0;
-			vertexBufferReference.indexFormat = mGeometryFormatInfo.indexDataFormat;
+			auto & indexBufferReference = vertexStreamDefinition.indexBufferReference;
+			indexBufferReference.sourceBuffer = indexBuffer;
+			indexBufferReference.relativeOffset = 0;
+			indexBufferReference.indexFormat = mDataFormat.indexDataFormat();
 		}
 
 		_gpaVertexStreamState = mCES.mGPUDevice->createIAVertexStreamImmutableState( vertexStreamDefinition );
@@ -177,36 +192,32 @@ namespace ts3
 	GeometryReference * GeometryStorage::addGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum )
 	{
 		auto & geometryReference = _geometryRefList.emplace_back();
-		geometryReference.geometryStorage = this;
-		geometryReference.formatInfo = &mGeometryFormatInfo;
+		geometryReference.storage = this;
+		geometryReference.dataFormat = &mDataFormat;
 		geometryReference.geometryIndex = numeric_cast<uint32>( _geometryRefList.size() - 1 );
 
 		for( uint32 iVertexStream = 0; iVertexStream < gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM; ++iVertexStream )
 		{
-			const auto vertexStreamElementSize = mGeometryFormatInfo.vertexStreamElementSizeArray[iVertexStream];
-			if( vertexStreamElementSize > 0 )
+			if( mDataFormat.isVertexStreamActive( iVertexStream ) )
 			{
-				auto & dataRegion = geometryReference.vertexStreamDataRegionArray[iVertexStream];
-				dataRegion.offsetInElementsNum = _currentAllocationState.verticesOffsetInElementsNum;
-				dataRegion.sizeInElementsNum = pVertexElementsNum;
+				const auto & vertexStreamFormat = mDataFormat.vertexStream( iVertexStream );
+
+				auto & vertexStreamDataRegion = geometryReference.dataReference.vertexStreamDataRegions[iVertexStream];
+				vertexStreamDataRegion.elementSize = vertexStreamFormat.elementSizeInBytes;
+				vertexStreamDataRegion.offsetInElementsNum = _currentAllocationState.verticesOffsetInElementsNum;
+				vertexStreamDataRegion.sizeInElementsNum = pVertexElementsNum;
 			}
 		}
 
 		if( pIndexElementsNum > 0 )
 		{
-			const auto indexComponentSize = cxdefs::getIndexDataFormatByteSize( mGeometryFormatInfo.indexDataFormat );
-			if( indexComponentSize > 0 )
+			if( mDataFormat.isIndexedGeometry() )
 			{
-				auto & dataRegion = geometryReference.indexDataRegion;
-				dataRegion.offsetInElementsNum = _currentAllocationState.indicesOffsetInElementsNum;
-				dataRegion.sizeInElementsNum = pIndexElementsNum;
+				auto & indexDataRegion = geometryReference.dataReference.indexDataRegion;
+				indexDataRegion.elementSize = mDataFormat.indexElementSizeInBytes();
+				indexDataRegion.offsetInElementsNum = _currentAllocationState.indicesOffsetInElementsNum;
+				indexDataRegion.sizeInElementsNum = pIndexElementsNum;
 			}
-		}
-		else
-		{
-			auto & dataRegion = geometryReference.indexDataRegion;
-			dataRegion.offsetInElementsNum = 0;
-			dataRegion.sizeInElementsNum = 0;
 		}
 
 		_currentAllocationState.indicesOffsetInElementsNum += pIndexElementsNum;
@@ -268,8 +279,8 @@ namespace ts3
 				return false;
 			}
 
-			const auto sourceIndexSize = cxdefs::getIndexDataFormatByteSize( pSharedStorage.mGeometryFormatInfo.indexDataFormat );
-			const auto targetIndexSize = cxdefs::getIndexDataFormatByteSize( pCreateInfo.geometryFormat.indexDataFormat );
+			const auto sourceIndexSize = cxdefs::getIndexDataFormatByteSize( pSharedStorage.mDataFormat.indexDataFormat() );
+			const auto targetIndexSize = cxdefs::getIndexDataFormatByteSize( pCreateInfo.dataFormat->indexDataFormat() );
 			if( sourceIndexSize != targetIndexSize )
 			{
 				return false;
@@ -290,8 +301,8 @@ namespace ts3
 					return false;
 				}
 
-				const auto sourceVertexComponentSize = pSharedStorage.mGeometryFormatInfo.vertexStreamElementSizeArray[iVertexStream];
-				const auto targetVertexComponentSize = pCreateInfo.geometryFormat.vertexStreamElementSizeArray[iVertexStream];
+				const auto sourceVertexComponentSize = pSharedStorage.mDataFormat.vertexStreamElementSizeInBytes( iVertexStream );
+				const auto targetVertexComponentSize = pCreateInfo.dataFormat->vertexStreamElementSizeInBytes( iVertexStream );
 				if( sourceVertexComponentSize != targetVertexComponentSize )
 				{
 					return false;

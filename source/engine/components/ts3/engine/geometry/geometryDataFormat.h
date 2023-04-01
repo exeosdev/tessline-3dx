@@ -6,6 +6,7 @@
 
 #include "geometryCommonDefs.h"
 #include "geometryVertexFormat.h"
+#include <unordered_map>
 
 namespace ts3
 {
@@ -15,8 +16,9 @@ namespace ts3
 		uint32 activeAttributesNum = 0;
 		uint32 activeAttributeSlotsNum = 0;
 		uint32 activeVertexStreamsNum = 0;
+		uint32 vertexElementSizeInBytes = 0;
 		Bitmask<gpuapi::EIAVertexAttributeFlags> activeAttributesMask;
-		Bitmask<EVertexAttributeSemanticFlags> activeFixedAttributesMask;
+		Bitmask<EVertexAttributeSemanticsFlags> activeAttributeSemanticsMask;
 		Bitmask<gpuapi::EIAVertexStreamBindingFlags> activeVertexStreamsMask;
 	};
 
@@ -33,7 +35,11 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD const VertexAttributeFormat & attribute( uint32 pAttributeIndex ) const;
 
+		TS3_ATTR_NO_DISCARD const VertexAttributeFormat & attribute( EVertexAttributeSemanticsID pAttributeSemantics ) const;
+
 		TS3_ATTR_NO_DISCARD const VertexStreamFormat & vertexStream( uint32 pVertexStreamIndex ) const;
+
+		TS3_ATTR_NO_DISCARD uint32 vertexElementSizeInBytes() const;
 
 		TS3_ATTR_NO_DISCARD uint32 vertexStreamElementSizeInBytes( uint32 pVertexStreamIndex ) const;
 
@@ -41,7 +47,11 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD uint32 indexElementSizeInBytes() const noexcept;
 
+		TS3_ATTR_NO_DISCARD bool isAttributeSemanticsActive( EVertexAttributeSemanticsID pAttributeSemantics ) const noexcept;
+
 		TS3_ATTR_NO_DISCARD bool isFixedAttributeActive( EFixedVertexAttributeID pFixedAttribute ) const noexcept;
+
+		TS3_ATTR_NO_DISCARD bool isIndexedGeometry() const noexcept;
 
 		TS3_ATTR_NO_DISCARD bool isAttributeSlotUsed( uint32 pAttributeIndex ) const;
 
@@ -51,7 +61,9 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD bool empty() const noexcept;
 
-		TS3_ATTR_NO_DISCARD gpuapi::IAInputLayoutDefinition generateGpaInputLayoutDefinition() const noexcept;
+		void setIndexDataFormat( gpuapi::EIndexDataFormat pIndexDataFormat );
+
+		void setPrimitiveTopology( gpuapi::EPrimitiveTopology pTopology );
 
 		bool configureFixedAttribute(
 				EFixedVertexAttributeID pFixedAttributeID,
@@ -91,9 +103,7 @@ namespace ts3
 				TAttribute TVertex::* pAttributePtr,
 				EVertexDataRate pAttributeDataRate = EVertexDataRate::PerVertex );
 
-		void setIndexDataFormat( gpuapi::EIndexDataFormat pIndexDataFormat );
-
-		void setPrimitiveTopology( gpuapi::EPrimitiveTopology pTopology );
+		TS3_ATTR_NO_DISCARD gpuapi::IAInputLayoutDefinition generateGpaInputLayoutDefinition() const noexcept;
 
 	private:
 		template <typename TAttribute>
@@ -112,8 +122,10 @@ namespace ts3
 		void updateStateWithNewAttribute( uint32 pNewAttributeIndex );
 
 	private:
+		using AttributeSemanticsMap = std::unordered_map<EVertexAttributeSemanticsID, uint32>;
 		GeometryDataFormatProperties _properties;
 		VertexAttributeFormatArray _attributes;
+		AttributeSemanticsMap _attributeSemanticsMap;
 		VertexStreamFormatArray _vertexStreams;
 		gpuapi::EIndexDataFormat _indexDataFormat;
 		gpuapi::EPrimitiveTopology _primitiveTopology;
