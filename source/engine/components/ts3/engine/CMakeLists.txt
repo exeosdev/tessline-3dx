@@ -2,6 +2,7 @@
 set( TS3_ENGINE_SRC_FILES
 		"prerequisites/gpuapiCommon.h"
 		"prerequisites/geometryCommon.h"
+		"prerequisites/coreEngineState.h"
 
         "prerequisites.h"
         "prerequisites.cpp"
@@ -12,7 +13,11 @@ set( TS3_ENGINE_SRC_FILES
         "camera/cameraController.h"
         "camera/cameraController.cpp"
 
-        # "gpuapi/commonGPUDefs.h"
+		"geometry/indexedMeshDataBufferBuilder.h"
+		"geometry/meshData.h"
+		"geometry/meshData.cpp"
+
+        "gpuapi/commonGpaDefs.h"
 		# "gpuapi/hwBufferCommon.h"
 		# "gpuapi/hwBuffer.h"
 		# "gpuapi/hwBuffer.cpp"
@@ -49,6 +54,8 @@ set( TS3_ENGINE_SRC_FILES
 		"res/imageCommon.cpp"
 		"res/image/bitmapCommon.h"
 		"res/image/bitmapCommon.cpp"
+		"res/image/pngCommon.cpp"
+		"res/image/pngCommon.h"
 		"res/resource.h"
 		"res/resource.cpp"
 		"res/resourceLoader.h"
@@ -71,7 +78,34 @@ set( TS3_ENGINE_SRC_FILES
 		# "utility/scfXMLCommon.cpp"
 		# "utility/scfXMLReader.h"
 		# "utility/scfXMLReader.cpp"
-		utility/gridGenerator.cpp utility/gridGenerator.h geometry/meshCommon.h geometry/meshCommon.cpp res/image/pngCommon.cpp res/image/pngCommon.h)
+		# "utility/gridGenerator.cpp"
+		# "utility/gridGenerator.h"
+
+		"geometry/meshGroup.h"
+		"renderer/materialCommon.h"
+		"renderer/gpaSharedStateLibrary.cpp"
+		"renderer/gpaSharedStateLibrary.h"
+		"renderer/renderingContext.cpp"
+		"renderer/renderingContext.h"
+		"renderer/shaderLoader.h"
+		"renderer/shaderLoader.cpp"
+
+		"gpuapi/constantBufferProxy.cpp"
+		"gpuapi/constantBufferProxy.h"
+		"geometry/dataTypesConv.h"
+        "geometry/geometryStorage.h"
+		"geometry/geometryStorage.cpp"
+		"geometry/geometryCommonDefs.h"
+		"geometry/geometryVertexFormat.h"
+		"geometry/geometryVertexFormat.cpp"
+
+		"fx/material.h"
+		"fx/material.cpp"
+		"fx/materialCommon.h"
+		"fx/materialCommon.cpp"
+		"fx/materialLibrary.cpp"
+		"fx/materialLibrary.h"
+        geometry/geometryDataFormat.cpp geometry/geometryDataFormat.h geometry/geometryManager.cpp geometry/geometryManager.h geometry/meshLoader.cpp geometry/meshLoader.h geometry/meshImporterAssimp.cpp geometry/mesh.cpp geometry/mesh.h geometry/geometryDataTransfer.cpp geometry/geometryDataTransfer.h geometry/geometryCommonDefs.cpp geometry/meshGroup.cpp geometry/geometryContainer.cpp geometry/geometryContainer.h)
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
     add_library( ts3-engine STATIC ${TS3_ENGINE_SRC_FILES} )

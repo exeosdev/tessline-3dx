@@ -32,10 +32,22 @@ namespace ts3
 	template <typename TValue, typename TAllocator = std::allocator<TValue>>
 	using Array = std::vector<TValue, TAllocator>;
 
-	template <typename TTarget, typename TSrc>
-	TS3_ATTR_NO_DISCARD inline TTarget * dynamic_cast_check( TSrc * pSource )
+	template <typename TResult, typename TSrc>
+	TS3_ATTR_NO_DISCARD inline TResult dynamic_cast_dbg( TSrc * pSource )
 	{
-		if( auto * targetPtr = dynamic_cast<TTarget *>( pSource ) )
+	#if( TS3_DEBUG )
+		auto * targetPtr = dynamic_cast<TResult>( pSource );
+		ts3DebugAssert( targetPtr );
+	#else
+		auto * targetPtr = static_cast<TResult>( pSource );
+	#endif
+		return targetPtr;
+	}
+
+	template <typename TResult, typename TSrc>
+	TS3_ATTR_NO_DISCARD inline TResult dynamic_cast_check( TSrc * pSource )
+	{
+		if( auto * targetPtr = dynamic_cast<TResult>( pSource ) )
 		{
 			return targetPtr;
 		}
@@ -43,20 +55,20 @@ namespace ts3
 		return nullptr;
 	}
 
-	template <typename TTarget, typename TSrc>
-	TS3_ATTR_NO_DISCARD inline TTarget * dynamic_cast_throw( TSrc * pSource )
+	template <typename TResult, typename TSrc>
+	TS3_ATTR_NO_DISCARD inline TResult dynamic_cast_throw( TSrc * pSource )
 	{
-		if( auto * targetPtr = dynamic_cast<TTarget *>( pSource ) )
+		if( auto * targetPtr = dynamic_cast<TResult>( pSource ) )
 		{
 			return targetPtr;
 		}
 		throw std::bad_cast();
 	}
 
-	template <typename TTarget, typename TSrc>
-	TS3_ATTR_NO_DISCARD inline std::shared_ptr<TTarget> dynamic_ptr_cast_check( std::shared_ptr<TSrc> pSource )
+	template <typename TResult, typename TSrc>
+	TS3_ATTR_NO_DISCARD inline std::shared_ptr<TResult> dynamic_ptr_cast_check( std::shared_ptr<TSrc> pSource )
 	{
-		if( auto targetPtr = std::dynamic_pointer_cast<TTarget>( std::move( pSource ) ) )
+		if( auto targetPtr = std::dynamic_pointer_cast<TResult>( std::move( pSource ) ) )
 		{
 			return targetPtr;
 		}
@@ -64,10 +76,10 @@ namespace ts3
 		return nullptr;
 	}
 
-	template <typename TTarget, typename TSrc>
-	TS3_ATTR_NO_DISCARD inline std::shared_ptr<TTarget> dynamic_ptr_cast_throw( std::shared_ptr<TSrc> pSource )
+	template <typename TResult, typename TSrc>
+	TS3_ATTR_NO_DISCARD inline std::shared_ptr<TResult> dynamic_ptr_cast_throw( std::shared_ptr<TSrc> pSource )
 	{
-		if( auto targetPtr = std::dynamic_pointer_cast<TTarget>( std::move( pSource ) ) )
+		if( auto targetPtr = std::dynamic_pointer_cast<TResult>( std::move( pSource ) ) )
 		{
 			return targetPtr;
 		}

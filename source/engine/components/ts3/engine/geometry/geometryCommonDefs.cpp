@@ -1,9 +1,73 @@
 
-#include "geometryCommonDefs.h"
+#include "geometryContainer.h"
 #include "geometryDataFormat.h"
+#include "geometryStorage.h"
 
 namespace ts3
 {
+
+	void GeometryDataRegion::append( const GeometryDataRegion & pOther )
+	{
+		ts3DebugAssert( pOther.offsetInElementsNum == ( offsetInElementsNum + sizeInElementsNum ) );
+		sizeInElementsNum += pOther.sizeInElementsNum;
+	}
+
+	void GeometrySize::append( const GeometrySize & pOther )
+	{
+		indexElementsNum += pOther.indexElementsNum;
+		vertexElementsNum += pOther.vertexElementsNum;
+	}
+
+
+	GeometryDataReference::GeometryDataReference( const GeometryDataFormat & pDataFormat )
+	: dataFormat( &pDataFormat )
+	{}
+
+	GeometryDataReference::operator bool() const noexcept
+	{
+		return dataFormat && !dataFormat->empty();
+	}
+
+	uint32 GeometryDataReference::vertexStreamElementSizeInBytes( uint32 pVertexStreamIndex ) const
+	{
+		return dataFormat->vertexStreamElementSizeInBytes( pVertexStreamIndex );
+	}
+
+	uint32 GeometryDataReference::vertexElementSizeInBytes() const noexcept
+	{
+		return dataFormat->vertexElementSizeInBytes();
+	}
+
+	uint32 GeometryDataReference::indexElementSizeInBytes() const noexcept
+	{
+		return dataFormat->indexElementSizeInBytes();
+	}
+
+	GeometrySize GeometryDataReference::calculateGeometrySize() const noexcept
+	{
+		GeometrySize geometrySize;
+		geometrySize.vertexElementsNum = vertexStreamDataRegions[0].sizeInElementsNum;
+		geometrySize.indexElementsNum = indexDataRegion.sizeInElementsNum;
+		return geometrySize;
+	}
+
+	void GeometryDataReference::append( const GeometryDataReference & pOther )
+	{
+		for( uint32 iVertexStream = 0; iVertexStream < dataFormat->activeVertexStreamIndexEnd(); ++iVertexStream )
+		{
+			vertexStreamDataRegions[iVertexStream].append( pOther.vertexStreamDataRegions[iVertexStream] );
+		}
+
+		indexDataRegion.append( pOther.indexDataRegion );
+	}
+
+
+	GeometryReference::GeometryReference( GeometryStorage & pStorage )
+	: storage( &pStorage )
+	, geometryIndex( cxdefs::GEOMETRY_INDEX_INVALID )
+	, dataReference( pStorage.mDataFormat )
+	{}
+
 
 	namespace gmutil
 	{
@@ -15,9 +79,9 @@ namespace ts3
 				uint32 pIndexDataOffsetInElementsNum,
 				uint32 pIndexElementsNum )
 		{
-			GeometryDataReference subGeometryDataRef;
+			GeometryDataReference subGeometryDataRef{ *pGeometryDataRef.dataFormat };
 
-			for( uint32 iVertexStream = 0; iVertexStream < gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM; ++iVertexStream )
+			for( uint32 iVertexStream = 0; iVertexStream < pGeometryDataRef.dataFormat->activeVertexStreamIndexEnd(); ++iVertexStream )
 			{
 				const auto & baseDataRegion = pGeometryDataRef.vertexStreamDataRegions[iVertexStream];
 				if( baseDataRegion.sizeInElementsNum > 0 )
@@ -46,6 +110,7 @@ namespace ts3
 				subDataRegion.dataPtr = baseDataRegion.dataPtr + ( pIndexDataOffsetInElementsNum * baseDataRegion.elementSize );
 			}
 
+
 			return subGeometryDataRef;
 		}
 
@@ -54,9 +119,9 @@ namespace ts3
 				uint32 pVertexElementsNum,
 				uint32 pIndexElementsNum )
 		{
-			GeometryDataReference advGeometryDataRef;
+			 GeometryDataReference advGeometryDataRef{ *pGeometryDataRef.dataFormat };
 
-			for( uint32 iVertexStream = 0; iVertexStream < gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM; ++iVertexStream )
+			for( uint32 iVertexStream = 0; iVertexStream < pGeometryDataRef.dataFormat->activeVertexStreamIndexEnd(); ++iVertexStream )
 			{
 				const auto & baseDataRegion = pGeometryDataRef.vertexStreamDataRegions[iVertexStream];
 				if( baseDataRegion.sizeInElementsNum > 0 )

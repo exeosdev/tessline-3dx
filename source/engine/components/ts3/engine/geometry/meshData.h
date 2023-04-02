@@ -1,183 +1,131 @@
 
 #pragma once
 
-#ifndef __TS3_ENGINE_MESH_COMMON_H__
-#define __TS3_ENGINE_MESH_COMMON_H__
+#ifndef __TS3_ENGINE_MESH_DATA_H__
+#define __TS3_ENGINE_MESH_DATA_H__
 
-#include "geometryCommonDefs.h"
-#include "../res/imageCommon.h"
-#include <ts3/math/vectorOps.h>
+#include "geometryContainer.h"
 #include <ts3/stdext/memoryBuffer.h>
 
 namespace ts3
 {
 
-	class GeometryDataFormat;
-	class MeshData;
+	class Mesh;
+	class MeshGroup;
 	class MeshLoader;
 
-//	struct MeshVertexFormat
-//	{
-//
-//		using AttributeDescArray = std::array<AttributeDesc, gpuapi::gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM>;
-//
-//		Bitmask<EVertexAttributeSemanticFlags> activeAttributesMask;
-//
-//		AttributeDescArray attributes;
-//
-//		bool isAttributeValid( uint32 pAttributeIndex ) const noexcept
-//		{
-//			return attributes[pAttributeIndex].attributeID != EFixedVertexAttributeID::Undefined;
-//		}
-//	};
-//
-//	struct MeshVertexMemoryLayout
-//	{
-//		struct AttributeMemoryLayout
-//		{
-//			uint16 baseOffsetInBytes = 0;
-//			uint16 sizeInBytes = 0;
-//		};
-//
-//		struct VertexStreamMemoryLayout
-//		{
-//			Bitmask<EVertexAttributeSemanticFlags> activeAttributesMask;
-//			uint16 elementSizeInBytes = 0;
-//		};
-//
-//		using AttributeMemoryLayoutArray = std::array<AttributeMemoryLayout, gpuapi::gpm::IA_MAX_VERTEX_ATTRIBUTES_NUM>;
-//		using VertexStreamMemoryLayoutArray = std::array<VertexStreamMemoryLayout, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
-//
-//		AttributeMemoryLayoutArray attributeLayouts;
-//
-//		VertexStreamMemoryLayoutArray vertexStreamLayouts;
-//	};
-//
-//	struct MeshDataLayout
-//	{
-//		gpuapi::EIndexDataFormat indexFormat = gpuapi::EIndexDataFormat::Undefined;
-//
-//		uint32 indexElementSizeInBytes = 0;
-//
-//		MeshVertexFormat vertexFormat;
-//
-//		MeshVertexMemoryLayout vertexMemoryLayout;
-//
-//		bool hasIndexData() const noexcept
-//		{
-//			return indexFormat != gpuapi::EIndexDataFormat::Undefined;
-//		}
-//
-//		bool isAttributeValid( uint32 pAttributeIndex ) const noexcept
-//		{
-//			return vertexFormat.isAttributeValid( pAttributeIndex );
-//		}
-//
-//		bool isVertexStreamActive( uint32 pStreamIndex ) const noexcept
-//		{
-//			return vertexMemoryLayout.vertexStreamLayouts[pStreamIndex].elementSizeInBytes > 0;
-//		}
-//	};
-
-	struct MeshSizeMetrics
+	struct MeshSubComponentData
 	{
-		uint32 meshPartsNum;
-		uint32 indexElementsNum;
-		uint32 vertexElementsNum;
+		std::string name;
+
+		uint32 componentIndex;
+
+		GeometryDataReference geometryDataRef;
+
+		MeshSubComponentData( const GeometryDataFormat & pDataFormat )
+		: geometryDataRef( pDataFormat )
+		{}
 	};
 
-	struct MeshDataStorage
+	class MeshData : public GeometryContainer
 	{
-	};
-
-	struct MeshDataBufferReadRegion
-	{
-		const byte * basePtr;
-		uint32 strideInBytes;
-	};
-
-	struct MeshDataBufferWriteRegion
-	{
-		byte * basePtr;
-		uint32 strideInBytes;
-	};
-
-	struct MeshPartReference
-	{
-		uint32 subMeshIndex;
-		uint32 indexDataOffsetInElementsNum;
-		uint32 indexElementsNum;
-		uint32 vertexDataOffsetInElementsNum;
-		uint32 vertexElementsNum;
-	};
-
-	class MeshData
-	{
-		friend class MeshLoader;
-
-	public:
-		const GeometryDataFormat & mGeometryDataFormat;
-
 	public:
 		MeshData( const GeometryDataFormat & pGeometryDataFormat )
-		: mGeometryDataFormat( pGeometryDataFormat )
+		: GeometryContainer( pGeometryDataFormat )
 		{}
 
-		TS3_ATTR_NO_DISCARD uint32 indexDataSizeInBytes() const noexcept;
+		TS3_ATTR_NO_DISCARD uint32 getMeshSubComponentsNum() const noexcept;
 
-		TS3_ATTR_NO_DISCARD uint32 vertexDataSizeInBytes() const noexcept;
+		TS3_ATTR_NO_DISCARD const std::string & getMeshName() const noexcept;
+
+		TS3_ATTR_NO_DISCARD const MeshSubComponentData * getMeshSubComponentData( uint32 pIndex ) const noexcept;
 
 		void initializeStorage( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
 
-		MeshPartReference & addMeshPart( uint32 pIndicesNum, uint32 pVerticesNum );
+		void setMeshName( std::string pName );
 
-		MeshDataBufferReadRegion getIndexDataWriteRegion( const MeshPartReference & pMeshPartRef ) const;
+		MeshSubComponentData * addMeshComponent( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
 
-		MeshDataBufferReadRegion getVertexDataWriteRegion( const MeshPartReference & pMeshPartRef, uint32 pAttributeIndex ) const;
+		DataBufferRegionSubElementMappingReadOnly getIndexDataSubRegionReadOnly(
+				const CPUGeometryDataReference & pMeshDataRef ) const noexcept;
 
-		MeshDataBufferWriteRegion getIndexDataWriteRegion( const MeshPartReference & pMeshPartRef );
+		DataBufferRegionSubElementMappingReadOnly getVertexAttributeDataSubRegionReadOnly(
+				const CPUGeometryDataReference & pMeshDataRef,
+				uint32 pAttributeIndex ) const noexcept;
 
-		MeshDataBufferWriteRegion getVertexDataWriteRegion( const MeshPartReference & pMeshPartRef, uint32 pAttributeIndex );
+		DataBufferRegionSubElementMappingReadWrite getIndexDataSubRegionReadWrite(
+				const CPUGeometryDataReference & pMeshDataRef ) noexcept;
 
-	protected:
-		byte * getWritableVertexDataBuffer( uint32 pStreamIndex );
+		DataBufferRegionSubElementMappingReadWrite getVertexAttributeDataSubRegionReadWrite(
+				const CPUGeometryDataReference & pMeshDataRef,
+				uint32 pAttributeIndex ) noexcept;
 
 	private:
 		using VertexDataBufferArray = std::array<DynamicMemoryBuffer, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
-		uint32 _indexElementsNum = 0;
-		uint32 _vertexElementsNum = 0;
+		GeometrySize _geometrySize;
+		std::string _meshName;
 		DynamicMemoryBuffer _indexDataBuffer;
 		VertexDataBufferArray _vertexDataBuffers;
-		std::vector<MeshPartReference> _subMeshes;
+		std::vector<MeshSubComponentData> _meshSubComponents;
 	};
 
-	class MeshImporter
+	inline uint32 MeshData::getMeshSubComponentsNum() const noexcept
+	{
+		return static_cast<uint32>( _meshSubComponents.size() );
+	}
+
+	inline const std::string & MeshData::getMeshName() const noexcept
+	{
+		return _meshName;
+	}
+
+	inline const MeshSubComponentData * MeshData::getMeshSubComponentData( uint32 pIndex ) const noexcept
+	{
+		return ( pIndex < _meshSubComponents.size() ) ? &( _meshSubComponents[pIndex] ) : nullptr;
+	}
+
+
+	class MeshGroupData
 	{
 	public:
-		virtual std::unique_ptr<MeshData> importMeshDefault(
-				const std::string & pFilename,
-				const GeometryDataFormat & pGeometryDataFormat ) = 0;
-	};
+		GeometryDataFormat const mGeometryDataFormat;
 
-	class AssimpMeshImporter : public MeshImporter
-	{
 	public:
-		virtual std::unique_ptr<MeshData> importMeshDefault(
-				const std::string & pFilename,
-				const GeometryDataFormat & pGeometryDataFormat ) override final;
+		MeshGroupData( const GeometryDataFormat & pGeometryDataFormat )
+		: mGeometryDataFormat( pGeometryDataFormat )
+		{}
+
+		TS3_ATTR_NO_DISCARD uint32 getMeshesNum() const noexcept
+		{
+			return static_cast<uint32>( _meshDataArray.size() );
+		}
+
+		TS3_ATTR_NO_DISCARD const GeometrySize & geometrySize() const noexcept
+		{
+			return _geometrySize;
+		}
+
+		TS3_ATTR_NO_DISCARD bool empty() const noexcept
+		{
+			return _meshDataArray.empty();
+		}
+
+		TS3_ATTR_NO_DISCARD const MeshData * getMeshData( uint32 pIndex ) const noexcept
+		{
+			return ( pIndex < _meshDataArray.size() ) ? _meshDataArray[pIndex].get() : nullptr;
+		}
+
+		MeshData & addMeshData( std::unique_ptr<MeshData> pMeshData );
+
+		MeshData & addMeshData( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
+
+	private:
+		using MeshDataPtr = std::unique_ptr<MeshData>;
+		using MeshDataArray = std::vector<MeshDataPtr>;
+		GeometrySize _geometrySize;
+		MeshDataArray _meshDataArray;
 	};
 
-//	namespace gmutil
-//	{
-//
-//		TS3_ATTR_NO_DISCARD MeshVertexMemoryLayout generateMeshVertexMemoryLayoutForVertexFormat( const MeshVertexFormat & pMeshVertexFormat );
-//
-//	}
-
-	///////////
-//
-//	using FileLoadCallback = std::function<DynamicMemoryBuffer( const std::string & )>;
-//
 	struct VertexDefaultP3N3T
 	{
 		math::Vec3f position;
@@ -187,7 +135,7 @@ namespace ts3
 		math::Vec3f tangent;
 		math::Vec3f biTangent;
 	};
-//
+
 //	template <typename TVertex, typename TIndex = uint32>
 //	struct MeshDataFixed
 //	{
@@ -247,7 +195,7 @@ namespace ts3
 //	};
 //
 //	template <typename TVertex, typename TIndex = uint32>
-//	struct MeshPartDefinition
+//	struct MeshComponentDefinition
 //	{
 //		MeshDataFixed<TVertex, TIndex> meshData;
 //
@@ -257,7 +205,7 @@ namespace ts3
 //	template <typename TVertex, typename TIndex = uint32>
 //	struct MeshDefinition
 //	{
-//		using SubMeshDefinition = MeshPartDefinition<TVertex, TIndex>;
+//		using SubMeshDefinition = MeshComponentDefinition<TVertex, TIndex>;
 //
 //		using SubMeshArray = std::vector<SubMeshDefinition>;
 //
@@ -398,4 +346,4 @@ namespace ts3
 
 } // namespace ts3
 
-#endif // __TS3_ENGINE_MESH_COMMON_H__
+#endif // __TS3_ENGINE_MESH_DATA_H__

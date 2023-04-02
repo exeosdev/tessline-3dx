@@ -4,9 +4,7 @@
 #ifndef __TS3_ENGINE_GEOMETRY_MANAGER_H__
 #define __TS3_ENGINE_GEOMETRY_MANAGER_H__
 
-#include "geometryCommonDefs.h"
-#include "../geometry/geometryReference.h"
-#include "../geometry/geometryVertexFormat.h"
+#include "geometryVertexFormat.h"
 
 namespace ts3
 {
@@ -44,8 +42,7 @@ namespace ts3
 				const GeometryStorage * pSharedStorage );
 
 	private:
-		using GeometryStoragePtr = std::unique_ptr<GeometryStorage>;
-		using GeometryStorageList = std::vector<GeometryStoragePtr>;
+		using GeometryStorageList = std::vector<GeometryStorageHandle>;
 		using NamedGeometryStorageMap = std::map<std::string, GeometryStorage *>;
 
 		GeometryStorageList _storages;

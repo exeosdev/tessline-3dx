@@ -25,9 +25,6 @@ namespace ts3
 	class GeometryDataFormat
 	{
 	public:
-		const GeometryDataFormatProperties & mProperties;
-
-	public:
 		GeometryDataFormat();
 		~GeometryDataFormat();
 
@@ -39,11 +36,13 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD const VertexStreamFormat & vertexStream( uint32 pVertexStreamIndex ) const;
 
-		TS3_ATTR_NO_DISCARD uint32 vertexElementSizeInBytes() const;
+		TS3_ATTR_NO_DISCARD uint32 vertexElementSizeInBytes() const noexcept;
 
 		TS3_ATTR_NO_DISCARD uint32 vertexStreamElementSizeInBytes( uint32 pVertexStreamIndex ) const;
 
 		TS3_ATTR_NO_DISCARD gpuapi::EIndexDataFormat indexDataFormat() const noexcept;
+
+		TS3_ATTR_NO_DISCARD uint32 activeVertexStreamIndexEnd() const noexcept;
 
 		TS3_ATTR_NO_DISCARD uint32 indexElementSizeInBytes() const noexcept;
 
@@ -127,6 +126,7 @@ namespace ts3
 		VertexAttributeFormatArray _attributes;
 		AttributeSemanticsMap _attributeSemanticsMap;
 		VertexStreamFormatArray _vertexStreams;
+		uint32 _activeVertexStreamIndexEnd;
 		gpuapi::EIndexDataFormat _indexDataFormat;
 		gpuapi::EPrimitiveTopology _primitiveTopology;
 	};

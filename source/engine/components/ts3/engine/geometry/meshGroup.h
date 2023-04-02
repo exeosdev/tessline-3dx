@@ -4,13 +4,16 @@
 #ifndef __TS3_ENGINE_MESH_GROUP_H__
 #define __TS3_ENGINE_MESH_GROUP_H__
 
-
-#include "meshCommon.h"
-#include "../geometry/geometryReference.h"
-#include "../geometry/geometryVertexFormat.h"
+#include "mesh.h"
+#include "../geometry/geometryDataFormat.h"
+#include <unordered_map>
 
 namespace ts3
 {
+
+	class Mesh;
+	class MeshComponent;
+	class MeshGroup;
 
 	struct MeshGroupInfo
 	{
@@ -19,26 +22,46 @@ namespace ts3
 		uint32 vertexElementsNum = 0;
 	};
 
-	// Meshes with same GeometryDataFormat, which can be rendered with a single rendering state (PSO/IL).
 	class MeshGroup
 	{
+		friend class MeshComponent;
+
 	public:
 		std::string const mGroupName;
+
 		GeometryDataFormat const mGeometryDataFormat;
 
 	public:
-		MeshGroup( std::string pGroupName, const GeometryDataFormat & pGeometryDataFormat )
-		: mGroupName( std::move( pGroupName ) )
-		, mGeometryDataFormat( pGeometryDataFormat )
-		{}
-
+		MeshGroup( std::string pGroupName, GeometryStorage * pGeometryStorage );
 		~MeshGroup();
 
+		GeometryStorage & getGeometryStorage() const noexcept;
+
+		Mesh * findMesh( const std::string & pName ) const noexcept;
+
+		MeshComponent * findMeshComponent( const std::string & pName ) const noexcept;
+
+		MeshComponent * findMeshSubComponent( const Mesh & pMesh, const std::string & pName ) const noexcept;
+
+		Mesh * addMesh( std::string pName );
+
 	private:
-		uint32 _indexElementsNum = 0;
-		uint32 _vertexElementsNum = 0;
-		std::unique_ptr<GeometryStorage> _geometryStorage;
+		void registerMeshComponent( MeshComponent & pMeshComponent );
+
+	private:
+		using MeshArray = std::deque<Mesh>;
+		using MeshName = std::string_view;
+		using MeshComponentMap = std::unordered_map<MeshName, MeshComponent *>;
+
+		MeshArray _meshes;
+		MeshComponentMap _meshComponents;
+		GeometryStorage * _geometryStorage;
 	};
+
+	inline GeometryStorage & MeshGroup::getGeometryStorage() const noexcept
+	{
+		return *_geometryStorage;
+	}
 
 } // namespace ts3
 

@@ -25,7 +25,7 @@ namespace ts3
 		TS3_ATTR_NO_DISCARD TInterfaceSubClass * getInterface()
 		{
 		#if( TS3_DEBUG )
-			return dynamic_cast_check<TInterfaceSubClass>( this );
+			return dynamic_cast_check<TInterfaceSubClass *>( this );
 		#else
 			return static_cast<TInterfaceSubClass *>( this );
 		#endif
@@ -35,7 +35,7 @@ namespace ts3
 		TS3_ATTR_NO_DISCARD const TInterfaceSubClass * getInterface() const
 		{
 		#if( TS3_DEBUG )
-		    return dynamic_cast_check<const TInterfaceSubClass>( this );
+		    return dynamic_cast_check<const TInterfaceSubClass *>( this );
 		#else
 		    return static_cast<const TInterfaceSubClass *>( this );
 		#endif
@@ -45,9 +45,9 @@ namespace ts3
 		TS3_ATTR_NO_DISCARD TInterfaceSubClass * queryInterface()
 		{
 		#if( TS3_DEBUG )
-			return dynamic_cast_check<TInterfaceSubClass>( this );
+			return dynamic_cast_check<TInterfaceSubClass *>( this );
 		#else
-			return dynamic_cast_throw<TInterfaceSubClass>( this );
+			return dynamic_cast_throw<TInterfaceSubClass *>( this );
 		#endif
 		}
 
@@ -55,9 +55,9 @@ namespace ts3
 		TS3_ATTR_NO_DISCARD const TInterfaceSubClass * queryInterface() const
 		{
 		#if( TS3_DEBUG )
-			return dynamic_cast_check<const TInterfaceSubClass>( this );
+			return dynamic_cast_check<const TInterfaceSubClass *>( this );
 		#else
-			return dynamic_cast_throw<const TInterfaceSubClass>( this );
+			return dynamic_cast_throw<const TInterfaceSubClass *>( this );
 		#endif
 		}
 

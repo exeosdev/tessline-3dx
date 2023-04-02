@@ -12,15 +12,25 @@
 namespace ts3
 {
 
+	ts3DeclareClassHandle( GeometryStorage );
+
 	struct GeometryReference;
 	struct GeometryStorageCreateInfo;
 
+	class GeometryContainer;
 	class GeometryDataFormat;
 	class GeometryDataGpuTransfer;
 	class GeometryManager;
 	class GeometryStorage;
 
 	using GeometryRefHandle = const GeometryReference *;
+
+	namespace cxdefs
+	{
+
+		constexpr auto GEOMETRY_INDEX_INVALID = Limits<uint32>::maxValue;
+
+	}
 
 	enum EVertexAttributeSemanticsFlags : uint32
 	{
@@ -177,23 +187,60 @@ namespace ts3
 
 	}
 
-	template <typename TRegion>
-	struct VertexIndexDataReference
-	{
-		TRegion indexDataRegion;
-
-		GeometryVertexStreamGenericArray<TRegion> vertexStreamDataRegions;
-	};
-
 	struct GeometryDataRegion
 	{
 		const byte * dataPtr = nullptr;
 		uint32 elementSize = 0;
 		uint32 offsetInElementsNum = 0;
 		uint32 sizeInElementsNum = 0;
+
+		void append( const GeometryDataRegion & pOther );
 	};
 
-	using GeometryDataReference = VertexIndexDataReference<GeometryDataRegion>;
+	struct GeometrySize
+	{
+		uint32 indexElementsNum = 0;
+		uint32 vertexElementsNum = 0;
+
+		void append( const GeometrySize & pOther );
+	};
+
+	struct GeometryDataReference
+	{
+		const GeometryDataFormat * dataFormat = nullptr;
+
+		GeometryDataRegion indexDataRegion;
+
+		GeometryVertexStreamGenericArray<GeometryDataRegion> vertexStreamDataRegions;
+
+		explicit GeometryDataReference( const GeometryDataFormat & pDataFormat );
+
+		TS3_ATTR_NO_DISCARD explicit operator bool() const noexcept;
+
+		TS3_ATTR_NO_DISCARD uint32 vertexStreamElementSizeInBytes( uint32 pVertexStreamIndex ) const;
+
+		TS3_ATTR_NO_DISCARD uint32 vertexElementSizeInBytes() const noexcept;
+
+		TS3_ATTR_NO_DISCARD uint32 indexElementSizeInBytes() const noexcept;
+
+		TS3_ATTR_NO_DISCARD GeometrySize calculateGeometrySize() const noexcept;
+
+		void append( const GeometryDataReference & pOther );
+	};
+
+	using CPUGeometryDataReference = GeometryDataReference;
+	using GPUGeometryDataReference = GeometryDataReference;
+
+	struct GeometryReference
+	{
+		GeometryStorage * storage;
+
+		uint32 geometryIndex;
+
+		GeometryDataReference dataReference;
+
+		GeometryReference( GeometryStorage & pStorage );
+	};
 
 	namespace gmutil
 	{
@@ -211,38 +258,6 @@ namespace ts3
 				uint32 pIndexElementsNum );
 
 	}
-
-//	struct GeometryDataOffset
-//	{
-//		uint32 indexDataOffsetInBytes = 0;
-//		uint32 vertexDataOffsetInBytes = 0;
-//	};
-//
-	struct GeometryDataSize
-	{
-		uint32 indexDataSizeInBytes = 0;
-		uint32 indexElementsNum = 0;
-		uint32 vertexDataSizeInBytes = 0;
-		uint32 vertexElementsNum = 0;
-	};
-//
-//	struct GeometryDataRegion
-//	{
-//		GeometryDataOffset offset;
-//		GeometryDataSize size;
-//	};
-
-	struct GeometryDataFormatInfo
-	{
-		gpuapi::EIndexDataFormat indexDataFormat = gpuapi::EIndexDataFormat::Undefined;
-
-		GeometryVertexStreamGenericArray<uint16> vertexStreamElementSizeArray{};
-
-		TS3_ATTR_NO_DISCARD uint16 indexElementByteSize() const noexcept
-		{
-			return cxdefs::getIndexDataFormatByteSize( indexDataFormat );
-		}
-	};
 
 } // namespace ts3
 

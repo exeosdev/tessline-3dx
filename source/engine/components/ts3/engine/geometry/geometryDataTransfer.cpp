@@ -1,7 +1,6 @@
 
 #include "geometryDataTransfer.h"
 #include "geometryDataFormat.h"
-#include "geometryReference.h"
 #include "geometryStorage.h"
 
 namespace ts3

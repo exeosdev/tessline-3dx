@@ -5,7 +5,7 @@ namespace ts3
 {
 
 	GeometryDataFormat::GeometryDataFormat()
-	: mProperties( _properties )
+	: _activeVertexStreamIndexEnd( 0 )
 	{}
 
 	GeometryDataFormat::~GeometryDataFormat() = default;
@@ -25,7 +25,7 @@ namespace ts3
 		return _vertexStreams.at( pVertexStreamIndex );
 	}
 
-	uint32 GeometryDataFormat::vertexElementSizeInBytes() const
+	uint32 GeometryDataFormat::vertexElementSizeInBytes() const noexcept
 	{
 		return _properties.vertexElementSizeInBytes;
 	}
@@ -39,6 +39,11 @@ namespace ts3
 	gpuapi::EIndexDataFormat GeometryDataFormat::indexDataFormat() const noexcept
 	{
 		return _indexDataFormat;
+	}
+
+	uint32 GeometryDataFormat::activeVertexStreamIndexEnd() const noexcept
+	{
+		return _activeVertexStreamIndexEnd;
 	}
 
 	uint32 GeometryDataFormat::indexElementSizeInBytes() const noexcept
@@ -130,6 +135,11 @@ namespace ts3
 			uint16 pStreamElementRelativeOffset,
 			EVertexDataRate pAttributeDataRate )
 	{
+		if( pStreamIndex >= gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM )
+		{
+			return false;
+		}
+
 		if( !gpuapi::cxdefs::isIAVertexAttributeIndexValid( pAttributeBaseIndex + pAttributeComponentsNum ) )
 		{
 			return false;
@@ -294,6 +304,11 @@ namespace ts3
 		vertexStreamFormat.elementSizeInBytes += attributeFormat.attributeTotalSizeInBytes;
 		vertexStreamFormat.activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( pNewAttributeIndex ) );
 		vertexStreamFormat.activeAttributesNum += 1;
+
+		if( attributeFormat.streamIndex >= _activeVertexStreamIndexEnd )
+		{
+			_activeVertexStreamIndexEnd = attributeFormat.streamIndex + 1;
+		}
 	}
 
 	namespace gpa

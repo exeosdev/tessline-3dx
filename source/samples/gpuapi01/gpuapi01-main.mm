@@ -37,8 +37,6 @@
 #include <ts3/engine/renderer/shaderLibrary.h>
 #include <ts3/engine/renderer/shaderLoader.h>
 #include <ts3/engine/renderer/effects/shadowRenderer.h>
-#include <ts3/engine/geometry/geometryReference.h>
-#include <ts3/engine/geometry/geometryVertexFormat.h>
 #include <ts3/engine/geometry/geometryManager.h>
 #include <ts3/engine/geometry/geometryDataTransfer.h>
 
@@ -378,12 +376,15 @@ int main( int pArgc, const char ** pArgv )
 	GeometryManager geometryManager{ ces };
 	GeometryDataGpuTransferDirect geometryDataGpuTransfer{ ces, *gxDriverState.cmdContext };
 
-	auto meshGroup = meshLoader.importMeshGroup(
-			meshImporter,
-			geometryManager,
-			geometryDataGpuTransfer,
-			gdf,
-			{ "assets/meshes/tree/Tree.obj" } );
+	MeshImportContext mic;
+	mic.geometryManager = &geometryManager;
+	mic.geometryDataFormat = &gdf;
+	mic.importer = &meshImporter;
+	mic.geometryDataTransfer = &geometryDataGpuTransfer;
+
+	auto meshGroup = meshLoader.importMeshGroup( mic, "MeshGroupID_Default", {
+			{ "MeshID_Default_TreeBase", "assets/meshes/tree/Tree.obj" }
+	} );
 
 	const auto rtSize = gxDriverState.presentationLayer->queryRenderTargetSize();
 	auto shaderLibrary = ShaderLoader::createShaderLibrary( ces, {

@@ -4,8 +4,7 @@
 #ifndef __TS3_ENGINE_GEOMETRY_STORAGE_H__
 #define __TS3_ENGINE_GEOMETRY_STORAGE_H__
 
-#include "geometryDataFormat.h"
-#include "geometryReference.h"
+#include "geometryContainer.h"
 #include <ts3/gpuapi/state/inputAssemblerImmutableStates.h>
 #include <deque>
 
@@ -18,19 +17,11 @@ namespace ts3
 		ShareExternal
 	};
 
-	struct GeometryStorageMetrics
-	{
-		uint32 indexDataCapacityInElementsNum;
-
-		uint32 vertexDataCapacityInElementsNum;
-	};
-
 	struct GeometryStorageCreateInfo
 	{
 		struct GeometryBufferDesc
 		{
 			EGeometryBufferAllocationMode allocationMode = EGeometryBufferAllocationMode::AllocLocal;
-
 			EGPUBufferUsagePolicy bufferUsagePolicy = EGPUBufferUsagePolicy::Undefined;
 		};
 
@@ -38,27 +29,20 @@ namespace ts3
 
 		const GeometryDataFormat * dataFormat;
 
-		GeometryStorageMetrics metrics;
+		GeometryContainerStorageCapacity capacity;
 
 		GeometryBufferDesc indexBufferDesc;
 
-		GeometryVertexStreamGenericArray<GeometryBufferDesc> vertexBufferDescArray{};
+		GeometryVertexStreamGenericArray<GeometryBufferDesc> vertexBufferDescArray;
 	};
 
-	class GeometryStorage : public CoreEngineObject
+	class GeometryStorage : public GeometryContainer
 	{
 	public:
 		using GeometryReferenceList = std::deque<GeometryReference>;
 
-		GeometryDataFormat const mDataFormat;
-
-		GeometryStorageMetrics const mStorageMetrics;
-
 	public:
-		GeometryStorage(
-			const CoreEngineState & pCES,
-			const GeometryDataFormat & pDataFormat,
-			const GeometryStorageMetrics & pStorageMetrics );
+		GeometryStorage( const GeometryDataFormat & pDataFormat );
 
 		virtual ~GeometryStorage();
 
@@ -68,23 +52,23 @@ namespace ts3
 
 		gpuapi::GPUBufferHandle getVertexBuffer( uint32 pIndex ) const noexcept;
 
-		const GeometryReference & getAllGeometryReference() const noexcept;
-
 		GeometryReference * addIndexedGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
 
 		GeometryReference * addNonIndexedGeometry( uint32 pVertexElementsNum );
 
-		static std::unique_ptr<GeometryStorage> createStorage(
+		void releaseStorage() {}
+
+		static GeometryStorageHandle createStorage(
 				const CoreEngineState & pCES,
 				const GeometryStorageCreateInfo & pCreateInfo,
 				const GeometryStorage * pSharedStorage = nullptr );
 
 	private:
-		void createStorageGPUBuffers( const GeometryStorageCreateInfo & pCreateInfo );
+		void createStorageGPUBuffers( const CoreEngineState & pCES, const GeometryStorageCreateInfo & pCreateInfo );
 
 		void bindSharedGPUBuffers( const GeometryStorageCreateInfo & pCreateInfo, const GeometryStorage & pSharedStorage );
 
-		void initializeVertexStreamState();
+		void initializeVertexStreamState( const CoreEngineState & pCES );
 
 		GeometryReference * addGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
 
@@ -107,22 +91,9 @@ namespace ts3
 				EGPUBufferUsagePolicy pCommonUsagePolicy );
 
 	private:
-		struct CurrentAllocationState
-		{
-			uint32 indicesOffsetInElementsNum = 0;
-			uint32 verticesOffsetInElementsNum = 0;
-		};
-
-		struct GeometryBufferState
-		{
-			gpuapi::GPUBufferHandle gpuBuffer;
-		};
-
-		CurrentAllocationState _currentAllocationState;
-		GeometryReference _allGeometryReference;
 		GeometryReferenceList _geometryRefList;
-		GeometryBufferState _indexBufferState;
-		GeometryVertexStreamGenericArray<GeometryBufferState> _vertexBufferStateArray;
+		gpuapi::GPUBufferHandle _indexBuffer;
+		GeometryVertexStreamGenericArray<gpuapi::GPUBufferHandle> _vertexBufferArray;
 		Bitmask<gpuapi::EIAVertexStreamBindingFlags> _vertexStreamBindingMask;
 		gpuapi::IAVertexStreamImmutableStateHandle _gpaVertexStreamState;
 	};

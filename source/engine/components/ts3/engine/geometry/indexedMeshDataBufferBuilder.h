@@ -4,7 +4,7 @@
 #ifndef __TS3_ENGINE_INDEXED_MESH_DATA_BUFFER_BUILDER_H__
 #define __TS3_ENGINE_INDEXED_MESH_DATA_BUFFER_BUILDER_H__
 
-#include "meshCommon.h"
+#include "meshData.h"
 #include <ts3/stdext/memoryBuffer.h>
 
 namespace ts3
