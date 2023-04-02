@@ -9,8 +9,8 @@ cbuffer CB0 : register( b0 )
 struct VSInputData
 {
 	float3 vPosition : POSITION;
-	float4 vColor : COLOR;
 	float3 vNormal : NORMAL;
+	float4 vColor : COLOR;
 	float2 vTexCoord0 : TEXCOORD0;
 };
 

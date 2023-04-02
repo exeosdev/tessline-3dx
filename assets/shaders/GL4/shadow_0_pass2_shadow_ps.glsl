@@ -34,12 +34,12 @@ float calculateShadowfactor( vec4 pLightSpacePos )
 
 	float depth = 0.0f;
 
-	const bool usePCF = true;
+	bool usePCF = false;
 
 	if( usePCF )
 	{
-	    const float xOffset = 1.0f / cbsShadowProperties.x;
-    	const float yOffset = 1.0f / cbsShadowProperties.y;
+	    float xOffset = 1.0f / cbsShadowProperties.x;
+    	float yOffset = 1.0f / cbsShadowProperties.y;
 
     	for( int xIndex = -1; xIndex <= 1; ++xIndex )
     	{
@@ -72,18 +72,18 @@ float calculateShadowfactor( vec4 pLightSpacePos )
 
 void main()
 {
-    vec3 textureColor0;
+    vec4 textureColor0;
 	if( psColor.a > 0.0f )
 	{
-		textureColor0 = psColor.rgb;
+		textureColor0 = psColor;
 	}
 	else
 	{
-		textureColor0 = texture( uSampler0, psTexCoord0 ).rgb;
+		textureColor0 = texture( uSampler0, psTexCoord0 );
 	}
 
-	vec3 fixedLightColor = vec3( 1.0f );
+	vec4 fixedLightColor = vec4( 1.0f );
 	float shadowFactor = calculateShadowfactor( psLightSpacePosition );
 
-	outPixelColor = vec4( shadowFactor * textureColor0 * fixedLightColor, 1.0 );
+	outPixelColor = vec4( shadowFactor * textureColor0 * fixedLightColor );
 }

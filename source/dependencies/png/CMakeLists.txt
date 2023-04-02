@@ -17,13 +17,22 @@ set( TS3_CDEP_png_SCR_FILES
         pngrutil.c
         pngset.c
         pngstruct.h
-        pngtest.c
+        # pngtest.c
         pngtrans.c
         pngwio.c
         pngwrite.c
         pngwtran.c
         pngwutil.c
         )
+
+if( "${CM_EBS_SYSCONF_TARGET_ARCH}" MATCHES "arm64|arm" )
+    set( TS3_CDEP_png_SCR_FILES
+            ${TS3_CDEP_png_SCR_FILES}
+            "arm/arm_init.c"
+            "arm/filter_neon_intrinsics.c"
+            "arm/palette_neon_intrinsics.c"
+            )
+endif()
 
 add_library( src-dep-png STATIC
         ${TS3_CDEP_png_SCR_FILES} )

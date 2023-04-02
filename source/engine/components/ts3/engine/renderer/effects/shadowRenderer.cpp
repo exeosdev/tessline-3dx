@@ -13,7 +13,7 @@ namespace ts3
 {
 
 	ShadowRenderer::ShadowRenderer( ShaderLibrary & pShaderLibrary, const ShadowConfig & pShadowConfig )
-	: _gpuDevice( pShaderLibrary.gpuDevice() )
+	: _gpuDevice( *pShaderLibrary.mCES.mGPUDevice )
 	, _shaderLibrary( pShaderLibrary )
 	, _shadowConfig( pShadowConfig )
 	{
@@ -249,9 +249,9 @@ namespace ts3
 			psoPass1LightCreateInfo.inputLayoutDefinition.activeAttributesMask =
 				E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_0_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_1_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_2_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_3_BIT;
 			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[0] = { 0, "POSITION", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, 0 };
-			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[1] = { 0, "COLOR", 0, ts3::gpuapi::EVertexAttribFormat::Vec4F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
-			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[2] = { 0, "NORMAL", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
-			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[3] = { 0, "TEXCOORD", 0, ts3::gpuapi::EVertexAttribFormat::Vec2F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[1] = { 0, "COLOR", 0, ts3::gpuapi::EVertexAttribFormat::Vec4F32, ts3::gpuapi::cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[2] = { 0, "NORMAL", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, ts3::gpuapi::cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			psoPass1LightCreateInfo.inputLayoutDefinition.attributeArray[3] = { 0, "TEXCOORD", 0, ts3::gpuapi::EVertexAttribFormat::Vec2F32, ts3::gpuapi::cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND };
 			psoPass1LightCreateInfo.shaderSet.addShader( vertexShaderPass1 );
 			psoPass1LightCreateInfo.shaderSet.addShader( pixelShaderPass1 );
 			psoPass1LightCreateInfo.shaderInputSignatureDesc.activeShaderStagesMask = E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT;
@@ -295,9 +295,9 @@ namespace ts3
 			psoPass2ShadowCreateInfo.inputLayoutDefinition.activeAttributesMask =
 				E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_0_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_1_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_2_BIT | E_IA_VERTEX_ATTRIBUTE_FLAG_ATTR_3_BIT;
 			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[0] = { 0, "POSITION", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, 0 };
-			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[1] = { 0, "COLOR", 0, ts3::gpuapi::EVertexAttribFormat::Vec4F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
-			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[2] = { 0, "NORMAL", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
-			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[3] = { 0, "TEXCOORD", 0, ts3::gpuapi::EVertexAttribFormat::Vec2F32, ts3::gpuapi::cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[1] = { 0, "COLOR", 0, ts3::gpuapi::EVertexAttribFormat::Vec4F32, ts3::gpuapi::cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[2] = { 0, "NORMAL", 0, ts3::gpuapi::EVertexAttribFormat::Vec3F32, ts3::gpuapi::cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND };
+			psoPass2ShadowCreateInfo.inputLayoutDefinition.attributeArray[3] = { 0, "TEXCOORD", 0, ts3::gpuapi::EVertexAttribFormat::Vec2F32, ts3::gpuapi::cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND };
 			psoPass2ShadowCreateInfo.shaderSet.addShader( vertexShaderPass2 );
 			psoPass2ShadowCreateInfo.shaderSet.addShader( pixelShaderPass2 );
 			psoPass2ShadowCreateInfo.shaderInputSignatureDesc.activeShaderStagesMask = E_SHADER_STAGE_MASK_GRAPHICS_VS_PS;

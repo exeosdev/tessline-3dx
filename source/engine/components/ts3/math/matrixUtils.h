@@ -115,6 +115,27 @@ namespace ts3::math
 	}
 
 	template <typename TVal>
+	inline Matrix3x3<TVal> inverse( const Matrix3x3<TVal> & pMatrix )
+	{
+		const auto oneOverDet = static_cast<TVal>( 1 ) / (
+				+ pMatrix[0][0] * (pMatrix[1][1] * pMatrix[2][2] - pMatrix[2][1] * pMatrix[1][2])
+				- pMatrix[1][0] * (pMatrix[0][1] * pMatrix[2][2] - pMatrix[2][1] * pMatrix[0][2])
+				+ pMatrix[2][0] * (pMatrix[0][1] * pMatrix[1][2] - pMatrix[1][1] * pMatrix[0][2]));
+
+		return {
+			+ (pMatrix[1][1] * pMatrix[2][2] - pMatrix[2][1] * pMatrix[1][2]) * oneOverDet,
+			- (pMatrix[1][0] * pMatrix[2][2] - pMatrix[2][0] * pMatrix[1][2]) * oneOverDet,
+			+ (pMatrix[1][0] * pMatrix[2][1] - pMatrix[2][0] * pMatrix[1][1]) * oneOverDet,
+			- (pMatrix[0][1] * pMatrix[2][2] - pMatrix[2][1] * pMatrix[0][2]) * oneOverDet,
+			+ (pMatrix[0][0] * pMatrix[2][2] - pMatrix[2][0] * pMatrix[0][2]) * oneOverDet,
+			- (pMatrix[0][0] * pMatrix[2][1] - pMatrix[2][0] * pMatrix[0][1]) * oneOverDet,
+			+ (pMatrix[0][1] * pMatrix[1][2] - pMatrix[1][1] * pMatrix[0][2]) * oneOverDet,
+			- (pMatrix[0][0] * pMatrix[1][2] - pMatrix[1][0] * pMatrix[0][2]) * oneOverDet,
+			+ (pMatrix[0][0] * pMatrix[1][1] - pMatrix[1][0] * pMatrix[0][1]) * oneOverDet
+		};
+	}
+
+	template <typename TVal>
 	inline Matrix3x3<TVal> inverseTranspose( const Matrix3x3<TVal> & pMatrix )
 	{
 		const TVal det =

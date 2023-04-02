@@ -1,8 +1,8 @@
 
 //#include <ts3/math/vectorTypes.h>
 //#include <ts3/math/matrixTypes.h>
-//#include <ts3/math/matrixOps.h>
-//#include <ts3/math/matrixUtils.h>
+#include <ts3/math/matrixOps.h>
+#include <ts3/math/matrixUtils.h>
 //#include <ts3/math/matrixUtilsSIMD.h>
 
 #include <ts3/math/vectorOps.h>
@@ -67,6 +67,14 @@ int main( int argc, char ** argv )
 	const auto ps = sizeof( Mat4f );
 
 	math::transposeInplace( mat4F );
+
+	math::Mat3f m1{
+		1, 2, 1,
+		4, 5, 1,
+		3, 6, 7
+	};
+
+	const auto it = math::inverse( m1 );
 
 	return 0;
 }

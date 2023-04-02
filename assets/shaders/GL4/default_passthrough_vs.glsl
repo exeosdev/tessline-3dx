@@ -2,9 +2,9 @@
 #version 430 core
 
 layout( location = 0 ) in vec3 vPosition;
-layout( location = 1 ) in vec4 vColor;
-layout( location = 2 ) in vec3 vNormal;
-layout( location = 3 ) in vec2 vTexCoord0;
+layout( location = 1 ) in vec3 vNormal;
+layout( location = 4 ) in vec4 vColor;
+layout( location = 5 ) in vec2 vTexCoord0;
 
 layout( std140, binding = 0 ) uniform CB0
 {
@@ -27,5 +27,6 @@ void main()
 {
 	psColor = vColor;
 	psTexCoord0 = vTexCoord0;
+	//gl_Position = vec4( vPosition , 1.0 );
 	gl_Position = cb0ProjectionMatrix * cb0ViewMatrix * cb0ModelMatrix * vec4( vPosition , 1.0 );
 }
