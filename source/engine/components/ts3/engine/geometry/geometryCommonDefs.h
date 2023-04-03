@@ -12,8 +12,6 @@
 namespace ts3
 {
 
-	ts3DeclareClassHandle( GeometryStorage );
-
 	struct GeometryReference;
 	struct GeometryStorageCreateInfo;
 
@@ -23,6 +21,7 @@ namespace ts3
 	class GeometryManager;
 	class GeometryStorage;
 
+	using GeometryStoragePtr = std::unique_ptr<GeometryStorage>;
 	using GeometryRefHandle = const GeometryReference *;
 
 	namespace cxdefs
@@ -217,7 +216,13 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD explicit operator bool() const noexcept;
 
+		TS3_ATTR_NO_DISCARD bool isIndexedGeometry() const noexcept;
+
+		TS3_ATTR_NO_DISCARD bool isVertexStreamActive( uint32 pVertexStreamIndex ) const;
+
 		TS3_ATTR_NO_DISCARD uint32 vertexStreamElementSizeInBytes( uint32 pVertexStreamIndex ) const;
+
+		TS3_ATTR_NO_DISCARD uint32 vertexDataOffsetInElementsNum() const noexcept;
 
 		TS3_ATTR_NO_DISCARD uint32 vertexElementSizeInBytes() const noexcept;
 

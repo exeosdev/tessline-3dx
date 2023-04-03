@@ -87,7 +87,7 @@ namespace ts3::gpuapi
 			D3D11_INPUT_ELEMENT_DESC d3D11InputElementDesc;
 
 			d3D11InputElementDesc.AlignedByteOffset = static_cast<UINT>( pAttributeInfo.relativeOffset );
-			d3D11InputElementDesc.SemanticName = pAttributeInfo.semanticName;
+			d3D11InputElementDesc.SemanticName = pAttributeInfo.semanticName.c_str();
 			d3D11InputElementDesc.SemanticIndex = pAttributeInfo.semanticIndex;
 			d3D11InputElementDesc.Format = atl::translateVertexAttribFormatDX( pAttributeInfo.format );
 			d3D11InputElementDesc.InputSlot = pAttributeInfo.streamIndex;
@@ -118,12 +118,12 @@ namespace ts3::gpuapi
 					// Translate the attribute data. This includes the relative offset.
 					dx11AttributeInfo = translateIAVertexAttributeInfoDX11( inputAttributeInfo );
 
-					if( inputAttributeInfo.relativeOffset == cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND )
+					if( inputAttributeInfo.relativeOffset == cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND )
 					{
 						// If the offset is APPEND, update it with the current packed offset calculated.
 						dx11AttributeInfo.AlignedByteOffset = numeric_cast<uint32>( memGetAlignedValue( currentAttributePackedRelativeOffset, 4 ) );
 					}
-					else if( inputAttributeInfo.relativeOffset == cxdefs::VERTEX_ATTRIBUTE_OFFSET_APPEND16 )
+					else if( inputAttributeInfo.relativeOffset == cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND16 )
 					{
 						// If the offset is APPEND, update it with the current packed offset calculated.
 						dx11AttributeInfo.AlignedByteOffset = numeric_cast<uint32>( memGetAlignedValue( currentAttributePackedRelativeOffset, 16 ) );

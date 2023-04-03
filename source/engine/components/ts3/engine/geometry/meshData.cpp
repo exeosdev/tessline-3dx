@@ -11,7 +11,7 @@ namespace ts3
 	{
 		setContainerCapacity( pVertexElementsNum, pIndexElementsNum );
 
-		for( uint32 iVertexStream = 0; iVertexStream < mDataFormat.activeVertexStreamIndexEnd(); ++iVertexStream )
+		for( auto iVertexStream : mDataFormat.activeVertexStreams() )
 		{
 			if( mDataFormat.isVertexStreamActive( iVertexStream ) )
 			{
@@ -42,12 +42,10 @@ namespace ts3
 			return nullptr;
 		}
 
-		auto * currentLastSubComponent = !_meshSubComponents.empty() ? &_meshSubComponents.back() : nullptr;
-
 		auto & subComponentData = _meshSubComponents.emplace_back( mDataFormat );
 		subComponentData.componentIndex = numeric_cast<uint32>( _meshSubComponents.size() - 1 );
 
-		if( !currentLastSubComponent )
+		if( subComponentData.componentIndex == 0 )
 		{
 			subComponentData.geometryDataRef = gmutil::getGeometryDataReferenceSubRegion(
 					_allGeometryDataRef,
@@ -56,8 +54,9 @@ namespace ts3
 		}
 		else
 		{
+			const auto & previousSubComponent = _meshSubComponents[subComponentData.componentIndex - 1];
 			subComponentData.geometryDataRef = gmutil::advanceGeometryDataReference(
-					currentLastSubComponent->geometryDataRef,
+					previousSubComponent.geometryDataRef,
 					pVertexElementsNum,
 					pIndexElementsNum );
 		}
@@ -87,7 +86,7 @@ namespace ts3
 		auto * bufferBasePtr = _vertexDataBuffers[attributeFormat.streamIndex].data();
 
 		return DataBufferRegionSubElementMappingReadWrite {
-				bufferBasePtr + ( vertexStreamDataRef.offsetInElementsNum * vertexStreamDataRef.elementSize ),
+				bufferBasePtr + ( vertexStreamDataRef.offsetInElementsNum * vertexStreamDataRef.elementSize ) + attributeFormat.streamElementRelativeOffset,
 				attributeFormat.attributeTotalSizeInBytes,
 				vertexStreamDataRef.elementSize
 		};

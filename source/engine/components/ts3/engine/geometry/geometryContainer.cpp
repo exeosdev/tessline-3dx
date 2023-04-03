@@ -50,7 +50,7 @@ namespace ts3
 		_storageMetrics.capacity.vertexDataCapacityInElementsNum = pVertexElementsNum;
 		_storageMetrics.capacity.indexDataCapacityInElementsNum = pIndexElementsNum;
 
-		for( uint32 iVertexStream = 0; iVertexStream < mDataFormat.activeVertexStreamIndexEnd(); ++iVertexStream )
+		for( auto iVertexStream : mDataFormat.activeVertexStreams() )
 		{
 			if( mDataFormat.isVertexStreamActive( iVertexStream ) )
 			{

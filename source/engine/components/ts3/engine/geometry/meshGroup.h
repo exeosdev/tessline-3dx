@@ -37,6 +37,8 @@ namespace ts3
 
 		GeometryStorage & getGeometryStorage() const noexcept;
 
+		Mesh * getMesh( size_t pIndex ) const noexcept;
+
 		Mesh * findMesh( const std::string & pName ) const noexcept;
 
 		MeshComponent * findMeshComponent( const std::string & pName ) const noexcept;
@@ -49,11 +51,13 @@ namespace ts3
 		void registerMeshComponent( MeshComponent & pMeshComponent );
 
 	private:
-		using MeshArray = std::deque<Mesh>;
+		using MeshStorage = std::deque<Mesh>;
+		using MeshList = std::vector<Mesh *>;
 		using MeshName = std::string_view;
 		using MeshComponentMap = std::unordered_map<MeshName, MeshComponent *>;
 
-		MeshArray _meshes;
+		MeshStorage _meshStorage;
+		MeshList _meshes;
 		MeshComponentMap _meshComponents;
 		GeometryStorage * _geometryStorage;
 	};

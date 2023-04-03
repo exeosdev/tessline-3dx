@@ -17,6 +17,7 @@ namespace ts3
 		ShareExternal
 	};
 
+
 	struct GeometryStorageCreateInfo
 	{
 		struct GeometryBufferDesc
@@ -58,7 +59,7 @@ namespace ts3
 
 		void releaseStorage() {}
 
-		static GeometryStorageHandle createStorage(
+		static GeometryStoragePtr createStorage(
 				const CoreEngineState & pCES,
 				const GeometryStorageCreateInfo & pCreateInfo,
 				const GeometryStorage * pSharedStorage = nullptr );

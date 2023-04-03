@@ -21,6 +21,11 @@ namespace ts3
 		}
 	}
 
+	Mesh * MeshGroup::getMesh( size_t pIndex ) const noexcept
+	{
+		return ( pIndex < _meshes.size() ) ? _meshes[pIndex] : nullptr;
+	}
+
 	Mesh * MeshGroup::findMesh( const std::string & pName ) const noexcept
 	{
 		auto * meshComponentPtr = findMeshComponent( pName );
@@ -57,7 +62,8 @@ namespace ts3
 
 	Mesh * MeshGroup::addMesh( std::string pName )
 	{
-		auto & mesh = _meshes.emplace_back( *this, std::move( pName ) );
+		auto & mesh = _meshStorage.emplace_back( *this, std::move( pName ) );
+		_meshes.push_back( &mesh );
 		return &mesh;
 	}
 

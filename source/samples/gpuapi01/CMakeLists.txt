@@ -1,7 +1,7 @@
 
 set( gpuapi01_SRC_FILES_COMMON
         "gpuapi01-meshDefs.h"
-        "gpuapi01-main.cpp"
+        "gpuapi01-main.mm"
         )
 
 set( gpuapi01_SRC_FILES_APPLE

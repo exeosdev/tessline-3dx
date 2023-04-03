@@ -47,7 +47,7 @@ namespace ts3
 		return addGeometry( pVertexElementsNum, 0 );
 	}
 
-	GeometryStorageHandle GeometryStorage::createStorage(
+	GeometryStoragePtr GeometryStorage::createStorage(
 			const CoreEngineState & pCES,
 			const GeometryStorageCreateInfo & pCreateInfo,
 			const GeometryStorage * pSharedStorage )
@@ -57,7 +57,7 @@ namespace ts3
 			return nullptr;
 		}
 
-		auto geometryStorage = createDynamicInterfaceObject<GeometryStorage>( *pCreateInfo.dataFormat );
+		auto geometryStorage = std::make_unique<GeometryStorage>( *pCreateInfo.dataFormat );
 
 		geometryStorage->createStorageGPUBuffers( pCES, pCreateInfo );
 
@@ -66,6 +66,8 @@ namespace ts3
 			geometryStorage->bindSharedGPUBuffers( pCreateInfo, *pSharedStorage );
 		}
 
+		geometryStorage->initializeVertexStreamState( pCES );
+
 		return geometryStorage;
 	}
 
@@ -73,7 +75,7 @@ namespace ts3
 	{
 		setContainerCapacity( pCreateInfo.capacity.vertexDataCapacityInElementsNum, pCreateInfo.capacity.indexDataCapacityInElementsNum );
 
-		for( uint32 iVertexStream = 0; iVertexStream < mDataFormat.activeVertexStreamIndexEnd(); ++iVertexStream )
+		for( auto iVertexStream : mDataFormat.activeVertexStreams() )
 		{
 			if( pCreateInfo.dataFormat->isVertexStreamActive( iVertexStream ) )
 			{
@@ -117,13 +119,11 @@ namespace ts3
 				_vertexStreamBindingMask.set( gpuapi::E_IA_VERTEX_STREAM_BINDING_FLAG_INDEX_BUFFER_BIT );
 			}
 		}
-
-		initializeVertexStreamState( pCES );
 	}
 
 	void GeometryStorage::bindSharedGPUBuffers( const GeometryStorageCreateInfo & pCreateInfo, const GeometryStorage & pSharedStorage )
 	{
-		for( uint32 iVertexStream = 0; iVertexStream < mDataFormat.activeVertexStreamIndexEnd(); ++iVertexStream )
+		for( auto iVertexStream : mDataFormat.activeVertexStreams() )
 		{
 			if( pCreateInfo.vertexBufferDescArray[iVertexStream].allocationMode == EGeometryBufferAllocationMode::ShareExternal )
 			{
@@ -144,7 +144,7 @@ namespace ts3
 		gpuapi::IAVertexStreamDefinition vertexStreamDefinition;
 		vertexStreamDefinition.activeBindingsMask = _vertexStreamBindingMask;
 
-		for( uint32 iVertexStream = 0; iVertexStream < mDataFormat.activeVertexStreamIndexEnd(); ++iVertexStream )
+		for( auto iVertexStream : mDataFormat.activeVertexStreams() )
 		{
 			if( const auto & vertexBuffer = _vertexBufferArray[iVertexStream] )
 			{
@@ -173,12 +173,10 @@ namespace ts3
 			return nullptr;
 		}
 
-		auto * lastGeometryRef = !_geometryRefList.empty() ? &_geometryRefList.back() : nullptr;
-
 		auto & geometryReference = _geometryRefList.emplace_back( *this );
 		geometryReference.geometryIndex = numeric_cast<uint32>( _geometryRefList.size() - 1 );
 
-		if( !lastGeometryRef )
+		if( geometryReference.geometryIndex == 0 )
 		{
 			geometryReference.dataReference = gmutil::getGeometryDataReferenceSubRegion(
 					_allGeometryDataRef,
@@ -187,8 +185,9 @@ namespace ts3
 		}
 		else
 		{
+			const auto & previousGeometryRef = _geometryRefList[geometryReference.geometryIndex - 1];
 			geometryReference.dataReference = gmutil::advanceGeometryDataReference(
-					lastGeometryRef->dataReference,
+					previousGeometryRef.dataReference,
 					pVertexElementsNum,
 					pIndexElementsNum );
 		}
@@ -266,7 +265,7 @@ namespace ts3
 
 		bool vertexBufferShared = false;
 
-		for( uint32 iVertexStream = 0; pCreateInfo.dataFormat->activeVertexStreamIndexEnd(); ++iVertexStream )
+		for( auto iVertexStream : pCreateInfo.dataFormat->activeVertexStreams() )
 		{
 			if( pCreateInfo.vertexBufferDescArray[iVertexStream].allocationMode == EGeometryBufferAllocationMode::ShareExternal )
 			{

@@ -36,19 +36,20 @@ namespace ts3::gpuapi
 		CommandList::endCommandSequence();
 	}
 
-	void GLCommandList::cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset )
+	void GLCommandList::cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset, native_uint pBaseVertexIndex )
 	{
 		_graphicsPipelineStateControllerGL->applyStateChanges();
 
 		const auto & drawTopologyProperties = _graphicsPipelineStateControllerGL->getGLDrawTopologyProperties();
 		const auto relativeIndexDataOffset = pIndicesOffset * drawTopologyProperties.indexBufferElementByteSize;
-		const auto * baseIndexDataOffset = reinterpret_cast<void *>( drawTopologyProperties.indexBufferBaseOffset + relativeIndexDataOffset );
+		auto * baseIndexDataOffset = reinterpret_cast<void *>( drawTopologyProperties.indexBufferBaseOffset + relativeIndexDataOffset );
 
-		glDrawElements(
+		glDrawElementsBaseVertex(
 			drawTopologyProperties.primitiveTopology,
-			static_cast< GLsizei >( pIndicesNum ),
+			static_cast<GLsizei>( pIndicesNum ),
 			drawTopologyProperties.indexBufferDataType,
-			baseIndexDataOffset );
+			baseIndexDataOffset,
+			static_cast<GLint>( pBaseVertexIndex ) );
 		ts3OpenGLHandleLastError();
 	}
 

@@ -90,6 +90,14 @@ namespace ts3
 	using VertexAttributeFormatArray = std::array<VertexAttributeFormat, gpa::MAX_GEOMETRY_VERTEX_ATTRIBUTES_NUM>;
 	using VertexStreamFormatArray = std::array<VertexStreamFormat, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
 
+	struct P3SVertex
+	{
+		math::Vec3f position;
+		math::Vec3f normal;
+		math::Vec4f color;
+		math::Vec2f texcoord0;
+	};
+
 
 } // namespace ts3
 

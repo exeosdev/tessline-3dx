@@ -38,13 +38,13 @@
 #include <ts3/engine/renderer/shaderLoader.h>
 #include <ts3/engine/renderer/effects/shadowRenderer.h>
 #include <ts3/engine/geometry/geometryManager.h>
+#include <ts3/engine/geometry/geometryStorage.h>
 #include <ts3/engine/geometry/geometryDataTransfer.h>
 
 #include <chrono>
 #include <thread>
 
 #include "gpuapi01-meshDefs.h"
-#import "ts3/engine/geometry/geometryManager.h"
 
 using namespace ts3;
 using namespace gpuapi;
@@ -141,23 +141,7 @@ int ts3AndroidAppMain( int argc, char ** argv, AndroidAppState * pAppState )
 
 int main( int pArgc, const char ** pArgv )
 {
-	// Assimp::Importer aImporter;
-	// auto * scene = aImporter.ReadFile( "assets/meshes/tree/Tree.obj", aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph | aiProcess_Triangulate );
-	// for(auto i = 0; i < scene->mNumMaterials; i++)
-	// {
-	// 	const auto materialPtr = scene->mMaterials[i];
-	// 	aiString aiTexturePath;
-	// 	if (materialPtr->GetTextureCount(aiTextureType_DIFFUSE) > 0)
-	// 	{
-	// 		if (materialPtr->GetTexture(aiTextureType_DIFFUSE, 0, &aiTexturePath) == AI_SUCCESS)
-	// 		{
-	// 			const auto * textureFileName = aiTexturePath.C_Str();
-	// 			continue;
-	// 		}
-	// 	}
-	// }
-
-    sGxDriverName = "DX11";
+    sGxDriverName = "GL4";
 
 	SysContextCreateInfo sysContextCreateInfo;
 	platform::SysContextCreateInfoNativeParams sysContextCreateInfoNP;
@@ -277,15 +261,6 @@ int main( int pArgc, const char ** pArgv )
             });
 #endif
 
-	auto fileLoadCallback = std::bind( loadFileDefault, std::ref( *assetLoader ), std::placeholders::_1 );
-
-	//auto meshLoader = std::make_unique<AssimpMeshLoader>( fileLoadCallback );
-	//auto meshDefinition = meshLoader->loadMeshDefault( "assets/meshes/tree/Tree.obj" );
-
-	// auto meshDataNew = meshImporter->importMeshDefault( "assets/meshes/tree/Tree.obj", gdf );
-
-	//geom::generateTangentsAndBiTangents( meshDefinition.subMeshes[0].meshData );
-
 	bool isFullscreen = true;
 	bool updateLightPosition = true;
 
@@ -361,6 +336,11 @@ int main( int pArgc, const char ** pArgv )
 
 	initializeGraphicsDriver( sysContext, gxDriverState );
 
+	if( auto * eventSource = gxDriverState.presentationLayer->getInternalSystemEventSource() )
+	{
+		evtController->registerEventSource( *eventSource );
+	}
+
 	CoreEngineState ces{ sysContext, gxDriverState.device };
 
 	GeometryDataFormat gdf;
@@ -372,19 +352,26 @@ int main( int pArgc, const char ** pArgv )
 	gdf.setPrimitiveTopology( gpuapi::EPrimitiveTopology::TriangleList );
 
 	MeshLoader meshLoader;
-	MeshImporterAssimp meshImporter;
 	GeometryManager geometryManager{ ces };
-	GeometryDataGpuTransferDirect geometryDataGpuTransfer{ ces, *gxDriverState.cmdContext };
 
-	MeshImportContext mic;
-	mic.geometryManager = &geometryManager;
-	mic.geometryDataFormat = &gdf;
-	mic.importer = &meshImporter;
-	mic.geometryDataTransfer = &geometryDataGpuTransfer;
+	std::unique_ptr<MeshGroup> meshGroup;
 
-	auto meshGroup = meshLoader.importMeshGroup( mic, "MeshGroupID_Default", {
-			{ "MeshID_Default_TreeBase", "assets/meshes/tree/Tree.obj" }
-	} );
+	{
+		MeshImporterAssimp meshImporter;
+		GeometryDataGpuTransferDirect geometryDataGpuTransfer{ ces, *gxDriverState.cmdContext };
+
+		MeshImportContext mic;
+		mic.geometryManager = &geometryManager;
+		mic.geometryDataFormat = &gdf;
+		mic.importer = &meshImporter;
+		mic.geometryDataTransfer = &geometryDataGpuTransfer;
+
+		meshGroup = meshLoader.importMeshGroup( mic, "MeshGroupID_Default", {
+				{ "MeshID_Default_TreeBase", "assets/meshes/tree/Tree.obj" }
+			} );
+	}
+
+	auto * meshTree = meshGroup->findMesh( "MeshID_Default_TreeBase" );
 
 	const auto rtSize = gxDriverState.presentationLayer->queryRenderTargetSize();
 	auto shaderLibrary = ShaderLoader::createShaderLibrary( ces, {
@@ -394,37 +381,12 @@ int main( int pArgc, const char ** pArgv )
 			{ "SID_SHADOW_0_PASS1_LIGHT_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass1_light_ps" ) },
 			{ "SID_SHADOW_0_PASS2_SHADOW_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass2_shadow_vs" ) },
 			{ "SID_SHADOW_0_PASS2_SHADOW_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass2_shadow_ps" ) },
-			//{ "SID_SHADOW_0_PASS2_SHADOW_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_vs" ) },
-			//{ "SID_SHADOW_0_PASS2_SHADOW_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_ps" ) },
 	} );
-
-	ts3::ShadowConfig shadowConfig;
-	shadowConfig.screenSize.width = rtSize.x;
-	shadowConfig.screenSize.height = rtSize.y;
-	shadowConfig.shadowMapSize.width = 2048;
-	shadowConfig.shadowMapSize.height = 2048;
-	auto shadowRenderer = std::make_unique<ts3::ShadowRenderer>( *shaderLibrary, shadowConfig );
-
-	AppSharedResources appResources;
-	{
-		auto txROG512Asset = assetLoader->openSubAsset( "bitmaps/rog-logo1-512", E_ASSET_OPEN_FLAG_NO_EXTENSION_BIT );
-
-		DynamicMemoryBuffer tmpBuffer;
-		txROG512Asset->readAll( tmpBuffer );
-		appResources.txROG512Data = loadBitmapFromMemory( tmpBuffer.data(), tmpBuffer.size() );
-	}
-
-	if( auto * eventSource = gxDriverState.presentationLayer->getInternalSystemEventSource() )
-	{
-		evtController->registerEventSource( *eventSource );
-	}
-
-	auto * gpuDevicePtr = gxDriverState.device.get();
 
 	auto vertexShader = shaderLibrary->getShader( "SID_DEFAULT_PASSTHROUGH_VS" );
 	auto pixelShader = shaderLibrary->getShader( "SID_DEFAULT_PASSTHROUGH_PS" );
 
-	gpuapi::RenderPassConfiguration rednerPassConfig;
+	auto * gpuDevicePtr = gxDriverState.device.get();
 
 	gpuapi::GPUBufferHandle cbuffer0;
 	{
@@ -436,123 +398,6 @@ int main( int pArgc, const char ** pArgv )
 
 		cbci.bufferSize = sizeof( CB0Data );
 		cbuffer0 = gxDriverState.device->createGPUBuffer( cbci );
-	}
-	gpuapi::GPUBufferHandle vbuffer;
-	{
-		const auto vertexData = generateVertexPNT0Data();
-		gpuapi::GPUBufferCreateInfo vbci;
-		vbci.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-
-		vbci.resourceFlags = gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
-		vbci.resourceFlags |= gpuapi::E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT;
-
-		vbci.initDataDesc.pointer = vertexData.data();
-		vbci.initDataDesc.size    = vertexData.size() * sizeof( VertexPNT0 );
-		vbuffer = gxDriverState.device->createGPUBuffer( vbci );
-	}
-	gpuapi::GPUBufferHandle ibuffer;
-	{
-		const auto indexData = generateIndexPNT0Data();
-		gpuapi::GPUBufferCreateInfo ibci;
-		ibci.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-
-		ibci.resourceFlags = gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
-		ibci.resourceFlags |= gpuapi::E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT;
-
-		ibci.initDataDesc.pointer = indexData.data();
-		ibci.initDataDesc.size    = indexData.size() * sizeof( uint32 );
-		ibuffer = gxDriverState.device->createGPUBuffer( ibci );
-	}
-
-	// IndexedMeshDataBufferBuilderP3N3T indexedMeshBuilder;
-	// indexedMeshBuilder.allocateStorage( meshDefinition );
-	// indexedMeshBuilder.addMeshDefinition( meshDefinition );
-
-	gpuapi::GPUBufferHandle mesh0VBuffer;
-	gpuapi::GPUBufferHandle mesh1VBuffer;
-//    {
-//        gpuapi::GPUBufferCreateInfo vbci;
-//        vbci.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-//        vbci.resourceFlags = gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
-//	    vbci.resourceFlags |= gpuapi::E_GPU_BUFFER_BIND_FLAG_VERTEX_BUFFER_BIT;
-//
-//	    const auto & subMesh0 = meshDefinition.subMeshes[0].meshData;
-//        vbci.bufferSize = subMesh0.verticesData.size();
-//	    vbci.initDataDesc.pointer = subMesh0.verticesData.data();
-//	    vbci.initDataDesc.size    = subMesh0.verticesData.size();
-//	    mesh0VBuffer = gxDriverState.device->createGPUBuffer( vbci );
-//
-//		const auto & subMesh1 = meshDefinition.subMeshes[1].meshData;
-//	    vbci.bufferSize = subMesh1.verticesData.size();
-//	    vbci.initDataDesc.pointer = subMesh1.verticesData.data();
-//	    vbci.initDataDesc.size    = subMesh1.verticesData.size();
-//	    mesh1VBuffer = gxDriverState.device->createGPUBuffer( vbci );
-//    }
-	gpuapi::GPUBufferHandle mesh0IBuffer;
-	gpuapi::GPUBufferHandle mesh1IBuffer;
-//    {
-//        gpuapi::GPUBufferCreateInfo ibci;
-//        ibci.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-//        ibci.resourceFlags = gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT;
-//	    ibci.resourceFlags |= gpuapi::E_GPU_BUFFER_BIND_FLAG_INDEX_BUFFER_BIT;
-//
-//		const auto & subMesh0 = meshDefinition.subMeshes[0].meshData;
-//	    ibci.bufferSize = subMesh0.indicesData.size();
-//	    ibci.initDataDesc.pointer = subMesh0.indicesData.data();
-//	    ibci.initDataDesc.size    = subMesh0.indicesData.size();
-//	    mesh0IBuffer = gxDriverState.device->createGPUBuffer( ibci );
-//
-//		const auto & subMesh1 = meshDefinition.subMeshes[1].meshData;
-//	    ibci.bufferSize = subMesh1.indicesData.size();
-//	    ibci.initDataDesc.pointer = subMesh1.indicesData.data();
-//	    ibci.initDataDesc.size    = subMesh1.indicesData.size();
-//	    mesh1IBuffer = gxDriverState.device->createGPUBuffer( ibci );
-//    }
-
-	std::vector<gpuapi::TextureHandle> meshTextures;
-//	meshTextures.resize( meshDefinition.materials.size() );
-//	{
-//		gpuapi::TextureCreateInfo txci;
-//		txci.texClass = gpuapi::ETextureClass::T2D;
-//		txci.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-//		txci.resourceFlags =
-//				gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT |
-//				gpuapi::E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT;
-//
-//		for( auto iMaterial = 0; iMaterial < meshDefinition.materials.size(); ++iMaterial )
-//		{
-//			const auto & materialDefinition = meshDefinition.materials[iMaterial];
-//			auto & imageData = materialDefinition.diffuseTextureData;
-//			if( imageData.empty() )
-//			{
-//				continue;
-//			}
-//			txci.dimensions.width = imageData.formatInfo.dimensions.x;
-//			txci.dimensions.height = imageData.formatInfo.dimensions.y;
-//			txci.internalFormat = smutil::getTextureFormatForGraphicsPixelLayout( imageData.formatInfo.pixelLayout );
-//			txci.initDataDesc.initialize( txci.dimensions );
-//			txci.initDataDesc.subTextureInitDataBasePtr[0].mipLevelInitDataArray[0].pointer = imageData.pixelBuffer.data();
-//			txci.initDataDesc.subTextureInitDataBasePtr[0].mipLevelInitDataArray[0].size = imageData.pixelBuffer.size();
-//			auto textureHandle = gpuDevicePtr->createTexture( txci );
-//			meshTextures[iMaterial] = textureHandle;
-//		}
-//	}
-
-	gpuapi::TextureHandle tex0;
-	{
-		gpuapi::TextureCreateInfo txci;
-		txci.texClass = gpuapi::ETextureClass::T2D;
-		txci.dimensions.width = appResources.txROG512Data.formatInfo.dimensions.x;
-		txci.dimensions.height = appResources.txROG512Data.formatInfo.dimensions.y;
-		txci.memoryFlags = gpuapi::E_GPU_MEMORY_ACCESS_FLAG_GPU_READ_BIT;
-		txci.resourceFlags =
-				gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT |
-				gpuapi::E_GPU_RESOURCE_USAGE_FLAG_SHADER_INPUT_BIT;;
-		txci.internalFormat = gpuapi::ETextureFormat::RGBA8UN;
-		txci.initDataDesc.initialize( txci.dimensions );
-		txci.initDataDesc.subTextureInitDataBasePtr[0].mipLevelInitDataArray[0].pointer = appResources.txROG512Data.pixelBuffer.data();
-		txci.initDataDesc.subTextureInitDataBasePtr[0].mipLevelInitDataArray[0].size = appResources.txROG512Data.sizeInBytes;
-		tex0 = gpuDevicePtr->createTexture( txci );
 	}
 
 	gpuapi::TextureHandle texRTColor0;
@@ -612,14 +457,9 @@ int main( int pArgc, const char ** pArgv )
 		rpConfig.depthStencilAttachment.clearConfig.stencilValue = 0xFF;
 		fboRenderPassState = gpuDevicePtr->createRenderPassConfigurationImmutableState( rpConfig );
 
-		rpConfig.colorAttachments[0].clearConfig.colorValue = { 0.68f, 0.92f, 0.78f, 1.0f };
+		// rpConfig.colorAttachments[0].clearConfig.colorValue = { 0.68f, 0.92f, 0.78f, 1.0f };
 		scrRenderPassState = gpuDevicePtr->createRenderPassConfigurationImmutableState( rpConfig );
 	}
-
-	gpuapi::SamplerCreateInfo samplerCreateInfo;
-	samplerCreateInfo.samplerConfig = gpuapi::cvSamplerConfigDefault;
-
-	auto defaultSampler = gxDriverState.device->createSampler( samplerCreateInfo );
 
 	GraphicsPipelineStateObjectHandle mainPSO;
 	{
@@ -636,24 +476,18 @@ int main( int pArgc, const char ** pArgv )
 		psoci.depthStencilConfig = defaults::cvPipelineDepthStencilConfigEnableDepthTest;
 		psoci.rasterizerConfig = defaults::cvPipelineRasterizerConfigDefault;
 		psoci.rasterizerConfig.cullMode = gpuapi::ECullMode::Back;
-		psoci.rasterizerConfig.primitiveFillMode = gpuapi::EPrimitiveFillMode::Solid;
-		psoci.rasterizerConfig.frontFaceVerticesOrder = gpuapi::ETriangleVerticesOrder::CounterClockwise;
+		psoci.rasterizerConfig.primitiveFillMode = gpuapi::EPrimitiveFillMode::Wireframe;
+		psoci.rasterizerConfig.frontFaceVerticesOrder = gpuapi::ETriangleVerticesOrder::Clockwise;
 		psoci.renderTargetLayout = rtLayout;
 		psoci.inputLayoutDefinition = gdf.generateGpaInputLayoutDefinition();
 		psoci.shaderSet.addShader( vertexShader );
 		psoci.shaderSet.addShader( pixelShader );
 		psoci.shaderInputSignatureDesc.activeShaderStagesMask = gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT | gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT;
-		psoci.shaderInputSignatureDesc.descriptorSetsNum = 2;
+		psoci.shaderInputSignatureDesc.descriptorSetsNum = 1;
 		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorType = gpuapi::EShaderInputDescriptorType::Resource;
-		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorsNum = 2;
+		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorsNum = 1;
 		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0] = {0, gpuapi::EShaderInputDescriptorType::Resource, gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_VERTEX_BIT };
 		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[0].uResourceDesc = { gpuapi::EShaderInputResourceType::CBVConstantBuffer, 0, 1 };
-		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[1] = { 1, gpuapi::EShaderInputDescriptorType::Resource, gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT };
-		psoci.shaderInputSignatureDesc.descriptorSetArray[0].descriptorList[1].uResourceDesc = { gpuapi::EShaderInputResourceType::SRVTextureImage, 0, 1 };
-		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorType = gpuapi::EShaderInputDescriptorType::Sampler;
-		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorsNum = 1;
-		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorList[0] = { 10, gpuapi::EShaderInputDescriptorType::Sampler, gpuapi::E_SHADER_STAGE_FLAG_GRAPHICS_PIXEL_BIT };
-		psoci.shaderInputSignatureDesc.descriptorSetArray[1].descriptorList[0].uSamplerConfig = { 0 };
 
 		mainPSO = gxDriverState.device->createGraphicsPipelineStateObject( psoci );
 	}
@@ -663,36 +497,6 @@ int main( int pArgc, const char ** pArgv )
 	c0.attachmentTexture = texRTColor0RT;
 	auto & ds = rtds.setDepthStencilAttachmentBinding();
 	ds.attachmentTexture = texRTDepthStencilRT;
-
-	IAVertexStreamDynamicState vsds;
-//	auto & vb0 = vsds.setVertexBufferRef( 0 );
-//	vb0.sourceBuffer = vbuffer;
-//	vb0.relativeOffset = 0;
-//	vb0.vertexStride = sizeof( VertexPNT0 );
-//	auto & ib = vsds.setIndexBufferRef();
-//	ib.sourceBuffer = ibuffer;
-//	ib.relativeOffset = 0;
-//	ib.indexFormat = EIndexDataFormat::Uint32;
-
-	IAVertexStreamDynamicState mesh0VSDS;
-//	auto & mesh0VB = mesh0VSDS.setVertexBufferRef( 0 );
-//	mesh0VB.sourceBuffer = mesh0VBuffer;
-//	mesh0VB.relativeOffset = 0;
-//	mesh0VB.vertexStride = sizeof( VertexDefaultP3N3T );
-//	auto & mesh0IB = mesh0VSDS.setIndexBufferRef();
-//	mesh0IB.sourceBuffer = mesh0IBuffer;
-//	mesh0IB.relativeOffset = 0;
-//	mesh0IB.indexFormat = EIndexDataFormat::Uint32;
-
-	IAVertexStreamDynamicState mesh1VSDS;
-//	auto & mesh1VB = mesh1VSDS.setVertexBufferRef( 0 );
-//	mesh1VB.sourceBuffer = mesh1VBuffer;
-//	mesh1VB.relativeOffset = 0;
-//	mesh1VB.vertexStride = sizeof( VertexDefaultP3N3T );
-//	auto & mesh1IB = mesh1VSDS.setIndexBufferRef();
-//	mesh1IB.sourceBuffer = mesh1IBuffer;
-//	mesh1IB.relativeOffset = 0;
-//	mesh1IB.indexFormat = EIndexDataFormat::Uint32;
 
 	math::Vec3f cameraOriginPoint{ 0.0f, 2.0f,  -4.0f };
 	math::Vec3f cameraTargetPoint{ 0.0f, 0.0f,  4.0f };
@@ -726,11 +530,11 @@ int main( int pArgc, const char ** pArgv )
 			cameraController.getPerspectiveFOVAngle(), ( float )rtSize.x / ( float )rtSize.y, 1.0f, 1000.0f );
 
 	CB0Data cb0DataBase =
-			{
-					math::identity4<float>(),
-					math::identity4<float>(),
-					math::identity4<float>(),
-			};
+	{
+		math::identity4<float>(),
+		math::identity4<float>(),
+		math::identity4<float>(),
+	};
 
 	const uint32 VNUM = 36;
 
@@ -771,31 +575,21 @@ int main( int pArgc, const char ** pArgv )
 					const auto & emove = pEvt.eInputMouseMove;
 					if( emove.buttonStateMask.isSet( ts3::system::E_MOUSE_BUTTON_FLAG_LEFT_BIT ) )
 					{
-						cameraController.rotateAroundOrigin( emove.movementDelta.x, -emove.movementDelta.y );
+						cameraController.rotateAroundOrigin( emove.movementDelta.x, emove.movementDelta.y );
 					}
 					else if( emove.buttonStateMask.isSet( ts3::system::E_MOUSE_BUTTON_FLAG_RIGHT_BIT ) )
 					{
-						cameraController.rotateAroundTarget( emove.movementDelta.x, -emove.movementDelta.y );
+						cameraController.rotateAroundTarget( emove.movementDelta.x, emove.movementDelta.y );
 					}
 				}
 				return true;
 			});
 
-	math::Vec3f lightPosition{ -2.0f, 2.0f, -2.0f };
-	math::Vec3f lightTarget{ 0.0f, 0.0f,  4.0f };
-
-	shadowRenderer->createRendererResources();
-	shadowRenderer->setCSLightPosition( lightPosition );
-	shadowRenderer->setCSLightTarget( lightTarget );
-	shadowRenderer->setCSProjectionMatrixLightPerspectiveDefault();
-
-	uint32 lightViewAngle = 0;
-
 	srand( time( nullptr ) );
 
 	const auto treesNum = 36;
 	const auto treeModelTransBase = math::translation( 0.0f, 0.48f, 1.0f);
-	const auto treeModelScale = math::scaling<float>( 0.75f, 0.75f, 0.75f );
+	const auto treeModelScale = math::scaling<float>( 0.85f, 0.85f, 0.85f );
 
 	const auto treeRangeX = std::make_pair( -4.0f, 4.0f );
 	const auto treeRangeZ = std::make_pair( 0.0f, 6.0f );
@@ -822,278 +616,48 @@ int main( int pArgc, const char ** pArgv )
 			continue;
 		}
 
-		lightPosition.x = 3 * std::cos( ( float )( lightViewAngle * math::constants::cxFloatRad1Degree ) );
-		lightPosition.x = 3 * std::sin( ( float )( lightViewAngle * math::constants::cxFloatRad1Degree ) );
-		shadowRenderer->setCSLightPosition( lightPosition );
-
 		try
 		{
-			auto pcstamp = PerfCounter::queryCurrentStamp();
-			if( PerfCounter::convertToDuration<ts3::EDurationPeriod::Millisecond>( pcstamp - u1ts ) >= update1ts )
-			{
-				u1angle += math::constants::cxFloatRad1Degree * 10 * ( 1.0f / update1ts );
-				u1ts = pcstamp;
-
-				if( updateLightPosition )
-				{
-					++lightViewAngle;
-				}
-			}
-			if( PerfCounter::convertToDuration<ts3::EDurationPeriod::Millisecond>( pcstamp - u2ts ) >= update2ts )
-			{
-				u2angle += math::constants::cxFloatRad1Degree * 10 * ( 1.0f / update2ts );
-				u2ts = pcstamp;
-			}
-
 			evtController->dispatchPendingEventsAuto();
 
 			gxDriverState.cmdContext->beginCommandSequence();
 
 			const auto cameraViewMatrix = cameraController.computeViewMatrixLH();
 
-//	        if( false )
-//	        {
-//		        const auto modelMatrix1 = math::translation<float>( 0.0f, 0, 2.0f );
-//		        const auto modelMatrix2 = math::translation<float>( 1.0f, 0, 4.0f );
-//		        const auto modelMatrix3 = math::translation<float>( 2.0f, 0, 6.0f );
-//
-//		        CB0Data cb0Data;
-//
-//		        auto & cmdContext = *gxDriverState.cmdContext;
-//
-//
-//
-//		        shadowRenderer->beginRenderPass1Light( *gxDriverState.cmdContext );
-//		        {
-//			        cmdContext.cmdSetShaderConstantBuffer( 10, *cbuffer0 );
-//
-//			        shadowRenderer->updateMatricesForLightPass( cmdContext );
-//
-//			        const auto & lightViewMatrix = shadowRenderer->getLightViewMatrix();
-//			        const auto & lightProjectionMatrix = shadowRenderer->getLightProjectionMatrix();
-//
-//			        cb0Data.viewMatrix = lightViewMatrix;
-//			        cb0Data.projectionMatrix = lightProjectionMatrix;
-//
-//			        cmdContext.setIAVertexStreamState( vsds );
-//			        cb0Data.modelMatrix = math::identity4<float>();
-//			        cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
-//			        cmdContext.cmdDrawDirectIndexed( 6, 42 );
-//
-//			        const auto & sMesh0 = meshDefinition.subMeshes[0].meshData;
-//			        const auto & sMesh1 = meshDefinition.subMeshes[1].meshData;
-//
-//			        for( uint32 iTree = 0; iTree < treesNum; ++iTree )
-//			        {
-//				        cb0Data.modelMatrix = treeModelMats[iTree];
-//				        cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
-//
-//				        cmdContext.setIAVertexStreamState( mesh0VSDS );
-//				        //cmdContext.cmdDrawDirectIndexed( sMesh0.indicesNum, 0 );
-//
-//				        cmdContext.setIAVertexStreamState( mesh1VSDS );
-//						//cmdContext.cmdDrawDirectIndexed( sMesh1.indicesNum, 0 );
-//			        }
-//		        }
-//		        shadowRenderer->endRenderPass( *gxDriverState.cmdContext );
-//
-//		        gxDriverState.presentationLayer->bindRenderTarget( gxDriverState.cmdContext.get() );
-//
-//		        shadowRenderer->beginRenderPass2Shadow( *gxDriverState.cmdContext );
-//		        {
-//			        cmdContext.cmdSetViewport( vpDescScreen );
-//			        cmdContext.cmdSetShaderConstantBuffer( 10, *cbuffer0 );
-//			        cmdContext.cmdSetShaderTextureSampler( 70, *defaultSampler );
-//			        {
-//				        shadowRenderer->updateMatricesForShadowPass( *gxDriverState.cmdContext );
-//
-//				        cb0Data.viewMatrix = cameraViewMatrix;
-//				        cb0Data.projectionMatrix = ts3CameraProjection;
-//
-//				        cmdContext.setIAVertexStreamState( vsds );
-//				        cmdContext.cmdSetShaderTextureImage( 20, *tex0 );
-//				        cb0Data.modelMatrix = math::identity4<float>();
-//				        cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
-//				        cmdContext.cmdDrawDirectIndexed( 6, 42 );
-//
-//				        const auto & sMesh0 = meshDefinition.subMeshes[0].meshData;
-//				        const auto & sTexIndex0 = meshDefinition.subMeshes[0].materialIndex;
-//				        const auto & sMesh1 = meshDefinition.subMeshes[1].meshData;
-//				        const auto & sTexIndex1 = meshDefinition.subMeshes[1].materialIndex;
-//
-//				        for( uint32 iTree = 0; iTree < treesNum; ++iTree )
-//				        {
-//					        cb0Data.modelMatrix = treeModelMats[iTree];
-//					        cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
-//
-//					        cmdContext.cmdSetShaderTextureImage( 20, *meshTextures[sTexIndex0] );
-//					        cmdContext.setIAVertexStreamState( mesh0VSDS );
-//					        //cmdContext.cmdDrawDirectIndexed( sMesh0.indicesNum, 0 );
-//
-//					        cmdContext.cmdSetShaderTextureImage( 20, *meshTextures[sTexIndex1] );
-//					        cmdContext.setIAVertexStreamState( mesh1VSDS );
-//					        //cmdContext.cmdDrawDirectIndexed( sMesh1.indicesNum, 0 );
-//				        }
-//			        }
-//			        gxDriverState.presentationLayer->invalidateRenderTarget( gxDriverState.cmdContext.get() );
-//		        }
-//		        cmdContext.endRenderPass();
-//	        }
+			gxDriverState.cmdContext->setGraphicsPipelineStateObject( *mainPSO );
+			gxDriverState.cmdContext->setIAVertexStreamState( *meshGroup->getGeometryStorage().getGpaVertexStreamState() );
 
-			if( false )
+			cb0DataBase.projectionMatrix = ts3CameraProjection;
+			cb0DataBase.viewMatrix = cameraViewMatrix;
+
+			gxDriverState.presentationLayer->bindRenderTarget( gxDriverState.cmdContext.get() );
+
+			gxDriverState.cmdContext->beginRenderPass( *scrRenderPassState );
 			{
-				const auto modelMatrix1 = math::translation<float>( 0.0f, 0, 2.0f );
-				const auto modelMatrix2 = math::translation<float>( 1.0f, 0, 4.0f );
-				const auto modelMatrix3 = math::translation<float>( 2.0f, 0, 6.0f );
+				gxDriverState.cmdContext->cmdSetViewport( vpDescScreen );
+				gxDriverState.cmdContext->cmdSetShaderConstantBuffer( 0, *cbuffer0 );
 
-				CB0Data cb0Data;
-
-				auto & cmdContext = *gxDriverState.cmdContext;
-
-				cmdContext.setIAVertexStreamState( vsds );
-
-				shadowRenderer->beginRenderPass1Light( *gxDriverState.cmdContext );
+				for( uint32 iTree = 0; iTree < treesNum; ++iTree )
 				{
-					cmdContext.cmdSetShaderConstantBuffer( 10, *cbuffer0 );
+					cb0DataBase.modelMatrix = treeModelMats[iTree];
+					gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0DataBase );
 
-					shadowRenderer->updateMatricesForLightPass( cmdContext );
-
-					const auto & lightViewMatrix = shadowRenderer->getLightViewMatrix();
-					const auto & lightProjectionMatrix = shadowRenderer->getLightProjectionMatrix();
-
-					cb0Data.viewMatrix = lightViewMatrix;
-					cb0Data.projectionMatrix = lightProjectionMatrix;
-
-					cb0Data.modelMatrix = math::identity4<float>();
-					cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
-					cmdContext.cmdDrawDirectIndexed( 6, 42 );
-
-					cb0Data.modelMatrix = modelMatrix1;
-					cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
-					cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
-
-					cb0Data.modelMatrix = modelMatrix2;
-					cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
-					cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
-
-					cb0Data.modelMatrix = modelMatrix3;
-					cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
-					cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
-				}
-				shadowRenderer->endRenderPass( *gxDriverState.cmdContext );
-
-				gxDriverState.presentationLayer->bindRenderTarget( gxDriverState.cmdContext.get() );
-
-				shadowRenderer->beginRenderPass2Shadow( *gxDriverState.cmdContext );
-				{
-					cmdContext.cmdSetViewport( vpDescScreen );
-					cmdContext.cmdSetShaderConstantBuffer( 10, *cbuffer0 );
-					cmdContext.cmdSetShaderTextureSampler( 70, *defaultSampler );
-					cmdContext.cmdSetShaderTextureImage( 20, *tex0 );
+					for( uint32 iMeshComponent = 0; iMeshComponent < meshTree->getComponentsNum(); ++iMeshComponent )
 					{
-						shadowRenderer->updateMatricesForShadowPass( *gxDriverState.cmdContext );
+						auto * meshComponent = meshTree->getSubComponent( iMeshComponent );
+						auto * geometryRef = meshComponent->geometryDataRef();
 
-						cb0Data.viewMatrix = cameraViewMatrix;
-						cb0Data.projectionMatrix = ts3CameraProjection;
 
-						cb0Data.modelMatrix = math::identity4<float>();
-						cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
-						cmdContext.cmdDrawDirectIndexed( 6, 42 );
-
-						cb0Data.modelMatrix = modelMatrix1;
-						cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
-						cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
-
-						cb0Data.modelMatrix = modelMatrix2;
-						cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
-						cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
-
-						cb0Data.modelMatrix = modelMatrix3;
-						cmdContext.updateBufferDataUpload( *cbuffer0, cb0Data );
-						cmdContext.cmdDrawDirectIndexed( VNUM, 0 );
+						gxDriverState.cmdContext->cmdDrawDirectIndexed(
+								geometryRef->dataReference.indexDataRegion.sizeInElementsNum,
+								geometryRef->dataReference.indexDataRegion.offsetInElementsNum,
+								geometryRef->dataReference.vertexDataOffsetInElementsNum() );
 					}
-					gxDriverState.presentationLayer->invalidateRenderTarget( gxDriverState.cmdContext.get() );
 				}
-				cmdContext.endRenderPass();
+
+				gxDriverState.presentationLayer->invalidateRenderTarget( gxDriverState.cmdContext.get() );
 			}
-
-			if( true )
-			{
-
-				cb0DataBase.modelMatrix = math::mul(
-						math::translation<float>( 0, 0, 8.5f ),
-						math::mul(
-								math::scaling( 2.0f, 2.0f, 2.0f ),
-								math::rotationAxisY( u2angle ) ) );
-
-				gxDriverState.cmdContext->setRenderTargetBindingState( rtds );
-				//gxDriverState.presentationLayer->bindRenderTarget( gxDriverState.cmdContext.get() );
-
-				gxDriverState.cmdContext->setGraphicsPipelineStateObject( *mainPSO );
-				gxDriverState.cmdContext->setIAVertexStreamState( vsds );
-
-				gxDriverState.cmdContext->beginRenderPass( *fboRenderPassState );
-				{
-					gxDriverState.cmdContext->cmdSetViewport( vpDescTexture );
-					gxDriverState.cmdContext->cmdSetShaderConstantBuffer( 0, *cbuffer0 );
-					gxDriverState.cmdContext->cmdSetShaderTextureSampler( 10, *defaultSampler );
-					gxDriverState.cmdContext->cmdSetShaderTextureImage( 1, *tex0 );
-					{
-						cb0DataBase.projectionMatrix = ts3ProjectionTexture;
-						cb0DataBase.viewMatrix = ts3ViewTexture;
-						cb0DataBase.modelMatrix = math::mul(
-								math::translation<float>( 0, 0, 3.0f ),
-								math::mul(
-										math::scaling( 2.0f, 2.0f, 2.0f ),
-										math::rotationAxisY( u1angle ) ) );
-						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0DataUploadDesc );
-						gxDriverState.cmdContext->cmdDrawDirectIndexed( VNUM, 0 );
-					}
-					{
-						cb0DataBase.projectionMatrix = ts3ProjectionTexture;
-						cb0DataBase.viewMatrix = ts3ViewTexture;
-						cb0DataBase.modelMatrix = math::mul(
-								math::translation<float>( 0, 0, 8.5f ),
-								math::mul(
-										math::scaling( 2.0f, 2.0f, 2.0f ),
-										math::rotationAxisY( u2angle ) ) );
-						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0DataUploadDesc );
-						gxDriverState.cmdContext->cmdDrawDirectIndexed( VNUM, 0 );
-					}
-				}
-				gxDriverState.cmdContext->endRenderPass();
-
-				gxDriverState.presentationLayer->bindRenderTarget( gxDriverState.cmdContext.get() );
-
-				gxDriverState.cmdContext->beginRenderPass( *scrRenderPassState );
-				{
-					gxDriverState.cmdContext->cmdSetViewport( vpDescScreen );
-					gxDriverState.cmdContext->cmdSetShaderConstantBuffer( 0, *cbuffer0 );
-					gxDriverState.cmdContext->cmdSetShaderTextureSampler( 10, *defaultSampler );
-					gxDriverState.cmdContext->cmdSetShaderTextureImage( 1, *texRTColor0RT->mTargetTexture.getRefTexture() );
-					{
-						cb0DataBase.projectionMatrix = ts3CameraProjection;
-						cb0DataBase.viewMatrix = cameraViewMatrix;
-						cb0DataBase.modelMatrix = math::mul(
-								math::scaling( 2.0f, 2.0f, 1.0f ),
-								math::mul( math::translation<float>( -2, 0, 6.0f ), math::rotationAxisY( -1.0f ) ) );
-						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0DataUploadDesc );
-						gxDriverState.cmdContext->cmdDrawDirectIndexed( 6, 36 );
-					}
-					{
-						cb0DataBase.projectionMatrix = ts3CameraProjection;
-						cb0DataBase.viewMatrix = cameraViewMatrix;
-						cb0DataBase.modelMatrix = math::mul(
-								math::scaling( 2.0f, 2.0f, 1.0f ),
-								math::mul( math::translation<float>( 2, 0, 6.0f ), math::rotationAxisY( 1.0f ) ) );
-						gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0DataUploadDesc );
-						gxDriverState.cmdContext->cmdDrawDirectIndexed( 6, 36 );
-					}
-
-					gxDriverState.presentationLayer->invalidateRenderTarget( gxDriverState.cmdContext.get() );
-				}
-				gxDriverState.cmdContext->endRenderPass();
-			}
+			gxDriverState.cmdContext->endRenderPass();
 
 			gxDriverState.cmdContext->endCommandSequence();
 			gxDriverState.cmdContext->submit();

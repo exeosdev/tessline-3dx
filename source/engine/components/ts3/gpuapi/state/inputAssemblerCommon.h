@@ -128,7 +128,7 @@ namespace ts3::gpuapi
 		uint16 instanceRate;
 
 		/// @brief Returns true if this instance represents a valid vertex attribute.
-		TS3_ATTR_NO_DISCARD constexpr bool active() const noexcept
+		TS3_ATTR_NO_DISCARD bool active() const noexcept
 		{
 			return !semanticName.empty() && cxdefs::isIAVertexBufferIndexValid( streamIndex ) && ( format != EVertexAttribFormat::Undefined );
 		}

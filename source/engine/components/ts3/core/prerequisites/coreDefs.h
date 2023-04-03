@@ -17,10 +17,10 @@
 #define ts3CaseReturnStr( pCaseValue ) \
 	case pCaseValue: return #pCaseValue
 
-#define ts3CaseDefaultBreak(  pReturnValue ) \
+#define ts3CaseDefaultBreak() \
 	default: break
 
-#define ts3CaseDefaultReturn(  pReturnValue ) \
+#define ts3CaseDefaultReturn( pReturnValue ) \
 	default: return pReturnValue
 
 namespace ts3

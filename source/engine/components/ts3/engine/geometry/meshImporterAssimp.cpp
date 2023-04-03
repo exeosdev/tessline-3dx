@@ -128,6 +128,8 @@ namespace ts3
 									attributeFormat,
 									conversionFunction );
 
+							const auto p3 = ( P3SVertex* )pMeshData.getVertexStreamBaseDataPtr(0);
+
 							break;
 						}
 						case EVertexAttributeSemanticsID::Normal:
@@ -141,6 +143,8 @@ namespace ts3
 									attributeFormat,
 									conversionFunction );
 
+							const auto p3 = ( P3SVertex * )pMeshData.getVertexStreamBaseDataPtr( 0 );
+
 							break;
 						}
 						case EVertexAttributeSemanticsID::TexCoord0:
@@ -153,6 +157,8 @@ namespace ts3
 									attributeDataWriteRegion,
 									attributeFormat,
 									conversionFunction );
+
+							const auto p3 = ( P3SVertex * )pMeshData.getVertexStreamBaseDataPtr( 0 );
 
 							break;
 						}

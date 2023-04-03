@@ -45,10 +45,10 @@ namespace ts3::gpuapi
 		CommandList::endCommandSequence();
 	}
 
-	void DX11CommandList::cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset )
+	void DX11CommandList::cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset, native_uint pBaseVertexIndex )
 	{
 		_graphicsPipelineStateControllerDX11.applyStateChanges();
-		mD3D11DeviceContext1->DrawIndexed( pIndicesNum, pIndicesOffset, 0 );
+		mD3D11DeviceContext1->DrawIndexed( pIndicesNum, pIndicesOffset, pBaseVertexIndex );
 	}
 
 	void DX11CommandList::cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset )

@@ -42,7 +42,7 @@ namespace ts3
 				const GeometryStorage * pSharedStorage );
 
 	private:
-		using GeometryStorageList = std::vector<GeometryStorageHandle>;
+		using GeometryStorageList = std::vector<GeometryStoragePtr>;
 		using NamedGeometryStorageMap = std::map<std::string, GeometryStorage *>;
 
 		GeometryStorageList _storages;

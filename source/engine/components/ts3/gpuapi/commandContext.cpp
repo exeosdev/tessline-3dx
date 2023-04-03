@@ -219,10 +219,10 @@ namespace ts3::gpuapi
 		return mCommandList->cmdSetShaderTextureSampler( pParamRefID, pSampler );
 	}
 
-	void CommandContextDirectGraphics::cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset )
+	void CommandContextDirectGraphics::cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset, native_uint pBaseVertexIndex )
 	{
 		ts3DebugAssert( checkCommandListSupport( E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DIRECT_GRAPHICS ) );
-		return mCommandList->cmdDrawDirectIndexed( pIndicesNum, pIndicesOffset );
+		return mCommandList->cmdDrawDirectIndexed( pIndicesNum, pIndicesOffset, pBaseVertexIndex );
 	}
 
 	void CommandContextDirectGraphics::cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset )
@@ -321,10 +321,10 @@ namespace ts3::gpuapi
 		return mCommandList->cmdSetShaderTextureSampler( pParamRefID, pSampler );
 	}
 
-	void CommandContextDeferredGraphics::cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset, EIndexDataFormat pIndexFormat )
+	void CommandContextDeferredGraphics::cmdDrawDirectIndexed( native_uint pIndicesNum, native_uint pIndicesOffset, native_uint pBaseVertexIndex )
 	{
 		ts3DebugAssert( checkCommandListSupport( E_COMMAND_OBJECT_PROPERTY_MASK_CONTEXT_FAMILY_DEFERRED_GRAPHICS ) );
-		return mCommandList->cmdDrawDirectIndexed( pIndicesNum, pIndicesOffset );
+		return mCommandList->cmdDrawDirectIndexed( pIndicesNum, pIndicesOffset, pBaseVertexIndex );
 	}
 
 	void CommandContextDeferredGraphics::cmdDrawDirectIndexedInstanced( native_uint pIndicesNumPerInstance, native_uint pInstancesNum, native_uint pIndicesOffset, EIndexDataFormat pIndexFormat )

@@ -3,6 +3,7 @@
 #include "meshGroup.h"
 #include "geometryStorage.h"
 #include "geometryManager.h"
+#include "geometryDataTransfer.h"
 
 namespace ts3
 {
@@ -51,6 +52,8 @@ namespace ts3
 				auto meshSubComponentGeometryRef = meshGroupGeometryStorage->addIndexedGeometry( meshSubComponentGeometrySize.vertexElementsNum, meshSubComponentGeometrySize.indexElementsNum );
 				mesh->addMeshComponent( meshSubComponentData->name, meshSubComponentGeometryRef );
 			}
+
+			pImportContext.geometryDataTransfer->initializeMeshData( *mesh->geometryDataRef(), meshData->getAllGeometryDataRef() );
 		}
 
 		return meshGroup;

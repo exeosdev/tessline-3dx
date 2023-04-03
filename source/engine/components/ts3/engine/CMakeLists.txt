@@ -82,16 +82,16 @@ set( TS3_ENGINE_SRC_FILES
 		# "utility/gridGenerator.h"
 
 		"geometry/meshGroup.h"
-		"renderer/materialCommon.h"
-		"renderer/gpaSharedStateLibrary.cpp"
-		"renderer/gpaSharedStateLibrary.h"
-		"renderer/renderingContext.cpp"
-		"renderer/renderingContext.h"
+		#"renderer/materialCommon.h"
+		#"renderer/gpaSharedStateLibrary.cpp"
+		#"renderer/gpaSharedStateLibrary.h"
+		#"renderer/renderingContext.cpp"
+		#"renderer/renderingContext.h"
 		"renderer/shaderLoader.h"
 		"renderer/shaderLoader.cpp"
 
-		"gpuapi/constantBufferProxy.cpp"
-		"gpuapi/constantBufferProxy.h"
+		#"gpuapi/constantBufferProxy.cpp"
+		#"gpuapi/constantBufferProxy.h"
 		"geometry/dataTypesConv.h"
         "geometry/geometryStorage.h"
 		"geometry/geometryStorage.cpp"
@@ -99,12 +99,12 @@ set( TS3_ENGINE_SRC_FILES
 		"geometry/geometryVertexFormat.h"
 		"geometry/geometryVertexFormat.cpp"
 
-		"fx/material.h"
-		"fx/material.cpp"
-		"fx/materialCommon.h"
-		"fx/materialCommon.cpp"
-		"fx/materialLibrary.cpp"
-		"fx/materialLibrary.h"
+		#"fx/material.h"
+		#"fx/material.cpp"
+		#"fx/materialCommon.h"
+		#"fx/materialCommon.cpp"
+		#"fx/materialLibrary.cpp"
+		#"fx/materialLibrary.h"
         geometry/geometryDataFormat.cpp geometry/geometryDataFormat.h geometry/geometryManager.cpp geometry/geometryManager.h geometry/meshLoader.cpp geometry/meshLoader.h geometry/meshImporterAssimp.cpp geometry/mesh.cpp geometry/mesh.h geometry/geometryDataTransfer.cpp geometry/geometryDataTransfer.h geometry/geometryCommonDefs.cpp geometry/meshGroup.cpp geometry/geometryContainer.cpp geometry/geometryContainer.h)
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )

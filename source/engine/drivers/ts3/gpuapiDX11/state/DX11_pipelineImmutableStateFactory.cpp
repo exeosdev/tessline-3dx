@@ -33,7 +33,7 @@ namespace ts3::gpuapi
 			const IAInputLayoutDefinition & pDefinition,
 			Shader & pVertexShaderWithBinary )
 	{
-		return DX11IAInputLayoutImmutableState::createInstance( mDX11GPUDevice, pDefinition, *pVertexShaderWithBinary->mShaderBinary );
+		return DX11IAInputLayoutImmutableState::createInstance( mDX11GPUDevice, pDefinition, *pVertexShaderWithBinary.mShaderBinary );
 	}
 
 	IAVertexStreamImmutableStateHandle DX11PipelineImmutableStateFactory::createIAVertexStreamState(

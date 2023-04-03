@@ -40,6 +40,10 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD const MeshSubComponentData * getMeshSubComponentData( uint32 pIndex ) const noexcept;
 
+		const void * getVertexStreamBaseDataPtr( uint32 pIndex ) const noexcept;
+
+		const void * getIndexBaseDataPtr() const noexcept;
+
 		void initializeStorage( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
 
 		void setMeshName( std::string pName );
@@ -82,6 +86,16 @@ namespace ts3
 	inline const MeshSubComponentData * MeshData::getMeshSubComponentData( uint32 pIndex ) const noexcept
 	{
 		return ( pIndex < _meshSubComponents.size() ) ? &( _meshSubComponents[pIndex] ) : nullptr;
+	}
+
+	inline const void * MeshData::getVertexStreamBaseDataPtr( uint32 pIndex ) const noexcept
+	{
+		return _vertexDataBuffers[pIndex].data();
+	}
+
+	inline const void * MeshData::getIndexBaseDataPtr() const noexcept
+	{
+		return _indexDataBuffer.data();
 	}
 
 

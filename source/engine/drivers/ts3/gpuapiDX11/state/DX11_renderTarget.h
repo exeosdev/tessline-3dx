@@ -110,12 +110,14 @@ namespace ts3::gpuapi
 		void renderPassClearRenderTargetDX11(
 				ID3D11DeviceContext1 * pD3D1DeviceContext,
 				const DX11RenderTargetBindingData & pRenderTargetBinding,
-				const RenderPassConfiguration & pRenderPassConfiguration );
+				const RenderPassConfiguration & pRenderPassConfiguration,
+				const GraphicsPipelineDynamicState & pDynamicState );
 
 		void renderPassResolveRenderTargetDX11(
 				ID3D11DeviceContext1 * pD3D1DeviceContext,
 				const DX11RenderTargetBindingData & pRenderTargetBinding,
-				const RenderPassConfiguration & pRenderPassConfiguration );
+				const RenderPassConfiguration & pRenderPassConfiguration,
+				const GraphicsPipelineDynamicState & pDynamicState );
 
 	}
 	

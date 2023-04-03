@@ -132,7 +132,7 @@ namespace ts3::system
 			return eventSource;
 		}
 
-		bool win32TranslateEvent( const NativeEventType & pNativeEventconst MSG & pMSG, EventObject & pOutEvent )
+		bool win32TranslateEvent( Win32EventController & pEventController, const MSG & pMSG, EventObject & pOutEvent )
 		{
 			auto * eventSource = win32FindEventSourceByHWND( pEventController, pMSG.hwnd );
 

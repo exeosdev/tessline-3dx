@@ -5,7 +5,6 @@ namespace ts3
 {
 
 	GeometryDataFormat::GeometryDataFormat()
-	: _activeVertexStreamIndexEnd( 0 )
 	{}
 
 	GeometryDataFormat::~GeometryDataFormat() = default;
@@ -25,6 +24,16 @@ namespace ts3
 		return _vertexStreams.at( pVertexStreamIndex );
 	}
 
+	ArrayView<const uint16> GeometryDataFormat::activeVertexStreams() const noexcept
+	{
+		return bindArrayView( _activeVertexStreams.data(), _properties.activeVertexStreamsNum );
+	}
+
+	uint16 GeometryDataFormat::firstActiveVertexStream() const noexcept
+	{
+		return _activeVertexStreams.empty() ? gpuapi::cxdefs::IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED : _activeVertexStreams[0];
+	}
+
 	uint32 GeometryDataFormat::vertexElementSizeInBytes() const noexcept
 	{
 		return _properties.vertexElementSizeInBytes;
@@ -39,11 +48,6 @@ namespace ts3
 	gpuapi::EIndexDataFormat GeometryDataFormat::indexDataFormat() const noexcept
 	{
 		return _indexDataFormat;
-	}
-
-	uint32 GeometryDataFormat::activeVertexStreamIndexEnd() const noexcept
-	{
-		return _activeVertexStreamIndexEnd;
 	}
 
 	uint32 GeometryDataFormat::indexElementSizeInBytes() const noexcept
@@ -173,10 +177,10 @@ namespace ts3
 		auto & baseAttributeDefinition = _attributes[pAttributeBaseIndex];
 		baseAttributeDefinition.semantics = std::move( pSemantics );
 		baseAttributeDefinition.componentFormat = pAttributeBaseFormat;
-		baseAttributeDefinition.componentsNum = pAttributeComponentsNum;
-		baseAttributeDefinition.componentSizeInBytes = gpuapi::cxdefs::getVertexAttribFormatByteSize( pAttributeBaseFormat );
+		baseAttributeDefinition.componentsNum = numeric_cast<uint16>( pAttributeComponentsNum );
+		baseAttributeDefinition.componentSizeInBytes = numeric_cast<uint16>( gpuapi::cxdefs::getVertexAttribFormatByteSize( pAttributeBaseFormat ) );
 		baseAttributeDefinition.attributeTotalSizeInBytes = baseAttributeDefinition.componentSizeInBytes * pAttributeComponentsNum;
-		baseAttributeDefinition.streamIndex = pStreamIndex;
+		baseAttributeDefinition.streamIndex = numeric_cast<uint16>( pStreamIndex );
 		baseAttributeDefinition.streamElementRelativeOffset = pStreamElementRelativeOffset;
 		baseAttributeDefinition.instanceRate = ( pAttributeDataRate == EVertexDataRate::PerInstance ) ? 1 : 0;
 
@@ -243,7 +247,7 @@ namespace ts3
 						auto & gpaSubAttributeInfo = gpaInputLayoutDefinition.attributeArray[++iAttribute];
 						gpaAttributeInfo.streamIndex = attributeFormat.streamIndex;
 						gpaAttributeInfo.semanticName = attributeFormat.semantics.semName;
-						gpaAttributeInfo.semanticIndex = attributeSubComponentIndex;
+						gpaAttributeInfo.semanticIndex = numeric_cast<gpuapi::input_assembler_index_t>( attributeSubComponentIndex );
 						gpaAttributeInfo.format = attributeFormat.componentFormat;
 						gpaAttributeInfo.instanceRate = attributeFormat.instanceRate;
 						gpaAttributeInfo.relativeOffset =
@@ -292,6 +296,7 @@ namespace ts3
 		if( vertexStreamFormat.streamDataRate == EVertexDataRate::Undefined )
 		{
 			vertexStreamFormat.streamDataRate = attributeFormat.getAttributeDataRate();
+			_activeVertexStreams[_properties.activeVertexStreamsNum] = attributeFormat.streamIndex;
 			_properties.activeVertexStreamsMask.set( gpuapi::cxdefs::makeIAVertexBufferFlag( attributeFormat.streamIndex ) );
 			_properties.activeVertexStreamsNum += 1;
 		}
@@ -304,11 +309,6 @@ namespace ts3
 		vertexStreamFormat.elementSizeInBytes += attributeFormat.attributeTotalSizeInBytes;
 		vertexStreamFormat.activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( pNewAttributeIndex ) );
 		vertexStreamFormat.activeAttributesNum += 1;
-
-		if( attributeFormat.streamIndex >= _activeVertexStreamIndexEnd )
-		{
-			_activeVertexStreamIndexEnd = attributeFormat.streamIndex + 1;
-		}
 	}
 
 	namespace gpa

@@ -36,13 +36,15 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD const VertexStreamFormat & vertexStream( uint32 pVertexStreamIndex ) const;
 
+		TS3_ATTR_NO_DISCARD ArrayView<const uint16> activeVertexStreams() const noexcept;
+
+		TS3_ATTR_NO_DISCARD uint16 firstActiveVertexStream() const noexcept;
+
 		TS3_ATTR_NO_DISCARD uint32 vertexElementSizeInBytes() const noexcept;
 
 		TS3_ATTR_NO_DISCARD uint32 vertexStreamElementSizeInBytes( uint32 pVertexStreamIndex ) const;
 
 		TS3_ATTR_NO_DISCARD gpuapi::EIndexDataFormat indexDataFormat() const noexcept;
-
-		TS3_ATTR_NO_DISCARD uint32 activeVertexStreamIndexEnd() const noexcept;
 
 		TS3_ATTR_NO_DISCARD uint32 indexElementSizeInBytes() const noexcept;
 
@@ -122,11 +124,12 @@ namespace ts3
 
 	private:
 		using AttributeSemanticsMap = std::unordered_map<EVertexAttributeSemanticsID, uint32>;
+		using VertexStreamActiveIndicesArray = std::array<uint16, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
 		GeometryDataFormatProperties _properties;
 		VertexAttributeFormatArray _attributes;
 		AttributeSemanticsMap _attributeSemanticsMap;
 		VertexStreamFormatArray _vertexStreams;
-		uint32 _activeVertexStreamIndexEnd;
+		VertexStreamActiveIndicesArray _activeVertexStreams;
 		gpuapi::EIndexDataFormat _indexDataFormat;
 		gpuapi::EPrimitiveTopology _primitiveTopology;
 	};

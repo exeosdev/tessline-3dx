@@ -248,21 +248,20 @@ namespace ts3::gpuapi
 
 	DXGI_FORMAT atl::translateBaseDataTypeDX( EBaseDataType pBaseDataType )
 	{
-		static const DXGI_FORMAT baseDataTypeArray[] =
+		switch( pBaseDataType )
 		{
-			DXGI_FORMAT_UNKNOWN,
-			DXGI_FORMAT_R8_SINT,
-			DXGI_FORMAT_R8_UINT,
-			DXGI_FORMAT_R16_SINT,
-			DXGI_FORMAT_R16_UINT,
-			DXGI_FORMAT_R32_SINT,
-			DXGI_FORMAT_R32_UINT,
-			DXGI_FORMAT_R16_FLOAT,
-			DXGI_FORMAT_R32_FLOAT,
-			DXGI_FORMAT_D24_UNORM_S8_UINT,
-		};
-		auto baseDataTypeIndex = cxdefs::getBaseDataTypeIndex( pBaseDataType );
-		return staticArrayElement( baseDataTypeArray, baseDataTypeIndex );
+			ts3CaseReturn( EBaseDataType::Undefined , DXGI_FORMAT_UNKNOWN           );
+			ts3CaseReturn( EBaseDataType::Byte      , DXGI_FORMAT_R8_SINT           );
+			ts3CaseReturn( EBaseDataType::Ubyte     , DXGI_FORMAT_R8_UINT           );
+			ts3CaseReturn( EBaseDataType::Int16     , DXGI_FORMAT_R16_SINT          );
+			ts3CaseReturn( EBaseDataType::Uint16    , DXGI_FORMAT_R16_UINT          );
+			ts3CaseReturn( EBaseDataType::Int32     , DXGI_FORMAT_R32_SINT          );
+			ts3CaseReturn( EBaseDataType::Uint32    , DXGI_FORMAT_R32_UINT          );
+			ts3CaseReturn( EBaseDataType::Float16   , DXGI_FORMAT_R16_FLOAT         );
+			ts3CaseReturn( EBaseDataType::Float32   , DXGI_FORMAT_R32_FLOAT         );
+			ts3CaseReturn( EBaseDataType::Uint24S8  , DXGI_FORMAT_D24_UNORM_S8_UINT );
+		}
+		return DXGI_FORMAT_UNKNOWN;
 	}
 
 	DXGI_FORMAT atl::translateTextureFormatDX( ETextureFormat pTextureFormat )

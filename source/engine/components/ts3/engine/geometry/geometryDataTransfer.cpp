@@ -25,31 +25,27 @@ namespace ts3
 	GeometryDataGpuTransferDirect::~GeometryDataGpuTransferDirect() = default;
 
 	void GeometryDataGpuTransferDirect::initializeMeshData(
-			const GeometryDataFormat & pGeometryDataFormat,
 			const GeometryReference & pGeometryRef,
 			const GeometryDataReference & pInputDataRef )
 	{
-		for( uint32 iVertexStream = 0; iVertexStream < gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM; ++iVertexStream )
+		for( auto iVertexStream : pGeometryRef.dataReference.dataFormat->activeVertexStreams() )
 		{
-			if( pGeometryDataFormat.isVertexStreamActive( iVertexStream ) )
-			{
-				const auto & vertexStreamFormat = pGeometryDataFormat.vertexStream( iVertexStream );
-				const auto & inputDataRegion = pInputDataRef.vertexStreamDataRegions[iVertexStream];
-				const auto & vertexBufferRegion = pGeometryRef.dataReference.vertexStreamDataRegions[iVertexStream];
+			const auto & vertexStreamFormat = pGeometryRef.dataReference.dataFormat->vertexStream( iVertexStream );
+			const auto & inputDataRegion = pInputDataRef.vertexStreamDataRegions[iVertexStream];
+			const auto & vertexBufferRegion = pGeometryRef.dataReference.vertexStreamDataRegions[iVertexStream];
 
-				const auto vertexBuffer = pGeometryRef.storage->getVertexBuffer( iVertexStream );
+			const auto vertexBuffer = pGeometryRef.storage->getVertexBuffer( iVertexStream );
 
-				gpuapi::GPUBufferSubDataUploadDesc gpaDataUploadDesc;
-				gpaDataUploadDesc.bufferRegion.offset = vertexBufferRegion.offsetInElementsNum * vertexStreamFormat.elementSizeInBytes;
-				gpaDataUploadDesc.bufferRegion.size = vertexBufferRegion.sizeInElementsNum * vertexStreamFormat.elementSizeInBytes;
-				gpaDataUploadDesc.inputDataDesc.pointer = inputDataRegion.dataPtr;
-				gpaDataUploadDesc.inputDataDesc.size = inputDataRegion.sizeInElementsNum * inputDataRegion.elementSize;
+			gpuapi::GPUBufferSubDataUploadDesc gpaDataUploadDesc;
+			gpaDataUploadDesc.bufferRegion.offset = vertexBufferRegion.offsetInElementsNum * vertexStreamFormat.elementSizeInBytes;
+			gpaDataUploadDesc.bufferRegion.size = vertexBufferRegion.sizeInElementsNum * vertexStreamFormat.elementSizeInBytes;
+			gpaDataUploadDesc.inputDataDesc.pointer = inputDataRegion.dataPtr;
+			gpaDataUploadDesc.inputDataDesc.size = inputDataRegion.sizeInElementsNum * inputDataRegion.elementSize;
 
-				mTransferCmdContext.updateBufferSubDataUpload( *vertexBuffer, gpaDataUploadDesc );
-			}
+			mTransferCmdContext.updateBufferSubDataUpload( *vertexBuffer, gpaDataUploadDesc );
 		}
 
-		if( pGeometryDataFormat.isIndexedGeometry() )
+		if( pGeometryRef.dataReference.dataFormat->isIndexedGeometry() )
 		{
 			const auto & inputDataRegion = pInputDataRef.indexDataRegion;
 			const auto & indexBufferRegion = pGeometryRef.dataReference.indexDataRegion;
@@ -57,8 +53,8 @@ namespace ts3
 			const auto indexBuffer = pGeometryRef.storage->getIndexBuffer();
 
 			gpuapi::GPUBufferSubDataUploadDesc gpaDataUploadDesc;
-			gpaDataUploadDesc.bufferRegion.offset = indexBufferRegion.offsetInElementsNum * pGeometryDataFormat.indexElementSizeInBytes();
-			gpaDataUploadDesc.bufferRegion.size = indexBufferRegion.sizeInElementsNum * pGeometryDataFormat.indexElementSizeInBytes();
+			gpaDataUploadDesc.bufferRegion.offset = indexBufferRegion.offsetInElementsNum * pGeometryRef.dataReference.dataFormat->indexElementSizeInBytes();
+			gpaDataUploadDesc.bufferRegion.size = indexBufferRegion.sizeInElementsNum * pGeometryRef.dataReference.dataFormat->indexElementSizeInBytes();
 			gpaDataUploadDesc.inputDataDesc.pointer = inputDataRegion.dataPtr;
 			gpaDataUploadDesc.inputDataDesc.size = inputDataRegion.sizeInElementsNum * inputDataRegion.elementSize;
 

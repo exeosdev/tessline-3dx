@@ -26,7 +26,6 @@ namespace ts3
 		virtual ~GeometryDataGpuTransfer();
 
 		virtual void initializeMeshData(
-				const GeometryDataFormat & pGeometryDataFormat,
 				const GeometryReference & pGeometryRef,
 				const GeometryDataReference & pInputDataRef ) = 0;
 	};
@@ -41,7 +40,6 @@ namespace ts3
 		virtual ~GeometryDataGpuTransferDirect();
 
 		virtual void initializeMeshData(
-				const GeometryDataFormat & pGeometryDataFormat,
 				const GeometryReference & pGeometryRef,
 				const GeometryDataReference & pInputDataRef ) override final;
 	};
@@ -53,7 +51,6 @@ namespace ts3
 		virtual ~GeometryDataGpuTransferIntermediateBuffer();
 
 		virtual void initializeMeshData(
-				const GeometryDataFormat & pGeometryDataFormat,
 				const GeometryReference & pGeometryRef,
 				const GeometryDataReference & pInputDataRef )  override final
 		{
@@ -67,7 +64,6 @@ namespace ts3
 		virtual ~GeometryDataGpuTransferUpload();
 
 		virtual void initializeMeshData(
-				const GeometryDataFormat & pGeometryDataFormat,
 				const GeometryReference & pGeometryRef,
 				const GeometryDataReference & pInputDataRef )  override final
 		{
