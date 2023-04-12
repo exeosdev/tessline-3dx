@@ -35,6 +35,32 @@ namespace ts3
 
 	using DataBufferRegionSubElementMappingReadWrite = DataBufferRegionSubElementMapping<byte>;
 
+	using VtxAttrPosition2D = math::Vec2f;
+	using VtxAttrPosition3D = math::Vec3f;
+	using VtxAttrNormal = math::Vec3f;
+	using VtxAttrTangent = math::Vec3f;
+	using VtxAttrTexCoord2D = math::Vec2f;
+
+	struct VtxAttrNormalTangent
+	{
+		VtxAttrNormal normal;
+		VtxAttrTangent tangent;
+	};
+
+	struct VtxFormatCommon2D
+	{
+		VtxAttrPosition2D position;
+		VtxAttrTexCoord2D texCoord0;
+	};
+
+	struct VtxFormatCommon3D
+	{
+		VtxAttrPosition3D position;
+		VtxAttrNormal normal;
+		VtxAttrTangent tangent;
+		VtxAttrTexCoord2D texCoord0;
+	};
+
 } // namespace ts3
 
 #endif // __TS3_ENGINE_GEOMETRY_COMMON_H__

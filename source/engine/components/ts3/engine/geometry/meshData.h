@@ -20,7 +20,7 @@ namespace ts3
 
 		uint32 componentIndex;
 
-		GeometryDataReference geometryDataRef;
+		GeometryDataReferenceBase geometryDataRef;
 
 		MeshSubComponentData( const GeometryDataFormat & pDataFormat )
 		: geometryDataRef( pDataFormat )
@@ -40,29 +40,29 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD const MeshSubComponentData * getMeshSubComponentData( uint32 pIndex ) const noexcept;
 
-		const void * getVertexStreamBaseDataPtr( uint32 pIndex ) const noexcept;
+		TS3_ATTR_NO_DISCARD const void * getVertexStreamBaseDataPtr( uint32 pIndex ) const noexcept;
 
-		const void * getIndexBaseDataPtr() const noexcept;
+		TS3_ATTR_NO_DISCARD const void * getIndexBaseDataPtr() const noexcept;
+
+		TS3_ATTR_NO_DISCARD DataBufferRegionSubElementMappingReadOnly getIndexDataSubRegionReadOnly(
+				const CPUGeometryDataReferenceBase & pMeshDataRef ) const noexcept;
+
+		TS3_ATTR_NO_DISCARD DataBufferRegionSubElementMappingReadOnly getVertexAttributeDataSubRegionReadOnly(
+				const CPUGeometryDataReferenceBase & pMeshDataRef,
+				uint32 pAttributeIndex ) const noexcept;
+
+		TS3_ATTR_NO_DISCARD DataBufferRegionSubElementMappingReadWrite getIndexDataSubRegionReadWrite(
+				const CPUGeometryDataReferenceBase & pMeshDataRef ) noexcept;
+
+		TS3_ATTR_NO_DISCARD DataBufferRegionSubElementMappingReadWrite getVertexAttributeDataSubRegionReadWrite(
+				const CPUGeometryDataReferenceBase & pMeshDataRef,
+				uint32 pAttributeIndex ) noexcept;
 
 		void initializeStorage( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
 
 		void setMeshName( std::string pName );
 
 		MeshSubComponentData * addMeshComponent( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
-
-		DataBufferRegionSubElementMappingReadOnly getIndexDataSubRegionReadOnly(
-				const CPUGeometryDataReference & pMeshDataRef ) const noexcept;
-
-		DataBufferRegionSubElementMappingReadOnly getVertexAttributeDataSubRegionReadOnly(
-				const CPUGeometryDataReference & pMeshDataRef,
-				uint32 pAttributeIndex ) const noexcept;
-
-		DataBufferRegionSubElementMappingReadWrite getIndexDataSubRegionReadWrite(
-				const CPUGeometryDataReference & pMeshDataRef ) noexcept;
-
-		DataBufferRegionSubElementMappingReadWrite getVertexAttributeDataSubRegionReadWrite(
-				const CPUGeometryDataReference & pMeshDataRef,
-				uint32 pAttributeIndex ) noexcept;
 
 	private:
 		using VertexDataBufferArray = std::array<DynamicMemoryBuffer, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
@@ -150,150 +150,20 @@ namespace ts3
 		math::Vec3f biTangent;
 	};
 
-//	template <typename TVertex, typename TIndex = uint32>
-//	struct MeshDataFixed
+//	namespace geom
 //	{
-//		using VertexType = TVertex;
-//		using IndexType = TIndex;
 //
-//		static constexpr native_uint sVertexSize = sizeof( TVertex );
-//		static constexpr native_uint sIndexSize = sizeof( TIndex );
-//
-//		DynamicMemoryBuffer verticesData;
-//
-//		native_uint verticesNum = 0;
-//
-//		native_uint verticesSizeInBytes = 0;
-//
-//		DynamicMemoryBuffer indicesData;
-//
-//		native_uint indicesNum = 0;
-//
-//		native_uint indicesSizeInBytes = 0;
-//
-//		bool vfaNormals = false;
-//		bool vfaTangents = false;
-//		bool vfaBiTangents = false;
-//
-//		void initialize( size_t pVerticesNum, size_t pFacesNum )
-//		{
-//			verticesNum = pVerticesNum;
-//			indicesNum = pFacesNum * 3;
-//			verticesSizeInBytes = verticesNum * sVertexSize;
-//			indicesSizeInBytes = indicesNum * sIndexSize;
-//
-//			verticesData.resize( verticesSizeInBytes );
-//			indicesData.resize( indicesSizeInBytes );
-//		}
-//
-//		TVertex * vertexPtr( size_t pOffset = 0 )
-//		{
-//			const auto byteOffset = pOffset * sVertexSize;
-//			auto * dataPtr = verticesData.data( byteOffset );
-//			return reinterpret_cast<TVertex *>( dataPtr );
-//		}
-//
-//		TIndex * indexPtr( size_t pOffset = 0 )
-//		{
-//			const auto byteOffset = pOffset * sIndexSize;
-//			auto * dataPtr = indicesData.data( byteOffset );
-//			return reinterpret_cast<TIndex *>( dataPtr );
-//		}
-//	};
-//
-//	using MeshDefaultP3N3T = MeshDataFixed<VertexDefaultP3N3T, uint32>;
-//
-//	struct MaterialData
-//	{
-//		ImageData diffuseTextureData;
-//	};
-//
-//	template <typename TVertex, typename TIndex = uint32>
-//	struct MeshComponentDefinition
-//	{
-//		MeshDataFixed<TVertex, TIndex> meshData;
-//
-//		uint32 materialIndex;
-//	};
-//
-//	template <typename TVertex, typename TIndex = uint32>
-//	struct MeshDefinition
-//	{
-//		using SubMeshDefinition = MeshComponentDefinition<TVertex, TIndex>;
-//
-//		using SubMeshArray = std::vector<SubMeshDefinition>;
-//
-//		using MaterialArray = std::vector<MaterialData>;
-//
-//		SubMeshArray subMeshes;
-//
-//		MaterialArray materials;
-//
-//		native_uint subMeshesTotalVerticesNum = 0;
-//
-//		native_uint subMeshesTotalVerticesSizeInBytes = 0;
-//
-//		native_uint subMeshesTotalIndicesNum = 0;
-//
-//		native_uint subMeshesTotalIndicesSizeInBytes = 0;
-//
-//		TS3_ATTR_NO_DISCARD explicit operator bool() const noexcept
-//		{
-//			return !empty();
-//		}
-//
-//		TS3_ATTR_NO_DISCARD bool empty() const noexcept
-//		{
-//			return subMeshes.empty();
-//		}
-//
-//		void reset()
-//		{
-//			for( auto & subMesh : subMeshes )
-//			{
-//				subMesh.meshData.verticesData.release();
-//				subMesh.meshData.indicesData.release();
-//			}
-//			materials.clear();
-//		}
-//	};
-//
-//	using MeshDefinitionDefaultP3N3T = MeshDefinition<VertexDefaultP3N3T, uint32>;
-//
-//	class MeshLoader
-//	{
-//	public:
-//		virtual MeshDefinitionDefaultP3N3T loadMeshDefault( const std::string & pFilename ) = 0;
-//	};
-//
-//	class AssimpMeshLoader : public MeshLoader
-//	{
-//	public:
-//		AssimpMeshLoader( FileLoadCallback pFileLoadCallback )
-//		: _fileLoadCallback( std::move( pFileLoadCallback ) )
-//		{}
-//
-//		virtual MeshDefinitionDefaultP3N3T loadMeshDefault( const std::string & pFilename ) override final;
-//
-//	private:
-//		FileLoadCallback _fileLoadCallback;
-//	};
-
-
-	namespace geom
-	{
-
 //		template <typename TVertex, typename TIndex>
-//		inline void generateTangentsAndBiTangents( MeshDataFixed<TVertex, TIndex> & pMeshData )
+//		inline void generateTangentsAndBiNormals( MeshDataFixed<TVertex, TIndex> & pMeshData )
 //		{
 //			auto * vertexArray = reinterpret_cast<TVertex *>( pMeshData.verticesData.data() );
 //
 //			for( native_uint iVertex = 0; iVertex < pMeshData.verticesNum; ++iVertex )
 //			{
 //				math::Vec3f & vTangent = vertexArray[iVertex].tangent;
-//				math::Vec3f & vBiTangent = vertexArray[iVertex].biTangent;
+//				math::Vec3f & vBiNormal = vertexArray[iVertex].biTangent;
 //				vTangent = { 0.0f, 0.0f, 0.0f };
-//				vBiTangent = { 0.0f, 0.0f, 0.0f };
+//				vBiNormal = { 0.0f, 0.0f, 0.0f };
 //				continue;
 //			}
 //
@@ -333,30 +203,30 @@ namespace ts3
 //				math::Vec3f & vTangent1 = vertexArray[faceIndex1].tangent;
 //				math::Vec3f & vTangent2 = vertexArray[faceIndex2].tangent;
 //
-//				math::Vec3f & vBiTangent0 = vertexArray[faceIndex0].biTangent;
-//				math::Vec3f & vBiTangent1 = vertexArray[faceIndex1].biTangent;
-//				math::Vec3f & vBiTangent2 = vertexArray[faceIndex2].biTangent;
+//				math::Vec3f & vBiNormal0 = vertexArray[faceIndex0].biTangent;
+//				math::Vec3f & vBiNormal1 = vertexArray[faceIndex1].biTangent;
+//				math::Vec3f & vBiNormal2 = vertexArray[faceIndex2].biTangent;
 //
 //				vTangent0 += math::normalize(tangent - vNormal0 * math::dot( vNormal0, tangent ) );
 //				vTangent1 += math::normalize(tangent - vNormal1 * math::dot( vNormal1, tangent ) );
 //				vTangent2 += math::normalize(tangent - vNormal2 * math::dot( vNormal2, tangent ) );
 //
-//				vBiTangent0 += math::normalize( biTangent - vNormal0 * math::dot( vNormal0, biTangent ) );
-//				vBiTangent1 += math::normalize( biTangent - vNormal1 * math::dot( vNormal1, biTangent ) );
-//				vBiTangent2 += math::normalize( biTangent - vNormal2 * math::dot( vNormal2, biTangent ) );
+//				vBiNormal0 += math::normalize( biTangent - vNormal0 * math::dot( vNormal0, biTangent ) );
+//				vBiNormal1 += math::normalize( biTangent - vNormal1 * math::dot( vNormal1, biTangent ) );
+//				vBiNormal2 += math::normalize( biTangent - vNormal2 * math::dot( vNormal2, biTangent ) );
 //			}
 //
 //			for( native_uint iVertex = 0; iVertex < pMeshData.verticesNum; ++iVertex )
 //			{
 //				math::Vec3f & vTangent = vertexArray[iVertex].tangent;
-//				math::Vec3f & vBiTangent = vertexArray[iVertex].biTangent;
+//				math::Vec3f & vBiNormal = vertexArray[iVertex].biTangent;
 //				vTangent = math::normalize( vTangent );
-//				vBiTangent = math::normalize( vBiTangent );
+//				vBiNormal = math::normalize( vBiNormal );
 //				continue;
 //			}
 //		}
-
-	}
+//
+//	}
 
 } // namespace ts3
 

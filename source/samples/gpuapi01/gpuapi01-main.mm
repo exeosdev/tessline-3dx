@@ -354,11 +354,12 @@ int main( int pArgc, const char ** pArgv )
 	MeshLoader meshLoader;
 	GeometryManager geometryManager{ ces };
 
-	std::unique_ptr<MeshGroup> meshGroup;
+	std::unique_ptr<MeshGroup> meshGroup1;
+	std::unique_ptr<MeshGroup> meshGroup2;
 
 	{
 		MeshImporterAssimp meshImporter;
-		GeometryDataGpuTransferDirect geometryDataGpuTransfer{ ces, *gxDriverState.cmdContext };
+		GeometryDataGpuTransferUpload geometryDataGpuTransfer{ ces, *gxDriverState.cmdContext };
 
 		MeshImportContext mic;
 		mic.geometryManager = &geometryManager;
@@ -366,21 +367,26 @@ int main( int pArgc, const char ** pArgv )
 		mic.importer = &meshImporter;
 		mic.geometryDataTransfer = &geometryDataGpuTransfer;
 
-		meshGroup = meshLoader.importMeshGroup( mic, "MeshGroupID_Default", {
+		meshGroup1 = meshLoader.importMeshGroup( mic, "MeshGroup1", {
 				{ "MeshID_Default_TreeBase", "assets/meshes/tree/Tree.obj" }
-			} );
+		} );
+
+		meshGroup2 = meshLoader.importMeshGroup( mic, "MeshGroup2", {
+				{ "stone_small_a_lod2", "assets/meshes/Mid.obj" }
+		} );
 	}
 
-	auto * meshTree = meshGroup->findMesh( "MeshID_Default_TreeBase" );
+	auto * meshTree = meshGroup1->findMesh( "MeshID_Default_TreeBase" );
+	auto * meshMID = meshGroup2->findMesh( "stone_small_a_lod2" );
 
 	const auto rtSize = gxDriverState.presentationLayer->queryRenderTargetSize();
 	auto shaderLibrary = ShaderLoader::createShaderLibrary( ces, {
-			{ "SID_DEFAULT_PASSTHROUGH_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_vs" ) },
-			{ "SID_DEFAULT_PASSTHROUGH_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_ps" ) },
-			{ "SID_SHADOW_0_PASS1_LIGHT_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass1_light_vs" ) },
-			{ "SID_SHADOW_0_PASS1_LIGHT_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass1_light_ps" ) },
-			{ "SID_SHADOW_0_PASS2_SHADOW_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass2_shadow_vs" ) },
-			{ "SID_SHADOW_0_PASS2_SHADOW_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass2_shadow_ps" ) },
+		{ "SID_DEFAULT_PASSTHROUGH_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_vs" ) },
+		{ "SID_DEFAULT_PASSTHROUGH_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "default_passthrough_ps" ) },
+		{ "SID_SHADOW_0_PASS1_LIGHT_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass1_light_vs" ) },
+		{ "SID_SHADOW_0_PASS1_LIGHT_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass1_light_ps" ) },
+		{ "SID_SHADOW_0_PASS2_SHADOW_VS", gpuapi::EShaderType::GSVertex, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass2_shadow_vs" ) },
+		{ "SID_SHADOW_0_PASS2_SHADOW_PS", gpuapi::EShaderType::GSPixel, bindShaderSourceLoadCallbackDefault( *assetLoader, "shadow_0_pass2_shadow_ps" ) },
 	} );
 
 	auto vertexShader = shaderLibrary->getShader( "SID_DEFAULT_PASSTHROUGH_VS" );
@@ -477,7 +483,7 @@ int main( int pArgc, const char ** pArgv )
 		psoci.rasterizerConfig = defaults::cvPipelineRasterizerConfigDefault;
 		psoci.rasterizerConfig.cullMode = gpuapi::ECullMode::Back;
 		psoci.rasterizerConfig.primitiveFillMode = gpuapi::EPrimitiveFillMode::Wireframe;
-		psoci.rasterizerConfig.frontFaceVerticesOrder = gpuapi::ETriangleVerticesOrder::Clockwise;
+		psoci.rasterizerConfig.frontFaceVerticesOrder = gpuapi::ETriangleVerticesOrder::CounterClockwise;
 		psoci.renderTargetLayout = rtLayout;
 		psoci.inputLayoutDefinition = gdf.generateGpaInputLayoutDefinition();
 		psoci.shaderSet.addShader( vertexShader );
@@ -587,12 +593,12 @@ int main( int pArgc, const char ** pArgv )
 
 	srand( time( nullptr ) );
 
-	const auto treesNum = 36;
-	const auto treeModelTransBase = math::translation( 0.0f, 0.48f, 1.0f);
-	const auto treeModelScale = math::scaling<float>( 0.85f, 0.85f, 0.85f );
+	const auto treesNum = 1;
+	const auto treeModelTransBase = math::translation( 0.0f, -0.18f, 0.0f);
+	const auto treeModelScale = math::scaling<float>( 5.85f, 5.85f, 5.85f );
 
-	const auto treeRangeX = std::make_pair( -4.0f, 4.0f );
-	const auto treeRangeZ = std::make_pair( 0.0f, 6.0f );
+	const auto treeRangeX = std::make_pair( -1.0f, 1.0f );
+	const auto treeRangeZ = std::make_pair( 0.0f, 1.0f );
 
 	math::Mat4f treeModelMats[treesNum];
 	for( uint32 iTree = 0; iTree < treesNum; ++iTree )
@@ -604,9 +610,11 @@ int main( int pArgc, const char ** pArgv )
 		const auto xOff = xMod * 0.01f + treeRangeX.first;
 		const auto zOff = zMod * 0.01f + treeRangeZ.first;
 
-		treeModelMats[iTree] = math::mul(
-				math::mul( treeModelTransBase, math::translation( xOff, 0.0f, zOff ) ),
-				math::mul( math::rotationAxisY( ( rand() % 360 )  * math::constants::cxFloatRad1Degree ), treeModelScale ) );
+//		treeModelMats[iTree] = math::mul(
+//				math::mul( treeModelTransBase, math::translation( xOff, 0.0f, zOff ) ),
+//				math::mul( math::rotationAxisY( ( rand() % 360 )  * math::constants::cxFloatRad1Degree ), treeModelScale ) );
+
+		treeModelMats[iTree] = math::mul( math::mul( treeModelTransBase, math::translation( xOff, 0.0f, zOff ) ), treeModelScale );
 	}
 
 	while( runApp )
@@ -625,7 +633,7 @@ int main( int pArgc, const char ** pArgv )
 			const auto cameraViewMatrix = cameraController.computeViewMatrixLH();
 
 			gxDriverState.cmdContext->setGraphicsPipelineStateObject( *mainPSO );
-			gxDriverState.cmdContext->setIAVertexStreamState( *meshGroup->getGeometryStorage().getGpaVertexStreamState() );
+			gxDriverState.cmdContext->setIAVertexStreamState( *meshGroup2->getGeometryStorage().getGpaVertexStreamState() );
 
 			cb0DataBase.projectionMatrix = ts3CameraProjection;
 			cb0DataBase.viewMatrix = cameraViewMatrix;
@@ -642,11 +650,10 @@ int main( int pArgc, const char ** pArgv )
 					cb0DataBase.modelMatrix = treeModelMats[iTree];
 					gxDriverState.cmdContext->updateBufferDataUpload( *cbuffer0, cb0DataBase );
 
-					for( uint32 iMeshComponent = 0; iMeshComponent < meshTree->getComponentsNum(); ++iMeshComponent )
+					for( uint32 iMeshComponent = 0; iMeshComponent < meshMID->getComponentsNum(); ++iMeshComponent )
 					{
-						auto * meshComponent = meshTree->getSubComponent( iMeshComponent );
+						auto * meshComponent = meshMID->getSubComponent( iMeshComponent );
 						auto * geometryRef = meshComponent->geometryDataRef();
-
 
 						gxDriverState.cmdContext->cmdDrawDirectIndexed(
 								geometryRef->dataReference.indexDataRegion.sizeInElementsNum,

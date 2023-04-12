@@ -12,17 +12,22 @@
 namespace ts3
 {
 
-	struct GeometryReference;
+	struct SharedGeometryReferenceBase;
 	struct GeometryStorageCreateInfo;
 
-	class GeometryContainer;
+	class GeometryContainerBase;
 	class GeometryDataFormat;
 	class GeometryDataGpuTransfer;
 	class GeometryManager;
-	class GeometryStorage;
+
+	ts3DeclareClassHandle( GeometryBuffer );
+	ts3DeclareClassHandle( IndexBuffer );
+	ts3DeclareClassHandle( VertexBuffer );
+	ts3DeclareClassHandle( GeometryDataSourceBase );
+	ts3DeclareClassHandle( GeometrySharedStorageBase );
 
 	using GeometryStoragePtr = std::unique_ptr<GeometryStorage>;
-	using GeometryRefHandle = const GeometryReference *;
+	using SharedGeometryRefHandle = const SharedGeometryReferenceBase *;
 
 	namespace cxdefs
 	{
@@ -33,28 +38,27 @@ namespace ts3
 
 	enum EVertexAttributeSemanticsFlags : uint32
 	{
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_POSITION_BIT    =     0x01,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_NORMAL_BIT      =     0x02,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TANGENT_BIT     =     0x04,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_BI_TANGENT_BIT  =     0x08,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_FIXED_COLOR_BIT =     0x10,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_0_BIT =   0x0100,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_1_BIT =   0x0200,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_2_BIT =   0x0400,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_3_BIT =   0x0800,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_4_BIT =   0x1000,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_5_BIT =   0x2000,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_6_BIT =   0x4000,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_7_BIT =   0x8000,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_TEX_COORD_ALL   =   0xFF00,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_RESERVED_13_BIT = 0x010000,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_RESERVED_14_BIT = 0x020000,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_RESERVED_15_BIT = 0x040000,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_RESERVED_ALL    = 0x070000,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_INSTANCE_0_BIT  = 0x100000,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_INSTANCE_1_BIT  = 0x200000,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_INSTANCE_ALL    = 0x300000,
-		E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_ALL             = 0x37FFFF,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_POSITION_BIT    =    0x01,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_NORMAL_BIT      =    0x02,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TANGENT_BIT     =    0x04,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_FIXED_COLOR_BIT =    0x08,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_0_BIT =   0x010,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_1_BIT =   0x020,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_2_BIT =   0x040,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_3_BIT =   0x080,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_4_BIT =   0x100,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_5_BIT =   0x200,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_6_BIT =   0x400,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_7_BIT =   0x800,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_TEX_COORD_ALL   =   0xFF0,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_RESERVED_13_BIT =  0x1000,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_RESERVED_14_BIT =  0x2000,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_RESERVED_15_BIT =  0x4000,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_RESERVED_ALL    =  0x7000,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_INSTANCE_0_BIT  = 0x10000,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_INSTANCE_1_BIT  = 0x20000,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_INSTANCE_ALL    = 0x30000,
+		E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_ALL             = 0x37FFF,
 
 		E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_INSTANCE_0_OVERLAP =
 				E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_3_BIT |
@@ -99,7 +103,7 @@ namespace ts3
 		Position   = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_POSITION_BIT    ),
 		Normal     = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_NORMAL_BIT      ),
 		Tangent    = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TANGENT_BIT     ),
-		BiTangent  = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_BI_TANGENT_BIT  ),
+		BiNormal   = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_BI_NORMAL_BIT  ),
 		FixedColor = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_FIXED_COLOR_BIT ),
 		TexCoord0  = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_0_BIT ),
 		TexCoord1  = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_1_BIT ),
@@ -119,7 +123,7 @@ namespace ts3
 		Position   = cxdefs::declareFixedVertexAttributeID(  0, 1, gpuapi::EVertexAttribFormat::Vec3F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_POSITION_BIT ),
 		Normal     = cxdefs::declareFixedVertexAttributeID(  1, 1, gpuapi::EVertexAttribFormat::Vec3F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_NORMAL_BIT ),
 		Tangent    = cxdefs::declareFixedVertexAttributeID(  2, 1, gpuapi::EVertexAttribFormat::Vec3F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TANGENT_BIT ),
-		BiTangent  = cxdefs::declareFixedVertexAttributeID(  3, 1, gpuapi::EVertexAttribFormat::Vec3F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_BI_TANGENT_BIT ),
+		BiNormal   = cxdefs::declareFixedVertexAttributeID(  3, 1, gpuapi::EVertexAttribFormat::Vec3F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_BI_NORMAL_BIT ),
 		FixedColor = cxdefs::declareFixedVertexAttributeID(  4, 1, gpuapi::EVertexAttribFormat::Vec4F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_FIXED_COLOR_BIT ),
 		TexCoord0  = cxdefs::declareFixedVertexAttributeID(  5, 1, gpuapi::EVertexAttribFormat::Vec2F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_0_BIT ),
 		TexCoord1  = cxdefs::declareFixedVertexAttributeID(  6, 1, gpuapi::EVertexAttribFormat::Vec2F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_1_BIT ),
@@ -186,14 +190,18 @@ namespace ts3
 
 	}
 
-	struct GeometryDataRegion
+	// Describes a region of geometry data located within a single buffer (it can be a CPU-side buffer
+	// located in RAM or a hardware GPU buffer). It is used to reference a subregion within large
+	// buffers containing multiple geometry objects.
+	struct GeometryBufferRegion
 	{
-		const byte * dataPtr = nullptr;
 		uint32 elementSize = 0;
 		uint32 offsetInElementsNum = 0;
 		uint32 sizeInElementsNum = 0;
 
-		void append( const GeometryDataRegion & pOther );
+		// Appends an adjacent region to the current one. Appended region's offset must be equal
+		// to current's region offset + size, otherwise the call is ignored and this region remains unchanged.
+		bool append( const GeometryBufferRegion & pOther );
 	};
 
 	struct GeometrySize
@@ -204,15 +212,23 @@ namespace ts3
 		void append( const GeometrySize & pOther );
 	};
 
-	struct GeometryDataReference
+	struct GeometryReferenceBase
 	{
 		const GeometryDataFormat * dataFormat = nullptr;
 
-		GeometryDataRegion indexDataRegion;
+		GeometryContainerBase * geometryContainer = nullptr;
 
-		GeometryVertexStreamGenericArray<GeometryDataRegion> vertexStreamDataRegions;
+		uint32 geometryIndex;
 
-		explicit GeometryDataReference( const GeometryDataFormat & pDataFormat );
+		uint32 activeVertexStreamsNum;
+
+		GeometryBufferRegion indexDataRegion;
+
+		GeometryBufferRegion * vertexDataRegionsPtr;
+
+		explicit GeometryReferenceBase( GeometryBufferRegion * pVertexDataRegionsPtr )
+		: vertexDataRegionsPtr( pVertexDataRegionsPtr )
+		{}
 
 		TS3_ATTR_NO_DISCARD explicit operator bool() const noexcept;
 
@@ -224,41 +240,65 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD uint32 vertexDataOffsetInElementsNum() const noexcept;
 
+		TS3_ATTR_NO_DISCARD uint32 vertexDataSizeInElementsNum() const noexcept;
+
 		TS3_ATTR_NO_DISCARD uint32 vertexElementSizeInBytes() const noexcept;
 
 		TS3_ATTR_NO_DISCARD uint32 indexElementSizeInBytes() const noexcept;
 
 		TS3_ATTR_NO_DISCARD GeometrySize calculateGeometrySize() const noexcept;
 
-		void append( const GeometryDataReference & pOther );
+		void append( const GeometryReferenceBase & pOther );
 	};
 
-	using CPUGeometryDataReference = GeometryDataReference;
-	using GPUGeometryDataReference = GeometryDataReference;
-
-	struct GeometryReference
+	template <size_t tVSN>
+	struct GeometryReference : public GeometryReferenceBase
 	{
-		GeometryStorage * storage;
+		GeometryBufferRegion vertexDataRegions[tVSN];
 
-		uint32 geometryIndex;
+		GeometryReference()
+		: GeometryReferenceBase( vertexDataRegions )
+		{}
+	};
 
-		GeometryDataReference dataReference;
+	using CPUGeometryDataReferenceBase = GeometryDataReferenceBase;
+	using GPUGeometryDataReferenceBase = GeometryDataReferenceBase;
 
-		GeometryReference( GeometryStorage & pStorage );
+	struct SharedGeometryReferenceBase
+	{
+
+		GeometryDataReferenceBase * dataReferencePtr;
+
+		SharedGeometryReferenceBase(
+				const GeometrySharedStorageBase & pSharedStorage,
+				uint32 pGeometryIndex,
+				GeometryDataReferenceBase & pDataReference );
+	};
+
+	template <size_t tVSN>
+	struct SharedGeometryReference : public SharedGeometryReferenceBase
+	{
+		using DataReference = GeometryDataReference<tVSN>;
+
+		DataReference dataReference;
+
+		SharedGeometryReference(
+				const GeometrySharedStorageBase & pSharedStorage,
+				uint32 pGeometryIndex );
 	};
 
 	namespace gmutil
 	{
 
-		TS3_ATTR_NO_DISCARD GeometryDataReference getGeometryDataReferenceSubRegion(
-				const GeometryDataReference & pGeometryDataRef,
+		TS3_ATTR_NO_DISCARD GeometryDataReferenceBase getGeometryDataReferenceBaseSubRegion(
+				const GeometryDataReferenceBase & pGeometryDataRef,
 				uint32 pVertexDataOffsetInElementsNum,
 				uint32 pVertexElementsNum,
 				uint32 pIndexDataOffsetInElementsNum,
 				uint32 pIndexElementsNum );
 
-		TS3_ATTR_NO_DISCARD GeometryDataReference advanceGeometryDataReference(
-				const GeometryDataReference & pGeometryDataRef,
+		TS3_ATTR_NO_DISCARD GeometryDataReferenceBase advanceGeometryDataReferenceBase(
+				const GeometryDataReferenceBase & pGeometryDataRef,
 				uint32 pVertexElementsNum,
 				uint32 pIndexElementsNum );
 

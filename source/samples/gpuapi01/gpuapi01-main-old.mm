@@ -288,7 +288,7 @@ int main( int pArgc, const char ** pArgv )
 	auto meshImporter = std::make_unique<AssimpMeshImporter>();
 	auto meshDataNew = meshImporter->importMeshDefault( "assets/meshes/tree/Tree.obj", gdf );
 
-	//geom::generateTangentsAndBiTangents( meshDefinition.subMeshes[0].meshData );
+	//geom::generateTangentsAndBiNormals( meshDefinition.subMeshes[0].meshData );
 
 	bool isFullscreen = true;
 	bool updateLightPosition = true;

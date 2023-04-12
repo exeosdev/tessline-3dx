@@ -26,7 +26,7 @@ namespace ts3
 
 		auto * aiSceneObject = aImporter.ReadFile(
 				pFilename.c_str(),
-				aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph | aiProcess_FlipWindingOrder | aiProcess_GenSmoothNormals | aiProcess_OptimizeMeshes );
+				aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph | aiProcess_FlipWindingOrder | aiProcess_GenSmoothNormals | aiProcess_Triangulate );
 
 		if( !aiSceneObject )
 		{

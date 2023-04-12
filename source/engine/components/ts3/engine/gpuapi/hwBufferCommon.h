@@ -2,7 +2,7 @@
 #ifndef __TS3_ENGINE_HARDWARE_BUFFER_COMMON_H__
 #define __TS3_ENGINE_HARDWARE_BUFFER_COMMON_H__
 
-#include "commonGPUDefs.h"
+#include "commonGpaDefs.h"
 #include <ts3/core/signals/signalCommon.h>
 
 namespace ts3
@@ -39,9 +39,6 @@ namespace ts3
 		ConstantBufferDynamic       = gpuapi::E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_DYNAMIC_BIT |
 		                              bshLeft<uint64, 32>( gpuapi::E_GPU_MEMORY_ACCESS_FLAG_CPU_WRITE_BIT ),
-
-		ConstantBufferImmutable     = gpuapi::E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT |
-		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_IMMUTABLE_BIT,
 
 		ConstantBufferStatic        = gpuapi::E_GPU_BUFFER_BIND_FLAG_CONSTANT_BUFFER_BIT |
 		                              gpuapi::E_GPU_RESOURCE_CONTENT_FLAG_STATIC_BIT,
@@ -87,17 +84,23 @@ namespace ts3
 		                              bshLeft<uint64, 32>( gpuapi::E_GPU_MEMORY_MAP_FLAG_WRITE_APPEND_BIT ),
 	};
 
-	template <typename TBufferUsage>
-	inline constexpr gpuapi::gpu_memory_flags_value_t cxdefs::getHWBufferUsageGPUMemoryFlags( TBufferUsage pBufferUsage )
+	namespace cxdefs
 	{
-		return static_cast<gpuapi::gpu_memory_flags_value_t>( ( ( ( hardware_buffer_flags_value_t ) pBufferUsage ) >> 32 ) & Limits<uint32>::maxValue );
+
+		template <typename TBufferUsage>
+		inline constexpr gpuapi::gpu_memory_flags_value_t getHWBufferUsageGPUMemoryFlags( TBufferUsage pBufferUsage )
+		{
+			return static_cast<gpuapi::gpu_memory_flags_value_t>( ( ( ( hardware_buffer_flags_value_t ) pBufferUsage ) >> 32 ) & Limits<uint32>::maxValue );
+		}
+
+		template <typename TBufferUsage>
+		inline constexpr gpuapi::resource_flags_value_t getHWBufferUsageGPUResourceFlags( TBufferUsage pBufferUsage )
+		{
+			return static_cast<gpuapi::resource_flags_value_t>( ( ( hardware_buffer_flags_value_t ) pBufferUsage ) & Limits<uint32>::maxValue );
+		}
+
 	}
 
-	template <typename TBufferUsage>
-	inline constexpr gpuapi::resource_flags_value_t cxdefs::getHWBufferUsageGPUResourceFlags( TBufferUsage pBufferUsage )
-	{
-		return static_cast<gpuapi::resource_flags_value_t>( ( ( hardware_buffer_flags_value_t ) pBufferUsage ) & Limits<uint32>::maxValue );
-	}
 
 } // namespace ts3
 

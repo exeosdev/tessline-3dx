@@ -27,21 +27,21 @@ namespace ts3
 
 		virtual void initializeMeshData(
 				const GeometryReference & pGeometryRef,
-				const GeometryDataReference & pInputDataRef ) = 0;
+				const GeometryDataReferenceBase & pInputDataRef ) = 0;
 	};
 
-	class GeometryDataGpuTransferDirect : public GeometryDataGpuTransfer
+	class GeometryDataGpuTransferDirectCopy : public GeometryDataGpuTransfer
 	{
 	public:
-		GeometryDataGpuTransferDirect(
-				CoreEngineState & pCES,
-				GpaTransferCommandContext & pTransferCmdContext );
+		GeometryDataGpuTransferDirectCopy();
 
-		virtual ~GeometryDataGpuTransferDirect();
+		virtual ~GeometryDataGpuTransferDirectCopy();
 
 		virtual void initializeMeshData(
 				const GeometryReference & pGeometryRef,
-				const GeometryDataReference & pInputDataRef ) override final;
+				const GeometryDataReferenceBase & pInputDataRef ) override final
+		{
+		}
 	};
 
 	class GeometryDataGpuTransferIntermediateBuffer : public GeometryDataGpuTransfer
@@ -52,7 +52,7 @@ namespace ts3
 
 		virtual void initializeMeshData(
 				const GeometryReference & pGeometryRef,
-				const GeometryDataReference & pInputDataRef )  override final
+				const GeometryDataReferenceBase & pInputDataRef )  override final
 		{
 		}
 	};
@@ -60,14 +60,15 @@ namespace ts3
 	class GeometryDataGpuTransferUpload : public GeometryDataGpuTransfer
 	{
 	public:
-		GeometryDataGpuTransferUpload();
+		GeometryDataGpuTransferUpload(
+				CoreEngineState & pCES,
+				GpaTransferCommandContext & pTransferCmdContext);
+
 		virtual ~GeometryDataGpuTransferUpload();
 
 		virtual void initializeMeshData(
 				const GeometryReference & pGeometryRef,
-				const GeometryDataReference & pInputDataRef )  override final
-		{
-		}
+				const GeometryDataReferenceBase & pInputDataRef )  override final;
 	};
 
 } // namespace ts3

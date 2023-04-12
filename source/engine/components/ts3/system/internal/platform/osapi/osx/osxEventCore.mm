@@ -4,6 +4,7 @@
 #include "nsOSXWindow.h"
 #include "nsOSXKeyboardSupport.h"
 #include <ts3/system/internal/eventCorePrivate.h>
+#include <AppKit/NSScreen.h>
 
 namespace ts3::system
 {
@@ -231,7 +232,9 @@ namespace ts3::system
 		OSXMouseCursorState osxQueryMouseCursorState( NSEvent * pNSEvent )
 		{
 			auto * nsSourceWindow = [pNSEvent window];
+
 			const auto nsWindowFrame = [nsSourceWindow frame];
+			const auto nsScreenFrame = [[nsSourceWindow screen] frame];
 			const auto nsWindowStyle = [nsSourceWindow styleMask];
 
 			const auto nsWindowClientAreaSize =
@@ -256,8 +259,10 @@ namespace ts3::system
 			}
 
 			OSXMouseCursorState osxCursorState;
-			osxCursorState.positionScreenSpace = mousePositionScreenSpace;
-			osxCursorState.positionWindowSpace = mousePositionWindowSpace;
+			osxCursorState.positionScreenSpace.x = mousePositionScreenSpace.x;
+			osxCursorState.positionScreenSpace.y = nsScreenFrame.size.height - mousePositionScreenSpace.y;
+			osxCursorState.positionWindowSpace.x = mousePositionWindowSpace.x;
+			osxCursorState.positionWindowSpace.y = nsWindowFrame.size.height - mousePositionWindowSpace.y;
 			osxCursorState.isInsideWindowFrame = mouseIsInsideWindowFrame;
 			osxCursorState.isInsideWindowClientArea = mouseIsInsideWindowClientArea;
 

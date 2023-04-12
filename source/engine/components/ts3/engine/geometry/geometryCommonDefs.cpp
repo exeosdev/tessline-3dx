@@ -19,48 +19,55 @@ namespace ts3
 	}
 
 
-	GeometryDataReference::GeometryDataReference( const GeometryDataFormat & pDataFormat )
+	GeometryDataReferenceBase::GeometryDataReferenceBase( const GeometryDataFormat & pDataFormat )
 	: dataFormat( &pDataFormat )
 	{}
 
-	GeometryDataReference::operator bool() const noexcept
+	GeometryDataReferenceBase::operator bool() const noexcept
 	{
 		return dataFormat && !dataFormat->empty();
 	}
 
-	bool GeometryDataReference::isIndexedGeometry() const noexcept
+	bool GeometryDataReferenceBase::isIndexedGeometry() const noexcept
 	{
 		return dataFormat->isIndexedGeometry();
 	}
 
-	bool GeometryDataReference::isVertexStreamActive( uint32 pVertexStreamIndex ) const
+	bool GeometryDataReferenceBase::isVertexStreamActive( uint32 pVertexStreamIndex ) const
 	{
 		return dataFormat->isVertexStreamActive( pVertexStreamIndex );
 	}
 
-	uint32 GeometryDataReference::vertexStreamElementSizeInBytes( uint32 pVertexStreamIndex ) const
+	uint32 GeometryDataReferenceBase::vertexStreamElementSizeInBytes( uint32 pVertexStreamIndex ) const
 	{
 		return dataFormat->vertexStreamElementSizeInBytes( pVertexStreamIndex );
 	}
 
-	uint32 GeometryDataReference::vertexDataOffsetInElementsNum() const noexcept
+	uint32 GeometryDataReferenceBase::vertexDataOffsetInElementsNum() const noexcept
 	{
 		const auto firstActiveStream = dataFormat->firstActiveVertexStream();
 		ts3DebugAssert( firstActiveStream != gpuapi::cxdefs::IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED );
 		return vertexStreamDataRegions[firstActiveStream].offsetInElementsNum;
 	}
 
-	uint32 GeometryDataReference::vertexElementSizeInBytes() const noexcept
+	uint32 GeometryDataReferenceBase::vertexDataSizeInElementsNum() const noexcept
+	{
+		const auto firstActiveStream = dataFormat->firstActiveVertexStream();
+		ts3DebugAssert( firstActiveStream != gpuapi::cxdefs::IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED );
+		return vertexStreamDataRegions[firstActiveStream].sizeInElementsNum;
+	}
+
+	uint32 GeometryDataReferenceBase::vertexElementSizeInBytes() const noexcept
 	{
 		return dataFormat->vertexElementSizeInBytes();
 	}
 
-	uint32 GeometryDataReference::indexElementSizeInBytes() const noexcept
+	uint32 GeometryDataReferenceBase::indexElementSizeInBytes() const noexcept
 	{
 		return dataFormat->indexElementSizeInBytes();
 	}
 
-	GeometrySize GeometryDataReference::calculateGeometrySize() const noexcept
+	GeometrySize GeometryDataReferenceBase::calculateGeometrySize() const noexcept
 	{
 		const auto firstActiveStream = dataFormat->firstActiveVertexStream();
 		ts3DebugAssert( firstActiveStream != gpuapi::cxdefs::IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED );
@@ -71,7 +78,7 @@ namespace ts3
 		};
 	}
 
-	void GeometryDataReference::append( const GeometryDataReference & pOther )
+	void GeometryDataReferenceBase::append( const GeometryDataReferenceBase & pOther )
 	{
 		for( auto iVertexStream : dataFormat->activeVertexStreams() )
 		{
@@ -92,14 +99,14 @@ namespace ts3
 	namespace gmutil
 	{
 
-		GeometryDataReference getGeometryDataReferenceSubRegion(
-				const GeometryDataReference & pGeometryDataRef,
+		GeometryDataReferenceBase getGeometryDataReferenceBaseSubRegion(
+				const GeometryDataReferenceBase & pGeometryDataRef,
 				uint32 pVertexDataOffsetInElementsNum,
 				uint32 pVertexElementsNum,
 				uint32 pIndexDataOffsetInElementsNum,
 				uint32 pIndexElementsNum )
 		{
-			GeometryDataReference subGeometryDataRef{ *pGeometryDataRef.dataFormat };
+			GeometryDataReferenceBase subGeometryDataRef{ *pGeometryDataRef.dataFormat };
 
 			for( auto iVertexStream : pGeometryDataRef.dataFormat->activeVertexStreams() )
 			{
@@ -134,12 +141,12 @@ namespace ts3
 			return subGeometryDataRef;
 		}
 
-		GeometryDataReference advanceGeometryDataReference(
-				const GeometryDataReference & pGeometryDataRef,
+		GeometryDataReferenceBase advanceGeometryDataReferenceBase(
+				const GeometryDataReferenceBase & pGeometryDataRef,
 				uint32 pVertexElementsNum,
 				uint32 pIndexElementsNum )
 		{
-			 GeometryDataReference advGeometryDataRef{ *pGeometryDataRef.dataFormat };
+			 GeometryDataReferenceBase advGeometryDataRef{ *pGeometryDataRef.dataFormat };
 
 			for( auto iVertexStream : pGeometryDataRef.dataFormat->activeVertexStreams() )
 			{

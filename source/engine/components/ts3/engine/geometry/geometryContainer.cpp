@@ -4,12 +4,46 @@
 namespace ts3
 {
 
+	GeometryContainer::GeometryContainer()
+	{}
+
+	GeometryContainer::GeometryContainer(
+			const GeometryDataFormat & pDataFormat,
+			GeometryVertexBufferReference * pVertexBufferRefsPtr )
+	: _activeVertexStreamsNum( pDataFormat.activeVertexStreamsNum() )
+	, _vertexBufferRefsPtr( pVertexBufferRefsPtr )
+	{}
+
+	bool GeometryContainer::setIndexBuffer( const GeometryIndexBufferReference & pIndexBufferReference )
+	{
+		_indexBufferRefPtr = pIndexBufferReference;
+		return true;
+	}
+
+	bool GeometryContainer::setVertexBuffer( uint32 pBufferIndex, const GeometryVertexBufferReference & pVertexBufferReference )
+	{
+		if( !_vertexBufferRefsPtr || ( pBufferIndex >= _activeVertexStreamsNum ) )
+		{
+			return false;
+		}
+
+		_vertexBufferRefsPtr[pBufferIndex] = pVertexBufferReference;
+		return true;
+	}
+
+	void GeometryContainer::setVertexBufferRefsStorage( GeometryVertexBufferReference * pVertexBufferRefsPtr )
+	{
+		_vertexBufferRefsPtr = pVertexBufferRefsPtr;
+	}
+
+
+	/*
 	GeometryContainer::GeometryContainer( const GeometryDataFormat & pDataFormat )
 	: mDataFormat( pDataFormat )
 	, _allGeometryDataRef( pDataFormat )
 	{}
 
-	const GeometryDataReference & GeometryContainer::getAllGeometryDataRef() const noexcept
+	const GeometryDataReferenceBase & GeometryContainer::getAllGeometryDataRef() const noexcept
 	{
 		return _allGeometryDataRef;
 	}
@@ -52,13 +86,10 @@ namespace ts3
 
 		for( auto iVertexStream : mDataFormat.activeVertexStreams() )
 		{
-			if( mDataFormat.isVertexStreamActive( iVertexStream ) )
-			{
-				const auto vertexStreamElementSize = mDataFormat.vertexStreamElementSizeInBytes( iVertexStream );
-				_allGeometryDataRef.vertexStreamDataRegions[iVertexStream].elementSize = vertexStreamElementSize;
-				_allGeometryDataRef.vertexStreamDataRegions[iVertexStream].offsetInElementsNum = 0;
-				_allGeometryDataRef.vertexStreamDataRegions[iVertexStream].sizeInElementsNum = pVertexElementsNum;
-			}
+			const auto vertexStreamElementSize = mDataFormat.vertexStreamElementSizeInBytes( iVertexStream );
+			_allGeometryDataRef.vertexStreamDataRegions[iVertexStream].elementSize = vertexStreamElementSize;
+			_allGeometryDataRef.vertexStreamDataRegions[iVertexStream].offsetInElementsNum = 0;
+			_allGeometryDataRef.vertexStreamDataRegions[iVertexStream].sizeInElementsNum = pVertexElementsNum;
 		}
 
 		if( mDataFormat.isIndexedGeometry() && ( pIndexElementsNum > 0 ) )
@@ -75,5 +106,6 @@ namespace ts3
 		_storageMetrics.geometrySize.vertexElementsNum += pVertexElementsNum;
 		_storageMetrics.geometrySize.indexElementsNum += pIndexElementsNum;
 	}
+	 */
 
 }

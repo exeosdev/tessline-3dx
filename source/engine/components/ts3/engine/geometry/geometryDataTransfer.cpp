@@ -16,17 +16,17 @@ namespace ts3
 	GeometryDataGpuTransfer::~GeometryDataGpuTransfer() = default;
 
 
-	GeometryDataGpuTransferDirect::GeometryDataGpuTransferDirect(
+	GeometryDataGpuTransferUpload::GeometryDataGpuTransferUpload(
 			CoreEngineState & pCES,
 			GpaTransferCommandContext & pTransferCmdContext )
 	: GeometryDataGpuTransfer( pCES, pTransferCmdContext )
 	{}
 
-	GeometryDataGpuTransferDirect::~GeometryDataGpuTransferDirect() = default;
+	GeometryDataGpuTransferUpload::~GeometryDataGpuTransferUpload() = default;
 
-	void GeometryDataGpuTransferDirect::initializeMeshData(
+	void GeometryDataGpuTransferUpload::initializeMeshData(
 			const GeometryReference & pGeometryRef,
-			const GeometryDataReference & pInputDataRef )
+			const GeometryDataReferenceBase & pInputDataRef )
 	{
 		for( auto iVertexStream : pGeometryRef.dataReference.dataFormat->activeVertexStreams() )
 		{

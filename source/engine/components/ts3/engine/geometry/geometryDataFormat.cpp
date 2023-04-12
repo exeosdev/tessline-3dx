@@ -321,7 +321,7 @@ namespace ts3
 				ts3CaseReturn( EVertexAttributeSemanticsID::Position   , "POSITION"  );
 				ts3CaseReturn( EVertexAttributeSemanticsID::Normal     , "NORMAL"    );
 				ts3CaseReturn( EVertexAttributeSemanticsID::Tangent    , "TANGENT"   );
-				ts3CaseReturn( EVertexAttributeSemanticsID::BiTangent  , "BITANGENT" );
+				ts3CaseReturn( EVertexAttributeSemanticsID::BiNormal  , "BITANGENT" );
 				ts3CaseReturn( EVertexAttributeSemanticsID::FixedColor , "COLOR"     );
 				ts3CaseReturn( EVertexAttributeSemanticsID::TexCoord0  , "TEXCOORD0" );
 				ts3CaseReturn( EVertexAttributeSemanticsID::TexCoord1  , "TEXCOORD1" );

@@ -11,12 +11,60 @@
 namespace ts3
 {
 
+	class GeometrySharedStorageBase : public GeometryContainer
+	{
+	public:
+		GeometrySharedStorageBase(
+				const GeometryDataFormat & pDataFormat,
+				GeometryVertexBufferReference * pVertexBufferReference = nullptr );
+
+		virtual SharedGeometryRefHandle addIndexedGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum ) = 0;
+
+		virtual SharedGeometryRefHandle addNonIndexedGeometry( uint32 pVertexElementsNum ) = 0;
+	};
+
+	template <size_t tVSN>
+	class GeometrySharedStorage : public GeometrySharedStorageBase
+	{
+	public:
+		using GeometryReference = SharedGeometryReference<tVSN>;
+
+	public:
+		GeometrySharedStorage( const GeometryDataFormat & pDataFormat )
+		: GeometrySharedStorageBase( pDataFormat, _vertexBufferRefs.data() )
+		{}
+
+	private:
+		using GeometryVertexBufferRefArray = std::array<GeometryVertexBufferReference, tVSN>;
+		GeometryVertexBufferRefArray _vertexBufferRefs;
+	};
+
+	template <>
+	class GeometrySharedStorage<0> : public GeometrySharedStorageBase
+	{
+	public:
+		using GeometryReference = SharedGeometryReference<gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
+
+	public:
+		GeometrySharedStorage( const GeometryDataFormat & pDataFormat )
+		: GeometrySharedStorageBase( pDataFormat )
+		{
+			_vertexBufferRefs.resize( pDataFormat.activeVertexStreamsNum() );
+			setVertexBufferRefsStorage( _vertexBufferRefs.data() );
+		}
+
+	private:
+		using GeometryVertexBufferRefDynamicArray = std::vector<GeometryVertexBufferReference>;
+		GeometryIndexBufferReference _indexBufferRef;
+		GeometryVertexBufferRefDynamicArray _vertexBufferRefs;
+	};
+
+
 	enum class EGeometryBufferAllocationMode : enum_default_value_t
 	{
 		AllocLocal,
 		ShareExternal
 	};
-
 
 	struct GeometryStorageCreateInfo
 	{
@@ -53,9 +101,9 @@ namespace ts3
 
 		gpuapi::GPUBufferHandle getVertexBuffer( uint32 pIndex ) const noexcept;
 
-		GeometryReference * addIndexedGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
+		GeometryRefHandle addIndexedGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
 
-		GeometryReference * addNonIndexedGeometry( uint32 pVertexElementsNum );
+		GeometryRefHandle addNonIndexedGeometry( uint32 pVertexElementsNum );
 
 		void releaseStorage() {}
 

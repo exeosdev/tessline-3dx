@@ -27,7 +27,7 @@ namespace ts3
 		return ( pIndex < gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM ) ? _vertexBufferArray[pIndex] : nullptr;
 	}
 
-	GeometryReference * GeometryStorage::addIndexedGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum )
+	GeometryRefHandle GeometryStorage::addIndexedGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum )
 	{
 		if( ( pVertexElementsNum == 0 ) || ( pIndexElementsNum == 0 ) || !isIndexedGeometryContainer() )
 		{
@@ -37,7 +37,7 @@ namespace ts3
 		return addGeometry( pVertexElementsNum, pIndexElementsNum );
 	}
 
-	GeometryReference * GeometryStorage::addNonIndexedGeometry( uint32 pVertexElementsNum )
+	GeometryRefHandle GeometryStorage::addNonIndexedGeometry( uint32 pVertexElementsNum )
 	{
 		if( pVertexElementsNum == 0 )
 		{
@@ -77,47 +77,41 @@ namespace ts3
 
 		for( auto iVertexStream : mDataFormat.activeVertexStreams() )
 		{
-			if( pCreateInfo.dataFormat->isVertexStreamActive( iVertexStream ) )
+			if( pCreateInfo.vertexBufferDescArray[iVertexStream].allocationMode == EGeometryBufferAllocationMode::AllocLocal )
 			{
-				if( pCreateInfo.vertexBufferDescArray[iVertexStream].allocationMode == EGeometryBufferAllocationMode::AllocLocal )
-				{
-					const auto & vertexStreamFormat = pCreateInfo.dataFormat->vertexStream( iVertexStream );
+				const auto & vertexStreamFormat = pCreateInfo.dataFormat->vertexStream( iVertexStream );
 
-					const auto bufferSizeInBytes =
-							vertexStreamFormat.elementSizeInBytes * pCreateInfo.capacity.vertexDataCapacityInElementsNum;
-
-					const auto bufferUsagePolicy = resolveGeometryBufferUsagePolicy(
-							pCreateInfo.vertexBufferDescArray[iVertexStream].bufferUsagePolicy,
-							pCreateInfo.commonBufferUsagePolicy );
-
-					_vertexBufferArray[iVertexStream] = createVertexBuffer(
-							pCES,
-							bufferSizeInBytes,
-							bufferUsagePolicy );
-
-					_vertexStreamBindingMask.set( gpuapi::cxdefs::makeIAVertexBufferFlag( iVertexStream ) );
-				}
-			}
-		}
-
-		if( pCreateInfo.indexBufferDesc.allocationMode == EGeometryBufferAllocationMode::AllocLocal )
-		{
-			if( pCreateInfo.dataFormat->isIndexedGeometry() )
-			{
 				const auto bufferSizeInBytes =
-						pCreateInfo.dataFormat->indexElementSizeInBytes() * pCreateInfo.capacity.indexDataCapacityInElementsNum;
+						vertexStreamFormat.elementSizeInBytes * pCreateInfo.capacity.vertexDataCapacityInElementsNum;
 
 				const auto bufferUsagePolicy = resolveGeometryBufferUsagePolicy(
-						pCreateInfo.indexBufferDesc.bufferUsagePolicy,
+						pCreateInfo.vertexBufferDescArray[iVertexStream].bufferUsagePolicy,
 						pCreateInfo.commonBufferUsagePolicy );
 
-				_indexBuffer = createIndexBuffer(
+				_vertexBufferArray[iVertexStream] = createVertexBuffer(
 						pCES,
 						bufferSizeInBytes,
 						bufferUsagePolicy );
 
-				_vertexStreamBindingMask.set( gpuapi::E_IA_VERTEX_STREAM_BINDING_FLAG_INDEX_BUFFER_BIT );
+				_vertexStreamBindingMask.set( gpuapi::cxdefs::makeIAVertexBufferFlag( iVertexStream ) );
 			}
+		}
+
+		if( pCreateInfo.dataFormat->isIndexedGeometry() && ( pCreateInfo.indexBufferDesc.allocationMode == EGeometryBufferAllocationMode::AllocLocal ) )
+		{
+			const auto bufferSizeInBytes =
+					pCreateInfo.dataFormat->indexElementSizeInBytes() * pCreateInfo.capacity.indexDataCapacityInElementsNum;
+
+			const auto bufferUsagePolicy = resolveGeometryBufferUsagePolicy(
+					pCreateInfo.indexBufferDesc.bufferUsagePolicy,
+					pCreateInfo.commonBufferUsagePolicy );
+
+			_indexBuffer = createIndexBuffer(
+					pCES,
+					bufferSizeInBytes,
+					bufferUsagePolicy );
+
+			_vertexStreamBindingMask.set( gpuapi::E_IA_VERTEX_STREAM_BINDING_FLAG_INDEX_BUFFER_BIT );
 		}
 	}
 
@@ -178,7 +172,7 @@ namespace ts3
 
 		if( geometryReference.geometryIndex == 0 )
 		{
-			geometryReference.dataReference = gmutil::getGeometryDataReferenceSubRegion(
+			geometryReference.dataReference = gmutil::getGeometryDataReferenceBaseSubRegion(
 					_allGeometryDataRef,
 					0, pVertexElementsNum,
 					0, pIndexElementsNum );
@@ -186,7 +180,7 @@ namespace ts3
 		else
 		{
 			const auto & previousGeometryRef = _geometryRefList[geometryReference.geometryIndex - 1];
-			geometryReference.dataReference = gmutil::advanceGeometryDataReference(
+			geometryReference.dataReference = gmutil::advanceGeometryDataReferenceBase(
 					previousGeometryRef.dataReference,
 					pVertexElementsNum,
 					pIndexElementsNum );

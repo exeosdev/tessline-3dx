@@ -7,19 +7,42 @@
 namespace ts3
 {
 
+	DataBufferRegionSubElementMappingReadWrite MeshData::getIndexDataSubRegionReadWrite(
+			const CPUGeometryDataReferenceBase & pMeshDataRef ) noexcept
+	{
+		return DataBufferRegionSubElementMappingReadWrite {
+				_indexDataBuffer.data() + ( pMeshDataRef.indexDataRegion.offsetInElementsNum * pMeshDataRef.indexDataRegion.elementSize ),
+				mDataFormat.indexElementSizeInBytes(),
+				mDataFormat.indexElementSizeInBytes()
+		};
+	}
+
+	DataBufferRegionSubElementMappingReadWrite MeshData::getVertexAttributeDataSubRegionReadWrite(
+			const CPUGeometryDataReferenceBase & pMeshDataRef,
+			uint32 pAttributeIndex ) noexcept
+	{
+		const auto & attributeFormat = mDataFormat.attribute( pAttributeIndex );
+		const auto & vertexStreamDataRef = pMeshDataRef.vertexStreamDataRegions[attributeFormat.streamIndex];
+
+		auto * bufferBasePtr = _vertexDataBuffers[attributeFormat.streamIndex].data();
+
+		return DataBufferRegionSubElementMappingReadWrite {
+				bufferBasePtr + ( vertexStreamDataRef.offsetInElementsNum * vertexStreamDataRef.elementSize ) + attributeFormat.streamElementRelativeOffset,
+				attributeFormat.attributeTotalSizeInBytes,
+				vertexStreamDataRef.elementSize
+		};
+	}
+
 	void MeshData::initializeStorage( uint32 pVertexElementsNum, uint32 pIndexElementsNum )
 	{
 		setContainerCapacity( pVertexElementsNum, pIndexElementsNum );
 
 		for( auto iVertexStream : mDataFormat.activeVertexStreams() )
 		{
-			if( mDataFormat.isVertexStreamActive( iVertexStream ) )
-			{
-				const auto vertexStreamElementSize = mDataFormat.vertexStreamElementSizeInBytes( iVertexStream );
-				const auto vertexStreamDataBufferSize = pVertexElementsNum * vertexStreamElementSize;
-				_vertexDataBuffers[iVertexStream].resize( vertexStreamDataBufferSize );
-				_allGeometryDataRef.vertexStreamDataRegions[iVertexStream].dataPtr = _vertexDataBuffers[iVertexStream].data();
-			}
+			const auto vertexStreamElementSize = mDataFormat.vertexStreamElementSizeInBytes( iVertexStream );
+			const auto vertexStreamDataBufferSize = pVertexElementsNum * vertexStreamElementSize;
+			_vertexDataBuffers[iVertexStream].resize( vertexStreamDataBufferSize );
+			_allGeometryDataRef.vertexStreamDataRegions[iVertexStream].dataPtr = _vertexDataBuffers[iVertexStream].data();
 		}
 
 		if( pIndexElementsNum > 0 )
@@ -47,7 +70,7 @@ namespace ts3
 
 		if( subComponentData.componentIndex == 0 )
 		{
-			subComponentData.geometryDataRef = gmutil::getGeometryDataReferenceSubRegion(
+			subComponentData.geometryDataRef = gmutil::getGeometryDataReferenceBaseSubRegion(
 					_allGeometryDataRef,
 					0, pVertexElementsNum,
 					0, pIndexElementsNum );
@@ -55,7 +78,7 @@ namespace ts3
 		else
 		{
 			const auto & previousSubComponent = _meshSubComponents[subComponentData.componentIndex - 1];
-			subComponentData.geometryDataRef = gmutil::advanceGeometryDataReference(
+			subComponentData.geometryDataRef = gmutil::advanceGeometryDataReferenceBase(
 					previousSubComponent.geometryDataRef,
 					pVertexElementsNum,
 					pIndexElementsNum );
@@ -64,32 +87,6 @@ namespace ts3
 		updateStoredGeometrySize( pVertexElementsNum, pIndexElementsNum );
 
 		return &( _meshSubComponents.back() );
-	}
-
-	DataBufferRegionSubElementMappingReadWrite MeshData::getIndexDataSubRegionReadWrite(
-			const CPUGeometryDataReference & pMeshDataRef ) noexcept
-	{
-		return DataBufferRegionSubElementMappingReadWrite {
-				_indexDataBuffer.data() + ( pMeshDataRef.indexDataRegion.offsetInElementsNum * pMeshDataRef.indexDataRegion.elementSize ),
-				mDataFormat.indexElementSizeInBytes(),
-				mDataFormat.indexElementSizeInBytes()
-		};
-	}
-
-	DataBufferRegionSubElementMappingReadWrite MeshData::getVertexAttributeDataSubRegionReadWrite(
-			const CPUGeometryDataReference & pMeshDataRef,
-			uint32 pAttributeIndex ) noexcept
-	{
-		const auto & attributeFormat = mDataFormat.attribute( pAttributeIndex );
-		const auto & vertexStreamDataRef = pMeshDataRef.vertexStreamDataRegions[attributeFormat.streamIndex];
-
-		auto * bufferBasePtr = _vertexDataBuffers[attributeFormat.streamIndex].data();
-
-		return DataBufferRegionSubElementMappingReadWrite {
-				bufferBasePtr + ( vertexStreamDataRef.offsetInElementsNum * vertexStreamDataRef.elementSize ) + attributeFormat.streamElementRelativeOffset,
-				attributeFormat.attributeTotalSizeInBytes,
-				vertexStreamDataRef.elementSize
-		};
 	}
 
 

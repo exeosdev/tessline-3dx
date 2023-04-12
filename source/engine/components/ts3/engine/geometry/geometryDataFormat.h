@@ -38,6 +38,8 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD ArrayView<const uint16> activeVertexStreams() const noexcept;
 
+		TS3_ATTR_NO_DISCARD uint32 activeVertexStreamsNum() const noexcept;
+
 		TS3_ATTR_NO_DISCARD uint16 firstActiveVertexStream() const noexcept;
 
 		TS3_ATTR_NO_DISCARD uint32 vertexElementSizeInBytes() const noexcept;
@@ -132,6 +134,44 @@ namespace ts3
 		VertexStreamActiveIndicesArray _activeVertexStreams;
 		gpuapi::EIndexDataFormat _indexDataFormat;
 		gpuapi::EPrimitiveTopology _primitiveTopology;
+	};
+
+	class VertexStreamLayoutBase
+	{
+	public:
+		VertexStreamLayoutBase();
+		virtual ~VertexStreamLayoutBase();
+
+		uint32 activeVertexStreamsNum() const noexcept;
+
+		ArrayView<uint32> activeVertexStreamIndices() const noexcept;
+
+		const VertexStreamFormat & vertexStreamFormat( uint32 pVertexStreamIndex ) const;
+
+	protected:
+		uint32 _vsn;
+		uint32 _activeVertexStreams;
+		uint32 * _activeVertexStreamsPtr;
+		VertexStreamFormat * _vertexStreamFormatsPtr;
+	};
+
+	template <size_t tVSN>
+	class VertexStreamDataLayout
+	{
+	public:
+		static constexpr uint32 sVSN = getMinOf( tVSN, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM );
+
+	public:
+		VertexStreamDataLayout();
+		virtual ~VertexStreamDataLayout();
+
+		VertexStreamDataLayout( const VertexStreamDataLayout & pSource );
+		VertexStreamDataLayout & operator=( const VertexStreamDataLayout & pRhs );
+
+	private:
+		using VertexStreamActiveIndicesArray = std::array<uint32, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
+		VertexStreamActiveIndicesArray _activeVertexStreams;
+		VertexStreamFormatArray _vertexStreamFormats;
 	};
 
 
