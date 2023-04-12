@@ -80,11 +80,21 @@ namespace ts3
 		Bitmask<gpuapi::EIAVertexAttributeFlags> activeAttributesMask;
 		uint16 activeAttributesNum = 0;
 		uint16 elementSizeInBytes = 0;
+		uint32 strideInBytes = 0;
 
 		bool active() const noexcept
 		{
 			return elementSizeInBytes > 0;
 		}
+	};
+
+	struct GeometryVertexStreamLayoutBase
+	{
+		uint32 activeVertexStreamsNum;
+
+		VertexStreamFormat * vertexStreamFormatsPtr;
+
+		GeometryVertexStreamLayoutBase
 	};
 
 	using VertexAttributeFormatArray = std::array<VertexAttributeFormat, gpa::MAX_GEOMETRY_VERTEX_ATTRIBUTES_NUM>;

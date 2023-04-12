@@ -11,55 +11,6 @@
 namespace ts3
 {
 
-	class GeometrySharedStorageBase : public GeometryContainer
-	{
-	public:
-		GeometrySharedStorageBase(
-				const GeometryDataFormat & pDataFormat,
-				GeometryVertexBufferReference * pVertexBufferReference = nullptr );
-
-		virtual SharedGeometryRefHandle addIndexedGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum ) = 0;
-
-		virtual SharedGeometryRefHandle addNonIndexedGeometry( uint32 pVertexElementsNum ) = 0;
-	};
-
-	template <size_t tVSN>
-	class GeometrySharedStorage : public GeometrySharedStorageBase
-	{
-	public:
-		using GeometryReference = SharedGeometryReference<tVSN>;
-
-	public:
-		GeometrySharedStorage( const GeometryDataFormat & pDataFormat )
-		: GeometrySharedStorageBase( pDataFormat, _vertexBufferRefs.data() )
-		{}
-
-	private:
-		using GeometryVertexBufferRefArray = std::array<GeometryVertexBufferReference, tVSN>;
-		GeometryVertexBufferRefArray _vertexBufferRefs;
-	};
-
-	template <>
-	class GeometrySharedStorage<0> : public GeometrySharedStorageBase
-	{
-	public:
-		using GeometryReference = SharedGeometryReference<gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
-
-	public:
-		GeometrySharedStorage( const GeometryDataFormat & pDataFormat )
-		: GeometrySharedStorageBase( pDataFormat )
-		{
-			_vertexBufferRefs.resize( pDataFormat.activeVertexStreamsNum() );
-			setVertexBufferRefsStorage( _vertexBufferRefs.data() );
-		}
-
-	private:
-		using GeometryVertexBufferRefDynamicArray = std::vector<GeometryVertexBufferReference>;
-		GeometryIndexBufferReference _indexBufferRef;
-		GeometryVertexBufferRefDynamicArray _vertexBufferRefs;
-	};
-
-
 	enum class EGeometryBufferAllocationMode : enum_default_value_t
 	{
 		AllocLocal,
@@ -85,25 +36,22 @@ namespace ts3
 		GeometryVertexStreamGenericArray<GeometryBufferDesc> vertexBufferDescArray;
 	};
 
-	class GeometryStorage : public GeometryContainer
+	template <size_t tVSN>
+	class GeometrySharedStorage : public GeometryContainer<tVSN>
 	{
 	public:
-		using GeometryReferenceList = std::deque<GeometryReference>;
+		using GeometryRefList = std::deque<GeometryReference>;
 
 	public:
-		GeometryStorage( const GeometryDataFormat & pDataFormat );
+		GeometrySharedStorage( const GeometryDataFormat & pDataFormat );
 
-		virtual ~GeometryStorage();
+		virtual ~GeometrySharedStorage() = default;
 
 		gpuapi::IAVertexStreamImmutableStateHandle getGpaVertexStreamState() const noexcept;
 
-		gpuapi::GPUBufferHandle getIndexBuffer() const noexcept;
+		SharedGeometryRefHandle addIndexedGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
 
-		gpuapi::GPUBufferHandle getVertexBuffer( uint32 pIndex ) const noexcept;
-
-		GeometryRefHandle addIndexedGeometry( uint32 pVertexElementsNum, uint32 pIndexElementsNum );
-
-		GeometryRefHandle addNonIndexedGeometry( uint32 pVertexElementsNum );
+		SharedGeometryRefHandle addNonIndexedGeometry( uint32 pVertexElementsNum );
 
 		void releaseStorage() {}
 

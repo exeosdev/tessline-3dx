@@ -44,17 +44,17 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD const void * getIndexBaseDataPtr() const noexcept;
 
-		TS3_ATTR_NO_DISCARD DataBufferRegionSubElementMappingReadOnly getIndexDataSubRegionReadOnly(
+		TS3_ATTR_NO_DISCARD DataBufferRegionSubElementRefReadOnly getIndexDataSubRegionReadOnly(
 				const CPUGeometryDataReferenceBase & pMeshDataRef ) const noexcept;
 
-		TS3_ATTR_NO_DISCARD DataBufferRegionSubElementMappingReadOnly getVertexAttributeDataSubRegionReadOnly(
+		TS3_ATTR_NO_DISCARD DataBufferRegionSubElementRefReadOnly getVertexAttributeDataSubRegionReadOnly(
 				const CPUGeometryDataReferenceBase & pMeshDataRef,
 				uint32 pAttributeIndex ) const noexcept;
 
-		TS3_ATTR_NO_DISCARD DataBufferRegionSubElementMappingReadWrite getIndexDataSubRegionReadWrite(
+		TS3_ATTR_NO_DISCARD DataBufferRegionSubElementRefReadWrite getIndexDataSubRegionReadWrite(
 				const CPUGeometryDataReferenceBase & pMeshDataRef ) noexcept;
 
-		TS3_ATTR_NO_DISCARD DataBufferRegionSubElementMappingReadWrite getVertexAttributeDataSubRegionReadWrite(
+		TS3_ATTR_NO_DISCARD DataBufferRegionSubElementRefReadWrite getVertexAttributeDataSubRegionReadWrite(
 				const CPUGeometryDataReferenceBase & pMeshDataRef,
 				uint32 pAttributeIndex ) noexcept;
 

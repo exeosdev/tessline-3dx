@@ -18,63 +18,72 @@ namespace ts3
 		uint32 vertexDataSizeInElementsNum;
 	};
 
-	template <typename TGeometryBufferType>
-	struct GeometryBufferReference
+	struct GeometryStorageCapacity
 	{
-		SharedHandle<TGeometryBufferType> buffer;
-
-		explicit operator bool() const noexcept
-		{
-			return static_cast<bool>( buffer );
-		}
-
-		IndexBuffer * operator->() const noexcept
-		{
-			ts3DebugAssert( buffer );
-			return buffer.get();
-		}
-
-		IndexBuffer & operator*() const noexcept
-		{
-			ts3DebugAssert( buffer );
-			return *buffer;
-		}
+		uint32 indexElementsNum = 0;
+		uint32 vertexElementsNum = 0;
 	};
 
-	using GeometryIndexBufferReference = GeometryBufferReference<IndexBuffer>;
-	using GeometryVertexBufferReference = GeometryBufferReference<VertexBuffer>;
-
-	template <size_t tVSN>
-	struct GeometryStorageMetrics
+	struct GeometrySharedStorageMetrics
 	{
+		GeometryStorageCapacity capacity;
+		GeometrySize geometrySize;
+		uint32 indexDataAllocationOffsetInElementsNum = 0;
+		uint32 vertexDataAllocationOffsetInElementsNum = 0;
+	};
+
+	class GeometryDataStore
+	{
+	public:
+		GeometryDataFormat const mDataFormat;
+
+	public:
+		virtual GeometryBufferDataRefReadOnly getIndexDataPtrReadOnly() const noexcept = 0;
+
+		virtual GeometryBufferDataRefReadWrite getIndexDataPtrReadWrite() = 0;
+
+		virtual GeometryBufferDataRefReadOnly getVertexDataPtrReadOnly( size_t pVertexStreamIndex ) const noexcept = 0;
+
+		virtual GeometryBufferDataRefReadWrite getVertexDataPtrReadWrite( size_t pVertexStreamIndex ) = 0;
+
+		GeometryBufferDataRefReadOnly getVertexAttributeDataSubRegionReadOnly() const noexcept;
+
+		GeometryBufferDataRefReadWrite getVertexAttributeDataSubRegionReadWrite();
 	};
 
 	class GeometryContainerBase
 	{
 	public:
 		GeometryDataFormat const mDataFormat;
+		GeometryStorageCapacity const mStorageCapacity;
 
 	public:
-		GeometryContainerBase( const GeometryDataFormat & pDataFormat )
+		GeometryContainerBase( const GeometryDataFormat & pDataFormat, const GeometryStorageCapacity & pStorageCapacity )
 		: mDataFormat( pDataFormat )
-		, _activeVertexStreamsNum( pDataFormat.activeVertexStreamsNum() )
+		, mStorageCapacity( pStorageCapacity )
 		{}
 
 		virtual ~GeometryContainerBase();
 
 		TS3_ATTR_NO_DISCARD bool isStorageInitialized() const noexcept;
 
-		TS3_ATTR_NO_DISCARD bool isIndexedGeometryContainer() const noexcept;
+		TS3_ATTR_NO_DISCARD bool isIndexedGeometry() const noexcept;
 
 		TS3_ATTR_NO_DISCARD GeometryIndexBufferReference getIndexBuffer() const noexcept;
 
-		TS3_ATTR_NO_DISCARD GeometryVertexBufferReference getVertexBuffer( size_t pBufferIndex ) const noexcept;
+		TS3_ATTR_NO_DISCARD GeometryVertexBufferReference getVertexBuffer( size_t pVertexStreamIndex ) const noexcept;
+
+		bool setIndexBuffer( const GeometryIndexBufferReference & pIndexBufferReference );
+
+		bool setVertexBuffer( uint32 pVertexStreamIndex, const GeometryVertexBufferReference & pVertexBufferReference );
 
 	protected:
 		void setVertexBufferRefsStorage( GeometryVertexBufferReference * pVertexBufferRefsPtr );
 
+		void initializeContainerStorage();
+
 	protected:
-		uint32 _activeVertexStreamsNum;
+		GeometryDataReference _allGeometryDataRef;
 		GeometryIndexBufferReference _indexBufferRefPtr;
 		GeometryVertexBufferReference * _vertexBufferRefsPtr;
 	};
@@ -83,31 +92,23 @@ namespace ts3
 	class GeometryContainer : public GeometryContainerBase
 	{
 	public:
-		using DataReference = GeometryDataReference<tVSN>;
-		using SharedGeometryRef = SharedGeometryReference<tVSN>;
-
-		GeometryContainer( const GeometryDataFormat & pDataFormat )
-		: GeometryContainerBase( pDataFormat )
+		GeometryContainer( const GeometryDataFormat & pDataFormat, const GeometryStorageCapacity & pStorageCapacity )
+		: GeometryContainerBase( pDataFormat, pStorageCapacity )
 		{
 			setVertexBufferRefsStorage( _vertexBufferRefs.data() );
 		}
 
 	private:
 		using GeometryVertexBufferRefArray = std::array<GeometryVertexBufferReference, tVSN>;
-		DataReference _dataRef;
 		GeometryVertexBufferRefArray _vertexBufferRefs;
-		SharedGeometryRefHandle _sharedGeometryRef;
 	};
 
 	template <>
 	class GeometryContainer<0> : public GeometryContainerBase
 	{
 	public:
-		using DataReference = GeometryDataReference<gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
-		using SharedGeometryRef = SharedGeometryReference<gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
-
-		GeometryDataSource( const GeometryDataFormat & pDataFormat )
-		: GeometryContainerBase( pDataFormat )
+		GeometryContainer( const GeometryDataFormat & pDataFormat, const GeometryStorageCapacity & pStorageCapacity )
+		: GeometryContainerBase( pDataFormat, pStorageCapacity )
 		{
 			_vertexBufferRefs.resize( pDataFormat.activeVertexStreamsNum() );
 			setVertexBufferRefsStorage( _vertexBufferRefs.data() );
@@ -118,87 +119,14 @@ namespace ts3
 		GeometryVertexBufferRefDynamicArray _vertexBufferRefs;
 	};
 
-	// Static mesh, dynamic mesh, skinned mesh, particle, etc.
-	class GeometryDataSourceBase : public GeometryContainer
+	class GeometryDataSource
 	{
 	public:
-		GeometryDataSourceBase( const GeometryDataFormat & pDataFormat )
-		: GeometryContainer( pDataFormat )
-		, _geometryDataRef( nullptr )
-		{}
-
-		GeometryDataSourceBase( GeometryDataReferenceBase & pGeometryDataRef )
-		: GeometryContainer( *pGeometryDataRef.dataFormat )
-		, _geometryDataRef( &pGeometryDataRef )
-		{}
-
-		bool setIndexBuffer( const GeometryIndexBufferReference & pIndexBufferReference );
-
-		bool setVertexBuffer( uint32 pBufferIndex, const GeometryVertexBufferReference & pVertexBufferReference );
+		GeometryDataSource();
+		~GeometryDataSource();
 
 	private:
-		GeometryDataReferenceBase * _geometryDataRef;
-		SharedGeometryRefHandle _sharedGeometryRef;
-	};
-
-	template <size_t tVSN>
-	class GeometryDataSource : public GeometryDataSourceBase
-	{
-	public:
-		using DataReference = GeometryDataReference<tVSN>;
-		using SharedGeometryRef = SharedGeometryReference<tVSN>;
-
-		GeometryDataSource( const GeometryDataFormat & pDataFormat )
-		: GeometryDataSourceBase( pDataFormat )
-		{
-			setVertexBufferRefsStorage( _vertexBufferRefs.data() );
-		}
-
-		GeometryDataSource( SharedGeometryRefHandle pSharedGeometryRef )
-		: GeometryDataSourceBase( *pSharedGeometryRef->dataReferencePtr->dataFormat )
-		, _sharedGeometryRef( pSharedGeometryRef )
-		{
-			setVertexBufferRefsStorage( _vertexBufferRefs.data() );
-		}
-
-	private:
-		using GeometryVertexBufferRefArray = std::array<GeometryVertexBufferReference, tVSN>;
-		DataReference _dataRef;
-		GeometryVertexBufferRefArray _vertexBufferRefs;
-		SharedGeometryRefHandle _sharedGeometryRef;
-	};
-
-	template <>
-	class GeometryDataSource<0> : public GeometryDataSourceBase
-	{
-	public:
-		using DataReference = GeometryDataReference<gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
-		using SharedGeometryRef = SharedGeometryReference<gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
-
-		GeometryDataSource( const GeometryDataFormat & pDataFormat )
-		: GeometryDataSourceBase( pDataFormat )
-		{
-			_vertexBufferRefs.resize( pDataFormat.activeVertexStreamsNum() );
-			setVertexBufferRefsStorage( _vertexBufferRefs.data() );
-		}
-
-	private:
-		using GeometryVertexBufferRefDynamicArray = std::vector<GeometryVertexBufferReference>;
-		GeometryVertexBufferRefDynamicArray _vertexBufferRefs;
-	};
-
-	struct GeometryContainerStorageCapacity
-	{
-		uint32 indexDataCapacityInElementsNum = 0;
-		uint32 vertexDataCapacityInElementsNum = 0;
-	};
-
-	struct GeometryContainerStorageMetrics
-	{
-		GeometryContainerStorageCapacity capacity;
-		GeometrySize geometrySize;
-		uint32 indexDataAllocationOffsetInElementsNum = 0;
-		uint32 vertexDataAllocationOffsetInElementsNum = 0;
+		GeometryReference _geometryRef;
 	};
 
 	class GeometryContainer2

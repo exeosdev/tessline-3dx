@@ -69,7 +69,7 @@ namespace ts3
 		void assimpReadMeshVertexAttributeData(
 				const TInput * pInputData,
 				const size_t pElementsNum,
-				const DataBufferRegionSubElementMappingReadWrite & pWriteRegion,
+				const DataBufferRegionSubElementRefReadWrite & pWriteRegion,
 				const VertexAttributeFormat & pAttributeFormat,
 				const DataTypeConversionFunction & pConversionFunction )
 		{

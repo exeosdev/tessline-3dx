@@ -12,7 +12,7 @@
 namespace ts3
 {
 
-	struct SharedGeometryReferenceBase;
+	struct GeometryReference;
 	struct GeometryStorageCreateInfo;
 
 	class GeometryContainerBase;
@@ -27,7 +27,7 @@ namespace ts3
 	ts3DeclareClassHandle( GeometrySharedStorageBase );
 
 	using GeometryStoragePtr = std::unique_ptr<GeometryStorage>;
-	using SharedGeometryRefHandle = const SharedGeometryReferenceBase *;
+	using SharedGeometryRefHandle = const GeometryReference *;
 
 	namespace cxdefs
 	{
@@ -195,13 +195,95 @@ namespace ts3
 	// buffers containing multiple geometry objects.
 	struct GeometryBufferRegion
 	{
-		uint32 elementSize = 0;
+		// Offset, from the start of the buffer, to the data referenced by this region, in number of elements.
 		uint32 offsetInElementsNum = 0;
+
+		// Size of the data referenced by this region, in number of elements.
 		uint32 sizeInElementsNum = 0;
 
 		// Appends an adjacent region to the current one. Appended region's offset must be equal
 		// to current's region offset + size, otherwise the call is ignored and this region remains unchanged.
 		bool append( const GeometryBufferRegion & pOther );
+	};
+
+	template <typename TByte>
+	struct GeometryBufferDataRef
+	{
+		TByte * baseElementPtr = nullptr;
+
+		uint32 dataSizeInElementsNum = 0;
+
+		uint32 elementSizeInBytes = 0;
+
+		uint32 strideInBytes = 0;
+
+		explicit operator bool() const noexcept
+		{
+			return baseElementPtr && ( dataSizeInElementsNum > 0 );
+		}
+	};
+
+	using GeometryBufferDataRefReadOnly = GeometryBufferDataRef<const byte>;
+	using GeometryBufferDataRefReadWrite = GeometryBufferDataRef<byte>;
+
+	template <typename TValue, typename TByte>
+	struct GeometryBufferDataIterator
+	{
+	public:
+		GeometryBufferDataIterator() = default;
+
+		GeometryBufferDataIterator( const GeometryBufferDataRef<TByte> & pDataRef, uint32 pCurrentElementOffset )
+		: _dataRef( pDataRef )
+		, _currentElementOffset( pCurrentElementOffset )
+		{}
+
+		TValue * dataPtr() const noexcept
+		{
+			ts3DebugAssert( sizeof( TValue ) == _dataRef.elementSizeInBytes );
+			return reinterpret_cast<TValue *>( _dataRef.baseElementPtr + ( _currentElementOffset * _dataRef.strideInBytes ) );
+		}
+
+		GeometryBufferDataIterator & operator++() noexcept
+		{
+			++_currentElementOffset;
+			return *this;
+		}
+
+		GeometryBufferDataIterator & operator--() noexcept
+		{
+			--_currentElementOffset;
+			return *this;
+		}
+
+		GeometryBufferDataIterator operator++( int ) noexcept
+		{
+			GeometryBufferDataIterator result{ _dataRef, _currentElementOffset };
+			++_currentElementOffset;
+			return result;
+		}
+
+		GeometryBufferDataIterator operator--( int ) noexcept
+		{
+			GeometryBufferDataIterator result{ _dataRef, _currentElementOffset };
+			--_currentElementOffset;
+			return result;
+		}
+
+		TValue * operator->() const noexcept
+		{
+			auto * const currentPtr = dataPtr();
+			return currentPtr;
+		}
+
+		TValue & operator*() const noexcept
+		{
+			auto * const currentPtr = dataPtr();
+			return *currentPtr;
+		}
+
+	private:
+		GeometryBufferDataRef<TByte> _dataRef;
+		uint32 _currentElementOffset = 0;
 	};
 
 	struct GeometrySize
@@ -212,23 +294,26 @@ namespace ts3
 		void append( const GeometrySize & pOther );
 	};
 
-	struct GeometryReferenceBase
+	struct GeometryDataReference
+	{
+		GeometryBufferRegion indexDataRegion;
+		GeometryBufferRegion vertexDataRegion;
+
+		//
+		bool append( const GeometryDataReference & pOther );
+	};
+
+	struct GeometryReference
 	{
 		const GeometryDataFormat * dataFormat = nullptr;
 
 		GeometryContainerBase * geometryContainer = nullptr;
 
-		uint32 geometryIndex;
+		uint32 geometryIndex = CX_UINT32_MAX;
 
 		uint32 activeVertexStreamsNum;
 
-		GeometryBufferRegion indexDataRegion;
-
-		GeometryBufferRegion * vertexDataRegionsPtr;
-
-		explicit GeometryReferenceBase( GeometryBufferRegion * pVertexDataRegionsPtr )
-		: vertexDataRegionsPtr( pVertexDataRegionsPtr )
-		{}
+		GeometryDataReference dataReference;
 
 		TS3_ATTR_NO_DISCARD explicit operator bool() const noexcept;
 
@@ -248,49 +333,40 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD GeometrySize calculateGeometrySize() const noexcept;
 
-		void append( const GeometryReferenceBase & pOther );
+		void append( const GeometryReference & pOther );
 	};
 
-	template <size_t tVSN>
-	struct GeometryReference : public GeometryReferenceBase
+	template <typename TGeometryBufferType>
+	struct GeometryBufferReference
 	{
-		GeometryBufferRegion vertexDataRegions[tVSN];
+		SharedHandle<TGeometryBufferType> buffer;
 
-		GeometryReference()
-		: GeometryReferenceBase( vertexDataRegions )
-		{}
+		explicit operator bool() const noexcept
+		{
+			return static_cast<bool>( buffer );
+		}
+
+		IndexBuffer * operator->() const noexcept
+		{
+			ts3DebugAssert( buffer );
+			return buffer.get();
+		}
+
+		IndexBuffer & operator*() const noexcept
+		{
+			ts3DebugAssert( buffer );
+			return *buffer;
+		}
 	};
 
-	using CPUGeometryDataReferenceBase = GeometryDataReferenceBase;
-	using GPUGeometryDataReferenceBase = GeometryDataReferenceBase;
-
-	struct SharedGeometryReferenceBase
-	{
-
-		GeometryDataReferenceBase * dataReferencePtr;
-
-		SharedGeometryReferenceBase(
-				const GeometrySharedStorageBase & pSharedStorage,
-				uint32 pGeometryIndex,
-				GeometryDataReferenceBase & pDataReference );
-	};
-
-	template <size_t tVSN>
-	struct SharedGeometryReference : public SharedGeometryReferenceBase
-	{
-		using DataReference = GeometryDataReference<tVSN>;
-
-		DataReference dataReference;
-
-		SharedGeometryReference(
-				const GeometrySharedStorageBase & pSharedStorage,
-				uint32 pGeometryIndex );
-	};
+	using GeometryIndexBufferReference = GeometryBufferReference<IndexBuffer>;
+	using GeometryVertexBufferReference = GeometryBufferReference<VertexBuffer>;
 
 	namespace gmutil
 	{
 
-		TS3_ATTR_NO_DISCARD GeometryDataReferenceBase getGeometryDataReferenceBaseSubRegion(
+		template <size_t tVSN>
+		TS3_ATTR_NO_DISCARD GeometryReference<tVSN> getGeometryDataReferenceBaseSubRegion(
 				const GeometryDataReferenceBase & pGeometryDataRef,
 				uint32 pVertexDataOffsetInElementsNum,
 				uint32 pVertexElementsNum,

@@ -17,7 +17,7 @@ namespace ts3
 	// - strideInBytes = sizeof( Vertex ) // How much do we advance the basePtr to get the next normal?
 	// This is used extensively by mesh loaders/importers to handle various Vertex Formats in a uniform way.
 	template <typename TByte>
-	struct DataBufferRegionSubElementMapping
+	struct DataBufferRegionSubElementRef
 	{
 		TByte * basePtr = nullptr;
 
@@ -31,9 +31,9 @@ namespace ts3
 		}
 	};
 
-	using DataBufferRegionSubElementMappingReadOnly = DataBufferRegionSubElementMapping<const byte>;
+	using DataBufferRegionSubElementRefReadOnly = DataBufferRegionSubElementRef<const byte>;
 
-	using DataBufferRegionSubElementMappingReadWrite = DataBufferRegionSubElementMapping<byte>;
+	using DataBufferRegionSubElementRefReadWrite = DataBufferRegionSubElementRef<byte>;
 
 	using VtxAttrPosition2D = math::Vec2f;
 	using VtxAttrPosition3D = math::Vec3f;

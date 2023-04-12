@@ -7,17 +7,17 @@
 namespace ts3
 {
 
-	DataBufferRegionSubElementMappingReadWrite MeshData::getIndexDataSubRegionReadWrite(
+	DataBufferRegionSubElementRefReadWrite MeshData::getIndexDataSubRegionReadWrite(
 			const CPUGeometryDataReferenceBase & pMeshDataRef ) noexcept
 	{
-		return DataBufferRegionSubElementMappingReadWrite {
+		return DataBufferRegionSubElementRefReadWrite {
 				_indexDataBuffer.data() + ( pMeshDataRef.indexDataRegion.offsetInElementsNum * pMeshDataRef.indexDataRegion.elementSize ),
 				mDataFormat.indexElementSizeInBytes(),
 				mDataFormat.indexElementSizeInBytes()
 		};
 	}
 
-	DataBufferRegionSubElementMappingReadWrite MeshData::getVertexAttributeDataSubRegionReadWrite(
+	DataBufferRegionSubElementRefReadWrite MeshData::getVertexAttributeDataSubRegionReadWrite(
 			const CPUGeometryDataReferenceBase & pMeshDataRef,
 			uint32 pAttributeIndex ) noexcept
 	{
@@ -26,7 +26,7 @@ namespace ts3
 
 		auto * bufferBasePtr = _vertexDataBuffers[attributeFormat.streamIndex].data();
 
-		return DataBufferRegionSubElementMappingReadWrite {
+		return DataBufferRegionSubElementRefReadWrite {
 				bufferBasePtr + ( vertexStreamDataRef.offsetInElementsNum * vertexStreamDataRef.elementSize ) + attributeFormat.streamElementRelativeOffset,
 				attributeFormat.attributeTotalSizeInBytes,
 				vertexStreamDataRef.elementSize
