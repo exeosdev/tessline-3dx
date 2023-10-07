@@ -8,7 +8,7 @@ namespace ts3
 
 	MeshGroup::MeshGroup( std::string pGroupName, GeometryStorage * pGeometryStorage )
 	: mGroupName( std::move( pGroupName ) )
-	, mGeometryDataFormat( pGeometryStorage->mDataFormat )
+	, mGeometryDataFormatBase( pGeometryStorage->mDataFormat )
 	, _geometryStorage( pGeometryStorage )
 	{}
 

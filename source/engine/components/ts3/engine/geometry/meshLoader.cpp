@@ -61,11 +61,11 @@ namespace ts3
 
 	GeometryStorage * MeshLoader::createGeometryStorageForMeshGroup(
 			GeometryManager & pGeometryManager,
-			const GeometryDataFormat & pGeometryDataFormat,
+			const GeometryDataFormatBase & pGeometryDataFormatBase,
 			const MeshGroupData & pMeshGroupData )
 	{
 		GeometryStorageCreateInfo storageCreateInfo;
-		storageCreateInfo.dataFormat = &pGeometryDataFormat;
+		storageCreateInfo.dataFormat = &pGeometryDataFormatBase;
 		storageCreateInfo.capacity.vertexDataCapacityInElementsNum = pMeshGroupData.geometrySize().vertexElementsNum;
 		storageCreateInfo.capacity.indexDataCapacityInElementsNum = pMeshGroupData.geometrySize().indexElementsNum;
 		storageCreateInfo.commonBufferUsagePolicy = EGPUBufferUsagePolicy::GeometryBufferStatic;

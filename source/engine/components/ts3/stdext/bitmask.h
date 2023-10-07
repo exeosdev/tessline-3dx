@@ -133,6 +133,11 @@ namespace ts3
 			_value = 0;
 		}
 
+		void swap( MyType & pOther )
+		{
+			std::swap( _value, pOther._value );
+		}
+
 		TS3_ATTR_NO_DISCARD ValueType get() const
 		{
 			return _value;
@@ -235,6 +240,12 @@ namespace ts3
 	private:
 		ValueType  _value;
 	};
+
+	template <typename TVal>
+	inline void swap( Bitmask<TVal> & pFirst, Bitmask<TVal> & pSecond )
+	{
+		pFirst.swap( pSecond );
+	}
 
 	template <typename TEnum, typename std::enable_if<std::is_enum<TEnum>::value, int>::type = 0>
 	TS3_ATTR_NO_DISCARD inline constexpr Bitmask<typename std::underlying_type<TEnum>::type> makeBitmask( TEnum pValue = static_cast<TEnum>( 0 ) ) noexcept

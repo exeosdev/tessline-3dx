@@ -4,108 +4,123 @@
 namespace ts3
 {
 
-	GeometryDataFormat::GeometryDataFormat()
+	GeometryDataFormatBase::GeometryDataFormatBase(
+			VertexAttributeArrayLayoutBase * pAttribLayoutPtr,
+			VertexStreamArrayLayoutBase * pStreamLayoutPtr )
+	: _attribLayoutPtr( pAttribLayoutPtr )
+	, _streamLayoutPtr( pStreamLayoutPtr )
 	{}
 
-	GeometryDataFormat::~GeometryDataFormat() = default;
+	GeometryDataFormatBase::~GeometryDataFormatBase() = default;
 
-	std::string GeometryDataFormat::getFormatStringID() const noexcept
+	std::string GeometryDataFormatBase::getFormatStringID() const noexcept
 	{
-		return gpa::generateVertexFormatStringID( _attributes );
+		return {}; // gpa::generateVertexFormatStringID( _attributes );
 	}
 
-	const VertexAttributeFormat & GeometryDataFormat::attribute( uint32 pAttributeIndex ) const
+	const VertexAttributeFormat & GeometryDataFormatBase::attribute( uint32 pAttributeIndex ) const
 	{
-		return _attributes.at( pAttributeIndex );
+		return _attribLayoutPtr->attributeFormat( pAttributeIndex );
 	}
 
-	const VertexStreamFormat & GeometryDataFormat::vertexStream( uint32 pVertexStreamIndex ) const
+	const VertexStreamFormat & GeometryDataFormatBase::vertexStream( uint32 pStreamIndex ) const
 	{
-		return _vertexStreams.at( pVertexStreamIndex );
+		return _streamLayoutPtr->streamFormat( pStreamIndex );
 	}
 
-	ArrayView<const uint16> GeometryDataFormat::activeVertexStreams() const noexcept
+	ArrayView<const uint16> GeometryDataFormatBase::activeVertexStreams() const noexcept
 	{
-		return bindArrayView( _activeVertexStreams.data(), _properties.activeVertexStreamsNum );
+		return bindArrayView( _streamLayoutPtr->activeVertexStreamArrayPtr, _streamLayoutPtr->activeVertexStreamsNum );
 	}
 
-	uint16 GeometryDataFormat::firstActiveVertexStream() const noexcept
+	uint16 GeometryDataFormatBase::firstActiveVertexStream() const noexcept
 	{
-		return _activeVertexStreams.empty() ? gpuapi::cxdefs::IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED : _activeVertexStreams[0];
+		const auto * activeStreamArray = _streamLayoutPtr->activeVertexStreamArrayPtr;
+		return ( _streamLayoutPtr->activeVertexStreamsNum > 0 ) ? activeStreamArray[0] : gpuapi::cxdefs::IA_VERTEX_BUFFER_BINDING_INDEX_UNDEFINED;
 	}
 
-	uint32 GeometryDataFormat::vertexElementSizeInBytes() const noexcept
+	uint32 GeometryDataFormatBase::vertexStreamElementSizeInBytes( uint32 pStreamIndex ) const
 	{
-		return _properties.vertexElementSizeInBytes;
-	}
-
-	uint32 GeometryDataFormat::vertexStreamElementSizeInBytes( uint32 pVertexStreamIndex ) const
-	{
-		const auto & vertexStreamFormat = _vertexStreams.at( pVertexStreamIndex );
+		const auto & vertexStreamFormat = _streamLayoutPtr->streamFormat( pStreamIndex );
 		return vertexStreamFormat.elementSizeInBytes;
 	}
 
-	gpuapi::EIndexDataFormat GeometryDataFormat::indexDataFormat() const noexcept
+	gpuapi::EIndexDataFormat GeometryDataFormatBase::indexDataFormat() const noexcept
 	{
 		return _indexDataFormat;
 	}
 
-	uint32 GeometryDataFormat::indexElementSizeInBytes() const noexcept
+	uint32 GeometryDataFormatBase::indexElementSizeInBytes() const noexcept
 	{
 		return gpuapi::cxdefs::getIndexDataFormatByteSize( _indexDataFormat );
 	}
 
-	bool GeometryDataFormat::isAttributeSemanticsActive( EVertexAttributeSemanticsID pAttributeSemantics ) const noexcept
+	bool GeometryDataFormatBase::isAttributeSemanticsActive( EVertexAttributeSemanticsID pAttributeSemantics ) const noexcept
 	{
 		const auto attributeSemanticsBit = static_cast<uint32>( pAttributeSemantics );
-		return _properties.activeAttributeSemanticsMask.isSet( attributeSemanticsBit );
+		return _attribLayoutPtr->activeAttributeSemanticsMask.isSet( attributeSemanticsBit );
 	}
 
-	bool GeometryDataFormat::isFixedAttributeActive( EFixedVertexAttributeID pFixedAttribute ) const noexcept
+	bool GeometryDataFormatBase::isFixedAttributeActive( EFixedVertexAttributeID pFixedAttribute ) const noexcept
 	{
 		const auto fixedAttributeSemanticsBit = cxdefs::getFixedVertexAttributeSemanticsFlags( pFixedAttribute );
-		return _properties.activeAttributeSemanticsMask.isSet( fixedAttributeSemanticsBit );
+		return _attribLayoutPtr->activeAttributeSemanticsMask.isSet( fixedAttributeSemanticsBit );
 	}
 
-	bool GeometryDataFormat::isIndexedGeometry() const noexcept
+	bool GeometryDataFormatBase::isIndexedGeometry() const noexcept
 	{
 		return _indexDataFormat != gpuapi::EIndexDataFormat::Undefined;
 	}
 
-	bool GeometryDataFormat::isAttributeSlotUsed( uint32 pAttributeIndex ) const
+	bool GeometryDataFormatBase::isAttributeSlotUsed( uint32 pAttributeIndex ) const
 	{
-		const auto & attributeFormat = _attributes.at( pAttributeIndex );
-		return attributeFormat.componentFormat != gpuapi::EVertexAttribFormat::Undefined;
+		if( pAttributeIndex < _attribLayoutPtr->attributeArraySize )
+		{
+			const auto & attributeFormat = _attribLayoutPtr->attributeFormat( pAttributeIndex );
+			return attributeFormat.active();
+		}
+
+		return false;
 	}
 
-	bool GeometryDataFormat::isAttributeActive( uint32 pAttributeIndex ) const
+	bool GeometryDataFormatBase::isAttributeActive( uint32 pAttributeIndex ) const
 	{
-		const auto & attributeFormat = _attributes.at( pAttributeIndex );
-		return attributeFormat.active();
+		if( pAttributeIndex < _attribLayoutPtr->attributeArraySize )
+		{
+			const auto & attributeFormat = _attribLayoutPtr->attributeFormat( pAttributeIndex );
+			return attributeFormat.isBaseAttribute();
+		}
+
+		return false;
 	}
 
-	bool GeometryDataFormat::isVertexStreamActive( uint32 pVertexStreamIndex ) const
+	bool GeometryDataFormatBase::isVertexStreamActive( uint32 pStreamIndex ) const
 	{
-		const auto & vertexStreamFormat = _vertexStreams.at( pVertexStreamIndex );
-		return vertexStreamFormat.active();
+		if( pStreamIndex < _streamLayoutPtr->vertexStreamArraySize )
+		{
+			const auto & vertexStreamFormat = _streamLayoutPtr->streamFormat( pStreamIndex );
+			return vertexStreamFormat.active();
+		}
+
+		return false;
 	}
 
-	bool GeometryDataFormat::empty() const noexcept
+	bool GeometryDataFormatBase::empty() const noexcept
 	{
-		return _properties.activeAttributesNum == 0;
+		return _attribLayoutPtr->activeAttributesNum == 0;
 	}
 
-	void GeometryDataFormat::setIndexDataFormat( gpuapi::EIndexDataFormat pIndexDataFormat )
+	void GeometryDataFormatBase::setIndexDataFormat( gpuapi::EIndexDataFormat pIndexDataFormat )
 	{
 		_indexDataFormat = pIndexDataFormat;
 	}
 
-	void GeometryDataFormat::setPrimitiveTopology( gpuapi::EPrimitiveTopology pTopology )
+	void GeometryDataFormatBase::setPrimitiveTopology( gpuapi::EPrimitiveTopology pTopology )
 	{
 		_primitiveTopology = pTopology;
 	}
 
-	bool GeometryDataFormat::configureFixedAttribute(
+	bool GeometryDataFormatBase::configureFixedAttribute(
 			EFixedVertexAttributeID pFixedAttributeID,
 			uint32 pStreamIndex,
 			uint16 pStreamElementRelativeOffset )
@@ -130,7 +145,7 @@ namespace ts3
 		return configureResult;
 	}
 
-	bool GeometryDataFormat::configureCustomAttribute(
+	bool GeometryDataFormatBase::configureCustomAttribute(
 			uint32 pAttributeBaseIndex,
 			VertexAttributeSemantics pSemantics,
 			gpuapi::EVertexAttribFormat pAttributeBaseFormat,
@@ -139,7 +154,121 @@ namespace ts3
 			uint16 pStreamElementRelativeOffset,
 			EVertexDataRate pAttributeDataRate )
 	{
-		if( pStreamIndex >= gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM )
+		if( !checkAttributeDefinitionParams( pAttributeBaseIndex, pAttributeComponentsNum, pStreamIndex, pAttributeDataRate ) )
+		{
+			return false;
+		}
+
+		if( !resolveAttributeSemanticsDefinition( pSemantics ) )
+		{
+			return false;
+		}
+
+		auto & baseAttributeDefinition = _attribLayoutPtr->attributeFormat( pAttributeBaseIndex );
+		baseAttributeDefinition.semantics = std::move( pSemantics );
+		baseAttributeDefinition.componentFormat = pAttributeBaseFormat;
+		baseAttributeDefinition.componentsNum = numeric_cast<uint16>( pAttributeComponentsNum );
+		baseAttributeDefinition.componentSizeInBytes = numeric_cast<uint16>( gpuapi::cxdefs::getVertexAttribFormatByteSize( pAttributeBaseFormat ) );
+		baseAttributeDefinition.attributeTotalSizeInBytes = baseAttributeDefinition.componentSizeInBytes * pAttributeComponentsNum;
+		baseAttributeDefinition.streamIndex = numeric_cast<uint16>( pStreamIndex );
+		baseAttributeDefinition.streamElementRelativeOffset = pStreamElementRelativeOffset;
+		baseAttributeDefinition.instanceRate = ( pAttributeDataRate == EVertexDataRate::PerInstance ) ? 1 : 0;
+
+		_attribLayoutPtr->activeAttributesNum += 1;
+		_attribLayoutPtr->activeAttributeSlotsNum += 1;
+		_attribLayoutPtr->activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( pAttributeBaseIndex ) );
+
+		if( cxdefs::isVertexAttributeSemanticsValid( pSemantics.semID ) )
+		{
+			_attribLayoutPtr->activeAttributeSemanticsMask.set( static_cast<uint32>( pSemantics.semID ) );
+			_attribLayoutPtr->semanticsMap[pSemantics.semName] = pAttributeBaseIndex;
+		}
+
+		if( pAttributeComponentsNum > 1 )
+		{
+			auto * attributePtr = &baseAttributeDefinition;
+
+			for( uint32 iComponent = 1; iComponent < pAttributeComponentsNum; ++iComponent )
+			{
+				const auto subAttributeIndex = pAttributeBaseIndex + iComponent;
+
+				auto & subAttributeDefinition = _attribLayoutPtr->attributeFormat( subAttributeIndex );
+				subAttributeDefinition.componentFormat = pAttributeBaseFormat;
+				attributePtr->nextComponent = &subAttributeDefinition;
+
+				_attribLayoutPtr->activeAttributeSlotsNum += 1;
+				_attribLayoutPtr->activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( subAttributeIndex ) );
+
+				attributePtr = attributePtr->nextComponent;
+			}
+		}
+
+		updateStateWithNewAttribute( pAttributeBaseIndex );
+
+		return true;
+	}
+
+
+
+	gpuapi::IAInputLayoutDefinition GeometryDataFormatBase::generateGpaInputLayoutDefinition() const noexcept
+	{
+		gpuapi::IAInputLayoutDefinition gpaInputLayoutDefinition;
+		gpaInputLayoutDefinition.primitiveTopology = _primitiveTopology;
+		gpaInputLayoutDefinition.activeAttributesMask = _attribLayoutPtr->activeAttributesMask;
+
+		for( uint32 iAttribute = 0; iAttribute < _attribLayoutPtr->attributeArraySize; /* No increment */ )
+		{
+			const auto & baseAttributeFormat = _attribLayoutPtr->attributeFormat( iAttribute );
+			if( baseAttributeFormat.isBaseAttribute() )
+			{
+				auto & gpaAttributeInfo = gpaInputLayoutDefinition.attributeArray[iAttribute];
+				gpaAttributeInfo.streamIndex = baseAttributeFormat.streamIndex;
+				gpaAttributeInfo.semanticName = baseAttributeFormat.semantics.semName;
+				gpaAttributeInfo.semanticIndex = 0;
+				gpaAttributeInfo.format = baseAttributeFormat.componentFormat;
+				gpaAttributeInfo.relativeOffset = baseAttributeFormat.streamElementRelativeOffset;
+				gpaAttributeInfo.instanceRate = baseAttributeFormat.instanceRate;
+
+				if( baseAttributeFormat.componentsNum > 1 )
+				{
+					auto * attributeSubComponent = baseAttributeFormat.nextComponent;
+					auto attributeSubComponentIndex = 1;
+
+					while( attributeSubComponent )
+					{
+						auto & gpaSubAttributeInfo = gpaInputLayoutDefinition.attributeArray[iAttribute + attributeSubComponentIndex];
+						gpaAttributeInfo.streamIndex = baseAttributeFormat.streamIndex;
+						gpaAttributeInfo.semanticName = baseAttributeFormat.semantics.semName;
+						gpaAttributeInfo.semanticIndex = numeric_cast<gpuapi::input_assembler_index_t>( attributeSubComponentIndex );
+						gpaAttributeInfo.format = baseAttributeFormat.componentFormat;
+						gpaAttributeInfo.instanceRate = baseAttributeFormat.instanceRate;
+						gpaAttributeInfo.relativeOffset =
+								baseAttributeFormat.streamElementRelativeOffset + attributeSubComponentIndex * baseAttributeFormat.componentSizeInBytes;
+
+						attributeSubComponent = attributeSubComponent->nextComponent;
+						attributeSubComponentIndex += 1;
+					}
+				}
+
+				iAttribute += baseAttributeFormat.componentsNum;
+			}
+		}
+
+		return gpaInputLayoutDefinition;
+	}
+
+	bool GeometryDataFormatBase::checkAttributeDefinitionParams(
+			uint32 pAttributeBaseIndex,
+			uint32 pAttributeComponentsNum,
+			uint32 pStreamIndex,
+			EVertexDataRate pAttributeDataRate )
+	{
+		if( ( pAttributeBaseIndex >= _attribLayoutPtr->attributeArraySize ) || ( pStreamIndex >= _streamLayoutPtr->vertexStreamArraySize ) )
+		{
+			return false;
+		}
+
+		if( pAttributeDataRate == EVertexDataRate::Undefined )
 		{
 			return false;
 		}
@@ -159,116 +288,16 @@ namespace ts3
 			return false;
 		}
 
-		if( cxdefs::isVertexAttributeSemanticsValid( pSemantics.semID ) && isAttributeSemanticsActive( pSemantics.semID ) )
-		{
-			return false;
-		}
-
-		if( pSemantics.semName.empty() && cxdefs::isVertexAttributeSemanticsValid( pSemantics.semID ) )
-		{
-			pSemantics.semName = gpa::getStandardVertexAttributeSemanticsName( pSemantics.semID );
-		}
-
-		if( pSemantics.semName.empty() || ( pAttributeDataRate == EVertexDataRate::Undefined ) )
-		{
-			return false;
-		}
-
-		auto & baseAttributeDefinition = _attributes[pAttributeBaseIndex];
-		baseAttributeDefinition.semantics = std::move( pSemantics );
-		baseAttributeDefinition.componentFormat = pAttributeBaseFormat;
-		baseAttributeDefinition.componentsNum = numeric_cast<uint16>( pAttributeComponentsNum );
-		baseAttributeDefinition.componentSizeInBytes = numeric_cast<uint16>( gpuapi::cxdefs::getVertexAttribFormatByteSize( pAttributeBaseFormat ) );
-		baseAttributeDefinition.attributeTotalSizeInBytes = baseAttributeDefinition.componentSizeInBytes * pAttributeComponentsNum;
-		baseAttributeDefinition.streamIndex = numeric_cast<uint16>( pStreamIndex );
-		baseAttributeDefinition.streamElementRelativeOffset = pStreamElementRelativeOffset;
-		baseAttributeDefinition.instanceRate = ( pAttributeDataRate == EVertexDataRate::PerInstance ) ? 1 : 0;
-
-		_properties.activeAttributesNum += 1;
-		_properties.activeAttributeSlotsNum += 1;
-		_properties.vertexElementSizeInBytes += baseAttributeDefinition.attributeTotalSizeInBytes;
-		_properties.activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( pAttributeBaseIndex ) );
-
-		if( cxdefs::isVertexAttributeSemanticsValid( pSemantics.semID ) )
-		{
-			_properties.activeAttributeSemanticsMask.set( static_cast<uint32>( pSemantics.semID ) );
-			_attributeSemanticsMap[pSemantics.semID] = pAttributeBaseIndex;
-		}
-
-		if( pAttributeComponentsNum > 1 )
-		{
-			auto * attributePtr = &baseAttributeDefinition;
-
-			for( uint32 iComponent = 1; iComponent < pAttributeComponentsNum; ++iComponent )
-			{
-				auto & subAttribute = _attributes[iComponent];
-				subAttribute.componentFormat = pAttributeBaseFormat;
-				attributePtr->nextComponent = &subAttribute;
-
-				_properties.activeAttributeSlotsNum += 1;
-				_properties.activeAttributesMask.set( gpuapi::cxdefs::makeIAVertexAttributeFlag( pAttributeBaseIndex + iComponent ) );
-
-				attributePtr = attributePtr->nextComponent;
-			}
-		}
-
-		updateStateWithNewAttribute( pAttributeBaseIndex );
-
 		return true;
 	}
 
-	gpuapi::IAInputLayoutDefinition GeometryDataFormat::generateGpaInputLayoutDefinition() const noexcept
-	{
-		gpuapi::IAInputLayoutDefinition gpaInputLayoutDefinition;
-		gpaInputLayoutDefinition.primitiveTopology = _primitiveTopology;
-		gpaInputLayoutDefinition.activeAttributesMask = _properties.activeAttributesMask;
-
-		for( uint32 iAttribute = 0; iAttribute < gpa::MAX_GEOMETRY_VERTEX_ATTRIBUTES_NUM; ++iAttribute )
-		{
-			const auto & attributeFormat = _attributes[iAttribute];
-			if( attributeFormat.active() )
-			{
-				auto & gpaAttributeInfo = gpaInputLayoutDefinition.attributeArray[iAttribute];
-				gpaAttributeInfo.streamIndex = attributeFormat.streamIndex;
-				gpaAttributeInfo.semanticName = attributeFormat.semantics.semName;
-				gpaAttributeInfo.semanticIndex = 0;
-				gpaAttributeInfo.format = attributeFormat.componentFormat;
-				gpaAttributeInfo.relativeOffset = attributeFormat.streamElementRelativeOffset;
-				gpaAttributeInfo.instanceRate = attributeFormat.instanceRate;
-
-				if( attributeFormat.componentsNum > 1 )
-				{
-					const auto * attributeSubComponent = attributeFormat.nextComponent;
-
-					auto attributeSubComponentIndex = 1;
-
-					while( attributeSubComponent )
-					{
-						auto & gpaSubAttributeInfo = gpaInputLayoutDefinition.attributeArray[++iAttribute];
-						gpaAttributeInfo.streamIndex = attributeFormat.streamIndex;
-						gpaAttributeInfo.semanticName = attributeFormat.semantics.semName;
-						gpaAttributeInfo.semanticIndex = numeric_cast<gpuapi::input_assembler_index_t>( attributeSubComponentIndex );
-						gpaAttributeInfo.format = attributeFormat.componentFormat;
-						gpaAttributeInfo.instanceRate = attributeFormat.instanceRate;
-						gpaAttributeInfo.relativeOffset =
-								attributeFormat.streamElementRelativeOffset + attributeSubComponentIndex * attributeFormat.componentSizeInBytes;
-
-						++attributeSubComponentIndex;
-					}
-				}
-			}
-		}
-
-		return gpaInputLayoutDefinition;
-	}
-
-	bool GeometryDataFormat::checkAttributeSlotRangeFree(
+	bool GeometryDataFormatBase::checkAttributeSlotRangeFree(
 			uint32 pAttributeBaseIndex,
 			uint32 pAttributeComponentsNum ) const noexcept
 	{
 		for( uint32 nAttribute = 0; nAttribute < pAttributeComponentsNum; ++nAttribute )
 		{
-			const auto & attributeFormat = _attributes[pAttributeBaseIndex + nAttribute];
+			const auto & attributeFormat = _attribLayoutPtr->attributeFormat( pAttributeBaseIndex + nAttribute );
 			if( attributeFormat.active() )
 			{
 				return false;
@@ -278,27 +307,27 @@ namespace ts3
 		return true;
 	}
 
-	bool GeometryDataFormat::checkAttributeVertexStreamCompatibility(
-			uint32 pVertexStreamIndex,
+	bool GeometryDataFormatBase::checkAttributeVertexStreamCompatibility(
+			uint32 pStreamIndex,
 			EVertexDataRate pAttributeDataRate ) const noexcept
 	{
-		auto & vertexStreamFormat = _vertexStreams[pVertexStreamIndex];
+		auto & vertexStreamFormat = _streamLayoutPtr->streamFormat( pStreamIndex );
 		return ( vertexStreamFormat.streamDataRate == EVertexDataRate::Undefined ) || ( vertexStreamFormat.streamDataRate == pAttributeDataRate );
 	}
 
-	void GeometryDataFormat::updateStateWithNewAttribute( uint32 pNewAttributeIndex )
+	void GeometryDataFormatBase::updateStateWithNewAttribute( uint32 pNewAttributeIndex )
 	{
-		auto & attributeFormat = _attributes[pNewAttributeIndex];
-		auto & vertexStreamFormat = _vertexStreams[attributeFormat.streamIndex];
+		auto & attributeFormat = _attribLayoutPtr->attributeFormat( pNewAttributeIndex );
+		auto & vertexStreamFormat = _streamLayoutPtr->streamFormat( attributeFormat.streamIndex );
 
 		ts3DebugAssert( attributeFormat.isBaseAttribute() );
 
 		if( vertexStreamFormat.streamDataRate == EVertexDataRate::Undefined )
 		{
 			vertexStreamFormat.streamDataRate = attributeFormat.getAttributeDataRate();
-			_activeVertexStreams[_properties.activeVertexStreamsNum] = attributeFormat.streamIndex;
-			_properties.activeVertexStreamsMask.set( gpuapi::cxdefs::makeIAVertexBufferFlag( attributeFormat.streamIndex ) );
-			_properties.activeVertexStreamsNum += 1;
+			_streamLayoutPtr->activeVertexStreamArrayPtr[_streamLayoutPtr->activeVertexStreamsNum] = attributeFormat.streamIndex;
+			_streamLayoutPtr->activeVertexStreamsMask.set( gpuapi::cxdefs::makeIAVertexBufferFlag( attributeFormat.streamIndex ) );
+			_streamLayoutPtr->activeVertexStreamsNum += 1;
 		}
 
 		if( attributeFormat.streamElementRelativeOffset == gpuapi::cxdefs::IA_VERTEX_ATTRIBUTE_OFFSET_APPEND )
@@ -311,6 +340,33 @@ namespace ts3
 		vertexStreamFormat.activeAttributesNum += 1;
 	}
 
+	bool GeometryDataFormatBase::resolveAttributeSemanticsDefinition(
+			VertexAttributeSemantics & pAttributeSemantics )
+	{
+		if( cxdefs::isVertexAttributeSemanticsValid( pAttributeSemantics.semID )  )
+		{
+			pAttributeSemantics.semName = gpa::getStandardVertexAttributeSemanticsName( pAttributeSemantics.semID );
+		}
+		else if( pAttributeSemantics.semID == EVertexAttributeSemanticsID::Custom )
+		{
+			if( pAttributeSemantics.semName.empty() )
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+
+		if( isAttributeSemanticsActive( pAttributeSemantics.semID ) )
+		{
+			return false;
+		}
+
+		return true;
+	}
+
 	namespace gpa
 	{
 
@@ -321,7 +377,6 @@ namespace ts3
 				ts3CaseReturn( EVertexAttributeSemanticsID::Position   , "POSITION"  );
 				ts3CaseReturn( EVertexAttributeSemanticsID::Normal     , "NORMAL"    );
 				ts3CaseReturn( EVertexAttributeSemanticsID::Tangent    , "TANGENT"   );
-				ts3CaseReturn( EVertexAttributeSemanticsID::BiNormal  , "BITANGENT" );
 				ts3CaseReturn( EVertexAttributeSemanticsID::FixedColor , "COLOR"     );
 				ts3CaseReturn( EVertexAttributeSemanticsID::TexCoord0  , "TEXCOORD0" );
 				ts3CaseReturn( EVertexAttributeSemanticsID::TexCoord1  , "TEXCOORD1" );

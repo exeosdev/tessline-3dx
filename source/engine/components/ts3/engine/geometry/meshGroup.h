@@ -29,7 +29,7 @@ namespace ts3
 	public:
 		std::string const mGroupName;
 
-		GeometryDataFormat const mGeometryDataFormat;
+		GeometryDataFormatBase const mGeometryDataFormatBase;
 
 	public:
 		MeshGroup( std::string pGroupName, GeometryStorage * pGeometryStorage );

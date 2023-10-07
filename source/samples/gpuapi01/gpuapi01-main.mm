@@ -343,7 +343,7 @@ int main( int pArgc, const char ** pArgv )
 
 	CoreEngineState ces{ sysContext, gxDriverState.device };
 
-	GeometryDataFormat gdf;
+	GeometryDataFormatBase gdf;
 	gdf.configureFixedAttribute( EFixedVertexAttributeID::Position, 0 );
 	gdf.configureFixedAttribute( EFixedVertexAttributeID::Normal, 0 );
 	gdf.configureFixedAttribute( EFixedVertexAttributeID::FixedColor, 0 );

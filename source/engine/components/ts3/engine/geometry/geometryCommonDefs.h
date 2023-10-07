@@ -16,7 +16,7 @@ namespace ts3
 	struct GeometryStorageCreateInfo;
 
 	class GeometryContainerBase;
-	class GeometryDataFormat;
+	class GeometryDataFormatBase;
 	class GeometryDataGpuTransfer;
 	class GeometryManager;
 
@@ -103,7 +103,6 @@ namespace ts3
 		Position   = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_POSITION_BIT    ),
 		Normal     = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_NORMAL_BIT      ),
 		Tangent    = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TANGENT_BIT     ),
-		BiNormal   = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_BI_NORMAL_BIT  ),
 		FixedColor = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_FIXED_COLOR_BIT ),
 		TexCoord0  = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_0_BIT ),
 		TexCoord1  = cxdefs::declareVertexAttributeSemanticsID( E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_1_BIT ),
@@ -123,7 +122,6 @@ namespace ts3
 		Position   = cxdefs::declareFixedVertexAttributeID(  0, 1, gpuapi::EVertexAttribFormat::Vec3F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_POSITION_BIT ),
 		Normal     = cxdefs::declareFixedVertexAttributeID(  1, 1, gpuapi::EVertexAttribFormat::Vec3F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_NORMAL_BIT ),
 		Tangent    = cxdefs::declareFixedVertexAttributeID(  2, 1, gpuapi::EVertexAttribFormat::Vec3F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TANGENT_BIT ),
-		BiNormal   = cxdefs::declareFixedVertexAttributeID(  3, 1, gpuapi::EVertexAttribFormat::Vec3F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_BI_NORMAL_BIT ),
 		FixedColor = cxdefs::declareFixedVertexAttributeID(  4, 1, gpuapi::EVertexAttribFormat::Vec4F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_FIXED_COLOR_BIT ),
 		TexCoord0  = cxdefs::declareFixedVertexAttributeID(  5, 1, gpuapi::EVertexAttribFormat::Vec2F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_0_BIT ),
 		TexCoord1  = cxdefs::declareFixedVertexAttributeID(  6, 1, gpuapi::EVertexAttribFormat::Vec2F32, E_VERTEX_ATTRIBUTE_SEMANTICS_FLAG_TEX_COORD_1_BIT ),
@@ -180,7 +178,8 @@ namespace ts3
 
 		inline bool isVertexAttributeSemanticsValid( EVertexAttributeSemanticsID pSemanticsID )
 		{
-			return Bitmask<uint32>( pSemanticsID ).isSetAnyOf( E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_ALL );
+			const auto semanticsMask = makeBitmask( pSemanticsID );
+			return semanticsMask.isSetAnyOf( E_VERTEX_ATTRIBUTE_SEMANTICS_MASK_ALL ) && ( semanticsMask.countBits() == 1 );
 		}
 
 		inline bool isVertexAttributeSemanticsDefined( EVertexAttributeSemanticsID pSemanticsID )
@@ -286,6 +285,12 @@ namespace ts3
 		uint32 _currentElementOffset = 0;
 	};
 
+	template <typename TValue>
+	using GeometryBufferDataIteratorReadOnly = GeometryBufferDataIterator<const TValue, const byte>;
+
+	template <typename TValue>
+	using GeometryBufferDataIteratorReadWrite = GeometryBufferDataIterator<TValue, byte>;
+
 	struct GeometrySize
 	{
 		uint32 indexElementsNum = 0;
@@ -305,7 +310,7 @@ namespace ts3
 
 	struct GeometryReference
 	{
-		const GeometryDataFormat * dataFormat = nullptr;
+		const GeometryDataFormatBase * dataFormat = nullptr;
 
 		GeometryContainerBase * geometryContainer = nullptr;
 
@@ -365,8 +370,8 @@ namespace ts3
 	namespace gmutil
 	{
 
-		template <size_t tVSN>
-		TS3_ATTR_NO_DISCARD GeometryReference<tVSN> getGeometryDataReferenceBaseSubRegion(
+		template <size_t tVertexStreamArraySize>
+		TS3_ATTR_NO_DISCARD GeometryReference<tVertexStreamArraySize> getGeometryDataReferenceBaseSubRegion(
 				const GeometryDataReferenceBase & pGeometryDataRef,
 				uint32 pVertexDataOffsetInElementsNum,
 				uint32 pVertexElementsNum,

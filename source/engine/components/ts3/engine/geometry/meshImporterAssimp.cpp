@@ -14,13 +14,13 @@ namespace ts3
 	namespace aidetail
 	{
 
-		std::unique_ptr<MeshData> assimpImportScene( const aiScene * pAiScene, const GeometryDataFormat & pGeometryDataFormat );
+		std::unique_ptr<MeshData> assimpImportScene( const aiScene * pAiScene, const GeometryDataFormatBase & pGeometryDataFormatBase );
 
 	}
 
 	std::unique_ptr<MeshData> MeshImporterAssimp::importMesh(
 			const std::string & pFilename,
-			const GeometryDataFormat & pGeometryDataFormat )
+			const GeometryDataFormatBase & pGeometryDataFormatBase )
 	{
 		Assimp::Importer aImporter;
 
@@ -34,7 +34,7 @@ namespace ts3
 			throw 0;
 		}
 
-		return aidetail::assimpImportScene( aiSceneObject, pGeometryDataFormat );
+		return aidetail::assimpImportScene( aiSceneObject, pGeometryDataFormatBase );
 	}
 
 
@@ -171,11 +171,11 @@ namespace ts3
 			}
 		}
 
-		std::unique_ptr<MeshData> assimpImportScene( const aiScene * pAiScene, const GeometryDataFormat & pGeometryDataFormat )
+		std::unique_ptr<MeshData> assimpImportScene( const aiScene * pAiScene, const GeometryDataFormatBase & pGeometryDataFormatBase )
 		{
 			const auto meshSizeMetrics = getAssimpMeshSizeMetrics( pAiScene );
 
-			auto meshData = std::make_unique<MeshData>( pGeometryDataFormat );
+			auto meshData = std::make_unique<MeshData>( pGeometryDataFormatBase );
 			meshData->initializeStorage( meshSizeMetrics.indexElementsNum, meshSizeMetrics.vertexElementsNum );
 
 			for( native_uint iMesh = 0; iMesh < pAiScene->mNumMeshes; ++iMesh )

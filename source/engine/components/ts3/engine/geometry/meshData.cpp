@@ -100,7 +100,7 @@ namespace ts3
 
 	MeshData & MeshGroupData::addMeshData( uint32 pVertexElementsNum, uint32 pIndexElementsNum )
 	{
-		auto meshData = std::make_unique<MeshData>( mGeometryDataFormat );
+		auto meshData = std::make_unique<MeshData>( mGeometryDataFormatBase );
 		meshData->initializeStorage( pVertexElementsNum, pIndexElementsNum );
 
 		return addMeshData( std::move( meshData ) );

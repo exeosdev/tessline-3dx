@@ -22,7 +22,7 @@ namespace ts3
 
 		GeometryDataReferenceBase geometryDataRef;
 
-		MeshSubComponentData( const GeometryDataFormat & pDataFormat )
+		MeshSubComponentData( const GeometryDataFormatBase & pDataFormat )
 		: geometryDataRef( pDataFormat )
 		{}
 	};
@@ -30,8 +30,8 @@ namespace ts3
 	class MeshData : public GeometryContainer
 	{
 	public:
-		MeshData( const GeometryDataFormat & pGeometryDataFormat )
-		: GeometryContainer( pGeometryDataFormat )
+		MeshData( const GeometryDataFormatBase & pGeometryDataFormatBase )
+		: GeometryContainer( pGeometryDataFormatBase )
 		{}
 
 		TS3_ATTR_NO_DISCARD uint32 getMeshSubComponentsNum() const noexcept;
@@ -102,11 +102,11 @@ namespace ts3
 	class MeshGroupData
 	{
 	public:
-		GeometryDataFormat const mGeometryDataFormat;
+		GeometryDataFormatBase const mGeometryDataFormatBase;
 
 	public:
-		MeshGroupData( const GeometryDataFormat & pGeometryDataFormat )
-		: mGeometryDataFormat( pGeometryDataFormat )
+		MeshGroupData( const GeometryDataFormatBase & pGeometryDataFormatBase )
+		: mGeometryDataFormatBase( pGeometryDataFormatBase )
 		{}
 
 		TS3_ATTR_NO_DISCARD uint32 getMeshesNum() const noexcept

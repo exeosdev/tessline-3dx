@@ -32,10 +32,10 @@ namespace ts3
 		uint32 vertexDataAllocationOffsetInElementsNum = 0;
 	};
 
-	class GeometryDataStore
+	class GeometryDataStoreBase
 	{
 	public:
-		GeometryDataFormat const mDataFormat;
+		GeometryDataFormatBase const mDataFormat;
 
 	public:
 		virtual GeometryBufferDataRefReadOnly getIndexDataPtrReadOnly() const noexcept = 0;
@@ -51,14 +51,26 @@ namespace ts3
 		GeometryBufferDataRefReadWrite getVertexAttributeDataSubRegionReadWrite();
 	};
 
+	template <typename TBufferData, size_t tVertexStreamArraySize>
+	class GeometryDataStore : public GeometryDataStoreBase
+	{
+	protected:
+		TBufferData _indexBufferData
+	};
+
+	template <typename TBufferData>
+	class GeometryDataStore<TBufferData, 0> : public GeometryDataStoreBase
+	{
+	};
+
 	class GeometryContainerBase
 	{
 	public:
-		GeometryDataFormat const mDataFormat;
+		GeometryDataFormatBase const mDataFormat;
 		GeometryStorageCapacity const mStorageCapacity;
 
 	public:
-		GeometryContainerBase( const GeometryDataFormat & pDataFormat, const GeometryStorageCapacity & pStorageCapacity )
+		GeometryContainerBase( const GeometryDataFormatBase & pDataFormat, const GeometryStorageCapacity & pStorageCapacity )
 		: mDataFormat( pDataFormat )
 		, mStorageCapacity( pStorageCapacity )
 		{}
@@ -88,18 +100,18 @@ namespace ts3
 		GeometryVertexBufferReference * _vertexBufferRefsPtr;
 	};
 
-	template <size_t tVSN>
+	template <size_t tVertexStreamArraySize>
 	class GeometryContainer : public GeometryContainerBase
 	{
 	public:
-		GeometryContainer( const GeometryDataFormat & pDataFormat, const GeometryStorageCapacity & pStorageCapacity )
+		GeometryContainer( const GeometryDataFormatBase & pDataFormat, const GeometryStorageCapacity & pStorageCapacity )
 		: GeometryContainerBase( pDataFormat, pStorageCapacity )
 		{
 			setVertexBufferRefsStorage( _vertexBufferRefs.data() );
 		}
 
 	private:
-		using GeometryVertexBufferRefArray = std::array<GeometryVertexBufferReference, tVSN>;
+		using GeometryVertexBufferRefArray = std::array<GeometryVertexBufferReference, tVertexStreamArraySize>;
 		GeometryVertexBufferRefArray _vertexBufferRefs;
 	};
 
@@ -107,7 +119,7 @@ namespace ts3
 	class GeometryContainer<0> : public GeometryContainerBase
 	{
 	public:
-		GeometryContainer( const GeometryDataFormat & pDataFormat, const GeometryStorageCapacity & pStorageCapacity )
+		GeometryContainer( const GeometryDataFormatBase & pDataFormat, const GeometryStorageCapacity & pStorageCapacity )
 		: GeometryContainerBase( pDataFormat, pStorageCapacity )
 		{
 			_vertexBufferRefs.resize( pDataFormat.activeVertexStreamsNum() );
@@ -132,10 +144,10 @@ namespace ts3
 	class GeometryContainer2
 	{
 	public:
-		const GeometryDataFormat & mDataFormat;
+		const GeometryDataFormatBase & mDataFormat;
 
 	public:
-		GeometryContainer2( const GeometryDataFormat & pDataFormat );
+		GeometryContainer2( const GeometryDataFormatBase & pDataFormat );
 
 		TS3_ATTR_NO_DISCARD bool isStorageInitialized() const noexcept;
 

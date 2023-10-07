@@ -9,10 +9,10 @@
 #include <type_traits>
 #include <utility>
 
-namespace ts3
+namespace Ice
 {
 
-	namespace cxdefs
+	namespace CX
 	{
 
 		/// @brief Represents max value which can be stored in the size_t type.

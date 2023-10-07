@@ -6,7 +6,7 @@
 namespace ts3
 {
 
-	GeometryStorage::GeometryStorage( const GeometryDataFormat & pDataFormat )
+	GeometryStorage::GeometryStorage( const GeometryDataFormatBase & pDataFormat )
 	: GeometryContainer( pDataFormat )
 	{}
 

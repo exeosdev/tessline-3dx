@@ -27,7 +27,7 @@ namespace ts3
 
 		EGPUBufferUsagePolicy commonBufferUsagePolicy = EGPUBufferUsagePolicy::Undefined;
 
-		const GeometryDataFormat * dataFormat;
+		const GeometryDataFormatBase * dataFormat;
 
 		GeometryContainerStorageCapacity capacity;
 
@@ -36,14 +36,14 @@ namespace ts3
 		GeometryVertexStreamGenericArray<GeometryBufferDesc> vertexBufferDescArray;
 	};
 
-	template <size_t tVSN>
-	class GeometrySharedStorage : public GeometryContainer<tVSN>
+	template <size_t tVertexStreamArraySize>
+	class GeometrySharedStorage : public GeometryContainer<tVertexStreamArraySize>
 	{
 	public:
 		using GeometryRefList = std::deque<GeometryReference>;
 
 	public:
-		GeometrySharedStorage( const GeometryDataFormat & pDataFormat );
+		GeometrySharedStorage( const GeometryDataFormatBase & pDataFormat );
 
 		virtual ~GeometrySharedStorage() = default;
 

@@ -8,7 +8,7 @@ namespace ts3
 	{}
 
 	GeometryContainer::GeometryContainer(
-			const GeometryDataFormat & pDataFormat,
+			const GeometryDataFormatBase & pDataFormat,
 			GeometryVertexBufferReference * pVertexBufferRefsPtr )
 	: _activeVertexStreamsNum( pDataFormat.activeVertexStreamsNum() )
 	, _vertexBufferRefsPtr( pVertexBufferRefsPtr )
@@ -38,7 +38,7 @@ namespace ts3
 
 
 	/*
-	GeometryContainer::GeometryContainer( const GeometryDataFormat & pDataFormat )
+	GeometryContainer::GeometryContainer( const GeometryDataFormatBase & pDataFormat )
 	: mDataFormat( pDataFormat )
 	, _allGeometryDataRef( pDataFormat )
 	{}

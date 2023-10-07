@@ -11,7 +11,7 @@
 namespace ts3
 {
 	
-	struct GeometryDataFormatProperties
+	struct GeometryDataFormatBaseProperties
 	{
 		uint32 activeAttributesNum = 0;
 		uint32 activeAttributeSlotsNum = 0;
@@ -22,11 +22,14 @@ namespace ts3
 		Bitmask<gpuapi::EIAVertexStreamBindingFlags> activeVertexStreamsMask;
 	};
 
-	class GeometryDataFormat
+	class GeometryDataFormatBase
 	{
 	public:
-		GeometryDataFormat();
-		~GeometryDataFormat();
+		GeometryDataFormatBase(
+				VertexAttributeArrayLayoutBase * pAttribLayoutPtr,
+				VertexStreamArrayLayoutBase * pStreamLayoutPtr );
+
+		virtual ~GeometryDataFormatBase();
 
 		TS3_ATTR_NO_DISCARD std::string getFormatStringID() const noexcept;
 
@@ -34,7 +37,7 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD const VertexAttributeFormat & attribute( EVertexAttributeSemanticsID pAttributeSemantics ) const;
 
-		TS3_ATTR_NO_DISCARD const VertexStreamFormat & vertexStream( uint32 pVertexStreamIndex ) const;
+		TS3_ATTR_NO_DISCARD const VertexStreamFormat & vertexStream( uint32 pStreamIndex ) const;
 
 		TS3_ATTR_NO_DISCARD ArrayView<const uint16> activeVertexStreams() const noexcept;
 
@@ -44,7 +47,7 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD uint32 vertexElementSizeInBytes() const noexcept;
 
-		TS3_ATTR_NO_DISCARD uint32 vertexStreamElementSizeInBytes( uint32 pVertexStreamIndex ) const;
+		TS3_ATTR_NO_DISCARD uint32 vertexStreamElementSizeInBytes( uint32 pStreamIndex ) const;
 
 		TS3_ATTR_NO_DISCARD gpuapi::EIndexDataFormat indexDataFormat() const noexcept;
 
@@ -60,7 +63,7 @@ namespace ts3
 
 		TS3_ATTR_NO_DISCARD bool isAttributeActive( uint32 pAttributeIndex ) const;
 
-		TS3_ATTR_NO_DISCARD bool isVertexStreamActive( uint32 pVertexStreamIndex ) const;
+		TS3_ATTR_NO_DISCARD bool isVertexStreamActive( uint32 pStreamIndex ) const;
 
 		TS3_ATTR_NO_DISCARD bool empty() const noexcept;
 
@@ -114,69 +117,50 @@ namespace ts3
 				gpuapi::EVertexAttribFormat pAttributeComponentFormat,
 				uint16 pAttributeComponentsNum ) const noexcept;
 
+		TS3_ATTR_NO_DISCARD bool checkAttributeDefinitionParams(
+				uint32 pAttributeBaseIndex,
+				uint32 pAttributeComponentsNum,
+				uint32 pStreamIndex,
+				EVertexDataRate pAttributeDataRate );
+
 		TS3_ATTR_NO_DISCARD bool checkAttributeSlotRangeFree(
 				uint32 pAttributeBaseIndex,
 				uint32 pAttributeComponentsNum ) const noexcept;
 
 		TS3_ATTR_NO_DISCARD bool checkAttributeVertexStreamCompatibility(
-				uint32 pVertexStreamIndex,
+				uint32 pStreamIndex,
 				EVertexDataRate pAttributeDataRate ) const noexcept;
 
 		void updateStateWithNewAttribute( uint32 pNewAttributeIndex );
 
+		TS3_ATTR_NO_DISCARD bool resolveAttributeSemanticsDefinition(
+				VertexAttributeSemantics & pAttributeSemantics );
+
 	private:
-		using AttributeSemanticsMap = std::unordered_map<EVertexAttributeSemanticsID, uint32>;
-		using VertexStreamActiveIndicesArray = std::array<uint16, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
-		GeometryDataFormatProperties _properties;
-		VertexAttributeFormatArray _attributes;
-		AttributeSemanticsMap _attributeSemanticsMap;
-		VertexStreamFormatArray _vertexStreams;
-		VertexStreamActiveIndicesArray _activeVertexStreams;
+		VertexAttributeArrayLayoutBase * _attribLayoutPtr;
+		VertexStreamArrayLayoutBase * _streamLayoutPtr;
 		gpuapi::EIndexDataFormat _indexDataFormat;
 		gpuapi::EPrimitiveTopology _primitiveTopology;
 	};
 
-	class VertexStreamLayoutBase
+	template <size_t tVertexAttributeArraySize = 0, size_t tVertexStreamArraySize = 0>
+	class GeometryDataFormat : public GeometryDataFormatBase
 	{
 	public:
-		VertexStreamLayoutBase();
-		virtual ~VertexStreamLayoutBase();
+		using VertexAttributeArrayLayoutType = VertexAttributeArrayLayout<tVertexAttributeArraySize>;
+		using VertexStreamArrayLayoutType = VertexStreamArrayLayout<tVertexStreamArraySize>;
 
-		uint32 activeVertexStreamsNum() const noexcept;
-
-		ArrayView<uint32> activeVertexStreamIndices() const noexcept;
-
-		const VertexStreamFormat & vertexStreamFormat( uint32 pVertexStreamIndex ) const;
-
-	protected:
-		uint32 _vsn;
-		uint32 _activeVertexStreams;
-		uint32 * _activeVertexStreamsPtr;
-		VertexStreamFormat * _vertexStreamFormatsPtr;
-	};
-
-	template <size_t tVSN>
-	class VertexStreamDataLayout
-	{
-	public:
-		static constexpr uint32 sVSN = getMinOf( tVSN, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM );
-
-	public:
-		VertexStreamDataLayout();
-		virtual ~VertexStreamDataLayout();
-
-		VertexStreamDataLayout( const VertexStreamDataLayout & pSource );
-		VertexStreamDataLayout & operator=( const VertexStreamDataLayout & pRhs );
+		GeometryDataFormat()
+		: GeometryDataFormatBase( &_attribLayout, &_streamLayout )
+		{}
 
 	private:
-		using VertexStreamActiveIndicesArray = std::array<uint32, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
-		VertexStreamActiveIndicesArray _activeVertexStreams;
-		VertexStreamFormatArray _vertexStreamFormats;
+		VertexAttributeArrayLayoutType _attribLayout;
+		VertexStreamArrayLayoutType _streamLayout;
 	};
 
-
 	template <typename TVertex, typename TAttribute>
-	inline bool GeometryDataFormat::configureFixedAttribute(
+	inline bool GeometryDataFormatBase::configureFixedAttribute(
 			EFixedVertexAttributeID pFixedAttributeID,
 			uint32 pStreamIndex,
 			TAttribute TVertex::* pAttributePtr )
@@ -195,7 +179,7 @@ namespace ts3
 	}
 
 	template <typename TVertex, typename TAttribute>
-	inline bool GeometryDataFormat::configureCustomAttribute(
+	inline bool GeometryDataFormatBase::configureCustomAttribute(
 			uint32 pAttributeBaseIndex,
 			VertexAttributeSemantics pSemantics,
 			gpuapi::EVertexAttribFormat pAttributeBaseFormat,
@@ -220,7 +204,7 @@ namespace ts3
 	}
 
 	template <typename TVertex, typename TAttribute>
-	inline bool GeometryDataFormat::configureCustomAttributeAuto(
+	inline bool GeometryDataFormatBase::configureCustomAttributeAuto(
 			uint32 pAttributeBaseIndex,
 			VertexAttributeSemantics pSemantics,
 			uint32 pStreamIndex,
@@ -244,7 +228,7 @@ namespace ts3
 	}
 
 	template <typename TAttribute>
-	inline bool GeometryDataFormat::checkAttributeAutoDataFormat(
+	inline bool GeometryDataFormatBase::checkAttributeAutoDataFormat(
 			gpuapi::EVertexAttribFormat pAttributeComponentFormat,
 			uint16 pAttributeComponentsNum ) const noexcept
 	{

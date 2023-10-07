@@ -277,7 +277,7 @@ int main( int pArgc, const char ** pArgv )
 	//auto meshLoader = std::make_unique<AssimpMeshLoader>( fileLoadCallback );
 	//auto meshDefinition = meshLoader->loadMeshDefault( "assets/meshes/tree/Tree.obj" );
 
-	GeometryDataFormat gdf;
+	GeometryDataFormatBase gdf;
 	gdf.configureFixedAttribute( EFixedVertexAttributeID::Position, 0 );
 	gdf.configureFixedAttribute( EFixedVertexAttributeID::Normal, 0 );
 	gdf.configureFixedAttribute( EFixedVertexAttributeID::FixedColor, 0 );

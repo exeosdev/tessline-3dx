@@ -105,7 +105,7 @@ set( TS3_ENGINE_SRC_FILES
 		#"fx/materialCommon.cpp"
 		#"fx/materialLibrary.cpp"
 		#"fx/materialLibrary.h"
-        geometry/geometryDataFormat.cpp geometry/geometryDataFormat.h geometry/geometryManager.cpp geometry/geometryManager.h geometry/meshLoader.cpp geometry/meshLoader.h geometry/meshImporterAssimp.cpp geometry/mesh.cpp geometry/mesh.h geometry/geometryDataTransfer.cpp geometry/geometryDataTransfer.h geometry/geometryCommonDefs.cpp geometry/meshGroup.cpp geometry/geometryContainer.cpp geometry/geometryContainer.h geometry/standardVertexFormats.h geometry/meshCommon.h geometry/geometryBuffer.h)
+        geometry/geometryDataFormat.cpp geometry/geometryDataFormat.h geometry/geometryManager.cpp geometry/geometryManager.h geometry/meshLoader.cpp geometry/meshLoader.h geometry/meshImporterAssimp.cpp geometry/mesh.cpp geometry/mesh.h geometry/geometryDataTransfer.cpp geometry/geometryDataTransfer.h geometry/geometryCommonDefs.cpp geometry/meshGroup.cpp geometry/geometryContainer.cpp geometry/geometryContainer.h geometry/standardVertexFormats.h geometry/meshCommon.h geometry/geometryBuffer.h geometry/geometryDataSource.cpp geometry/geometryDataSource.h)
 
 if( "${TS3_COMPONENTS_BUILD_MODE}" STREQUAL "STATIC" )
     add_library( ts3-engine STATIC ${TS3_ENGINE_SRC_FILES} )

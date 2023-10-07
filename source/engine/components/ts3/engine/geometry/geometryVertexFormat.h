@@ -35,17 +35,6 @@ namespace ts3
 		{}
 	};
 
-	struct VertexAttributeDesc
-	{
-		uint32 attributeBaseIndex;
-		VertexAttributeSemantics semantics;
-		gpuapi::EVertexAttribFormat baseFormat;
-		uint32 componentsNum;
-		uint32 streamIndex;
-		uint16 streamElementRelativeOffset;
-		EVertexDataRate dataRate;
-	};
-
 	struct VertexAttributeFormat
 	{
 		VertexAttributeFormat * nextComponent = nullptr;
@@ -65,7 +54,7 @@ namespace ts3
 
 		bool isBaseAttribute() const noexcept
 		{
-			return !semantics.semName.empty();
+			return active() && !semantics.semName.empty();
 		}
 
 		EVertexDataRate getAttributeDataRate() const noexcept
@@ -77,9 +66,13 @@ namespace ts3
 	struct VertexStreamFormat
 	{
 		EVertexDataRate streamDataRate = EVertexDataRate::Undefined;
+
 		Bitmask<gpuapi::EIAVertexAttributeFlags> activeAttributesMask;
+
 		uint16 activeAttributesNum = 0;
+
 		uint16 elementSizeInBytes = 0;
+
 		uint32 strideInBytes = 0;
 
 		bool active() const noexcept
@@ -88,17 +81,138 @@ namespace ts3
 		}
 	};
 
-	struct GeometryVertexStreamLayoutBase
+	struct VertexAttributeArrayLayoutBase
 	{
-		uint32 activeVertexStreamsNum;
+		using AttributeSemanticsMap = std::unordered_map<std::string_view, uint32>;
 
-		VertexStreamFormat * vertexStreamFormatsPtr;
+		uint32 attributeArraySize = 0;
 
-		GeometryVertexStreamLayoutBase
+		VertexAttributeFormat * attributeArrayPtr = nullptr;
+
+		uint32 activeAttributesNum = 0;
+
+		uint32 activeAttributeSlotsNum = 0;
+
+		Bitmask<gpuapi::EIAVertexAttributeFlags> activeAttributesMask;
+
+		Bitmask<EVertexAttributeSemanticsFlags> activeAttributeSemanticsMask;
+
+		AttributeSemanticsMap semanticsMap;
+
+		VertexAttributeFormat & attributeFormat( size_t pAttributeIndex ) noexcept
+		{
+			ts3DebugAssert( attributeArrayPtr && ( attributeArraySize > 0 ) );
+			ts3DebugAssert( pAttributeIndex < attributeArraySize );
+			return attributeArrayPtr[pAttributeIndex];
+		}
+
+		const VertexAttributeFormat & attributeFormat( size_t pAttributeIndex ) const noexcept
+		{
+			ts3DebugAssert( attributeArrayPtr && ( attributeArraySize > 0 ) );
+			ts3DebugAssert( pAttributeIndex < attributeArraySize );
+			return attributeArrayPtr[pAttributeIndex];
+		}
 	};
 
-	using VertexAttributeFormatArray = std::array<VertexAttributeFormat, gpa::MAX_GEOMETRY_VERTEX_ATTRIBUTES_NUM>;
-	using VertexStreamFormatArray = std::array<VertexStreamFormat, gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM>;
+	template <size_t tVertexAttributeArraySize = 0>
+	struct VertexAttributeArrayLayout : public VertexAttributeArrayLayoutBase
+	{
+		using VertexAttributeFormatArray = std::array<VertexAttributeFormat, tVertexAttributeArraySize>;
+
+		VertexAttributeFormatArray attributeArray;
+
+		VertexAttributeArrayLayout()
+		{
+			attributeArrayPtr = attributeArray.data();
+			attributeArraySize = tVertexAttributeArraySize;
+		}
+	};
+
+	template <>
+	struct VertexAttributeArrayLayout<0> : public VertexAttributeArrayLayoutBase
+	{
+		using VertexAttributeFormatArray = std::vector<VertexAttributeFormat>;
+
+		VertexAttributeFormatArray attributeArray;
+
+		VertexAttributeArrayLayout( size_t pVertexAttributeArraySize )
+		{
+			ts3DebugAssert( pVertexAttributeArraySize > 0 );
+			ts3DebugAssert( pVertexAttributeArraySize <= gpa::MAX_GEOMETRY_VERTEX_ATTRIBUTES_NUM );
+			attributeArray.resize( pVertexAttributeArraySize );
+			attributeArrayPtr = attributeArray.data();
+			attributeArraySize = pVertexAttributeArraySize;
+		}
+	};
+
+	struct VertexStreamArrayLayoutBase
+	{
+		using VertexStreamIndexArray = std::vector<uint16>;
+
+		uint32 vertexStreamArraySize = 0;
+
+		VertexStreamFormat * vertexStreamArrayPtr = nullptr;
+
+		uint32 activeVertexStreamsNum = 0;
+
+		uint16 * activeVertexStreamArrayPtr = nullptr;
+
+		Bitmask<gpuapi::EIAVertexStreamBindingFlags> activeVertexStreamsMask;
+
+		VertexStreamFormat & streamFormat( size_t pStreamIndex ) noexcept
+		{
+			ts3DebugAssert( vertexStreamArrayPtr && ( vertexStreamArraySize > 0 ) );
+			ts3DebugAssert( pStreamIndex < vertexStreamArraySize );
+			return vertexStreamArrayPtr[pStreamIndex];
+		}
+
+		const VertexStreamFormat & streamFormat( size_t pStreamIndex ) const noexcept
+		{
+			ts3DebugAssert( vertexStreamArrayPtr && ( vertexStreamArraySize > 0 ) );
+			ts3DebugAssert( pStreamIndex < vertexStreamArraySize );
+			return vertexStreamArrayPtr[pStreamIndex];
+		}
+	};
+
+	template <size_t tVertexStreamArraySize = 0>
+	struct VertexStreamArrayLayout : public VertexStreamArrayLayoutBase
+	{
+		using VertexStreamFormatArray = std::array<VertexStreamFormat, tVertexStreamArraySize>;
+		using ActiveVertexStreamArray = std::array<uint16, tVertexStreamArraySize>;
+
+		VertexStreamFormatArray vertexStreamArray;
+
+		ActiveVertexStreamArray activeVertexStreamArray;
+
+		VertexStreamArrayLayout()
+		{
+			vertexStreamArrayPtr = vertexStreamArray.data();
+			vertexStreamArraySize = tVertexStreamArraySize;
+			activeVertexStreamArrayPtr = activeVertexStreamArray.data();
+		}
+	};
+
+	template <>
+	struct VertexStreamArrayLayout<0> : public VertexStreamArrayLayoutBase
+	{
+		using VertexStreamFormatArray = std::vector<VertexStreamFormat>;
+		using ActiveVertexStreamArray = std::vector<uint16>;
+
+		VertexStreamFormatArray vertexStreamArray;
+
+		ActiveVertexStreamArray activeVertexStreamArray;
+
+		VertexStreamArrayLayout( size_t pVertexStreamArraySize )
+		{
+			ts3DebugAssert( pVertexStreamArraySize > 0 );
+			ts3DebugAssert( pVertexStreamArraySize <= gpa::MAX_GEOMETRY_VERTEX_STREAMS_NUM );
+			vertexStreamArray.resize( pVertexStreamArraySize );
+			vertexStreamArrayPtr = vertexStreamArray.data();
+			vertexStreamArraySize = pVertexStreamArraySize;
+			activeVertexStreamArray.resize( pVertexStreamArraySize );
+			activeVertexStreamArrayPtr = activeVertexStreamArray.data();
+		}
+	};
 
 	struct P3SVertex
 	{

@@ -14,7 +14,7 @@ namespace ts3
 	public:
 		virtual std::unique_ptr<MeshData> importMesh(
 				const std::string & pFilename,
-				const GeometryDataFormat & pGeometryDataFormat ) = 0;
+				const GeometryDataFormatBase & pGeometryDataFormatBase ) = 0;
 	};
 
 	class MeshImporterAssimp : public MeshImporter
@@ -22,7 +22,7 @@ namespace ts3
 	public:
 		virtual std::unique_ptr<MeshData> importMesh(
 				const std::string & pFilename,
-				const GeometryDataFormat & pGeometryDataFormat ) override final;
+				const GeometryDataFormatBase & pGeometryDataFormatBase ) override final;
 	};
 
 	struct MeshInputDesc
@@ -36,7 +36,7 @@ namespace ts3
 		MeshImporter * importer = nullptr;
 		GeometryManager * geometryManager = nullptr;
 		GeometryDataGpuTransfer * geometryDataTransfer = nullptr;
-		const GeometryDataFormat * geometryDataFormat = nullptr;
+		const GeometryDataFormatBase * geometryDataFormat = nullptr;
 
 	};
 
@@ -51,7 +51,7 @@ namespace ts3
 	private:
 		GeometryStorage * createGeometryStorageForMeshGroup(
 				GeometryManager & pGeometryManager,
-				const GeometryDataFormat & pGeometryDataFormat,
+				const GeometryDataFormatBase & pGeometryDataFormatBase,
 				const MeshGroupData & pMeshGroupData );
 	};
 
